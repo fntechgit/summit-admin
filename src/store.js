@@ -16,6 +16,7 @@ import { loggedUserReducer } from "openstack-uicore-foundation/lib/security/redu
 import thunk from "redux-thunk";
 import { persistStore, persistCombineReducers } from "redux-persist";
 import storage from "redux-persist/es/storage";
+import allFiltersReducer from "./components/GridFilter/reducers/all-filters-reducer";
 import baseReducer from "./reducers/base-reducer";
 import currentSummitReducer from "./reducers/summits/current-summit-reducer";
 import directoryReducer from "./reducers/summits/directory-reducer";
@@ -184,6 +185,7 @@ const config = {
 
 const reducers = persistCombineReducers(config, {
   loggedUserState: loggedUserReducer,
+  allGridFiltersState: allFiltersReducer,
   baseState: baseReducer,
   directoryState: directoryReducer,
   currentSummitState: currentSummitReducer,

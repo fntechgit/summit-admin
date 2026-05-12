@@ -889,19 +889,18 @@ export const getSpeakersBySummit =
     perPage = DEFAULT_PER_PAGE,
     order = "full_name",
     orderDir = DEFAULT_ORDER_DIR,
-    filters = {}
+    filters = []
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const filter = parseFilters(filters);
+    const filter = [...filters];
 
     dispatch(startLoading());
 
     if (term) {
       const filterTerm = buildTermFilter(term);
-
       filter.push(filterTerm.join(","));
     }
 

@@ -18,31 +18,37 @@ import Dropdown from "../Dropdown";
 
 const INPUT_TYPE_MAP = { text: TextField, select: Dropdown };
 
-const ValueInput = ({type, ...rest}) => {
-  const Component = INPUT_TYPE_MAP[type];
-  console.log(type, typeof Component);
+const ValueInput = ({ type, ...rest }) => {
+  const Component = type ? INPUT_TYPE_MAP[type] : Dropdown; // use dropdown as a placeholder
   // eslint-disable-next-line react/jsx-props-no-spreading
   return Component ? <Component {...rest} /> : null;
-}
+};
 
 ValueInput.propTypes = {
   id: PropTypes.string.isRequired,
   type: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
-  options: PropTypes.arrayOf(PropTypes.shape({
-    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    label: PropTypes.string.isRequired,
-  })),
+  value: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+    PropTypes.array
+  ]),
+  options: PropTypes.arrayOf(
+    PropTypes.shape({
+      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+        .isRequired,
+      label: PropTypes.string.isRequired
+    })
+  ),
   label: PropTypes.string,
   placeholder: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
-}
+  onChange: PropTypes.func.isRequired
+};
 
 ValueInput.defaultProps = {
   value: null,
   label: "",
   placeholder: "",
   options: null
-}
+};
 
 export default ValueInput;

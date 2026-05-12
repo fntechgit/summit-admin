@@ -11,8 +11,9 @@
  * limitations under the License.
  * */
 
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
+import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
   Box,
@@ -21,27 +22,14 @@ import {
   DialogActions,
   DialogContent,
   Divider,
-  IconButton,
   Typography
 } from "@mui/material";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import ToggleButtons from "./components/ToggleButtons";
 import Filter from "./components/Filter";
-
-const OPERATORS = [
-  { value: "==", label: "is" },
-  { value: "=@", label: "like" },
-  { value: "@@", label: "like start" },
-  { value: "<>", label: "is not" },
-  { value: ">>", label: "has" },
-  { value: "!>>", label: "has not" },
-  { value: "<", label: "less than" },
-  { value: "<=", label: "less than or equal to" },
-  { value: ">", label: "greater than" },
-  { value: ">=", label: "greater than or equal to" },
-  { value: "[]", label: "between" },
-  { value: "()", label: "between strict" }
-];
+import FilterButton from "./components/FilterButton";
+import { saveFilters } from "./actions/filter-actions";
+import useGridFilter, { EMPTY_FILTER } from "./hooks/useGridFilter";
+import { JOIN_OPERATORS } from "./utils";
 
 // sample props
 /*
@@ -63,6 +51,41 @@ criterias =  [
           multi: true,
           placeholder: "Select Tracks"
         },
+      },
+    },
+    {
+      key: "selection_status",
+      label: "Selection Status",
+      operators: [{ value: "==", label: "is" }],
+      values: {
+        type: "select",
+        props: {
+          options: [...selectionStatusOptions],
+          placeholder: "Filter by Selection Status"
+        }
+      },
+      customParser: (f) => {
+        const filter = [];
+        if (f.value) {
+          switch (f.value) {
+            case "only_rejected":
+              filter.push("has_rejected_presentations==true");
+              filter.push("has_accepted_presentations==false");
+              filter.push("has_alternate_presentations==false");
+              break;
+            case "only_accepted":
+              filter.push("has_rejected_presentations==false");
+              filter.push("has_accepted_presentations==true");
+              filter.push("has_alternate_presentations==false");
+              break;
+            case "only_alternate":
+              filter.push("has_rejected_presentations==false");
+              filter.push("has_accepted_presentations==false");
+              filter.push("has_alternate_presentations==true");
+              break;
+          }
+        }
+        return filter;
       },
     },
     {
@@ -94,101 +117,138 @@ value = [
     value: "openstack"
   }
 ]
-
-
  */
 
-const GridFilter = ({ values, criterias, onApply }) => {
+const GridFilter = ({ id, criterias, onApply, saveFilters }) => {
+  const { joinOperator, filterCount, valuesWithIds } = useGridFilter(id);
+  const valuesString = useMemo(
+    () => valuesWithIds.map((v) => v.id).join(","),
+    [valuesWithIds]
+  );
   const [openModal, setOpenModal] = useState(false);
-  const [filters, setFilters] = useState(values);
-  const criteriaOptions = criterias.map((c) => ({
-    label: c.label,
-    value: c.key
-  }));
+  const [filters, setFilters] = useState([]);
+  const [andOrAny, setAndOrAny] = useState(joinOperator);
+
+  useEffect(() => {
+    if (openModal) {
+      // we want to rest to applied filters when closing modal (Cancel)
+      setFilters([...valuesWithIds, EMPTY_FILTER]);
+      setAndOrAny(joinOperator);
+    }
+  }, [valuesString, joinOperator, openModal]);
+
+  const parseFilter = (filter) => {
+    const parser = criterias.find(
+      ({ key }) => key === filter.criteria
+    )?.customParser;
+    if (parser) {
+      return parser(filter);
+    }
+    const value = Array.isArray(filter.value)
+      ? filter.value.join("||")
+      : filter.value;
+    if (value) {
+      return [`${filter.criteria}${filter.operator}${value}`];
+    }
+  };
 
   const handleChange = (filter) => {
-    setFilters((prevFilters) => ({ ...prevFilters, filter }));
-    console.log("change filter", filter);
+    setFilters((prevFilters) =>
+      prevFilters.map((f) => (f.id === filter.id ? filter : f))
+    );
   };
 
   const handleAdd = () => {
-    console.log("add filter");
+    setFilters((prevFilters) => {
+      // replacing "new" id and adding new empty filter
+      const currentFilters = prevFilters.map((f, i) => ({
+        ...f,
+        id: `${f.criteria}-${i}`
+      }));
+      return [...currentFilters, EMPTY_FILTER];
+    });
   };
 
   const handleRemove = (filter) => {
-    setFilters((prevFilters) =>
-      prevFilters.filter((f) => f !== filter.criteria)
-    );
-    console.log("remove filter", filter);
+    setFilters((prevFilters) => prevFilters.filter((f) => f.id !== filter.id));
   };
 
   const handleClear = () => {
-    console.log("clear filters");
+    setFilters([EMPTY_FILTER]);
   };
 
   const handleSubmit = () => {
-    console.log("save filters", filters);
-    onApply(filters);
+    // remove empty filters and adding parsed string for API
+    const validFilters = filters
+      .filter((f) => f.criteria && f.operator && f.value)
+      .map((f) => ({ ...f, parsed: parseFilter(f) }));
+
+    saveFilters(id, validFilters, andOrAny);
+    onApply(validFilters, andOrAny);
+    setOpenModal(false);
+  };
+
+  const handleRemoveAndApply = () => {
+    saveFilters(id);
+    onApply([], JOIN_OPERATORS.ALL);
   };
 
   return (
     <>
-      <IconButton
-        size="large"
+      <FilterButton
+        filterCount={filterCount}
         onClick={() => setOpenModal(true)}
-        sx={{ mr: 1, top: "-6px", position: "relative" }}
-      >
-        <FilterListIcon fontSize="large" />
-      </IconButton>
+        onDelete={handleRemoveAndApply}
+      />
       <Dialog
         open={openModal}
         onClose={() => setOpenModal(false)}
         maxWidth="md"
         fullWidth
       >
-        <DialogContent sx={{ p: 0 }}>
+        <DialogContent>
           <Box sx={{ display: "flex", gap: 1 }}>
-            <Typography variant="body2">
+            <Typography
+              variant="body1"
+              sx={{ fontSize: 16, lineHeight: "32px" }}
+            >
               {T.translate("grid_filter.filter_by")}
             </Typography>
             <ToggleButtons
-              options={["All", "Any"]}
-              onChange={(val) => handleChange(val)}
+              options={Object.values(JOIN_OPERATORS)}
+              value={andOrAny}
+              onChange={setAndOrAny}
               name="and-or-any"
             />
-            <Typography variant="body2">
+            <Typography
+              variant="body1"
+              sx={{ fontSize: 16, lineHeight: "32px" }}
+            >
               {T.translate("grid_filter.following")}
             </Typography>
           </Box>
-          <Divider />
+          <Divider sx={{ m: "10px -24px" }} />
           <Box>
-            {values.map((value, index) => {
-              const criteria = criterias.find((c) => c.key === value.criteria);
-
-              return (
-                <Filter
-                  id={`grid-filter-${index}`}
-                  key={`grid-filter-${index}`}
-                  criterias={criterias}
-                  value={value}
-                  onChange={handleChange}
-                  onAdd={handleAdd}
-                  onDelete={handleRemove}
-                />
-              );
-            })}
-            <Filter
-              id="grid-filter-new"
-              criterias={criterias}
-              onChange={handleChange}
-              onAdd={handleAdd}
-              onDelete={handleRemove}
-            />
+            {filters.map((filter) => (
+              <Filter
+                id={filter.id}
+                key={`grid-filter-${filter.id}`}
+                criterias={criterias}
+                value={filter}
+                onChange={handleChange}
+                onAdd={handleAdd}
+                onDelete={handleRemove}
+              />
+            ))}
           </Box>
         </DialogContent>
         <Divider />
         <DialogActions sx={{ p: 2 }}>
-          <Button variant="text" onClick={() => handleClear()}>
+          <Button
+            variant="text"
+            onClick={() => handleClear()}
+            sx={{ mr: "auto" }}
+          >
             {T.translate("grid_filter.clear_filters")}
           </Button>
           <Button variant="outlined" onClick={() => setOpenModal(false)}>
@@ -204,19 +264,7 @@ const GridFilter = ({ values, criterias, onApply }) => {
 };
 
 GridFilter.propTypes = {
-  values: PropTypes.arrayOf(
-    PropTypes.shape({
-      criteria: PropTypes.string.isRequired,
-      operator: PropTypes.string.isRequired,
-      value: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.number,
-        PropTypes.arrayOf(
-          PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-        )
-      ]).isRequired
-    })
-  ),
+  id: PropTypes.string.isRequired,
   criterias: PropTypes.arrayOf(
     PropTypes.shape({
       key: PropTypes.string.isRequired,
@@ -232,11 +280,13 @@ GridFilter.propTypes = {
         props: PropTypes.object.isRequired
       })
     })
-  ).isRequired
+  ).isRequired,
+  onApply: PropTypes.func,
+  saveFilters: PropTypes.func.isRequired
 };
 
 GridFilter.defaultProps = {
-  values: []
+  onApply: () => {}
 };
 
-export default GridFilter;
+export default connect(null, { saveFilters })(GridFilter);

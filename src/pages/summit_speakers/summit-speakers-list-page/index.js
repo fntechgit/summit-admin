@@ -19,6 +19,7 @@ import SelectableTable from "openstack-uicore-foundation/lib/components/table-se
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
 import GridFilter from "../../../components/GridFilter";
+import useGridFilter from "../../../components/GridFilter/hooks/useGridFilter";
 import {
   exportSummitSpeakers,
   getSpeakersBySummit,
@@ -42,6 +43,8 @@ import { SpeakersSources as sources } from "../../../utils/constants";
 import "../../../styles/speakers-list-page.less";
 import SendEmailModal from "./components/send-email-modal";
 
+const FILTER_ID = "summit_speakers_list";
+
 const selectionStatusOptions = [
   { label: "Accepted", value: "accepted" },
   { label: "Alternate", value: "alternate" },
@@ -56,7 +59,7 @@ const selectionStatusOptions = [
 
 const getCriterias = (summit) => [
   {
-    key: "selection_plan",
+    key: "presentations_selection_plan_id",
     label: "Selection Plan",
     operators: [{ value: "==", label: "is" }],
     values: {
@@ -71,7 +74,7 @@ const getCriterias = (summit) => [
     }
   },
   {
-    key: "track",
+    key: "presentations_track_id",
     label: "Track",
     operators: [{ value: "==", label: "is" }],
     values: {
@@ -83,7 +86,7 @@ const getCriterias = (summit) => [
     }
   },
   {
-    key: "activity_type",
+    key: "presentations_type_id",
     label: "Activity Type",
     operators: [{ value: "==", label: "is" }],
     values: {
@@ -107,10 +110,59 @@ const getCriterias = (summit) => [
         options: [...selectionStatusOptions],
         placeholder: "Filter by Selection Status"
       }
+    },
+    customParser: (f) => {
+      const filter = [];
+      if (f.value) {
+        switch (f.value) {
+          case "only_rejected":
+            filter.push("has_rejected_presentations==true");
+            filter.push("has_accepted_presentations==false");
+            filter.push("has_alternate_presentations==false");
+            break;
+          case "only_accepted":
+            filter.push("has_rejected_presentations==false");
+            filter.push("has_accepted_presentations==true");
+            filter.push("has_alternate_presentations==false");
+            break;
+          case "only_alternate":
+            filter.push("has_rejected_presentations==false");
+            filter.push("has_accepted_presentations==false");
+            filter.push("has_alternate_presentations==true");
+            break;
+          case "accepted_alternate":
+            filter.push("has_rejected_presentations==false");
+            filter.push("has_accepted_presentations==true");
+            filter.push("has_alternate_presentations==true");
+            break;
+          case "accepted_rejected":
+            filter.push("has_rejected_presentations==true");
+            filter.push("has_accepted_presentations==true");
+            filter.push("has_alternate_presentations==false");
+            break;
+          case "alternate_rejected":
+            filter.push("has_rejected_presentations==true");
+            filter.push("has_accepted_presentations==false");
+            filter.push("has_alternate_presentations==true");
+            break;
+          case "accepted":
+            filter.push("has_accepted_presentations==true");
+            break;
+          case "rejected":
+            filter.push("has_rejected_presentations==true");
+            break;
+          case "alternate":
+            filter.push("has_alternate_presentations==true");
+            break;
+          default:
+            break;
+        }
+      }
+      return filter;
     }
   },
   {
-    key: "track_group",
+    key: "presentations_track_group_id",
     label: "Track Group",
     operators: [{ value: "==", label: "is" }],
     values: {
@@ -125,7 +177,7 @@ const getCriterias = (summit) => [
     }
   },
   {
-    key: "media_upload_type",
+    key: "has_media_upload_with_type",
     label: "Media Upload Type",
     operators: [
       { value: ">>", label: "has" },
@@ -157,7 +209,6 @@ const sourceOptions = [
 ];
 
 const SummitSpeakersListPage = ({
-  filterValues,
   currentSummit,
   history,
   speakersProps,
@@ -178,6 +229,7 @@ const SummitSpeakersListPage = ({
   const [source, setSource] = useState(sources.speakers);
   const isSpeakerMode = source === sources.speakers;
   const subjectProps = isSpeakerMode ? speakersProps : submittersProps;
+  const { parsedFilter } = useGridFilter(FILTER_ID);
 
   useEffect(() => {
     initSubmittersList();
@@ -186,7 +238,7 @@ const SummitSpeakersListPage = ({
     if (currentSummit) {
       getBySummit();
     }
-  }, [currentSummit, source]);
+  }, [currentSummit, source, parsedFilter.join(",")]);
 
   const getBySummit = (params = {}) => {
     const { term, page, perPage, order, orderDir } = subjectProps;
@@ -197,9 +249,15 @@ const SummitSpeakersListPage = ({
       ? getSpeakersBySummit
       : getSubmittersBySummit;
 
-    const { term: t, page: p, perPage: pp, order: o, orderDir: od } = mergedParams;
+    const {
+      term: t,
+      page: p,
+      perPage: pp,
+      order: o,
+      orderDir: od
+    } = mergedParams;
 
-    getSubjects(t, p, pp, o, od, filterValues, source);
+    getSubjects(t, p, pp, o, od, parsedFilter, source);
   };
 
   const handleSourceChange = (ev) => {
@@ -232,12 +290,14 @@ const SummitSpeakersListPage = ({
       ? exportSummitSpeakers
       : exportSummitSubmitters;
 
-    exportSubjects(term, order, orderDir, filterValues, source);
+    exportSubjects(term, order, orderDir, parsedFilter, source);
   };
 
   const handleSelected = (itemId, isSelected) => {
     const select = isSpeakerMode ? selectSummitSpeaker : selectSummitSubmitter;
-    const unselect = isSpeakerMode ? unselectSummitSpeaker : unselectSummitSubmitter;
+    const unselect = isSpeakerMode
+      ? unselectSummitSpeaker
+      : unselectSummitSubmitter;
 
     if (isSelected) select(itemId);
     else unselect(itemId);
@@ -245,8 +305,12 @@ const SummitSpeakersListPage = ({
 
   const handleSelectedAll = (ev) => {
     const selectedAll = ev.target.checked;
-    const selectAll = isSpeakerMode ? selectAllSummitSpeakers : selectAllSummitSubmitters;
-    const unselectAll = isSpeakerMode ? unselectAllSummitSpeakers : unselectAllSummitSubmitters;
+    const selectAll = isSpeakerMode
+      ? selectAllSummitSpeakers
+      : selectAllSummitSubmitters;
+    const unselectAll = isSpeakerMode
+      ? unselectAllSummitSpeakers
+      : unselectAllSummitSubmitters;
 
     if (selectedAll) selectAll();
     else unselectAll();
@@ -323,7 +387,7 @@ const SummitSpeakersListPage = ({
             onSearch={handleSearch}
           />
         </div>
-        <div className="col-md-3">
+        <div className="col-md-2">
           <Dropdown
             id="speakerSubmitterSourceSelector"
             value={source}
@@ -333,11 +397,8 @@ const SummitSpeakersListPage = ({
             placeholder="Select a source"
           />
         </div>
-        <div className="col-md-1">
-          <GridFilter
-            criterias={getCriterias(currentSummit)}
-            onApply={getBySummit}
-          />
+        <div className="col-md-2">
+          <GridFilter id={FILTER_ID} criterias={getCriterias(currentSummit)} />
         </div>
         <div className="col-md-2 text-right">
           <button
@@ -349,7 +410,7 @@ const SummitSpeakersListPage = ({
         </div>
       </div>
 
-      <SendEmailModal source={source} filterValues={[]} />
+      <SendEmailModal source={source} filters={parsedFilter} />
 
       {items.length === 0 && (
         <div>
@@ -396,7 +457,7 @@ const SummitSpeakersListPage = ({
 const mapStateToProps = ({
   currentSummitState,
   currentSummitSpeakersListState,
-  currentSummitSubmittersListState,
+  currentSummitSubmittersListState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
   speakersProps: currentSummitSpeakersListState,

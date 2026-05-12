@@ -111,7 +111,7 @@ const promoCodeStrategiesDDL = [
 
 const SendEmailModal = ({
   source,
-  filterValues,
+  filters,
   speakersProps,
   submittersProps,
   currentSummit,
@@ -218,7 +218,7 @@ const SendEmailModal = ({
 
     sendEmails(
       term,
-      filterValues,
+      filters,
       testRecipient,
       excerptRecipient,
       shouldSendCopy2Submitter,
