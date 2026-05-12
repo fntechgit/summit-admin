@@ -4202,7 +4202,8 @@
     "following": " one of the following: ",
     "select_criteria": "Select criteria",
     "select_operator": "Select operator",
-    "select_value": "Select value",
+    "select_values": "Select values",
+    "filters": "Filters",
     "clear_filters": "Clear Filters",
     "cancel": "Cancel",
     "apply_filters": "Apply Filters"

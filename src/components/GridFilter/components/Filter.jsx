@@ -11,87 +11,69 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Grid2, Button, Box } from "@mui/material";
+import { Box, Grid2, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import PropTypes from "prop-types";
 import Dropdown from "./Dropdown";
 import ValueInput from "./ValueInput";
+import RoundButton from "./RoundButton";
 
-const Filter = ({
-  id,
-  value,
-  criterias,
-  onChange,
-  onAdd,
-  onDelete
-}) => {
-  const [selectedCriteria, setSelectedCriteria] = useState(null);
-  const [selectedOperator, setSelectedOperator] = useState(null);
-  const [selectedValue, setSelectedValue] = useState(null);
-  const criteriaOptions = criterias.map(({ key, label }) => ({ value: key, label }));
-  const criteriaObj = criterias.find(({ key }) => key === selectedCriteria);
+const Filter = ({ id, value, criterias, onChange, onAdd, onDelete }) => {
+  const criteriaOptions = criterias.map(({ key, label }) => ({
+    value: key,
+    label
+  }));
+  const criteriaObj = criterias.find(({ key }) => key === value?.criteria);
   const operatorOptions = criteriaObj?.operators || [];
   const valueSettings = criteriaObj?.values || {};
-
-  useEffect(() => {
-    if(value){
-      setSelectedCriteria(value.criteria);
-      setSelectedOperator(value.operator);
-      setSelectedValue(value.value);
-    }
-  }, [value])
 
   const handleChange = (prop, val) => {
     onChange({ ...value, [prop]: val });
   };
 
-
-  // TODO: no es mejor hacer el change en el state del padre ??? pq guardo el state aca ???
-
   const handleChangeCriteria = (ev) => {
     const val = ev.target.value;
-    setSelectedCriteria(val);
     handleChange("criteria", val);
-  }
+  };
 
   const handleChangeOperator = (ev) => {
     const val = ev.target.value;
-    setSelectedOperator(val);
     handleChange("operator", val);
-  }
+  };
 
   const handleChangeValue = (ev) => {
     const val = ev.target.value;
-    setSelectedValue(val);
     handleChange("value", val);
-  }
+  };
 
   return (
-    <Grid2 container spacing={2} sx={{ alignItems: "center" }}>
+    <Grid2 container spacing={2} sx={{ alignItems: "center", mb: 2 }}>
       <Grid2 size={11}>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: "14px" }}>
           <Dropdown
             id={`${id}-column`}
-            value={selectedCriteria}
+            value={value?.criteria || ""}
             placeholder={T.translate("grid_filter.select_criteria")}
             options={criteriaOptions}
             onChange={handleChangeCriteria}
           />
           <Dropdown
             id={`${id}-operator`}
-            value={selectedOperator}
+            value={value?.operator || ""}
             placeholder={T.translate("grid_filter.select_operator")}
             options={operatorOptions}
+            disabled={!value?.criteria}
             onChange={handleChangeOperator}
           />
           <ValueInput
             id={`${id}-value`}
-            value={selectedValue}
+            value={value?.value || ""}
             type={valueSettings.type}
             placeholder={T.translate("grid_filter.select_values")}
+            disabled={!value?.criteria}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...valueSettings.props}
             onChange={handleChangeValue}
@@ -99,18 +81,24 @@ const Filter = ({
         </Box>
       </Grid2>
       <Grid2 size={1}>
-        {value ? (
-          <Button
-            variant="outlined"
-            aria-label="delete"
-            onClick={() => onDelete(id)}
+        {value?.id !== "new" ? (
+          <IconButton
+            aria-label="delete-filter"
+            onClick={() => onDelete(value)}
+            size="large"
           >
-            <DeleteIcon />
-          </Button>
+            <DeleteIcon fontSize="large" />
+          </IconButton>
         ) : (
-          <Button variant="contained" aria-label="add" onClick={onAdd}>
-            <AddIcon />
-          </Button>
+          <RoundButton
+            variant="contained"
+            aria-label="add-filter"
+            onClick={() => onAdd()}
+            disabled={!value?.criteria || !value?.operator || !value?.value}
+            sx={{ ml: "4px" }}
+          >
+            <AddIcon fontSize="large" />
+          </RoundButton>
         )}
       </Grid2>
     </Grid2>

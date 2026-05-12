@@ -12,35 +12,54 @@
  * */
 
 import React from "react";
-import { ToggleButtonGroup, ToggleButton } from "react-bootstrap";
+import { ToggleButtonGroup, ToggleButton } from "@mui/material";
 import PropTypes from "prop-types";
 
-const ToggleButtons = ({ name, options, value, onChange }) => (
-    <ToggleButtonGroup
-      name={name}
-      color="primary"
-      value={value}
-      exclusive
-      onChange={onChange}
-      aria-label="Platform"
-    >
-      {options.map((option) => (
-        <ToggleButton key={`toggle-btn-${option}`} value={option}>
-          {option}
-        </ToggleButton>
-      ))}
-    </ToggleButtonGroup>
-  );
+const ToggleButtons = ({ options, value, onChange, color = "primary" }) => (
+  <ToggleButtonGroup
+    value={value}
+    color={color}
+    exclusive
+    onChange={(_, newValue) => {
+      if (newValue !== null) onChange(newValue);
+    }}
+    sx={(theme) => {
+      const theColor = theme.palette[color]?.main ?? theme.palette.primary.main;
+      return {
+        border: `1px solid ${theColor}`,
+        overflow: "hidden",
+        "& .MuiToggleButtonGroup-grouped": {
+          color: theColor,
+          fontSize: "14px",
+          padding: "2px 16px",
+          "&.Mui-selected": {
+            backgroundColor: theColor,
+            color: "#fff",
+            "&:hover": { backgroundColor: theColor }
+          },
+          "&:hover": { backgroundColor: `${theColor}18` }
+        }
+      };
+    }}
+  >
+    {options.map((option) => (
+      <ToggleButton key={`toggle-btn-${option}`} value={option} disableRipple>
+        {option}
+      </ToggleButton>
+    ))}
+  </ToggleButtonGroup>
+);
 
 ToggleButtons.propTypes = {
-  name: PropTypes.string.isRequired,
   options: PropTypes.arrayOf(PropTypes.string).isRequired,
   value: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
-}
+  color: PropTypes.string,
+  onChange: PropTypes.func.isRequired
+};
 
 ToggleButtons.defaultProps = {
   value: null,
-}
+  color: "primary"
+};
 
 export default ToggleButtons;
