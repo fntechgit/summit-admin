@@ -705,7 +705,6 @@ class SummitSpeakersListPage extends React.Component {
       totalActivities,
       selectedCount,
       selectedAll,
-      selectedItems,
       excludedItems,
       selectionPlanFilter,
       trackFilter,
@@ -716,19 +715,7 @@ class SummitSpeakersListPage extends React.Component {
       currentFlowEvent
     } = this.getSubjectProps();
 
-    const selectedActivities = (() => {
-      if (selectedAll && excludedItems.length === 0) return totalActivities;
-      const relevant = selectedAll
-        ? items.filter((item) => !excludedItems.includes(item.id))
-        : items.filter((item) => selectedItems.includes(item.id));
-      const ids = new Set();
-      relevant.forEach((item) => {
-        (item.accepted_presentations || []).forEach((p) => ids.add(p.id));
-        (item.alternate_presentations || []).forEach((p) => ids.add(p.id));
-        (item.rejected_presentations || []).forEach((p) => ids.add(p.id));
-      });
-      return ids.size;
-    })();
+    const activitiesCountAccurate = selectedAll && excludedItems.length === 0;
 
     const columns = [
       {
@@ -1065,12 +1052,19 @@ class SummitSpeakersListPage extends React.Component {
           <div>
             <span>
               <b>
-                {T.translate(
-                  this.state.source === sources.speakers
-                    ? "summit_speakers_list.items_qty"
-                    : "summit_submitters_list.items_qty",
-                  { qty: selectedCount, activitiesQty: selectedActivities }
-                )}
+                {activitiesCountAccurate
+                  ? T.translate(
+                      this.state.source === sources.speakers
+                        ? "summit_speakers_list.items_qty"
+                        : "summit_submitters_list.items_qty",
+                      { qty: selectedCount, activitiesQty: totalActivities }
+                    )
+                  : T.translate(
+                      this.state.source === sources.speakers
+                        ? "summit_speakers_list.items_qty_no_activities"
+                        : "summit_submitters_list.items_qty_no_activities",
+                      { qty: selectedCount }
+                    )}
               </b>
             </span>
             <SelectableTable
