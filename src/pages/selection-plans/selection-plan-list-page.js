@@ -14,15 +14,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Divider from "@mui/material/Divider";
 import Grid2 from "@mui/material/Grid2";
-import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
-import CloseIcon from "@mui/icons-material/Close";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
@@ -33,15 +27,13 @@ import {
 } from "../../actions/selection-plan-actions";
 import { getMarketingSettingsBySelectionPlan } from "../../actions/marketing-actions";
 import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../utils/constants";
-import EditSelectionPlanPage from "./edit-selection-plan-page";
+import SelectionPlanPopup from "./selection-plan-popup";
 
 const SelectionPlanListPage = ({
   currentSummit,
   history,
-  match,
   selectionPlans,
   currentSelectionPlan,
-  currentSelectionPlanErrors,
   totalSelectionPlans,
   perPage,
   term,
@@ -55,7 +47,6 @@ const SelectionPlanListPage = ({
   deleteSelectionPlan
 }) => {
   const [openSelectionPlanPopup, setOpenSelectionPlanPopup] = useState(false);
-  const routeSelectionPlanId = match?.params?.selection_plan_id;
 
   const openEditModal = useCallback(
     (selectionPlanId) => {
@@ -76,14 +67,10 @@ const SelectionPlanListPage = ({
   );
 
   useEffect(() => {
-    getSelectionPlans(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
-  }, []);
-
-  useEffect(() => {
-    if (routeSelectionPlanId) {
-      openEditModal(routeSelectionPlanId);
+    if (currentSummit?.id) {
+      getSelectionPlans(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
     }
-  }, [openEditModal, routeSelectionPlanId]);
+  }, [currentSummit]);
 
   const refreshSelectionPlans = () =>
     getSelectionPlans(term, currentPage, perPage, order, orderDir);
@@ -96,7 +83,9 @@ const SelectionPlanListPage = ({
   const handleDelete = (selectionPlan) => {
     if (!selectionPlan?.id) return;
 
-    deleteSelectionPlan(selectionPlan.id).then(() => refreshSelectionPlans());
+    deleteSelectionPlan(selectionPlan.id)
+      .finally(() => refreshSelectionPlans())
+      .catch(() => {});
   };
 
   const handleNew = () => {
@@ -107,19 +96,11 @@ const SelectionPlanListPage = ({
   const handleClosePopup = () => {
     resetSelectionPlanForm();
     setOpenSelectionPlanPopup(false);
-
-    if (routeSelectionPlanId) {
-      history.replace(`/app/summits/${currentSummit.id}/selection-plans`);
-    }
   };
 
   const handleSelectionPlanSaved = () => {
     setOpenSelectionPlanPopup(false);
     refreshSelectionPlans();
-
-    if (routeSelectionPlanId) {
-      history.replace(`/app/summits/${currentSummit.id}/selection-plans`);
-    }
   };
 
   const handleSort = (key, dir) => {
@@ -238,35 +219,14 @@ const SelectionPlanListPage = ({
         </div>
       )}
 
-      <Dialog
-        open={openSelectionPlanPopup}
-        onClose={handleClosePopup}
-        maxWidth="xl"
-        fullWidth
-        disableEnforceFocus
-        disableAutoFocus
-        disableRestoreFocus
-      >
-        <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-          {currentSelectionPlan?.id
-            ? T.translate("general.edit")
-            : T.translate("general.add")}{" "}
-          {T.translate("edit_selection_plan.selection_plan")}
-          <IconButton size="small" onClick={handleClosePopup}>
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </DialogTitle>
-        <Divider />
-        <DialogContent>
-          <EditSelectionPlanPage
-            onSaved={handleSelectionPlanSaved}
-            history={history}
-            currentSummit={currentSummit}
-            entity={currentSelectionPlan}
-            errors={currentSelectionPlanErrors}
-          />
-        </DialogContent>
-      </Dialog>
+      {openSelectionPlanPopup && (
+        <SelectionPlanPopup
+          isEditing={!!currentSelectionPlan?.id}
+          onClose={handleClosePopup}
+          onSaved={handleSelectionPlanSaved}
+          history={history}
+        />
+      )}
     </div>
   );
 };
@@ -278,8 +238,7 @@ const mapStateToProps = ({
 }) => ({
   currentSummit: currentSummitState.currentSummit,
   ...currentSelectionPlanListState,
-  currentSelectionPlan: currentSelectionPlanState.entity,
-  currentSelectionPlanErrors: currentSelectionPlanState.errors
+  currentSelectionPlan: currentSelectionPlanState.entity
 });
 
 export default connect(mapStateToProps, {

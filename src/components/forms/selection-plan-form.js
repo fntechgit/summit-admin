@@ -11,8 +11,10 @@
  * limitations under the License.
  * */
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import T from "i18n-react/dist/i18n-react";
+import { useFormik, FormikProvider } from "formik";
+import moment from "moment-timezone";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
@@ -20,7 +22,7 @@ import {
   queryEventTypes
 } from "openstack-uicore-foundation/lib/utils/query-actions";
 import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
-import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
+import MuiFormikDatepicker from "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker";
 import SimpleLinkList from "openstack-uicore-foundation/lib/components/simple-link-list";
 import SortableTable from "openstack-uicore-foundation/lib/components/mui/sortable-table";
 import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
@@ -29,18 +31,14 @@ import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import Switch from "react-switch";
 import { Pagination } from "react-bootstrap";
-import {
-  isEmpty,
-  scrollToError,
-  shallowEqual,
-  stripTags
-} from "../../utils/methods";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import { scrollToError, stripTags } from "../../utils/methods";
 import EmailTemplateInput from "../inputs/email-template-input";
 import ImportModal from "../inputs/import-modal";
-import {
-  MILLISECONDS_TO_SECONDS,
-  PresentationTypeClassName
-} from "../../utils/constants";
+import { PresentationTypeClassName } from "../../utils/constants";
 import Many2ManyDropDown from "../inputs/many-2-many-dropdown";
 import { querySelectionPlanExtraQuestions } from "../../actions/selection-plan-actions";
 import { querySummitProgressFlags } from "../../actions/track-chair-actions";
@@ -49,6 +47,26 @@ import {
   DEFAULT_ALLOWED_QUESTIONS,
   DEFAULT_CFP_PRESENTATION_EDITION_TABS
 } from "../../reducers/selection_plans/selection-plan-reducer";
+
+const DATE_FIELDS = [
+  "submission_begin_date",
+  "submission_end_date",
+  "submission_lock_down_presentation_status_date",
+  "voting_begin_date",
+  "voting_end_date",
+  "selection_begin_date",
+  "selection_end_date"
+];
+
+const buildInitialValues = (entity, timezone) => {
+  const values = { ...entity };
+  DATE_FIELDS.forEach((field) => {
+    values[field] = entity[field]
+      ? epochToMomentTimeZone(entity[field], timezone)
+      : null;
+  });
+  return values;
+};
 
 const SelectionPlanForm = (props) => {
   const {
@@ -61,6 +79,7 @@ const SelectionPlanForm = (props) => {
     actionTypesOrder,
     allowedMembers,
     onSaved,
+    onSavingChange,
     onSubmit,
     saveSelectionPlanSettings,
     onTrackGroupLink,
@@ -85,85 +104,30 @@ const SelectionPlanForm = (props) => {
     onAllowedMembersPageChange
   } = props;
 
-  const [entity, setEntity] = useState({ ...propsEntity });
-  const [errors, setErrors] = useState(propsErrors);
   const [showSection, setShowSection] = useState("main");
   const [newMemberEmail, setNewMemberEmail] = useState("");
   const [showImportModal, setShowImportModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const prevPropsRef = useRef({ entity: propsEntity, errors: propsErrors });
+  const handleFormikSubmit = (values) => {
+    setIsSaving(true);
+    if (onSavingChange) onSavingChange(true);
 
-  useEffect(() => {
-    const prevEntity = prevPropsRef.current.entity;
-    const prevErrors = prevPropsRef.current.errors;
-
-    scrollToError(propsErrors);
-
-    const updates = {};
-
-    if (!shallowEqual(prevEntity, propsEntity)) {
-      updates.entity = { ...propsEntity };
-      updates.errors = {};
-    }
-
-    if (!shallowEqual(prevErrors, propsErrors)) {
-      updates.errors = { ...propsErrors };
-    }
-
-    if (!isEmpty(updates)) {
-      if (updates.entity) setEntity(updates.entity);
-      if (updates.errors !== undefined) setErrors(updates.errors);
-    }
-
-    prevPropsRef.current = { entity: propsEntity, errors: propsErrors };
-  }, [propsEntity, propsErrors]);
-
-  const hasErrors = (field) => {
-    if (field in errors) return errors[field];
-    return "";
-  };
-
-  const handleChange = (ev) => {
-    const newEntity = { ...entity };
-    const newErrors = { ...errors };
-    let { value, id } = ev.target;
-
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
-
-    if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_TO_SECONDS;
-    }
-
-    if (id.startsWith("cfp_")) {
-      if (
-        !Object.prototype.hasOwnProperty.call(newEntity.marketing_settings, id)
-      ) {
-        newEntity.marketing_settings[id] = { value: "" };
+    const normalized = { ...values };
+    DATE_FIELDS.forEach((field) => {
+      if (values[field]) {
+        normalized[field] = moment
+          .tz(values[field], currentSummit.time_zone_id)
+          .unix();
+      } else {
+        normalized[field] = 0;
       }
-      newEntity.marketing_settings[id].value = value;
-    } else {
-      newErrors[id] = "";
-      newEntity[id] = value;
-    }
+    });
 
-    setEntity(newEntity);
-    setErrors(newErrors);
-  };
-
-  const handleNotificationEmailTemplateChange = (ev) => {
-    const { value, id } = ev.target;
-    setEntity((prev) => ({ ...prev, [id]: value }));
-    setErrors((prev) => ({ ...prev, [id]: "" }));
-  };
-
-  const handleSubmit = (ev) => {
-    ev.preventDefault();
-    return onSubmit(entity)
+    return onSubmit(normalized)
       .then((e) => {
         if (!e?.id) return null;
-        return saveSelectionPlanSettings(entity.marketing_settings, e.id).then(
+        return saveSelectionPlanSettings(values.marketing_settings, e.id).then(
           () => {
             if (onSaved) onSaved(e);
           }
@@ -171,15 +135,55 @@ const SelectionPlanForm = (props) => {
       })
       .catch(() => {
         // errors are surfaced via error handler
+      })
+      .finally(() => {
+        setIsSaving(false);
+        if (onSavingChange) onSavingChange(false);
       });
   };
 
-  const handleTrackGroupLink = (value) => onTrackGroupLink(entity.id, value);
+  const formik = useFormik({
+    initialValues: buildInitialValues(propsEntity, currentSummit.time_zone_id),
+    onSubmit: handleFormikSubmit,
+    enableReinitialize: true,
+    validateOnChange: false
+  });
+
+  useEffect(() => {
+    scrollToError(propsErrors);
+    if (propsErrors && Object.keys(propsErrors).length > 0) {
+      formik.setErrors(propsErrors);
+    }
+  }, [propsErrors]);
+
+  const hasErrors = (field) => formik.errors[field] ?? "";
+
+  const handleChange = (ev) => {
+    let { value, id } = ev.target;
+
+    if (ev.target.type === "checkbox") {
+      value = ev.target.checked;
+    }
+
+    if (id.startsWith("cfp_")) {
+      const current = formik.values.marketing_settings[id] || {};
+      formik.setFieldValue(`marketing_settings.${id}`, { ...current, value });
+    } else {
+      formik.setFieldValue(id, value);
+    }
+  };
+
+  const handleNotificationEmailTemplateChange = (ev) => {
+    formik.setFieldValue(ev.target.id, ev.target.value);
+  };
+
+  const handleTrackGroupLink = (value) =>
+    onTrackGroupLink(formik.values.id, value);
   const handleTrackGroupUnLink = (valueId) =>
-    onTrackGroupUnLink(entity.id, valueId);
-  const handleAddEventType = (value) => onAddEventType(entity.id, value);
+    onTrackGroupUnLink(formik.values.id, valueId);
+  const handleAddEventType = (value) => onAddEventType(formik.values.id, value);
   const handleDeleteEventType = (valueId) =>
-    onDeleteEventType(entity.id, valueId);
+    onDeleteEventType(formik.values.id, valueId);
   const handleAddRatingType = () => onAddRatingType();
   const handleEditRatingType = (ratingTypeId) => onEditRatingType(ratingTypeId);
   const handleDeleteRatingType = (ratingTypeId) =>
@@ -192,15 +196,15 @@ const SelectionPlanForm = (props) => {
   const handleRemoveProgressFlag = (progressFlagId) =>
     onUnassignProgressFlag(progressFlagId);
   const handleDeleteAllowedMember = (valueId) =>
-    onAllowedMemberDelete(entity.id, valueId);
+    onAllowedMemberDelete(formik.values.id, valueId);
   const handleAllowedMembersPageChange = (page) =>
-    onAllowedMembersPageChange(entity.id, page);
+    onAllowedMembersPageChange(formik.values.id, page);
 
   const handleAddAllowedMember = () =>
-    onAllowedMemberAdd(entity.id, newMemberEmail);
+    onAllowedMemberAdd(formik.values.id, newMemberEmail);
 
   const handleImportAllowedMembers = (importFile) => {
-    if (importFile) onImportAllowedMembers(entity.id, importFile);
+    if (importFile) onImportAllowedMembers(formik.values.id, importFile);
     setShowImportModal(false);
   };
 
@@ -212,7 +216,7 @@ const SelectionPlanForm = (props) => {
   const linkSummitSelectionPlanExtraQuestion = (question) => {
     onAssignExtraQuestion2SelectionPlan(
       currentSummit.id,
-      entity.id,
+      formik.values.id,
       question.id
     );
   };
@@ -225,23 +229,17 @@ const SelectionPlanForm = (props) => {
   const linkSummitProgressFlag = (progressFlag) => {
     onAssignProgressFlag2SelectionPlan(
       currentSummit.id,
-      entity.id,
+      formik.values.id,
       progressFlag.id
     );
   };
 
   const handleOnSwitchChange = (setting, value) => {
-    const newEntity = { ...entity };
-    if (
-      !Object.prototype.hasOwnProperty.call(
-        newEntity.marketing_settings,
-        setting
-      )
-    ) {
-      newEntity.marketing_settings[setting] = { value: "" };
-    }
-    newEntity.marketing_settings[setting].value = value;
-    setEntity(newEntity);
+    const current = formik.values.marketing_settings[setting] || {};
+    formik.setFieldValue(`marketing_settings.${setting}`, {
+      ...current,
+      value
+    });
   };
 
   const toggleSection = (section) => {
@@ -353,1002 +351,954 @@ const SelectionPlanForm = (props) => {
   };
 
   return (
-    <form className="selection-plan-form">
-      <input type="hidden" id="id" value={entity.id} />
-      <div className="row form-group">
-        <div className="col-md-4">
-          <label> {T.translate("edit_selection_plan.name")} *</label>
-          <Input
-            id="name"
-            className="form-control"
-            error={hasErrors("name")}
-            onChange={handleChange}
-            value={entity.name}
-          />
-        </div>
-        <div className="col-md-2 checkboxes-div">
-          <div className="form-check abc-checkbox">
-            <input
-              type="checkbox"
-              id="is_enabled"
-              checked={entity.is_enabled}
+    <FormikProvider value={formik}>
+      <Box
+        component="form"
+        className="selection-plan-form"
+        onSubmit={formik.handleSubmit}
+      >
+        <input type="hidden" id="id" value={formik.values.id} />
+        <div className="row form-group">
+          <div className="col-md-4">
+            <label> {T.translate("edit_selection_plan.name")} *</label>
+            <Input
+              id="name"
+              className="form-control"
+              error={hasErrors("name")}
               onChange={handleChange}
-              className="form-check-input"
+              value={formik.values.name}
             />
-            <label className="form-check-label" htmlFor="is_enabled">
-              {T.translate("edit_selection_plan.enabled")}
-            </label>
           </div>
-        </div>
-        <div className="col-md-2 checkboxes-div">
-          <div className="form-check abc-checkbox">
-            <input
-              type="checkbox"
-              id="is_hidden"
-              checked={entity.is_hidden}
-              onChange={handleChange}
-              className="form-check-input"
+          <div className="col-md-2 checkboxes-div">
+            <FormControlLabel
+              control={
+                <Checkbox
+                  id="is_enabled"
+                  checked={formik.values.is_enabled}
+                  onChange={handleChange}
+                />
+              }
+              label={T.translate("edit_selection_plan.enabled")}
             />
-            <label className="form-check-label" htmlFor="is_hidden">
-              {T.translate("edit_selection_plan.hidden")}
-            </label>
           </div>
-        </div>
-        <div className="col-md-2 checkboxes-div">
-          <div className="form-check abc-checkbox">
-            <input
-              type="checkbox"
-              id="allow_proposed_schedules"
-              checked={entity.allow_proposed_schedules}
-              onChange={handleChange}
-              className="form-check-input"
+          <div className="col-md-2 checkboxes-div">
+            <FormControlLabel
+              control={
+                <Checkbox
+                  id="is_hidden"
+                  checked={formik.values.is_hidden}
+                  onChange={handleChange}
+                />
+              }
+              label={T.translate("edit_selection_plan.hidden")}
             />
-            <label
-              className="form-check-label"
-              htmlFor="allow_proposed_schedules"
-            >
-              {T.translate("edit_selection_plan.allow_proposed_schedules")}
-            </label>
           </div>
-        </div>
-        <div className="col-md-2 checkboxes-div">
-          <div className="form-check abc-checkbox">
-            <input
-              type="checkbox"
-              id="allow_new_presentations"
-              checked={entity.allow_new_presentations}
-              onChange={handleChange}
-              className="form-check-input"
-            />
-            <label
-              className="form-check-label"
-              htmlFor="allow_new_presentations"
-            >
-              {T.translate("edit_selection_plan.allow_new_presentations")}
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div className="row form-group">
-        <div className="col-md-6">
-          <label>
-            {" "}
-            {T.translate("edit_selection_plan.submission_begin_date")}{" "}
-          </label>
-          <DateTimePicker
-            id="submission_begin_date"
-            onChange={handleChange}
-            format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-            timezone={currentSummit.time_zone_id}
-            value={epochToMomentTimeZone(
-              entity.submission_begin_date,
-              currentSummit.time_zone_id
-            )}
-          />
-        </div>
-        <div className="col-md-6">
-          <label>
-            {" "}
-            {T.translate("edit_selection_plan.submission_end_date")}{" "}
-          </label>
-          <DateTimePicker
-            id="submission_end_date"
-            onChange={handleChange}
-            format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-            timezone={currentSummit.time_zone_id}
-            value={epochToMomentTimeZone(
-              entity.submission_end_date,
-              currentSummit.time_zone_id
-            )}
-          />
-        </div>
-      </div>
-      <div className="row form-group">
-        <div className="col-md-6">
-          <label> {T.translate("edit_selection_plan.max_submissions")}</label>
-          <Input
-            className="form-control"
-            type="number"
-            error={hasErrors("max_submission_allowed_per_user")}
-            id="max_submission_allowed_per_user"
-            value={entity.max_submission_allowed_per_user}
-            onChange={handleChange}
-            min={0}
-          />
-        </div>
-        <div className="col-md-6">
-          <label>
-            {T.translate(
-              "edit_selection_plan.submission_lock_down_presentation_status_date"
-            )}{" "}
-            &nbsp;
-            <i
-              className="fa fa-info-circle"
-              aria-hidden="true"
-              title={T.translate(
-                "edit_selection_plan.submission_lock_down_presentation_status_date_info"
+          <div className="col-md-2 checkboxes-div">
+            <FormControlLabel
+              control={
+                <Checkbox
+                  id="allow_proposed_schedules"
+                  checked={formik.values.allow_proposed_schedules}
+                  onChange={handleChange}
+                />
+              }
+              label={T.translate(
+                "edit_selection_plan.allow_proposed_schedules"
               )}
             />
-          </label>
-          <DateTimePicker
-            id="submission_lock_down_presentation_status_date"
-            onChange={handleChange}
-            format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-            timezone={currentSummit.time_zone_id}
-            value={epochToMomentTimeZone(
-              entity.submission_lock_down_presentation_status_date,
-              currentSummit.time_zone_id
-            )}
-          />
-        </div>
-      </div>
-      <div className="row form-group">
-        <div className="col-md-6">
-          <label>
-            {" "}
-            {T.translate("edit_selection_plan.voting_begin_date")}{" "}
-          </label>
-          <DateTimePicker
-            id="voting_begin_date"
-            onChange={handleChange}
-            format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-            timezone={currentSummit.time_zone_id}
-            value={epochToMomentTimeZone(
-              entity.voting_begin_date,
-              currentSummit.time_zone_id
-            )}
-          />
-        </div>
-        <div className="col-md-6">
-          <label> {T.translate("edit_selection_plan.voting_end_date")} </label>
-          <DateTimePicker
-            id="voting_end_date"
-            onChange={handleChange}
-            format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-            timezone={currentSummit.time_zone_id}
-            value={epochToMomentTimeZone(
-              entity.voting_end_date,
-              currentSummit.time_zone_id
-            )}
-          />
-        </div>
-      </div>
-      <div className="row form-group">
-        <div className="col-md-6">
-          <label>
-            {" "}
-            {T.translate("edit_selection_plan.selection_begin_date")}{" "}
-          </label>
-          <DateTimePicker
-            id="selection_begin_date"
-            onChange={handleChange}
-            format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-            timezone={currentSummit.time_zone_id}
-            value={epochToMomentTimeZone(
-              entity.selection_begin_date,
-              currentSummit.time_zone_id
-            )}
-          />
-        </div>
-        <div className="col-md-6">
-          <label>
-            {" "}
-            {T.translate("edit_selection_plan.selection_end_date")}{" "}
-          </label>
-          <DateTimePicker
-            id="selection_end_date"
-            onChange={handleChange}
-            format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-            timezone={currentSummit.time_zone_id}
-            value={epochToMomentTimeZone(
-              entity.selection_end_date,
-              currentSummit.time_zone_id
-            )}
-          />
-        </div>
-      </div>
-
-      <div className="row form-group">
-        <div className="col-md-12">
-          <label>
-            {" "}
-            {T.translate("edit_selection_plan.submission_period_disclaimer")} *
-          </label>
-          <TextEditorV3
-            id="submission_period_disclaimer"
-            value={entity.submission_period_disclaimer}
-            onChange={handleChange}
-            error={hasErrors("submission_period_disclaimer")}
-            license={process.env.JODIT_LICENSE_KEY}
-          />
-        </div>
-      </div>
-
-      <hr />
-
-      {entity.id !== 0 && (
-        <>
-          <Panel
-            show={showSection === "track_groups"}
-            title={T.translate("edit_selection_plan.track_groups")}
-            handleClick={() => toggleSection("track_groups")}
-          >
-            <SimpleLinkList
-              values={entity.track_groups}
-              columns={trackGroupsColumns}
-              options={trackGroupsOptions}
+          </div>
+          <div className="col-md-2 checkboxes-div">
+            <FormControlLabel
+              control={
+                <Checkbox
+                  id="allow_new_presentations"
+                  checked={formik.values.allow_new_presentations}
+                  onChange={handleChange}
+                />
+              }
+              label={T.translate("edit_selection_plan.allow_new_presentations")}
             />
-          </Panel>
-          <Panel
-            show={showSection === "event_types"}
-            title={T.translate("edit_selection_plan.event_types")}
-            handleClick={() => toggleSection("event_types")}
-          >
-            <SimpleLinkList
-              values={entity.event_types}
-              columns={eventTypesColumns}
-              options={eventTypesOptions}
+          </div>
+        </div>
+
+        <div className="row form-group">
+          <div className="col-md-6">
+            <MuiFormikDatepicker
+              name="submission_begin_date"
+              label={T.translate("edit_selection_plan.submission_begin_date")}
             />
-          </Panel>
-          <Panel
-            show={showSection === "extra_questions"}
-            title={T.translate("edit_selection_plan.extra_questions")}
-            handleClick={() => toggleSection("extra_questions")}
-          >
-            <div className="row">
-              <Many2ManyDropDown
-                id="addAllowedExtraQuestions"
-                isClearable
-                placeholder={T.translate(
-                  "edit_selection_plan.placeholders.link_question"
-                )}
-                fetchOptions={fetchSummitSelectionPlanExtraQuestions}
-                onAdd={linkSummitSelectionPlanExtraQuestion}
-              />
-              <div className="col-md-6 text-right col-md-offset-6">
-                <button
-                  className="btn btn-primary right-space"
-                  onClick={handleNewExtraQuestion}
-                >
-                  {T.translate("edit_selection_plan.add_extra_questions")}
-                </button>
-              </div>
-            </div>
-            {entity.extra_questions.length === 0 && (
-              <div>{T.translate("edit_selection_plan.no_extra_questions")}</div>
-            )}
-            {entity.extra_questions.length > 0 && (
-              <SortableTable
-                options={extraQuestionsOptions}
-                data={entity.extra_questions.map((q) => ({
-                  ...q,
-                  label: stripTags(q.label)
-                }))}
-                columns={extraQuestionColumns}
-                onReorder={updateExtraQuestionOrder}
-                updateOrderKey="order"
-              />
-            )}
-          </Panel>
-          <Panel
-            show={showSection === "email_templates"}
-            title={T.translate("edit_selection_plan.email_templates")}
-            handleClick={() => toggleSection("email_templates")}
-          >
-            <div className="row form-group">
-              <div className="col-md-6">
-                <label>
-                  {" "}
+          </div>
+          <div className="col-md-6">
+            <MuiFormikDatepicker
+              name="submission_end_date"
+              label={T.translate("edit_selection_plan.submission_end_date")}
+            />
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label> {T.translate("edit_selection_plan.max_submissions")}</label>
+            <Input
+              className="form-control"
+              type="number"
+              error={hasErrors("max_submission_allowed_per_user")}
+              id="max_submission_allowed_per_user"
+              value={formik.values.max_submission_allowed_per_user}
+              onChange={handleChange}
+              min={0}
+            />
+          </div>
+          <div className="col-md-6">
+            <MuiFormikDatepicker
+              name="submission_lock_down_presentation_status_date"
+              label={
+                <>
                   {T.translate(
-                    "edit_selection_plan.creator_notification_email_template"
-                  )}
-                </label>
-                <EmailTemplateInput
-                  id="presentation_creator_notification_email_template"
-                  value={
-                    entity.presentation_creator_notification_email_template
-                  }
-                  placeholder={T.translate(
-                    "edit_selection_plan.placeholders.creator_notification_email_select_template"
-                  )}
-                  onChange={handleNotificationEmailTemplateChange}
-                  isClearable
-                  plainValue
-                />
-              </div>
-              <div className="col-md-6">
-                <label>
-                  {" "}
-                  {T.translate(
-                    "edit_selection_plan.moderator_notification_email_template"
-                  )}
-                </label>
-                <EmailTemplateInput
-                  id="presentation_moderator_notification_email_template"
-                  value={
-                    entity.presentation_moderator_notification_email_template
-                  }
-                  placeholder={T.translate(
-                    "edit_selection_plan.placeholders.moderator_notification_email_select_template"
-                  )}
-                  onChange={handleNotificationEmailTemplateChange}
-                  isClearable
-                  plainValue
-                />
-              </div>
-            </div>
-            <div className="row form-group">
-              <div className="col-md-6">
-                <label>
-                  {" "}
-                  {T.translate(
-                    "edit_selection_plan.speaker_notification_email_template"
-                  )}
-                </label>
-                <EmailTemplateInput
-                  id="presentation_speaker_notification_email_template"
-                  value={
-                    entity.presentation_speaker_notification_email_template
-                  }
-                  placeholder={T.translate(
-                    "edit_selection_plan.placeholders.speaker_notification_email_select_template"
-                  )}
-                  onChange={handleNotificationEmailTemplateChange}
-                  isClearable
-                  plainValue
-                />
-              </div>
-            </div>
-          </Panel>
-          <Panel
-            show={showSection === "track_chair_settings"}
-            title={T.translate("track_chair_settings.title")}
-            handleClick={() => toggleSection("track_chair_settings")}
-          >
-            <div className="row">
-              <div className="col-md-4 checkboxes-div">
-                <div className="form-check abc-checkbox">
-                  <input
-                    type="checkbox"
-                    id="allow_track_change_requests"
-                    checked={entity.allow_track_change_requests}
-                    onChange={handleChange}
-                    className="form-check-input"
+                    "edit_selection_plan.submission_lock_down_presentation_status_date"
+                  )}{" "}
+                  &nbsp;
+                  <i
+                    className="fa fa-info-circle"
+                    aria-hidden="true"
+                    title={T.translate(
+                      "edit_selection_plan.submission_lock_down_presentation_status_date_info"
+                    )}
                   />
-                  <label
-                    className="form-check-label"
-                    htmlFor="allow_track_change_requests"
-                  >
-                    {T.translate("track_chair_settings.allow_change_requests")}
-                  </label>
-                </div>
-              </div>
-            </div>
-            <hr />
-            <div className="row">
-              <div className="col-md-6 text-right col-md-offset-6">
-                <button
-                  className="btn btn-primary right-space"
-                  onClick={handleAddRatingType}
-                >
-                  {T.translate("track_chair_settings.add_rating_type")}
-                </button>
-              </div>
-            </div>
-            <SortableTable
-              options={ratingTypesOptions}
-              data={entity.track_chair_rating_types}
-              columns={ratingTypesColumns}
-              onReorder={onUpdateRatingTypeOrder}
-              updateOrderKey="order"
+                </>
+              }
             />
-          </Panel>
-          <Panel
-            show={showSection === "presentation_action_types"}
-            title={T.translate("edit_selection_plan.presentation_action_types")}
-            handleClick={() => toggleSection("presentation_action_types")}
-          >
-            <div className="row">
-              <Many2ManyDropDown
-                id="addAllowedPresentationActionType"
-                isClearable
-                CSSClass="col-md-9"
-                placeholder={T.translate(
-                  "edit_selection_plan.placeholders.link_presentation_action_type"
-                )}
-                fetchOptions={fetchSummitPresentationActionTypes}
-                onAdd={linkSummitProgressFlag}
-              />
-            </div>
-            {entity.allowed_presentation_action_types.length === 0 && (
-              <div>
-                {T.translate(
-                  "edit_selection_plan.no_presentation_action_types"
-                )}
-              </div>
-            )}
-            {entity.allowed_presentation_action_types.length > 0 && (
-              <SortableTable
-                options={actionTypesOptions}
-                data={entity.allowed_presentation_action_types}
-                columns={actionTypesColumns}
-                onReorder={onUpdateProgressFlagOrder}
-                updateOrderKey="order"
-              />
-            )}
-          </Panel>
-          {!propsEntity.is_hidden && (
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-6">
+            <MuiFormikDatepicker
+              name="voting_begin_date"
+              label={T.translate("edit_selection_plan.voting_begin_date")}
+            />
+          </div>
+          <div className="col-md-6">
+            <MuiFormikDatepicker
+              name="voting_end_date"
+              label={T.translate("edit_selection_plan.voting_end_date")}
+            />
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-6">
+            <MuiFormikDatepicker
+              name="selection_begin_date"
+              label={T.translate("edit_selection_plan.selection_begin_date")}
+            />
+          </div>
+          <div className="col-md-6">
+            <MuiFormikDatepicker
+              name="selection_end_date"
+              label={T.translate("edit_selection_plan.selection_end_date")}
+            />
+          </div>
+        </div>
+
+        <div className="row form-group">
+          <div className="col-md-12">
+            <label>
+              {" "}
+              {T.translate(
+                "edit_selection_plan.submission_period_disclaimer"
+              )}{" "}
+              *
+            </label>
+            <TextEditorV3
+              id="submission_period_disclaimer"
+              value={formik.values.submission_period_disclaimer}
+              onChange={handleChange}
+              error={hasErrors("submission_period_disclaimer")}
+              license={process.env.JODIT_LICENSE_KEY}
+            />
+          </div>
+        </div>
+
+        <hr />
+
+        {formik.values.id !== 0 && (
+          <>
             <Panel
-              show={showSection === "allowed_members"}
-              title={T.translate("edit_selection_plan.allowed_members")}
-              handleClick={() => toggleSection("allowed_members")}
-              className="allowed-members-panel"
+              show={showSection === "track_groups"}
+              title={T.translate("edit_selection_plan.track_groups")}
+              handleClick={() => toggleSection("track_groups")}
             >
-              <div className="allowed-members-header">
-                <div className="pull-right input-group">
-                  <input
-                    className="form-control"
-                    onChange={(ev) => setNewMemberEmail(ev.target.value)}
-                    value={newMemberEmail}
-                  />
-                  <span className="input-group-btn">
-                    <button
-                      type="button"
-                      className="btn btn-default add-button"
-                      onClick={handleAddAllowedMember}
-                      disabled={!newMemberEmail}
-                    >
-                      {T.translate("general.add")}
-                    </button>
-                  </span>
-                </div>
-
-                <div className="pull-left input-group">
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={() => setShowImportModal(true)}
-                  >
-                    {T.translate("edit_selection_plan.import")}
-                  </button>
-                </div>
-              </div>
-
-              <Table
-                data={allowedMembers.data}
-                columns={allowedMembersColumns}
-                options={allowedMembersOptions}
-              />
-              <Pagination
-                bsSize="medium"
-                prev
-                next
-                first
-                last
-                ellipsis
-                boundaryLinks
-                maxButtons={10}
-                items={allowedMembers.lastPage}
-                activePage={allowedMembers.currentPage}
-                onSelect={handleAllowedMembersPageChange}
+              <SimpleLinkList
+                values={formik.values.track_groups}
+                columns={trackGroupsColumns}
+                options={trackGroupsOptions}
               />
             </Panel>
-          )}
-          <Panel
-            show={showSection === "cfp_settings"}
-            title={T.translate("edit_selection_plan.cfp_settings")}
-            handleClick={() => toggleSection("cfp_settings")}
-          >
-            <div className="row form-group">
-              <div className="col-md-12">
-                <label>
-                  {" "}
-                  {T.translate(
-                    "edit_selection_plan.cfp_presentation_edition_custom_message"
-                  )}
-                  &nbsp;
-                  <i
-                    className="fa fa-info-circle"
-                    aria-hidden="true"
-                    title={T.translate(
-                      "edit_selection_plan.cfp_presentation_edition_custom_message_info"
-                    )}
-                  />
-                </label>
-                <TextEditorV3
-                  id="cfp_presentation_edition_custom_message"
-                  error={hasErrors("cfp_presentation_edition_custom_message")}
-                  onChange={handleChange}
-                  value={
-                    entity.marketing_settings
-                      .cfp_presentation_edition_custom_message?.value || ""
-                  }
-                  license={process.env.JODIT_LICENSE_KEY}
-                />
-              </div>
-            </div>
-            <div className="row form-group">
-              <div className="col-md-12">
-                <label>
-                  {" "}
-                  {T.translate(
-                    "edit_selection_plan.allowed_presentation_questions"
-                  )}
-                </label>
-                <Dropdown
-                  id="allowed_presentation_questions"
-                  value={entity.allowed_presentation_questions}
-                  placeholder={T.translate(
-                    "edit_selection_plan.placeholders.allowed_presentation_questions"
-                  )}
-                  onChange={handleChange}
-                  options={DEFAULT_ALLOWED_QUESTIONS}
-                  isMulti
-                />
-              </div>
-            </div>
-            <div className="row form-group">
-              <div className="col-md-12">
-                <label>
-                  {" "}
-                  {T.translate(
-                    "edit_selection_plan.allowed_presentation_editable_questions"
-                  )}{" "}
-                  *
-                </label>
-                <Dropdown
-                  id="allowed_presentation_editable_questions"
-                  value={entity.allowed_presentation_editable_questions}
-                  placeholder={T.translate(
-                    "edit_selection_plan.placeholders.allowed_presentation_editable_questions"
-                  )}
-                  onChange={handleChange}
-                  options={DEFAULT_ALLOWED_EDITABLE_QUESTIONS}
-                  isMulti
-                />
-              </div>
-            </div>
-            <div className="row form-group">
-              <div className="col-md-12">
-                <label>
-                  {" "}
-                  {T.translate(
-                    "edit_selection_plan.cfp_presentation_edition_default_tab"
-                  )}
-                </label>
-                <Dropdown
-                  id="cfp_presentation_edition_default_tab"
-                  value={
-                    entity.marketing_settings
-                      .cfp_presentation_edition_default_tab?.value || ""
-                  }
-                  placeholder={T.translate(
-                    "edit_selection_plan.placeholders.cfp_presentation_edition_default_tab"
-                  )}
-                  onChange={handleChange}
-                  options={DEFAULT_CFP_PRESENTATION_EDITION_TABS}
-                  isMulti={false}
+            <Panel
+              show={showSection === "event_types"}
+              title={T.translate("edit_selection_plan.event_types")}
+              handleClick={() => toggleSection("event_types")}
+            >
+              <SimpleLinkList
+                values={formik.values.event_types}
+                columns={eventTypesColumns}
+                options={eventTypesOptions}
+              />
+            </Panel>
+            <Panel
+              show={showSection === "extra_questions"}
+              title={T.translate("edit_selection_plan.extra_questions")}
+              handleClick={() => toggleSection("extra_questions")}
+            >
+              <div className="row">
+                <Many2ManyDropDown
+                  id="addAllowedExtraQuestions"
                   isClearable
-                />
-              </div>
-            </div>
-            <div className="row form-group">
-              <div className="col-md-6">
-                <label>
-                  {" "}
-                  {T.translate("edit_selection_plan.cfp_landing_page_title")}
-                  &nbsp;
-                  <i
-                    className="fa fa-info-circle"
-                    aria-hidden="true"
-                    title={T.translate(
-                      "edit_selection_plan.cfp_landing_page_title_info"
-                    )}
-                  />
-                </label>
-                <Input
-                  id="cfp_landing_page_title"
-                  className="form-control"
-                  error={hasErrors("cfp_landing_page_title")}
-                  onChange={handleChange}
-                  value={
-                    entity.marketing_settings.cfp_landing_page_title?.value ||
-                    ""
-                  }
-                />
-              </div>
-              <div className="col-md-6">
-                <label>
-                  {" "}
-                  {T.translate("edit_selection_plan.cfp_track_question_label")}
-                  &nbsp;
-                  <i
-                    className="fa fa-info-circle"
-                    aria-hidden="true"
-                    title={T.translate(
-                      "edit_selection_plan.cfp_track_question_label_info"
-                    )}
-                  />
-                </label>
-                <Input
-                  id="cfp_track_question_label"
-                  className="form-control"
-                  error={hasErrors("cfp_track_question_label")}
-                  onChange={handleChange}
-                  value={
-                    entity.marketing_settings.cfp_track_question_label?.value ||
-                    ""
-                  }
-                />
-              </div>
-            </div>
-            <div className="row form-group">
-              <div className="col-md-6">
-                <label>
-                  {" "}
-                  {T.translate(
-                    "edit_selection_plan.cfp_speakers_singular_label"
+                  placeholder={T.translate(
+                    "edit_selection_plan.placeholders.link_question"
                   )}
-                  &nbsp;
-                  <i
-                    className="fa fa-info-circle"
-                    aria-hidden="true"
-                    title={T.translate(
-                      "edit_selection_plan.cfp_speakers_singular_label_info"
-                    )}
-                  />
-                </label>
-                <Input
-                  id="cfp_speakers_singular_label"
-                  className="form-control"
-                  error={hasErrors("cfp_speakers_singular_label")}
-                  onChange={handleChange}
-                  value={
-                    entity.marketing_settings.cfp_speakers_singular_label
-                      ?.value || ""
-                  }
+                  fetchOptions={fetchSummitSelectionPlanExtraQuestions}
+                  onAdd={linkSummitSelectionPlanExtraQuestion}
                 />
+                <div className="col-md-6 text-right col-md-offset-6">
+                  <Button
+                    type="button"
+                    variant="contained"
+                    className="right-space"
+                    onClick={handleNewExtraQuestion}
+                  >
+                    {T.translate("edit_selection_plan.add_extra_questions")}
+                  </Button>
+                </div>
               </div>
-              <div className="col-md-6">
-                <label>
-                  {" "}
-                  {T.translate("edit_selection_plan.cfp_speakers_plural_label")}
-                  &nbsp;
-                  <i
-                    className="fa fa-info-circle"
-                    aria-hidden="true"
-                    title={T.translate(
-                      "edit_selection_plan.cfp_speakers_plural_label_info"
-                    )}
-                  />
-                </label>
-                <Input
-                  id="cfp_speakers_plural_label"
-                  className="form-control"
-                  error={hasErrors("cfp_speakers_plural_label")}
-                  onChange={handleChange}
-                  value={
-                    entity.marketing_settings.cfp_speakers_plural_label
-                      ?.value || ""
-                  }
+              {formik.values.extra_questions.length === 0 && (
+                <div>
+                  {T.translate("edit_selection_plan.no_extra_questions")}
+                </div>
+              )}
+              {formik.values.extra_questions.length > 0 && (
+                <SortableTable
+                  options={extraQuestionsOptions}
+                  data={formik.values.extra_questions.map((q) => ({
+                    ...q,
+                    label: stripTags(q.label)
+                  }))}
+                  columns={extraQuestionColumns}
+                  onReorder={updateExtraQuestionOrder}
+                  updateOrderKey="order"
                 />
-              </div>
-            </div>
-            <div className="row form-group">
-              <div className="col-md-6">
-                <label>
-                  {" "}
-                  {T.translate(
-                    "edit_selection_plan.cfp_presentations_singular_label"
-                  )}
-                  &nbsp;
-                  <i
-                    className="fa fa-info-circle"
-                    aria-hidden="true"
-                    title={T.translate(
-                      "edit_selection_plan.cfp_presentations_singular_label_info"
-                    )}
-                  />
-                </label>
-                <Input
-                  id="cfp_presentations_singular_label"
-                  className="form-control"
-                  error={hasErrors("cfp_presentations_singular_label")}
-                  onChange={handleChange}
-                  value={
-                    entity.marketing_settings.cfp_presentations_singular_label
-                      ?.value || ""
-                  }
-                />
-              </div>
-              <div className="col-md-6">
-                <label>
-                  {" "}
-                  {T.translate(
-                    "edit_selection_plan.cfp_presentations_plural_label"
-                  )}
-                  &nbsp;
-                  <i
-                    className="fa fa-info-circle"
-                    aria-hidden="true"
-                    title={T.translate(
-                      "edit_selection_plan.cfp_presentations_plural_label_info"
-                    )}
-                  />
-                </label>
-                <Input
-                  id="cfp_presentations_plural_label"
-                  className="form-control"
-                  error={hasErrors("cfp_presentations_plural_label")}
-                  onChange={handleChange}
-                  value={
-                    entity.marketing_settings.cfp_presentations_plural_label
-                      ?.value || ""
-                  }
-                />
-              </div>
-            </div>
-            <div className="row form-group">
-              <div className="col-md-6">
-                <label>
-                  {" "}
-                  {T.translate(
-                    "edit_selection_plan.cfp_presentation_summary_title_label"
-                  )}
-                  &nbsp;
-                  <i
-                    className="fa fa-info-circle"
-                    aria-hidden="true"
-                    title={T.translate(
-                      "edit_selection_plan.cfp_presentation_summary_title_label_info"
-                    )}
-                  />
-                </label>
-                <Input
-                  id="cfp_presentation_summary_title_label"
-                  className="form-control"
-                  error={hasErrors("cfp_presentation_summary_title_label")}
-                  onChange={handleChange}
-                  value={
-                    entity.marketing_settings
-                      .cfp_presentation_summary_title_label?.value || ""
-                  }
-                />
-              </div>
-              <div className="col-md-6">
-                <label>
-                  {" "}
-                  {T.translate(
-                    "edit_selection_plan.cfp_presentation_summary_abstract_label"
-                  )}
-                  &nbsp;
-                  <i
-                    className="fa fa-info-circle"
-                    aria-hidden="true"
-                    title={T.translate(
-                      "edit_selection_plan.cfp_presentation_summary_abstract_label_info"
-                    )}
-                  />
-                </label>
-                <Input
-                  id="cfp_presentation_summary_abstract_label"
-                  className="form-control"
-                  error={hasErrors("cfp_presentation_summary_abstract_label")}
-                  onChange={handleChange}
-                  value={
-                    entity.marketing_settings
-                      .cfp_presentation_summary_abstract_label?.value || ""
-                  }
-                />
-              </div>
-            </div>
-            <div className="row form-group">
-              <div className="col-md-6">
-                <label>
-                  {" "}
-                  {T.translate(
-                    "edit_selection_plan.cfp_presentation_summary_social_summary_label"
-                  )}
-                  &nbsp;
-                  <i
-                    className="fa fa-info-circle"
-                    aria-hidden="true"
-                    title={T.translate(
-                      "edit_selection_plan.cfp_presentation_summary_social_summary_label_info"
-                    )}
-                  />
-                </label>
-                <Input
-                  id="cfp_presentation_summary_social_summary_label"
-                  className="form-control"
-                  error={hasErrors(
-                    "cfp_presentation_summary_social_summary_label"
-                  )}
-                  onChange={handleChange}
-                  value={
-                    entity.marketing_settings
-                      .cfp_presentation_summary_social_summary_label?.value ||
-                    ""
-                  }
-                />
-              </div>
-              <div className="col-md-6">
-                <label>
-                  {" "}
-                  {T.translate(
-                    "edit_selection_plan.cfp_presentation_summary_links_label"
-                  )}
-                  &nbsp;
-                  <i
-                    className="fa fa-info-circle"
-                    aria-hidden="true"
-                    title={T.translate(
-                      "edit_selection_plan.cfp_presentation_summary_links_label_info"
-                    )}
-                  />
-                </label>
-                <Input
-                  id="cfp_presentation_summary_links_label"
-                  className="form-control"
-                  error={hasErrors("cfp_presentation_summary_links_label")}
-                  onChange={handleChange}
-                  value={
-                    entity.marketing_settings
-                      .cfp_presentation_summary_links_label?.value || ""
-                  }
-                />
-              </div>
-            </div>
-            <div className="row form-group">
-              <div className="col-md-6">
-                <label>
-                  {" "}
-                  {T.translate(
-                    "edit_selection_plan.cfp_presentation_summary_hide_track_selection"
-                  )}
-                  &nbsp;
-                  <i
-                    className="fa fa-info-circle"
-                    aria-hidden="true"
-                    title={T.translate(
-                      "edit_selection_plan.cfp_presentation_summary_hide_track_selection_info"
-                    )}
-                  />
-                </label>{" "}
-                <br />
-                <Switch
-                  checked={
-                    entity.marketing_settings
-                      .cfp_presentation_summary_hide_track_selection?.value ||
-                    false
-                  }
-                  onChange={(val) => {
-                    handleOnSwitchChange(
-                      "cfp_presentation_summary_hide_track_selection",
-                      val
-                    );
-                  }}
-                  uncheckedIcon={false}
-                  checkedIcon={false}
-                  className="react-switch"
-                />
-              </div>
-              <div className="col-md-6">
-                <label>
-                  {" "}
-                  {T.translate(
-                    "edit_selection_plan.cfp_presentation_summary_hide_activity_type_selection"
-                  )}
-                  &nbsp;
-                  <i
-                    className="fa fa-info-circle"
-                    aria-hidden="true"
-                    title={T.translate(
-                      "edit_selection_plan.cfp_presentation_summary_hide_activity_type_selection_info"
-                    )}
-                  />
-                </label>{" "}
-                <br />
-                <Switch
-                  checked={
-                    entity.marketing_settings
-                      .cfp_presentation_summary_hide_activity_type_selection
-                      ?.value || false
-                  }
-                  onChange={(val) => {
-                    handleOnSwitchChange(
-                      "cfp_presentation_summary_hide_activity_type_selection",
-                      val
-                    );
-                  }}
-                  uncheckedIcon={false}
-                  checkedIcon={false}
-                  className="react-switch"
-                />
-              </div>
-            </div>
-            {window.CFP_APP_BASE_URL && (
+              )}
+            </Panel>
+            <Panel
+              show={showSection === "email_templates"}
+              title={T.translate("edit_selection_plan.email_templates")}
+              handleClick={() => toggleSection("email_templates")}
+            >
               <div className="row form-group">
                 <div className="col-md-6">
                   <label>
+                    {" "}
                     {T.translate(
-                      "edit_selection_plan.cfp_presentation_selection_plan_link"
+                      "edit_selection_plan.creator_notification_email_template"
                     )}
                   </label>
-                  <br />
-                  <a
-                    className="text-table-link"
-                    href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${entity.id}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${entity.id}`}
-                  </a>
+                  <EmailTemplateInput
+                    id="presentation_creator_notification_email_template"
+                    value={
+                      formik.values
+                        .presentation_creator_notification_email_template
+                    }
+                    placeholder={T.translate(
+                      "edit_selection_plan.placeholders.creator_notification_email_select_template"
+                    )}
+                    onChange={handleNotificationEmailTemplateChange}
+                    isClearable
+                    plainValue
+                  />
                 </div>
                 <div className="col-md-6">
                   <label>
+                    {" "}
                     {T.translate(
-                      "edit_selection_plan.cfp_presentation_all_selection_plan_link"
+                      "edit_selection_plan.moderator_notification_email_template"
                     )}
                   </label>
-                  <br />
-                  <a
-                    className="text-table-link"
-                    href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
-                  </a>
+                  <EmailTemplateInput
+                    id="presentation_moderator_notification_email_template"
+                    value={
+                      formik.values
+                        .presentation_moderator_notification_email_template
+                    }
+                    placeholder={T.translate(
+                      "edit_selection_plan.placeholders.moderator_notification_email_select_template"
+                    )}
+                    onChange={handleNotificationEmailTemplateChange}
+                    isClearable
+                    plainValue
+                  />
                 </div>
               </div>
+              <div className="row form-group">
+                <div className="col-md-6">
+                  <label>
+                    {" "}
+                    {T.translate(
+                      "edit_selection_plan.speaker_notification_email_template"
+                    )}
+                  </label>
+                  <EmailTemplateInput
+                    id="presentation_speaker_notification_email_template"
+                    value={
+                      formik.values
+                        .presentation_speaker_notification_email_template
+                    }
+                    placeholder={T.translate(
+                      "edit_selection_plan.placeholders.speaker_notification_email_select_template"
+                    )}
+                    onChange={handleNotificationEmailTemplateChange}
+                    isClearable
+                    plainValue
+                  />
+                </div>
+              </div>
+            </Panel>
+            <Panel
+              show={showSection === "track_chair_settings"}
+              title={T.translate("track_chair_settings.title")}
+              handleClick={() => toggleSection("track_chair_settings")}
+            >
+              <div className="row">
+                <div className="col-md-4 checkboxes-div">
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        id="allow_track_change_requests"
+                        checked={formik.values.allow_track_change_requests}
+                        onChange={handleChange}
+                      />
+                    }
+                    label={T.translate(
+                      "track_chair_settings.allow_change_requests"
+                    )}
+                  />
+                </div>
+              </div>
+              <hr />
+              <div className="row">
+                <div className="col-md-6 text-right col-md-offset-6">
+                  <Button
+                    type="button"
+                    variant="contained"
+                    className="right-space"
+                    onClick={handleAddRatingType}
+                  >
+                    {T.translate("track_chair_settings.add_rating_type")}
+                  </Button>
+                </div>
+              </div>
+              <SortableTable
+                options={ratingTypesOptions}
+                data={formik.values.track_chair_rating_types}
+                columns={ratingTypesColumns}
+                onReorder={onUpdateRatingTypeOrder}
+                updateOrderKey="order"
+              />
+            </Panel>
+            <Panel
+              show={showSection === "presentation_action_types"}
+              title={T.translate(
+                "edit_selection_plan.presentation_action_types"
+              )}
+              handleClick={() => toggleSection("presentation_action_types")}
+            >
+              <div className="row">
+                <Many2ManyDropDown
+                  id="addAllowedPresentationActionType"
+                  isClearable
+                  CSSClass="col-md-9"
+                  placeholder={T.translate(
+                    "edit_selection_plan.placeholders.link_presentation_action_type"
+                  )}
+                  fetchOptions={fetchSummitPresentationActionTypes}
+                  onAdd={linkSummitProgressFlag}
+                />
+              </div>
+              {formik.values.allowed_presentation_action_types.length === 0 && (
+                <div>
+                  {T.translate(
+                    "edit_selection_plan.no_presentation_action_types"
+                  )}
+                </div>
+              )}
+              {formik.values.allowed_presentation_action_types.length > 0 && (
+                <SortableTable
+                  options={actionTypesOptions}
+                  data={formik.values.allowed_presentation_action_types}
+                  columns={actionTypesColumns}
+                  onReorder={onUpdateProgressFlagOrder}
+                  updateOrderKey="order"
+                />
+              )}
+            </Panel>
+            {!formik.values.is_hidden && (
+              <Panel
+                show={showSection === "allowed_members"}
+                title={T.translate("edit_selection_plan.allowed_members")}
+                handleClick={() => toggleSection("allowed_members")}
+                className="allowed-members-panel"
+              >
+                <div className="allowed-members-header">
+                  <div className="pull-right input-group">
+                    <input
+                      className="form-control"
+                      onChange={(ev) => setNewMemberEmail(ev.target.value)}
+                      value={newMemberEmail}
+                    />
+                    <span className="input-group-btn">
+                      <Button
+                        type="button"
+                        variant="outlined"
+                        className="add-button"
+                        onClick={handleAddAllowedMember}
+                        disabled={!newMemberEmail}
+                      >
+                        {T.translate("general.add")}
+                      </Button>
+                    </span>
+                  </div>
+
+                  <div className="pull-left input-group">
+                    <Button
+                      type="button"
+                      variant="contained"
+                      onClick={() => setShowImportModal(true)}
+                    >
+                      {T.translate("edit_selection_plan.import")}
+                    </Button>
+                  </div>
+                </div>
+
+                <Table
+                  data={allowedMembers.data}
+                  columns={allowedMembersColumns}
+                  options={allowedMembersOptions}
+                />
+                <Pagination
+                  bsSize="medium"
+                  prev
+                  next
+                  first
+                  last
+                  ellipsis
+                  boundaryLinks
+                  maxButtons={10}
+                  items={allowedMembers.lastPage}
+                  activePage={allowedMembers.currentPage}
+                  onSelect={handleAllowedMembersPageChange}
+                />
+              </Panel>
             )}
-          </Panel>
-        </>
-      )}
+            <Panel
+              show={showSection === "cfp_settings"}
+              title={T.translate("edit_selection_plan.cfp_settings")}
+              handleClick={() => toggleSection("cfp_settings")}
+            >
+              <div className="row form-group">
+                <div className="col-md-12">
+                  <label>
+                    {" "}
+                    {T.translate(
+                      "edit_selection_plan.cfp_presentation_edition_custom_message"
+                    )}
+                    &nbsp;
+                    <i
+                      className="fa fa-info-circle"
+                      aria-hidden="true"
+                      title={T.translate(
+                        "edit_selection_plan.cfp_presentation_edition_custom_message_info"
+                      )}
+                    />
+                  </label>
+                  <TextEditorV3
+                    id="cfp_presentation_edition_custom_message"
+                    error={hasErrors("cfp_presentation_edition_custom_message")}
+                    onChange={handleChange}
+                    value={
+                      formik.values.marketing_settings
+                        .cfp_presentation_edition_custom_message?.value || ""
+                    }
+                    license={process.env.JODIT_LICENSE_KEY}
+                  />
+                </div>
+              </div>
+              <div className="row form-group">
+                <div className="col-md-12">
+                  <label>
+                    {" "}
+                    {T.translate(
+                      "edit_selection_plan.allowed_presentation_questions"
+                    )}
+                  </label>
+                  <Dropdown
+                    id="allowed_presentation_questions"
+                    value={formik.values.allowed_presentation_questions}
+                    placeholder={T.translate(
+                      "edit_selection_plan.placeholders.allowed_presentation_questions"
+                    )}
+                    onChange={handleChange}
+                    options={DEFAULT_ALLOWED_QUESTIONS}
+                    isMulti
+                  />
+                </div>
+              </div>
+              <div className="row form-group">
+                <div className="col-md-12">
+                  <label>
+                    {" "}
+                    {T.translate(
+                      "edit_selection_plan.allowed_presentation_editable_questions"
+                    )}{" "}
+                    *
+                  </label>
+                  <Dropdown
+                    id="allowed_presentation_editable_questions"
+                    value={
+                      formik.values.allowed_presentation_editable_questions
+                    }
+                    placeholder={T.translate(
+                      "edit_selection_plan.placeholders.allowed_presentation_editable_questions"
+                    )}
+                    onChange={handleChange}
+                    options={DEFAULT_ALLOWED_EDITABLE_QUESTIONS}
+                    isMulti
+                  />
+                </div>
+              </div>
+              <div className="row form-group">
+                <div className="col-md-12">
+                  <label>
+                    {" "}
+                    {T.translate(
+                      "edit_selection_plan.cfp_presentation_edition_default_tab"
+                    )}
+                  </label>
+                  <Dropdown
+                    id="cfp_presentation_edition_default_tab"
+                    value={
+                      formik.values.marketing_settings
+                        .cfp_presentation_edition_default_tab?.value || ""
+                    }
+                    placeholder={T.translate(
+                      "edit_selection_plan.placeholders.cfp_presentation_edition_default_tab"
+                    )}
+                    onChange={handleChange}
+                    options={DEFAULT_CFP_PRESENTATION_EDITION_TABS}
+                    isMulti={false}
+                    isClearable
+                  />
+                </div>
+              </div>
+              <div className="row form-group">
+                <div className="col-md-6">
+                  <label>
+                    {" "}
+                    {T.translate("edit_selection_plan.cfp_landing_page_title")}
+                    &nbsp;
+                    <i
+                      className="fa fa-info-circle"
+                      aria-hidden="true"
+                      title={T.translate(
+                        "edit_selection_plan.cfp_landing_page_title_info"
+                      )}
+                    />
+                  </label>
+                  <Input
+                    id="cfp_landing_page_title"
+                    className="form-control"
+                    error={hasErrors("cfp_landing_page_title")}
+                    onChange={handleChange}
+                    value={
+                      formik.values.marketing_settings.cfp_landing_page_title
+                        ?.value || ""
+                    }
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label>
+                    {" "}
+                    {T.translate(
+                      "edit_selection_plan.cfp_track_question_label"
+                    )}
+                    &nbsp;
+                    <i
+                      className="fa fa-info-circle"
+                      aria-hidden="true"
+                      title={T.translate(
+                        "edit_selection_plan.cfp_track_question_label_info"
+                      )}
+                    />
+                  </label>
+                  <Input
+                    id="cfp_track_question_label"
+                    className="form-control"
+                    error={hasErrors("cfp_track_question_label")}
+                    onChange={handleChange}
+                    value={
+                      formik.values.marketing_settings.cfp_track_question_label
+                        ?.value || ""
+                    }
+                  />
+                </div>
+              </div>
+              <div className="row form-group">
+                <div className="col-md-6">
+                  <label>
+                    {" "}
+                    {T.translate(
+                      "edit_selection_plan.cfp_speakers_singular_label"
+                    )}
+                    &nbsp;
+                    <i
+                      className="fa fa-info-circle"
+                      aria-hidden="true"
+                      title={T.translate(
+                        "edit_selection_plan.cfp_speakers_singular_label_info"
+                      )}
+                    />
+                  </label>
+                  <Input
+                    id="cfp_speakers_singular_label"
+                    className="form-control"
+                    error={hasErrors("cfp_speakers_singular_label")}
+                    onChange={handleChange}
+                    value={
+                      formik.values.marketing_settings
+                        .cfp_speakers_singular_label?.value || ""
+                    }
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label>
+                    {" "}
+                    {T.translate(
+                      "edit_selection_plan.cfp_speakers_plural_label"
+                    )}
+                    &nbsp;
+                    <i
+                      className="fa fa-info-circle"
+                      aria-hidden="true"
+                      title={T.translate(
+                        "edit_selection_plan.cfp_speakers_plural_label_info"
+                      )}
+                    />
+                  </label>
+                  <Input
+                    id="cfp_speakers_plural_label"
+                    className="form-control"
+                    error={hasErrors("cfp_speakers_plural_label")}
+                    onChange={handleChange}
+                    value={
+                      formik.values.marketing_settings.cfp_speakers_plural_label
+                        ?.value || ""
+                    }
+                  />
+                </div>
+              </div>
+              <div className="row form-group">
+                <div className="col-md-6">
+                  <label>
+                    {" "}
+                    {T.translate(
+                      "edit_selection_plan.cfp_presentations_singular_label"
+                    )}
+                    &nbsp;
+                    <i
+                      className="fa fa-info-circle"
+                      aria-hidden="true"
+                      title={T.translate(
+                        "edit_selection_plan.cfp_presentations_singular_label_info"
+                      )}
+                    />
+                  </label>
+                  <Input
+                    id="cfp_presentations_singular_label"
+                    className="form-control"
+                    error={hasErrors("cfp_presentations_singular_label")}
+                    onChange={handleChange}
+                    value={
+                      formik.values.marketing_settings
+                        .cfp_presentations_singular_label?.value || ""
+                    }
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label>
+                    {" "}
+                    {T.translate(
+                      "edit_selection_plan.cfp_presentations_plural_label"
+                    )}
+                    &nbsp;
+                    <i
+                      className="fa fa-info-circle"
+                      aria-hidden="true"
+                      title={T.translate(
+                        "edit_selection_plan.cfp_presentations_plural_label_info"
+                      )}
+                    />
+                  </label>
+                  <Input
+                    id="cfp_presentations_plural_label"
+                    className="form-control"
+                    error={hasErrors("cfp_presentations_plural_label")}
+                    onChange={handleChange}
+                    value={
+                      formik.values.marketing_settings
+                        .cfp_presentations_plural_label?.value || ""
+                    }
+                  />
+                </div>
+              </div>
+              <div className="row form-group">
+                <div className="col-md-6">
+                  <label>
+                    {" "}
+                    {T.translate(
+                      "edit_selection_plan.cfp_presentation_summary_title_label"
+                    )}
+                    &nbsp;
+                    <i
+                      className="fa fa-info-circle"
+                      aria-hidden="true"
+                      title={T.translate(
+                        "edit_selection_plan.cfp_presentation_summary_title_label_info"
+                      )}
+                    />
+                  </label>
+                  <Input
+                    id="cfp_presentation_summary_title_label"
+                    className="form-control"
+                    error={hasErrors("cfp_presentation_summary_title_label")}
+                    onChange={handleChange}
+                    value={
+                      formik.values.marketing_settings
+                        .cfp_presentation_summary_title_label?.value || ""
+                    }
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label>
+                    {" "}
+                    {T.translate(
+                      "edit_selection_plan.cfp_presentation_summary_abstract_label"
+                    )}
+                    &nbsp;
+                    <i
+                      className="fa fa-info-circle"
+                      aria-hidden="true"
+                      title={T.translate(
+                        "edit_selection_plan.cfp_presentation_summary_abstract_label_info"
+                      )}
+                    />
+                  </label>
+                  <Input
+                    id="cfp_presentation_summary_abstract_label"
+                    className="form-control"
+                    error={hasErrors("cfp_presentation_summary_abstract_label")}
+                    onChange={handleChange}
+                    value={
+                      formik.values.marketing_settings
+                        .cfp_presentation_summary_abstract_label?.value || ""
+                    }
+                  />
+                </div>
+              </div>
+              <div className="row form-group">
+                <div className="col-md-6">
+                  <label>
+                    {" "}
+                    {T.translate(
+                      "edit_selection_plan.cfp_presentation_summary_social_summary_label"
+                    )}
+                    &nbsp;
+                    <i
+                      className="fa fa-info-circle"
+                      aria-hidden="true"
+                      title={T.translate(
+                        "edit_selection_plan.cfp_presentation_summary_social_summary_label_info"
+                      )}
+                    />
+                  </label>
+                  <Input
+                    id="cfp_presentation_summary_social_summary_label"
+                    className="form-control"
+                    error={hasErrors(
+                      "cfp_presentation_summary_social_summary_label"
+                    )}
+                    onChange={handleChange}
+                    value={
+                      formik.values.marketing_settings
+                        .cfp_presentation_summary_social_summary_label?.value ||
+                      ""
+                    }
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label>
+                    {" "}
+                    {T.translate(
+                      "edit_selection_plan.cfp_presentation_summary_links_label"
+                    )}
+                    &nbsp;
+                    <i
+                      className="fa fa-info-circle"
+                      aria-hidden="true"
+                      title={T.translate(
+                        "edit_selection_plan.cfp_presentation_summary_links_label_info"
+                      )}
+                    />
+                  </label>
+                  <Input
+                    id="cfp_presentation_summary_links_label"
+                    className="form-control"
+                    error={hasErrors("cfp_presentation_summary_links_label")}
+                    onChange={handleChange}
+                    value={
+                      formik.values.marketing_settings
+                        .cfp_presentation_summary_links_label?.value || ""
+                    }
+                  />
+                </div>
+              </div>
+              <div className="row form-group">
+                <div className="col-md-6">
+                  <label>
+                    {" "}
+                    {T.translate(
+                      "edit_selection_plan.cfp_presentation_summary_hide_track_selection"
+                    )}
+                    &nbsp;
+                    <i
+                      className="fa fa-info-circle"
+                      aria-hidden="true"
+                      title={T.translate(
+                        "edit_selection_plan.cfp_presentation_summary_hide_track_selection_info"
+                      )}
+                    />
+                  </label>{" "}
+                  <br />
+                  <Switch
+                    checked={
+                      formik.values.marketing_settings
+                        .cfp_presentation_summary_hide_track_selection?.value ||
+                      false
+                    }
+                    onChange={(val) => {
+                      handleOnSwitchChange(
+                        "cfp_presentation_summary_hide_track_selection",
+                        val
+                      );
+                    }}
+                    uncheckedIcon={false}
+                    checkedIcon={false}
+                    className="react-switch"
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label>
+                    {" "}
+                    {T.translate(
+                      "edit_selection_plan.cfp_presentation_summary_hide_activity_type_selection"
+                    )}
+                    &nbsp;
+                    <i
+                      className="fa fa-info-circle"
+                      aria-hidden="true"
+                      title={T.translate(
+                        "edit_selection_plan.cfp_presentation_summary_hide_activity_type_selection_info"
+                      )}
+                    />
+                  </label>{" "}
+                  <br />
+                  <Switch
+                    checked={
+                      formik.values.marketing_settings
+                        .cfp_presentation_summary_hide_activity_type_selection
+                        ?.value || false
+                    }
+                    onChange={(val) => {
+                      handleOnSwitchChange(
+                        "cfp_presentation_summary_hide_activity_type_selection",
+                        val
+                      );
+                    }}
+                    uncheckedIcon={false}
+                    checkedIcon={false}
+                    className="react-switch"
+                  />
+                </div>
+              </div>
+              {window.CFP_APP_BASE_URL && (
+                <div className="row form-group">
+                  <div className="col-md-6">
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_presentation_selection_plan_link"
+                      )}
+                    </label>
+                    <br />
+                    <a
+                      className="text-table-link"
+                      href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${formik.values.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${formik.values.id}`}
+                    </a>
+                  </div>
+                  <div className="col-md-6">
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_presentation_all_selection_plan_link"
+                      )}
+                    </label>
+                    <br />
+                    <a
+                      className="text-table-link"
+                      href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
+                    </a>
+                  </div>
+                </div>
+              )}
+            </Panel>
+          </>
+        )}
 
-      <div className="row">
-        <div className="col-md-12 submit-buttons">
-          <input
-            type="button"
-            onClick={handleSubmit}
-            className="btn btn-primary pull-right"
-            value={T.translate("general.save")}
-          />
+        <div className="row">
+          <div className="col-md-12 submit-buttons">
+            <Button
+              type="submit"
+              variant="contained"
+              className="pull-right"
+              disabled={isSaving}
+            >
+              {T.translate("general.save")}
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <ImportModal
-        title={T.translate("edit_selection_plan.import_allowed_members")}
-        show={showImportModal}
-        wrapperClass="allowed-members-import-upload-wrapper"
-        onHide={() => setShowImportModal(false)}
-        onIngest={handleImportAllowedMembers}
-      >
-        * email ( text )<br />
-      </ImportModal>
-    </form>
+        <ImportModal
+          title={T.translate("edit_selection_plan.import_allowed_members")}
+          show={showImportModal}
+          wrapperClass="allowed-members-import-upload-wrapper"
+          onHide={() => setShowImportModal(false)}
+          onIngest={handleImportAllowedMembers}
+        >
+          * email ( text )<br />
+        </ImportModal>
+      </Box>
+    </FormikProvider>
   );
 };
 

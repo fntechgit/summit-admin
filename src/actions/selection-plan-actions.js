@@ -163,15 +163,18 @@ export const saveSelectionPlan = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )({})(dispatch).then((payload) => {
-      dispatch(stopLoading());
-      dispatch(
-        showSuccessMessage(
-          T.translate("edit_selection_plan.selection_plan_saved")
-        )
-      );
-      return payload.response;
-    });
+    )({})(dispatch)
+      .then((payload) => {
+        dispatch(
+          showSuccessMessage(
+            T.translate("edit_selection_plan.selection_plan_saved")
+          )
+        );
+        return payload.response;
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   }
   return postRequest(
     createAction(UPDATE_SELECTION_PLAN),
@@ -180,15 +183,18 @@ export const saveSelectionPlan = (entity) => async (dispatch, getState) => {
     normalizedEntity,
     authErrorHandler,
     entity
-  )({})(dispatch).then((payload) => {
-    dispatch(stopLoading());
-    dispatch(
-      showSuccessMessage(
-        T.translate("edit_selection_plan.selection_plan_created")
-      )
-    );
-    return payload.response;
-  });
+  )({})(dispatch)
+    .then((payload) => {
+      dispatch(
+        showSuccessMessage(
+          T.translate("edit_selection_plan.selection_plan_created")
+        )
+      );
+      return payload.response;
+    })
+    .finally(() => {
+      dispatch(stopLoading());
+    });
 };
 
 export const deleteSelectionPlan =
