@@ -8,7 +8,7 @@ module.exports = merge(common, {
   devtool: "inline-source-map",
   devServer: {
     historyApiFallback: true,
-    server: { type: "http" }
+    server: { type: "https" }
   },
   output: {
     filename: "[name].js",
