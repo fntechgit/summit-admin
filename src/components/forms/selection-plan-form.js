@@ -29,6 +29,10 @@ import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import Switch from "react-switch";
 import { Pagination } from "react-bootstrap";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import {
   isEmpty,
   scrollToError,
@@ -353,7 +357,11 @@ const SelectionPlanForm = (props) => {
   };
 
   return (
-    <form className="selection-plan-form">
+    <Box
+      component="form"
+      className="selection-plan-form"
+      onSubmit={handleSubmit}
+    >
       <input type="hidden" id="id" value={entity.id} />
       <div className="row form-group">
         <div className="col-md-4">
@@ -367,66 +375,52 @@ const SelectionPlanForm = (props) => {
           />
         </div>
         <div className="col-md-2 checkboxes-div">
-          <div className="form-check abc-checkbox">
-            <input
-              type="checkbox"
-              id="is_enabled"
-              checked={entity.is_enabled}
-              onChange={handleChange}
-              className="form-check-input"
-            />
-            <label className="form-check-label" htmlFor="is_enabled">
-              {T.translate("edit_selection_plan.enabled")}
-            </label>
-          </div>
+          <FormControlLabel
+            control={
+              <Checkbox
+                id="is_enabled"
+                checked={entity.is_enabled}
+                onChange={handleChange}
+              />
+            }
+            label={T.translate("edit_selection_plan.enabled")}
+          />
         </div>
         <div className="col-md-2 checkboxes-div">
-          <div className="form-check abc-checkbox">
-            <input
-              type="checkbox"
-              id="is_hidden"
-              checked={entity.is_hidden}
-              onChange={handleChange}
-              className="form-check-input"
-            />
-            <label className="form-check-label" htmlFor="is_hidden">
-              {T.translate("edit_selection_plan.hidden")}
-            </label>
-          </div>
+          <FormControlLabel
+            control={
+              <Checkbox
+                id="is_hidden"
+                checked={entity.is_hidden}
+                onChange={handleChange}
+              />
+            }
+            label={T.translate("edit_selection_plan.hidden")}
+          />
         </div>
         <div className="col-md-2 checkboxes-div">
-          <div className="form-check abc-checkbox">
-            <input
-              type="checkbox"
-              id="allow_proposed_schedules"
-              checked={entity.allow_proposed_schedules}
-              onChange={handleChange}
-              className="form-check-input"
-            />
-            <label
-              className="form-check-label"
-              htmlFor="allow_proposed_schedules"
-            >
-              {T.translate("edit_selection_plan.allow_proposed_schedules")}
-            </label>
-          </div>
+          <FormControlLabel
+            control={
+              <Checkbox
+                id="allow_proposed_schedules"
+                checked={entity.allow_proposed_schedules}
+                onChange={handleChange}
+              />
+            }
+            label={T.translate("edit_selection_plan.allow_proposed_schedules")}
+          />
         </div>
         <div className="col-md-2 checkboxes-div">
-          <div className="form-check abc-checkbox">
-            <input
-              type="checkbox"
-              id="allow_new_presentations"
-              checked={entity.allow_new_presentations}
-              onChange={handleChange}
-              className="form-check-input"
-            />
-            <label
-              className="form-check-label"
-              htmlFor="allow_new_presentations"
-            >
-              {T.translate("edit_selection_plan.allow_new_presentations")}
-            </label>
-          </div>
+          <FormControlLabel
+            control={
+              <Checkbox
+                id="allow_new_presentations"
+                checked={entity.allow_new_presentations}
+                onChange={handleChange}
+              />
+            }
+            label={T.translate("edit_selection_plan.allow_new_presentations")}
+          />
         </div>
       </div>
 
@@ -627,12 +621,14 @@ const SelectionPlanForm = (props) => {
                 onAdd={linkSummitSelectionPlanExtraQuestion}
               />
               <div className="col-md-6 text-right col-md-offset-6">
-                <button
-                  className="btn btn-primary right-space"
+                <Button
+                  type="button"
+                  variant="contained"
+                  className="right-space"
                   onClick={handleNewExtraQuestion}
                 >
                   {T.translate("edit_selection_plan.add_extra_questions")}
-                </button>
+                </Button>
               </div>
             </div>
             {entity.extra_questions.length === 0 && (
@@ -728,32 +724,31 @@ const SelectionPlanForm = (props) => {
           >
             <div className="row">
               <div className="col-md-4 checkboxes-div">
-                <div className="form-check abc-checkbox">
-                  <input
-                    type="checkbox"
-                    id="allow_track_change_requests"
-                    checked={entity.allow_track_change_requests}
-                    onChange={handleChange}
-                    className="form-check-input"
-                  />
-                  <label
-                    className="form-check-label"
-                    htmlFor="allow_track_change_requests"
-                  >
-                    {T.translate("track_chair_settings.allow_change_requests")}
-                  </label>
-                </div>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      id="allow_track_change_requests"
+                      checked={entity.allow_track_change_requests}
+                      onChange={handleChange}
+                    />
+                  }
+                  label={T.translate(
+                    "track_chair_settings.allow_change_requests"
+                  )}
+                />
               </div>
             </div>
             <hr />
             <div className="row">
               <div className="col-md-6 text-right col-md-offset-6">
-                <button
-                  className="btn btn-primary right-space"
+                <Button
+                  type="button"
+                  variant="contained"
+                  className="right-space"
                   onClick={handleAddRatingType}
                 >
                   {T.translate("track_chair_settings.add_rating_type")}
-                </button>
+                </Button>
               </div>
             </div>
             <SortableTable
@@ -813,25 +808,26 @@ const SelectionPlanForm = (props) => {
                     value={newMemberEmail}
                   />
                   <span className="input-group-btn">
-                    <button
+                    <Button
                       type="button"
-                      className="btn btn-default add-button"
+                      variant="outlined"
+                      className="add-button"
                       onClick={handleAddAllowedMember}
                       disabled={!newMemberEmail}
                     >
                       {T.translate("general.add")}
-                    </button>
+                    </Button>
                   </span>
                 </div>
 
                 <div className="pull-left input-group">
-                  <button
+                  <Button
                     type="button"
-                    className="btn btn-primary"
+                    variant="contained"
                     onClick={() => setShowImportModal(true)}
                   >
                     {T.translate("edit_selection_plan.import")}
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -1330,12 +1326,9 @@ const SelectionPlanForm = (props) => {
 
       <div className="row">
         <div className="col-md-12 submit-buttons">
-          <input
-            type="button"
-            onClick={handleSubmit}
-            className="btn btn-primary pull-right"
-            value={T.translate("general.save")}
-          />
+          <Button type="submit" variant="contained" className="pull-right">
+            {T.translate("general.save")}
+          </Button>
         </div>
       </div>
 
@@ -1348,7 +1341,7 @@ const SelectionPlanForm = (props) => {
       >
         * email ( text )<br />
       </ImportModal>
-    </form>
+    </Box>
   );
 };
 
