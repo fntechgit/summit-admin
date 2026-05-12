@@ -887,6 +887,18 @@ const parseFilters = (filters) => {
   return filter;
 };
 
+const getSpeakersActivitiesCount =
+  (summitId, filter, accessToken) => (dispatch) => {
+    const params = { access_token: accessToken };
+    if (filter.length > 0) params["filter[]"] = filter;
+    return getRequest(
+      createAction(REQUEST_SPEAKERS_ACTIVITIES_COUNT),
+      createAction(RECEIVE_SPEAKERS_ACTIVITIES_COUNT),
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/speakers/all/events/count`,
+      authErrorHandler
+    )(params)(dispatch);
+  };
+
 export const getSpeakersBySummit =
   (
     term = null,
@@ -932,6 +944,8 @@ export const getSpeakersBySummit =
       const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
       params.order = `${orderDirSign}${order}`;
     }
+
+    dispatch(getSpeakersActivitiesCount(currentSummit.id, filter, accessToken));
 
     return getRequest(
       createAction(REQUEST_SPEAKERS_BY_SUMMIT),
@@ -1172,15 +1186,3 @@ export const unselectAllSummitSpeakers = () => (dispatch) => {
 export const setCurrentFlowEvent = (value) => (dispatch) => {
   dispatch(createAction(SET_SPEAKERS_CURRENT_FLOW_EVENT)(value));
 };
-
-const getSpeakersActivitiesCount =
-  (summitId, filter, accessToken) => (dispatch) => {
-    const params = { access_token: accessToken };
-    if (filter.length > 0) params["filter[]"] = filter;
-    return getRequest(
-      createAction(REQUEST_SPEAKERS_ACTIVITIES_COUNT),
-      createAction(RECEIVE_SPEAKERS_ACTIVITIES_COUNT),
-      `${window.API_BASE_URL}/api/v1/summits/${summitId}/speakers/all/events/count`,
-      authErrorHandler
-    )(params)(dispatch);
-  };
