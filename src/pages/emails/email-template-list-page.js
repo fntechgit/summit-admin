@@ -12,13 +12,14 @@
  * */
 
 import React, { useEffect } from "react";
+import Button from "@mui/material/Button";
+import Grid2 from "@mui/material/Grid2";
+import AddIcon from "@mui/icons-material/Add";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import { Pagination } from "react-bootstrap";
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import Table from "openstack-uicore-foundation/lib/components/table";
-import { getSummitById } from "../../actions/summit-actions";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 import {
   getEmailTemplates,
   deleteEmailTemplate
@@ -26,7 +27,6 @@ import {
 
 const EmailTemplateListPage = ({
   templates,
-  lastPage,
   currentPage,
   perPage,
   term,
@@ -34,26 +34,43 @@ const EmailTemplateListPage = ({
   orderDir,
   totalTemplates,
   history,
-  ...props
+  getEmailTemplates: fetchEmailTemplates,
+  deleteEmailTemplate: removeEmailTemplate
 }) => {
   useEffect(() => {
-    props.getEmailTemplates(term, currentPage, perPage, order, orderDir);
-  }, []);
+    fetchEmailTemplates(term, currentPage, perPage, order, orderDir);
+  }, [fetchEmailTemplates]);
 
-  const handleEdit = (template_id) => {
-    history.push(`/app/emails/templates/${template_id}`);
+  const handleEdit = (row) => {
+    history.push(`/app/emails/templates/${row.id}`);
   };
 
-  const handlePageChange = (newPage) => {
-    props.getEmailTemplates(term, newPage, perPage, order, orderDir);
+  const handlePageChange = (page) => {
+    fetchEmailTemplates(term, page, perPage, order, orderDir);
   };
 
-  const handleSort = (index, key, dir) => {
-    props.getEmailTemplates(term, currentPage, perPage, key, dir);
+  const handlePerPageChange = (newPerPage) => {
+    fetchEmailTemplates(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir
+    );
+  };
+
+  const handleSort = (key, dir) => {
+    fetchEmailTemplates(term, currentPage, perPage, key, dir);
   };
 
   const handleSearch = (newTerm) => {
-    props.getEmailTemplates(newTerm, 1, perPage, order, orderDir);
+    fetchEmailTemplates(
+      newTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir
+    );
   };
 
   const handleNewEmailTemplate = (ev) => {
@@ -61,69 +78,75 @@ const EmailTemplateListPage = ({
     history.push("/app/emails/templates/new");
   };
 
-  const handleDeleteEmailTemplate = (templateId) => {
-    const template = templates.find((t) => t.id === templateId);
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("emails.delete_template_warning")} ${
-        template.identifier
-      }`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        props.deleteEmailTemplate(templateId);
-      }
-    });
+  const handleDeleteEmailTemplate = (row) => {
+    removeEmailTemplate(row.id);
   };
 
   const columns = [
-    { columnKey: "id", value: T.translate("general.id"), sortable: true },
+    {
+      columnKey: "id",
+      header: T.translate("general.id"),
+      sortable: true,
+      width: 70
+    },
     {
       columnKey: "identifier",
-      value: T.translate("emails.name"),
-      styles: { wordBreak: "break-all" },
+      header: T.translate("emails.name"),
+      render: (row) => (
+        <div style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+          {row.identifier}
+        </div>
+      ),
       sortable: true
     },
-    { columnKey: "subject", value: T.translate("emails.subject") },
-    { columnKey: "from_email", value: T.translate("emails.from_email") }
+    { columnKey: "subject", header: T.translate("emails.subject") },
+    { columnKey: "from_email", header: T.translate("emails.from_email") }
   ];
 
-  const table_options = {
+  const tableOptions = {
     sortCol: order,
-    sortDir: orderDir,
-    actions: {
-      edit: { onClick: handleEdit },
-      delete: { onClick: handleDeleteEmailTemplate }
-    }
+    sortDir: orderDir
   };
 
   return (
     <div className="container">
-      <h3>
-        {" "}
-        {T.translate("emails.template_list")} ({totalTemplates})
-      </h3>
-      <div className="row">
-        <div className="col-md-6">
-          <FreeTextSearch
-            value={term}
-            placeholder={T.translate("emails.placeholders.search_templates")}
-            onSearch={handleSearch}
-          />
-        </div>
-        <div className="col-md-6 text-right">
-          <button
-            className="btn btn-primary right-space"
+      <h3>{T.translate("emails.template_list")}</h3>
+      <Grid2
+        container
+        spacing={2}
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+        <Grid2 size={2}>
+          {totalTemplates} {T.translate("emails.templates")}
+        </Grid2>
+        <Grid2 size={10} container spacing={1} sx={{ justifyContent: "end" }}>
+          <Grid2 size={3}>
+            <SearchInput
+              term={term}
+              onSearch={handleSearch}
+              placeholder={T.translate("emails.placeholders.search_templates")}
+            />
+          </Grid2>
+          <Button
+            variant="contained"
             onClick={handleNewEmailTemplate}
+            startIcon={<AddIcon />}
+            sx={{
+              height: "36px",
+              padding: "6px 16px",
+              fontSize: "1.4rem",
+              lineHeight: "2.4rem",
+              letterSpacing: "0.4px"
+            }}
           >
             {T.translate("emails.add_template")}
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Grid2>
+      </Grid2>
 
       {templates.length === 0 && (
         <div>{T.translate("emails.no_templates")}</div>
@@ -131,24 +154,23 @@ const EmailTemplateListPage = ({
 
       {templates.length > 0 && (
         <div>
-          <Table
-            options={table_options}
+          <MuiTable
+            options={tableOptions}
             data={templates}
             columns={columns}
+            perPage={perPage}
+            currentPage={currentPage}
+            totalRows={totalTemplates}
+            onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
             onSort={handleSort}
-          />
-          <Pagination
-            bsSize="medium"
-            prev
-            next
-            first
-            last
-            ellipsis
-            boundaryLinks
-            maxButtons={10}
-            items={lastPage}
-            activePage={currentPage}
-            onSelect={handlePageChange}
+            onEdit={handleEdit}
+            onDelete={handleDeleteEmailTemplate}
+            getName={(row) => row.identifier}
+            deleteDialogBody={(item) =>
+              `${T.translate("emails.delete_template_warning")} ${item}`
+            }
+            confirmButtonColor="error"
           />
         </div>
       )}
@@ -161,7 +183,6 @@ const mapStateToProps = ({ emailTemplateListState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  getSummitById,
   getEmailTemplates,
   deleteEmailTemplate
 })(EmailTemplateListPage);
