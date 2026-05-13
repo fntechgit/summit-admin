@@ -227,7 +227,7 @@ const SponsorPagesTab = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       );
     });
   };

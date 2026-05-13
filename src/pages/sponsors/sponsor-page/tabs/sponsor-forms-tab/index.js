@@ -237,7 +237,7 @@ const SponsorFormsTab = ({
       managedForms.perPage,
       managedForms.order,
       managedForms.orderDir,
-      hideArchived
+      showArchived
     );
     getSponsorCustomizedForms(
       term,
@@ -245,7 +245,7 @@ const SponsorFormsTab = ({
       customizedForms.perPage,
       customizedForms.order,
       customizedForms.orderDir,
-      hideArchived
+      showArchived
     );
   };
 
