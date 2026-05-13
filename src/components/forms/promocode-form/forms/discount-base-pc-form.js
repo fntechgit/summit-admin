@@ -1,7 +1,7 @@
 import React from "react";
 import T from "i18n-react";
-import BasePCForm from "./base-pc-form";
 import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
+import BasePCForm from "./base-pc-form";
 import { DiscountTicketTable } from "../../../tables/dicount-ticket-table";
 
 const DiscountBasePCForm = (props) => {
@@ -28,6 +28,9 @@ const DiscountBasePCForm = (props) => {
               {T.translate("edit_promocode.apply_to_all_tix")}
             </label>
           </div>
+          <small className="form-text text-muted">
+            {T.translate("edit_promocode.apply_to_all_tix_helper")}
+          </small>
         </div>
       </div>
       {props.entity.apply_to_all_tix && (

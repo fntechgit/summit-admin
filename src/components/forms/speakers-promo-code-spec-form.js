@@ -14,10 +14,10 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
-import PromocodeInput from "openstack-uicore-foundation/lib/components/inputs/promocode-input"
-import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
+import PromocodeInput from "openstack-uicore-foundation/lib/components/inputs/promocode-input";
+import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input";
 import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input";
 import BadgeFeatureInput from "../inputs/badge-feature-input";
 import {
@@ -227,6 +227,9 @@ class SpeakerPromoCodeSpecForm extends React.Component {
                         {T.translate("edit_promocode.apply_to_all_tix")}
                       </label>
                     </div>
+                    <small className="form-text text-muted">
+                      {T.translate("edit_promocode.apply_to_all_tix_helper")}
+                    </small>
                   </div>
                 </div>
                 {!entity.applyToAllTix && (
