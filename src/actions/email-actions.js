@@ -29,7 +29,7 @@ import {
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
-import debounce from "lodash/debounce"
+import debounce from "lodash/debounce";
 import history from "../history";
 import { checkOrFilter, getAccessTokenSafely } from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";
@@ -99,7 +99,7 @@ export const getEmailTemplates =
       createAction(RECEIVE_TEMPLATES),
       `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates`,
       authErrorHandler,
-      { order, orderDir, term }
+      { order, orderDir, term, page, perPage }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
