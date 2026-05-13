@@ -503,7 +503,6 @@ const SponsorPagesTab = ({
       {openPopup === "usingTemplate" && (
         <AddSponsorPageTemplatePopup
           sponsor={sponsor}
-          summitId={currentSummit.id}
           onSubmit={handleSaveManagedPageFromTemplate}
           onClose={() => setOpenPopup(null)}
         />

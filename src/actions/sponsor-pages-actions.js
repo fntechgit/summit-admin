@@ -285,16 +285,9 @@ export const deleteSponsorManagedPage =
 const normalizeSponsorManagedPage = (entity) => {
   const normalizedEntity = {
     show_page_ids: entity.pages,
-    allowed_add_ons: entity.add_ons
+    allowed_add_ons: [],
+    apply_to_all_add_ons: false
   };
-
-  if (normalizedEntity.allowed_add_ons.includes("all")) {
-    normalizedEntity.apply_to_all_add_ons = true;
-    normalizedEntity.allowed_add_ons = [];
-  } else {
-    normalizedEntity.allowed_add_ons = entity.add_ons.map((a) => a.id);
-    normalizedEntity.apply_to_all_add_ons = false;
-  }
 
   return normalizedEntity;
 };

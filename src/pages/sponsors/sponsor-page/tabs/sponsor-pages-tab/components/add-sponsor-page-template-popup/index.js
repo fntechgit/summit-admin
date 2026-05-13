@@ -31,18 +31,15 @@ import {
 } from "@mui/material";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
 import CloseIcon from "@mui/icons-material/Close";
-import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import MenuButton from "../../../../../../../components/mui/menu-button";
-import { querySponsorAddons } from "../../../../../../../actions/sponsor-actions";
 import { getShowPages } from "../../../../../../../actions/show-pages-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   FIVE_PER_PAGE
 } from "../../../../../../../utils/constants";
-import MuiFormikSelectGroup from "../../../../../../../components/mui/formik-inputs/mui-formik-select-group";
 
 const AddSponsorPageTemplatePopup = ({
   onClose,
@@ -55,33 +52,17 @@ const AddSponsorPageTemplatePopup = ({
   totalCount,
   term = "",
   getShowPages,
-  sponsor,
-  summitId
+  sponsor
 }) => {
   const [selectedPages, setSelectedPages] = useState([]);
-
-  const sponsorshipIds = sponsor.sponsorships.map((e) => e.id);
 
   const sponsorshipTypeIds = sponsor.sponsorships.map((e) => e.type.id);
 
   const formik = useFormik({
-    initialValues: {
-      add_ons: []
-    },
-    validationSchema: yup.object({
-      add_ons: yup
-        .array()
-        .test(
-          "add_ons-required",
-          T.translate("validation.add_on_required"),
-          (value) => value?.includes("all") || value?.length > 0
-        )
-    }),
-    onSubmit: (values) => {
-      const { add_ons } = values;
+    initialValues: {},
+    onSubmit: () => {
       const entity = {
-        pages: selectedPages,
-        add_ons
+        pages: selectedPages
       };
       onSubmit(entity);
     },
@@ -214,24 +195,6 @@ const AddSponsorPageTemplatePopup = ({
           autoComplete="off"
         >
           <DialogContent sx={{ p: 0 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <MuiFormikSelectGroup
-                name="add_ons"
-                formik={formik}
-                queryFunction={querySponsorAddons}
-                // params for function, except input
-                queryParams={[summitId, sponsor.id, sponsorshipIds]}
-                showSelectAll
-                getGroupId={(addon) => addon.sponsorship.type.id}
-                getGroupLabel={(addon) => addon.sponsorship.type.type.name}
-                noOptionsLabel={T.translate(
-                  "edit_sponsor.pages_tab.no_add_ons"
-                )}
-                placeholder={T.translate(
-                  "edit_sponsor.placeholders.select_add_ons"
-                )}
-              />
-            </Grid2>
             <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
               <Grid2
                 container
