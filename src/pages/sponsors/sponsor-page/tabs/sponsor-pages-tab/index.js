@@ -220,13 +220,20 @@ const SponsorPagesTab = ({
 
   const handleCustomizedDelete = (itemId) => {
     deleteSponsorCustomizedPage(itemId).then(() => {
-      const { perPage, order, orderDir } = customizedPages;
       getSponsorCustomizedPages(
         term,
         DEFAULT_CURRENT_PAGE,
-        perPage,
-        order,
-        orderDir,
+        customizedPages.perPage,
+        customizedPages.order,
+        customizedPages.orderDir,
+        showArchived
+      );
+      getSponsorManagedPages(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        managedPages.perPage,
+        managedPages.order,
+        managedPages.orderDir,
         showArchived
       );
     });
