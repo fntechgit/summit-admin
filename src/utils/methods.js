@@ -629,3 +629,10 @@ export const formatDate = (date, timeZone, format = DATETIME_FORMAT) => {
     .tz(timeZone)
     .format(format);
 };
+
+export const getSafePageAfterRemove = (totalCount, perPage, currentPage) => {
+  const totalAfter = totalCount - 1;
+  const totalPages = Math.ceil(totalAfter / perPage);
+  const lastValidPage = Math.max(1, totalPages);
+  return Math.min(currentPage, lastValidPage);
+};

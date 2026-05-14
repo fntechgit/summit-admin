@@ -45,6 +45,7 @@ import AddFormTemplateItemDialog from "./add-form-template-item-popup";
 import SponsorInventoryDialog from "./sponsor-inventory-popup";
 import { getInventoryItems } from "../../../actions/inventory-item-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import { getSafePageAfterRemove } from "../../../utils/methods";
 
 const FormTemplateItemListPage = ({
   formTemplateId,
@@ -161,9 +162,25 @@ const FormTemplateItemListPage = ({
   };
 
   const handleArchiveItem = (item) =>
-    item.is_archived
+    (item.is_archived
       ? unarchiveFormTemplateItem(formTemplateId, item)
-      : archiveFormTemplateItem(formTemplateId, item);
+      : archiveFormTemplateItem(formTemplateId, item)
+    ).then(() => {
+      const safePage = getSafePageAfterRemove(
+        totalFormTemplateItems,
+        perPage,
+        currentPage
+      );
+      getFormTemplateItems(
+        formTemplateId,
+        term,
+        safePage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      );
+    });
 
   const handleShowArchivedForms = (ev) => {
     getFormTemplateItems(
