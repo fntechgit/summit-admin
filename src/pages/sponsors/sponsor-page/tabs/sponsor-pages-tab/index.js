@@ -44,6 +44,7 @@ import {
   DEFAULT_CURRENT_PAGE,
   SPONSOR_MANAGED_PAGE_ASSIGNMENT
 } from "../../../../../utils/constants";
+import { getSafePageAfterRemove } from "../../../../../utils/methods";
 import AddSponsorPageTemplatePopup from "./components/add-sponsor-page-template-popup";
 import PageTemplatePopup from "../../../../sponsors-global/page-templates/page-template-popup";
 
