@@ -64,7 +64,7 @@ const PageModules = ({ name = "modules", getAllMediaFileTypes }) => {
       }),
       type: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
+      confirmButtonColor: "error",
       confirmButtonText: T.translate("general.yes_delete")
     });
 
