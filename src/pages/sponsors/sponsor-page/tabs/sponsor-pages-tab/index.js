@@ -184,10 +184,12 @@ const SponsorPagesTab = ({
       ? unarchiveCustomizedPage(item.id)
       : archiveCustomizedPage(item.id)
     ).then(() => {
-      const { perPage, order, orderDir, currentPage } = customizedPages;
+      const { perPage, order, orderDir, currentPage, totalItems } =
+        customizedPages;
+      const safePage = getSafePageAfterRemove(totalItems, perPage, currentPage);
       return getSponsorCustomizedPages(
         term,
-        currentPage,
+        safePage,
         perPage,
         order,
         orderDir,

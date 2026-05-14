@@ -636,3 +636,10 @@ export const formatDate = (
 
 export const getFileUploadAllowedExtensions = () =>
   window.FILE_UPLOAD_ALLOWED_EXTENSIONS?.split(",").filter(Boolean) ?? [];
+
+export const getSafePageAfterRemove = (totalCount, perPage, currentPage) => {
+  const totalAfter = totalCount - 1;
+  const totalPages = Math.ceil(totalAfter / perPage);
+  const lastValidPage = Math.max(1, totalPages);
+  return Math.min(currentPage, lastValidPage);
+};

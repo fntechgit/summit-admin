@@ -38,6 +38,7 @@ import {
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 import PageTemplatePopup from "./page-template-popup";
 import PageTemplateClonePopup from "./page-template-clone-popup";
+import { getSafePageAfterRemove } from "../../../utils/methods";
 
 const PageTemplateListPage = ({
   pageTemplates,
@@ -119,9 +120,17 @@ const PageTemplateListPage = ({
   };
 
   const handleArchive = (item) =>
-    item.is_archived
+    (item.is_archived
       ? unarchivePageTemplate(item.id)
-      : archivePageTemplate(item.id);
+      : archivePageTemplate(item.id)
+    ).then(() => {
+      const safePage = getSafePageAfterRemove(
+        totalPageTemplates,
+        perPage,
+        currentPage
+      );
+      getPageTemplates(term, safePage, perPage, order, orderDir, showArchived);
+    });
 
   const handleEdit = (row) => {
     getPageTemplate(row.id).then(() => setOpenPageDialog(true));
