@@ -166,13 +166,20 @@ const SponsorFormsTab = ({
 
   const handleCustomizedDelete = (itemId) => {
     deleteSponsorCustomizedForm(itemId).then(() => {
-      const { perPage, order, orderDir } = customizedForms;
       getSponsorCustomizedForms(
         term,
         DEFAULT_CURRENT_PAGE,
-        perPage,
-        order,
-        orderDir,
+        customizedForms.perPage,
+        customizedForms.order,
+        customizedForms.orderDir,
+        showArchived
+      );
+      getSponsorManagedForms(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        managedForms.perPage,
+        managedForms.order,
+        managedForms.orderDir,
         showArchived
       );
     });
