@@ -65,6 +65,32 @@ describe("Dropdown", () => {
     ).toBeInTheDocument();
   });
 
+  test("renders placeholder when value is an empty array", () => {
+    render(
+      <Dropdown
+        id="test"
+        value={[]}
+        options={options}
+        placeholder="Pick one"
+        onChange={jest.fn()}
+      />
+    );
+    expect(screen.getByText("Pick one")).toBeInTheDocument();
+  });
+
+  test("renders joined labels when value is an array", () => {
+    render(
+      <Dropdown
+        id="test"
+        value={["a", "c"]}
+        options={options}
+        placeholder="Pick one"
+        onChange={jest.fn()}
+      />
+    );
+    expect(screen.getByText("Option A, Option C")).toBeInTheDocument();
+  });
+
   test("calls onChange when an option is selected", () => {
     const onChange = jest.fn();
     render(

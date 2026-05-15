@@ -40,8 +40,21 @@ const Dropdown = ({
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...rest}
         renderValue={(selected) => {
-          if (selected == null || selected === "") {
+          if (
+            selected == null ||
+            selected === "" ||
+            (Array.isArray(selected) && selected.length === 0)
+          ) {
             return <em>{finalPlaceholder}</em>;
+          }
+          if (Array.isArray(selected)) {
+            const lookup = Object.fromEntries(
+              options.map((o) => [o.value, o.label])
+            );
+            return selected
+              .map((v) => lookup[v])
+              .filter(Boolean)
+              .join(", ");
           }
           const selectedOption = options.find(
             ({ value }) => value === selected
@@ -61,7 +74,11 @@ const Dropdown = ({
 
 Dropdown.propTypes = {
   id: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  value: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+    PropTypes.array
+  ]),
   options: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])

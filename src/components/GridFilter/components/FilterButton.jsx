@@ -42,6 +42,7 @@ const FilterButton = ({ filterCount, onClick, onDelete }) => {
   return (
     <IconButton
       size="large"
+      aria-label={T.translate("grid_filter.open_filters")}
       onClick={onClick}
       sx={{ mr: 1, top: "-6px", position: "relative" }}
     >

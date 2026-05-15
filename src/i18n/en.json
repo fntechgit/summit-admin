@@ -4222,6 +4222,7 @@
     "clear_filters": "Clear Filters",
     "cancel": "Cancel",
     "apply_filters": "Apply Filters",
+    "open_filters": "Open filters",
     "operators": {
       "is": "is",
       "is_not": "is not",
