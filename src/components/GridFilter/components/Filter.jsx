@@ -32,6 +32,7 @@ const Filter = ({ id, value, criterias, onChange, onAdd, onDelete }) => {
   const criteriaObj = criterias.find(({ key }) => key === value?.criteria);
   const operatorOptions = criteriaObj?.operators || [];
   const valueSettings = criteriaObj?.values || {};
+  const defaultValue = valueSettings.props?.multiple ? [] : "";
 
   const handleChange = (prop, val) => {
     onChange({ ...value, [prop]: val });
@@ -95,7 +96,7 @@ const Filter = ({ id, value, criterias, onChange, onAdd, onDelete }) => {
           />
           <ValueInput
             id={`${id}-value`}
-            value={value?.value || ""}
+            value={value?.value ?? defaultValue}
             type={valueSettings.type}
             placeholder={T.translate("grid_filter.select_values")}
             disabled={!value?.criteria}

@@ -75,7 +75,8 @@ const getCriterias = (summit, mediaUploadTypes) => [
           label: sp.name,
           value: sp.id
         })),
-        placeholder: "Filter by Selection Plan"
+        placeholder: "Filter by Selection Plan",
+        multiple: true
       }
     }
   },
@@ -87,7 +88,8 @@ const getCriterias = (summit, mediaUploadTypes) => [
       type: "select",
       props: {
         options: summit.tracks.map((t) => ({ label: t.name, value: t.id })),
-        placeholder: "Filter by Track"
+        placeholder: "Filter by Track",
+        multiple: true
       }
     }
   },
@@ -102,7 +104,8 @@ const getCriterias = (summit, mediaUploadTypes) => [
           label: type.name,
           value: type.id
         })),
-        placeholder: "Filter by Activity Type"
+        placeholder: "Filter by Activity Type",
+        multiple: true
       }
     }
   },
@@ -114,7 +117,8 @@ const getCriterias = (summit, mediaUploadTypes) => [
       type: "select",
       props: {
         options: [...selectionStatusOptions],
-        placeholder: "Filter by Selection Status"
+        placeholder: "Filter by Selection Status",
+        multiple: true
       }
     },
     customParser: (f) => {
@@ -178,7 +182,8 @@ const getCriterias = (summit, mediaUploadTypes) => [
           label: trackGroup.name,
           value: trackGroup.id
         })),
-        placeholder: "Filter by Track Groups"
+        placeholder: "Filter by Track Groups",
+        multiple: true
       }
     }
   },
@@ -193,21 +198,18 @@ const getCriterias = (summit, mediaUploadTypes) => [
           value: type.id,
           label: type.name
         })),
-        placeholder: "Filter by Media Upload Type"
+        placeholder: "Filter by Media Upload Type",
+        multiple: true
       }
     },
     customParser: (f) => {
       const filter = [];
 
       if (f.operator === OPERATORS.HAS.value) {
-        const value = Array.isArray(filter.value)
-          ? filter.value.join("||")
-          : filter.value;
+        const value = Array.isArray(f.value) ? f.value.join("||") : f.value;
         filter.push(`has_media_upload_with_type==${value}`);
       } else {
-        const value = Array.isArray(filter.value)
-          ? filter.value.join("&&")
-          : filter.value;
+        const value = Array.isArray(f.value) ? f.value.join("&&") : f.value;
         filter.push(`has_not_media_upload_with_type==${value}`);
       }
 
