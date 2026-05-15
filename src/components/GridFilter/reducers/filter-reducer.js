@@ -3,7 +3,7 @@ import { JOIN_OPERATORS } from "../utils";
 
 const INITIAL_STATE = {
   id: null,
-  joinOperator: "all",
+  joinOperator: JOIN_OPERATORS.ALL,
   filterValues: [],
   parsedFilter: []
 };

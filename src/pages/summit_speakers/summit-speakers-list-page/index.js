@@ -18,8 +18,11 @@ import { Pagination } from "react-bootstrap";
 import SelectableTable from "openstack-uicore-foundation/lib/components/table-selectable";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
-import GridFilter from "../../../components/GridFilter";
-import useGridFilter from "../../../components/GridFilter/hooks/useGridFilter";
+import {
+  GridFilter,
+  useGridFilter,
+  OPERATORS
+} from "../../../components/GridFilter";
 import {
   exportSummitSpeakers,
   getSpeakersBySummit,
@@ -38,8 +41,11 @@ import {
   unselectAllSummitSubmitters,
   unselectSummitSubmitter
 } from "../../../actions/submitter-actions";
-
-import { SpeakersSources as sources } from "../../../utils/constants";
+import { getMediaUploads } from "../../../actions/media-upload-actions";
+import {
+  MAX_PER_PAGE,
+  SpeakersSources as sources
+} from "../../../utils/constants";
 import "../../../styles/speakers-list-page.less";
 import SendEmailModal from "./components/send-email-modal";
 
@@ -57,11 +63,11 @@ const selectionStatusOptions = [
   { label: "Alternate/Rejected", value: "alternate_rejected" }
 ];
 
-const getCriterias = (summit) => [
+const getCriterias = (summit, mediaUploadTypes) => [
   {
     key: "presentations_selection_plan_id",
     label: "Selection Plan",
-    operators: [{ value: "==", label: "is" }],
+    operators: [OPERATORS.IS],
     values: {
       type: "select",
       props: {
@@ -76,7 +82,7 @@ const getCriterias = (summit) => [
   {
     key: "presentations_track_id",
     label: "Track",
-    operators: [{ value: "==", label: "is" }],
+    operators: [OPERATORS.IS],
     values: {
       type: "select",
       props: {
@@ -88,7 +94,7 @@ const getCriterias = (summit) => [
   {
     key: "presentations_type_id",
     label: "Activity Type",
-    operators: [{ value: "==", label: "is" }],
+    operators: [OPERATORS.IS],
     values: {
       type: "select",
       props: {
@@ -103,7 +109,7 @@ const getCriterias = (summit) => [
   {
     key: "selection_status",
     label: "Selection Status",
-    operators: [{ value: "==", label: "is" }],
+    operators: [OPERATORS.IS],
     values: {
       type: "select",
       props: {
@@ -164,7 +170,7 @@ const getCriterias = (summit) => [
   {
     key: "presentations_track_group_id",
     label: "Track Group",
-    operators: [{ value: "==", label: "is" }],
+    operators: [OPERATORS.IS],
     values: {
       type: "select",
       props: {
@@ -177,18 +183,35 @@ const getCriterias = (summit) => [
     }
   },
   {
-    key: "has_media_upload_with_type",
+    key: "media_upload_with_type",
     label: "Media Upload Type",
-    operators: [
-      { value: ">>", label: "has" },
-      { value: "!>>", label: "has not" }
-    ],
+    operators: [OPERATORS.HAS, OPERATORS.HAS_NOT],
     values: {
       type: "select",
       props: {
-        options: [{ value: "async", label: "Async" }],
-        placeholder: "Filter by MediaUploads Type"
+        options: mediaUploadTypes.map((type) => ({
+          value: type.id,
+          label: type.name
+        })),
+        placeholder: "Filter by Media Upload Type"
       }
+    },
+    customParser: (f) => {
+      const filter = [];
+
+      if (f.operator === OPERATORS.HAS.value) {
+        const value = Array.isArray(filter.value)
+          ? filter.value.join("||")
+          : filter.value;
+        filter.push(`has_media_upload_with_type==${value}`);
+      } else {
+        const value = Array.isArray(filter.value)
+          ? filter.value.join("&&")
+          : filter.value;
+        filter.push(`has_not_media_upload_with_type==${value}`);
+      }
+
+      return filter;
     }
   }
 ];
@@ -213,6 +236,8 @@ const SummitSpeakersListPage = ({
   history,
   speakersProps,
   submittersProps,
+  mediaUploadTypes,
+  getMediaUploads,
   getSpeakersBySummit,
   getSubmittersBySummit,
   exportSummitSpeakers,
@@ -229,12 +254,23 @@ const SummitSpeakersListPage = ({
   const [source, setSource] = useState(sources.speakers);
   const isSpeakerMode = source === sources.speakers;
   const subjectProps = isSpeakerMode ? speakersProps : submittersProps;
-  const { parsedFilter } = useGridFilter(FILTER_ID);
+  const { parsedFilter, resetFilters } = useGridFilter(FILTER_ID);
 
+  useEffect(() => {
+    if (currentSummit) {
+      getMediaUploads("", 1, MAX_PER_PAGE, "name", 1);
+    }
+  }, [currentSummit]);
+
+  // reset filters if source changes
   useEffect(() => {
     initSubmittersList();
     initSpeakersList();
+    resetFilters();
+  }, [currentSummit, source]);
 
+  // fetch speakers/submitters list if filters change
+  useEffect(() => {
     if (currentSummit) {
       getBySummit();
     }
@@ -398,7 +434,10 @@ const SummitSpeakersListPage = ({
           />
         </div>
         <div className="col-md-2">
-          <GridFilter id={FILTER_ID} criterias={getCriterias(currentSummit)} />
+          <GridFilter
+            id={FILTER_ID}
+            criterias={getCriterias(currentSummit, mediaUploadTypes)}
+          />
         </div>
         <div className="col-md-2 text-right">
           <button
@@ -457,14 +496,17 @@ const SummitSpeakersListPage = ({
 const mapStateToProps = ({
   currentSummitState,
   currentSummitSpeakersListState,
-  currentSummitSubmittersListState
+  currentSummitSubmittersListState,
+  mediaUploadListState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
   speakersProps: currentSummitSpeakersListState,
-  submittersProps: currentSummitSubmittersListState
+  submittersProps: currentSummitSubmittersListState,
+  mediaUploadTypes: mediaUploadListState.media_uploads
 });
 
 export default connect(mapStateToProps, {
+  getMediaUploads,
   initSpeakersList,
   getSpeakersBySummit,
   exportSummitSpeakers,

@@ -29,95 +29,9 @@ import Filter from "./components/Filter";
 import FilterButton from "./components/FilterButton";
 import { saveFilters } from "./actions/filter-actions";
 import useGridFilter, { EMPTY_FILTER } from "./hooks/useGridFilter";
-import { JOIN_OPERATORS } from "./utils";
+import { JOIN_OPERATORS, OPERATORS } from "./utils";
 
-// sample props
-/*
-criterias =  [
-    {
-      key: "tracks",
-      label: "Tracks",
-      operators: [
-        {value: "==", label: "is"},
-        {value: "=@", label: "like"},
-      ],
-      values: {
-        type: "select",
-        props: {
-          options: [
-            {value: 1, label: "OpenStack"},
-            {value: 2, label: "FnTech"}
-          ],
-          multi: true,
-          placeholder: "Select Tracks"
-        },
-      },
-    },
-    {
-      key: "selection_status",
-      label: "Selection Status",
-      operators: [{ value: "==", label: "is" }],
-      values: {
-        type: "select",
-        props: {
-          options: [...selectionStatusOptions],
-          placeholder: "Filter by Selection Status"
-        }
-      },
-      customParser: (f) => {
-        const filter = [];
-        if (f.value) {
-          switch (f.value) {
-            case "only_rejected":
-              filter.push("has_rejected_presentations==true");
-              filter.push("has_accepted_presentations==false");
-              filter.push("has_alternate_presentations==false");
-              break;
-            case "only_accepted":
-              filter.push("has_rejected_presentations==false");
-              filter.push("has_accepted_presentations==true");
-              filter.push("has_alternate_presentations==false");
-              break;
-            case "only_alternate":
-              filter.push("has_rejected_presentations==false");
-              filter.push("has_accepted_presentations==false");
-              filter.push("has_alternate_presentations==true");
-              break;
-          }
-        }
-        return filter;
-      },
-    },
-    {
-      key: "sponsor",
-      label: "Sponsor",
-      operators: [
-        {value: "==", label: "is"},
-        {value: "=@", label: "like"},
-      ],
-      values: {
-        type: "text",
-        props: {
-          placeholder: "Type Sponsor Name"
-        },
-      },
-    }
-  ]
-
-
-value = [
-  {
-    criteria: "tracks",
-    operator: "==",
-    value: [1, 2]
-  },
-  {
-    criteria: "sponsor",
-    operator: "=@",
-    value: "openstack"
-  }
-]
- */
+const OPERATOR_VALUES = Object.values(OPERATORS).map((op) => op.value);
 
 const GridFilter = ({ id, criterias, onApply, saveFilters }) => {
   const { joinOperator, filterCount, valuesWithIds } = useGridFilter(id);
@@ -271,7 +185,7 @@ GridFilter.propTypes = {
       label: PropTypes.string.isRequired,
       operators: PropTypes.arrayOf(
         PropTypes.shape({
-          value: PropTypes.string.isRequired,
+          value: PropTypes.oneOf(OPERATOR_VALUES).isRequired,
           label: PropTypes.string.isRequired
         })
       ),

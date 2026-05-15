@@ -4221,6 +4221,22 @@
     "filters": "Filters",
     "clear_filters": "Clear Filters",
     "cancel": "Cancel",
-    "apply_filters": "Apply Filters"
+    "apply_filters": "Apply Filters",
+    "operators": {
+      "is": "is",
+      "is_not": "is not",
+      "like": "like",
+      "like_start": "like start",
+      "has": "has",
+      "has_not": "has not",
+      "less": "less than",
+      "less_or_equal": "less than or equal to",
+      "greater": "greater than",
+      "greater_or_equal": "greater than or equal to",
+      "between": "between",
+      "between_strict": "between strict",
+      "all": "all",
+      "any": "any"
+    }
   }
 }
