@@ -175,6 +175,7 @@ const SponsorPagesTab = ({
   };
 
   const handleAddPage = () => {
+    resetSponsorPage();
     setOpenPopup("customizedPagePopup");
   };
 
