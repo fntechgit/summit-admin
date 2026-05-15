@@ -55,9 +55,11 @@ const GridFilter = ({ id, criterias, onApply, saveFilters }) => {
     const parser = criterias.find(
       ({ key }) => key === filter.criteria
     )?.customParser;
+
     if (parser) {
       return parser(filter);
     }
+
     const value = Array.isArray(filter.value)
       ? filter.value.join("||")
       : filter.value;
