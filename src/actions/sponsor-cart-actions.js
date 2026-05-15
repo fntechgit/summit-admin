@@ -92,7 +92,8 @@ export const getSponsorCart =
 
     const params = {
       access_token: accessToken,
-      expand: "forms,forms.items,forms.items.type,forms.items.meta_fields,notes,fees"
+      expand:
+        "forms,forms.items,forms.items.type,forms.items.meta_fields,notes,fees"
     };
 
     if (filter.length > 0) {
@@ -255,7 +256,7 @@ export const getSponsorCartForm =
 
     const params = {
       access_token: accessToken,
-      expand: "items,items.type,items.meta_fields"
+      expand: "items,items.type,items.meta_fields,items.meta_fields.values"
     };
 
     return getRequest(
@@ -475,7 +476,8 @@ export const checkoutCart = () => async (dispatch, getState) => {
 
   const params = {
     access_token: accessToken,
-    expand: "forms,forms.items,forms.items.type,forms.items.meta_fields,notes,fees"
+    expand:
+      "forms,forms.items,forms.items.type,forms.items.meta_fields,notes,fees"
   };
 
   return putRequest(
@@ -499,7 +501,8 @@ export const reopenCart = () => async (dispatch, getState) => {
 
   const params = {
     access_token: accessToken,
-    expand: "forms,forms.items,forms.items.type,forms.items.meta_fields,notes,fees"
+    expand:
+      "forms,forms.items,forms.items.type,forms.items.meta_fields,notes,fees"
   };
 
   return deleteRequest(
@@ -508,10 +511,9 @@ export const reopenCart = () => async (dispatch, getState) => {
     `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/checkout`,
     null,
     snackbarErrorHandler
-  )(params)(dispatch)
-    .finally(() => {
-      dispatch(stopLoading());
-    });
+  )(params)(dispatch).finally(() => {
+    dispatch(stopLoading());
+  });
 };
 
 export const payWithInvoice = () => async (dispatch, getState) => {
