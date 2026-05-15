@@ -52,14 +52,21 @@ const Filter = ({ id, value, criterias, onChange, onAdd, onDelete }) => {
     }
   }, [valueSettings.props?.options?.length, value?.criteria]);
 
+  const isAddDisabled =
+    value?.criteria == null ||
+    value?.operator == null ||
+    value?.value == null ||
+    value?.value === "" ||
+    (Array.isArray(value?.value) && value.value.length === 0);
+
   const handleChangeCriteria = (ev) => {
     const val = ev.target.value;
-    handleChange("criteria", val);
+    onChange({ ...value, criteria: val, operator: null, value: null });
   };
 
   const handleChangeOperator = (ev) => {
     const val = ev.target.value;
-    handleChange("operator", val);
+    onChange({ ...value, operator: val, value: null });
   };
 
   const handleChangeValue = (ev) => {
@@ -112,7 +119,7 @@ const Filter = ({ id, value, criterias, onChange, onAdd, onDelete }) => {
             variant="contained"
             aria-label="add-filter"
             onClick={() => onAdd()}
-            disabled={!value?.criteria || !value?.operator || !value?.value}
+            disabled={isAddDisabled}
             sx={{ ml: "4px" }}
           >
             <AddIcon fontSize="large" />
@@ -126,6 +133,7 @@ const Filter = ({ id, value, criterias, onChange, onAdd, onDelete }) => {
 Filter.propTypes = {
   id: PropTypes.string.isRequired,
   value: PropTypes.shape({
+    id: PropTypes.string,
     criteria: PropTypes.string,
     operator: PropTypes.string,
     value: PropTypes.oneOfType([

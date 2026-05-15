@@ -61,7 +61,7 @@ const GridFilter = ({ id, criterias, onApply, saveFilters }) => {
     const value = Array.isArray(filter.value)
       ? filter.value.join("||")
       : filter.value;
-    if (value) {
+    if (value != null && value !== "") {
       return [`${filter.criteria}${filter.operator}${value}`];
     }
   };
@@ -94,7 +94,14 @@ const GridFilter = ({ id, criterias, onApply, saveFilters }) => {
   const handleSubmit = () => {
     // remove empty filters and adding parsed string for API
     const validFilters = filters
-      .filter((f) => f.criteria && f.operator && f.value)
+      .filter(
+        (f) =>
+          f.criteria != null &&
+          f.operator != null &&
+          f.value != null &&
+          f.value !== "" &&
+          !(Array.isArray(f.value) && f.value.length === 0)
+      )
       .map((f) => ({ ...f, parsed: parseFilter(f) }));
 
     saveFilters(id, validFilters, andOrAny);

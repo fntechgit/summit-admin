@@ -193,10 +193,10 @@ const SendEmailModal = ({
   };
 
   const handleModalChange = (ev) => {
-    const { id, value, checked } = ev.target;
+    const { id, value, checked, type } = ev.target;
     setModalValues({
       ...modalValues,
-      [id]: checked || value
+      [id]: type === "checkbox" ? checked : value
     });
   };
 

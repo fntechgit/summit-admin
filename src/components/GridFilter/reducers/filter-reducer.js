@@ -14,13 +14,14 @@ const filterReducer = (state = INITIAL_STATE, action) => {
   switch (type) {
     case `FIL_${SAVE_FILTERS}`: {
       const { id, filters, joinOperator } = payload;
-      let parsedFilter = filters.flatMap((f) => f.parsed);
+      const safeFilters = Array.isArray(filters) ? filters : [];
+      let parsedFilter = safeFilters.flatMap((f) => f?.parsed ?? []);
       if (joinOperator === JOIN_OPERATORS.ANY)
         parsedFilter = parsedFilter.map((p) => `or(${p})`);
       return {
         ...state,
         id,
-        filterValues: filters,
+        filterValues: safeFilters,
         joinOperator,
         parsedFilter
       };

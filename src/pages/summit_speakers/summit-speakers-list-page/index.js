@@ -238,6 +238,8 @@ const SummitSpeakersListPage = ({
   submittersProps,
   mediaUploadTypes,
   getMediaUploads,
+  initSpeakersList,
+  initSubmittersList,
   getSpeakersBySummit,
   getSubmittersBySummit,
   exportSummitSpeakers,
@@ -402,7 +404,7 @@ const SummitSpeakersListPage = ({
     selectedAll
   };
 
-  if (!currentSummit.id) return <div />;
+  if (!currentSummit?.id) return <div />;
 
   return (
     <div className="container">
