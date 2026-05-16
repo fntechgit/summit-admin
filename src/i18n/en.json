@@ -2548,6 +2548,8 @@
       "custom_page_created": "Custom Sponsor Page created successfully",
       "managed_page_saved": "Sponsor Managed Page saved successfully",
       "managed_page_created": "Sponsor Managed Page created successfully",
+      "managed_page_already_added": "Selected page(s) have already been added ({alreadyCount}).",
+      "managed_page_partially_added": "Added {addedCount} page(s). {alreadyCount} page(s) were already added.",
       "page_delete_warning": "Please verify you want to delete {page}"
     },
     "cart_tab": {

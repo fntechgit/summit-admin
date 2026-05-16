@@ -25,9 +25,15 @@ import T from "i18n-react/dist/i18n-react";
 import moment from "moment-timezone";
 import {
   getAccessTokenSafely,
-  normalizeSelectAllField
+  normalizeSelectAllField,
+  fetchResponseHandler,
+  fetchErrorHandler
 } from "../utils/methods";
-import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
+import {
+  snackbarErrorHandler,
+  snackbarSuccessHandler,
+  snackbarWarningHandler
+} from "./base-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
@@ -228,26 +234,66 @@ export const saveSponsorManagedPage =
         });
     }
 
-    const normalizedEntity = normalizeSponsorManagedPage(entity);
+    // Fetch all managed page IDs (paginated) to detect duplicates across all pages, not just current grid page
+    const existingManagedPageIds = new Set();
+    const baseUrl = `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages`;
+    for (let page = 1; ; page++) {
+      const url = `${baseUrl}?${new URLSearchParams({
+        access_token: accessToken,
+        fields: "id",
+        page,
+        per_page: "100"
+      })}`;
+      const res = await fetch(url)
+        .then(fetchResponseHandler)
+        .catch((err) => {
+          fetchErrorHandler(err);
+          throw err;
+        });
+      res.data?.forEach(({ id }) => existingManagedPageIds.add(id));
+      if (page >= (res.last_page ?? 1)) break;
+    }
+
+    const selectedPageIds = entity.pages ?? [];
+    const newPageIds = selectedPageIds.filter(
+      (id) => !existingManagedPageIds.has(id)
+    );
+    const alreadyCount = selectedPageIds.length - newPageIds.length;
+    const successTitle = T.translate("general.success");
+
+    if (selectedPageIds.length && !newPageIds.length) {
+      dispatch(
+        snackbarWarningHandler({
+          title: successTitle,
+          html: T.translate(
+            "edit_sponsor.pages_tab.managed_page_already_added",
+            { alreadyCount }
+          )
+        })
+      );
+      dispatch(stopLoading());
+      return { skipped: true, reason: "already-added" };
+    }
+
+    const html =
+      alreadyCount > 0
+        ? T.translate("edit_sponsor.pages_tab.managed_page_partially_added", {
+            addedCount: newPageIds.length,
+            alreadyCount
+          })
+        : T.translate("edit_sponsor.pages_tab.managed_page_created");
 
     return postRequest(
       null,
       createAction(SPONSOR_MANAGED_PAGE_ADDED),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages`,
-      normalizedEntity,
+      normalizeSponsorManagedPage({ ...entity, pages: newPageIds }),
       snackbarErrorHandler
     )(params)(dispatch)
-      .then(() => {
-        dispatch(
-          snackbarSuccessHandler({
-            title: T.translate("general.success"),
-            html: T.translate("edit_sponsor.pages_tab.managed_page_created")
-          })
-        );
-      })
-      .finally(() => {
-        dispatch(stopLoading());
-      });
+      .then(() =>
+        dispatch(snackbarSuccessHandler({ title: successTitle, html }))
+      )
+      .finally(() => dispatch(stopLoading()));
   };
 
 export const deleteSponsorManagedPage =

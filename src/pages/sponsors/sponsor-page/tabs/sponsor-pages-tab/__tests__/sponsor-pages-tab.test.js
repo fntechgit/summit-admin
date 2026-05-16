@@ -23,8 +23,11 @@ jest.mock(
       return (
         <div data-testid="add-sponsor-page-template-popup">
           <button onClick={onClose}>Close</button>
-          <button onClick={() => onSubmit({ id: 1, name: "Test" })}>
+          <button onClick={() => onSubmit({ pages: [1], add_ons: [] })}>
             Submit
+          </button>
+          <button onClick={() => onSubmit({ pages: [1, 2], add_ons: [] })}>
+            Submit Mixed
           </button>
         </div>
       );
@@ -368,6 +371,98 @@ describe("SponsorPagesTab", () => {
       });
       expect(
         screen.queryByTestId("page-template-popup")
+      ).not.toBeInTheDocument();
+    });
+
+    it("should send template selection to action for duplicate managed pages", async () => {
+      renderWithRedux(
+        <SponsorPagesTab
+          sponsor={createSponsor()}
+          summitId={1}
+          summitTZ="UTC"
+        />,
+        {
+          initialState: {
+            ...defaultState,
+            sponsorPagePagesListState: {
+              ...defaultState.sponsorPagePagesListState,
+              managedPages: {
+                ...defaultState.sponsorPagePagesListState.managedPages,
+                pages: [createManagedPage(1)],
+                totalItems: 1
+              }
+            }
+          }
+        }
+      );
+
+      const usingTemplateButton = screen.getByText(
+        "edit_sponsor.pages_tab.using_template"
+      );
+
+      await act(async () => {
+        await userEvent.click(usingTemplateButton);
+      });
+
+      expect(
+        screen.getByTestId("add-sponsor-page-template-popup")
+      ).toBeInTheDocument();
+
+      const submitButton = screen.getByText("Submit");
+      await act(async () => {
+        await userEvent.click(submitButton);
+      });
+
+      expect(saveSponsorManagedPage).toHaveBeenCalledWith({
+        pages: [1],
+        add_ons: []
+      });
+      expect(
+        screen.queryByTestId("add-sponsor-page-template-popup")
+      ).not.toBeInTheDocument();
+    });
+
+    it("should send mixed template selection to action", async () => {
+      renderWithRedux(
+        <SponsorPagesTab
+          sponsor={createSponsor()}
+          summitId={1}
+          summitTZ="UTC"
+        />,
+        {
+          initialState: {
+            ...defaultState,
+            sponsorPagePagesListState: {
+              ...defaultState.sponsorPagePagesListState,
+              managedPages: {
+                ...defaultState.sponsorPagePagesListState.managedPages,
+                pages: [createManagedPage(1)],
+                totalItems: 1
+              }
+            }
+          }
+        }
+      );
+
+      const usingTemplateButton = screen.getByText(
+        "edit_sponsor.pages_tab.using_template"
+      );
+
+      await act(async () => {
+        await userEvent.click(usingTemplateButton);
+      });
+
+      const submitMixedButton = screen.getByText("Submit Mixed");
+      await act(async () => {
+        await userEvent.click(submitMixedButton);
+      });
+
+      expect(saveSponsorManagedPage).toHaveBeenCalledWith({
+        pages: [1, 2],
+        add_ons: []
+      });
+      expect(
+        screen.queryByTestId("add-sponsor-page-template-popup")
       ).not.toBeInTheDocument();
     });
   });
