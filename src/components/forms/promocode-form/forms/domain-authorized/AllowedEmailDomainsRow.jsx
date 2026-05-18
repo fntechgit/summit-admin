@@ -268,9 +268,11 @@ const AllowedEmailDomainsRow = ({
       <ManageAllowedEmailDomainsModal
         show={manageOpen}
         onHide={() => setManageOpen(false)}
-        onApply={(next) =>
-          fireChange(handleChange, "allowed_email_domains", next)
-        }
+        onApply={(next) => {
+          setDomainsError("");
+          setDraft("");
+          fireChange(handleChange, "allowed_email_domains", next);
+        }}
         existing={domains}
       />
     </>
