@@ -49,7 +49,7 @@ const inventoryItemListReducer = (state = DEFAULT_STATE, action = {}) => {
       return DEFAULT_STATE;
     }
     case REQUEST_INVENTORY_ITEMS: {
-      const { order, orderDir, page, ...rest } = payload;
+      const { order, orderDir, page, perPage, ...rest } = payload;
 
       if (
         order !== state.order ||
@@ -62,6 +62,7 @@ const inventoryItemListReducer = (state = DEFAULT_STATE, action = {}) => {
           order,
           orderDir,
           currentPage: page,
+          perPage,
           ...rest
         };
       }
@@ -72,6 +73,7 @@ const inventoryItemListReducer = (state = DEFAULT_STATE, action = {}) => {
         orderDir,
         inventoryItems: [],
         currentPage: page,
+        perPage,
         ...rest
       };
     }

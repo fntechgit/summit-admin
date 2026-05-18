@@ -40,7 +40,7 @@ const formTemplateItemListReducer = (state = DEFAULT_STATE, action = {}) => {
       return DEFAULT_STATE;
     }
     case REQUEST_FORM_TEMPLATE_ITEMS: {
-      const { order, orderDir, page, ...rest } = payload;
+      const { order, orderDir, page, perPage, ...rest } = payload;
 
       if (
         order !== state.order ||
@@ -53,6 +53,7 @@ const formTemplateItemListReducer = (state = DEFAULT_STATE, action = {}) => {
           order,
           orderDir,
           currentPage: page,
+          perPage,
           ...rest
         };
       }
@@ -63,6 +64,7 @@ const formTemplateItemListReducer = (state = DEFAULT_STATE, action = {}) => {
         orderDir,
         formTemplateItems: [],
         currentPage: page,
+        perPage,
         ...rest
       };
     }
