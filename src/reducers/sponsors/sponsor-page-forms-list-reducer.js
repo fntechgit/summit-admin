@@ -247,7 +247,8 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         customizedForms: {
           ...state.customizedForms,
-          forms
+          forms,
+          totalCount: state.customizedForms.totalCount - 1
         }
       };
     }

@@ -123,14 +123,32 @@ const PageTemplateListPage = ({
     (item.is_archived
       ? unarchivePageTemplate(item.id)
       : archivePageTemplate(item.id)
-    ).then(() => {
-      const safePage = getSafePageAfterRemove(
-        totalPageTemplates,
-        perPage,
-        currentPage
+    )
+      .then(() => {
+        const safePage = getSafePageAfterRemove(
+          totalPageTemplates,
+          perPage,
+          currentPage
+        );
+        getPageTemplates(
+          term,
+          safePage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        );
+      })
+      .catch(() =>
+        getPageTemplates(
+          term,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        )
       );
-      getPageTemplates(term, safePage, perPage, order, orderDir, showArchived);
-    });
 
   const handleEdit = (row) => {
     getPageTemplate(row.id).then(() => setOpenPageDialog(true));

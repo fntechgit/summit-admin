@@ -114,17 +114,32 @@ const SponsorFormItemListPage = ({
     (item.is_archived
       ? unarchiveSponsorFormItem(formId, item.id)
       : archiveSponsorFormItem(formId, item.id)
-    ).then(() => {
-      const safePage = getSafePageAfterRemove(totalCount, perPage, currentPage);
-      getSponsorFormItems(
-        formId,
-        safePage,
-        perPage,
-        order,
-        orderDir,
-        showArchived
+    )
+      .then(() => {
+        const safePage = getSafePageAfterRemove(
+          totalCount,
+          perPage,
+          currentPage
+        );
+        getSponsorFormItems(
+          formId,
+          safePage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        );
+      })
+      .catch(() =>
+        getSponsorFormItems(
+          formId,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        )
       );
-    });
 
   const handleRowDelete = (itemId) => {
     deleteSponsorFormItem(formId, itemId).then(() => {

@@ -266,14 +266,32 @@ const InventoryListPage = ({
     (item.is_archived
       ? unarchiveInventoryItem(item)
       : archiveInventoryItem(item)
-    ).then(() => {
-      const safePage = getSafePageAfterRemove(
-        totalInventoryItems,
-        perPage,
-        currentPage
+    )
+      .then(() => {
+        const safePage = getSafePageAfterRemove(
+          totalInventoryItems,
+          perPage,
+          currentPage
+        );
+        getInventoryItems(
+          term,
+          safePage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        );
+      })
+      .catch(() =>
+        getInventoryItems(
+          term,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        )
       );
-      getInventoryItems(term, safePage, perPage, order, orderDir, showArchived);
-    });
 
   const columns = [
     {
