@@ -22,7 +22,7 @@ import {
   GridFilter,
   useGridFilter,
   OPERATORS
-} from "../../../components/GridFilter";
+} from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import {
   exportSummitSpeakers,
   getSpeakersBySummit,
