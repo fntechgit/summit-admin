@@ -521,6 +521,41 @@ describe("validate() — domain-authorized email-domain enforcement", () => {
     getByIdSpy.mockRestore();
   });
 
+  it("scrolls to the compact-mode wrapper when allowed_email_domains has > 50 entries (Codex A-fix regression)", () => {
+    // Codex pass-2 minor finding: A-fix added id="allowed_email_domains" to the
+    // compact wrapper, but no integration test exercised the FULL scrollToError
+    // path with > 50 entries. This test does. If a future refactor changes
+    // where scrollToError looks up the field, the unit tests at lines :545-:568
+    // still cover the static id presence — this test pins the end-to-end
+    // validate() → scrollToError → document.getElementById path in compact mode.
+    const getByIdSpy = jest.spyOn(document, "getElementById");
+    // 60 entries (> LARGE_DOMAIN_LIST_THRESHOLD=50) where at least one is
+    // malformed, so validate() fails and scrollToError fires.
+    const compactEntries = Array.from({ length: 59 }, (_, i) => `@e${i}.com`);
+    compactEntries.push("malformed");
+    const { container } = renderForm(
+      baseEntity({
+        class_name: "DOMAIN_AUTHORIZED_DISCOUNT_CODE",
+        allowed_email_domains: compactEntries
+      })
+    );
+    // Sanity-check we're in compact mode (Manage List button present).
+    expect(
+      container.querySelector("[data-testid='manage-list-button']")
+    ).toBeInTheDocument();
+    getByIdSpy.mockClear();
+    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    // scrollToError must have looked up the compact wrapper by id.
+    expect(getByIdSpy).toHaveBeenCalledWith("allowed_email_domains");
+    // And the lookup must have resolved (not returned null) — proves the id
+    // is actually present in the rendered DOM at large N.
+    const calls = getByIdSpy.mock.results.filter(
+      (r) => r.type === "return" && r.value !== null
+    );
+    expect(calls.length).toBeGreaterThan(0);
+    getByIdSpy.mockRestore();
+  });
+
   it("clears the .text-danger banner on plain typing after a failed save (regression — Codex review)", () => {
     const { container } = renderForm(
       baseEntity({
