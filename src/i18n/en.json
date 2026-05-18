@@ -1043,6 +1043,21 @@
     },
     "errors": {
       "allowed_email_domains_format": "Each entry must be an exact domain (@acme.com), a TLD suffix (.edu), or a full email address."
+    },
+    "manage_modal": {
+      "title": "Manage Allowed Email Domains",
+      "add_helper": "Accepts domains (@acme.com), TLD suffixes (.edu, .gov), or exact emails (user@example.com).",
+      "add_button": "Add Domains",
+      "added_toast": "Added {added} · skipped {invalid} invalid · {dup} duplicates",
+      "configured_count": "Configured Domains ({n})",
+      "done": "Done",
+      "cancel": "Cancel"
+    },
+    "large_list": {
+      "summary_count": "{n} domains configured",
+      "summary_type_mix": "{atDomain} @domain · {tld} .tld · {email} user@email",
+      "summary_example": "e.g. {entry}",
+      "manage_button": "Manage List"
     }
   },
   "discount_ticket": {

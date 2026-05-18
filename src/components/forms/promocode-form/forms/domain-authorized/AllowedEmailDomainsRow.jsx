@@ -101,14 +101,14 @@ const AllowedEmailDomainsRow = ({
               }}
             >
               <div>
-                {/* TODO(A5): replace with T.translate("edit_promocode.large_list.summary_count", {n}) */}
                 <div
                   data-testid="compact-summary-count"
                   style={{ fontWeight: 600, fontSize: "1.05em" }}
                 >
-                  {domains.length} domains configured
+                  {T.translate("edit_promocode.large_list.summary_count", {
+                    n: domains.length
+                  })}
                 </div>
-                {/* TODO(A5): replace with T.translate("edit_promocode.large_list.type_mix", {at, tld, email}) */}
                 <div
                   data-testid="compact-summary-type-mix"
                   className="text-muted"
@@ -118,24 +118,27 @@ const AllowedEmailDomainsRow = ({
                     const counts = { atDomain: 0, tld: 0, email: 0 };
                     // eslint-disable-next-line no-restricted-syntax
                     for (const d of domains) counts[typeOf(d)] += 1;
-                    return `${counts.atDomain} @domain · ${counts.tld} .tld · ${counts.email} user@email`;
+                    return T.translate(
+                      "edit_promocode.large_list.summary_type_mix",
+                      counts
+                    );
                   })()}
                 </div>
                 {domains.length > 0 && (
-                  // TODO(A5): replace with T.translate("edit_promocode.large_list.example", {sample})
                   <div className="text-muted" style={{ fontSize: "0.9em" }}>
-                    e.g. {domains[0]}
+                    {T.translate("edit_promocode.large_list.summary_example", {
+                      entry: domains[0]
+                    })}
                   </div>
                 )}
               </div>
-              {/* TODO(A5): replace with T.translate("edit_promocode.large_list.manage_list") */}
               <button
                 type="button"
                 className="btn btn-default btn-sm"
                 data-testid="manage-list-button"
                 onClick={() => setManageOpen(true)}
               >
-                Manage List
+                {T.translate("edit_promocode.large_list.manage_button")}
               </button>
             </div>
           ) : (
