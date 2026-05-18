@@ -345,6 +345,31 @@ describe("AllowedEmailDomainsRow — compact summary + modal", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("boundary: chip wall at length=50, compact summary at length=51 (pins > vs >=)", () => {
+    const exactly50 = Array.from({ length: 50 }, (_, i) => `@e${i}.com`);
+    const { container: c50, unmount } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: exactly50 })}
+        handleChange={() => {}}
+      />
+    );
+    expect(
+      c50.querySelector("[data-testid='manage-list-button']")
+    ).not.toBeInTheDocument();
+    unmount();
+
+    const exactly51 = Array.from({ length: 51 }, (_, i) => `@e${i}.com`);
+    const { container: c51 } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: exactly51 })}
+        handleChange={() => {}}
+      />
+    );
+    expect(
+      c51.querySelector("[data-testid='manage-list-button']")
+    ).toBeInTheDocument();
+  });
+
   it("renders compact summary + Manage List when domains.length > 50", () => {
     const big = Array.from({ length: 60 }, (_, i) => `@e${i}.com`);
     const { container } = render(
