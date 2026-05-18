@@ -203,7 +203,11 @@ const inventoryItemListReducer = (state = DEFAULT_STATE, action = {}) => {
       const updatedInventoryItems = state.inventoryItems.map((item) =>
         item.id === updatedItem.id ? { ...item, is_archived: true } : item
       );
-      return { ...state, inventoryItems: updatedInventoryItems };
+      return {
+        ...state,
+        inventoryItems: updatedInventoryItems,
+        totalInventoryItems: state.totalInventoryItems - 1
+      };
     }
     case INVENTORY_ITEM_UNARCHIVED: {
       const updatedItemId = payload;
@@ -211,7 +215,11 @@ const inventoryItemListReducer = (state = DEFAULT_STATE, action = {}) => {
       const updatedInventoryItems = state.inventoryItems.map((item) =>
         item.id === updatedItemId ? { ...item, is_archived: false } : item
       );
-      return { ...state, inventoryItems: updatedInventoryItems };
+      return {
+        ...state,
+        inventoryItems: updatedInventoryItems,
+        totalInventoryItems: state.totalInventoryItems - 1
+      };
     }
     case INVENTORY_ITEM_IMAGE_SAVED: {
       const newImage = payload.response;

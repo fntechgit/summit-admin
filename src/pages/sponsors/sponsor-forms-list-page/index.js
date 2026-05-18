@@ -122,10 +122,25 @@ const SponsorFormsListPage = ({
     (item.is_archived
       ? unarchiveSponsorForm(item.id)
       : archiveSponsorForm(item.id)
-    ).then(() => {
-      const safePage = getSafePageAfterRemove(totalCount, perPage, currentPage);
-      getSponsorForms(term, safePage, perPage, order, orderDir, showArchived);
-    });
+    )
+      .then(() => {
+        const safePage = getSafePageAfterRemove(
+          totalCount,
+          perPage,
+          currentPage
+        );
+        getSponsorForms(term, safePage, perPage, order, orderDir, showArchived);
+      })
+      .catch(() =>
+        getSponsorForms(
+          term,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        )
+      );
 
   const handleShowArchivedForms = (ev) => {
     getSponsorForms(

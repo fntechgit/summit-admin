@@ -127,7 +127,7 @@ const sponsorCustomizedFormItemsListReducer = (
         item.id === itemId ? { ...item, is_archived: true } : item
       );
 
-      return { ...state, items };
+      return { ...state, items, totalCount: state.totalCount - 1 };
     }
     case SPONSOR_CUSTOMIZED_FORM_ITEM_UNARCHIVED: {
       const { itemId } = payload;
@@ -136,7 +136,7 @@ const sponsorCustomizedFormItemsListReducer = (
         item.id === itemId ? { ...item, is_archived: false } : item
       );
 
-      return { ...state, items };
+      return { ...state, items, totalCount: state.totalCount - 1 };
     }
     case SPONSOR_FORM_MANAGED_ITEM_UPDATED: {
       const updatedItem = payload.response;

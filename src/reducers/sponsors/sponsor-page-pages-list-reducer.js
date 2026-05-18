@@ -240,7 +240,8 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         customizedPages: {
           ...state.customizedPages,
-          pages: [...pages]
+          pages: [...pages],
+          totalItems: state.customizedPages.totalItems - 1
         }
       };
     }
@@ -253,7 +254,8 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         customizedPages: {
           ...state.customizedPages,
-          pages: [...pages]
+          pages: [...pages],
+          totalItems: state.customizedPages.totalItems - 1
         }
       };
     }
