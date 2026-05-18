@@ -84,11 +84,16 @@ const ManageAllowedEmailDomainsModal = ({
     onHide();
   };
 
+  // TODO(A5): replace with T.translate("edit_promocode.manage_modal.added_toast", {...})
+  // once the i18n keys land. i18n-react does not interpolate {params} for missing keys,
+  // so this template string is the working-tree contract until A5 adds the strings.
   const toastText = useMemo(() => {
     if (!toast) return null;
     return `Added ${toast.added} · ${toast.invalid} invalid · ${toast.dup} duplicates`;
   }, [toast]);
 
+  // TODO(A5): replace with T.translate("edit_promocode.manage_modal.configured_count", {n}).
+  // Same reason as toastText — interpolation requires the key to exist.
   const countText = `${T.translate(
     "edit_promocode.manage_modal.configured_label"
   )} (${working.length})`;
