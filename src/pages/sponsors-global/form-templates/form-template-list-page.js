@@ -212,6 +212,18 @@ const FormTemplateListPage = ({
     sortDir: orderDir
   };
 
+  const handleOnSave = async (values) => {
+    await saveFormTemplate(values);
+    getFormTemplates(
+      "",
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      showArchived
+    );
+  };
+
   return (
     <div className="container">
       <h3>
@@ -322,7 +334,7 @@ const FormTemplateListPage = ({
         entity={currentFormTemplate}
         errors={currentFormTemplateErrors}
         open={formTemplatePopupOpen}
-        onSave={saveFormTemplate}
+        onSave={handleOnSave}
         toDuplicate={formTemplateDuplicate}
         onClose={() => setFormTemplatePopupOpen(false)}
         onMetaFieldTypeDeleted={deleteFormTemplateMetaFieldType}
