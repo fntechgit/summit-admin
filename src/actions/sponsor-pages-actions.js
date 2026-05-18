@@ -25,9 +25,7 @@ import T from "i18n-react/dist/i18n-react";
 import moment from "moment-timezone";
 import {
   getAccessTokenSafely,
-  normalizeSelectAllField,
-  fetchResponseHandler,
-  fetchErrorHandler
+  normalizeSelectAllField
 } from "../utils/methods";
 import {
   snackbarErrorHandler,
@@ -234,30 +232,10 @@ export const saveSponsorManagedPage =
         });
     }
 
-    // Fetch all managed page IDs (paginated) to detect duplicates across all pages, not just current grid page
-    const existingManagedPageIds = new Set();
-    const baseUrl = `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages`;
-    for (let page = 1; ; page++) {
-      const url = `${baseUrl}?${new URLSearchParams({
-        access_token: accessToken,
-        fields: "id",
-        page,
-        per_page: "100"
-      })}`;
-      const res = await fetch(url)
-        .then(fetchResponseHandler)
-        .catch((err) => {
-          fetchErrorHandler(err);
-          throw err;
-        });
-      res.data?.forEach(({ id }) => existingManagedPageIds.add(id));
-      if (page >= (res.last_page ?? 1)) break;
-    }
-
     const selectedPageIds = entity.pages ?? [];
-    const newPageIds = selectedPageIds.filter(
-      (id) => !existingManagedPageIds.has(id)
-    );
+    const { managedPages } = getState().sponsorState;
+    const existingPageIds = new Set(managedPages.pages?.map((p) => p.id) ?? []);
+    const newPageIds = selectedPageIds.filter((id) => !existingPageIds.has(id));
     const alreadyCount = selectedPageIds.length - newPageIds.length;
     const successTitle = T.translate("general.success");
 
