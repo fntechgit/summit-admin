@@ -105,7 +105,11 @@ const formTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
           ? { ...item, is_archived: true }
           : item
       );
-      return { ...state, formTemplates: updatedFormTemplates };
+      return {
+        ...state,
+        formTemplates: updatedFormTemplates,
+        totalFormTemplates: state.totalFormTemplates - 1
+      };
     }
     case FORM_TEMPLATE_UNARCHIVED: {
       const updatedFormTemplateId = payload;
@@ -115,7 +119,11 @@ const formTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
           ? { ...item, is_archived: false }
           : item
       );
-      return { ...state, formTemplates: updatedFormTemplates };
+      return {
+        ...state,
+        formTemplates: updatedFormTemplates,
+        totalFormTemplates: state.totalFormTemplates - 1
+      };
     }
     case CHANGE_FORM_TEMPLATE_SEARCH_TERM: {
       const { term } = payload;

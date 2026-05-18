@@ -102,13 +102,18 @@ const ShowPagesListPage = ({
   };
 
   const handleArchiveItem = (item) =>
-    (item.is_archived
-      ? unarchiveShowPage(item.id)
-      : archiveShowPage(item.id)
-    ).then(() => {
-      const safePage = getSafePageAfterRemove(totalCount, perPage, currentPage);
-      getShowPages(term, safePage, perPage, order, orderDir, showArchived);
-    });
+    (item.is_archived ? unarchiveShowPage(item.id) : archiveShowPage(item.id))
+      .then(() => {
+        const safePage = getSafePageAfterRemove(
+          totalCount,
+          perPage,
+          currentPage
+        );
+        getShowPages(term, safePage, perPage, order, orderDir, showArchived);
+      })
+      .catch(() =>
+        getShowPages(term, currentPage, perPage, order, orderDir, showArchived)
+      );
 
   const handleShowArchivedForms = (ev) => {
     getShowPages(

@@ -112,7 +112,11 @@ const pageTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
           ? { ...item, is_archived: true }
           : item
       );
-      return { ...state, pageTemplates: updatedPageTemplates };
+      return {
+        ...state,
+        pageTemplates: updatedPageTemplates,
+        totalPageTemplates: state.totalPageTemplates - 1
+      };
     }
     case PAGE_TEMPLATE_UNARCHIVED: {
       const { pageTemplateId } = payload;
@@ -120,7 +124,11 @@ const pageTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
       const updatedPageTemplates = state.pageTemplates.map((item) =>
         item.id === pageTemplateId ? { ...item, is_archived: false } : item
       );
-      return { ...state, pageTemplates: updatedPageTemplates };
+      return {
+        ...state,
+        pageTemplates: updatedPageTemplates,
+        totalPageTemplates: state.totalPageTemplates - 1
+      };
     }
     default:
       return state;

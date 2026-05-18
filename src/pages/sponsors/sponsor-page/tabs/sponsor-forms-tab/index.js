@@ -151,19 +151,35 @@ const SponsorFormsTab = ({
     (item.is_archived
       ? unarchiveSponsorCustomizedForm(item.id)
       : archiveSponsorCustomizedForm(item.id)
-    ).then(() => {
-      const { perPage, order, orderDir, currentPage, totalCount } =
-        customizedForms;
-      const safePage = getSafePageAfterRemove(totalCount, perPage, currentPage);
-      getSponsorCustomizedForms(
-        term,
-        safePage,
-        perPage,
-        order,
-        orderDir,
-        showArchived
-      );
-    });
+    )
+      .then(() => {
+        const { perPage, order, orderDir, currentPage, totalCount } =
+          customizedForms;
+        const safePage = getSafePageAfterRemove(
+          totalCount,
+          perPage,
+          currentPage
+        );
+        getSponsorCustomizedForms(
+          term,
+          safePage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        );
+      })
+      .catch(() => {
+        const { perPage, order, orderDir, currentPage } = customizedForms;
+        getSponsorCustomizedForms(
+          term,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        );
+      });
 
   const handleCustomizedFormManageItems = (item) => {
     history.push(
