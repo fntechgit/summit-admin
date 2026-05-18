@@ -48,6 +48,7 @@ export const classifyEntries = ({ raw, existing }) => {
     autoPrefixed: []
   };
 
+  // eslint-disable-next-line no-restricted-syntax
   for (const row of raw ?? []) {
     const { normalized, dedupKey, autoPrefixed } = normalizeEntry(row.entry);
     if (normalized.length === 0) continue;
