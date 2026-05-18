@@ -483,3 +483,89 @@ describe("AllowedEmailDomainsRow — case-insensitive single-entry dedup", () =>
     expect(calls).toHaveLength(0);
   });
 });
+
+describe("AllowedEmailDomainsRow — inline + add one input present at every size (SDS L58/69/100/186)", () => {
+  it("renders the inline input when domains.length <= 50 (chip wall)", () => {
+    const small = Array.from({ length: 10 }, (_, i) => `@e${i}.com`);
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: small })}
+        handleChange={() => {}}
+      />
+    );
+    expect(
+      container.querySelector("[data-testid='allowed_email_domains_input']")
+    ).toBeInTheDocument();
+  });
+
+  it("renders the inline input when domains.length > 50 (compact summary)", () => {
+    const big = Array.from({ length: 60 }, (_, i) => `@e${i}.com`);
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: big })}
+        handleChange={() => {}}
+      />
+    );
+    expect(
+      container.querySelector("[data-testid='allowed_email_domains_input']")
+    ).toBeInTheDocument();
+  });
+
+  it("commits a single entry from compact mode via Enter (parity with chip-wall behavior)", () => {
+    const big = Array.from({ length: 60 }, (_, i) => `@e${i}.com`);
+    const handleChange = jest.fn();
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: big })}
+        handleChange={handleChange}
+      />
+    );
+    typeAndCommit(container, "@new.com");
+    expect(handleChange).toHaveBeenCalledTimes(1);
+    expect(handleChange.mock.calls[0][0].target.value).toEqual([
+      ...big,
+      "@new.com"
+    ]);
+  });
+
+  it("case-insensitive single-entry dedup works in compact mode", () => {
+    const big = Array.from({ length: 60 }, (_, i) => `@e${i}.com`);
+    const handleChange = jest.fn();
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: big })}
+        handleChange={handleChange}
+      />
+    );
+    typeAndCommit(container, "@E0.COM"); // dup of @e0.com case-insensitively
+    expect(handleChange).not.toHaveBeenCalled();
+  });
+});
+
+describe("AllowedEmailDomainsRow — scrollToError target present in both branches (Codex A2)", () => {
+  it("compact branch carries id='allowed_email_domains' so document.getElementById finds it", () => {
+    const big = Array.from({ length: 60 }, (_, i) => `@e${i}.com`);
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: big })}
+        handleChange={() => {}}
+      />
+    );
+    expect(
+      container.querySelector("#allowed_email_domains")
+    ).toBeInTheDocument();
+  });
+
+  it("chip-wall branch still carries id='allowed_email_domains' (existing behavior, regression check)", () => {
+    const small = Array.from({ length: 10 }, (_, i) => `@e${i}.com`);
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: small })}
+        handleChange={() => {}}
+      />
+    );
+    expect(
+      container.querySelector("#allowed_email_domains")
+    ).toBeInTheDocument();
+  });
+});

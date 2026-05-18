@@ -76,6 +76,49 @@ const AllowedEmailDomainsRow = ({
     if (draft.length > 0) commit(draft);
   };
 
+  // Single-entry inline `+ add one` input. Declared once, mounted in BOTH
+  // branches (chip wall + compact summary) so the small-add affordance stays
+  // available at every list size — SDS L58/L69/L100/L186.
+  const inlineAddInput = (
+    <input
+      type="text"
+      data-testid="allowed_email_domains_input"
+      aria-label={T.translate("edit_promocode.allowed_email_domains")}
+      value={draft}
+      placeholder={
+        domains.length === 0
+          ? T.translate("edit_promocode.placeholders.allowed_email_domains")
+          : ""
+      }
+      onChange={(e) => {
+        setDraft(e.target.value);
+        setDomainsError("");
+        // Parallel-clear the parent validate()-path error so the
+        // .text-danger banner disappears as soon as the user starts
+        // editing — same UX every other field gets via index.js:114
+        // (newErrors[id] = "" inside handleChange). The chip input's
+        // onChange normally doesn't bubble to the parent (typing
+        // updates local draft only), so we synthesize a no-op array
+        // change to trigger the parent reset. Only fires when a
+        // parent error is currently set, so the cost (one extra
+        // setState) is paid only after a failed Save.
+        if (hasErrors("allowed_email_domains")) {
+          fireChange(handleChange, "allowed_email_domains", domains);
+        }
+      }}
+      onKeyDown={handleKeyDown}
+      onBlur={handleBlur}
+      style={{
+        border: 0,
+        outline: "none",
+        flex: 1,
+        minWidth: 120,
+        background: "transparent",
+        padding: 0
+      }}
+    />
+  );
+
   return (
     <>
       <div className="row form-group" data-testid="allowed-email-domains-row">
@@ -90,56 +133,77 @@ const AllowedEmailDomainsRow = ({
           </label>
           {domains.length > LARGE_DOMAIN_LIST_THRESHOLD ? (
             <div
+              id="allowed_email_domains"
               className="form-control"
               style={{
                 minHeight: 38,
+                height: "auto",
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
+                flexDirection: "column",
                 gap: 8,
                 padding: "8px 12px"
               }}
             >
-              <div>
-                <div
-                  data-testid="compact-summary-count"
-                  style={{ fontWeight: 600, fontSize: "1.05em" }}
-                >
-                  {T.translate("edit_promocode.large_list.summary_count", {
-                    n: domains.length
-                  })}
-                </div>
-                <div
-                  data-testid="compact-summary-type-mix"
-                  className="text-muted"
-                  style={{ fontSize: "0.9em" }}
-                >
-                  {(() => {
-                    const counts = { atDomain: 0, tld: 0, email: 0 };
-                    // eslint-disable-next-line no-restricted-syntax
-                    for (const d of domains) counts[typeOf(d)] += 1;
-                    return T.translate(
-                      "edit_promocode.large_list.summary_type_mix",
-                      counts
-                    );
-                  })()}
-                </div>
-                {domains.length > 0 && (
-                  <div className="text-muted" style={{ fontSize: "0.9em" }}>
-                    {T.translate("edit_promocode.large_list.summary_example", {
-                      entry: domains[0]
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 8
+                }}
+              >
+                <div>
+                  <div
+                    data-testid="compact-summary-count"
+                    style={{ fontWeight: 600, fontSize: "1.05em" }}
+                  >
+                    {T.translate("edit_promocode.large_list.summary_count", {
+                      n: domains.length
                     })}
                   </div>
-                )}
+                  <div
+                    data-testid="compact-summary-type-mix"
+                    className="text-muted"
+                    style={{ fontSize: "0.9em" }}
+                  >
+                    {(() => {
+                      const counts = { atDomain: 0, tld: 0, email: 0 };
+                      // eslint-disable-next-line no-restricted-syntax
+                      for (const d of domains) counts[typeOf(d)] += 1;
+                      return T.translate(
+                        "edit_promocode.large_list.summary_type_mix",
+                        counts
+                      );
+                    })()}
+                  </div>
+                  {domains.length > 0 && (
+                    <div className="text-muted" style={{ fontSize: "0.9em" }}>
+                      {T.translate(
+                        "edit_promocode.large_list.summary_example",
+                        {
+                          entry: domains[0]
+                        }
+                      )}
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-default btn-sm"
+                  data-testid="manage-list-button"
+                  onClick={() => setManageOpen(true)}
+                >
+                  {T.translate("edit_promocode.large_list.manage_button")}
+                </button>
               </div>
-              <button
-                type="button"
-                className="btn btn-default btn-sm"
-                data-testid="manage-list-button"
-                onClick={() => setManageOpen(true)}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center"
+                }}
               >
-                {T.translate("edit_promocode.large_list.manage_button")}
-              </button>
+                {inlineAddInput}
+              </div>
             </div>
           ) : (
             <div
@@ -188,45 +252,7 @@ const AllowedEmailDomainsRow = ({
                   </button>
                 </span>
               ))}
-              <input
-                type="text"
-                data-testid="allowed_email_domains_input"
-                aria-label={T.translate("edit_promocode.allowed_email_domains")}
-                value={draft}
-                placeholder={
-                  domains.length === 0
-                    ? T.translate(
-                        "edit_promocode.placeholders.allowed_email_domains"
-                      )
-                    : ""
-                }
-                onChange={(e) => {
-                  setDraft(e.target.value);
-                  setDomainsError("");
-                  // Parallel-clear the parent validate()-path error so the
-                  // .text-danger banner disappears as soon as the user starts
-                  // editing — same UX every other field gets via index.js:114
-                  // (newErrors[id] = "" inside handleChange). The chip input's
-                  // onChange normally doesn't bubble to the parent (typing
-                  // updates local draft only), so we synthesize a no-op array
-                  // change to trigger the parent reset. Only fires when a
-                  // parent error is currently set, so the cost (one extra
-                  // setState) is paid only after a failed Save.
-                  if (hasErrors("allowed_email_domains")) {
-                    fireChange(handleChange, "allowed_email_domains", domains);
-                  }
-                }}
-                onKeyDown={handleKeyDown}
-                onBlur={handleBlur}
-                style={{
-                  border: 0,
-                  outline: "none",
-                  flex: 1,
-                  minWidth: 120,
-                  background: "transparent",
-                  padding: 0
-                }}
-              />
+              {inlineAddInput}
             </div>
           )}
           <small className="form-text text-muted">
