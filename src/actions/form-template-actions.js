@@ -25,7 +25,6 @@ import {
   authErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
-import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
@@ -185,6 +184,8 @@ export const saveFormTemplate = (entity) => async (dispatch) => {
   dispatch(startLoading());
 
   const normalizedEntity = normalizeEntity(entity);
+  const materials = entity.materials ?? [];
+  const metaFields = entity.meta_fields ?? [];
 
   if (entity.id) {
     return putRequest(
@@ -198,41 +199,28 @@ export const saveFormTemplate = (entity) => async (dispatch) => {
       .then(() => {
         const promises = [];
 
-        if (entity.materials.length > 0) {
+        if (materials.length > 0) {
           promises.push(saveFormTemplateMaterials(normalizedEntity)(dispatch));
         }
 
-        if (entity.meta_fields.length > 0) {
+        if (metaFields.length > 0) {
           promises.push(
             saveFormTemplateMetaFieldTypes(normalizedEntity)(dispatch)
           );
         }
 
-        Promise.all(promises)
-          .then(() => {
-            dispatch(
-              showSuccessMessage(
-                T.translate("edit_form_template.form_template_saved")
-              )
-            );
-          })
-          .catch((err) => {
-            console.error(err);
-          })
-          .finally(() => {
-            dispatch(stopLoading());
-          });
+        return Promise.all(promises).then(() => {
+          dispatch(
+            showSuccessMessage(
+              T.translate("edit_form_template.form_template_saved")
+            )
+          );
+        });
       })
-      .catch((err) => {
-        console.error(err);
+      .finally(() => {
+        dispatch(stopLoading());
       });
   }
-
-  const success_message = {
-    title: T.translate("general.done"),
-    html: T.translate("edit_form_template.form_template_created"),
-    type: "success"
-  };
 
   return postRequest(
     createAction(ADD_FORM_TEMPLATE),
@@ -246,31 +234,26 @@ export const saveFormTemplate = (entity) => async (dispatch) => {
       const formTemplate = { ...normalizedEntity, id: response.id };
       const promises = [];
 
-      if (entity.materials.length > 0) {
+      if (materials.length > 0) {
         promises.push(saveFormTemplateMaterials(formTemplate)(dispatch));
       }
 
-      if (entity.meta_fields.length > 0) {
+      if (metaFields.length > 0) {
         promises.push(saveFormTemplateMetaFieldTypes(formTemplate)(dispatch));
       }
 
-      Promise.all(promises)
-        .then(() => {
-          dispatch(
-            showMessage(success_message, () => {
-              history.push("/app/form-templates");
-            })
-          );
-        })
-        .catch((err) => {
-          console.error(err);
-        })
-        .finally(() => {
-          dispatch(stopLoading());
-        });
+      return Promise.all(promises).then(() => {
+        dispatch(
+          showMessage({
+            title: T.translate("general.done"),
+            html: T.translate("edit_form_template.form_template_created"),
+            type: "success"
+          })
+        );
+      });
     })
-    .catch((err) => {
-      console.error(err);
+    .finally(() => {
+      dispatch(stopLoading());
     });
 };
 

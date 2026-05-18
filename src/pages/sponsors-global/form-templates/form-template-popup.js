@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import PropTypes from "prop-types";
 import {
@@ -35,6 +35,13 @@ const FormTemplateDialog = ({
   onMetaFieldTypeValueDeleted,
   entity: initialEntity
 }) => {
+  const [isSaving, setIsSaving] = useState(false);
+
+  const closePopup = () => {
+    formik.resetForm();
+    onClose();
+  };
+
   const formik = useFormik({
     initialValues: {
       ...initialEntity,
@@ -64,15 +71,27 @@ const FormTemplateDialog = ({
           }))
         }))
       };
-      onSave(finalValues);
+      if (isSaving) return;
+
+      setIsSaving(true);
+      Promise.resolve(onSave(finalValues))
+        .then(() => {
+          closePopup();
+        })
+        .catch(() => {
+          // keep dialog open on save error to preserve user input
+        })
+        .finally(() => {
+          setIsSaving(false);
+        });
     }
   });
 
   useScrollToError(formik);
 
   const handleClose = () => {
-    formik.resetForm();
-    onClose();
+    if (isSaving) return;
+    closePopup();
   };
 
   return (
@@ -84,10 +103,17 @@ const FormTemplateDialog = ({
       disableEnforceFocus
       disableAutoFocus
       disableRestoreFocus
+      disableEscapeKeyDown={isSaving}
+      sx={{ zIndex: 1000 }}
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         Edit Item
-        <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
+        <IconButton
+          size="small"
+          onClick={() => handleClose()}
+          sx={{ mr: 1 }}
+          disabled={isSaving}
+        >
           <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
@@ -153,7 +179,12 @@ const FormTemplateDialog = ({
           </DialogContent>
           <Divider />
           <DialogActions>
-            <Button type="submit" fullWidth variant="contained">
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={isSaving}
+            >
               {initialEntity.id
                 ? T.translate("edit_form_template.save_changes")
                 : T.translate("edit_form_template.add_form")}
