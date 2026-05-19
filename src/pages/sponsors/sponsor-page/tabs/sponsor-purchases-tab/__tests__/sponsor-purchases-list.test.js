@@ -247,7 +247,10 @@ describe("SponsorPurchasesTab", () => {
         );
       });
 
-      expect(approveSponsorPurchase).toHaveBeenCalledWith(purchase.payment_id);
+      expect(approveSponsorPurchase).toHaveBeenCalledWith(
+        123,
+        purchase.payment_id
+      );
       expect(rejectSponsorPurchase).not.toHaveBeenCalled();
     });
 
@@ -270,7 +273,10 @@ describe("SponsorPurchasesTab", () => {
         );
       });
 
-      expect(rejectSponsorPurchase).toHaveBeenCalledWith(purchase.payment_id);
+      expect(rejectSponsorPurchase).toHaveBeenCalledWith(
+        123,
+        purchase.payment_id
+      );
       expect(approveSponsorPurchase).not.toHaveBeenCalled();
     });
 
@@ -326,7 +332,10 @@ describe("SponsorPurchasesTab", () => {
         );
       });
 
-      expect(approveSponsorPurchase).toHaveBeenCalledWith(purchase.payment_id);
+      expect(approveSponsorPurchase).toHaveBeenCalledWith(
+        123,
+        purchase.payment_id
+      );
       // Dropdown is still present — component did not unmount on error
       expect(withinTableBody().getByRole("combobox")).toBeInTheDocument();
     });
@@ -356,7 +365,10 @@ describe("SponsorPurchasesTab", () => {
         );
       });
 
-      expect(rejectSponsorPurchase).toHaveBeenCalledWith(purchase.payment_id);
+      expect(rejectSponsorPurchase).toHaveBeenCalledWith(
+        123,
+        purchase.payment_id
+      );
       expect(withinTableBody().getByRole("combobox")).toBeInTheDocument();
     });
   });
