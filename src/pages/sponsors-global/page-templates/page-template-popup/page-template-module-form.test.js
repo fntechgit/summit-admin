@@ -30,6 +30,14 @@ jest.mock(
 );
 
 jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/upload",
+  () =>
+    function MockMuiFormikUpload({ name }) {
+      return <div data-testid={`upload-${name}`}>Upload</div>;
+    }
+);
+
+jest.mock(
   "../../../../components/mui/formik-inputs/mui-formik-textfield",
   () =>
     function MockMuiFormikTextField({ name }) {
