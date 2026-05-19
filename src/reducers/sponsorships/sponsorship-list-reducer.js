@@ -60,7 +60,8 @@ const sponsorshipListReducer = (state = DEFAULT_STATE, action) => {
       const { sponsorshipId } = payload;
       return {
         ...state,
-        sponsorships: state.sponsorships.filter((t) => t.id !== sponsorshipId)
+        sponsorships: state.sponsorships.filter((t) => t.id !== sponsorshipId),
+        totalSponsorships: state.totalSponsorships - 1
       };
     }
     default:
