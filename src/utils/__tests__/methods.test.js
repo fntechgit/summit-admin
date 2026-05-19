@@ -86,6 +86,24 @@ describe("getMediaInputValue", () => {
       });
     });
 
+    it.each([[], null, undefined])(
+      "should return apply_to_all true when allSelected is true and items is %s",
+      (items) => {
+        expect(
+          normalizeSelectAllField(items, "apply_to_all", "items", true)
+        ).toEqual({ apply_to_all: true, items: [] });
+      }
+    );
+
+    it.each([[], null, undefined])(
+      "should return apply_to_all false when allSelected is false and items is %s",
+      (items) => {
+        expect(
+          normalizeSelectAllField(items, "apply_to_all", "items", false)
+        ).toEqual({ apply_to_all: false, items: [] });
+      }
+    );
+
     it("should return array of ids when items are objects with id", () => {
       expect(
         normalizeSelectAllField([{ id: 1 }, { id: 2 }], "apply_to_all", "items")
