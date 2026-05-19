@@ -772,116 +772,6 @@ export const removeFeaturedSpeaker =
 /* SPEAKERS BY SUMMIT */
 /** ************************************************************************************************* */
 
-const parseFilters = (filters) => {
-  const filter = [];
-
-  if (
-    filters?.selectionPlanFilter &&
-    Array.isArray(filters.selectionPlanFilter) &&
-    filters.selectionPlanFilter.length > 0
-  ) {
-    filter.push(
-      `presentations_selection_plan_id==${filters.selectionPlanFilter.join(
-        "||"
-      )}`
-    );
-  }
-
-  if (
-    filters?.trackFilter &&
-    Array.isArray(filters.trackFilter) &&
-    filters.trackFilter.length > 0
-  ) {
-    filter.push(`presentations_track_id==${filters.trackFilter.join("||")}`);
-  }
-
-  if (
-    filters?.trackGroupFilter &&
-    Array.isArray(filters.trackGroupFilter) &&
-    filters.trackGroupFilter.length > 0
-  ) {
-    filter.push(
-      `presentations_track_group_id==${filters.trackGroupFilter.join("||")}`
-    );
-  }
-
-  if (
-    filters?.activityTypeFilter &&
-    Array.isArray(filters.activityTypeFilter) &&
-    filters.activityTypeFilter.length > 0
-  ) {
-    filter.push(
-      `presentations_type_id==${filters.activityTypeFilter.join("||")}`
-    );
-  }
-
-  if (
-    filters?.selectionStatusFilter &&
-    Array.isArray(filters.selectionStatusFilter) &&
-    filters.selectionStatusFilter.length > 0
-  ) {
-    // exclusive filters
-    if (filters.selectionStatusFilter.includes("only_rejected")) {
-      filter.push("has_rejected_presentations==true");
-      filter.push("has_accepted_presentations==false");
-      filter.push("has_alternate_presentations==false");
-    } else if (filters.selectionStatusFilter.includes("only_accepted")) {
-      filter.push("has_rejected_presentations==false");
-      filter.push("has_accepted_presentations==true");
-      filter.push("has_alternate_presentations==false");
-    } else if (filters.selectionStatusFilter.includes("only_alternate")) {
-      filter.push("has_rejected_presentations==false");
-      filter.push("has_accepted_presentations==false");
-      filter.push("has_alternate_presentations==true");
-    } else if (filters.selectionStatusFilter.includes("accepted_alternate")) {
-      filter.push("has_rejected_presentations==false");
-      filter.push("has_accepted_presentations==true");
-      filter.push("has_alternate_presentations==true");
-    } else if (filters.selectionStatusFilter.includes("accepted_rejected")) {
-      filter.push("has_rejected_presentations==true");
-      filter.push("has_accepted_presentations==true");
-      filter.push("has_alternate_presentations==false");
-    } else if (filters.selectionStatusFilter.includes("alternate_rejected")) {
-      filter.push("has_rejected_presentations==true");
-      filter.push("has_accepted_presentations==false");
-      filter.push("has_alternate_presentations==true");
-    } else {
-      filter.push(
-        filters.selectionStatusFilter.reduce(
-          (accumulator, at) =>
-            `${
-              accumulator + (accumulator !== "" ? "," : "")
-            }has_${at}_presentations==true`,
-          ""
-        )
-      );
-    }
-  }
-
-  if (
-    filters?.mediaUploadTypeFilter &&
-    filters.mediaUploadTypeFilter.operator !== null &&
-    Array.isArray(filters.mediaUploadTypeFilter.value) &&
-    filters.mediaUploadTypeFilter.value.length > 0
-  ) {
-    filter.push(
-      `${
-        filters.mediaUploadTypeFilter.operator
-      }${filters.mediaUploadTypeFilter.value
-        .map((v) => v.id)
-        .join(
-          filters.mediaUploadTypeFilter.operator ===
-            "has_media_upload_with_type=="
-            ? "||"
-            : "&&"
-        )}`
-    );
-  }
-
-  // return checkOrFilter(filters, filter);
-  return filter;
-};
-
 export const getSpeakersBySummit =
   (
     term = null,
@@ -889,19 +779,18 @@ export const getSpeakersBySummit =
     perPage = DEFAULT_PER_PAGE,
     order = "full_name",
     orderDir = DEFAULT_ORDER_DIR,
-    filters = {}
+    filters = []
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const filter = parseFilters(filters);
+    const filter = [...filters];
 
     dispatch(startLoading());
 
     if (term) {
       const filterTerm = buildTermFilter(term);
-
       filter.push(filterTerm.join(","));
     }
 
@@ -948,7 +837,7 @@ export const getSpeakersBySummit =
   };
 
 export const exportSummitSpeakers =
-  (term = null, order = "id", orderDir = DEFAULT_ORDER_DIR, filters = {}) =>
+  (term = null, order = "id", orderDir = DEFAULT_ORDER_DIR, filters = []) =>
   async (dispatch, getState) => {
     const csvMIME = "text/csv;charset=utf-8";
     const pageSize = 500;
@@ -967,7 +856,7 @@ export const exportSummitSpeakers =
 
     dispatch(startLoading());
 
-    const filter = parseFilters(filters);
+    const filter = [...filters];
 
     if (term) {
       const filterTerm = buildTermFilter(term);
@@ -1018,7 +907,7 @@ export const exportSummitSpeakers =
 export const sendSpeakerEmails =
   (
     term = null,
-    filters = {},
+    filters = [],
     testRecipient = "",
     excerptRecipient = "",
     shouldSendCopy2Submitter = false,
@@ -1047,7 +936,7 @@ export const sendSpeakerEmails =
     if (!selectedAll && selectedItems.length > 0) {
       // we don't need the filter criteria, we have the ids
       filter.push(`id==${selectedItems.join("||")}`);
-      const originalFilters = parseFilters(filters);
+      const originalFilters = [...filters];
       if (term) {
         const filterTerm = buildTermFilter(term);
         originalFilters.push(filterTerm.join(","));
@@ -1055,7 +944,7 @@ export const sendSpeakerEmails =
 
       payload.original_filter = originalFilters;
     } else {
-      filter = parseFilters(filters);
+      filter = [...filters];
 
       if (term) {
         const filterTerm = buildTermFilter(term);

@@ -31,7 +31,7 @@ import { buildSpeakersSubmittersList } from "../utils/methods";
 
 const DEFAULT_STATE = {
   items: [],
-  term: null,
+  term: "",
   order: "full_name",
   orderDir: 1,
   currentPage: 1,
@@ -42,12 +42,6 @@ const DEFAULT_STATE = {
   selectedItems: [],
   excludedItems: [],
   selectedAll: false,
-  selectionPlanFilter: [],
-  trackFilter: [],
-  trackGroupFilter: [],
-  activityTypeFilter: [],
-  selectionStatusFilter: [],
-  mediaUploadTypeFilter: { operator: null, value: [] },
   currentFlowEvent: "",
   currentSummitId: null
 };
