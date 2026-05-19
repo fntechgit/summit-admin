@@ -90,6 +90,7 @@
     "to": "To",
     "from": "From",
     "placeholders": {
+      "search": "Search...",
       "search_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id",
       "select_acceptance_criteria": "Select acceptance criteria",
       "select_invitation_status": "Select status"
@@ -186,6 +187,7 @@
     "sponsor_list": "Sponsor List",
     "sponsor_forms": "Forms",
     "sponsor_pages": "Pages",
+    "sponsor_purchases": "Purchases",
     "sponsorship_list": "Tiers",
     "sponsor_users": "Users",
     "sponsors_promocodes": "Promo Codes",
@@ -2865,6 +2867,15 @@
         "search": "Search..."
       }
     }
+  },
+  "sponsor_show_purchases": {
+    "order": "Order",
+    "purchased": "Purchased",
+    "payment_method": "Payment Method",
+    "status": "Status",
+    "amount": "Amount",
+    "details": "Details",
+    "purchases": "Purchases"
   },
   "sponsor_users": {
     "users": "Users",
