@@ -221,6 +221,10 @@ const SponsorItemDialog = ({
                   id="image-upload"
                   name="images"
                   maxFiles={mediaType.max_uploads_qty}
+                  allowedExtensions={[
+                    "pdf",
+                    ...ALLOWED_INVENTORY_IMAGE_FORMATS
+                  ]}
                 />
               </Grid2>
             </Grid2>

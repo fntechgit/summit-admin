@@ -28,7 +28,10 @@ import useScrollToError from "../../../../hooks/useScrollToError";
 import ItemPriceTiers from "../../../../components/mui/formik-inputs/item-price-tiers";
 import FormikTextEditor from "../../../../components/inputs/formik-text-editor";
 import MuiFormikQuantityField from "../../../../components/mui/formik-inputs/mui-formik-quantity-field";
-import { MAX_INVENTORY_IMAGES_UPLOAD_QTY } from "../../../../utils/constants";
+import {
+  ALLOWED_INVENTORY_IMAGE_FORMATS,
+  MAX_INVENTORY_IMAGES_UPLOAD_QTY
+} from "../../../../utils/constants";
 
 const buildInitialValues = (data) => ({ ...data });
 
@@ -148,6 +151,7 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
                 id="item-image-upload"
                 name="images"
                 maxFiles={MAX_INVENTORY_IMAGES_UPLOAD_QTY}
+                allowedExtensions={["pdf", ...ALLOWED_INVENTORY_IMAGE_FORMATS]}
               />
             </Box>
           </Grid2>
