@@ -95,7 +95,7 @@ export const getAdminAccesses =
       createAction(RECEIVE_ADMIN_ACCESSES),
       `${window.API_BASE_URL}/api/v1/summit-administrator-groups`,
       authErrorHandler,
-      { order, orderDir, term }
+      { order, orderDir, term, page, perPage }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -129,7 +129,7 @@ export const resetAdminAccessForm = () => (dispatch) => {
 };
 
 export const saveAdminAccess =
-  (entity, noAlert = false) =>
+  (entity, redirectOnCreate = true) =>
   async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
 
@@ -139,7 +139,7 @@ export const saveAdminAccess =
     const params = { access_token: accessToken };
 
     if (entity.id) {
-      putRequest(
+      return putRequest(
         createAction(UPDATE_ADMIN_ACCESS),
         createAction(ADMIN_ACCESS_UPDATED),
         `${window.API_BASE_URL}/api/v1/summit-administrator-groups/${entity.id}`,
@@ -147,32 +147,34 @@ export const saveAdminAccess =
         authErrorHandler,
         entity
       )(params)(dispatch).then(() => {
-        if (!noAlert)
-          dispatch(showSuccessMessage(T.translate("admin_access.saved")));
-        else dispatch(stopLoading());
+        dispatch(showSuccessMessage(T.translate("admin_access.saved")));
       });
-    } else {
-      const successMessage = {
-        title: T.translate("general.done"),
-        html: T.translate("admin_access.created"),
-        type: "success"
-      };
+    }
+    return postRequest(
+      createAction(UPDATE_ADMIN_ACCESS),
+      createAction(ADMIN_ACCESS_ADDED),
+      `${window.API_BASE_URL}/api/v1/summit-administrator-groups`,
+      normalizedEntity,
+      authErrorHandler,
+      entity
+    )(params)(dispatch).then((payload) => {
+      if (redirectOnCreate) {
+        const successMessage = {
+          title: T.translate("general.done"),
+          html: T.translate("admin_access.created"),
+          type: "success"
+        };
 
-      postRequest(
-        createAction(UPDATE_ADMIN_ACCESS),
-        createAction(ADMIN_ACCESS_ADDED),
-        `${window.API_BASE_URL}/api/v1/summit-administrator-groups`,
-        normalizedEntity,
-        authErrorHandler,
-        entity
-      )(params)(dispatch).then((payload) => {
         dispatch(
           showMessage(successMessage, () => {
             history.push(`/app/admin-access/${payload.response.id}`);
           })
         );
-      });
-    }
+        return;
+      }
+
+      dispatch(showSuccessMessage(T.translate("admin_access.created")));
+    });
   };
 
 export const deleteAdminAccess = (adminAccessId) => async (dispatch) => {
