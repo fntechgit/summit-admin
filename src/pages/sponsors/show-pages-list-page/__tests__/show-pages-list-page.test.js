@@ -13,8 +13,7 @@ import {
   archiveShowPage,
   unarchiveShowPage
 } from "../../../../actions/show-pages-actions";
-import { getSponsorships } from "../../../../actions/sponsor-forms-actions";
-
+import { getSummitSponsorshipTypes } from "../../../../actions/summit-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   MAX_PER_PAGE
@@ -61,8 +60,8 @@ jest.mock("../../../../actions/show-pages-actions", () => ({
   resetShowPageForm: jest.fn(() => ({ type: "MOCK_ACTION" }))
 }));
 
-jest.mock("../../../../actions/sponsor-forms-actions", () => ({
-  getSponsorships: jest.fn(() => () => Promise.resolve({ items: [] }))
+jest.mock("../../../../actions/summit-actions", () => ({
+  getSummitSponsorshipTypes: jest.fn(() => () => Promise.resolve({ items: [] }))
 }));
 
 // Helper to create show page data
@@ -134,7 +133,7 @@ describe("ShowPagesListPage", () => {
       await act(async () => {
         await userEvent.click(editButton);
       });
-      expect(getSponsorships).toHaveBeenCalledWith(
+      expect(getSummitSponsorshipTypes).toHaveBeenCalledWith(
         DEFAULT_CURRENT_PAGE,
         MAX_PER_PAGE
       );
@@ -158,7 +157,7 @@ describe("ShowPagesListPage", () => {
       await act(async () => {
         await userEvent.click(editButton);
       });
-      expect(getSponsorships).toHaveBeenCalledWith(
+      expect(getSummitSponsorshipTypes).toHaveBeenCalledWith(
         DEFAULT_CURRENT_PAGE,
         MAX_PER_PAGE
       );

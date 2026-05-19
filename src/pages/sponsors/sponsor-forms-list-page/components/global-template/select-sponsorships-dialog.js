@@ -12,7 +12,7 @@ import {
   Typography
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { getSponsorships } from "../../../../../actions/sponsor-forms-actions";
+import { getSummitSponsorshipTypes } from "../../../../../actions/summit-actions";
 import { DEFAULT_PER_PAGE } from "../../../../../utils/constants";
 import CheckBoxList from "../../../../../components/mui/checkbox-list";
 
@@ -21,18 +21,18 @@ const SelectSponsorshipsDialog = ({
   onSave,
   onClose,
   isSaving = false,
-  getSponsorships
+  getSummitSponsorshipTypes
 }) => {
   const { items, currentPage, total } = sponsorships;
   const [selection, setSelection] = useState({ ids: [], all: false });
 
   useEffect(() => {
-    getSponsorships(1, DEFAULT_PER_PAGE);
+    getSummitSponsorshipTypes(1, DEFAULT_PER_PAGE);
   }, []);
 
   const handleLoadMore = () => {
     if (total > items.length) {
-      getSponsorships(currentPage + 1, DEFAULT_PER_PAGE);
+      getSummitSponsorshipTypes(currentPage + 1, DEFAULT_PER_PAGE);
     }
   };
 
@@ -103,5 +103,5 @@ const mapStateToProps = ({ sponsorFormsListState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  getSponsorships
+  getSummitSponsorshipTypes
 })(SelectSponsorshipsDialog);

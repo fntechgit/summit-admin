@@ -14,7 +14,6 @@
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import T from "i18n-react/dist/i18n-react";
 import {
-  RECEIVE_GLOBAL_SPONSORSHIPS,
   RECEIVE_GLOBAL_TEMPLATES,
   RECEIVE_SPONSOR_FORM,
   RECEIVE_SPONSOR_FORMS,
@@ -25,7 +24,10 @@ import {
   SPONSOR_FORM_DELETED,
   SPONSOR_FORM_UNARCHIVED
 } from "../../actions/sponsor-forms-actions";
-import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import {
+  SET_CURRENT_SUMMIT,
+  RECEIVE_SUMMIT_SPONSORSHIP_TYPES
+} from "../../actions/summit-actions";
 
 const DEFAULT_STATE = {
   sponsorForms: [],
@@ -217,7 +219,7 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
         }
       };
     }
-    case RECEIVE_GLOBAL_SPONSORSHIPS: {
+    case RECEIVE_SUMMIT_SPONSORSHIP_TYPES: {
       const {
         current_page: currentPage,
         last_page: lastPage,
