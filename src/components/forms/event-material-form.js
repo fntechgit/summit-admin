@@ -14,8 +14,8 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import UploadInputV3 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v3";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import {
@@ -149,7 +149,8 @@ class EventMaterialForm extends React.Component {
     // on admin we upload one per time
     const media_type = {
       ...entity.media_upload_type,
-      max_size: entity.media_upload_type?.max_size || MAX_MEDIA_UPLOAD_SIZE,
+      max_size:
+        (entity.media_upload_type?.max_size || MAX_MEDIA_UPLOAD_SIZE) * KB,
       max_uploads_qty: 1
     };
     const mediaInputValue = entity.filename ? [entity] : [];
@@ -172,7 +173,7 @@ class EventMaterialForm extends React.Component {
 
     const slideMediaType = {
       id: "slide",
-      max_size: MAX_SLIDE_UPLOAD_SIZE,
+      max_size: MAX_SLIDE_UPLOAD_SIZE * KB,
       type: {
         allowed_extensions: ALLOWED_SLIDES_FORMATS
       }
