@@ -123,14 +123,32 @@ const AllowedEmailDomainsRow = ({
     <>
       <div className="row form-group" data-testid="allowed-email-domains-row">
         <div className="col-md-12">
-          <label htmlFor="allowed_email_domains">
-            {T.translate("edit_promocode.allowed_email_domains")}&nbsp;
-            <i
-              className="fa fa-info-circle"
-              aria-hidden="true"
-              title={T.translate("edit_promocode.info.allowed_email_domains")}
-            />
-          </label>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 4
+            }}
+          >
+            <label htmlFor="allowed_email_domains" style={{ marginBottom: 0 }}>
+              {T.translate("edit_promocode.allowed_email_domains")}&nbsp;
+              <i
+                className="fa fa-info-circle"
+                aria-hidden="true"
+                title={T.translate("edit_promocode.info.allowed_email_domains")}
+              />
+            </label>
+            <button
+              type="button"
+              className="btn btn-default btn-xs"
+              data-testid="manage-list-button"
+              onClick={() => setManageOpen(true)}
+              style={{ fontWeight: "normal" }}
+            >
+              {T.translate("edit_promocode.manage_button")}
+            </button>
+          </div>
           {domains.length > LARGE_DOMAIN_LIST_THRESHOLD ? (
             <div
               id="allowed_email_domains"
@@ -144,57 +162,37 @@ const AllowedEmailDomainsRow = ({
                 padding: "8px 12px"
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 8
-                }}
-              >
-                <div>
-                  <div
-                    data-testid="compact-summary-count"
-                    style={{ fontWeight: 600, fontSize: "1.05em" }}
-                  >
-                    {T.translate("edit_promocode.large_list.summary_count", {
-                      n: domains.length
+              <div>
+                <div
+                  data-testid="compact-summary-count"
+                  style={{ fontWeight: 600, fontSize: "1.05em" }}
+                >
+                  {T.translate("edit_promocode.large_list.summary_count", {
+                    n: domains.length
+                  })}
+                </div>
+                <div
+                  data-testid="compact-summary-type-mix"
+                  className="text-muted"
+                  style={{ fontSize: "0.9em" }}
+                >
+                  {(() => {
+                    const counts = { atDomain: 0, tld: 0, email: 0 };
+                    // eslint-disable-next-line no-restricted-syntax
+                    for (const d of domains) counts[typeOf(d)] += 1;
+                    return T.translate(
+                      "edit_promocode.large_list.summary_type_mix",
+                      counts
+                    );
+                  })()}
+                </div>
+                {domains.length > 0 && (
+                  <div className="text-muted" style={{ fontSize: "0.9em" }}>
+                    {T.translate("edit_promocode.large_list.summary_example", {
+                      entry: domains[0]
                     })}
                   </div>
-                  <div
-                    data-testid="compact-summary-type-mix"
-                    className="text-muted"
-                    style={{ fontSize: "0.9em" }}
-                  >
-                    {(() => {
-                      const counts = { atDomain: 0, tld: 0, email: 0 };
-                      // eslint-disable-next-line no-restricted-syntax
-                      for (const d of domains) counts[typeOf(d)] += 1;
-                      return T.translate(
-                        "edit_promocode.large_list.summary_type_mix",
-                        counts
-                      );
-                    })()}
-                  </div>
-                  {domains.length > 0 && (
-                    <div className="text-muted" style={{ fontSize: "0.9em" }}>
-                      {T.translate(
-                        "edit_promocode.large_list.summary_example",
-                        {
-                          entry: domains[0]
-                        }
-                      )}
-                    </div>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-default btn-sm"
-                  data-testid="manage-list-button"
-                  onClick={() => setManageOpen(true)}
-                >
-                  {T.translate("edit_promocode.large_list.manage_button")}
-                </button>
+                )}
               </div>
               <div
                 style={{

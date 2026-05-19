@@ -539,9 +539,11 @@ describe("validate() — domain-authorized email-domain enforcement", () => {
         allowed_email_domains: compactEntries
       })
     );
-    // Sanity-check we're in compact mode (Manage List button present).
+    // Sanity-check we're in compact mode (compact-summary-count present —
+    // Manage List button is threshold-independent post-Tier 1.1 and no longer
+    // a valid compact-mode probe).
     expect(
-      container.querySelector("[data-testid='manage-list-button']")
+      container.querySelector("[data-testid='compact-summary-count']")
     ).toBeInTheDocument();
     getByIdSpy.mockClear();
     fireEvent.click(screen.getByRole("button", { name: /save/i }));

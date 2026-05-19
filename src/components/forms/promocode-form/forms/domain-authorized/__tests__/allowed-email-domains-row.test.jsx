@@ -329,7 +329,7 @@ describe("AllowedEmailDomainsRow", () => {
 });
 
 describe("AllowedEmailDomainsRow — compact summary + modal", () => {
-  it("renders chip wall when domains.length ≤ 50", () => {
+  it("renders chip wall when domains.length ≤ 50, with Manage List button always present (Tier 1.1)", () => {
     const small = Array.from({ length: 50 }, (_, i) => `@e${i}.com`);
     const { container } = render(
       <AllowedEmailDomainsRow
@@ -340,8 +340,28 @@ describe("AllowedEmailDomainsRow — compact summary + modal", () => {
     expect(
       container.querySelector("[data-testid='domain-chip-@e0.com']")
     ).toBeInTheDocument();
+    // Tier 1.1: Manage List button is threshold-independent; present at all counts.
     expect(
       container.querySelector("[data-testid='manage-list-button']")
+    ).toBeInTheDocument();
+    // Compact summary must NOT be visible at ≤ 50 — chip wall owns this range.
+    expect(
+      container.querySelector("[data-testid='compact-summary-count']")
+    ).not.toBeInTheDocument();
+  });
+
+  it("Manage List button present at count=0 (Tier 1.1 — empty-form bulk-paste entry)", () => {
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: [] })}
+        handleChange={() => {}}
+      />
+    );
+    expect(
+      container.querySelector("[data-testid='manage-list-button']")
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector("[data-testid='compact-summary-count']")
     ).not.toBeInTheDocument();
   });
 
@@ -353,9 +373,13 @@ describe("AllowedEmailDomainsRow — compact summary + modal", () => {
         handleChange={() => {}}
       />
     );
+    // Probe compact summary, not Manage List button (button is threshold-independent post-Tier 1.1).
     expect(
-      c50.querySelector("[data-testid='manage-list-button']")
+      c50.querySelector("[data-testid='compact-summary-count']")
     ).not.toBeInTheDocument();
+    expect(
+      c50.querySelector("[data-testid='domain-chip-@e0.com']")
+    ).toBeInTheDocument();
     unmount();
 
     const exactly51 = Array.from({ length: 51 }, (_, i) => `@e${i}.com`);
@@ -366,11 +390,14 @@ describe("AllowedEmailDomainsRow — compact summary + modal", () => {
       />
     );
     expect(
-      c51.querySelector("[data-testid='manage-list-button']")
+      c51.querySelector("[data-testid='compact-summary-count']")
     ).toBeInTheDocument();
+    expect(
+      c51.querySelector("[data-testid='domain-chip-@e0.com']")
+    ).not.toBeInTheDocument();
   });
 
-  it("renders compact summary + Manage List when domains.length > 50", () => {
+  it("renders compact summary when domains.length > 50 (Manage List button is always present)", () => {
     const big = Array.from({ length: 60 }, (_, i) => `@e${i}.com`);
     const { container } = render(
       <AllowedEmailDomainsRow
@@ -382,8 +409,7 @@ describe("AllowedEmailDomainsRow — compact summary + modal", () => {
       container.querySelector("[data-testid='domain-chip-@e0.com']")
     ).not.toBeInTheDocument();
     // i18n-react renders raw keys in jest env; the {n} interpolation is
-    // not visible, so we assert on the key wiring + button presence. The
-    // 60-vs-50 threshold is also exercised by the boundary test above.
+    // not visible, so we assert on the key wiring + button presence.
     expect(
       container.querySelector("[data-testid='compact-summary-count']")
     ).toHaveTextContent("edit_promocode.large_list.summary_count");
@@ -392,7 +418,7 @@ describe("AllowedEmailDomainsRow — compact summary + modal", () => {
     ).toBeInTheDocument();
     expect(
       container.querySelector("[data-testid='manage-list-button']")
-    ).toHaveTextContent("edit_promocode.large_list.manage_button");
+    ).toHaveTextContent("edit_promocode.manage_button");
   });
 
   it("type-mix hint counts @domain / .tld / user@email correctly", () => {
