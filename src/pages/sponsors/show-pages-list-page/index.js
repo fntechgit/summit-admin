@@ -14,6 +14,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
+import { Breadcrumb } from "react-breadcrumbs";
 import {
   Box,
   Button,
@@ -26,13 +27,13 @@ import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
-  getShowPages,
   archiveShowPage,
-  unarchiveShowPage,
-  getShowPage,
-  saveShowPage,
   deleteShowPage,
-  resetShowPageForm
+  getShowPage,
+  getShowPages,
+  resetShowPageForm,
+  saveShowPage,
+  unarchiveShowPage
 } from "../../../actions/show-pages-actions";
 import { getSummitSponsorshipTypes } from "../../../actions/summit-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
@@ -41,6 +42,7 @@ import PageTemplatePopup from "../../sponsors-global/page-templates/page-templat
 import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
 
 const ShowPagesListPage = ({
+  match,
   showPages,
   currentPage,
   perPage,
@@ -179,6 +181,14 @@ const ShowPagesListPage = ({
 
   return (
     <div className="container">
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("show_pages.pages"),
+            pathname: match.url
+          }}
+        />
+      </div>
       <h3>{T.translate("show_pages.pages")}</h3>
       <CustomAlert message={T.translate("show_pages.alert_info")} hideIcon />
       <Grid2
