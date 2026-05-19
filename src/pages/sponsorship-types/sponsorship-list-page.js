@@ -14,10 +14,10 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2, TextField } from "@mui/material";
+import { Box, Button, Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   getSponsorships,
   getSponsorship,
@@ -31,6 +31,7 @@ import SponsorshipDialog from "./components/sponsorship-dialog";
 const SponsorshipListPage = ({
   sponsorships,
   currentSponsorship,
+  term,
   currentPage,
   perPage,
   order,
@@ -43,41 +44,26 @@ const SponsorshipListPage = ({
   resetSponsorshipForm
 }) => {
   const [open, setOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     getSponsorships();
-  }, [getSponsorships]);
+  }, []);
 
   const handlePageChange = (page) => {
-    getSponsorships(searchTerm, page, perPage, order, orderDir);
+    getSponsorships(term, page, perPage, order, orderDir);
   };
 
   const handlePerPageChange = (newPerPage) => {
-    getSponsorships(
-      searchTerm,
-      DEFAULT_CURRENT_PAGE,
-      newPerPage,
-      order,
-      orderDir
-    );
+    getSponsorships(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
   };
 
   const handleSort = (key, dir) => {
-    getSponsorships(searchTerm, currentPage, perPage, key, dir);
+    getSponsorships(term, currentPage, perPage, key, dir);
   };
 
-  const handleSearch = (ev) => {
-    setSearchTerm(ev.target.value);
-    if (ev.key === "Enter") {
-      getSponsorships(
-        searchTerm,
-        DEFAULT_CURRENT_PAGE,
-        perPage,
-        order,
-        orderDir
-      );
-    }
+  const handleSearch = (searchTerm) => {
+    getSponsorships(searchTerm, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
   };
 
   const handleRowEdit = (row) => {
@@ -90,33 +76,25 @@ const SponsorshipListPage = ({
   };
 
   const handleClose = () => {
+    if (isSaving) return;
     resetSponsorshipForm();
     setOpen(false);
   };
 
   const handleSave = (entity) => {
+    if (isSaving) return;
+    setIsSaving(true);
     saveSponsorship(entity)
       .then(() =>
-        getSponsorships(
-          searchTerm,
-          DEFAULT_CURRENT_PAGE,
-          perPage,
-          order,
-          orderDir
-        )
+        getSponsorships(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
       )
-      .then(() => setOpen(false));
+      .then(() => setOpen(false))
+      .finally(() => setIsSaving(false));
   };
 
   const handleDelete = (sponsorshipId) => {
     deleteSponsorship(sponsorshipId).then(() =>
-      getSponsorships(
-        searchTerm,
-        DEFAULT_CURRENT_PAGE,
-        perPage,
-        order,
-        orderDir
-      )
+      getSponsorships(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
     );
   };
 
@@ -168,17 +146,13 @@ const SponsorshipListPage = ({
             alignItems: "center"
           }}
         >
-          <TextField
-            variant="outlined"
-            value={searchTerm}
-            placeholder={T.translate("sponsorship_list.placeholders.search")}
-            slotProps={{
-              input: { startAdornment: <SearchIcon sx={{ mr: 1 }} /> }
-            }}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={handleSearch}
-            sx={{ "& .MuiOutlinedInput-root": { height: "36px" } }}
-          />
+          <Grid2 size={5}>
+            <SearchInput
+              onSearch={handleSearch}
+              term={term}
+              placeholder={T.translate("sponsorship_list.placeholders.search")}
+            />
+          </Grid2>
           <Button
             variant="contained"
             onClick={handleNew}
@@ -224,6 +198,7 @@ const SponsorshipListPage = ({
           entity={currentSponsorship}
           onSave={handleSave}
           onClose={handleClose}
+          isSaving={isSaving}
         />
       )}
     </div>

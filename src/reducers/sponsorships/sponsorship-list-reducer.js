@@ -23,6 +23,7 @@ import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 const DEFAULT_STATE = {
   sponsorships: [],
+  term: "",
   currentPage: 1,
   lastPage: 1,
   perPage: 10,
@@ -39,9 +40,9 @@ const sponsorshipListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSORSHIPS: {
-      const { order, orderDir, perPage } = payload;
+      const { term, order, orderDir, perPage } = payload;
 
-      return { ...state, order, orderDir, perPage };
+      return { ...state, term, order, orderDir, perPage };
     }
     case RECEIVE_SPONSORSHIPS: {
       const { current_page, total, last_page } = payload.response;

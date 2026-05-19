@@ -24,7 +24,12 @@ import { requiredStringValidation } from "../../../utils/yup";
 
 const SIZE_OPTIONS = ["Small", "Medium", "Large", "Big"];
 
-const SponsorshipDialog = ({ entity: initialEntity, onClose, onSave }) => {
+const SponsorshipDialog = ({
+  entity: initialEntity,
+  onClose,
+  onSave,
+  isSaving = false
+}) => {
   const formik = useFormik({
     initialValues: {
       id: initialEntity?.id ?? 0,
@@ -33,7 +38,6 @@ const SponsorshipDialog = ({ entity: initialEntity, onClose, onSave }) => {
       size: initialEntity?.size ?? "",
       order: initialEntity?.order ?? 0
     },
-    enableReinitialize: true,
     validationSchema: yup.object().shape({
       name: requiredStringValidation()
     }),
@@ -56,7 +60,13 @@ const SponsorshipDialog = ({ entity: initialEntity, onClose, onSave }) => {
       )}`;
 
   return (
-    <Dialog open onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      disableEscapeKeyDown={isSaving}
+    >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         {title}
         <IconButton
@@ -64,6 +74,7 @@ const SponsorshipDialog = ({ entity: initialEntity, onClose, onSave }) => {
           onClick={handleClose}
           sx={{ mr: 1 }}
           aria-label="close"
+          disabled={isSaving}
         >
           <CloseIcon fontSize="small" />
         </IconButton>
@@ -128,7 +139,12 @@ const SponsorshipDialog = ({ entity: initialEntity, onClose, onSave }) => {
           </DialogContent>
           <Divider />
           <DialogActions>
-            <Button type="submit" fullWidth variant="contained">
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={isSaving}
+            >
               {T.translate("general.save")}
             </Button>
           </DialogActions>

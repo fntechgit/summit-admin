@@ -89,7 +89,7 @@ export const getSponsorships =
       createAction(RECEIVE_SPONSORSHIPS),
       `${window.API_BASE_URL}/api/v1/sponsorship-types`,
       snackbarErrorHandler,
-      { order, orderDir, page, perPage }
+      { term, order, orderDir, page, perPage }
     )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
