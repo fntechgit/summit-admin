@@ -184,6 +184,7 @@ export const saveMediaFileType = (entity) => async (dispatch) => {
 };
 
 export const deleteMediaFileType = (mediaFileTypeId) => async (dispatch) => {
+  dispatch(startLoading());
   const accessToken = await getAccessTokenSafely();
 
   const params = {

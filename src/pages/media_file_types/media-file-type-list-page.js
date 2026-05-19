@@ -44,6 +44,7 @@ const MediaFileTypeListPage = ({
   resetMediaFileTypeForm
 }) => {
   const [open, setOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     getMediaFileTypes();
@@ -81,16 +82,21 @@ const MediaFileTypeListPage = ({
   };
 
   const handleClose = () => {
+    if (isSaving) return;
     resetMediaFileTypeForm();
     setOpen(false);
   };
 
-  const handleSave = (entity) =>
-    saveMediaFileType(entity)
+  const handleSave = (entity) => {
+    if (isSaving) return;
+    setIsSaving(true);
+    return saveMediaFileType(entity)
       .then(() =>
         getMediaFileTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
       )
-      .then(() => setOpen(false));
+      .then(() => setOpen(false))
+      .finally(() => setIsSaving(false));
+  };
 
   const handleDelete = (mediaFileTypeId) => {
     deleteMediaFileType(mediaFileTypeId).then(() =>
@@ -197,6 +203,8 @@ const MediaFileTypeListPage = ({
           entity={currentMediaFileType}
           onSave={handleSave}
           onClose={handleClose}
+          key={currentMediaFileType?.id}
+          isSaving={isSaving}
         />
       )}
     </div>

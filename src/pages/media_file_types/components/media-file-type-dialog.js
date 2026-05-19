@@ -20,7 +20,12 @@ import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik
 import useScrollToError from "../../../hooks/useScrollToError";
 import { requiredStringValidation } from "../../../utils/yup";
 
-const MediaFileTypeDialog = ({ entity: initialEntity, onClose, onSave }) => {
+const MediaFileTypeDialog = ({
+  entity: initialEntity,
+  onClose,
+  onSave,
+  isSaving = false
+}) => {
   const formik = useFormik({
     initialValues: {
       id: initialEntity?.id ?? 0,
@@ -30,7 +35,6 @@ const MediaFileTypeDialog = ({ entity: initialEntity, onClose, onSave }) => {
         ? initialEntity.allowed_extensions.join(",")
         : initialEntity?.allowed_extensions ?? ""
     },
-    enableReinitialize: true,
     validationSchema: yup.object().shape({
       name: requiredStringValidation()
     }),
@@ -53,13 +57,20 @@ const MediaFileTypeDialog = ({ entity: initialEntity, onClose, onSave }) => {
       )}`;
 
   return (
-    <Dialog open onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      disableEscapeKeyDown={isSaving}
+    >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         {title}
         <IconButton
           size="small"
           onClick={handleClose}
           sx={{ mr: 1 }}
+          disabled={isSaving}
           aria-label="close"
         >
           <CloseIcon fontSize="small" />
@@ -126,7 +137,7 @@ const MediaFileTypeDialog = ({ entity: initialEntity, onClose, onSave }) => {
               type="submit"
               fullWidth
               variant="contained"
-              disabled={formik.isSubmitting}
+              disabled={isSaving}
             >
               {T.translate("general.save")}
             </Button>
