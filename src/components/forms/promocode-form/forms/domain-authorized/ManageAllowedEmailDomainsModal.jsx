@@ -32,6 +32,9 @@ const Row = React.memo(({ index, style, data }) => {
       <input
         type="checkbox"
         data-testid={`manage-modal-checkbox-${originalIndex}`}
+        aria-label={T.translate("edit_promocode.manage_modal.row_select_aria", {
+          entry
+        })}
         checked={selection.has(originalIndex)}
         onChange={() => onToggle(originalIndex)}
       />
@@ -204,6 +207,7 @@ const ManageAllowedEmailDomainsModal = ({
             data-testid="manage-modal-search"
             className="form-control"
             value={searchInput}
+            aria-label={T.translate("edit_promocode.manage_modal.search_aria")}
             placeholder={T.translate(
               "edit_promocode.manage_modal.search_placeholder"
             )}
@@ -213,6 +217,9 @@ const ManageAllowedEmailDomainsModal = ({
             data-testid="manage-modal-type-filter"
             className="form-control"
             style={{ maxWidth: 180 }}
+            aria-label={T.translate(
+              "edit_promocode.manage_modal.type_filter_aria"
+            )}
             value={typeFilter}
             onChange={(ev) => setTypeFilter(ev.target.value)}
           >
@@ -236,6 +243,7 @@ const ManageAllowedEmailDomainsModal = ({
             className="form-control"
             rows={4}
             value={draftText}
+            aria-label={T.translate("edit_promocode.manage_modal.add_aria")}
             placeholder={T.translate("edit_promocode.manage_modal.add_helper")}
             onChange={(ev) => setDraftText(ev.target.value)}
             onKeyDown={handleKeyDown}
