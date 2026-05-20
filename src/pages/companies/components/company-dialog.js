@@ -60,6 +60,7 @@ const getLogoValue = (value) =>
 const CompanyDialog = ({
   entity: initialEntity,
   sponsoredProjects = [],
+  isSaving = false,
   onSave,
   onClose,
   onDeleteSponsorship,
@@ -176,7 +177,13 @@ const CompanyDialog = ({
     formik.values.id > 0 && window.APP_CLIENT_NAME === "openstack";
 
   return (
-    <Dialog open onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog
+      open
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      disableEscapeKeyDown={isSaving}
+    >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">{title}</Typography>
         <IconButton
@@ -184,6 +191,7 @@ const CompanyDialog = ({
           onClick={onClose}
           sx={{ mr: 1 }}
           aria-label="close"
+          disabled={isSaving}
         >
           <CloseIcon fontSize="small" />
         </IconButton>
@@ -456,7 +464,12 @@ const CompanyDialog = ({
           </DialogContent>
           <Divider />
           <DialogActions>
-            <Button type="submit" fullWidth variant="contained">
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={isSaving}
+            >
               {T.translate("general.save")}
             </Button>
           </DialogActions>

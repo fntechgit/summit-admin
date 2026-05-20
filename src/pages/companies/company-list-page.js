@@ -53,6 +53,7 @@ const CompanyListPage = ({
   sponsoredProjects
 }) => {
   const [companyPopup, setCompanyPopup] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (window.APP_CLIENT_NAME === "openstack")
@@ -110,10 +111,14 @@ const CompanyListPage = ({
   };
 
   const handleSave = (entity) => {
-    saveCompany(entity).then(() => {
-      setCompanyPopup(false);
-      getCompanies(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
-    });
+    if (isSaving) return;
+    setIsSaving(true);
+    saveCompany(entity)
+      .then(() => {
+        setCompanyPopup(false);
+        getCompanies(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+      })
+      .finally(() => setIsSaving(false));
   };
 
   const handleClose = () => {
@@ -198,6 +203,7 @@ const CompanyListPage = ({
       {companyPopup && (
         <CompanyDialog
           entity={currentCompany}
+          isSaving={isSaving}
           onClose={handleClose}
           onSave={handleSave}
           onAddSponsorship={saveSupportingCompany}
