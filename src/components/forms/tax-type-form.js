@@ -13,178 +13,134 @@
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import {
-  Input,
-  SimpleLinkList
-} from "openstack-uicore-foundation/lib/components";
+import { useFormik, FormikProvider } from "formik";
+import * as yup from "yup";
+import Button from "@mui/material/Button";
+import Grid2 from "@mui/material/Grid2";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import SimpleLinkList from "openstack-uicore-foundation/lib/components/simple-link-list";
 import { queryTicketTypes } from "openstack-uicore-foundation/lib/utils/query-actions";
-import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
-import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
+import useScrollToError from "../../hooks/useScrollToError";
 
-class TaxTypeForm extends React.Component {
-  constructor(props) {
-    super(props);
+const validationSchema = yup.object({
+  name: yup.string().required(T.translate("validation.required")),
+  rate: yup
+    .number()
+    .typeError(T.translate("validation.number"))
+    .min(0, T.translate("validation.min", { min: 0 }))
+    .required(T.translate("validation.required")),
+  tax_id: yup.string().required(T.translate("validation.required"))
+});
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors
-    };
+const TaxTypeForm = ({
+  entity: entityProp,
+  currentSummit,
+  onTicketLink,
+  onTicketUnLink,
+  onSubmit
+}) => {
+  const initialValues = {
+    id: entityProp.id,
+    name: entityProp.name || "",
+    rate: entityProp.rate ?? "",
+    tax_id: entityProp.tax_id || "",
+    ticket_types: entityProp.ticket_types ?? []
+  };
 
-    this.handleTicketLink = this.handleTicketLink.bind(this);
-    this.handleTicketUnLink = this.handleTicketUnLink.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+  const formik = useFormik({
+    initialValues,
+    validationSchema,
+    enableReinitialize: true,
+    onSubmit: (values) => {
+      onSubmit({ ...entityProp, ...values });
+    },
+    validateOnChange: false
+  });
 
-  componentDidUpdate(prevProps) {
-    const state = {};
-    scrollToError(this.props.errors);
+  useScrollToError(formik);
 
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
+  const handleTicketLink = (value) => {
+    onTicketLink(formik.values.id, value);
+  };
+  const handleTicketUnLink = (valueId) => {
+    onTicketUnLink(formik.values.id, valueId);
+  };
+
+  const ticketColumns = [
+    { columnKey: "name", value: T.translate("edit_tax_type.name") },
+    {
+      columnKey: "description",
+      value: T.translate("edit_tax_type.description")
     }
-
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
+  ];
+  const ticketOptions = {
+    title: T.translate("edit_tax_type.ticket_types"),
+    valueKey: "name",
+    labelKey: "name",
+    defaultOptions: true,
+    actions: {
+      search: (ev, callback) =>
+        queryTicketTypes(currentSummit.id, { name: ev }, callback, "v2"),
+      delete: { onClick: handleTicketUnLink },
+      add: { onClick: handleTicketLink }
     }
+  };
 
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
-    }
-  }
-
-  handleChange(ev) {
-    const newEntity = { ...this.state.entity };
-    const newErrors = { ...this.state.errors };
-    let { value, id } = ev.target;
-
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
-
-    if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_TO_SECONDS;
-    }
-
-    newErrors[id] = "";
-    newEntity[id] = value;
-    this.setState({ entity: newEntity, errors: newErrors });
-  }
-
-  handleSubmit(ev) {
-    const entity = { ...this.state.entity };
-    ev.preventDefault();
-
-    this.props.onSubmit(entity);
-  }
-
-  hasErrors(field) {
-    const { errors } = this.state;
-    if (field in errors) {
-      return errors[field];
-    }
-
-    return "";
-  }
-
-  handleTicketLink(value) {
-    const { entity } = this.state;
-    this.props.onTicketLink(entity.id, value);
-  }
-
-  handleTicketUnLink(valueId) {
-    const { entity } = this.state;
-    this.props.onTicketUnLink(entity.id, valueId);
-  }
-
-  render() {
-    const { entity } = this.state;
-    const { currentSummit } = this.props;
-
-    const ticketColumns = [
-      { columnKey: "name", value: T.translate("edit_tax_type.name") },
-      {
-        columnKey: "description",
-        value: T.translate("edit_tax_type.description")
-      }
-    ];
-
-    const ticketOptions = {
-      title: T.translate("edit_tax_type.ticket_types"),
-      valueKey: "name",
-      labelKey: "name",
-      defaultOptions: true,
-      actions: {
-        search: (ev, callback) =>
-          queryTicketTypes(currentSummit.id, { name: ev }, callback, "v2"),
-        delete: { onClick: this.handleTicketUnLink },
-        add: { onClick: this.handleTicketLink }
-      }
-    };
-
-    return (
-      <form className="tax-type-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("edit_tax_type.name")} *</label>
-            <Input
-              id="name"
-              className="form-control"
-              error={this.hasErrors("name")}
-              onChange={this.handleChange}
-              value={entity.name}
+  return (
+    <FormikProvider value={formik}>
+      <Box
+        component="form"
+        onSubmit={formik.handleSubmit}
+        noValidate
+        autoComplete="off"
+      >
+        <input type="hidden" name="id" value={formik.values.id} />
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <MuiFormikTextField
+              name="name"
+              label={T.translate("edit_tax_type.name")}
+              required
+              fullWidth
             />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("edit_tax_type.rate")}</label>
-            <Input
-              className="form-control"
+          </Grid2>
+        </Grid2>
+        <Grid2 container spacing={2} sx={{ mb: 3 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <MuiFormikTextField
+              name="rate"
+              label={T.translate("edit_tax_type.rate")}
               type="number"
-              error={this.hasErrors("rate")}
-              id="rate"
-              value={entity.rate}
-              onChange={this.handleChange}
+              fullWidth
             />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_tax_type.tax_id")}</label>
-            <Input
-              className="form-control"
-              error={this.hasErrors("tax_id")}
-              id="tax_id"
-              value={entity.tax_id}
-              onChange={this.handleChange}
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <MuiFormikTextField
+              name="tax_id"
+              label={T.translate("edit_tax_type.tax_id")}
+              fullWidth
             />
-          </div>
-        </div>
-
-        <hr />
-        {entity.id !== 0 && (
-          <SimpleLinkList
-            values={entity.ticket_types}
-            columns={ticketColumns}
-            options={ticketOptions}
-          />
+          </Grid2>
+        </Grid2>
+        {formik.values.id !== 0 && (
+          <Box sx={{ mb: 3 }}>
+            <SimpleLinkList
+              values={formik.values.ticket_types}
+              columns={ticketColumns}
+              options={ticketOptions}
+            />
+          </Box>
         )}
-
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
-        </div>
-      </form>
-    );
-  }
-}
+        <Stack direction="row" justifyContent="flex-end">
+          <Button variant="contained" type="submit">
+            {T.translate("general.save")}
+          </Button>
+        </Stack>
+      </Box>
+    </FormikProvider>
+  );
+};
 
 export default TaxTypeForm;
