@@ -184,4 +184,39 @@ describe("ManageAllowedEmailDomainsModal — Tier 2", () => {
       ).toHaveLength(2)
     );
   });
+
+  it("Add within debounce window clears pending search and keeps new entry visible", async () => {
+    // Open with one existing entry.
+    openModal(["@acme.com"]);
+
+    // Type a search term — fireEvent is synchronous, so the 150 ms debounce
+    // timeout has NOT fired yet: searchInput="acme", search="" still.
+    fireEvent.change(screen.getByTestId("manage-modal-search"), {
+      target: { value: "acme" }
+    });
+
+    // Immediately (same tick) add a domain that does NOT match "acme" — the
+    // bug would leave searchInput intact and then the deferred setSearch fires,
+    // filtering the just-added entry out of view.
+    const textarea = screen.getByTestId("manage-modal-textarea");
+    fireEvent.change(textarea, { target: { value: "@beta.com" } });
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "edit_promocode.manage_modal.add_button"
+      })
+    );
+
+    // The search input must be cleared immediately after the click (no waiting).
+    expect(screen.getByTestId("manage-modal-search")).toHaveValue("");
+
+    // After the debounce window drains (it should be a no-op now that
+    // searchInput was cleared), both entries must be visible.
+    await waitFor(() =>
+      expect(
+        within(screen.getByTestId("fixed-size-list")).getAllByTestId(
+          /manage-modal-row-/
+        )
+      ).toHaveLength(2)
+    );
+  });
 });

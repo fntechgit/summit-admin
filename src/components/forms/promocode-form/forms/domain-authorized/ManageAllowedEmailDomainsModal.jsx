@@ -81,16 +81,16 @@ const ManageAllowedEmailDomainsModal = ({
     setDraftText("");
 
     // Adds append to the end of the working copy. If a search filter is
-    // active the new entries may be filtered out of view — clear it so the
-    // additions are visible, and only autoscroll when the unfiltered list
-    // index space matches `working`.
-    if (search !== "") {
+    // active — or a search is pending in the debounce window (searchInput
+    // typed but `search` state not yet updated) — clear both so the additions
+    // are visible. Only autoscroll when the list is fully unfiltered.
+    if (search !== "" || searchInput !== "") {
       setSearchInput("");
       setSearch("");
     } else if (listRef.current && next.length > 0) {
       listRef.current.scrollToItem(next.length - 1, "end");
     }
-  }, [draftText, working, search]);
+  }, [draftText, working, search, searchInput]);
 
   const handleKeyDown = (ev) => {
     if (ev.key === "Enter" && (ev.metaKey || ev.ctrlKey)) {
