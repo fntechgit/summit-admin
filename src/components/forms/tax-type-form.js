@@ -11,97 +11,62 @@
  * limitations under the License.
  * */
 
-import React, { useCallback, useEffect, useState } from "react";
+import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import TextField from "@mui/material/TextField";
+import { useFormik, FormikProvider } from "formik";
+import * as yup from "yup";
 import Button from "@mui/material/Button";
 import Grid2 from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import SimpleLinkList from "openstack-uicore-foundation/lib/components/simple-link-list";
 import { queryTicketTypes } from "openstack-uicore-foundation/lib/utils/query-actions";
-import { scrollToError, shallowEqual } from "../../utils/methods";
+import useScrollToError from "../../hooks/useScrollToError";
+
+const validationSchema = yup.object({
+  name: yup.string().required(T.translate("validation.required")),
+  rate: yup
+    .number()
+    .typeError(T.translate("validation.number"))
+    .min(0, T.translate("validation.min", { min: 0 }))
+    .required(T.translate("validation.required")),
+  tax_id: yup.string().required(T.translate("validation.required"))
+});
 
 const TaxTypeForm = ({
   entity: entityProp,
-  errors: errorsProp,
   currentSummit,
   onTicketLink,
   onTicketUnLink,
   onSubmit
 }) => {
-  const [entity, setEntity] = useState({ ...entityProp });
-  const [errors, setErrors] = useState(errorsProp);
+  const initialValues = {
+    id: entityProp.id,
+    name: entityProp.name || "",
+    rate: entityProp.rate ?? "",
+    tax_id: entityProp.tax_id || "",
+    ticket_types: entityProp.ticket_types ?? []
+  };
 
-  useEffect(() => {
-    setEntity({ ...entityProp });
-    setErrors({});
-  }, [entityProp.id]);
-
-  useEffect(() => {
-    const nextTicketTypes = entityProp.ticket_types ?? [];
-
-    setEntity((prev) => {
-      if (prev.id !== entityProp.id) return prev;
-      if (shallowEqual(prev.ticket_types ?? [], nextTicketTypes)) return prev;
-
-      return {
-        ...prev,
-        ticket_types: [...nextTicketTypes]
-      };
-    });
-  }, [entityProp.id, entityProp.ticket_types]);
-
-  useEffect(() => {
-    scrollToError(errorsProp);
-    if (!shallowEqual(errors, errorsProp)) {
-      setErrors({ ...errorsProp });
-    }
-  }, [errorsProp]);
-
-  const handleChange = useCallback(
-    (ev) => {
-      const { value, id } = ev.target;
-      const newEntity = { ...entity, [id]: value };
-      const newErrors = { ...errors, [id]: "" };
-      setEntity(newEntity);
-      setErrors(newErrors);
+  const formik = useFormik({
+    initialValues,
+    validationSchema,
+    enableReinitialize: true,
+    onSubmit: (values) => {
+      onSubmit({ ...entityProp, ...values });
     },
-    [entity, errors]
-  );
+    validateOnChange: false
+  });
 
-  const handleSubmit = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      onSubmit({ ...entity });
-    },
-    [entity, onSubmit]
-  );
+  useScrollToError(formik);
 
-  const hasErrors = useCallback(
-    (field) => {
-      if (field in errors) {
-        return errors[field];
-      }
-
-      return "";
-    },
-    [errors]
-  );
-
-  const handleTicketLink = useCallback(
-    (value) => {
-      onTicketLink(entity.id, value);
-    },
-    [entity.id, onTicketLink]
-  );
-
-  const handleTicketUnLink = useCallback(
-    (valueId) => {
-      onTicketUnLink(entity.id, valueId);
-    },
-    [entity.id, onTicketUnLink]
-  );
+  const handleTicketLink = (value) => {
+    onTicketLink(formik.values.id, value);
+  };
+  const handleTicketUnLink = (valueId) => {
+    onTicketUnLink(formik.values.id, valueId);
+  };
 
   const ticketColumns = [
     { columnKey: "name", value: T.translate("edit_tax_type.name") },
@@ -110,7 +75,6 @@ const TaxTypeForm = ({
       value: T.translate("edit_tax_type.description")
     }
   ];
-
   const ticketOptions = {
     title: T.translate("edit_tax_type.ticket_types"),
     valueKey: "name",
@@ -125,66 +89,57 @@ const TaxTypeForm = ({
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit}>
-      <input type="hidden" id="id" value={entity.id} />
-
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-          <TextField
-            id="name"
-            label={T.translate("edit_tax_type.name")}
-            value={entity.name}
-            onChange={handleChange}
-            error={!!hasErrors("name")}
-            helperText={hasErrors("name")}
-            fullWidth
-            required
-          />
+    <FormikProvider value={formik}>
+      <Box
+        component="form"
+        onSubmit={formik.handleSubmit}
+        noValidate
+        autoComplete="off"
+      >
+        <input type="hidden" name="id" value={formik.values.id} />
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <MuiFormikTextField
+              name="name"
+              label={T.translate("edit_tax_type.name")}
+              required
+              fullWidth
+            />
+          </Grid2>
         </Grid2>
-      </Grid2>
-
-      <Grid2 container spacing={2} sx={{ mb: 3 }}>
-        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-          <TextField
-            id="rate"
-            label={T.translate("edit_tax_type.rate")}
-            type="number"
-            value={entity.rate}
-            onChange={handleChange}
-            error={!!hasErrors("rate")}
-            helperText={hasErrors("rate")}
-            fullWidth
-          />
+        <Grid2 container spacing={2} sx={{ mb: 3 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <MuiFormikTextField
+              name="rate"
+              label={T.translate("edit_tax_type.rate")}
+              type="number"
+              fullWidth
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <MuiFormikTextField
+              name="tax_id"
+              label={T.translate("edit_tax_type.tax_id")}
+              fullWidth
+            />
+          </Grid2>
         </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-          <TextField
-            id="tax_id"
-            label={T.translate("edit_tax_type.tax_id")}
-            value={entity.tax_id}
-            onChange={handleChange}
-            error={!!hasErrors("tax_id")}
-            helperText={hasErrors("tax_id")}
-            fullWidth
-          />
-        </Grid2>
-      </Grid2>
-
-      {entity.id !== 0 && (
-        <Box sx={{ mb: 3 }}>
-          <SimpleLinkList
-            values={entity.ticket_types}
-            columns={ticketColumns}
-            options={ticketOptions}
-          />
-        </Box>
-      )}
-
-      <Stack direction="row" justifyContent="flex-end">
-        <Button variant="contained" type="submit">
-          {T.translate("general.save")}
-        </Button>
-      </Stack>
-    </Box>
+        {formik.values.id !== 0 && (
+          <Box sx={{ mb: 3 }}>
+            <SimpleLinkList
+              values={formik.values.ticket_types}
+              columns={ticketColumns}
+              options={ticketOptions}
+            />
+          </Box>
+        )}
+        <Stack direction="row" justifyContent="flex-end">
+          <Button variant="contained" type="submit">
+            {T.translate("general.save")}
+          </Button>
+        </Stack>
+      </Box>
+    </FormikProvider>
   );
 };
 
