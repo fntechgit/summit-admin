@@ -44,6 +44,7 @@ import {
   DEFAULT_CURRENT_PAGE,
   SPONSOR_MANAGED_PAGE_ASSIGNMENT
 } from "../../../../../utils/constants";
+import { getSafePageAfterRemove } from "../../../../../utils/methods";
 import AddSponsorPageTemplatePopup from "./components/add-sponsor-page-template-popup";
 import PageTemplatePopup from "../../../../sponsors-global/page-templates/page-template-popup";
 
@@ -183,17 +184,35 @@ const SponsorPagesTab = ({
     (item.is_archived
       ? unarchiveCustomizedPage(item.id)
       : archiveCustomizedPage(item.id)
-    ).then(() => {
-      const { perPage, order, orderDir, currentPage } = customizedPages;
-      return getSponsorCustomizedPages(
-        term,
-        currentPage,
-        perPage,
-        order,
-        orderDir,
-        showArchived
-      );
-    });
+    )
+      .then(() => {
+        const { perPage, order, orderDir, currentPage, totalItems } =
+          customizedPages;
+        const safePage = getSafePageAfterRemove(
+          totalItems,
+          perPage,
+          currentPage
+        );
+        return getSponsorCustomizedPages(
+          term,
+          safePage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        );
+      })
+      .catch(() => {
+        const { perPage, order, orderDir, currentPage } = customizedPages;
+        getSponsorCustomizedPages(
+          term,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        );
+      });
 
   const handleManagedEdit = (item) => {
     getSponsorManagedPage(item.id).then(() => setOpenPopup("managedPagePopup"));

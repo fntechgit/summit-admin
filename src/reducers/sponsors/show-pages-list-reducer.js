@@ -112,7 +112,8 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
       );
       return {
         ...state,
-        showPages: [...pages]
+        showPages: [...pages],
+        totalCount: state.totalCount - 1
       };
     }
     case SHOW_PAGE_UNARCHIVED: {
@@ -122,7 +123,8 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
       );
       return {
         ...state,
-        showPages: [...pages]
+        showPages: [...pages],
+        totalCount: state.totalCount - 1
       };
     }
     case RECEIVE_SHOW_PAGE: {

@@ -42,6 +42,7 @@ import SponsorFormAddItemFromInventoryPopup from "./components/sponsor-form-add-
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 import { rateCellValidation } from "../../../utils/yup";
 import { rateToCents } from "../../../utils/rate-helpers";
+import { getSafePageAfterRemove } from "../../../utils/methods";
 
 const SponsorFormItemListPage = ({
   match,
@@ -110,9 +111,35 @@ const SponsorFormItemListPage = ({
   };
 
   const handleArchiveItem = (item) =>
-    item.is_archived
+    (item.is_archived
       ? unarchiveSponsorFormItem(formId, item.id)
-      : archiveSponsorFormItem(formId, item.id);
+      : archiveSponsorFormItem(formId, item.id)
+    )
+      .then(() => {
+        const safePage = getSafePageAfterRemove(
+          totalCount,
+          perPage,
+          currentPage
+        );
+        getSponsorFormItems(
+          formId,
+          safePage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        );
+      })
+      .catch(() =>
+        getSponsorFormItems(
+          formId,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        )
+      );
 
   const handleRowDelete = (itemId) => {
     deleteSponsorFormItem(formId, itemId).then(() => {
