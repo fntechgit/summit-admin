@@ -54,7 +54,13 @@ const toMemberOption = (member) => {
   return formatMemberOption(member);
 };
 
-const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
+const TrackChairDialog = ({
+  entity,
+  tracks,
+  isSaving = false,
+  onSave,
+  onClose
+}) => {
   const formik = useFormik({
     initialValues: {
       id: entity?.id ?? 0,
@@ -86,7 +92,13 @@ const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
   const tracks_ddl = tracks.map((t) => ({ label: t.name, value: t.id }));
 
   return (
-    <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      disableEscapeKeyDown={isSaving}
+    >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">{title}</Typography>
         <IconButton
@@ -94,6 +106,7 @@ const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
           onClick={onClose}
           sx={{ mr: 1 }}
           aria-label="close"
+          disabled={isSaving}
         >
           <CloseIcon fontSize="small" />
         </IconButton>
@@ -199,7 +212,12 @@ const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
           </DialogContent>
           <Divider />
           <DialogActions>
-            <Button type="submit" fullWidth variant="contained">
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={isSaving}
+            >
               {T.translate("general.save")}
             </Button>
           </DialogActions>
@@ -212,6 +230,7 @@ const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
 TrackChairDialog.propTypes = {
   entity: PropTypes.object,
   tracks: PropTypes.array.isRequired,
+  isSaving: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired
 };

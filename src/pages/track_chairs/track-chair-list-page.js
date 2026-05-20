@@ -55,6 +55,7 @@ const TrackChairListPage = ({
   exportTrackChairs
 }) => {
   const [dialogEntity, setDialogEntity] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (currentSummit?.id) getTrackChairs();
@@ -121,15 +122,18 @@ const TrackChairListPage = ({
   };
 
   const handleSave = ({ id, member, trackIds }) => {
+    if (isSaving) return;
+    setIsSaving(true);
     const newMember = dialogEntity?.originalMemberId !== member?.value;
     const action =
       !id || newMember
         ? addTrackChair({ id: member.value }, trackIds)
         : saveTrackChair(id, trackIds);
-    action.then(() => setDialogEntity(null));
+    action.then(() => setDialogEntity(null)).finally(() => setIsSaving(false));
   };
 
   const handleClose = () => {
+    if (isSaving) return;
     setDialogEntity(null);
   };
 
@@ -284,6 +288,7 @@ const TrackChairListPage = ({
         <TrackChairDialog
           entity={dialogEntity}
           tracks={chairTracks}
+          isSaving={isSaving}
           onSave={handleSave}
           onClose={handleClose}
         />
