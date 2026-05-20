@@ -223,6 +223,22 @@ describe("ManageAllowedEmailDomainsModal — Tier 2", () => {
   it("Type filter narrows by entry type and composes with search", async () => {
     openModal(["@acme.com", ".edu", "user@acme.com"]);
 
+    // Apply search first and wait for the debounce to actually fire — observable
+    // as a row-count drop from 3 to 2 (".edu" is excluded). This guarantees
+    // `search` has settled before the type filter is exercised, so the later
+    // assertions are not racing the 150 ms debounce.
+    fireEvent.change(screen.getByTestId("manage-modal-search"), {
+      target: { value: "acme" }
+    });
+    await waitFor(() =>
+      expect(
+        within(screen.getByTestId("fixed-size-list")).getAllByTestId(
+          /manage-modal-row-/
+        )
+      ).toHaveLength(2)
+    );
+
+    // @domain ∩ "acme" → only @acme.com
     fireEvent.change(screen.getByTestId("manage-modal-type-filter"), {
       target: { value: "at_domain" }
     });
@@ -232,17 +248,7 @@ describe("ManageAllowedEmailDomainsModal — Tier 2", () => {
       )
     ).toHaveLength(1);
 
-    fireEvent.change(screen.getByTestId("manage-modal-search"), {
-      target: { value: "acme" }
-    });
-    await waitFor(() =>
-      expect(
-        within(screen.getByTestId("fixed-size-list")).getAllByTestId(
-          /manage-modal-row-/
-        )
-      ).toHaveLength(1)
-    );
-
+    // .tld ∩ "acme" → nothing (".edu" is a tld but does not match "acme")
     fireEvent.change(screen.getByTestId("manage-modal-type-filter"), {
       target: { value: "tld" }
     });

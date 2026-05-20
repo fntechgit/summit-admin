@@ -168,12 +168,7 @@ const ManageAllowedEmailDomainsModal = ({
             className="form-control"
             style={{ maxWidth: 180 }}
             value={typeFilter}
-            onChange={(ev) => {
-              // Flush any pending debounced search so the new type filter
-              // applies against the search the user already typed.
-              setSearch(searchInput);
-              setTypeFilter(ev.target.value);
-            }}
+            onChange={(ev) => setTypeFilter(ev.target.value)}
           >
             <option value="all">
               {T.translate("edit_promocode.manage_modal.filter.all")}
