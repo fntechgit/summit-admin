@@ -14,7 +14,6 @@ const ROW_HEIGHT = 32;
 const LIST_HEIGHT = 320;
 const SEARCH_DEBOUNCE_MS = 150;
 
-// eslint-disable-next-line no-unused-vars, unused-imports/no-unused-vars
 const typeOf = (entry) => {
   if (entry.startsWith("@")) return "at_domain";
   if (entry.startsWith(".")) return "tld";
@@ -45,6 +44,7 @@ const ManageAllowedEmailDomainsModal = ({
   const [toast, setToast] = useState(null);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
   const listRef = useRef(null);
 
   // Intentionally depend only on `show`: snapshot `existing` when the modal opens
@@ -56,6 +56,7 @@ const ManageAllowedEmailDomainsModal = ({
       setToast(null);
       setSearchInput("");
       setSearch("");
+      setTypeFilter("all");
     }
   }, [show]);
 
@@ -80,17 +81,18 @@ const ManageAllowedEmailDomainsModal = ({
     });
     setDraftText("");
 
-    // Adds append to the end of the working copy. If a search filter is
+    // Adds append to the end of the working copy. If a search or type filter is
     // active — or a search is pending in the debounce window (searchInput
-    // typed but `search` state not yet updated) — clear both so the additions
-    // are visible. Only autoscroll when the list is fully unfiltered.
-    if (search !== "" || searchInput !== "") {
+    // typed but `search` state not yet updated) — clear all filters so the
+    // additions are visible. Only autoscroll when the list is fully unfiltered.
+    if (search !== "" || searchInput !== "" || typeFilter !== "all") {
       setSearchInput("");
       setSearch("");
+      setTypeFilter("all");
     } else if (listRef.current && next.length > 0) {
       listRef.current.scrollToItem(next.length - 1, "end");
     }
-  }, [draftText, working, search, searchInput]);
+  }, [draftText, working, search, searchInput, typeFilter]);
 
   const handleKeyDown = (ev) => {
     if (ev.key === "Enter" && (ev.metaKey || ev.ctrlKey)) {
@@ -130,9 +132,12 @@ const ManageAllowedEmailDomainsModal = ({
       entry,
       originalIndex
     }));
-    if (!q) return indexed;
-    return indexed.filter((x) => x.entry.toLowerCase().includes(q));
-  }, [working, search]);
+    return indexed.filter((x) => {
+      if (typeFilter !== "all" && typeOf(x.entry) !== typeFilter) return false;
+      if (q && !x.entry.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [working, search, typeFilter]);
 
   const itemData = useMemo(() => ({ items: visible }), [visible]);
 
@@ -158,6 +163,31 @@ const ManageAllowedEmailDomainsModal = ({
             )}
             onChange={(ev) => setSearchInput(ev.target.value)}
           />
+          <select
+            data-testid="manage-modal-type-filter"
+            className="form-control"
+            style={{ maxWidth: 180 }}
+            value={typeFilter}
+            onChange={(ev) => {
+              // Flush any pending debounced search so the new type filter
+              // applies against the search the user already typed.
+              setSearch(searchInput);
+              setTypeFilter(ev.target.value);
+            }}
+          >
+            <option value="all">
+              {T.translate("edit_promocode.manage_modal.filter.all")}
+            </option>
+            <option value="at_domain">
+              {T.translate("edit_promocode.manage_modal.filter.at_domain")}
+            </option>
+            <option value="tld">
+              {T.translate("edit_promocode.manage_modal.filter.tld")}
+            </option>
+            <option value="email">
+              {T.translate("edit_promocode.manage_modal.filter.email")}
+            </option>
+          </select>
         </div>
         <div className="manage-modal-add-section" style={{ marginBottom: 12 }}>
           <textarea

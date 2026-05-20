@@ -1052,6 +1052,12 @@
       "added_toast": "Added {added} · skipped {invalid} invalid · {dup} duplicates",
       "configured_count": "Configured Domains ({n})",
       "search_placeholder": "Search domains...",
+      "filter": {
+        "all": "All",
+        "at_domain": "@domain",
+        "tld": ".tld",
+        "email": "user@email"
+      },
       "done": "Done",
       "cancel": "Cancel"
     },

@@ -219,4 +219,65 @@ describe("ManageAllowedEmailDomainsModal — Tier 2", () => {
       ).toHaveLength(2)
     );
   });
+
+  it("Type filter narrows by entry type and composes with search", async () => {
+    openModal(["@acme.com", ".edu", "user@acme.com"]);
+
+    fireEvent.change(screen.getByTestId("manage-modal-type-filter"), {
+      target: { value: "at_domain" }
+    });
+    expect(
+      within(screen.getByTestId("fixed-size-list")).getAllByTestId(
+        /manage-modal-row-/
+      )
+    ).toHaveLength(1);
+
+    fireEvent.change(screen.getByTestId("manage-modal-search"), {
+      target: { value: "acme" }
+    });
+    await waitFor(() =>
+      expect(
+        within(screen.getByTestId("fixed-size-list")).getAllByTestId(
+          /manage-modal-row-/
+        )
+      ).toHaveLength(1)
+    );
+
+    fireEvent.change(screen.getByTestId("manage-modal-type-filter"), {
+      target: { value: "tld" }
+    });
+    expect(
+      within(screen.getByTestId("fixed-size-list")).queryAllByTestId(
+        /manage-modal-row-/
+      )
+    ).toHaveLength(0);
+  });
+
+  it("Add Domains while filtered clears the filter so additions are visible", () => {
+    openModal(["@acme.com"]);
+    fireEvent.change(screen.getByTestId("manage-modal-type-filter"), {
+      target: { value: "tld" }
+    });
+    // .tld filter hides @acme.com
+    expect(
+      within(screen.getByTestId("fixed-size-list")).queryAllByTestId(
+        /manage-modal-row-/
+      )
+    ).toHaveLength(0);
+    fireEvent.change(screen.getByTestId("manage-modal-textarea"), {
+      target: { value: "@beta.com" }
+    });
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "edit_promocode.manage_modal.add_button"
+      })
+    );
+    // filter reset to "all" → both the pre-existing and the new entry show
+    expect(screen.getByTestId("manage-modal-type-filter")).toHaveValue("all");
+    expect(
+      within(screen.getByTestId("fixed-size-list")).getAllByTestId(
+        /manage-modal-row-/
+      )
+    ).toHaveLength(2);
+  });
 });
