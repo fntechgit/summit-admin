@@ -70,6 +70,7 @@ describe("SponsorFormItemsListReducer", () => {
           order: "date",
           orderDir: 2,
           page: 10,
+          perPage: 50,
           showArchived: true
         }
       });
@@ -79,6 +80,7 @@ describe("SponsorFormItemsListReducer", () => {
         order: "date",
         orderDir: 2,
         currentPage: 10,
+        perPage: 50,
         showArchived: true,
         items: []
       });

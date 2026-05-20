@@ -1109,7 +1109,7 @@ export const getSponsorFormItems =
       createAction(RECEIVE_SPONSOR_FORM_ITEMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items`,
       authErrorHandler,
-      { order, orderDir, page, showArchived }
+      { order, orderDir, page, perPage, showArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
