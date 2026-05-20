@@ -317,7 +317,10 @@ describe("ManageAllowedEmailDomainsModal — Tier 2", () => {
   });
 
   it("Select All respects the active filter (only visible rows deleted)", () => {
-    openModal(["@acme.com", ".edu", "user@acme.com"]);
+    // Indices chosen so the filtered rows' originalIndex (1, 3) differ from
+    // their visible indices (0, 1): a buggy impl selecting by visible index
+    // would delete the wrong working entries and fail this assertion.
+    openModal([".edu", "@acme.com", "user@acme.com", "@beta.com"]);
     fireEvent.change(screen.getByTestId("manage-modal-type-filter"), {
       target: { value: "at_domain" }
     });
