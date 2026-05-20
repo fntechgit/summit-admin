@@ -14,8 +14,8 @@ const ROW_HEIGHT = 32;
 const LIST_HEIGHT = 320;
 const SEARCH_DEBOUNCE_MS = 150;
 
-// eslint-disable-next-line no-unused-vars
-const _typeOf = (entry) => {
+// eslint-disable-next-line no-unused-vars, unused-imports/no-unused-vars
+const typeOf = (entry) => {
   if (entry.startsWith("@")) return "at_domain";
   if (entry.startsWith(".")) return "tld";
   return "email";
