@@ -1058,6 +1058,8 @@
         "tld": ".tld",
         "email": "user@email"
       },
+      "select_all": "Select All",
+      "delete_selected": "Delete Selected ({n})",
       "done": "Done",
       "cancel": "Cancel"
     },

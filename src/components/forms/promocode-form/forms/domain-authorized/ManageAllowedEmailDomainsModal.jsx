@@ -21,14 +21,21 @@ const typeOf = (entry) => {
 };
 
 const Row = React.memo(({ index, style, data }) => {
-  const { entry } = data.items[index];
+  const { items, selection, onToggle } = data;
+  const { entry, originalIndex } = items[index];
   return (
     <div
-      style={style}
+      style={{ ...style, display: "flex", alignItems: "center", gap: 8 }}
       data-testid={`manage-modal-row-${index}`}
       className="manage-modal-row"
     >
-      {entry}
+      <input
+        type="checkbox"
+        data-testid={`manage-modal-checkbox-${originalIndex}`}
+        checked={selection.has(originalIndex)}
+        onChange={() => onToggle(originalIndex)}
+      />
+      <span>{entry}</span>
     </div>
   );
 });
@@ -45,6 +52,7 @@ const ManageAllowedEmailDomainsModal = ({
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [selection, setSelection] = useState(() => new Set());
   const listRef = useRef(null);
 
   // Intentionally depend only on `show`: snapshot `existing` when the modal opens
@@ -57,6 +65,7 @@ const ManageAllowedEmailDomainsModal = ({
       setSearchInput("");
       setSearch("");
       setTypeFilter("all");
+      setSelection(new Set());
     }
   }, [show]);
 
@@ -64,6 +73,10 @@ const ManageAllowedEmailDomainsModal = ({
     const id = setTimeout(() => setSearch(searchInput), SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(id);
   }, [searchInput]);
+
+  useEffect(() => {
+    setSelection(new Set());
+  }, [search, typeFilter]);
 
   const handleAddDomains = useCallback(() => {
     const rows = parseTextBlob(draftText);
@@ -93,6 +106,15 @@ const ManageAllowedEmailDomainsModal = ({
       listRef.current.scrollToItem(next.length - 1, "end");
     }
   }, [draftText, working, search, searchInput, typeFilter]);
+
+  const handleToggleSelect = useCallback((originalIndex) => {
+    setSelection((prev) => {
+      const next = new Set(prev);
+      if (next.has(originalIndex)) next.delete(originalIndex);
+      else next.add(originalIndex);
+      return next;
+    });
+  }, []);
 
   const handleKeyDown = (ev) => {
     if (ev.key === "Enter" && (ev.metaKey || ev.ctrlKey)) {
@@ -139,7 +161,19 @@ const ManageAllowedEmailDomainsModal = ({
     });
   }, [working, search, typeFilter]);
 
-  const itemData = useMemo(() => ({ items: visible }), [visible]);
+  const handleSelectAll = useCallback(() => {
+    setSelection(new Set(visible.map((x) => x.originalIndex)));
+  }, [visible]);
+
+  const handleDeleteSelected = useCallback(() => {
+    setWorking((prev) => prev.filter((_, idx) => !selection.has(idx)));
+    setSelection(new Set());
+  }, [selection]);
+
+  const itemData = useMemo(
+    () => ({ items: visible, selection, onToggle: handleToggleSelect }),
+    [visible, selection, handleToggleSelect]
+  );
 
   return (
     <Modal show={show} onHide={handleCancel} bsSize="large">
@@ -214,10 +248,33 @@ const ManageAllowedEmailDomainsModal = ({
         )}
         <div
           className="manage-modal-count"
-          data-testid="manage-modal-count"
-          style={{ marginBottom: 4 }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            marginBottom: 4
+          }}
         >
-          {countText}
+          <span data-testid="manage-modal-count">{countText}</span>
+          <button
+            type="button"
+            className="btn btn-default btn-xs"
+            data-testid="manage-modal-select-all"
+            onClick={handleSelectAll}
+          >
+            {T.translate("edit_promocode.manage_modal.select_all")}
+          </button>
+          <button
+            type="button"
+            className="btn btn-danger btn-xs"
+            data-testid="manage-modal-delete-selected"
+            onClick={handleDeleteSelected}
+            disabled={selection.size === 0}
+          >
+            {T.translate("edit_promocode.manage_modal.delete_selected", {
+              n: selection.size
+            })}
+          </button>
         </div>
         <FixedSizeList
           ref={listRef}

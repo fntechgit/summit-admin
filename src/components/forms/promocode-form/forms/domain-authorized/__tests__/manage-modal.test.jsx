@@ -286,4 +286,72 @@ describe("ManageAllowedEmailDomainsModal — Tier 2", () => {
       )
     ).toHaveLength(2);
   });
+
+  it("single checkbox + Delete Selected removes only that entry", () => {
+    openModal(["@a.com", "@b.com", "@c.com"]);
+    fireEvent.click(screen.getByTestId("manage-modal-checkbox-1"));
+    fireEvent.click(screen.getByTestId("manage-modal-delete-selected"));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "edit_promocode.manage_modal.done"
+      })
+    );
+    expect(onApply).toHaveBeenCalledWith(["@a.com", "@c.com"]);
+  });
+
+  it("Select All + Delete Selected empties the working list", () => {
+    openModal(["@a.com", "@b.com", "@c.com"]);
+    fireEvent.click(screen.getByTestId("manage-modal-select-all"));
+    fireEvent.click(screen.getByTestId("manage-modal-delete-selected"));
+    expect(
+      within(screen.getByTestId("fixed-size-list")).queryAllByTestId(
+        /manage-modal-row-/
+      )
+    ).toHaveLength(0);
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "edit_promocode.manage_modal.done"
+      })
+    );
+    expect(onApply).toHaveBeenCalledWith([]);
+  });
+
+  it("Select All respects the active filter (only visible rows deleted)", () => {
+    openModal(["@acme.com", ".edu", "user@acme.com"]);
+    fireEvent.change(screen.getByTestId("manage-modal-type-filter"), {
+      target: { value: "at_domain" }
+    });
+    fireEvent.click(screen.getByTestId("manage-modal-select-all"));
+    fireEvent.click(screen.getByTestId("manage-modal-delete-selected"));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "edit_promocode.manage_modal.done"
+      })
+    );
+    expect(onApply).toHaveBeenCalledWith([".edu", "user@acme.com"]);
+  });
+
+  it("selection clears when search changes", async () => {
+    openModal(["@acme.com", "@beta.com"]);
+    fireEvent.click(screen.getByTestId("manage-modal-checkbox-0"));
+    fireEvent.change(screen.getByTestId("manage-modal-search"), {
+      target: { value: "acme" }
+    });
+    await waitFor(() =>
+      expect(
+        within(screen.getByTestId("fixed-size-list")).getAllByTestId(
+          /manage-modal-row-/
+        )
+      ).toHaveLength(1)
+    );
+    // Direct invariant: with selection cleared, Delete Selected is disabled.
+    expect(screen.getByTestId("manage-modal-delete-selected")).toBeDisabled();
+    fireEvent.click(screen.getByTestId("manage-modal-delete-selected"));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "edit_promocode.manage_modal.done"
+      })
+    );
+    expect(onApply).toHaveBeenCalledWith(["@acme.com", "@beta.com"]);
+  });
 });
