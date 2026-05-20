@@ -2,6 +2,32 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import AllowedEmailDomainsRow from "../AllowedEmailDomainsRow";
 
+jest.mock("../ManageAllowedEmailDomainsModal", () => ({
+  __esModule: true,
+  default: ({ show, onApply, onHide, existing }) =>
+    show ? (
+      <div data-testid="manage-modal-mock">
+        <div data-testid="manage-modal-existing">
+          {JSON.stringify(existing)}
+        </div>
+        <button
+          type="button"
+          data-testid="manage-modal-mock-apply"
+          onClick={() => onApply(["@bulk1.com", "@bulk2.com"])}
+        >
+          mock apply
+        </button>
+        <button
+          type="button"
+          data-testid="manage-modal-mock-close"
+          onClick={onHide}
+        >
+          mock close
+        </button>
+      </div>
+    ) : null
+}));
+
 const baseEntity = (overrides = {}) => ({
   allowed_email_domains: [],
   ...overrides
@@ -299,5 +325,273 @@ describe("AllowedEmailDomainsRow", () => {
       container.querySelector("[data-testid='allowed_email_domains_input']")
         .value
     ).toBe("");
+  });
+});
+
+describe("AllowedEmailDomainsRow — compact summary + modal", () => {
+  it("renders chip wall when domains.length ≤ 50, with Manage List button always present (Tier 1.1)", () => {
+    const small = Array.from({ length: 50 }, (_, i) => `@e${i}.com`);
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: small })}
+        handleChange={() => {}}
+      />
+    );
+    expect(
+      container.querySelector("[data-testid='domain-chip-@e0.com']")
+    ).toBeInTheDocument();
+    // Tier 1.1: Manage List button is threshold-independent; present at all counts.
+    expect(
+      container.querySelector("[data-testid='manage-list-button']")
+    ).toBeInTheDocument();
+    // Compact summary must NOT be visible at ≤ 50 — chip wall owns this range.
+    expect(
+      container.querySelector("[data-testid='compact-summary-count']")
+    ).not.toBeInTheDocument();
+  });
+
+  it("Manage List button present at count=0 (Tier 1.1 — empty-form bulk-paste entry)", () => {
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: [] })}
+        handleChange={() => {}}
+      />
+    );
+    expect(
+      container.querySelector("[data-testid='manage-list-button']")
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector("[data-testid='compact-summary-count']")
+    ).not.toBeInTheDocument();
+  });
+
+  it("boundary: chip wall at length=50, compact summary at length=51 (pins > vs >=)", () => {
+    const exactly50 = Array.from({ length: 50 }, (_, i) => `@e${i}.com`);
+    const { container: c50, unmount } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: exactly50 })}
+        handleChange={() => {}}
+      />
+    );
+    // Probe compact summary, not Manage List button (button is threshold-independent post-Tier 1.1).
+    expect(
+      c50.querySelector("[data-testid='compact-summary-count']")
+    ).not.toBeInTheDocument();
+    expect(
+      c50.querySelector("[data-testid='domain-chip-@e0.com']")
+    ).toBeInTheDocument();
+    unmount();
+
+    const exactly51 = Array.from({ length: 51 }, (_, i) => `@e${i}.com`);
+    const { container: c51 } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: exactly51 })}
+        handleChange={() => {}}
+      />
+    );
+    expect(
+      c51.querySelector("[data-testid='compact-summary-count']")
+    ).toBeInTheDocument();
+    expect(
+      c51.querySelector("[data-testid='domain-chip-@e0.com']")
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders compact summary when domains.length > 50 (Manage List button is always present)", () => {
+    const big = Array.from({ length: 60 }, (_, i) => `@e${i}.com`);
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: big })}
+        handleChange={() => {}}
+      />
+    );
+    expect(
+      container.querySelector("[data-testid='domain-chip-@e0.com']")
+    ).not.toBeInTheDocument();
+    // i18n-react renders raw keys in jest env; the {n} interpolation is
+    // not visible, so we assert on the key wiring + button presence.
+    expect(
+      container.querySelector("[data-testid='compact-summary-count']")
+    ).toHaveTextContent("edit_promocode.large_list.summary_count");
+    expect(
+      container.querySelector("[data-testid='manage-list-button']")
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector("[data-testid='manage-list-button']")
+    ).toHaveTextContent("edit_promocode.manage_button");
+  });
+
+  it("type-mix hint counts @domain / .tld / user@email correctly", () => {
+    // Total must exceed LARGE_DOMAIN_LIST_THRESHOLD (50) to render compact mode.
+    const mix = [
+      ...Array.from({ length: 46 }, (_, i) => `@d${i}.com`),
+      ".edu",
+      ".gov",
+      "user@example.com",
+      "x@y.com",
+      "z@w.com"
+    ];
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: mix })}
+        handleChange={() => {}}
+      />
+    );
+    const mixHint = container.querySelector(
+      "[data-testid='compact-summary-type-mix']"
+    );
+    // Raw key in jest env (no translator); the per-category numbers (46,
+    // 2, 3) are passed as i18n params and only visible at runtime. Pin
+    // the key wiring here.
+    expect(mixHint).toHaveTextContent(
+      "edit_promocode.large_list.summary_type_mix"
+    );
+  });
+
+  it("clicking Manage List opens the modal with current domains as existing", () => {
+    const big = Array.from({ length: 60 }, (_, i) => `@e${i}.com`);
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: big })}
+        handleChange={() => {}}
+      />
+    );
+    fireEvent.click(
+      container.querySelector("[data-testid='manage-list-button']")
+    );
+    expect(
+      container.querySelector("[data-testid='manage-modal-mock']")
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector("[data-testid='manage-modal-existing']")
+    ).toHaveTextContent(JSON.stringify(big));
+  });
+
+  it("modal onApply bubbles via fireChange (handleChange called with new array)", () => {
+    const big = Array.from({ length: 60 }, (_, i) => `@e${i}.com`);
+    const handleChange = jest.fn();
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: big })}
+        handleChange={handleChange}
+      />
+    );
+    fireEvent.click(
+      container.querySelector("[data-testid='manage-list-button']")
+    );
+    fireEvent.click(
+      container.querySelector("[data-testid='manage-modal-mock-apply']")
+    );
+    expect(handleChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        target: expect.objectContaining({
+          id: "allowed_email_domains",
+          value: ["@bulk1.com", "@bulk2.com"]
+        })
+      })
+    );
+  });
+});
+
+describe("AllowedEmailDomainsRow — case-insensitive single-entry dedup", () => {
+  it("rejects @ACME.COM when @acme.com is already present", () => {
+    const handleChange = jest.fn();
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: ["@acme.com"] })}
+        handleChange={handleChange}
+      />
+    );
+    typeAndCommit(container, "@ACME.COM");
+    const calls = handleChange.mock.calls.filter(
+      (c) => Array.isArray(c[0]?.target?.value) && c[0].target.value.length > 1
+    );
+    expect(calls).toHaveLength(0);
+  });
+});
+
+describe("AllowedEmailDomainsRow — inline + add one input present at every size (SDS L58/69/100/186)", () => {
+  it("renders the inline input when domains.length <= 50 (chip wall)", () => {
+    const small = Array.from({ length: 10 }, (_, i) => `@e${i}.com`);
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: small })}
+        handleChange={() => {}}
+      />
+    );
+    expect(
+      container.querySelector("[data-testid='allowed_email_domains_input']")
+    ).toBeInTheDocument();
+  });
+
+  it("renders the inline input when domains.length > 50 (compact summary)", () => {
+    const big = Array.from({ length: 60 }, (_, i) => `@e${i}.com`);
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: big })}
+        handleChange={() => {}}
+      />
+    );
+    expect(
+      container.querySelector("[data-testid='allowed_email_domains_input']")
+    ).toBeInTheDocument();
+  });
+
+  it("commits a single entry from compact mode via Enter (parity with chip-wall behavior)", () => {
+    const big = Array.from({ length: 60 }, (_, i) => `@e${i}.com`);
+    const handleChange = jest.fn();
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: big })}
+        handleChange={handleChange}
+      />
+    );
+    typeAndCommit(container, "@new.com");
+    expect(handleChange).toHaveBeenCalledTimes(1);
+    expect(handleChange.mock.calls[0][0].target.value).toEqual([
+      ...big,
+      "@new.com"
+    ]);
+  });
+
+  it("case-insensitive single-entry dedup works in compact mode", () => {
+    const big = Array.from({ length: 60 }, (_, i) => `@e${i}.com`);
+    const handleChange = jest.fn();
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: big })}
+        handleChange={handleChange}
+      />
+    );
+    typeAndCommit(container, "@E0.COM"); // dup of @e0.com case-insensitively
+    expect(handleChange).not.toHaveBeenCalled();
+  });
+});
+
+describe("AllowedEmailDomainsRow — scrollToError target present in both branches (Codex A2)", () => {
+  it("compact branch carries id='allowed_email_domains' so document.getElementById finds it", () => {
+    const big = Array.from({ length: 60 }, (_, i) => `@e${i}.com`);
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: big })}
+        handleChange={() => {}}
+      />
+    );
+    expect(
+      container.querySelector("#allowed_email_domains")
+    ).toBeInTheDocument();
+  });
+
+  it("chip-wall branch still carries id='allowed_email_domains' (existing behavior, regression check)", () => {
+    const small = Array.from({ length: 10 }, (_, i) => `@e${i}.com`);
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: small })}
+        handleChange={() => {}}
+      />
+    );
+    expect(
+      container.querySelector("#allowed_email_domains")
+    ).toBeInTheDocument();
   });
 });
