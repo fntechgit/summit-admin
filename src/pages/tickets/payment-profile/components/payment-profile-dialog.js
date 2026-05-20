@@ -88,6 +88,7 @@ const PAYMENT_TYPE_FEE_METHOD = [
 const PaymentProfileDialog = ({
   onSave,
   onClose,
+  isSaving = false,
   entity: initialEntity,
   paymentFeeTypes,
   onDeleteFeeType,
@@ -115,7 +116,6 @@ const PaymentProfileDialog = ({
     //   live_secret_key: yup.string().required(T.translate("validation.required")),
     //   live_publishable_key: yup.string().required(T.translate("validation.required"))
     // }),
-    enableReinitialize: true,
     onSubmit: (values) => onSave(values)
   });
 
@@ -137,7 +137,8 @@ const PaymentProfileDialog = ({
       max_cents: yup.number().required(T.translate("validation.required")),
       min_cents: yup.number().required(T.translate("validation.required"))
     }),
-    onSubmit: (values) => onSaveFeeType(values).then(() => {
+    onSubmit: (values) =>
+      onSaveFeeType(values).then(() => {
         feeTypeFormik.resetForm();
         setShowFeeTypeForm(false);
       })
@@ -218,10 +219,16 @@ const PaymentProfileDialog = ({
       disableEnforceFocus
       disableAutoFocus
       disableRestoreFocus
+      disableEscapeKeyDown={isSaving}
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         {title}
-        <IconButton size="small" onClick={handleClose} sx={{ mr: 1 }}>
+        <IconButton
+          size="small"
+          onClick={handleClose}
+          sx={{ mr: 1 }}
+          disabled={isSaving}
+        >
           <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
@@ -565,7 +572,11 @@ const PaymentProfileDialog = ({
         </DialogContent>
         <Divider />
         <DialogActions>
-          <Button onClick={formik.handleSubmit} variant="contained">
+          <Button
+            onClick={formik.handleSubmit}
+            variant="contained"
+            disabled={isSaving}
+          >
             {T.translate("general.save")}
           </Button>
         </DialogActions>
@@ -579,6 +590,7 @@ PaymentProfileDialog.propTypes = {
   onSave: PropTypes.func.isRequired,
   entity: PropTypes.object,
   paymentFeeTypes: PropTypes.array,
+  isSaving: PropTypes.bool,
   onSaveFeeType: PropTypes.func.isRequired,
   onDeleteFeeType: PropTypes.func.isRequired
 };

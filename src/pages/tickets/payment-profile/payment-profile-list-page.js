@@ -57,6 +57,7 @@ const PaymentProfileListPage = ({
   }, [currentSummit?.id]);
 
   const [paymentProfilePopup, setPaymentProfilePopup] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleEdit = (paymentProfile) => {
     getPaymentProfile(paymentProfile.id).then(() => {
@@ -66,10 +67,14 @@ const PaymentProfileListPage = ({
   };
 
   const handleSave = (entity) => {
-    savePaymentProfile(entity).then(() => {
-      getPaymentProfiles("", DEFAULT_CURRENT_PAGE, perPage);
-      setPaymentProfilePopup(false);
-    });
+    if (isSaving) return;
+    setIsSaving(true);
+    savePaymentProfile(entity)
+      .then(() => {
+        getPaymentProfiles("", DEFAULT_CURRENT_PAGE, perPage);
+        setPaymentProfilePopup(false);
+      })
+      .finally(() => setIsSaving(false));
   };
 
   const handleDelete = (paymentProfileId) =>
@@ -93,6 +98,7 @@ const PaymentProfileListPage = ({
   };
 
   const handleClose = () => {
+    if (isSaving) return;
     resetPaymentProfileForm();
     setPaymentProfilePopup(false);
   };
@@ -222,6 +228,7 @@ const PaymentProfileListPage = ({
         <PaymentProfileDialog
           entity={currentPaymentProfile}
           paymentFeeTypes={paymentFeeTypes}
+          isSaving={isSaving}
           onClose={handleClose}
           onSave={handleSave}
           onSaveFeeType={handleSaveFeeType}
