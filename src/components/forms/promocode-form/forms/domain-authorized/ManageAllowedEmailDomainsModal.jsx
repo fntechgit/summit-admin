@@ -54,6 +54,7 @@ const ManageAllowedEmailDomainsModal = ({
   const [typeFilter, setTypeFilter] = useState("all");
   const [selection, setSelection] = useState(() => new Set());
   const listRef = useRef(null);
+  const scrollToEndRef = useRef(false);
 
   // Intentionally depend only on `show`: snapshot `existing` when the modal opens
   // and ignore subsequent prop changes — modal owns the working copy until Done/Cancel.
@@ -94,16 +95,19 @@ const ManageAllowedEmailDomainsModal = ({
     });
     setDraftText("");
 
-    // Adds append to the end of the working copy. If a search or type filter is
-    // active — or a search is pending in the debounce window (searchInput
-    // typed but `search` state not yet updated) — clear all filters so the
-    // additions are visible. Only autoscroll when the list is fully unfiltered.
+    // Adds append to the end of the working copy. Clear any active or pending
+    // filter so the additions are not filtered out of the visible list.
     if (search !== "" || searchInput !== "" || typeFilter !== "all") {
       setSearchInput("");
       setSearch("");
       setTypeFilter("all");
-    } else if (listRef.current && next.length > 0) {
-      listRef.current.scrollToItem(next.length - 1, "end");
+    }
+    // Defer the autoscroll: `setWorking` above is batched and not yet committed,
+    // so react-window still has the old itemCount and would clamp the target
+    // index to the old last row. A flag + post-render effect scrolls once the
+    // list has re-rendered with the new (larger) itemCount.
+    if (additions.length > 0) {
+      scrollToEndRef.current = true;
     }
   }, [draftText, working, search, searchInput, typeFilter]);
 
@@ -160,6 +164,13 @@ const ManageAllowedEmailDomainsModal = ({
       return true;
     });
   }, [working, search, typeFilter]);
+
+  useEffect(() => {
+    if (scrollToEndRef.current && listRef.current && visible.length > 0) {
+      listRef.current.scrollToItem(visible.length - 1, "end");
+    }
+    scrollToEndRef.current = false;
+  }, [visible]);
 
   const handleSelectAll = useCallback(() => {
     setSelection(new Set(visible.map((x) => x.originalIndex)));

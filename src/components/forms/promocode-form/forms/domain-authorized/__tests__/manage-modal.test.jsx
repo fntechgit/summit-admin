@@ -8,10 +8,22 @@ import {
 } from "@testing-library/react";
 import ManageAllowedEmailDomainsModal from "../ManageAllowedEmailDomainsModal";
 
+// Shared scroll-call log written by the react-window mock below.
+// Tests clear this in beforeEach; the mock pushes { index, itemCountAtCallTime }
+// on every scrollToItem call so deferred-scroll tests can inspect call-time state.
+const scrollLog = [];
+
 // Mock react-window — jsdom has no layout, so FixedSizeList won't render rows.
 // Mock renders first 10 rows directly to match production's ~10-rows-visible cap.
+//
+// On every render the mock closes over the current `itemCount` so that
+// scrollToItem records itemCountAtCallTime — distinguishing whether the call
+// happened before or after the list re-rendered with the new (larger) count.
 jest.mock("react-window", () => {
   const React = require("react");
+  // Reference the module-level scrollLog declared above (same module scope).
+  // jest.mock hoists, but the factory runs lazily, so by the time it executes
+  // scrollLog is already defined.
   return {
     __esModule: true,
     FixedSizeList: React.forwardRef(
@@ -19,7 +31,13 @@ jest.mock("react-window", () => {
         const Row = children;
         const visible = Math.min(itemCount, 10);
         if (ref) {
-          ref.current = { scrollToItem: jest.fn() };
+          ref.current = {
+            scrollToItem: jest.fn((index, align) => {
+              // scrollLog is closed over from the outer module scope.
+              // itemCount here is the value from THIS render cycle.
+              scrollLog.push({ index, align, itemCountAtCallTime: itemCount });
+            })
+          };
         }
         return React.createElement(
           "div",
@@ -44,6 +62,7 @@ const onHide = jest.fn();
 beforeEach(() => {
   onApply.mockClear();
   onHide.mockClear();
+  scrollLog.length = 0;
 });
 
 const openModal = (existing = []) =>
@@ -356,5 +375,42 @@ describe("ManageAllowedEmailDomainsModal — Tier 2", () => {
       })
     );
     expect(onApply).toHaveBeenCalledWith(["@acme.com", "@beta.com"]);
+  });
+
+  it("autoscroll after Add targets the new last index with the post-add itemCount", async () => {
+    // Open with 2 entries. Add 1 more (new total: 3).
+    // The deferred-scroll fix: scrollToItem must be called with index=2 AND
+    // itemCountAtCallTime=3 (not the pre-add itemCount of 2). The pre-fix
+    // synchronous code would call scrollToItem while the list still had
+    // itemCount=2, clamping the scroll target to index 1 (the old last row).
+    //
+    // What this test DOES verify: scrollToItem is called once, with the correct
+    // index (visible.length - 1 = 2) and the correct itemCount at call time (3).
+    //
+    // What this test does NOT verify: that the scroll actually moves the browser
+    // viewport — jsdom has no layout engine, so the scrollToItem call is captured
+    // via the mock but never produces a visual scroll. The test validates the
+    // index + call-time itemCount contract, not the pixel position.
+    openModal(["@a.com", "@b.com"]);
+    expect(scrollLog).toHaveLength(0);
+
+    const textarea = screen.getByTestId("manage-modal-textarea");
+    fireEvent.change(textarea, { target: { value: "@c.com" } });
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "edit_promocode.manage_modal.add_button"
+      })
+    );
+
+    // The deferred effect fires after React commits the new visible array.
+    // waitFor lets RTL flush all state updates + effects.
+    await waitFor(() => expect(scrollLog).toHaveLength(1));
+
+    const [call] = scrollLog;
+    // Index must target the new last row (3 entries → index 2).
+    expect(call.index).toBe(2);
+    // itemCountAtCallTime must equal the post-add count (3), proving the effect
+    // ran after the list re-rendered — not synchronously while itemCount was 2.
+    expect(call.itemCountAtCallTime).toBe(3);
   });
 });
