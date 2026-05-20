@@ -1051,6 +1051,7 @@
       "add_button": "Add Domains",
       "added_toast": "Added {added} · skipped {invalid} invalid · {dup} duplicates",
       "configured_count": "Configured Domains ({n})",
+      "search_placeholder": "Search domains...",
       "done": "Done",
       "cancel": "Cancel"
     },

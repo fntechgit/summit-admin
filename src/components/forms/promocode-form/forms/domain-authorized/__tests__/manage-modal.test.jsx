@@ -1,5 +1,11 @@
 import React from "react";
-import { render, screen, fireEvent, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  within,
+  waitFor
+} from "@testing-library/react";
 import ManageAllowedEmailDomainsModal from "../ManageAllowedEmailDomainsModal";
 
 // Mock react-window — jsdom has no layout, so FixedSizeList won't render rows.
@@ -154,5 +160,28 @@ describe("ManageAllowedEmailDomainsModal — Tier 1", () => {
       screen.getByRole("button", { name: "edit_promocode.manage_modal.done" })
     );
     expect(onApply).toHaveBeenCalledWith(["@a.com"]);
+  });
+});
+
+describe("ManageAllowedEmailDomainsModal — Tier 2", () => {
+  it("Search narrows the visible list (debounced 150 ms)", async () => {
+    openModal(["@acme.com", "@beta.com", "@acmeworld.com"]);
+    expect(
+      within(screen.getByTestId("fixed-size-list")).getAllByTestId(
+        /manage-modal-row-/
+      )
+    ).toHaveLength(3);
+
+    fireEvent.change(screen.getByTestId("manage-modal-search"), {
+      target: { value: "acme" }
+    });
+
+    await waitFor(() =>
+      expect(
+        within(screen.getByTestId("fixed-size-list")).getAllByTestId(
+          /manage-modal-row-/
+        )
+      ).toHaveLength(2)
+    );
   });
 });

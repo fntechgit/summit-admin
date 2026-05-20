@@ -12,9 +12,17 @@ import { parseTextBlob, classifyEntries } from "./bulk-input-parser";
 
 const ROW_HEIGHT = 32;
 const LIST_HEIGHT = 320;
+const SEARCH_DEBOUNCE_MS = 150;
+
+// eslint-disable-next-line no-unused-vars
+const _typeOf = (entry) => {
+  if (entry.startsWith("@")) return "at_domain";
+  if (entry.startsWith(".")) return "tld";
+  return "email";
+};
 
 const Row = React.memo(({ index, style, data }) => {
-  const entry = data[index];
+  const { entry } = data.items[index];
   return (
     <div
       style={style}
@@ -35,6 +43,8 @@ const ManageAllowedEmailDomainsModal = ({
   const [working, setWorking] = useState([]);
   const [draftText, setDraftText] = useState("");
   const [toast, setToast] = useState(null);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
   const listRef = useRef(null);
 
   // Intentionally depend only on `show`: snapshot `existing` when the modal opens
@@ -44,8 +54,15 @@ const ManageAllowedEmailDomainsModal = ({
       setWorking(Array.isArray(existing) ? [...existing] : []);
       setDraftText("");
       setToast(null);
+      setSearchInput("");
+      setSearch("");
     }
   }, [show]);
+
+  useEffect(() => {
+    const id = setTimeout(() => setSearch(searchInput), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(id);
+  }, [searchInput]);
 
   const handleAddDomains = useCallback(() => {
     const rows = parseTextBlob(draftText);
@@ -63,10 +80,17 @@ const ManageAllowedEmailDomainsModal = ({
     });
     setDraftText("");
 
-    if (listRef.current && next.length > 0) {
+    // Adds append to the end of the working copy. If a search filter is
+    // active the new entries may be filtered out of view — clear it so the
+    // additions are visible, and only autoscroll when the unfiltered list
+    // index space matches `working`.
+    if (search !== "") {
+      setSearchInput("");
+      setSearch("");
+    } else if (listRef.current && next.length > 0) {
       listRef.current.scrollToItem(next.length - 1, "end");
     }
-  }, [draftText, working]);
+  }, [draftText, working, search]);
 
   const handleKeyDown = (ev) => {
     if (ev.key === "Enter" && (ev.metaKey || ev.ctrlKey)) {
@@ -100,6 +124,18 @@ const ManageAllowedEmailDomainsModal = ({
     }
   );
 
+  const visible = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const indexed = working.map((entry, originalIndex) => ({
+      entry,
+      originalIndex
+    }));
+    if (!q) return indexed;
+    return indexed.filter((x) => x.entry.toLowerCase().includes(q));
+  }, [working, search]);
+
+  const itemData = useMemo(() => ({ items: visible }), [visible]);
+
   return (
     <Modal show={show} onHide={handleCancel} bsSize="large">
       <Modal.Header closeButton>
@@ -108,6 +144,21 @@ const ManageAllowedEmailDomainsModal = ({
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
+        <div
+          className="manage-modal-controls"
+          style={{ display: "flex", gap: 8, marginBottom: 12 }}
+        >
+          <input
+            type="text"
+            data-testid="manage-modal-search"
+            className="form-control"
+            value={searchInput}
+            placeholder={T.translate(
+              "edit_promocode.manage_modal.search_placeholder"
+            )}
+            onChange={(ev) => setSearchInput(ev.target.value)}
+          />
+        </div>
         <div className="manage-modal-add-section" style={{ marginBottom: 12 }}>
           <textarea
             data-testid="manage-modal-textarea"
@@ -147,9 +198,9 @@ const ManageAllowedEmailDomainsModal = ({
           ref={listRef}
           height={LIST_HEIGHT}
           width="100%"
-          itemCount={working.length}
+          itemCount={visible.length}
           itemSize={ROW_HEIGHT}
-          itemData={working}
+          itemData={itemData}
         >
           {Row}
         </FixedSizeList>
