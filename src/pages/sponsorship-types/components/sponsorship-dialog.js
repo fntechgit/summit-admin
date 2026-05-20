@@ -17,8 +17,8 @@ import {
   MenuItem
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
-import MuiFormikSelect from "../../../components/mui/formik-inputs/mui-formik-select";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
 import useScrollToError from "../../../hooks/useScrollToError";
 import { requiredStringValidation } from "../../../utils/yup";
 
@@ -98,8 +98,8 @@ const SponsorshipDialog = ({
                   name="name"
                   id="name"
                   margin="none"
-                  formik={formik}
                   fullWidth
+                  required
                 />
               </Grid2>
               <Grid2 size={6} sx={{ mt: 2 }}>
@@ -110,7 +110,6 @@ const SponsorshipDialog = ({
                   variant="outlined"
                   name="label"
                   margin="none"
-                  formik={formik}
                   fullWidth
                 />
               </Grid2>
@@ -126,6 +125,7 @@ const SponsorshipDialog = ({
                     )}
                     margin="none"
                     isClearable
+                    options={SIZE_OPTIONS}
                   >
                     {SIZE_OPTIONS.map((s) => (
                       <MenuItem key={s} value={s}>
