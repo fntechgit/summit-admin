@@ -601,19 +601,19 @@ export const normalizeSelectAllField = (
   listName,
   allSelected
 ) => {
-  if (!items?.length)
-    return {
-      [flagName]: false,
-      [listName]: []
-    };
-
-  const isAllSelected = allSelected ?? items.includes("all");
+  const isAllSelected = allSelected ?? items?.includes("all");
   if (isAllSelected) {
     return {
       [flagName]: true,
       [listName]: []
     };
   }
+
+  if (!items?.length)
+    return {
+      [flagName]: false,
+      [listName]: []
+    };
   return {
     [flagName]: false,
     [listName]: items.map((a) => a.id ?? a)
