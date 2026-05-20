@@ -413,4 +413,53 @@ describe("ManageAllowedEmailDomainsModal — Tier 2", () => {
     // ran after the list re-rendered — not synchronously while itemCount was 2.
     expect(call.itemCountAtCallTime).toBe(3);
   });
+
+  it("closing the modal within the debounce window cancels the pending setSearch", () => {
+    // The modal is mounted but hidden (`show={false}`) — the component stays
+    // mounted per AllowedEmailDomainsRow's unconditional render, but the effect
+    // must not fire setSearch while hidden.
+    jest.useFakeTimers();
+    const { rerender } = render(
+      <ManageAllowedEmailDomainsModal
+        show
+        onHide={onHide}
+        onApply={onApply}
+        existing={["@a.com"]}
+      />
+    );
+
+    // Type into search — searchInput="acme", debounce clock starts.
+    fireEvent.change(screen.getByTestId("manage-modal-search"), {
+      target: { value: "acme" }
+    });
+    // Verify the input is set before closing.
+    expect(screen.getByTestId("manage-modal-search")).toHaveValue("acme");
+
+    // Close the modal before 150 ms elapses.
+    rerender(
+      <ManageAllowedEmailDomainsModal
+        show={false}
+        onHide={onHide}
+        onApply={onApply}
+        existing={["@a.com"]}
+      />
+    );
+
+    // Advance past the debounce window. The `if (!show) return undefined` guard
+    // must prevent setSearch from running (no error, no state update side-effects).
+    expect(() => jest.runAllTimers()).not.toThrow();
+
+    // Reopen the modal — the open effect resets searchInput to "" and search to "".
+    rerender(
+      <ManageAllowedEmailDomainsModal
+        show
+        onHide={onHide}
+        onApply={onApply}
+        existing={["@a.com"]}
+      />
+    );
+    expect(screen.getByTestId("manage-modal-search")).toHaveValue("");
+
+    jest.useRealTimers();
+  });
 });

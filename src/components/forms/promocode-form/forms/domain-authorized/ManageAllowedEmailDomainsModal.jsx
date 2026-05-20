@@ -71,9 +71,10 @@ const ManageAllowedEmailDomainsModal = ({
   }, [show]);
 
   useEffect(() => {
+    if (!show) return undefined;
     const id = setTimeout(() => setSearch(searchInput), SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(id);
-  }, [searchInput]);
+  }, [searchInput, show]);
 
   useEffect(() => {
     setSelection(new Set());
