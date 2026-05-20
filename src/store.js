@@ -169,6 +169,7 @@ import sponsorCustomizedFormReducer from "./reducers/sponsors/sponsor-customized
 import sponsorPageCartListReducer from "./reducers/sponsors/sponsor-page-cart-list-reducer";
 import sponsorCustomizedFormItemsListReducer from "./reducers/sponsors/sponsor-customized-form-items-list-reducer.js";
 import showPagesListReducer from "./reducers/sponsors/show-pages-list-reducer.js";
+import showPurchaseListReducer from "./reducers/sponsors/show-purchase-list-reducer.js";
 import sponsorPagePurchaseListReducer from "./reducers/sponsors/sponsor-page-purchase-list-reducer.js";
 import sponsorPagePagesListReducer from "./reducers/sponsors/sponsor-page-pages-list-reducer.js";
 import sponsorPageMUListReducer from "./reducers/sponsors/sponsor-page-mu-list-reducer.js";
@@ -258,6 +259,7 @@ const reducers = persistCombineReducers(config, {
   sponsorFormsListState: sponsorFormsListReducer,
   sponsorFormItemsListState: sponsorFormItemsListReducer,
   showPagesListState: showPagesListReducer,
+  showPurchaseListState: showPurchaseListReducer,
   sponsorUsersListState: sponsorUsersListReducer,
   sponsorPageFormsListState: sponsorPageFormsListReducer,
   sponsorPageCartListState: sponsorPageCartListReducer,
