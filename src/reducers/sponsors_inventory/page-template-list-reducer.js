@@ -70,19 +70,22 @@ const pageTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
     case RECEIVE_PAGE_TEMPLATES: {
       const { current_page, total, last_page } = payload.response;
 
-      const pageTemplates = payload.response.data.map((a) => ({
-        id: a.id,
-        code: a.code,
-        name: a.name,
-        info_mod: a.modules.filter((m) => m.kind === PAGES_MODULE_KINDS.INFO)
-          .length,
-        upload_mod: a.modules.filter((m) => m.kind === PAGES_MODULE_KINDS.MEDIA)
-          .length,
-        download_mod: a.modules.filter(
-          (m) => m.kind === PAGES_MODULE_KINDS.DOCUMENT
-        ).length,
-        is_archived: a.is_archived
-      }));
+      const pageTemplates = payload.response.data.map((a) => {
+        const modules = a.modules ?? [];
+        return {
+          id: a.id,
+          code: a.code,
+          name: a.name,
+          info_mod: modules.filter((m) => m.kind === PAGES_MODULE_KINDS.INFO)
+            .length,
+          upload_mod: modules.filter((m) => m.kind === PAGES_MODULE_KINDS.MEDIA)
+            .length,
+          download_mod: modules.filter(
+            (m) => m.kind === PAGES_MODULE_KINDS.DOCUMENT
+          ).length,
+          is_archived: a.is_archived
+        };
+      });
 
       return {
         ...state,
