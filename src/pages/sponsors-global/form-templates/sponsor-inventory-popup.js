@@ -37,6 +37,7 @@ import {
 } from "../../../utils/yup";
 import ItemPriceTiers from "../../../components/mui/formik-inputs/item-price-tiers";
 import MuiFormikQuantityField from "../../../components/mui/formik-inputs/mui-formik-quantity-field";
+import { getFileUploadAllowedExtensions } from "../../../utils/methods";
 
 const SponsorItemDialog = ({
   onClose,
@@ -221,10 +222,7 @@ const SponsorItemDialog = ({
                   id="image-upload"
                   name="images"
                   maxFiles={mediaType.max_uploads_qty}
-                  allowedExtensions={[
-                    "pdf",
-                    ...ALLOWED_INVENTORY_IMAGE_FORMATS
-                  ]}
+                  allowedExtensions={getFileUploadAllowedExtensions()}
                 />
               </Grid2>
             </Grid2>

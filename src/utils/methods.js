@@ -629,3 +629,6 @@ export const formatDate = (date, timeZone, format = DATETIME_FORMAT) => {
     .tz(timeZone)
     .format(format);
 };
+
+export const getFileUploadAllowedExtensions = () =>
+  window.FILE_UPLOAD_ALLOWED_EXTENSIONS?.split(",").filter(Boolean) ?? [];
