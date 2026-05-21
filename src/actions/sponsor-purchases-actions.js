@@ -62,7 +62,7 @@ export const getAllSponsorPurchases =
     if (term) {
       const escapedTerm = escapeFilterValue(term);
       filter.push(
-        `number==${escapedTerm},purchased_by_email=@${escapedTerm},purchased_by_full_name=@${escapedTerm}`
+        `number==${escapedTerm},company_name=@${escapedTerm},purchased_by_email=@${escapedTerm},purchased_by_full_name=@${escapedTerm}`
       );
     }
 
@@ -70,7 +70,10 @@ export const getAllSponsorPurchases =
       page,
       per_page: perPage,
       access_token: accessToken,
-      expand: "sponsor"
+      expand: "sponsor",
+      relations: "sponsor",
+      fields:
+        "number,payment_id,purchased_date,sponsor.id,sponsor.company_name,payment_method,status,net_amount"
     };
 
     if (filter.length > 0) {
@@ -86,6 +89,9 @@ export const getAllSponsorPurchases =
           break;
         case "amount":
           params.order = `${orderDirSign}raw_amount`;
+          break;
+        case "sponsor_name":
+          params.order = `${orderDirSign}sponsor_company_name`;
           break;
         default:
           params.order = `${orderDirSign}${order}`;
@@ -115,7 +121,7 @@ export const exportAllSponsorPurchases =
     if (term) {
       const escapedTerm = escapeFilterValue(term);
       filter.push(
-        `number==${escapedTerm},purchased_by_email=@${escapedTerm},purchased_by_full_name=@${escapedTerm}`
+        `number==${escapedTerm},company_name=@${escapedTerm},purchased_by_email=@${escapedTerm},purchased_by_full_name=@${escapedTerm}`
       );
     }
 
@@ -124,7 +130,7 @@ export const exportAllSponsorPurchases =
       expand: "sponsor",
       relations: "sponsor",
       fields:
-        "order_number,purchased_date,sponsor.name,payment_method,status,amount"
+        "number,payment_id,purchased_date,sponsor.id,sponsor.company_name,payment_method,status,net_amount"
     };
 
     if (filter.length > 0) {
@@ -140,6 +146,9 @@ export const exportAllSponsorPurchases =
           break;
         case "amount":
           params.order = `${orderDirSign}raw_amount`;
+          break;
+        case "sponsor_name":
+          params.order = `${orderDirSign}sponsor_company_name`;
           break;
         default:
           params.order = `${orderDirSign}${order}`;

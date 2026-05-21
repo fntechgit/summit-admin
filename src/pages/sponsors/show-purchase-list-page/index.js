@@ -110,6 +110,11 @@ const ShowPurchaseListPage = ({
       sortable: true
     },
     {
+      columnKey: "sponsor_name",
+      header: T.translate("sponsor_show_purchases.sponsor"),
+      sortable: true
+    },
+    {
       columnKey: "payment_method",
       header: T.translate("sponsor_show_purchases.payment_method"),
       sortable: true

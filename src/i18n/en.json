@@ -2886,6 +2886,7 @@
   "sponsor_show_purchases": {
     "order": "Order",
     "purchased": "Purchased",
+    "sponsor": "Sponsor",
     "payment_method": "Payment Method",
     "status": "Status",
     "amount": "Amount",

@@ -63,9 +63,8 @@ const showPurchaseListReducer = (state = DEFAULT_STATE, action) => {
 
       const purchases = payload.response.data.map((a) => ({
         ...a,
-        order: a.order_number,
         sponsor_id: a.sponsor?.id,
-        sponsor_name: a.sponsor?.name,
+        sponsor_name: a.sponsor?.company_name,
         amount: `$${amountFromCents(a.net_amount)}`,
         purchased: a.purchased_date
           ? moment(a.purchased_date * MILLISECONDS_TO_SECONDS).format(
