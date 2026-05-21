@@ -123,50 +123,72 @@ const getCriterias = (summit, mediaUploadTypes) => [
     },
     customParser: (f) => {
       const filter = [];
-      if (f.value) {
-        switch (f.value) {
-          case "only_rejected":
-            filter.push("has_rejected_presentations==true");
-            filter.push("has_accepted_presentations==false");
-            filter.push("has_alternate_presentations==false");
-            break;
-          case "only_accepted":
-            filter.push("has_rejected_presentations==false");
-            filter.push("has_accepted_presentations==true");
-            filter.push("has_alternate_presentations==false");
-            break;
-          case "only_alternate":
-            filter.push("has_rejected_presentations==false");
-            filter.push("has_accepted_presentations==false");
-            filter.push("has_alternate_presentations==true");
-            break;
-          case "accepted_alternate":
-            filter.push("has_rejected_presentations==false");
-            filter.push("has_accepted_presentations==true");
-            filter.push("has_alternate_presentations==true");
-            break;
-          case "accepted_rejected":
-            filter.push("has_rejected_presentations==true");
-            filter.push("has_accepted_presentations==true");
-            filter.push("has_alternate_presentations==false");
-            break;
-          case "alternate_rejected":
-            filter.push("has_rejected_presentations==true");
-            filter.push("has_accepted_presentations==false");
-            filter.push("has_alternate_presentations==true");
-            break;
-          case "accepted":
-            filter.push("has_accepted_presentations==true");
-            break;
-          case "rejected":
-            filter.push("has_rejected_presentations==true");
-            break;
-          case "alternate":
-            filter.push("has_alternate_presentations==true");
-            break;
-          default:
-            break;
-        }
+
+      if (Array.isArray(f.value) && f.value.length > 0) {
+        // if user chose a combined option then we ignore single options, only single options can be combined
+        const combinedOptions = [
+          "only_rejected",
+          "only_accepted",
+          "only_alternate",
+          "accepted_alternate",
+          "accepted_rejected",
+          "alternate_rejected"
+        ];
+        const hasCombinedOption = f.value.some((v) =>
+          combinedOptions.includes(v)
+        );
+
+        f.value.forEach((val) => {
+          switch (val) {
+            case "only_rejected":
+              filter.push("has_rejected_presentations==true");
+              filter.push("has_accepted_presentations==false");
+              filter.push("has_alternate_presentations==false");
+              break;
+            case "only_accepted":
+              filter.push("has_rejected_presentations==false");
+              filter.push("has_accepted_presentations==true");
+              filter.push("has_alternate_presentations==false");
+              break;
+            case "only_alternate":
+              filter.push("has_rejected_presentations==false");
+              filter.push("has_accepted_presentations==false");
+              filter.push("has_alternate_presentations==true");
+              break;
+            case "accepted_alternate":
+              filter.push("has_rejected_presentations==false");
+              filter.push("has_accepted_presentations==true");
+              filter.push("has_alternate_presentations==true");
+              break;
+            case "accepted_rejected":
+              filter.push("has_rejected_presentations==true");
+              filter.push("has_accepted_presentations==true");
+              filter.push("has_alternate_presentations==false");
+              break;
+            case "alternate_rejected":
+              filter.push("has_rejected_presentations==true");
+              filter.push("has_accepted_presentations==false");
+              filter.push("has_alternate_presentations==true");
+              break;
+            case "accepted":
+              if (!hasCombinedOption) {
+                filter.push("has_accepted_presentations==true");
+              }
+              break;
+            case "rejected":
+              if (!hasCombinedOption) {
+                filter.push("has_rejected_presentations==true");
+              }
+              break;
+            case "alternate":
+              if (!hasCombinedOption) {
+                filter.push("has_alternate_presentations==true");
+              }
+              break;
+            default:
+              break;
+          }
+        });
       }
       return filter;
     }
@@ -281,7 +303,7 @@ const SummitSpeakersListPage = ({
   }, [currentSummit, source, parsedFilter.join(",")]);
 
   const getBySummit = (params = {}) => {
-    const { term, page, perPage, order, orderDir } = subjectProps;
+    const { term, currentPage: page, perPage, order, orderDir } = subjectProps;
 
     const mergedParams = { term, page, perPage, order, orderDir, ...params };
 

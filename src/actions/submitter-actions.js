@@ -108,7 +108,6 @@ export const getSubmittersBySummit =
         page,
         perPage,
         term,
-        ...filters,
         currentSummitId: currentSummit.id
       }
     )(params)(dispatch).then(() => {
@@ -121,7 +120,7 @@ export const exportSummitSubmitters =
     term = null,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    filters = {},
+    filters = [],
     source = null
   ) =>
   async (dispatch, getState) => {
@@ -180,7 +179,7 @@ export const sendSubmitterEmails =
   (
     /* eslint-disable */
     term = null,
-    filters = {},
+    filters = [],
     testRecipient = "",
     excerptRecipient = "",
     // not used only left to keep the signature

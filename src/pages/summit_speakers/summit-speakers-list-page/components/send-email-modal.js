@@ -325,6 +325,7 @@ const SendEmailModal = ({
               <br />
               <input
                 id="ingest_email"
+                value={modalValues.ingest_email || ""}
                 className="form-control"
                 onChange={handleModalChange}
               />
@@ -337,6 +338,7 @@ const SendEmailModal = ({
                 <div className="form-check abc-checkbox">
                   <input
                     id="should_send_copy_2_submitter"
+                    checked={modalValues.should_send_copy_2_submitter}
                     className="form-check-input"
                     type="checkbox"
                     onChange={handleModalChange}

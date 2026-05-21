@@ -828,7 +828,6 @@ export const getSpeakersBySummit =
         page,
         perPage,
         term,
-        ...filters,
         currentSummitId: currentSummit.id
       }
     )(params)(dispatch).then(() => {
