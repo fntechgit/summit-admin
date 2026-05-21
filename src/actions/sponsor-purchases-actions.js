@@ -88,7 +88,7 @@ export const getAllSponsorPurchases =
           params.order = `${orderDirSign}created`;
           break;
         case "amount":
-          params.order = `${orderDirSign}raw_amount`;
+          params.order = `${orderDirSign}net_amount`;
           break;
         case "sponsor_name":
           params.order = `${orderDirSign}sponsor_company_name`;
@@ -104,7 +104,7 @@ export const getAllSponsorPurchases =
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/purchases`,
       authErrorHandler,
       { order, orderDir, page, perPage, term }
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -145,7 +145,7 @@ export const exportAllSponsorPurchases =
           params.order = `${orderDirSign}created`;
           break;
         case "amount":
-          params.order = `${orderDirSign}raw_amount`;
+          params.order = `${orderDirSign}net_amount`;
           break;
         case "sponsor_name":
           params.order = `${orderDirSign}sponsor_company_name`;
@@ -206,7 +206,7 @@ export const getSponsorPurchases =
           params.order = `${orderDirSign}created`;
           break;
         case "amount":
-          params.order = `${orderDirSign}raw_amount`;
+          params.order = `${orderDirSign}net_amount`;
           break;
         default:
           params.order = `${orderDirSign}${order}`;

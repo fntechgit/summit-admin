@@ -185,7 +185,7 @@ const ShowPagesListPage = ({
         <Breadcrumb
           data={{
             title: T.translate("show_pages.pages"),
-            pathname: match.url
+            pathname: match?.url
           }}
         />
       </div>

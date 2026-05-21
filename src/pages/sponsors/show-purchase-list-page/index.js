@@ -76,7 +76,7 @@ const ShowPurchaseListPage = ({
   };
 
   const handleExport = () => {
-    exportAllSponsorPurchases();
+    exportAllSponsorPurchases(term, order, orderDir);
   };
 
   const handleSearch = (searchTerm) => {
