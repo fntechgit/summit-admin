@@ -32,6 +32,7 @@ import {
   ALLOWED_INVENTORY_IMAGE_FORMATS,
   MAX_INVENTORY_IMAGES_UPLOAD_QTY
 } from "../../../../utils/constants";
+import { getFileUploadAllowedExtensions } from "../../../../utils/methods";
 
 const buildInitialValues = (data) => ({ ...data });
 
@@ -151,7 +152,10 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
                 id="item-image-upload"
                 name="images"
                 maxFiles={MAX_INVENTORY_IMAGES_UPLOAD_QTY}
-                allowedExtensions={["pdf", ...ALLOWED_INVENTORY_IMAGE_FORMATS]}
+                allowedExtensions={[
+                  ...getFileUploadAllowedExtensions(),
+                  ...ALLOWED_INVENTORY_IMAGE_FORMATS
+                ]}
               />
             </Box>
           </Grid2>

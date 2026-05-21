@@ -10,6 +10,7 @@ import {
   PAGE_MODULES_DOWNLOAD
 } from "../../../../../utils/constants";
 import MuiFormikRadioGroup from "../../../../../components/mui/formik-inputs/mui-formik-radio-group";
+import { getFileUploadAllowedExtensions } from "../../../../../utils/methods";
 
 const DocumentDownloadModule = ({ baseName, index }) => {
   const buildFieldName = (field) => `${baseName}[${index}].${field}`;
@@ -82,7 +83,10 @@ const DocumentDownloadModule = ({ baseName, index }) => {
             id={`document-module-upload-${index}`}
             name={buildFieldName("file")}
             maxFiles={1}
-            allowedExtensions={["pdf", ...ALLOWED_INVENTORY_IMAGE_FORMATS]}
+            allowedExtensions={[
+              ...getFileUploadAllowedExtensions(),
+              ...ALLOWED_INVENTORY_IMAGE_FORMATS
+            ]}
           />
         </Grid2>
       )}

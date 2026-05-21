@@ -37,6 +37,7 @@ import {
 } from "../../../utils/yup";
 import ItemPriceTiers from "../../../components/mui/formik-inputs/item-price-tiers";
 import MuiFormikQuantityField from "../../../components/mui/formik-inputs/mui-formik-quantity-field";
+import { getFileUploadAllowedExtensions } from "../../../utils/methods";
 
 const SponsorItemDialog = ({
   onClose,
@@ -76,6 +77,8 @@ const SponsorItemDialog = ({
       allowed_extensions: ALLOWED_INVENTORY_IMAGE_FORMATS
     }
   };
+
+  console.log("CHECK!", getFileUploadAllowedExtensions());
 
   useScrollToError(formik);
 
@@ -222,7 +225,7 @@ const SponsorItemDialog = ({
                   name="images"
                   maxFiles={mediaType.max_uploads_qty}
                   allowedExtensions={[
-                    "pdf",
+                    ...getFileUploadAllowedExtensions(),
                     ...ALLOWED_INVENTORY_IMAGE_FORMATS
                   ]}
                 />
