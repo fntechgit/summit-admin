@@ -44,7 +44,10 @@ import LogOutCallbackRoute from "./routes/logout-callback-route";
 import AuthButton from "./components/auth-button";
 import DefaultRoute from "./routes/default-route";
 import { getTimezones } from "./actions/base-actions";
-import { LANGUAGE_CODE_LENGTH } from "./utils/constants";
+import {
+  ALLOWED_INVENTORY_IMAGE_FORMATS,
+  LANGUAGE_CODE_LENGTH
+} from "./utils/constants";
 import { SentryFallbackFunction } from "./components/SentryErrorComponent";
 
 import "@fontsource/roboto/300.css";
@@ -104,7 +107,7 @@ window.CFP_APP_BASE_URL = process.env.CFP_APP_BASE_URL;
 window.DROPBOX_MATERIALIZER_API_BASE_URL =
   process.env.DROPBOX_MATERIALIZER_API_BASE_URL;
 window.FILE_UPLOAD_ALLOWED_EXTENSIONS =
-  process.env.FILE_UPLOAD_ALLOWED_EXTENSIONS;
+  process.env.FILE_UPLOAD_ALLOWED_EXTENSIONS || ALLOWED_INVENTORY_IMAGE_FORMATS;
 
 if (exclusiveSections.hasOwnProperty(process.env.APP_CLIENT_NAME)) {
   window.EXCLUSIVE_SECTIONS = exclusiveSections[process.env.APP_CLIENT_NAME];

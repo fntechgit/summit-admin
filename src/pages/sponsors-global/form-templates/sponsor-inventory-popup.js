@@ -78,8 +78,6 @@ const SponsorItemDialog = ({
     }
   };
 
-  console.log("CHECK!", getFileUploadAllowedExtensions());
-
   useScrollToError(formik);
 
   const handleClose = () => {
@@ -224,10 +222,7 @@ const SponsorItemDialog = ({
                   id="image-upload"
                   name="images"
                   maxFiles={mediaType.max_uploads_qty}
-                  allowedExtensions={[
-                    ...getFileUploadAllowedExtensions(),
-                    ...ALLOWED_INVENTORY_IMAGE_FORMATS
-                  ]}
+                  allowedExtensions={getFileUploadAllowedExtensions()}
                 />
               </Grid2>
             </Grid2>
