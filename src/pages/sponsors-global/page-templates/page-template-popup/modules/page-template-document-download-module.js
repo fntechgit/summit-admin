@@ -5,11 +5,9 @@ import { useField } from "formik";
 import { Divider, Grid2, InputLabel } from "@mui/material";
 import MuiFormikUpload from "openstack-uicore-foundation/lib/components/mui/formik-inputs/upload";
 import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
-import {
-  ALLOWED_INVENTORY_IMAGE_FORMATS,
-  PAGE_MODULES_DOWNLOAD
-} from "../../../../../utils/constants";
+import { PAGE_MODULES_DOWNLOAD } from "../../../../../utils/constants";
 import MuiFormikRadioGroup from "../../../../../components/mui/formik-inputs/mui-formik-radio-group";
+import { getFileUploadAllowedExtensions } from "../../../../../utils/methods";
 
 const DocumentDownloadModule = ({ baseName, index }) => {
   const buildFieldName = (field) => `${baseName}[${index}].${field}`;
@@ -82,7 +80,7 @@ const DocumentDownloadModule = ({ baseName, index }) => {
             id={`document-module-upload-${index}`}
             name={buildFieldName("file")}
             maxFiles={1}
-            allowedExtensions={["pdf", ...ALLOWED_INVENTORY_IMAGE_FORMATS]}
+            allowedExtensions={getFileUploadAllowedExtensions()}
           />
         </Grid2>
       )}
