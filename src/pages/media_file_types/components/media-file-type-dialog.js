@@ -16,16 +16,11 @@ import {
   Grid2
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import useScrollToError from "../../../hooks/useScrollToError";
 import { requiredStringValidation } from "../../../utils/yup";
 
-const MediaFileTypeDialog = ({
-  entity: initialEntity,
-  onClose,
-  onSave,
-  isSaving = false
-}) => {
+const MediaFileTypeDialog = ({ entity: initialEntity, onClose, onSave }) => {
   const formik = useFormik({
     initialValues: {
       id: initialEntity?.id ?? 0,
@@ -38,12 +33,28 @@ const MediaFileTypeDialog = ({
     validationSchema: yup.object().shape({
       name: requiredStringValidation()
     }),
-    onSubmit: (values) => onSave(values)
+    onSubmit: (values) => {
+      if (isSaving) return;
+      setIsSaving(true);
+      Promise.resolve(onSave(values))
+        .then(() => {
+          onClose();
+        })
+        .catch(() => {
+          // keep dialog open on save error to preserve user input
+        })
+        .finally(() => {
+          setIsSaving(false);
+        });
+    }
   });
 
   useScrollToError(formik);
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleClose = () => {
+    if (isSaving) return;
     formik.resetForm();
     onClose();
   };
@@ -95,8 +106,8 @@ const MediaFileTypeDialog = ({
                   name="name"
                   id="name"
                   margin="none"
-                  formik={formik}
                   fullWidth
+                  required
                 />
               </Grid2>
               <Grid2 size={12} sx={{ mt: 2 }}>
@@ -108,7 +119,6 @@ const MediaFileTypeDialog = ({
                   name="description"
                   id="description"
                   margin="none"
-                  formik={formik}
                   fullWidth
                   multiline
                   rows={3}
@@ -123,7 +133,6 @@ const MediaFileTypeDialog = ({
                   name="allowed_extensions"
                   id="allowed_extensions"
                   margin="none"
-                  formik={formik}
                   fullWidth
                   multiline
                   rows={2}
