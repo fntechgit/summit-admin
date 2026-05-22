@@ -29,7 +29,7 @@ import {
   RECEIVE_SUMMIT_SPONSORSHIP_TYPES
 } from "../../actions/summit-actions";
 
-const DEFAULT_STATE = {
+export const DEFAULT_STATE = {
   sponsorForms: [],
   term: "",
   order: "name",
