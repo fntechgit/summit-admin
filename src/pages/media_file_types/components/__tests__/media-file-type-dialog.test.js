@@ -9,21 +9,25 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 }));
 
 jest.mock(
-  "../../../../components/mui/formik-inputs/mui-formik-textfield",
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield",
   () => {
     const React = require("react");
+    const { useFormikContext } = require("formik");
     return {
       __esModule: true,
-      default: ({ name, id, formik }) => (
-        <input
-          id={id || name}
-          name={name}
-          data-testid={`field-${name}`}
-          value={formik.values[name]}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-        />
-      )
+      default: ({ name, id }) => {
+        const formik = useFormikContext();
+        return (
+          <input
+            id={id || name}
+            name={name}
+            data-testid={`field-${name}`}
+            value={formik.values[name]}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+          />
+        );
+      }
     };
   }
 );
