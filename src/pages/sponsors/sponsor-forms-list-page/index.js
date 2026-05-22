@@ -32,11 +32,11 @@ import {
   archiveSponsorForm,
   getSponsorForm,
   getSponsorForms,
-  getSponsorships,
   unarchiveSponsorForm,
   deleteSponsorForm,
   updateFormTemplateTiers
 } from "../../../actions/sponsor-forms-actions";
+import { getSummitSponsorshipTypes } from "../../../actions/summit-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import GlobalTemplatePopup from "./components/global-template/global-template-popup";
 import FormTemplatePopup from "./components/form-template/form-template-popup";
@@ -54,7 +54,7 @@ const SponsorFormsListPage = ({
   totalCount,
   getSponsorForms,
   getSponsorForm,
-  getSponsorships,
+  getSummitSponsorshipTypes,
   archiveSponsorForm,
   unarchiveSponsorForm,
   deleteSponsorForm,
@@ -65,8 +65,8 @@ const SponsorFormsListPage = ({
 
   useEffect(() => {
     getSponsorForms();
-    getSponsorships(DEFAULT_CURRENT_PAGE, MAX_PER_PAGE);
-  }, [getSponsorForms, getSponsorships]);
+    getSummitSponsorshipTypes(DEFAULT_CURRENT_PAGE, MAX_PER_PAGE);
+  }, [getSponsorForms, getSummitSponsorshipTypes]);
 
   const handlePageChange = (page) => {
     getSponsorForms(term, page, perPage, order, orderDir, showArchived);
@@ -449,7 +449,7 @@ const mapStateToProps = ({ sponsorFormsListState }) => ({
 export default connect(mapStateToProps, {
   getSponsorForms,
   getSponsorForm,
-  getSponsorships,
+  getSummitSponsorshipTypes,
   archiveSponsorForm,
   unarchiveSponsorForm,
   deleteSponsorForm,
