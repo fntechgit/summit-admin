@@ -20,7 +20,6 @@ import {
   nullableDecimalValidation,
   formMetafieldsValidation,
   positiveNumberValidation,
-  requiredHTMLValidation,
   requiredStringValidation
 } from "../../../../utils/yup";
 import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
@@ -28,9 +27,7 @@ import useScrollToError from "../../../../hooks/useScrollToError";
 import ItemPriceTiers from "../../../../components/mui/formik-inputs/item-price-tiers";
 import FormikTextEditor from "../../../../components/inputs/formik-text-editor";
 import MuiFormikQuantityField from "../../../../components/mui/formik-inputs/mui-formik-quantity-field";
-import {
-  MAX_INVENTORY_IMAGES_UPLOAD_QTY
-} from "../../../../utils/constants";
+import { MAX_INVENTORY_IMAGES_UPLOAD_QTY } from "../../../../utils/constants";
 import { getFileUploadAllowedExtensions } from "../../../../utils/methods";
 
 const buildInitialValues = (data) => ({ ...data });
@@ -43,7 +40,6 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
     validationSchema: yup.object({
       code: requiredStringValidation(),
       name: requiredStringValidation(),
-      description: requiredHTMLValidation(),
       early_bird_rate: nullableDecimalValidation(),
       standard_rate: nullableDecimalValidation(),
       onsite_rate: nullableDecimalValidation(),
@@ -89,7 +85,7 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
             </Grid2>
             <Grid2 size={12}>
               <InputLabel htmlFor="description">
-                {T.translate("sponsor_form_item_list.edit_item.description")} *
+                {T.translate("sponsor_form_item_list.edit_item.description")}
               </InputLabel>
               <FormikTextEditor
                 name="description"
