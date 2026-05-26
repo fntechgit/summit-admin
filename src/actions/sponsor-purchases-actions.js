@@ -62,7 +62,7 @@ export const getAllSponsorPurchases =
     if (term) {
       const escapedTerm = escapeFilterValue(term);
       filter.push(
-        `number==${escapedTerm},company_name=@${escapedTerm},purchased_by_email=@${escapedTerm},purchased_by_full_name=@${escapedTerm}`
+        `number==${escapedTerm},sponsor_company_name=@${escapedTerm},purchased_by_email=@${escapedTerm},purchased_by_full_name=@${escapedTerm}`
       );
     }
 
@@ -121,7 +121,7 @@ export const exportAllSponsorPurchases =
     if (term) {
       const escapedTerm = escapeFilterValue(term);
       filter.push(
-        `number==${escapedTerm},company_name=@${escapedTerm},purchased_by_email=@${escapedTerm},purchased_by_full_name=@${escapedTerm}`
+        `number==${escapedTerm},sponsor_company_name=@${escapedTerm},purchased_by_email=@${escapedTerm},purchased_by_full_name=@${escapedTerm}`
       );
     }
 
