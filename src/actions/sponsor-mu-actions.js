@@ -55,7 +55,7 @@ export const getSponsorMURequests =
     const params = {
       page: currentPage,
       fields:
-        "id,name,max_file_size,deadline,media_upload,file_type.id,file_type.allowed_extensions,add_ons.id,add_ons.name",
+        "id,name,page_id,upload_deadline,max_file_size,deadline,media_upload,file_type.id,file_type.allowed_extensions,add_ons.id,add_ons.name",
       relations: "media_upload,file_type,add_ons",
       expand: "media_upload,file_type,add_ons",
       per_page: perPage,
@@ -98,7 +98,7 @@ export const getGeneralMURequests =
     const params = {
       page: currentPage,
       fields:
-        "id,name,max_file_size,deadline,media_upload,file_type.id,file_type.allowed_extensions,add_ons.id,add_ons.name",
+        "id,name,page_id,upload_deadline,max_file_size,deadline,media_upload,file_type.id,file_type.allowed_extensions,add_ons.id,add_ons.name",
       relations: "media_upload,file_type,add_ons",
       expand: "media_upload,file_type,add_ons",
       per_page: perPage,
