@@ -91,12 +91,18 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
         ),
       wire_transfer_notification_email: yup
         .string(T.translate("validation.string"))
-        .emailList(T.translate("validation.email")),
+        .emailList(T.translate("validation.email"))
+        .nullable(),
       access_request_notification_email: yup
         .string(T.translate("validation.string"))
-        .emailList(T.translate("validation.email")),
-      wire_transfer_detail: yup.string(T.translate("validation.string")),
-      cart_checkout_cancel_policy: yup.string(T.translate("validation.string"))
+        .emailList(T.translate("validation.email"))
+        .nullable(),
+      wire_transfer_detail: yup
+        .string(T.translate("validation.string"))
+        .nullable(),
+      cart_checkout_cancel_policy: yup
+        .string(T.translate("validation.string"))
+        .nullable()
     }),
     onSubmit,
     validateOnChange: false,
