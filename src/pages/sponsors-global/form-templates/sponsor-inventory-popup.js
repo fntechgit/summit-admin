@@ -32,8 +32,7 @@ import {
   nullableDecimalValidation,
   requiredStringValidation,
   positiveNumberValidation,
-  formMetafieldsValidation,
-  requiredHTMLValidation
+  formMetafieldsValidation
 } from "../../../utils/yup";
 import ItemPriceTiers from "../../../components/mui/formik-inputs/item-price-tiers";
 import MuiFormikQuantityField from "../../../components/mui/formik-inputs/mui-formik-quantity-field";
@@ -57,7 +56,6 @@ const SponsorItemDialog = ({
     validationSchema: yup.object().shape({
       code: requiredStringValidation(),
       name: requiredStringValidation(),
-      description: requiredHTMLValidation(),
       images: yup.array(),
       early_bird_rate: nullableDecimalValidation(),
       standard_rate: nullableDecimalValidation(),
@@ -140,7 +138,7 @@ const SponsorItemDialog = ({
             <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
               <Grid2 size={12}>
                 <InputLabel htmlFor="description">
-                  {T.translate("edit_inventory_item.description")} *
+                  {T.translate("edit_inventory_item.description")}
                 </InputLabel>
                 <FormikTextEditor
                   name="description"
