@@ -4211,5 +4211,9 @@
     "country": "Country",
     "save": "Save",
     "cancel": "Cancel"
+  },
+  "preview_modal": {
+    "file_name": "File name",
+    "uploaded": "Uploaded"
   }
 }
