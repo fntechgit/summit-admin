@@ -58,9 +58,10 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
   const formik = useFormik({
     initialValues: buildInitialValues(settings, summitTZ),
     validationSchema: yup.object({
-      early_bird_end_date: yup.date(T.translate("validation.date")),
+      early_bird_end_date: yup.date(T.translate("validation.date")).nullable(),
       standard_price_end_date: yup
         .date(T.translate("validation.date"))
+        .nullable()
         .isAfterDateField(
           yup.ref("early_bird_end_date"),
           T.translate("validation.after", {
@@ -70,6 +71,7 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
         ),
       onsite_price_start_date: yup
         .date(T.translate("validation.date"))
+        .nullable()
         .isAfterDateField(
           yup.ref("standard_price_end_date"),
           T.translate("validation.after", {
@@ -79,6 +81,7 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
         ),
       onsite_price_end_date: yup
         .date(T.translate("validation.date"))
+        .nullable()
         .isAfterDateField(
           yup.ref("onsite_price_start_date"),
           T.translate("validation.after", {
