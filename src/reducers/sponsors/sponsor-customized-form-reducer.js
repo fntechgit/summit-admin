@@ -43,10 +43,14 @@ const sponsorCustomizedFormReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case RECEIVE_SPONSOR_CUSTOMIZED_FORM: {
-      return {
-        ...state,
-        entity: payload.response
+      const entity = {
+        ...payload.response,
+        items: payload.response.items.map((it) => ({
+          ...it,
+          images: it.images.map((img) => ({ ...img, file_path: img.file_url }))
+        }))
       };
+      return { ...state, entity };
     }
     default:
       return state;
