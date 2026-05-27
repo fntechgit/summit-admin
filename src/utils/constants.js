@@ -287,6 +287,11 @@ export const PURCHASE_METHODS = {
   INVOICE: "Invoice"
 };
 
+export const PURCHASE_TYPES = {
+  ONLINE: "Online",
+  OFFLINE: "Offline"
+};
+
 export const SPONSOR_USER_ASSIGNMENT_TYPE = {
   EXISTING: "existing",
   NEW: "new"

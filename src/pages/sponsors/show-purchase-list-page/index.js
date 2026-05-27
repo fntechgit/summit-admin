@@ -107,6 +107,7 @@ const ShowPurchaseListPage = ({
     {
       columnKey: "purchased",
       header: T.translate("sponsor_show_purchases.purchased"),
+      width: 200,
       sortable: true
     },
     {

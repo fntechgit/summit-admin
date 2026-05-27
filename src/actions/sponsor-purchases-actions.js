@@ -73,7 +73,7 @@ export const getAllSponsorPurchases =
       expand: "sponsor",
       relations: "sponsor",
       fields:
-        "number,payment_id,purchased_date,sponsor.id,sponsor.company_name,payment_method,status,net_amount"
+        "id,number,payment_id,purchased_date,sponsor.id,sponsor.company_name,payment_method,status,net_amount"
     };
 
     if (filter.length > 0) {

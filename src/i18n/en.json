@@ -4203,7 +4203,8 @@
     "reason": "Reason for Refund",
     "amount": "Amount",
     "queue_refund": "Queue refund",
-    "info": "If the original payment was made via Stripe, the refund will be automatically queued and processed."
+    "info": "If the original payment was made via Stripe, the refund will be automatically queued and processed.",
+    "only_online_payments": "Only online payments are eligible for refunds"
   },
   "client_card": {
     "title": "Client & Address Details",
