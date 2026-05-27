@@ -163,16 +163,14 @@ export const saveTag = (entity) => async (dispatch) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(showSuccessMessage(T.translate("edit_tag.tag_saved")));
-    });
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(showSuccessMessage(T.translate("edit_tag.tag_saved")));
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   }
-  const success_message = {
-    title: T.translate("general.done"),
-    html: T.translate("edit_tag.tag_created"),
-    type: "success"
-  };
-
   return postRequest(
     createAction(UPDATE_TAG),
     createAction(TAG_ADDED),
@@ -180,13 +178,13 @@ export const saveTag = (entity) => async (dispatch) => {
     normalizedEntity,
     authErrorHandler,
     entity
-  )(params)(dispatch).then(() => {
-    dispatch(
-      showMessage(success_message, () => {
-        history.push("/app/tags");
-      })
-    );
-  });
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(showSuccessMessage(T.translate("edit_tag.tag_created")));
+    })
+    .finally(() => {
+      dispatch(stopLoading());
+    });
 };
 
 export const getTagGroups = () => async (dispatch, getState) => {

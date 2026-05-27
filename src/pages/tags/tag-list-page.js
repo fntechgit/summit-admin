@@ -36,6 +36,7 @@ const TagListPage = ({
   order = "id",
   orderDir = 1,
   totalTags = 0,
+  currentSummit,
   getTags,
   deleteTag,
   saveTag,
@@ -46,9 +47,11 @@ const TagListPage = ({
   const [editData, setEditData] = useState(null);
 
   useEffect(() => {
-    setSearch("");
-    getTags("", 1, DEFAULT_PER_PAGE, "id", 1);
-  }, []);
+    if (currentSummit) {
+      setSearch("");
+      getTags("", 1, DEFAULT_PER_PAGE, "id", 1);
+    }
+  }, [currentSummit]);
 
   const handleSearch = (searchTerm) => {
     setSearch(searchTerm);
@@ -71,17 +74,19 @@ const TagListPage = ({
     resetTagForm();
   };
 
-  const handleSaveTag = (entity) => {
-    saveTag(entity).then(() => {
+  const handleSaveTag = (entity) => saveTag(entity).then(() => {
       handleCloseDialog();
       getTags(search, currentPage, perPage, order, orderDir);
     });
-  };
 
   const handleDeleteTag = (id) => {
-    deleteTag(id).then(() => {
-      getTags(search, currentPage, perPage, order, orderDir);
-    });
+    deleteTag(id)
+      .then(() => {
+        getTags(search, currentPage, perPage, order, orderDir);
+      })
+      .catch(() => {
+        getTags(search, currentPage, perPage, order, orderDir);
+      });
   };
 
   const columns = [
@@ -180,18 +185,20 @@ const TagListPage = ({
         confirmButtonColor="error"
       />
 
-      <TagsDialog
-        open={dialogOpen}
-        onClose={handleCloseDialog}
-        onSave={handleSaveTag}
-        initialData={editData}
-      />
+      {dialogOpen && (
+        <TagsDialog
+          onClose={handleCloseDialog}
+          onSave={handleSaveTag}
+          initialData={editData}
+        />
+      )}
     </Box>
   );
 };
 
-const mapStateToProps = ({ currentTagListState }) => ({
-  ...currentTagListState
+const mapStateToProps = ({ currentTagListState, currentSummitState }) => ({
+  ...currentTagListState,
+  currentSummit: currentSummitState.currentSummit
 });
 
 export default connect(mapStateToProps, {

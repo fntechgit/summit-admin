@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
@@ -13,7 +13,9 @@ import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
 import CloseIcon from "@mui/icons-material/Close";
 
-const TagsDialog = ({ open, onClose, onSave, initialData }) => {
+const TagsDialog = ({ onClose, onSave, initialData }) => {
+  const [isSaving, setIsSaving] = useState(false);
+
   const formik = useFormik({
     initialValues: {
       tag: initialData?.tag || ""
@@ -23,27 +25,29 @@ const TagsDialog = ({ open, onClose, onSave, initialData }) => {
     }),
     enableReinitialize: true,
     onSubmit: (values) => {
-      onSave({ ...initialData, tag: values.tag.trim() });
+      setIsSaving(true);
+      onSave({ ...initialData, tag: values.tag.trim() })
+        .catch(() => {
+          /* keep dialog open on API failure */
+        })
+        .finally(() => setIsSaving(false));
     }
   });
 
-  useEffect(() => {
-    if (open) {
-      formik.resetForm({
-        values: {
-          tag: initialData?.tag || ""
-        }
-      });
-    }
-  }, [open, initialData?.id, initialData?.tag]);
-
   const handleClose = () => {
+    if (isSaving) return;
     formik.resetForm();
     onClose();
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
+    <Dialog
+      open
+      onClose={handleClose}
+      disableEscapeKeyDown={isSaving}
+      maxWidth="xs"
+      fullWidth
+    >
       <DialogTitle>
         {initialData?.id
           ? `${T.translate("general.edit")} ${T.translate("edit_tag.tag")}`
@@ -51,6 +55,7 @@ const TagsDialog = ({ open, onClose, onSave, initialData }) => {
         <IconButton
           aria-label="close"
           onClick={handleClose}
+          disabled={isSaving}
           sx={{ position: "absolute", right: 8, top: 8 }}
         >
           <CloseIcon />
@@ -75,10 +80,10 @@ const TagsDialog = ({ open, onClose, onSave, initialData }) => {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose}>
+            <Button onClick={handleClose} disabled={isSaving}>
               {T.translate("general.cancel")}
             </Button>
-            <Button type="submit" variant="contained">
+            <Button type="submit" variant="contained" disabled={isSaving}>
               {T.translate("general.save")}
             </Button>
           </DialogActions>

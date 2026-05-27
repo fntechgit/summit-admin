@@ -12,8 +12,9 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-
 import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+
 import {
   REQUEST_TAGS,
   RECEIVE_TAGS,
@@ -34,6 +35,7 @@ const DEFAULT_STATE = {
 const tagListReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
+    case SET_CURRENT_SUMMIT:
     case LOGOUT_USER: {
       return DEFAULT_STATE;
     }
