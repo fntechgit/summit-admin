@@ -13,16 +13,20 @@ import {
   Box,
   IconButton,
   Divider,
-  Grid2,
-  MenuItem
+  Grid2
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
-import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
+import MuiFormikSelectV2 from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select-v2";
 import useScrollToError from "../../../hooks/useScrollToError";
 import { requiredStringValidation } from "../../../utils/yup";
 
-const SIZE_OPTIONS = ["Small", "Medium", "Large", "Big"];
+const SIZE_OPTIONS_DDL = [
+  { label: "Small", value: "Small" },
+  { label: "Medium", value: "Medium" },
+  { label: "Large", value: "Large" },
+  { label: "Big", value: "Big" }
+];
 
 const SponsorshipDialog = ({
   entity: initialEntity,
@@ -118,21 +122,15 @@ const SponsorshipDialog = ({
                   {T.translate("edit_sponsorship.size")}
                 </InputLabel>
                 <Box>
-                  <MuiFormikSelect
+                  <MuiFormikSelectV2
                     name="size"
                     placeholder={T.translate(
                       "edit_sponsorship.placeholders.select_size"
                     )}
                     margin="none"
                     isClearable
-                    options={SIZE_OPTIONS}
-                  >
-                    {SIZE_OPTIONS.map((s) => (
-                      <MenuItem key={s} value={s}>
-                        {s}
-                      </MenuItem>
-                    ))}
-                  </MuiFormikSelect>
+                    options={SIZE_OPTIONS_DDL}
+                  />
                 </Box>
               </Grid2>
             </Grid2>
