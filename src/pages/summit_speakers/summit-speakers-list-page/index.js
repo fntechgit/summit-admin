@@ -20,8 +20,8 @@ import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown
 import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
 import {
   GridFilter,
-  useGridFilter,
-  OPERATORS
+  OPERATORS,
+  useGridFilter
 } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import {
   exportSummitSpeakers,
@@ -116,7 +116,30 @@ const getCriterias = (summit, mediaUploadTypes) => [
     values: {
       type: "select",
       props: {
-        options: [...selectionStatusOptions],
+        options: (currentValue) => {
+          // if user chooses a combined option, then we disable all other options, only single options can be combined
+          // if user chooses a single option, then we disable all the combined options
+          const combinedOptions = [
+            "only_rejected",
+            "only_accepted",
+            "only_alternate",
+            "accepted_alternate",
+            "accepted_rejected",
+            "alternate_rejected"
+          ];
+          const hasCombined =
+            Array.isArray(currentValue) &&
+            currentValue.some((v) => combinedOptions.includes(v));
+          const hasSingle =
+            Array.isArray(currentValue) &&
+            currentValue.some((v) => !combinedOptions.includes(v));
+          return selectionStatusOptions.map((opt) => ({
+            ...opt,
+            disabled:
+              (hasCombined && !currentValue.includes(opt.value)) ||
+              (hasSingle && combinedOptions.includes(opt.value))
+          }));
+        },
         placeholder: "Filter by Selection Status",
         multiple: true
       }
@@ -125,19 +148,7 @@ const getCriterias = (summit, mediaUploadTypes) => [
       const filter = [];
 
       if (Array.isArray(f.value) && f.value.length > 0) {
-        // if user chose a combined option then we ignore single options, only single options can be combined
-        const combinedOptions = [
-          "only_rejected",
-          "only_accepted",
-          "only_alternate",
-          "accepted_alternate",
-          "accepted_rejected",
-          "alternate_rejected"
-        ];
-        const hasCombinedOption = f.value.some((v) =>
-          combinedOptions.includes(v)
-        );
-
+        // values are restricted on change, no need to add logic here
         f.value.forEach((val) => {
           switch (val) {
             case "only_rejected":
@@ -171,19 +182,13 @@ const getCriterias = (summit, mediaUploadTypes) => [
               filter.push("has_alternate_presentations==true");
               break;
             case "accepted":
-              if (!hasCombinedOption) {
-                filter.push("has_accepted_presentations==true");
-              }
+              filter.push("has_accepted_presentations==true");
               break;
             case "rejected":
-              if (!hasCombinedOption) {
-                filter.push("has_rejected_presentations==true");
-              }
+              filter.push("has_rejected_presentations==true");
               break;
             case "alternate":
-              if (!hasCombinedOption) {
-                filter.push("has_alternate_presentations==true");
-              }
+              filter.push("has_alternate_presentations==true");
               break;
             default:
               break;
@@ -292,7 +297,20 @@ const SummitSpeakersListPage = ({
   useEffect(() => {
     initSubmittersList();
     initSpeakersList();
-    resetFilters();
+    if (parsedFilter.length > 0) {
+      // parsedFilter change will trigger the fetch effect with fresh state
+      resetFilters();
+    } else if (currentSummit) {
+      // parsedFilter won't change, so fetch immediately with explicit defaults
+      // (subjectProps is stale at this point — inits haven't re-rendered yet)
+      getBySummit({
+        term: "",
+        page: 1,
+        order: "full_name",
+        orderDir: 1,
+        perPage: 10
+      });
+    }
   }, [currentSummit, source]);
 
   // fetch speakers/submitters list if filters change
@@ -300,7 +318,7 @@ const SummitSpeakersListPage = ({
     if (currentSummit) {
       getBySummit();
     }
-  }, [currentSummit, source, parsedFilter.join(",")]);
+  }, [currentSummit, parsedFilter.join(",")]);
 
   const getBySummit = (params = {}) => {
     const { term, currentPage: page, perPage, order, orderDir } = subjectProps;
