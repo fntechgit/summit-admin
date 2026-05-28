@@ -26,7 +26,8 @@ const DEFAULT_ENTITY = {
   opens_at: "",
   expires_at: "",
   instructions: "",
-  meta_fields: []
+  meta_fields: [],
+  items: []
 };
 
 const DEFAULT_STATE = {
