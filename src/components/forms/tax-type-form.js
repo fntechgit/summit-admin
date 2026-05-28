@@ -39,7 +39,8 @@ const TaxTypeForm = ({
   currentSummit,
   onTicketLink,
   onTicketUnLink,
-  onSubmit
+  onSubmit,
+  isSaving = false
 }) => {
   const initialValues = {
     id: entityProp.id,
@@ -134,7 +135,7 @@ const TaxTypeForm = ({
           </Box>
         )}
         <Stack direction="row" justifyContent="flex-end">
-          <Button variant="contained" type="submit">
+          <Button variant="contained" type="submit" disabled={isSaving}>
             {T.translate("general.save")}
           </Button>
         </Stack>

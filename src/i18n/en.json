@@ -1929,7 +1929,7 @@
     "name": "Name",
     "tax_id": "Tax Id",
     "rate": "Rate",
-    "remove_warning": "Are you sure you want to delete tax type "
+    "remove_warning": "Please verify you want to delete tax type {taxType}"
   },
   "edit_tax_type": {
     "tax_type": "Tax Type",

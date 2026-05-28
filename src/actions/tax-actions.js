@@ -41,8 +41,6 @@ export const TAX_TYPE_ADDED = "TAX_TYPE_ADDED";
 export const TAX_TYPE_DELETED = "TAX_TYPE_DELETED";
 export const TAX_TICKET_ADDED = "TAX_TICKET_ADDED";
 export const TAX_TICKET_REMOVED = "TAX_TICKET_REMOVED";
-const ALLOWED_TAX_TYPE_SORT_FIELDS = ["name", "rate"];
-
 export const getTaxTypes =
   (
     term = "",
@@ -56,9 +54,6 @@ export const getTaxTypes =
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const filter = [];
-    const normalizedOrder = ALLOWED_TAX_TYPE_SORT_FIELDS.includes(order)
-      ? order
-      : "name";
 
     dispatch(startLoading());
 
@@ -79,9 +74,9 @@ export const getTaxTypes =
     }
 
     // order
-    if (normalizedOrder != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "" : "-";
-      params.order = `${orderDirSign}${normalizedOrder}`;
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -121,6 +116,12 @@ export const resetTaxTypeForm = () => (dispatch) => {
   dispatch(createAction(RESET_TAX_TYPE_FORM)({}));
 };
 
+const normalizeEntity = (entity) => {
+  const normalizedEntity = { ...entity };
+
+  return normalizedEntity;
+};
+
 export const saveTaxType = (entity) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
@@ -142,10 +143,16 @@ export const saveTaxType = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
-      dispatch(showSuccessMessage(T.translate("edit_tax_type.tax_type_saved")));
-      return payload;
-    });
+    )(params)(dispatch)
+      .then((payload) => {
+        dispatch(
+          showSuccessMessage(T.translate("edit_tax_type.tax_type_saved"))
+        );
+        return payload;
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   }
   return postRequest(
     createAction(UPDATE_TAX_TYPE),
@@ -154,10 +161,16 @@ export const saveTaxType = (entity) => async (dispatch, getState) => {
     normalizedEntity,
     authErrorHandler,
     entity
-  )(params)(dispatch).then((payload) => {
-    dispatch(showSuccessMessage(T.translate("edit_tax_type.tax_type_created")));
-    return payload;
-  });
+  )(params)(dispatch)
+    .then((payload) => {
+      dispatch(
+        showSuccessMessage(T.translate("edit_tax_type.tax_type_created"))
+      );
+      return payload;
+    })
+    .finally(() => {
+      dispatch(stopLoading());
+    });
 };
 
 export const deleteTaxType = (taxTypeId) => async (dispatch, getState) => {
@@ -225,9 +238,3 @@ export const removeTicketFromTaxType =
       dispatch(stopLoading());
     });
   };
-
-const normalizeEntity = (entity) => {
-  const normalizedEntity = { ...entity };
-
-  return normalizedEntity;
-};

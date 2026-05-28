@@ -44,7 +44,6 @@ const TaxTypeListPage = ({
   currentPage,
   totalTaxTypes,
   currentTaxType,
-  currentTaxTypeErrors,
   getTaxTypes,
   deleteTaxType,
   getTaxType,
@@ -63,7 +62,11 @@ const TaxTypeListPage = ({
   }, [currentSummit]);
 
   const handleDelete = (taxTypeId) => {
-    deleteTaxType(taxTypeId);
+    deleteTaxType(taxTypeId)
+      .finally(() => {
+        getTaxTypes(term, currentPage, perPage, order, orderDir);
+      })
+      .catch(() => {});
   };
 
   const handleSort = (key, dir) => {
@@ -91,12 +94,11 @@ const TaxTypeListPage = ({
     getTaxType(row.id).then(() => setShowTaxTypeModal(true));
   };
 
-  const handleSave = (entity) => {
+  const handleSave = (entity) =>
     saveTaxType(entity).then(() => {
       getTaxTypes(term, currentPage, perPage, order, orderDir);
       setShowTaxTypeModal(false);
     });
-  };
 
   const handleClosePopup = () => {
     setShowTaxTypeModal(false);
@@ -111,7 +113,8 @@ const TaxTypeListPage = ({
     },
     {
       columnKey: "rate",
-      header: T.translate("tax_type_list.rate")
+      header: T.translate("tax_type_list.rate"),
+      sortable: true
     },
     {
       columnKey: "tax_id",
@@ -201,16 +204,17 @@ const TaxTypeListPage = ({
             onPerPageChange={handlePerPageChange}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            deleteDialogBody={(name) =>
+              T.translate("tax_type_list.remove_warning", { taxType: name })
+            }
             confirmButtonColor="error"
           />
         )}
 
         {showTaxTypeModal && (
           <TaxTypePopup
-            open={showTaxTypeModal}
             onClose={handleClosePopup}
             entity={currentTaxType}
-            errors={currentTaxTypeErrors}
             currentSummit={currentSummit}
             onSubmit={handleSave}
             onTicketLink={addTicketToTaxType}
@@ -229,8 +233,7 @@ const mapStateToProps = ({
 }) => ({
   currentSummit: currentSummitState.currentSummit,
   ...currentTaxTypeListState,
-  currentTaxType: currentTaxTypeState.entity,
-  currentTaxTypeErrors: currentTaxTypeState.errors
+  currentTaxType: currentTaxTypeState.entity
 });
 
 export default Restrict(

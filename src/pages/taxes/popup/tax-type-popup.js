@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import Dialog from "@mui/material/Dialog";
@@ -11,26 +11,46 @@ import CloseIcon from "@mui/icons-material/Close";
 import TaxTypeForm from "../../../components/forms/tax-type-form";
 
 const TaxTypePopup = ({
-  open,
   onClose,
   entity,
-  errors,
   currentSummit,
   onSubmit,
   onTicketLink,
   onTicketUnLink
 }) => {
+  const [isSaving, setIsSaving] = useState(false);
+
   const title = entity?.id
     ? T.translate("general.edit")
     : T.translate("general.add");
 
+  const handleClose = () => {
+    if (isSaving) return;
+    onClose();
+  };
+
+  const handleSubmit = (values) => {
+    setIsSaving(true);
+    onSubmit(values)
+      .catch(() => {
+        /* keep dialog open on API failure */
+      })
+      .finally(() => setIsSaving(false));
+  };
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog
+      open
+      onClose={handleClose}
+      disableEscapeKeyDown={isSaving}
+      maxWidth="md"
+      fullWidth
+    >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.8rem">
           {title} {T.translate("edit_tax_type.tax_type")}
         </Typography>
-        <IconButton size="small" onClick={onClose}>
+        <IconButton size="small" onClick={handleClose} disabled={isSaving}>
           <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
@@ -39,10 +59,10 @@ const TaxTypePopup = ({
         <TaxTypeForm
           entity={entity}
           currentSummit={currentSummit}
-          errors={errors}
           onTicketLink={onTicketLink}
           onTicketUnLink={onTicketUnLink}
-          onSubmit={onSubmit}
+          onSubmit={handleSubmit}
+          isSaving={isSaving}
         />
       </DialogContent>
     </Dialog>
@@ -50,18 +70,12 @@ const TaxTypePopup = ({
 };
 
 TaxTypePopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   entity: PropTypes.object.isRequired,
-  errors: PropTypes.object,
   currentSummit: PropTypes.object.isRequired,
   onSubmit: PropTypes.func.isRequired,
   onTicketLink: PropTypes.func.isRequired,
   onTicketUnLink: PropTypes.func.isRequired
-};
-
-TaxTypePopup.defaultProps = {
-  errors: {}
 };
 
 export default TaxTypePopup;
