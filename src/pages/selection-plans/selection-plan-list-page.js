@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Dialog from "@mui/material/Dialog";
@@ -55,6 +55,8 @@ const SelectionPlanListPage = ({
   deleteSelectionPlan
 }) => {
   const [openSelectionPlanPopup, setOpenSelectionPlanPopup] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const isSavingRef = useRef(false);
   const routeSelectionPlanId = match?.params?.selection_plan_id;
 
   const openEditModal = useCallback(
@@ -76,8 +78,10 @@ const SelectionPlanListPage = ({
   );
 
   useEffect(() => {
-    getSelectionPlans(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
-  }, []);
+    if (currentSummit?.id) {
+      getSelectionPlans(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+    }
+  }, [currentSummit]);
 
   useEffect(() => {
     if (routeSelectionPlanId) {
@@ -96,7 +100,9 @@ const SelectionPlanListPage = ({
   const handleDelete = (selectionPlan) => {
     if (!selectionPlan?.id) return;
 
-    deleteSelectionPlan(selectionPlan.id).then(() => refreshSelectionPlans());
+    deleteSelectionPlan(selectionPlan.id)
+      .finally(() => refreshSelectionPlans())
+      .catch(() => {});
   };
 
   const handleNew = () => {
@@ -105,12 +111,18 @@ const SelectionPlanListPage = ({
   };
 
   const handleClosePopup = () => {
+    if (isSavingRef.current) return;
     resetSelectionPlanForm();
     setOpenSelectionPlanPopup(false);
 
     if (routeSelectionPlanId) {
       history.replace(`/app/summits/${currentSummit.id}/selection-plans`);
     }
+  };
+
+  const handleSavingChange = (saving) => {
+    isSavingRef.current = saving;
+    setIsSaving(saving);
   };
 
   const handleSelectionPlanSaved = () => {
@@ -238,35 +250,45 @@ const SelectionPlanListPage = ({
         </div>
       )}
 
-      <Dialog
-        open={openSelectionPlanPopup}
-        onClose={handleClosePopup}
-        maxWidth="xl"
-        fullWidth
-        disableEnforceFocus
-        disableAutoFocus
-        disableRestoreFocus
-      >
-        <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-          {currentSelectionPlan?.id
-            ? T.translate("general.edit")
-            : T.translate("general.add")}{" "}
-          {T.translate("edit_selection_plan.selection_plan")}
-          <IconButton size="small" onClick={handleClosePopup}>
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </DialogTitle>
-        <Divider />
-        <DialogContent>
-          <EditSelectionPlanPage
-            onSaved={handleSelectionPlanSaved}
-            history={history}
-            currentSummit={currentSummit}
-            entity={currentSelectionPlan}
-            errors={currentSelectionPlanErrors}
-          />
-        </DialogContent>
-      </Dialog>
+      {openSelectionPlanPopup && (
+        <Dialog
+          open
+          onClose={handleClosePopup}
+          disableEscapeKeyDown={isSaving}
+          maxWidth="xl"
+          fullWidth
+          disableEnforceFocus
+          disableAutoFocus
+          disableRestoreFocus
+        >
+          <DialogTitle
+            sx={{ display: "flex", justifyContent: "space-between" }}
+          >
+            {currentSelectionPlan?.id
+              ? T.translate("general.edit")
+              : T.translate("general.add")}{" "}
+            {T.translate("edit_selection_plan.selection_plan")}
+            <IconButton
+              size="small"
+              onClick={handleClosePopup}
+              disabled={isSaving}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </DialogTitle>
+          <Divider />
+          <DialogContent>
+            <EditSelectionPlanPage
+              onSaved={handleSelectionPlanSaved}
+              onSavingChange={handleSavingChange}
+              history={history}
+              currentSummit={currentSummit}
+              entity={currentSelectionPlan}
+              errors={currentSelectionPlanErrors}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };

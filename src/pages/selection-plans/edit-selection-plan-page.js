@@ -42,6 +42,7 @@ const EditSelectionPlanPage = ({
   allowedMembers,
   errors,
   onSaved,
+  onSavingChange,
   history,
   extraQuestionsOrder,
   extraQuestionsOrderDir,
@@ -186,6 +187,7 @@ const EditSelectionPlanPage = ({
       currentSummit={currentSummit}
       errors={errors}
       onSaved={onSaved}
+      onSavingChange={onSavingChange}
       extraQuestionsOrder={extraQuestionsOrder}
       extraQuestionsOrderDir={extraQuestionsOrderDir}
       onTrackGroupLink={addTrackGroupToSelectionPlan}

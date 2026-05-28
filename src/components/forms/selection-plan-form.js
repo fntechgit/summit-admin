@@ -65,6 +65,7 @@ const SelectionPlanForm = (props) => {
     actionTypesOrder,
     allowedMembers,
     onSaved,
+    onSavingChange,
     onSubmit,
     saveSelectionPlanSettings,
     onTrackGroupLink,
@@ -94,6 +95,7 @@ const SelectionPlanForm = (props) => {
   const [showSection, setShowSection] = useState("main");
   const [newMemberEmail, setNewMemberEmail] = useState("");
   const [showImportModal, setShowImportModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const prevPropsRef = useRef({ entity: propsEntity, errors: propsErrors });
 
@@ -164,6 +166,8 @@ const SelectionPlanForm = (props) => {
 
   const handleSubmit = (ev) => {
     ev.preventDefault();
+    setIsSaving(true);
+    if (onSavingChange) onSavingChange(true);
     return onSubmit(entity)
       .then((e) => {
         if (!e?.id) return null;
@@ -175,6 +179,10 @@ const SelectionPlanForm = (props) => {
       })
       .catch(() => {
         // errors are surfaced via error handler
+      })
+      .finally(() => {
+        setIsSaving(false);
+        if (onSavingChange) onSavingChange(false);
       });
   };
 
@@ -1326,7 +1334,12 @@ const SelectionPlanForm = (props) => {
 
       <div className="row">
         <div className="col-md-12 submit-buttons">
-          <Button type="submit" variant="contained" className="pull-right">
+          <Button
+            type="submit"
+            variant="contained"
+            className="pull-right"
+            disabled={isSaving}
+          >
             {T.translate("general.save")}
           </Button>
         </div>
