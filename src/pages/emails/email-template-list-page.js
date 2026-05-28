@@ -79,7 +79,11 @@ const EmailTemplateListPage = ({
   };
 
   const handleDeleteEmailTemplate = (row) => {
-    removeEmailTemplate(row.id);
+    removeEmailTemplate(row.id)
+      .finally(() =>
+        fetchEmailTemplates(term, currentPage, perPage, order, orderDir)
+      )
+      .catch(() => {});
   };
 
   const columns = [
