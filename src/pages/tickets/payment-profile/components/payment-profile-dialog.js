@@ -10,9 +10,11 @@ import {
   Divider,
   Grid2,
   IconButton,
+  InputAdornment,
   MenuItem,
   Box,
   InputLabel,
+  TextField,
   Tooltip
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -23,8 +25,16 @@ import * as yup from "yup";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikPriceField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/price-field";
 import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
+import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import useScrollToError from "../../../../hooks/useScrollToError";
+import { decimalValidation } from "../../../../utils/yup";
+import {
+  MAX_CENTS,
+  ONE_HUNDRED,
+  TEN_THOUSAND
+} from "../../../../utils/constants";
 
 const InfoTooltip = ({ title }) => (
   <Tooltip
@@ -110,12 +120,12 @@ const PaymentProfileDialog = ({
       test_secret_key: initialEntity?.test_secret_key || "",
       test_publishable_key: initialEntity?.test_publishable_key || ""
     },
-    // validationSchema: yup.object().shape({
-    //   application_type: yup.string().required(T.translate("validation.required")),
-    //   provider: yup.string().required(T.translate("validation.required")),
-    //   live_secret_key: yup.string().required(T.translate("validation.required")),
-    //   live_publishable_key: yup.string().required(T.translate("validation.required"))
-    // }),
+    validationSchema: yup.object().shape({
+      application_type: yup
+        .string()
+        .required(T.translate("validation.required")),
+      provider: yup.string().required(T.translate("validation.required"))
+    }),
     onSubmit: (values) => onSave(values)
   });
 
@@ -125,23 +135,46 @@ const PaymentProfileDialog = ({
       name: "",
       kind: "",
       payment_method: "",
-      value: "",
-      max_cents: "",
-      min_cents: ""
+      value: 0,
+      max_cents: 0,
+      min_cents: 0
     },
     validationSchema: yup.object().shape({
       name: yup.string().required(T.translate("validation.required")),
       kind: yup.string().required(T.translate("validation.required")),
       payment_method: yup.string().required(T.translate("validation.required")),
-      value: yup.number().required(T.translate("validation.required")),
-      max_cents: yup.number().required(T.translate("validation.required")),
-      min_cents: yup.number().required(T.translate("validation.required"))
+      value: yup
+        .number()
+        .typeError(T.translate("validation.number"))
+        .required(T.translate("validation.required"))
+        .when("kind", {
+          is: "Rate",
+          then: (schema) =>
+            schema
+              .integer(T.translate("validation.integer"))
+              .min(1, T.translate("validation.minimum", { minimum: 1 }))
+              .max(
+                TEN_THOUSAND,
+                T.translate("validation.maximum", { maximum: 10000 })
+              ),
+          otherwise: (schema) =>
+            schema.min(0, T.translate("validation.non_negative"))
+        }),
+      max_cents: decimalValidation().max(
+        MAX_CENTS,
+        T.translate("validation.maximum", { maximum: 99 })
+      ),
+      min_cents: decimalValidation().max(
+        MAX_CENTS,
+        T.translate("validation.maximum", { maximum: 99 })
+      )
     }),
-    onSubmit: (values) =>
+    onSubmit: (values) => {
       onSaveFeeType(values).then(() => {
         feeTypeFormik.resetForm();
         setShowFeeTypeForm(false);
-      })
+      });
+    }
   });
 
   useScrollToError(formik, true);
@@ -174,7 +207,11 @@ const PaymentProfileDialog = ({
     },
     {
       columnKey: "value",
-      header: T.translate("edit_payment_profile.payment_type_fee_value")
+      header: T.translate("edit_payment_profile.payment_type_fee_value"),
+      render: (row) =>
+        row.kind === "Rate"
+          ? `${row.value / ONE_HUNDRED}%`
+          : `${currencyAmountFromCents(row.value)}`
     },
     {
       columnKey: "max_cents",
@@ -486,13 +523,57 @@ const PaymentProfileDialog = ({
                               "edit_payment_profile.payment_type_fee_value"
                             )}
                           </InputLabel>
-                          <MuiFormikTextField
-                            type="number"
-                            name="value"
-                            fullWidth
-                            variant="outlined"
-                            margin="none"
-                          />
+                          {feeTypeFormik.values.kind === "Amount" ? (
+                            <MuiFormikPriceField
+                              name="value"
+                              fullWidth
+                              variant="outlined"
+                              margin="none"
+                              inCents
+                            />
+                          ) : (
+                            <TextField
+                              type="number"
+                              value={
+                                feeTypeFormik.values.value > 0
+                                  ? feeTypeFormik.values.value / ONE_HUNDRED
+                                  : ""
+                              }
+                              onChange={(e) => {
+                                const pct = parseFloat(e.target.value);
+                                feeTypeFormik.setFieldValue(
+                                  "value",
+                                  Number.isNaN(pct)
+                                    ? 0
+                                    : Math.round(pct * ONE_HUNDRED)
+                                );
+                              }}
+                              onBlur={() =>
+                                feeTypeFormik.setFieldTouched("value", true)
+                              }
+                              error={
+                                feeTypeFormik.touched.value &&
+                                Boolean(feeTypeFormik.errors.value)
+                              }
+                              helperText={
+                                feeTypeFormik.touched.value &&
+                                feeTypeFormik.errors.value
+                              }
+                              fullWidth
+                              variant="outlined"
+                              margin="none"
+                              slotProps={{
+                                input: {
+                                  endAdornment: (
+                                    <InputAdornment position="end">
+                                      %
+                                    </InputAdornment>
+                                  )
+                                },
+                                htmlInput: { min: 0.01, max: 100, step: 0.01 }
+                              }}
+                            />
+                          )}
                         </Grid2>
                         <Grid2 size={4}>
                           <InputLabel htmlFor="max_cents">
@@ -500,12 +581,12 @@ const PaymentProfileDialog = ({
                               "edit_payment_profile.payment_type_fee_max_cents"
                             )}
                           </InputLabel>
-                          <MuiFormikTextField
-                            type="number"
+                          <MuiFormikPriceField
                             name="max_cents"
                             fullWidth
                             variant="outlined"
                             margin="none"
+                            inCents
                           />
                         </Grid2>
                         <Grid2 size={4}>
@@ -514,12 +595,12 @@ const PaymentProfileDialog = ({
                               "edit_payment_profile.payment_type_fee_min_cents"
                             )}
                           </InputLabel>
-                          <MuiFormikTextField
-                            type="number"
+                          <MuiFormikPriceField
                             name="min_cents"
                             fullWidth
                             variant="outlined"
                             margin="none"
+                            inCents
                           />
                         </Grid2>
                         <Grid2

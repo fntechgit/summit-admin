@@ -69,9 +69,15 @@ const PaymentProfileListPage = ({
   const handleSave = (entity) => {
     if (isSaving) return;
     setIsSaving(true);
-    savePaymentProfile(entity)
+    return savePaymentProfile(entity)
       .then(() => {
-        getPaymentProfiles("", DEFAULT_CURRENT_PAGE, perPage);
+        getPaymentProfiles(
+          term,
+          DEFAULT_CURRENT_PAGE,
+          perPage,
+          order,
+          orderDir
+        );
         setPaymentProfilePopup(false);
       })
       .finally(() => setIsSaving(false));
@@ -79,7 +85,7 @@ const PaymentProfileListPage = ({
 
   const handleDelete = (paymentProfileId) =>
     deletePaymentProfile(paymentProfileId).then(() =>
-      getPaymentProfiles("", DEFAULT_CURRENT_PAGE, perPage)
+      getPaymentProfiles(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
     );
 
   const handleSearch = (searchTerm) => {
@@ -103,11 +109,15 @@ const PaymentProfileListPage = ({
     setPaymentProfilePopup(false);
   };
 
-  const handleSaveFeeType = (entity) =>
-    savePaymentFeeType(entity).then(() => {
-      getPaymentFeeTypes(currentPaymentProfile.id);
-      setPaymentProfilePopup(false);
-    });
+  const handleSaveFeeType = (entity) => {
+    if (isSaving) return;
+    setIsSaving(true);
+    return savePaymentFeeType(entity)
+      .then(() => {
+        getPaymentFeeTypes(currentPaymentProfile.id);
+      })
+      .finally(() => setIsSaving(false));
+  };
 
   const handleDeleteFeeType = (feeTypeId) =>
     deletePaymentFeeType(feeTypeId).then(() => {

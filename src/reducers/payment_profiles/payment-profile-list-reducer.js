@@ -41,8 +41,8 @@ const paymentProfileListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_PAYMENT_PROFILES: {
-      const { order, orderDir } = payload;
-      return { ...state, order, orderDir };
+      const { term, page, perPage, order, orderDir } = payload;
+      return { ...state, term, currentPage: page, perPage, order, orderDir };
     }
     case RECEIVE_PAYMENT_PROFILES: {
       const {
