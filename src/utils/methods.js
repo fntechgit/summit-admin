@@ -620,7 +620,11 @@ export const normalizeSelectAllField = (
   };
 };
 
-export const formatDate = (date, timeZone, format = DATETIME_FORMAT) => {
+export const formatDate = (
+  date,
+  timeZone = "LOC",
+  format = DATETIME_FORMAT
+) => {
   if (timeZone === "LOC") {
     return moment(date * MILLISECONDS_TO_SECONDS).format(format);
   }
@@ -629,3 +633,6 @@ export const formatDate = (date, timeZone, format = DATETIME_FORMAT) => {
     .tz(timeZone)
     .format(format);
 };
+
+export const getFileUploadAllowedExtensions = () =>
+  window.FILE_UPLOAD_ALLOWED_EXTENSIONS?.split(",").filter(Boolean) ?? [];

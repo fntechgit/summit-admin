@@ -11,11 +11,11 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import {
-  getSponsorships,
   resetFormTemplate,
   saveFormTemplate,
   updateFormTemplate
 } from "../../../../../actions/sponsor-forms-actions";
+import { getSummitSponsorshipTypes } from "../../../../../actions/summit-actions";
 import { MAX_PER_PAGE } from "../../../../../utils/constants";
 import FormTemplateForm from "./form-template-form";
 
@@ -25,7 +25,7 @@ const FormTemplatePopup = ({
   formTemplate,
   open,
   onClose,
-  getSponsorships,
+  getSummitSponsorshipTypes,
   resetFormTemplate,
   saveFormTemplate,
   updateFormTemplate,
@@ -34,7 +34,7 @@ const FormTemplatePopup = ({
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    getSponsorships(1, MAX_PER_PAGE);
+    getSummitSponsorshipTypes(1, MAX_PER_PAGE);
   }, []);
 
   const closePopup = () => {
@@ -126,5 +126,5 @@ export default connect(mapStateToProps, {
   resetFormTemplate,
   saveFormTemplate,
   updateFormTemplate,
-  getSponsorships
+  getSummitSponsorshipTypes
 })(FormTemplatePopup);
