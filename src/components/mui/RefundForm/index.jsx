@@ -19,8 +19,9 @@ import { Box, Button, Grid2 } from "@mui/material";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikPriceField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/price-field";
 import InfoNote from "openstack-uicore-foundation/lib/components/mui/info-note";
+import CustomAlert from "openstack-uicore-foundation/lib/components/mui/custom-alert";
 
-const RefundForm = ({ onSubmit }) => {
+const RefundForm = ({ onSubmit, disabled = false }) => {
   const formik = useFormik({
     initialValues: {
       reason: "",
@@ -56,6 +57,7 @@ const RefundForm = ({ onSubmit }) => {
               fullWidth
               size="small"
               label={T.translate("refund_form.reason")}
+              disabled={disabled}
             />
           </Grid2>
           <Grid2 size={4}>
@@ -65,6 +67,7 @@ const RefundForm = ({ onSubmit }) => {
               size="small"
               inCents
               label={T.translate("refund_form.amount")}
+              disabled={disabled}
             />
           </Grid2>
           <Grid2 size={2} sx={{ pt: 2 }}>
@@ -74,13 +77,23 @@ const RefundForm = ({ onSubmit }) => {
               color="primary"
               fullWidth
               size="small"
+              disabled={disabled}
             >
               {T.translate("refund_form.queue_refund")}
             </Button>
           </Grid2>
         </Grid2>
       </Box>
-      <InfoNote message={T.translate("refund_form.info")} sx={{ mt: 2 }} />
+      <Box sx={{ mt: 2 }}>
+        {disabled ? (
+          <CustomAlert
+            message={T.translate("refund_form.only_online_payments")}
+            severity="warning"
+          />
+        ) : (
+          <InfoNote message={T.translate("refund_form.info")} />
+        )}
+      </Box>
     </FormikProvider>
   );
 };
