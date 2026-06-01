@@ -81,7 +81,17 @@ const emailTemplateReducer = (state = DEFAULT_STATE, action) => {
 
     case SET_CURRENT_SUMMIT:
     case RESET_TEMPLATE_FORM:
-      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+      return {
+        ...state,
+        entity: { ...DEFAULT_ENTITY },
+        errors: {},
+        // reset render sequencing so in-flight responses for the previous
+        // template cannot match latestRenderId and repopulate the new form
+        preview: null,
+        render_errors: [],
+        templateLoading: false,
+        latestRenderId: 0
+      };
 
     case RECEIVE_TEMPLATE: {
       const entity = normalizeEntityFields({ ...payload.response });
@@ -93,7 +103,10 @@ const emailTemplateReducer = (state = DEFAULT_STATE, action) => {
           original_mjml_content: entity.mjml_content,
           original_html_content: entity.html_content
         },
-        preview: null
+        preview: null,
+        render_errors: [],
+        templateLoading: false,
+        latestRenderId: 0
       };
     }
 
@@ -107,7 +120,11 @@ const emailTemplateReducer = (state = DEFAULT_STATE, action) => {
           ...entity,
           original_mjml_content: entity.mjml_content,
           original_html_content: entity.html_content
-        }
+        },
+        preview: null,
+        render_errors: [],
+        templateLoading: false,
+        latestRenderId: 0
       };
     }
 
