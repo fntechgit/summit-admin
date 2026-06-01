@@ -8,7 +8,11 @@ const CustomAlert = ({ severity = "info", message = "", hideIcon = false }) => (
     sx={{
       justifyContent: "start",
       alignItems: "center",
-      mb: 2
+      mb: 2,
+      "& .MuiAlert-message": {
+        fontWeight: "normal",
+        ...(severity === "info" && { color: "#1E88E5" })
+      }
     }}
   >
     {message}

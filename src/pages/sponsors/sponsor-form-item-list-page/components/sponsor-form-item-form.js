@@ -130,7 +130,7 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
           </Grid2>
           <Grid2 size={12}>
             <Box sx={{ px: 3, my: "10px" }}>
-              <Typography variant="h5">
+              <Typography variant="h5" color="text.primary">
                 {T.translate(
                   "sponsor_form_item_list.edit_item.additional_fields"
                 )}
