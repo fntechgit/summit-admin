@@ -128,7 +128,7 @@ describe("EmailTemplateForm preview dispatch", () => {
     // FIX: mode must re-init to HTML and send isMjml=false (pre-fix this stays true / sends mjml_content)
     expect(sharedRender).toHaveBeenLastCalledWith(
       htmlProps.templateJsonData,
-      expect.any(String),
+      htmlEntity.html_content,
       false
     );
   });
