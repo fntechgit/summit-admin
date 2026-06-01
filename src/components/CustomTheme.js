@@ -77,6 +77,10 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ ownerState }) => ({
           fontWeight: 500,
+          boxShadow: "none",
+          "&:hover": { boxShadow: "none" },
+          "&:active": { boxShadow: "none" },
+          "&:focus": { boxShadow: "none" },
           ...(ownerState.size === "small" && {
             fontSize: "13px",
             lineHeight: "18px",
@@ -127,7 +131,10 @@ const theme = createTheme({
           fontSize: "12px"
         },
         standardInfo: ({ theme }) => ({
-          color: theme.palette.primary.dark
+          color: theme.palette.primary.dark,
+          "& .MuiAlert-message": {
+            color: theme.palette.primary.dark
+          }
         })
       }
     }
