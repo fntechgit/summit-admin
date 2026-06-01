@@ -9,24 +9,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import debounce from "lodash/debounce"
-import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader"
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import debounce from "lodash/debounce";
+import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import EmailTemplateInput from "../inputs/email-template-input";
 import CodeMirror from "@uiw/react-codemirror";
 import { sublimeInit } from "@uiw/codemirror-theme-sublime";
 import { html } from "@codemirror/lang-html";
 import mjml2html from "mjml-browser";
+import Swal from "sweetalert2";
+import EmailTemplateInput from "../inputs/email-template-input";
 import { scrollToError, shallowEqual, hasErrors } from "../../utils/methods";
 import "./email-template.less";
-import Swal from "sweetalert2";
 import {
   EMAIL_TEMPLATE_TYPE_HTML,
   EMAIL_TEMPLATE_TYPE_MJML
@@ -78,9 +78,9 @@ const EmailTemplateForm = ({
 
   const previewRef = useRef(null);
 
-  let style = mobileView
-    ? { width: "320px", height: `960px`, transform: `scale(${scale})` }
-    : { width: "800px", height: `960px`, transform: `scale(${scale})` };
+  const style = mobileView
+    ? { width: "320px", height: "960px", transform: `scale(${scale})` }
+    : { width: "800px", height: "960px", transform: `scale(${scale})` };
 
   useEffect(() => {
     scrollToError(errors);
@@ -114,11 +114,7 @@ const EmailTemplateForm = ({
       }
       setStateErrors({});
       setMjmlEditor(
-        entity.mjml_content.length > 0
-          ? true
-          : entity.html_content
-          ? false
-          : true
+        entity.mjml_content.length > 0 ? true : !entity.html_content
       );
     }
   }, [templateLoaded]);
@@ -132,20 +128,35 @@ const EmailTemplateForm = ({
     }
   }, [singleTab]);
 
+  const DEBOUNCE_MS = 500;
   const debouncedRenderTemplate = useRef(
-    debounce(async (htmlContent, json_data) => {
-      renderEmailTemplate(json_data, htmlContent).then(() => {
+    debounce(async (content, json_data, isMjml) => {
+      renderEmailTemplate(json_data, content, isMjml).then(() => {
         // wait until first API email preview to display template on screen
         if (!previewLoaded) setPreviewLoaded(true);
       });
-    }, 500)
+    }, DEBOUNCE_MS)
   ).current;
 
+  // MJML mode: send raw mjml_content so the API runs Jinja -> official MJML CLI
+  // (same pipeline as production). mjmlEditor is in the deps so a button-only
+  // mode switch re-fires this; the debounce coalesces with the HTML effect so
+  // only one preview request goes out per mode.
   useEffect(() => {
-    // wait until the template is loaded from the API to re render
-    if (templateLoaded)
-      debouncedRenderTemplate(stateEntity.html_content, templateJsonData);
-  }, [stateEntity.html_content, entity, templateJsonData]);
+    if (templateLoaded && mjmlEditor)
+      debouncedRenderTemplate(stateEntity.mjml_content, templateJsonData, true);
+  }, [stateEntity.mjml_content, mjmlEditor, entity, templateJsonData]);
+
+  // HTML mode: unchanged Jinja-on-HTML preview. Guarded on !mjmlEditor so it
+  // does not fire for MJML templates.
+  useEffect(() => {
+    if (templateLoaded && !mjmlEditor)
+      debouncedRenderTemplate(
+        stateEntity.html_content,
+        templateJsonData,
+        false
+      );
+  }, [stateEntity.html_content, mjmlEditor, entity, templateJsonData]);
 
   useEffect(() => {
     if (mjmlEditor) {
@@ -184,14 +195,14 @@ const EmailTemplateForm = ({
     }
   }, [mjmlEditor]);
 
-  const handleCodeMirrorHTMLChange = (value, change) => {
-    setStateErrors({ ...stateErrors, ["html_content"]: "" });
-    setStateEntity({ ...stateEntity, ["html_content"]: value });
+  const handleCodeMirrorHTMLChange = (value) => {
+    setStateErrors({ ...stateErrors, html_content: "" });
+    setStateEntity({ ...stateEntity, html_content: value });
   };
 
-  const handleCodeMirrorMJMLChange = (value, change) => {
-    setStateErrors({ ...stateErrors, ["mjml_content"]: "" });
-    setStateEntity({ ...stateEntity, ["mjml_content"]: value });
+  const handleCodeMirrorMJMLChange = (value) => {
+    setStateErrors({ ...stateErrors, mjml_content: "" });
+    setStateEntity({ ...stateEntity, mjml_content: value });
   };
 
   const handleChange = (ev) => {
@@ -219,23 +230,25 @@ const EmailTemplateForm = ({
     onRender();
   };
 
+  const SINGLE_TAB_BREAKPOINT = 992;
+  const MOBILE_PREVIEW_WIDTH = 320;
+  const DESKTOP_PREVIEW_WIDTH = 800;
+
   const handleResizeWindow = () => {
-    if (window.innerWidth < 992) {
+    if (window.innerWidth < SINGLE_TAB_BREAKPOINT) {
       setSingleTab(true);
     } else {
       setSingleTab(false);
     }
     const currentPreviewWidth = previewRef?.current?.offsetWidth;
     if (mobileView) {
-      if (currentPreviewWidth < 320) {
-        const newScale = currentPreviewWidth / 320;
+      if (currentPreviewWidth < MOBILE_PREVIEW_WIDTH) {
+        const newScale = currentPreviewWidth / MOBILE_PREVIEW_WIDTH;
         setScale(newScale);
       }
-    } else {
-      if (currentPreviewWidth < 800) {
-        const newScale = currentPreviewWidth / 800;
-        setScale(newScale);
-      }
+    } else if (currentPreviewWidth < DESKTOP_PREVIEW_WIDTH) {
+      const newScale = currentPreviewWidth / DESKTOP_PREVIEW_WIDTH;
+      setScale(newScale);
     }
   };
 
@@ -249,14 +262,16 @@ const EmailTemplateForm = ({
         setCodeOnly(true);
         setPreviewOnly(false);
       }
+    } else if (id === "preview") {
+      if (codeOnly) {
+        setCodeOnly(false);
+      } else {
+        setPreviewOnly(true);
+      }
+    } else if (previewOnly) {
+      setPreviewOnly(false);
     } else {
-      id === "preview"
-        ? codeOnly
-          ? setCodeOnly(false)
-          : setPreviewOnly(true)
-        : previewOnly
-        ? setPreviewOnly(false)
-        : setCodeOnly(true);
+      setCodeOnly(true);
     }
   };
 
@@ -287,9 +302,7 @@ const EmailTemplateForm = ({
     }
   };
 
-  const isTemplateInvalid = () => {
-    return mjmlEditor && mjmlRenderError !== null;
-  };
+  const isTemplateInvalid = () => mjmlEditor && mjmlRenderError !== null;
 
   useEffect(() => {
     handleResizeWindow();
@@ -409,6 +422,7 @@ const EmailTemplateForm = ({
                             <a
                               target="_blank"
                               href="https://documentation.mjml.io/"
+                              rel="noreferrer"
                             >
                               MJML format
                             </a>
@@ -419,7 +433,7 @@ const EmailTemplateForm = ({
                             onClick={() => {
                               setMjmlEditor(false);
                             }}
-                            className={`btn btn-primary`}
+                            className="btn btn-primary"
                             value={T.translate("emails.display_html")}
                           />
                         </>
@@ -431,6 +445,7 @@ const EmailTemplateForm = ({
                             <a
                               target="_blank"
                               href="https://opensource.com/sites/default/files/gated-content/osdc_cheatsheet-jinja2.pdf"
+                              rel="noreferrer"
                             >
                               jinja format
                             </a>
@@ -442,7 +457,7 @@ const EmailTemplateForm = ({
                             onClick={() => {
                               setMjmlEditor(true);
                             }}
-                            className={`btn btn-primary`}
+                            className="btn btn-primary"
                             value={T.translate("emails.display_mjml")}
                           />
                         </>
@@ -459,7 +474,7 @@ const EmailTemplateForm = ({
                             <Dropdown
                               id="history_version"
                               value={historyVersion}
-                              isClearable={true}
+                              isClearable
                               placeholder={T.translate(
                                 "emails.placeholders.select_version"
                               )}
@@ -483,8 +498,9 @@ const EmailTemplateForm = ({
                                 "emails.placeholders.see_version"
                               )}
                               target="_blank"
+                              rel="noreferrer"
                             >
-                              <i className="fa fa-github fa-lg"></i>
+                              <i className="fa fa-github fa-lg" />
                             </a>
                           </div>
                         )}
@@ -499,7 +515,7 @@ const EmailTemplateForm = ({
                     <input
                       type="button"
                       onClick={() => setMobileView(!mobileView)}
-                      className={`btn btn-primary`}
+                      className="btn btn-primary"
                       value={
                         mobileView
                           ? T.translate("emails.display_desktop")
@@ -571,7 +587,7 @@ const EmailTemplateForm = ({
                       id="code"
                       onClick={(ev) => handleTabChange(ev)}
                     >
-                      <i className="fa fa-chevron-right"></i>
+                      <i className="fa fa-chevron-right" />
                     </button>
                   )}
                   {!previewOnly && (
@@ -580,45 +596,40 @@ const EmailTemplateForm = ({
                       id="preview"
                       onClick={(ev) => handleTabChange(ev)}
                     >
-                      <i className="fa fa-chevron-left"></i>
+                      <i className="fa fa-chevron-left" />
                     </button>
                   )}
                 </div>
                 {!codeOnly && (
-                  <>
-                    <div className="email-template-preview" ref={previewRef}>
-                      <AjaxLoader
-                        show={templateLoading}
-                        size={120}
-                        relative={true}
-                      />
-                      {renderErrors.length > 0 ? (
-                        <div className="container">
-                          There is an error trying to render the email template:
-                          <ul>
-                            {renderErrors.map((err) => (
-                              <li>{err}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      ) : mjmlRenderError?.message ? (
-                        <div className="container">
-                          There is an error trying to render the email template:
-                          <ul>{mjmlRenderError.message}</ul>
-                        </div>
-                      ) : (
-                        previewLoaded && (
-                          <iframe
-                            style={{ ...style }}
-                            id={"preview"}
-                            name={"preview"}
-                            sandbox={"allow-same-origin"}
-                            srcDoc={preview}
-                          />
-                        )
-                      )}
-                    </div>
-                  </>
+                  <div className="email-template-preview" ref={previewRef}>
+                    <AjaxLoader show={templateLoading} size={120} relative />
+                    {renderErrors.length > 0 ? (
+                      <div className="container">
+                        There is an error trying to render the email template:
+                        <ul>
+                          {renderErrors.map((err) => (
+                            <li>{err}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : mjmlRenderError?.message ? (
+                      <div className="container">
+                        There is an error trying to render the email template:
+                        <ul>{mjmlRenderError.message}</ul>
+                      </div>
+                    ) : (
+                      previewLoaded && (
+                        <iframe
+                          style={{ ...style }}
+                          id="preview"
+                          name="preview"
+                          title="Email template preview"
+                          sandbox="allow-same-origin"
+                          srcDoc={preview}
+                        />
+                      )
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -636,8 +647,8 @@ const EmailTemplateForm = ({
             className="btn btn-primary pull-right"
             value={T.translate("general.save")}
           />
-          {/*<input type="button" onClick={this.handleSendTest}
-                            className="btn btn-primary pull-right" value={T.translate("emails.send_test")}/>*/}
+          {/* <input type="button" onClick={this.handleSendTest}
+                            className="btn btn-primary pull-right" value={T.translate("emails.send_test")}/> */}
         </div>
       </div>
     </form>
