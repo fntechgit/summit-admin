@@ -7,7 +7,7 @@ import {
   beforeEach,
   afterEach
 } from "@jest/globals";
-import { render, act } from "@testing-library/react";
+import { render, act, fireEvent } from "@testing-library/react";
 
 import EmailTemplateForm from "../email-template-form";
 
@@ -93,6 +93,40 @@ describe("EmailTemplateForm preview dispatch", () => {
     expect(props.renderEmailTemplate).toHaveBeenCalledWith(
       props.templateJsonData,
       htmlEntity.html_content,
+      false
+    );
+  });
+
+  it("re-fires the HTML-mode preview when toggled from MJML to HTML", async () => {
+    const props = baseProps(mjmlEntity);
+    const { getByDisplayValue } = render(<EmailTemplateForm {...props} />);
+
+    // initial mount → one MJML-mode request
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(props.renderEmailTemplate).toHaveBeenCalledTimes(1);
+    expect(props.renderEmailTemplate).toHaveBeenLastCalledWith(
+      props.templateJsonData,
+      mjmlEntity.mjml_content,
+      true
+    );
+
+    // click the "switch to HTML" button — button-only mode toggle,
+    // mutates neither content field directly
+    // T.translate returns the key string when no i18n config is loaded
+    await act(async () => {
+      fireEvent.click(getByDisplayValue("emails.display_html"));
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    // the HTML-mode effect re-fires with isMjml=false
+    expect(props.renderEmailTemplate).toHaveBeenCalledTimes(2);
+    expect(props.renderEmailTemplate).toHaveBeenLastCalledWith(
+      props.templateJsonData,
+      expect.any(String),
       false
     );
   });
