@@ -1,5 +1,5 @@
 import { describe, it, expect } from "@jest/globals";
-import { buildRenderPayload } from "../email-actions";
+import { buildRenderPayload, normalizeRenderErrors } from "../email-actions";
 
 describe("Email Actions", () => {
   describe("buildRenderPayload", () => {
@@ -26,6 +26,31 @@ describe("Email Actions", () => {
         payload: { a: 1 },
         html: "<p>hi</p>"
       });
+    });
+  });
+
+  describe("normalizeRenderErrors", () => {
+    it("passes a 412 string array through unchanged", () => {
+      expect(
+        normalizeRenderErrors([
+          "Invalid MJML syntax: <mj-foo> unknown",
+          "line 2"
+        ])
+      ).toEqual(["Invalid MJML syntax: <mj-foo> unknown", "line 2"]);
+    });
+
+    it("wraps a bare 500 'server error' string in an array", () => {
+      expect(normalizeRenderErrors("server error")).toEqual(["server error"]);
+    });
+
+    it("flattens an object error body to a string array", () => {
+      expect(normalizeRenderErrors({ mjml: ["bad tag"] })).toEqual(["bad tag"]);
+    });
+
+    it("returns a reachability message when there is no response body", () => {
+      expect(normalizeRenderErrors(undefined)).toEqual([
+        "Could not reach the email preview service. Please try again."
+      ]);
     });
   });
 });

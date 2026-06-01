@@ -214,10 +214,18 @@ export const renderEmailTemplate =
     });
   };
 
+export const normalizeRenderErrors = (body) => {
+  if (Array.isArray(body)) return body.map(String);
+  if (typeof body === "string") return [body];
+  if (body && typeof body === "object")
+    return Object.values(body).flat().map(String);
+  return ["Could not reach the email preview service. Please try again."];
+};
+
 const renderErrorHandler = (err) => (dispatch) => {
   dispatch({
     type: VALIDATE_RENDER,
-    payload: { errors: err.response.body }
+    payload: { errors: normalizeRenderErrors(err?.response?.body) }
   });
 };
 
