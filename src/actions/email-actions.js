@@ -29,7 +29,7 @@ import {
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
-import debounce from "lodash/debounce"
+import debounce from "lodash/debounce";
 import history from "../history";
 import { checkOrFilter, getAccessTokenSafely } from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";
@@ -191,28 +191,53 @@ export const deleteEmailTemplate = (templateId) => async (dispatch) => {
   });
 };
 
-export const renderEmailTemplate = (json, html) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
+export const buildRenderPayload = (json, content, isMjml) =>
+  isMjml ? { payload: json, mjml: content } : { payload: json, html: content };
 
-  const params = {
-    access_token: accessToken
+let renderRequestSeq = 0;
+
+export const renderEmailTemplate =
+  (json, content, isMjml = false) =>
+  async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+
+    const params = {
+      access_token: accessToken
+    };
+
+    renderRequestSeq += 1;
+    const requestId = renderRequestSeq;
+
+    return putRequest(
+      createAction(REQUEST_TEMPLATE_RENDER),
+      ({ response }) => ({
+        type: TEMPLATE_RENDER_RECEIVED,
+        payload: { response, requestId }
+      }),
+      `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/all/render`,
+      buildRenderPayload(json, content, isMjml),
+      renderErrorHandler(requestId),
+      { requestId }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
   };
 
-  return putRequest(
-    createAction(REQUEST_TEMPLATE_RENDER),
-    createAction(TEMPLATE_RENDER_RECEIVED),
-    `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/all/render`,
-    { payload: json, html },
-    renderErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+export const normalizeRenderErrors = (body) => {
+  if (Array.isArray(body)) return body.map(String);
+  if (typeof body === "string") return [body];
+  if (body && typeof body === "object")
+    return Object.values(body).flat().map(String);
+  return ["Could not reach the email preview service. Please try again."];
 };
 
-const renderErrorHandler = (err) => (dispatch) => {
+const renderErrorHandler = (requestId) => (err) => (dispatch) => {
   dispatch({
     type: VALIDATE_RENDER,
-    payload: { errors: err.response.body }
+    payload: {
+      errors: normalizeRenderErrors(err?.response?.body),
+      requestId
+    }
   });
 };
 
