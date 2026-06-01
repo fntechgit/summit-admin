@@ -19,7 +19,8 @@ import {
   postRequest,
   putRequest,
   startLoading,
-  stopLoading
+  stopLoading,
+  getCSV
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
@@ -31,6 +32,8 @@ import {
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
+export const REQUEST_ALL_SPONSOR_PURCHASES = "REQUEST_ALL_SPONSOR_PURCHASES";
+export const RECEIVE_ALL_SPONSOR_PURCHASES = "RECEIVE_ALL_SPONSOR_PURCHASES";
 export const REQUEST_SPONSOR_PURCHASES = "REQUEST_SPONSOR_PURCHASES";
 export const RECEIVE_SPONSOR_PURCHASES = "RECEIVE_SPONSOR_PURCHASES";
 export const SPONSOR_PURCHASE_STATUS_UPDATED =
@@ -39,6 +42,127 @@ export const RECEIVE_SPONSOR_ORDER = "RECEIVE_SPONSOR_ORDER";
 export const CLEAR_SPONSOR_ORDER = "CLEAR_SPONSOR_ORDER";
 export const SPONSOR_CLIENT_ADDRESS_UPDATED = "SPONSOR_CLIENT_ADDRESS_UPDATED";
 export const SPONSOR_CLIENT_UPDATED = "SPONSOR_CLIENT_UPDATED";
+
+export const getAllSponsorPurchases =
+  (
+    term = "",
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "created",
+    orderDir = -1
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+    const accessToken = await getAccessTokenSafely();
+    const filter = [];
+
+    dispatch(startLoading());
+
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(
+        `number==${escapedTerm},sponsor_company_name=@${escapedTerm},purchased_by_email=@${escapedTerm},purchased_by_full_name=@${escapedTerm}`
+      );
+    }
+
+    const params = {
+      page,
+      per_page: perPage,
+      access_token: accessToken,
+      expand: "sponsor",
+      relations: "sponsor",
+      fields:
+        "id,number,payment_id,purchased_date,sponsor.id,sponsor.company_name,payment_method,status,net_amount"
+    };
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      switch (order) {
+        case "purchased":
+          params.order = `${orderDirSign}created`;
+          break;
+        case "amount":
+          params.order = `${orderDirSign}net_amount`;
+          break;
+        case "sponsor_name":
+          params.order = `${orderDirSign}sponsor_company_name`;
+          break;
+        default:
+          params.order = `${orderDirSign}${order}`;
+      }
+    }
+
+    return getRequest(
+      createAction(REQUEST_ALL_SPONSOR_PURCHASES),
+      createAction(RECEIVE_ALL_SPONSOR_PURCHASES),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/purchases`,
+      authErrorHandler,
+      { order, orderDir, page, perPage, term }
+    )(params)(dispatch).finally(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const exportAllSponsorPurchases =
+  (term = null, order, orderDir) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const filter = [];
+    const filename = `${currentSummit.id}-purchases.csv`;
+
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(
+        `number==${escapedTerm},sponsor_company_name=@${escapedTerm},purchased_by_email=@${escapedTerm},purchased_by_full_name=@${escapedTerm}`
+      );
+    }
+
+    const params = {
+      access_token: accessToken,
+      expand: "sponsor",
+      relations: "sponsor",
+      fields:
+        "number,payment_id,purchased_date,sponsor.id,sponsor.company_name,payment_method,status,net_amount"
+    };
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      switch (order) {
+        case "purchased":
+          params.order = `${orderDirSign}created`;
+          break;
+        case "amount":
+          params.order = `${orderDirSign}net_amount`;
+          break;
+        case "sponsor_name":
+          params.order = `${orderDirSign}sponsor_company_name`;
+          break;
+        default:
+          params.order = `${orderDirSign}${order}`;
+      }
+    }
+
+    dispatch(
+      getCSV(
+        `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/purchases/csv`,
+        params,
+        filename
+      )
+    );
+  };
 
 export const getSponsorPurchases =
   (
@@ -82,7 +206,7 @@ export const getSponsorPurchases =
           params.order = `${orderDirSign}created`;
           break;
         case "amount":
-          params.order = `${orderDirSign}raw_amount`;
+          params.order = `${orderDirSign}net_amount`;
           break;
         default:
           params.order = `${orderDirSign}${order}`;
@@ -101,10 +225,9 @@ export const getSponsorPurchases =
   };
 
 export const approveSponsorPurchase =
-  (paymentId) => async (dispatch, getState) => {
-    const { currentSummitState, currentSponsorState } = getState();
+  (sponsorId, paymentId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
-    const { entity: sponsor } = currentSponsorState;
     const accessToken = await getAccessTokenSafely();
 
     const params = {
@@ -119,7 +242,7 @@ export const approveSponsorPurchase =
         paymentId,
         status: PURCHASE_STATUS.PAID
       }),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/payments/${paymentId}/approve`,
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/payments/${paymentId}/approve`,
       {},
       snackbarErrorHandler
     )(params)(dispatch)
@@ -138,10 +261,9 @@ export const approveSponsorPurchase =
   };
 
 export const rejectSponsorPurchase =
-  (paymentId) => async (dispatch, getState) => {
-    const { currentSummitState, currentSponsorState } = getState();
+  (sponsorId, paymentId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
-    const { entity: sponsor } = currentSponsorState;
     const accessToken = await getAccessTokenSafely();
 
     const params = {
@@ -156,7 +278,7 @@ export const rejectSponsorPurchase =
         paymentId,
         status: PURCHASE_STATUS.CANCELLED
       }),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/payments/${paymentId}/cancel`,
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/payments/${paymentId}/cancel`,
       null,
       snackbarErrorHandler
     )(params)(dispatch)

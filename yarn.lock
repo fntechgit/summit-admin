@@ -9056,10 +9056,10 @@ open@^10.0.3:
     is-inside-container "^1.0.0"
     wsl-utils "^0.1.0"
 
-openstack-uicore-foundation@5.0.30-beta.2:
-  version "5.0.30-beta.2"
-  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-5.0.30-beta.2.tgz#f2ee0ddad80e21aa9768a8de05637ccd601e3d7f"
-  integrity sha512-InHgMK19oQhQjjloLjCwj/LEg1sqWhmLxExmXIwYdLbarfLqAcY9jSxgERtvOaOghZH3zQvFN1IkkcdcTRWRqw==
+openstack-uicore-foundation@5.0.32:
+  version "5.0.32"
+  resolved "https://registry.npmjs.org/openstack-uicore-foundation/-/openstack-uicore-foundation-5.0.32.tgz#856623f5d7b3021f7fa08550a3c0a7f656bd3011"
+  integrity sha512-jQCs/F2+74bOGgj/0mT8W6h0DfT6kbgkbwau6ZFOi5lDBjrCkKTOJosnCyonj3R4TEvtx4A6x1nmwP6Z7Mc+dQ==
   dependencies:
     use-sync-external-store "^1.6.0"
 
@@ -11728,7 +11728,7 @@ use-memo-one@^1.1.1:
 
 use-sync-external-store@^1.6.0:
   version "1.6.0"
-  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.6.0.tgz#b174bfa65cb2b526732d9f2ac0a408027876f32d"
+  resolved "https://registry.npmjs.org/use-sync-external-store/-/use-sync-external-store-1.6.0.tgz#b174bfa65cb2b526732d9f2ac0a408027876f32d"
   integrity sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==
 
 util-deprecate@^1.0.1, util-deprecate@^1.0.2, util-deprecate@~1.0.1:
