@@ -117,7 +117,7 @@ const EmailTemplateForm = ({
         entity.mjml_content.length > 0 ? true : !entity.html_content
       );
     }
-  }, [templateLoaded]);
+  }, [templateLoaded, entity.id, entity.identifier]);
 
   useEffect(() => {
     if (singleTab) {

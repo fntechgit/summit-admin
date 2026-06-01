@@ -97,6 +97,42 @@ describe("EmailTemplateForm preview dispatch", () => {
     );
   });
 
+  it("re-inits preview mode when the loaded template changes in place (MJML -> HTML)", async () => {
+    const sharedRender = jest.fn(() => Promise.resolve());
+    const mjProps = {
+      ...baseProps(mjmlEntity),
+      renderEmailTemplate: sharedRender
+    };
+    const { rerender } = render(<EmailTemplateForm {...mjProps} />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    // initial MJML-mode request
+    expect(sharedRender).toHaveBeenLastCalledWith(
+      mjProps.templateJsonData,
+      mjmlEntity.mjml_content,
+      true
+    );
+
+    // simulate in-place navigation to a DIFFERENT (HTML) template on the SAME form instance
+    const htmlProps = {
+      ...baseProps(htmlEntity),
+      renderEmailTemplate: sharedRender
+    };
+    rerender(<EmailTemplateForm {...htmlProps} />);
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    // FIX: mode must re-init to HTML and send isMjml=false (pre-fix this stays true / sends mjml_content)
+    expect(sharedRender).toHaveBeenLastCalledWith(
+      htmlProps.templateJsonData,
+      expect.any(String),
+      false
+    );
+  });
+
   it("re-fires the HTML-mode preview when toggled from MJML to HTML", async () => {
     const props = baseProps(mjmlEntity);
     const { getByDisplayValue } = render(<EmailTemplateForm {...props} />);
