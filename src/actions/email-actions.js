@@ -194,6 +194,8 @@ export const deleteEmailTemplate = (templateId) => async (dispatch) => {
 export const buildRenderPayload = (json, content, isMjml) =>
   isMjml ? { payload: json, mjml: content } : { payload: json, html: content };
 
+let renderRequestSeq = 0;
+
 export const renderEmailTemplate =
   (json, content, isMjml = false) =>
   async (dispatch) => {
@@ -203,12 +205,19 @@ export const renderEmailTemplate =
       access_token: accessToken
     };
 
+    renderRequestSeq += 1;
+    const requestId = renderRequestSeq;
+
     return putRequest(
       createAction(REQUEST_TEMPLATE_RENDER),
-      createAction(TEMPLATE_RENDER_RECEIVED),
+      ({ response }) => ({
+        type: TEMPLATE_RENDER_RECEIVED,
+        payload: { response, requestId }
+      }),
       `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/all/render`,
       buildRenderPayload(json, content, isMjml),
-      renderErrorHandler
+      renderErrorHandler(requestId),
+      { requestId }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -222,10 +231,13 @@ export const normalizeRenderErrors = (body) => {
   return ["Could not reach the email preview service. Please try again."];
 };
 
-const renderErrorHandler = (err) => (dispatch) => {
+const renderErrorHandler = (requestId) => (err) => (dispatch) => {
   dispatch({
     type: VALIDATE_RENDER,
-    payload: { errors: normalizeRenderErrors(err?.response?.body) }
+    payload: {
+      errors: normalizeRenderErrors(err?.response?.body),
+      requestId
+    }
   });
 };
 
