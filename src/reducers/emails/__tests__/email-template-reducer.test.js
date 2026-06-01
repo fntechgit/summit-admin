@@ -45,6 +45,23 @@ describe("TEMPLATE_RENDER_RECEIVED out-of-order guard", () => {
     expect(state.render_errors).toEqual([]);
     expect(state.templateLoading).toBe(false);
   });
+
+  it("stale response does NOT wipe a prior fresh preview already on screen", () => {
+    // Step 1: id2 is latest, and a fresh preview has already been applied
+    const stateAfterFresh = emailTemplateReducer(stateWithId2, {
+      type: TEMPLATE_RENDER_RECEIVED,
+      payload: { response: { html_content: "FRESH" }, requestId: 2 }
+    });
+    expect(stateAfterFresh.preview).toBe("FRESH"); // precondition
+
+    // Step 2: a stale response for id1 arrives — must not overwrite "FRESH"
+    const stateAfterStale = emailTemplateReducer(stateAfterFresh, {
+      type: TEMPLATE_RENDER_RECEIVED,
+      payload: { response: { html_content: "STALE" }, requestId: 1 }
+    });
+    expect(stateAfterStale.preview).toBe("FRESH");
+    expect(stateAfterStale.preview).not.toBe("STALE");
+  });
 });
 
 // ─── Test 3: VALIDATE_RENDER out-of-order guard ───────────────────────────────
@@ -72,6 +89,23 @@ describe("VALIDATE_RENDER out-of-order guard", () => {
     });
     expect(state.render_errors).toEqual(["render failed"]);
     expect(state.templateLoading).toBe(false);
+  });
+
+  it("stale error does NOT wipe a prior fresh render_errors already on screen", () => {
+    // Step 1: id2 is latest, and a fresh error list has already been applied
+    const stateAfterFreshError = emailTemplateReducer(stateWithId2, {
+      type: VALIDATE_RENDER,
+      payload: { errors: ["render failed"], requestId: 2 }
+    });
+    expect(stateAfterFreshError.render_errors).toEqual(["render failed"]); // precondition
+
+    // Step 2: a stale VALIDATE_RENDER for id1 arrives — must not overwrite fresh errors
+    const stateAfterStaleError = emailTemplateReducer(stateAfterFreshError, {
+      type: VALIDATE_RENDER,
+      payload: { errors: ["stale error"], requestId: 1 }
+    });
+    expect(stateAfterStaleError.render_errors).toEqual(["render failed"]);
+    expect(stateAfterStaleError.render_errors).not.toContain("stale error");
   });
 });
 
