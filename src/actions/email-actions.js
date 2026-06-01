@@ -29,7 +29,7 @@ import {
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
-import debounce from "lodash/debounce"
+import debounce from "lodash/debounce";
 import history from "../history";
 import { checkOrFilter, getAccessTokenSafely } from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";
@@ -191,23 +191,28 @@ export const deleteEmailTemplate = (templateId) => async (dispatch) => {
   });
 };
 
-export const renderEmailTemplate = (json, html) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
+export const buildRenderPayload = (json, content, isMjml) =>
+  isMjml ? { payload: json, mjml: content } : { payload: json, html: content };
 
-  const params = {
-    access_token: accessToken
+export const renderEmailTemplate =
+  (json, content, isMjml = false) =>
+  async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return putRequest(
+      createAction(REQUEST_TEMPLATE_RENDER),
+      createAction(TEMPLATE_RENDER_RECEIVED),
+      `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/all/render`,
+      buildRenderPayload(json, content, isMjml),
+      renderErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
   };
-
-  return putRequest(
-    createAction(REQUEST_TEMPLATE_RENDER),
-    createAction(TEMPLATE_RENDER_RECEIVED),
-    `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/all/render`,
-    { payload: json, html },
-    renderErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
-};
 
 const renderErrorHandler = (err) => (dispatch) => {
   dispatch({
