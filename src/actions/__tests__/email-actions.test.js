@@ -47,6 +47,17 @@ describe("Email Actions", () => {
       expect(normalizeRenderErrors({ mjml: ["bad tag"] })).toEqual(["bad tag"]);
     });
 
+    it("flattens a multi-key object body across all values", () => {
+      expect(normalizeRenderErrors({ mjml: ["a"], html: ["b"] })).toEqual([
+        "a",
+        "b"
+      ]);
+    });
+
+    it("normalizes an object whose values are plain strings", () => {
+      expect(normalizeRenderErrors({ detail: "boom" })).toEqual(["boom"]);
+    });
+
     it("returns a reachability message when there is no response body", () => {
       expect(normalizeRenderErrors(undefined)).toEqual([
         "Could not reach the email preview service. Please try again."
