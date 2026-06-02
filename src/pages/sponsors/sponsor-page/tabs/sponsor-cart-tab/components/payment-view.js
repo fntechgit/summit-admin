@@ -80,7 +80,6 @@ const PaymentView = ({
               notes={cart?.notes || []}
               fees={cart?.fees || []}
               total={cart?.total}
-              withDescription
             />
           </CardContent>
         </Card>
