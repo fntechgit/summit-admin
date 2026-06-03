@@ -110,7 +110,8 @@ const SponsorGlobalNewUserPopup = ({
 
 SponsorGlobalNewUserPopup.propTypes = {
   onClose: PropTypes.func.isRequired,
-  sendSponsorUserInvite: PropTypes.func.isRequired
+  sendSponsorUserInvite: PropTypes.func.isRequired,
+  summitId: PropTypes.number.isRequired
 };
 
 export default connect(() => {}, {
