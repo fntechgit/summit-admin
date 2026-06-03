@@ -170,12 +170,9 @@ const SponsorOrderDetails = ({
           >
             <CardContent>
               <SponsorOrderGrid
-                lines={currentOrder?.forms || []}
-                notes={currentOrder?.notes || []}
-                payments={currentOrder?.payments || []}
-                refunds={currentOrder?.refunds || []}
-                fees={currentOrder?.fees || []}
-                total={currentOrder?.total}
+                order={currentOrder}
+                withReconciliation
+                withCancelledItemsHeader
                 onCancelForm={handleCancelForm}
                 onUndoCancelForm={handleUndoCancelForm}
               />
