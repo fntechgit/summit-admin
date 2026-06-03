@@ -1,9 +1,10 @@
 import React from "react";
 import { ThemeProvider } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
+import { CustomThemeBase } from "openstack-uicore-foundation/lib/utils/theme";
 import PropTypes from "prop-types";
 
-const theme = createTheme({
+const theme = createTheme(CustomThemeBase, {
   palette: {
     primary: {
       main: "#2196F3",
@@ -129,6 +130,9 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           fontSize: "12px"
+        },
+        message: {
+          fontWeight: "normal"
         },
         standardInfo: ({ theme }) => ({
           color: theme.palette.primary.dark,
