@@ -38,10 +38,10 @@ import { getCountryList } from "openstack-uicore-foundation/lib/utils/query-acti
 import Table from "openstack-uicore-foundation/lib/components/mui/table";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
+import { MuiColorInput } from "mui-color-input";
 // import MuiFormikAsyncAutocomplete from "openstack-uicore-foundation/lib/components/mui/formik-inputs/async-select";
 import useScrollToError from "../../../hooks/useScrollToError";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
-import MuiFormikColorInput from "../../../components/mui/formik-inputs/mui-formik-color-input";
 import MuiFormikAsyncAutocomplete from "../../../components/mui/formik-inputs/mui-formik-async-select";
 import showConfirmDialog from "../../../components/mui/showConfirmDialog";
 
@@ -71,6 +71,8 @@ const CompanyDialog = ({
   const [selectedSponsorShipType, setSelectedSponsorShipType] = useState(null);
   const [sponsorShipTypes, setSponsorShipTypes] = useState([]);
 
+  const [colorValue, setColorValue] = useState(initialEntity?.color || "");
+
   const formik = useFormik({
     initialValues: {
       id: initialEntity?.id ?? 0,
@@ -95,7 +97,10 @@ const CompanyDialog = ({
     validationSchema: yup.object().shape({
       name: yup.string().required(T.translate("validation.required"))
     }),
-    onSubmit: (values) => onSave(values)
+    onSubmit: (values) => {
+      const valuesToSave = { ...values, color: colorValue };
+      onSave(valuesToSave);
+    }
   });
 
   useScrollToError(formik, true);
@@ -158,6 +163,10 @@ const CompanyDialog = ({
         sponsorshipId,
         supportingCompany.id
       );
+  };
+
+  const handleColorChange = (newValue) => {
+    setColorValue(newValue);
   };
 
   const sponsored_project_columns = [
@@ -245,7 +254,14 @@ const CompanyDialog = ({
                 <InputLabel htmlFor="color">
                   {T.translate("edit_company.color")}
                 </InputLabel>
-                <MuiFormikColorInput name="color" margin="none" fullWidth />
+                <MuiColorInput
+                  name="color"
+                  value={colorValue}
+                  format="hex"
+                  margin="none"
+                  fullWidth
+                  onChange={handleColorChange}
+                />
               </Grid2>
               <Grid2 size={4}>
                 <InputLabel htmlFor="admin_email">
@@ -408,7 +424,7 @@ const CompanyDialog = ({
                 </Grid2>
               )}
 
-              {initialEntity.project_sponsorships.length > 0 &&
+              {initialEntity.project_sponsorships?.length > 0 &&
                 window.APP_CLIENT_NAME == "openstack" && (
                   <Grid2 size={12} mb={2}>
                     <Table
