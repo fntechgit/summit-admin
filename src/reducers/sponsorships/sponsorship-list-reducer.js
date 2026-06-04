@@ -9,7 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 import {
   RECEIVE_SPONSORSHIPS,
@@ -18,10 +20,10 @@ import {
 } from "../../actions/sponsorship-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
   sponsorships: [],
+  term: "",
   currentPage: 1,
   lastPage: 1,
   perPage: 10,
@@ -38,27 +40,28 @@ const sponsorshipListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSORSHIPS: {
-      let { order, orderDir } = payload;
+      const { term, order, orderDir, perPage } = payload;
 
-      return { ...state, order, orderDir };
+      return { ...state, term, order, orderDir, perPage };
     }
     case RECEIVE_SPONSORSHIPS: {
-      let { current_page, total, last_page } = payload.response;
-      let sponsorships = payload.response.data;
+      const { current_page, total, last_page } = payload.response;
+      const sponsorships = payload.response.data;
 
       return {
         ...state,
-        sponsorships: sponsorships,
+        sponsorships,
         totalSponsorships: total,
         currentPage: current_page,
         lastPage: last_page
       };
     }
     case SPONSORSHIP_DELETED: {
-      let { sponsorshipId } = payload;
+      const { sponsorshipId } = payload;
       return {
         ...state,
-        sponsorships: state.sponsorships.filter((t) => t.id !== sponsorshipId)
+        sponsorships: state.sponsorships.filter((t) => t.id !== sponsorshipId),
+        totalSponsorships: state.totalSponsorships - 1
       };
     }
     default:
