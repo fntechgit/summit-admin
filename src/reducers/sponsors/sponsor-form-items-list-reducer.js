@@ -57,7 +57,7 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSOR_FORM_ITEMS: {
-      const { order, orderDir, page, showArchived } = payload;
+      const { order, orderDir, page, perPage, showArchived } = payload;
 
       return {
         ...state,
@@ -65,6 +65,7 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
         orderDir,
         items: [],
         currentPage: page,
+        perPage,
         showArchived
       };
     }

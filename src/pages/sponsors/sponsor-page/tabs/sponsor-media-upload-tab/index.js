@@ -30,6 +30,7 @@ import CustomAlert from "../../../../../components/mui/custom-alert";
 import { SPONSOR_MEDIA_UPLOAD_STATUS } from "../../../../../utils/constants";
 import UploadDialog from "../../../../../components/upload-dialog";
 import showConfirmDialog from "../../../../../components/mui/showConfirmDialog";
+import PreviewModal from "../../../../../components/mui/PreviewModal";
 
 const SponsorMediaUploadTab = ({
   sponsor,
@@ -41,6 +42,7 @@ const SponsorMediaUploadTab = ({
   removeFileForSponsorMU
 }) => {
   const [uploadModule, setUploadModule] = useState(null);
+  const [previewModule, setPreviewModule] = useState(null);
 
   useEffect(() => {
     getSponsorMURequests();
@@ -70,11 +72,17 @@ const SponsorMediaUploadTab = ({
   };
 
   const handleView = (item) => {
-    console.log("VIEW : ", item);
+    setPreviewModule(item);
   };
 
   const handleDownload = (item) => {
-    console.log("DOWNLOAD : ", item);
+    if (item?.media_upload?.public_url) {
+      window.open(
+        item.media_upload.public_url,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    }
   };
 
   const handleDelete = async (item) => {
@@ -161,15 +169,18 @@ const SponsorMediaUploadTab = ({
         header: "",
         width: 80,
         align: "center",
-        render: (row) => (
-          <IconButton
-            size="large"
-            disabled={!row.media_upload}
-            onClick={() => handleView(row)}
-          >
-            <VisibilityIcon fontSize="large" />
-          </IconButton>
-        )
+        render: (row) => {
+          const isImage = row.media_upload?.file_mimetype.includes("image");
+          return (
+            <IconButton
+              size="large"
+              disabled={!row.media_upload || !isImage}
+              onClick={() => handleView(row)}
+            >
+              <VisibilityIcon fontSize="large" />
+            </IconButton>
+          );
+        }
       },
       {
         columnKey: "download",
@@ -267,6 +278,14 @@ const SponsorMediaUploadTab = ({
           max_file_size: uploadModule?.max_file_size
         }}
         maxFiles={1}
+      />
+      <PreviewModal
+        open={!!previewModule}
+        onClose={() => setPreviewModule(null)}
+        title={previewModule?.name}
+        filename={previewModule?.media_upload?.file_name}
+        uploadDate={previewModule?.media_upload?.file_created}
+        url={previewModule?.media_upload?.public_url}
       />
     </Box>
   );

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { useFormikContext, getIn } from "formik";
@@ -16,18 +16,27 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import DragAndDropList from "../../../../components/mui/dnd-list";
 import showConfirmDialog from "../../../../components/mui/showConfirmDialog";
-import { PAGES_MODULE_KINDS } from "../../../../utils/constants";
+import {
+  DEBOUNCE_WAIT_150,
+  PAGES_MODULE_KINDS
+} from "../../../../utils/constants";
 import InfoModule from "./modules/page-template-info-module";
 import DocumentDownloadModule from "./modules/page-template-document-download-module";
 import MediaRequestModule from "./modules/page-template-media-request-module";
 import { getAllMediaFileTypes } from "../../../../actions/media-file-type-actions";
 
 const PageModules = ({ name = "modules", getAllMediaFileTypes }) => {
-  const { values, setFieldValue } = useFormikContext();
+  const { values, setFieldValue, errors, submitCount } = useFormikContext();
   const modules = getIn(values, name) || [];
+  const moduleErrors = getIn(errors, name);
 
   const bottomRef = useRef(null);
   const prevModulesLength = useRef(modules.length);
+  const moduleRefMap = useRef(new Map());
+
+  const [collapsedModules, setCollapsedModules] = useState(new Set());
+
+  const getModuleId = (module) => module._tempId || module.id;
 
   // auto-scroll to new module
   useEffect(() => {
@@ -36,6 +45,29 @@ const PageModules = ({ name = "modules", getAllMediaFileTypes }) => {
     }
     prevModulesLength.current = modules.length;
   }, [modules.length]);
+
+  // on submit with errors, expand collapsed modules that have errors and scroll to the first
+  useEffect(() => {
+    if (submitCount === 0 || !Array.isArray(moduleErrors)) return;
+
+    const errorIds = moduleErrors
+      .map((err, i) => err && getModuleId(modules[i]))
+      .filter(Boolean);
+
+    if (errorIds.length === 0) return;
+
+    setCollapsedModules((prev) => {
+      const next = new Set(prev);
+      errorIds.forEach((id) => next.delete(id));
+      return next;
+    });
+
+    setTimeout(() => {
+      moduleRefMap.current
+        .get(errorIds[0])
+        ?.scrollIntoView({ behavior: "smooth" });
+    }, DEBOUNCE_WAIT_150);
+  }, [submitCount]);
 
   useEffect(() => {
     getAllMediaFileTypes();
@@ -78,6 +110,18 @@ const PageModules = ({ name = "modules", getAllMediaFileTypes }) => {
     setFieldValue(name, newModules);
   };
 
+  const handleToggle = (moduleId) => (_, isExpanded) => {
+    setCollapsedModules((prev) => {
+      const next = new Set(prev);
+      if (isExpanded) {
+        next.delete(moduleId);
+      } else {
+        next.add(moduleId);
+      }
+      return next;
+    });
+  };
+
   const renderModuleFields = (module, index) => {
     switch (module.kind) {
       case PAGES_MODULE_KINDS.INFO:
@@ -93,7 +137,11 @@ const PageModules = ({ name = "modules", getAllMediaFileTypes }) => {
 
   const renderModule = (module, index) => (
     <Accordion
-      defaultExpanded
+      expanded={!collapsedModules.has(getModuleId(module))}
+      onChange={handleToggle(getModuleId(module))}
+      ref={(el) => {
+        moduleRefMap.current.set(getModuleId(module), el);
+      }}
       sx={{
         mb: 1,
         "&:before": { display: "none" },

@@ -22,8 +22,10 @@ import {
   SHOW_PAGE_DELETED,
   RESET_SHOW_PAGE_FORM
 } from "../../actions/show-pages-actions";
-import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { RECEIVE_GLOBAL_SPONSORSHIPS } from "../../actions/sponsor-forms-actions";
+import {
+  SET_CURRENT_SUMMIT,
+  RECEIVE_SUMMIT_SPONSORSHIP_TYPES
+} from "../../actions/summit-actions";
 import { denormalizePageModules } from "../../utils/page-template";
 
 const DEFAULT_SHOW_PAGE = {
@@ -154,7 +156,7 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
     case RESET_SHOW_PAGE_FORM: {
       return { ...state, currentShowPage: DEFAULT_SHOW_PAGE };
     }
-    case RECEIVE_GLOBAL_SPONSORSHIPS: {
+    case RECEIVE_SUMMIT_SPONSORSHIP_TYPES: {
       const {
         current_page: currentPage,
         last_page: lastPage,

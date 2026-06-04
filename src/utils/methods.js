@@ -601,26 +601,30 @@ export const normalizeSelectAllField = (
   listName,
   allSelected
 ) => {
-  if (!items?.length)
-    return {
-      [flagName]: false,
-      [listName]: []
-    };
-
-  const isAllSelected = allSelected ?? items.includes("all");
+  const isAllSelected = allSelected ?? items?.includes("all");
   if (isAllSelected) {
     return {
       [flagName]: true,
       [listName]: []
     };
   }
+
+  if (!items?.length)
+    return {
+      [flagName]: false,
+      [listName]: []
+    };
   return {
     [flagName]: false,
     [listName]: items.map((a) => a.id ?? a)
   };
 };
 
-export const formatDate = (date, timeZone, format = DATETIME_FORMAT) => {
+export const formatDate = (
+  date,
+  timeZone = "LOC",
+  format = DATETIME_FORMAT
+) => {
   if (timeZone === "LOC") {
     return moment(date * MILLISECONDS_TO_SECONDS).format(format);
   }
@@ -629,3 +633,6 @@ export const formatDate = (date, timeZone, format = DATETIME_FORMAT) => {
     .tz(timeZone)
     .format(format);
 };
+
+export const getFileUploadAllowedExtensions = () =>
+  window.FILE_UPLOAD_ALLOWED_EXTENSIONS?.split(",").filter(Boolean) ?? [];

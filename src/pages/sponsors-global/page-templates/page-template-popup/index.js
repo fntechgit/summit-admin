@@ -9,6 +9,8 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  FormControl,
+  FormHelperText,
   Grid2,
   IconButton,
   Typography
@@ -116,6 +118,11 @@ const PageTemplatePopup = ({
     validationSchema: yup.object().shape({
       code: yup.string().required(T.translate("validation.required")),
       name: yup.string().required(T.translate("validation.required")),
+      ...(showSponsorships && {
+        sponsorship_types: yup
+          .array()
+          .min(1, T.translate("validation.required"))
+      }),
       modules: yup.array().of(moduleSchema)
     }),
     enableReinitialize: true,
@@ -207,14 +214,35 @@ const PageTemplatePopup = ({
               </Grid2>
               {showSponsorships && (
                 <Grid2 spacing={2} size={4}>
-                  <MuiDropdownCheckbox
-                    name="sponsorship_types"
-                    label={T.translate("page_template_list.sponsorship")}
-                    allLabel={T.translate("page_template_list.all_tiers")}
-                    value={formik.values.sponsorship_types}
-                    options={sponsorships}
-                    onChange={formik.handleChange}
-                  />
+                  <FormControl
+                    fullWidth
+                    error={
+                      formik.touched.sponsorship_types &&
+                      !!formik.errors.sponsorship_types
+                    }
+                  >
+                    <MuiDropdownCheckbox
+                      name="sponsorship_types"
+                      label={T.translate("page_template_list.sponsorship")}
+                      allLabel={T.translate("page_template_list.all_tiers")}
+                      value={formik.values.sponsorship_types}
+                      options={sponsorships}
+                      onChange={formik.handleChange}
+                      onBlur={() =>
+                        formik.setFieldTouched("sponsorship_types", true)
+                      }
+                      error={
+                        formik.touched.sponsorship_types &&
+                        !!formik.errors.sponsorship_types
+                      }
+                    />
+                    {formik.touched.sponsorship_types &&
+                      formik.errors.sponsorship_types && (
+                        <FormHelperText sx={{ mx: "14px", mt: "-4px" }}>
+                          {formik.errors.sponsorship_types}
+                        </FormHelperText>
+                      )}
+                  </FormControl>
                 </Grid2>
               )}
               {showAllowedAddons && (

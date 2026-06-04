@@ -13,8 +13,7 @@ import {
   archiveShowPage,
   unarchiveShowPage
 } from "../../../../actions/show-pages-actions";
-import { getSponsorships } from "../../../../actions/sponsor-forms-actions";
-
+import { getSummitSponsorshipTypes } from "../../../../actions/summit-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   MAX_PER_PAGE
@@ -61,8 +60,8 @@ jest.mock("../../../../actions/show-pages-actions", () => ({
   resetShowPageForm: jest.fn(() => ({ type: "MOCK_ACTION" }))
 }));
 
-jest.mock("../../../../actions/sponsor-forms-actions", () => ({
-  getSponsorships: jest.fn(() => () => Promise.resolve({ items: [] }))
+jest.mock("../../../../actions/summit-actions", () => ({
+  getSummitSponsorshipTypes: jest.fn(() => () => Promise.resolve({ items: [] }))
 }));
 
 // Helper to create show page data
@@ -75,7 +74,8 @@ const createShowPage = (id, overrides = {}) => ({
   ...overrides
 });
 
-const renderWithConfirmDialog = (ui, options) => renderWithRedux(
+const renderWithConfirmDialog = (ui, options) =>
+  renderWithRedux(
     <>
       <GlobalConfirmDialog />
       {ui}
@@ -90,15 +90,18 @@ describe("ShowPagesListPage", () => {
 
   describe("Component", () => {
     it("should render empty state when no pages exist", () => {
-      renderWithConfirmDialog(<ShowPagesListPage />, {
-        initialState: {
-          showPagesListState: {
-            ...showPagesListDefaultState,
-            showPages: [],
-            totalCount: 0
+      renderWithConfirmDialog(
+        <ShowPagesListPage match={{ url: "/show-pages" }} />,
+        {
+          initialState: {
+            showPagesListState: {
+              ...showPagesListDefaultState,
+              showPages: [],
+              totalCount: 0
+            }
           }
         }
-      });
+      );
 
       expect(
         screen.getByText("show_pages.no_sponsors_pages")
@@ -106,35 +109,41 @@ describe("ShowPagesListPage", () => {
     });
 
     it("should render table when pages exist", () => {
-      renderWithConfirmDialog(<ShowPagesListPage />, {
-        initialState: {
-          showPagesListState: {
-            ...showPagesListDefaultState,
-            showPages: [createShowPage(1), createShowPage(2)],
-            totalCount: 2
+      renderWithConfirmDialog(
+        <ShowPagesListPage match={{ url: "/show-pages" }} />,
+        {
+          initialState: {
+            showPagesListState: {
+              ...showPagesListDefaultState,
+              showPages: [createShowPage(1), createShowPage(2)],
+              totalCount: 2
+            }
           }
         }
-      });
+      );
 
       expect(screen.getByText("Page 1")).toBeInTheDocument();
       expect(screen.getByText("Page 2")).toBeInTheDocument();
     });
 
     it("should call getShowPage and open popup when edit is clicked", async () => {
-      renderWithConfirmDialog(<ShowPagesListPage />, {
-        initialState: {
-          showPagesListState: {
-            ...showPagesListDefaultState,
-            showPages: [createShowPage(1)],
-            totalCount: 1
+      renderWithConfirmDialog(
+        <ShowPagesListPage match={{ url: "/show-pages" }} />,
+        {
+          initialState: {
+            showPagesListState: {
+              ...showPagesListDefaultState,
+              showPages: [createShowPage(1)],
+              totalCount: 1
+            }
           }
         }
-      });
+      );
       const editButton = screen.getByTestId("EditIcon").closest("button");
       await act(async () => {
         await userEvent.click(editButton);
       });
-      expect(getSponsorships).toHaveBeenCalledWith(
+      expect(getSummitSponsorshipTypes).toHaveBeenCalledWith(
         DEFAULT_CURRENT_PAGE,
         MAX_PER_PAGE
       );
@@ -145,20 +154,23 @@ describe("ShowPagesListPage", () => {
     });
 
     it("should refresh list after save", async () => {
-      renderWithConfirmDialog(<ShowPagesListPage />, {
-        initialState: {
-          showPagesListState: {
-            ...showPagesListDefaultState,
-            showPages: [createShowPage(1)],
-            totalCount: 1
+      renderWithConfirmDialog(
+        <ShowPagesListPage match={{ url: "/show-pages" }} />,
+        {
+          initialState: {
+            showPagesListState: {
+              ...showPagesListDefaultState,
+              showPages: [createShowPage(1)],
+              totalCount: 1
+            }
           }
         }
-      });
+      );
       const editButton = screen.getByTestId("EditIcon").closest("button");
       await act(async () => {
         await userEvent.click(editButton);
       });
-      expect(getSponsorships).toHaveBeenCalledWith(
+      expect(getSummitSponsorshipTypes).toHaveBeenCalledWith(
         DEFAULT_CURRENT_PAGE,
         MAX_PER_PAGE
       );
@@ -178,19 +190,22 @@ describe("ShowPagesListPage", () => {
     });
 
     it("should call deleteShowPage and refresh list when delete is confirmed", async () => {
-      renderWithConfirmDialog(<ShowPagesListPage />, {
-        initialState: {
-          showPagesListState: {
-            ...showPagesListDefaultState,
-            showPages: [
-              createShowPage(1),
-              createShowPage(2),
-              createShowPage(3)
-            ],
-            totalCount: 3
+      renderWithConfirmDialog(
+        <ShowPagesListPage match={{ url: "/show-pages" }} />,
+        {
+          initialState: {
+            showPagesListState: {
+              ...showPagesListDefaultState,
+              showPages: [
+                createShowPage(1),
+                createShowPage(2),
+                createShowPage(3)
+              ],
+              totalCount: 3
+            }
           }
         }
-      });
+      );
       const deleteButtons = screen.getAllByTestId("DeleteIcon");
       const secondDeleteButton = deleteButtons[1].closest("button");
       await act(async () => {
@@ -215,15 +230,18 @@ describe("ShowPagesListPage", () => {
     });
 
     it("should not call deleteShowPage when delete is cancelled", async () => {
-      renderWithConfirmDialog(<ShowPagesListPage />, {
-        initialState: {
-          showPagesListState: {
-            ...showPagesListDefaultState,
-            showPages: [createShowPage(1)],
-            totalCount: 1
+      renderWithConfirmDialog(
+        <ShowPagesListPage match={{ url: "/show-pages" }} />,
+        {
+          initialState: {
+            showPagesListState: {
+              ...showPagesListDefaultState,
+              showPages: [createShowPage(1)],
+              totalCount: 1
+            }
           }
         }
-      });
+      );
       const deleteButton = screen.getByTestId("DeleteIcon").closest("button");
       await act(async () => {
         await userEvent.click(deleteButton);
@@ -243,15 +261,18 @@ describe("ShowPagesListPage", () => {
     });
 
     it("should call archiveShowPage for non-archived item", async () => {
-      renderWithConfirmDialog(<ShowPagesListPage />, {
-        initialState: {
-          showPagesListState: {
-            ...showPagesListDefaultState,
-            showPages: [createShowPage(1, { is_archived: false })],
-            totalCount: 1
+      renderWithConfirmDialog(
+        <ShowPagesListPage match={{ url: "/show-pages" }} />,
+        {
+          initialState: {
+            showPagesListState: {
+              ...showPagesListDefaultState,
+              showPages: [createShowPage(1, { is_archived: false })],
+              totalCount: 1
+            }
           }
         }
-      });
+      );
       const archiveButton = screen.getByText("general.archive");
       await act(async () => {
         await userEvent.click(archiveButton);
@@ -260,15 +281,18 @@ describe("ShowPagesListPage", () => {
     });
 
     it("should call unarchiveShowPage for archived item", async () => {
-      renderWithConfirmDialog(<ShowPagesListPage />, {
-        initialState: {
-          showPagesListState: {
-            ...showPagesListDefaultState,
-            showPages: [createShowPage(1, { is_archived: true })],
-            totalCount: 1
+      renderWithConfirmDialog(
+        <ShowPagesListPage match={{ url: "/show-pages" }} />,
+        {
+          initialState: {
+            showPagesListState: {
+              ...showPagesListDefaultState,
+              showPages: [createShowPage(1, { is_archived: true })],
+              totalCount: 1
+            }
           }
         }
-      });
+      );
       const unarchiveButton = screen.getByText("general.unarchive");
       await act(async () => {
         await userEvent.click(unarchiveButton);

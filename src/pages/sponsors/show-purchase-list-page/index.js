@@ -14,6 +14,7 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
+import { Breadcrumb } from "react-breadcrumbs";
 import {
   Box,
   Button,
@@ -25,20 +26,21 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
-import history from "../../../../../history";
+import history from "../../../history";
 import {
   approveSponsorPurchase,
-  getSponsorPurchases,
+  exportAllSponsorPurchases,
+  getAllSponsorPurchases,
   rejectSponsorPurchase
-} from "../../../../../actions/sponsor-purchases-actions";
+} from "../../../actions/sponsor-purchases-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   PURCHASE_METHODS,
   PURCHASE_STATUS
-} from "../../../../../utils/constants";
+} from "../../../utils/constants";
 
-const SponsorPurchasesTab = ({
-  sponsor,
+const ShowPurchaseListPage = ({
+  match,
   purchases,
   term,
   order,
@@ -46,24 +48,25 @@ const SponsorPurchasesTab = ({
   currentPage,
   perPage,
   totalCount,
-  getSponsorPurchases,
+  getAllSponsorPurchases,
+  exportAllSponsorPurchases,
   approveSponsorPurchase,
   rejectSponsorPurchase
 }) => {
   useEffect(() => {
-    getSponsorPurchases();
-  }, [sponsor?.id]);
+    getAllSponsorPurchases();
+  }, []);
 
   const handlePageChange = (page) => {
-    getSponsorPurchases(term, page, perPage, order, orderDir);
+    getAllSponsorPurchases(term, page, perPage, order, orderDir);
   };
 
   const handleSort = (key, dir) => {
-    getSponsorPurchases(term, currentPage, perPage, key, dir);
+    getAllSponsorPurchases(term, currentPage, perPage, key, dir);
   };
 
   const handlePerPageChange = (newPerPage) => {
-    getSponsorPurchases(
+    getAllSponsorPurchases(
       term,
       DEFAULT_CURRENT_PAGE,
       newPerPage,
@@ -72,44 +75,54 @@ const SponsorPurchasesTab = ({
     );
   };
 
+  const handleExport = () => {
+    exportAllSponsorPurchases(term, order, orderDir);
+  };
+
   const handleSearch = (searchTerm) => {
-    getSponsorPurchases(searchTerm);
+    getAllSponsorPurchases(searchTerm);
   };
 
   const handleDetails = (item) => {
-    history.push(`purchases/${item.id}`);
+    history.push(`${item.sponsor_id}/purchases/${item.id}`);
   };
 
   const handleMenu = (item) => {
     console.log("MENU : ", item);
   };
 
-  const handleStatusChange = (purchaseId, newStatus) => {
+  const handleStatusChange = (sponsorId, purchaseId, newStatus) => {
     if (newStatus === PURCHASE_STATUS.PAID)
-      approveSponsorPurchase(sponsor.id, purchaseId);
+      approveSponsorPurchase(sponsorId, purchaseId);
     if (newStatus === PURCHASE_STATUS.CANCELLED)
-      rejectSponsorPurchase(sponsor.id, purchaseId);
+      rejectSponsorPurchase(sponsorId, purchaseId);
   };
 
   const tableColumns = [
     {
       columnKey: "number",
-      header: T.translate("edit_sponsor.purchase_tab.order"),
+      header: T.translate("sponsor_show_purchases.order"),
       sortable: true
     },
     {
       columnKey: "purchased",
-      header: T.translate("edit_sponsor.purchase_tab.purchased"),
+      header: T.translate("sponsor_show_purchases.purchased"),
+      width: 200,
+      sortable: true
+    },
+    {
+      columnKey: "sponsor_name",
+      header: T.translate("sponsor_show_purchases.sponsor"),
       sortable: true
     },
     {
       columnKey: "payment_method",
-      header: T.translate("edit_sponsor.purchase_tab.payment_method"),
+      header: T.translate("sponsor_show_purchases.payment_method"),
       sortable: true
     },
     {
       columnKey: "status",
-      header: T.translate("edit_sponsor.purchase_tab.status"),
+      header: T.translate("sponsor_show_purchases.status"),
       sortable: true,
       render: (row) => {
         if (
@@ -122,7 +135,11 @@ const SponsorPurchasesTab = ({
               variant="outlined"
               value={row.status}
               onChange={(ev) =>
-                handleStatusChange(row.payment_id, ev.target.value)
+                handleStatusChange(
+                  row.sponsor_id,
+                  row.payment_id,
+                  ev.target.value
+                )
               }
             >
               {Object.values(PURCHASE_STATUS).map((s) => (
@@ -139,7 +156,7 @@ const SponsorPurchasesTab = ({
     },
     {
       columnKey: "amount",
-      header: T.translate("edit_sponsor.purchase_tab.amount"),
+      header: T.translate("sponsor_show_purchases.amount"),
       sortable: true
     },
     {
@@ -154,7 +171,7 @@ const SponsorPurchasesTab = ({
           size="small"
           onClick={() => handleDetails(row)}
         >
-          {T.translate("edit_sponsor.purchase_tab.details")}
+          {T.translate("sponsor_show_purchases.details")}
         </Button>
       )
     },
@@ -176,7 +193,16 @@ const SponsorPurchasesTab = ({
   ];
 
   return (
-    <Box sx={{ mt: 2 }}>
+    <div className="container">
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("sponsor_show_purchases.purchases"),
+            pathname: match.url
+          }}
+        />
+      </div>
+      <h3>{T.translate("sponsor_show_purchases.purchases")}</h3>
       <Grid2
         container
         spacing={2}
@@ -188,15 +214,21 @@ const SponsorPurchasesTab = ({
       >
         <Grid2 size={2}>
           <Box component="span">
-            {totalCount} {T.translate("edit_sponsor.purchase_tab.purchases")}
+            {totalCount}{" "}
+            {T.translate("sponsor_show_purchases.purchases").toLowerCase()}
           </Box>
         </Grid2>
-        <Grid2 size={2} offset={8}>
+        <Grid2 size={2} offset={6}>
           <SearchInput
             term={term}
             onSearch={handleSearch}
-            placeholder={T.translate("edit_sponsor.placeholders.search")}
+            placeholder={T.translate("general.placeholders.search")}
           />
+        </Grid2>
+        <Grid2 size={2}>
+          <Button variant="contained" onClick={handleExport}>
+            {T.translate("general.export")}
+          </Button>
         </Grid2>
       </Grid2>
       <div>
@@ -212,20 +244,17 @@ const SponsorPurchasesTab = ({
           onSort={handleSort}
         />
       </div>
-    </Box>
+    </div>
   );
 };
 
-const mapStateToProps = ({
-  sponsorPagePurchaseListState,
-  currentSponsorState
-}) => ({
-  ...sponsorPagePurchaseListState,
-  sponsor: currentSponsorState.entity
+const mapStateToProps = ({ showPurchaseListState }) => ({
+  ...showPurchaseListState
 });
 
 export default connect(mapStateToProps, {
-  getSponsorPurchases,
+  getAllSponsorPurchases,
+  exportAllSponsorPurchases,
   approveSponsorPurchase,
   rejectSponsorPurchase
-})(SponsorPurchasesTab);
+})(ShowPurchaseListPage);

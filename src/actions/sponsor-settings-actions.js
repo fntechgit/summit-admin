@@ -177,18 +177,30 @@ const normalizeEntityFprPurchaseAPI = (entity, summitTZ) => {
 
   normalizedEntity.wire_transfer_notification_email =
     wire_transfer_notification_email?.split(";") || [];
-  normalizedEntity.early_bird_end_date = moment
-    .tz(early_bird_end_date, summitTZ)
-    .unix();
-  normalizedEntity.standard_price_end_date = moment
-    .tz(standard_price_end_date, summitTZ)
-    .unix();
-  normalizedEntity.onsite_price_start_date = moment
-    .tz(onsite_price_start_date, summitTZ)
-    .unix();
-  normalizedEntity.onsite_price_end_date = moment
-    .tz(onsite_price_end_date, summitTZ)
-    .unix();
+
+  if (early_bird_end_date)
+    normalizedEntity.early_bird_end_date = moment
+      .tz(early_bird_end_date, summitTZ)
+      .unix();
+  else delete normalizedEntity.early_bird_end_date;
+
+  if (standard_price_end_date)
+    normalizedEntity.standard_price_end_date = moment
+      .tz(standard_price_end_date, summitTZ)
+      .unix();
+  else delete normalizedEntity.standard_price_end_date;
+
+  if (onsite_price_start_date)
+    normalizedEntity.onsite_price_start_date = moment
+      .tz(onsite_price_start_date, summitTZ)
+      .unix();
+  else delete normalizedEntity.onsite_price_start_date;
+
+  if (onsite_price_end_date)
+    normalizedEntity.onsite_price_end_date = moment
+      .tz(onsite_price_end_date, summitTZ)
+      .unix();
+  else delete normalizedEntity.onsite_price_end_date;
 
   return normalizedEntity;
 };

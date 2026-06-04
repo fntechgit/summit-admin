@@ -1,7 +1,39 @@
 import React from "react";
-import { render, fireEvent, screen } from "@testing-library/react";
+import { render, fireEvent, screen, within } from "@testing-library/react";
 
 import PromocodeForm from "../index";
+
+// jsdom has no layout, so react-window's FixedSizeList won't render rows.
+// The modal under test uses it for the working-list view; mock it like the
+// manage-modal unit test does so the integration test can read the rows.
+jest.mock("react-window", () => {
+  // eslint-disable-next-line global-require
+  const React = require("react");
+  return {
+    __esModule: true,
+    FixedSizeList: React.forwardRef(
+      ({ itemCount, itemData, children }, ref) => {
+        const Row = children;
+        const visible = Math.min(itemCount, 10);
+        if (ref) {
+          ref.current = { scrollToItem: jest.fn() };
+        }
+        return React.createElement(
+          "div",
+          { "data-testid": "fixed-size-list" },
+          Array.from({ length: visible }, (_, i) =>
+            React.createElement(Row, {
+              key: i,
+              index: i,
+              style: {},
+              data: itemData
+            })
+          )
+        );
+      }
+    )
+  };
+});
 
 // jsdom does not implement scrollIntoView; polyfill so componentDidUpdate
 // (which calls scrollToError → firstNode.scrollIntoView) does not throw.
@@ -489,6 +521,43 @@ describe("validate() — domain-authorized email-domain enforcement", () => {
     getByIdSpy.mockRestore();
   });
 
+  it("scrolls to the compact-mode wrapper when allowed_email_domains has > 50 entries (Codex A-fix regression)", () => {
+    // Codex pass-2 minor finding: A-fix added id="allowed_email_domains" to the
+    // compact wrapper, but no integration test exercised the FULL scrollToError
+    // path with > 50 entries. This test does. If a future refactor changes
+    // where scrollToError looks up the field, the unit tests at lines :545-:568
+    // still cover the static id presence — this test pins the end-to-end
+    // validate() → scrollToError → document.getElementById path in compact mode.
+    const getByIdSpy = jest.spyOn(document, "getElementById");
+    // 60 entries (> LARGE_DOMAIN_LIST_THRESHOLD=50) where at least one is
+    // malformed, so validate() fails and scrollToError fires.
+    const compactEntries = Array.from({ length: 59 }, (_, i) => `@e${i}.com`);
+    compactEntries.push("malformed");
+    const { container } = renderForm(
+      baseEntity({
+        class_name: "DOMAIN_AUTHORIZED_DISCOUNT_CODE",
+        allowed_email_domains: compactEntries
+      })
+    );
+    // Sanity-check we're in compact mode (compact-summary-count present —
+    // Manage List button is threshold-independent post-Tier 1.1 and no longer
+    // a valid compact-mode probe).
+    expect(
+      container.querySelector("[data-testid='compact-summary-count']")
+    ).toBeInTheDocument();
+    getByIdSpy.mockClear();
+    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    // scrollToError must have looked up the compact wrapper by id.
+    expect(getByIdSpy).toHaveBeenCalledWith("allowed_email_domains");
+    // And the lookup must have resolved (not returned null) — proves the id
+    // is actually present in the rendered DOM at large N.
+    const calls = getByIdSpy.mock.results.filter(
+      (r) => r.type === "return" && r.value !== null
+    );
+    expect(calls.length).toBeGreaterThan(0);
+    getByIdSpy.mockRestore();
+  });
+
   it("clears the .text-danger banner on plain typing after a failed save (regression — Codex review)", () => {
     const { container } = renderForm(
       baseEntity({
@@ -695,5 +764,102 @@ describe("DiscountBasePCForm — Apply to all Ticket Types audience restriction 
     const helper = getApplyToAllHelper(container);
     expect(helper).toBeInTheDocument();
     expect(helper.textContent).toBe(HELPER_KEY);
+  });
+});
+
+describe("PromocodeForm — DOMAIN_AUTHORIZED bulk input (Tier 1)", () => {
+  // End-to-end through the row → modal → onApply → form state → onSubmit
+  // path. Does NOT mock the modal (unlike the row unit test) — exercises
+  // the actual ManageAllowedEmailDomainsModal component, which is why the
+  // file-level react-window mock is required (jsdom can't virtualize).
+  it("60 existing domains → compact summary → modal paste → Done → entity reflects merge", () => {
+    const seed = Array.from({ length: 60 }, (_, i) => `@e${i}.com`);
+    const onSubmit = jest.fn();
+    const { container } = renderForm(
+      baseEntity({
+        class_name: "DOMAIN_AUTHORIZED_PROMO_CODE",
+        allowed_email_domains: seed
+      }),
+      { onSubmit }
+    );
+
+    // Above LARGE_DOMAIN_LIST_THRESHOLD (50) — chip wall is replaced by
+    // the compact summary + Manage List button.
+    expect(
+      container.querySelector("[data-testid='compact-summary-count']")
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector("[data-testid='domain-chip-@e0.com']")
+    ).not.toBeInTheDocument();
+    expect(
+      container.querySelector("[data-testid='manage-list-button']")
+    ).toBeInTheDocument();
+
+    // Open the modal.
+    fireEvent.click(
+      container.querySelector("[data-testid='manage-list-button']")
+    );
+    expect(screen.getByTestId("manage-modal-textarea")).toBeInTheDocument();
+
+    // Paste mix: 3 valid net-new, 1 invalid, 1 dup-of-existing.
+    fireEvent.change(screen.getByTestId("manage-modal-textarea"), {
+      target: {
+        value: "@new1.com\n@new2.com\n@e0.com\nnot-a-domain\n@new3.com"
+      }
+    });
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "edit_promocode.manage_modal.add_button"
+      })
+    );
+
+    // Toast renders the raw i18n key in jest env (no translator); the
+    // interpolated numbers are not visible. Verify the tally via the
+    // working-list row count instead: 60 existing + 3 new = 63.
+    expect(screen.getByTestId("manage-modal-toast")).toHaveTextContent(
+      "edit_promocode.manage_modal.added_toast"
+    );
+    // FixedSizeList mock caps visible rows at 10; assert all 10 render.
+    const modalList = screen.getByTestId("fixed-size-list");
+    expect(within(modalList).getAllByTestId(/manage-modal-row-/)).toHaveLength(
+      10
+    );
+
+    // Commit via Done — onApply fires up through fireChange, parent
+    // handleChange updates entity.allowed_email_domains.
+    fireEvent.click(
+      screen.getByRole("button", { name: "edit_promocode.manage_modal.done" })
+    );
+
+    // The form's internal entity state should now hold the merged array.
+    // Trigger Save and inspect the entity passed to onSubmit. (react-bootstrap
+    // 0.31's animated Modal can stay mounted in jsdom because the exit
+    // transition never resolves, so the modal's buttons remain in the
+    // accessibility tree and shadow the form's Save. Query the Save input
+    // directly via its DOM selector instead.)
+    const saveBtn = container.querySelector(
+      "input[type=\"button\"].btn.btn-primary.pull-right"
+    );
+    expect(saveBtn).toBeInTheDocument();
+    fireEvent.click(saveBtn);
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    const submittedEntity = onSubmit.mock.calls[0][0];
+    expect(submittedEntity.allowed_email_domains).toHaveLength(63);
+    // Original entries preserved.
+    expect(submittedEntity.allowed_email_domains).toEqual(
+      expect.arrayContaining(["@e0.com", "@e59.com"])
+    );
+    // New entries appended.
+    expect(submittedEntity.allowed_email_domains).toEqual(
+      expect.arrayContaining(["@new1.com", "@new2.com", "@new3.com"])
+    );
+    // Invalid + dup NOT present.
+    expect(submittedEntity.allowed_email_domains).not.toContain("not-a-domain");
+    // No duplicate @e0.com (still only one instance).
+    const e0count = submittedEntity.allowed_email_domains.filter(
+      (d) => d === "@e0.com"
+    ).length;
+    expect(e0count).toBe(1);
   });
 });

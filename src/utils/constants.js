@@ -138,6 +138,8 @@ export const DEBOUNCE_WAIT = 500;
 
 export const DEBOUNCE_WAIT_250 = 250;
 
+export const DEBOUNCE_WAIT_150 = 150;
+
 export const LETTERS_IN_ALPHABET = 26;
 
 export const UPPERCASE_A_IN_ASCII = 65;
@@ -205,7 +207,7 @@ export const ALLOWED_FORM_TEMPLATE_MATERIAL_FORMATS = [
 
 // 500 * 1024kb
 export const MAX_INVENTORY_IMAGE_UPLOAD_SIZE = 512000;
-export const MAX_INVENTORY_IMAGES_UPLOAD_QTY = 5;
+export const MAX_INVENTORY_IMAGES_UPLOAD_QTY = 1;
 export const ALLOWED_INVENTORY_IMAGE_FORMATS = ["jpg", "jpeg", "png"];
 
 export const METAFIELD_TYPES_WITH_OPTIONS = [
@@ -283,6 +285,11 @@ export const PURCHASE_STATUS = {
 export const PURCHASE_METHODS = {
   CARD: "card",
   INVOICE: "Invoice"
+};
+
+export const PURCHASE_TYPES = {
+  ONLINE: "Online",
+  OFFLINE: "Offline"
 };
 
 export const SPONSOR_USER_ASSIGNMENT_TYPE = {

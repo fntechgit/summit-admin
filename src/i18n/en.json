@@ -90,6 +90,7 @@
     "to": "To",
     "from": "From",
     "placeholders": {
+      "search": "Search...",
       "search_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id",
       "select_acceptance_criteria": "Select acceptance criteria",
       "select_invitation_status": "Select status"
@@ -186,6 +187,7 @@
     "sponsor_list": "Sponsor List",
     "sponsor_forms": "Forms",
     "sponsor_pages": "Pages",
+    "sponsor_purchases": "Purchases",
     "sponsorship_list": "Tiers",
     "sponsor_users": "Users",
     "sponsors_promocodes": "Promo Codes",
@@ -1043,6 +1045,21 @@
     },
     "errors": {
       "allowed_email_domains_format": "Each entry must be an exact domain (@acme.com), a TLD suffix (.edu), or a full email address."
+    },
+    "manage_button": "Manage List",
+    "manage_modal": {
+      "title": "Manage Allowed Email Domains",
+      "add_helper": "Accepts domains (@acme.com), TLD suffixes (.edu, .gov), or exact emails (user@example.com).",
+      "add_button": "Add Domains",
+      "added_toast": "Added {added} · skipped {invalid} invalid · {dup} duplicates",
+      "configured_count": "Configured Domains ({n})",
+      "done": "Done",
+      "cancel": "Cancel"
+    },
+    "large_list": {
+      "summary_count": "{n} domains configured",
+      "summary_type_mix": "{atDomain} @domain · {tld} .tld · {email} user@email",
+      "summary_example": "e.g. {entry}"
     }
   },
   "discount_ticket": {
@@ -2866,6 +2883,16 @@
       }
     }
   },
+  "sponsor_show_purchases": {
+    "order": "Order",
+    "purchased": "Purchased",
+    "sponsor": "Sponsor",
+    "payment_method": "Payment Method",
+    "status": "Status",
+    "amount": "Amount",
+    "details": "Details",
+    "purchases": "Purchases"
+  },
   "sponsor_users": {
     "users": "Users",
     "access_request": "access request",
@@ -4179,7 +4206,8 @@
     "reason": "Reason for Refund",
     "amount": "Amount",
     "queue_refund": "Queue refund",
-    "info": "If the original payment was made via Stripe, the refund will be automatically queued and processed."
+    "info": "If the original payment was made via Stripe, the refund will be automatically queued and processed.",
+    "only_online_payments": "Only online payments are eligible for refunds"
   },
   "client_card": {
     "title": "Client & Address Details",
@@ -4199,5 +4227,9 @@
     "country": "Country",
     "save": "Save",
     "cancel": "Cancel"
+  },
+  "preview_modal": {
+    "file_name": "File name",
+    "uploaded": "Uploaded"
   }
 }

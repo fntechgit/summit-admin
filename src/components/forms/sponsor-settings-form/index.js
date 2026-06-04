@@ -58,12 +58,10 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
   const formik = useFormik({
     initialValues: buildInitialValues(settings, summitTZ),
     validationSchema: yup.object({
-      early_bird_end_date: yup
-        .date(T.translate("validation.date"))
-        .required(T.translate("validation.required")),
+      early_bird_end_date: yup.date(T.translate("validation.date")).nullable(),
       standard_price_end_date: yup
         .date(T.translate("validation.date"))
-        .required(T.translate("validation.required"))
+        .nullable()
         .isAfterDateField(
           yup.ref("early_bird_end_date"),
           T.translate("validation.after", {
@@ -73,7 +71,7 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
         ),
       onsite_price_start_date: yup
         .date(T.translate("validation.date"))
-        .required(T.translate("validation.required"))
+        .nullable()
         .isAfterDateField(
           yup.ref("standard_price_end_date"),
           T.translate("validation.after", {
@@ -83,7 +81,7 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
         ),
       onsite_price_end_date: yup
         .date(T.translate("validation.date"))
-        .required(T.translate("validation.required"))
+        .nullable()
         .isAfterDateField(
           yup.ref("onsite_price_start_date"),
           T.translate("validation.after", {
@@ -93,12 +91,18 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
         ),
       wire_transfer_notification_email: yup
         .string(T.translate("validation.string"))
-        .emailList(T.translate("validation.email")),
+        .emailList(T.translate("validation.email"))
+        .nullable(),
       access_request_notification_email: yup
         .string(T.translate("validation.string"))
-        .emailList(T.translate("validation.email")),
-      wire_transfer_detail: yup.string(T.translate("validation.string")),
-      cart_checkout_cancel_policy: yup.string(T.translate("validation.string"))
+        .emailList(T.translate("validation.email"))
+        .nullable(),
+      wire_transfer_detail: yup
+        .string(T.translate("validation.string"))
+        .nullable(),
+      cart_checkout_cancel_policy: yup
+        .string(T.translate("validation.string"))
+        .nullable()
     }),
     onSubmit,
     validateOnChange: false,

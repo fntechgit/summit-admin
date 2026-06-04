@@ -13,7 +13,6 @@
 
 import moment from "moment-timezone";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
   RECEIVE_GENERAL_MEDIA_UPLOADS,
@@ -23,7 +22,7 @@ import {
   SPONSOR_MEDIA_UPLOAD_FILE_DELETED,
   SPONSOR_MEDIA_UPLOAD_FILE_UPLOADED
 } from "../../actions/sponsor-mu-actions";
-import { bytesToMb } from "../../utils/methods";
+import { bytesToMb, formatDate } from "../../utils/methods";
 import {
   DEADLINE_ALERT_DAYS,
   SPONSOR_MEDIA_UPLOAD_STATUS
@@ -71,11 +70,9 @@ const getStatus = (mediaObject) => {
   return status;
 };
 
-const mapMediaObject = (mediaObject, summitTZ) => {
+const mapMediaObject = (mediaObject) => {
   const deadline = mediaObject.upload_deadline
-    ? epochToMomentTimeZone(mediaObject.upload_deadline, summitTZ)?.format(
-        "YYYY/MM/DD"
-      )
+    ? formatDate(mediaObject.upload_deadline)
     : "N/A";
 
   return {
@@ -119,9 +116,7 @@ const sponsorPageMUListReducer = (state = DEFAULT_STATE, action) => {
         last_page: lastPage
       } = payload.response;
 
-      const requests = payload.response.data.map((a) =>
-        mapMediaObject(a, state.summitTZ)
-      );
+      const requests = payload.response.data.map(mapMediaObject);
 
       return {
         ...state,
@@ -157,9 +152,7 @@ const sponsorPageMUListReducer = (state = DEFAULT_STATE, action) => {
         last_page: lastPage
       } = payload.response;
 
-      const requests = payload.response.data.map((a) =>
-        mapMediaObject(a, state.summitTZ)
-      );
+      const requests = payload.response.data.map(mapMediaObject);
 
       return {
         ...state,

@@ -3,10 +3,11 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { useField } from "formik";
 import { Divider, Grid2, InputLabel } from "@mui/material";
-import { MuiFormikUpload } from "openstack-uicore-foundation/lib/components";
+import MuiFormikUpload from "openstack-uicore-foundation/lib/components/mui/formik-inputs/upload";
 import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
 import { PAGE_MODULES_DOWNLOAD } from "../../../../../utils/constants";
 import MuiFormikRadioGroup from "../../../../../components/mui/formik-inputs/mui-formik-radio-group";
+import { getFileUploadAllowedExtensions } from "../../../../../utils/methods";
 
 const DocumentDownloadModule = ({ baseName, index }) => {
   const buildFieldName = (field) => `${baseName}[${index}].${field}`;
@@ -79,6 +80,7 @@ const DocumentDownloadModule = ({ baseName, index }) => {
             id={`document-module-upload-${index}`}
             name={buildFieldName("file")}
             maxFiles={1}
+            allowedExtensions={getFileUploadAllowedExtensions()}
           />
         </Grid2>
       )}

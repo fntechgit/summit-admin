@@ -44,6 +44,9 @@ const SponsorUsersListPage = React.lazy(() =>
 const ShowPagesListPage = React.lazy(() =>
   import("../pages/sponsors/show-pages-list-page")
 );
+const SponsorOrdersListPage = React.lazy(() =>
+  import("../pages/sponsors/show-purchase-list-page")
+);
 
 const SponsorLayout = ({ match }) => (
   <div>
@@ -85,19 +88,15 @@ const SponsorLayout = ({ match }) => (
         />
         <Route
           path={`${match.url}/pages`}
-          render={(props) => (
-            <div>
-              <Breadcrumb
-                data={{
-                  title: T.translate("show_pages.pages"),
-                  pathname: props.match.url
-                }}
-              />
-            </div>
-          )}
           strict
           exact
           component={ShowPagesListPage}
+        />
+        <Route
+          path={`${match.url}/purchases`}
+          strict
+          exact
+          component={SponsorOrdersListPage}
         />
         <Route
           strict

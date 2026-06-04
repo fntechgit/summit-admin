@@ -114,7 +114,7 @@ export const getFormTemplateItems =
       createAction(RECEIVE_FORM_TEMPLATE_ITEMS),
       `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items`,
       snackbarErrorHandler,
-      { order, orderDir, page, term, showArchived }
+      { order, orderDir, page, perPage, term, showArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
