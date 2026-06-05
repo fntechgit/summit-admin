@@ -18,9 +18,10 @@ import {
 } from "@mui/material";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
 import CloseIcon from "@mui/icons-material/Close";
-import ImageIcon from "@mui/icons-material/Image";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import { ImagePreviewCell } from "../../../components/image-preview-cell";
+import { isImageUrl } from "../../../utils/methods";
 import MenuButton from "../../../components/mui/menu-button";
 import {
   clearAllSelectedInventoryItems,
@@ -159,21 +160,11 @@ const AddFormTemplateItemDialog = ({
       header: "",
       width: 40,
       align: "center",
-      render: (row) =>
-        row.images.length > 0 ? (
-          <IconButton size="small">
-            <ImageIcon
-              fontSize="small"
-              onClick={() =>
-                window.open(
-                  row.images[0].file_url,
-                  "_blank",
-                  "noopener,noreferrer"
-                )
-              }
-            />
-          </IconButton>
-        ) : null
+      render: (row) => {
+        const url = row.images?.[0]?.file_url ?? row.images?.[0]?.file_path;
+        if (!url || !isImageUrl(url)) return null;
+        return <ImagePreviewCell imageUrl={url} />;
+      }
     }
   ];
 
