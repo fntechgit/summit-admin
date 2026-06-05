@@ -395,5 +395,26 @@ describe("PaymentProfileDialog", () => {
       expect(screen.queryByTestId("price-value")).not.toBeInTheDocument();
       expect(screen.getByText("%")).toBeInTheDocument();
     });
+
+    test("changing kind resets value to 0", async () => {
+      // Set kind to Rate and enter a value
+      fireEvent.change(screen.getByTestId("select-kind"), {
+        target: { value: "Rate" }
+      });
+      const valueInput = screen
+        .getAllByRole("spinbutton")
+        .find((el) => !el.hasAttribute("data-testid"));
+      fireEvent.change(valueInput, { target: { value: "20" } });
+
+      // Switch to Amount — value should be reset
+      fireEvent.change(screen.getByTestId("select-kind"), {
+        target: { value: "Amount" }
+      });
+
+      // price-value is the Amount field; its formik value should be 0
+      await waitFor(() => {
+        expect(screen.getByTestId("price-value")).toHaveValue(0);
+      });
+    });
   });
 });

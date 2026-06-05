@@ -152,10 +152,10 @@ const PaymentProfileDialog = ({
           then: (schema) =>
             schema
               .integer(T.translate("validation.integer"))
-              .min(1, T.translate("validation.minimum", { minimum: 1 }))
+              .min(1, T.translate("validation.minimum", { minimum: 0.01 }))
               .max(
                 TEN_THOUSAND,
-                T.translate("validation.maximum", { maximum: 10000 })
+                T.translate("validation.maximum", { maximum: 100 })
               ),
           otherwise: (schema) =>
             schema.min(0, T.translate("validation.non_negative"))
@@ -476,6 +476,13 @@ const PaymentProfileDialog = ({
                             placeholder={T.translate(
                               "edit_payment_profile.payment_type_fee_kind"
                             )}
+                            onChange={(e) =>
+                              feeTypeFormik.setValues({
+                                ...feeTypeFormik.values,
+                                kind: e.target.value,
+                                value: 0
+                              })
+                            }
                           >
                             {PAYMENT_TYPE_FEE_KIND.map((opt) => (
                               <MenuItem key={opt.value} value={opt.value}>

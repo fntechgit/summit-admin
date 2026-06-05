@@ -1955,8 +1955,8 @@
     "payment_type_fee_kind": "Kind",
     "payment_type_fee_method": "Method",
     "payment_type_fee_value": "Value",
-    "payment_type_fee_max_cents": "Max Cents",
-    "payment_type_fee_min_cents": "Min Cents"
+    "payment_type_fee_max_cents": "Max Amount",
+    "payment_type_fee_min_cents": "Min Amount"
   },
   "edit_payment_fee_type": {
     "payment_fee_type": "Payment Fee Type",
