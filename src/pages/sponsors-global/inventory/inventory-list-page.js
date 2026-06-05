@@ -18,21 +18,16 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid2,
-  Popover,
-  Typography
+  Grid2
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
-import IconButton from "@mui/material/IconButton";
-import ImageIcon from "@mui/icons-material/Image";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
   archiveInventoryItem,
-  deleteInventoryItem,
   deleteInventoryItemImage,
   deleteInventoryItemMetaFieldType,
   deleteInventoryItemMetaFieldTypeValue,
@@ -43,117 +38,9 @@ import {
   unarchiveInventoryItem
 } from "../../../actions/inventory-item-actions";
 import SponsorInventoryDialog from "../form-templates/sponsor-inventory-popup";
+import { ImagePreviewCell } from "../../../components/image-preview-cell";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
-
-const PREVIEW_BOX_SIZE = 220;
-const PREVIEW_MARGIN_BOTTOM = 1;
-const PREVIEW_TRANSITION_DURATION = { enter: 120, exit: 90 };
-const PREVIEW_POINTER_EVENTS = "none";
-
-export const InventoryImagePreviewCell = React.memo(
-  ({ imageUrl, itemName }) => {
-    const [anchorEl, setAnchorEl] = useState(null);
-    const [imageLoadError, setImageLoadError] = useState(false);
-
-    const previewActionLabel = itemName
-      ? T.translate("inventory_item_list.image_preview_action_alt", {
-          itemName
-        })
-      : T.translate("inventory_item_list.image_preview_action_alt");
-
-    const previewImgAlt = itemName
-      ? T.translate("inventory_item_list.image_preview_alt", { itemName })
-      : T.translate("inventory_item_list.image_preview_alt");
-
-    if (!imageUrl) return null;
-
-    const isOpen = Boolean(anchorEl);
-
-    const openPreview = (target) => {
-      setAnchorEl(target);
-      setImageLoadError(false);
-    };
-
-    const closePreview = () => setAnchorEl(null);
-
-    return (
-      <>
-        <IconButton
-          size="small"
-          aria-label={previewActionLabel}
-          onMouseEnter={(event) => openPreview(event.currentTarget)}
-          onMouseLeave={closePreview}
-          onFocus={(event) => openPreview(event.currentTarget)}
-          onBlur={closePreview}
-          onClick={() => window.open(imageUrl, "_blank", "noopener,noreferrer")}
-        >
-          <ImageIcon fontSize="small" />
-        </IconButton>
-
-        <Popover
-          open={isOpen}
-          anchorEl={anchorEl}
-          onClose={closePreview}
-          disableRestoreFocus
-          transitionDuration={PREVIEW_TRANSITION_DURATION}
-          sx={{
-            pointerEvents: PREVIEW_POINTER_EVENTS
-          }}
-          anchorOrigin={{
-            vertical: "top",
-            horizontal: "center"
-          }}
-          transformOrigin={{
-            vertical: "bottom",
-            horizontal: "center"
-          }}
-          slotProps={{
-            paper: {
-              sx: {
-                p: 1,
-                mb: PREVIEW_MARGIN_BOTTOM,
-                pointerEvents: PREVIEW_POINTER_EVENTS
-              }
-            }
-          }}
-        >
-          <Box
-            sx={{
-              width: PREVIEW_BOX_SIZE,
-              height: PREVIEW_BOX_SIZE,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              overflow: "hidden"
-            }}
-          >
-            {!imageLoadError ? (
-              <Box
-                component="img"
-                src={imageUrl}
-                alt={previewImgAlt}
-                loading="lazy"
-                onError={() => setImageLoadError(true)}
-                sx={{
-                  width: "100%",
-                  height: "100%",
-                  display: "block",
-                  objectFit: "contain"
-                }}
-              />
-            ) : (
-              <Typography variant="body2" color="text.secondary" align="center">
-                {T.translate("inventory_item_list.image_preview_unavailable")}
-              </Typography>
-            )}
-          </Box>
-        </Popover>
-      </>
-    );
-  }
-);
-
-InventoryImagePreviewCell.displayName = "InventoryImagePreviewCell";
+import { isImageUrl } from "../../../utils/methods";
 
 const InventoryListPage = ({
   inventoryItems,
@@ -288,11 +175,9 @@ const InventoryListPage = ({
         const imageUrl = row.images?.[0]?.file_url;
         const itemName = row.name;
 
-        if (!hasImages || !imageUrl) return null;
+        if (!hasImages || !imageUrl || !isImageUrl(imageUrl)) return null;
 
-        return (
-          <InventoryImagePreviewCell imageUrl={imageUrl} itemName={itemName} />
-        );
+        return <ImagePreviewCell imageUrl={imageUrl} itemName={itemName} />;
       }
     }
   ];
@@ -425,7 +310,7 @@ export default connect(mapStateToProps, {
   getInventoryItem,
   resetInventoryItemForm,
   saveInventoryItem,
-  deleteInventoryItem,
+
   deleteInventoryItemImage,
   deleteInventoryItemMetaFieldType,
   deleteInventoryItemMetaFieldTypeValue,

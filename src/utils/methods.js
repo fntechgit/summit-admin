@@ -634,5 +634,11 @@ export const formatDate = (
     .format(format);
 };
 
-export const getFileUploadAllowedExtensions = () =>
-  window.FILE_UPLOAD_ALLOWED_EXTENSIONS?.split(",").filter(Boolean) ?? [];
+export const getFileUploadAllowedExtensions = () => {
+  const ext = window.FILE_UPLOAD_ALLOWED_EXTENSIONS;
+  if (!ext) return [];
+  return (Array.isArray(ext) ? ext : String(ext).split(",")).filter(Boolean);
+};
+
+export const isImageUrl = (url) =>
+  /\.(jpe?g|png|gif|webp|svg|bmp)(\?|$)/i.test(url);

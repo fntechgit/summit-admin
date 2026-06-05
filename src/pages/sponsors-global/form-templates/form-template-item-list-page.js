@@ -24,13 +24,10 @@ import {
   Grid2
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
-import ImageIcon from "@mui/icons-material/Image";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import { ImagePreviewCell } from "../../../components/image-preview-cell";
 import {
   cloneFromInventoryItem,
-  deleteFormTemplateItem,
   getFormTemplateItem,
   getFormTemplateItems,
   saveFormTemplateItem,
@@ -45,6 +42,7 @@ import AddFormTemplateItemDialog from "./add-form-template-item-popup";
 import SponsorInventoryDialog from "./sponsor-inventory-popup";
 import { getInventoryItems } from "../../../actions/inventory-item-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import { isImageUrl } from "../../../utils/methods";
 
 const FormTemplateItemListPage = ({
   formTemplateId,
@@ -208,23 +206,12 @@ const FormTemplateItemListPage = ({
       header: "",
       width: 40,
       align: "center",
-      render: (row) =>
-        row.images?.length > 0 ? (
-          <Tooltip title={row.images[0].file_url} placement="top" arrow>
-            <IconButton size="small">
-              <ImageIcon
-                fontSize="small"
-                onClick={() =>
-                  window.open(
-                    row.images[0].file_url,
-                    "_blank",
-                    "noopener,noreferrer"
-                  )
-                }
-              />
-            </IconButton>
-          </Tooltip>
-        ) : null
+      render: (row) => {
+        if (!row.images?.length) return null;
+        const { file_url: url } = row.images[0];
+        if (!isImageUrl(url)) return null;
+        return <ImagePreviewCell imageUrl={url} />;
+      }
     }
   ];
 
@@ -349,7 +336,6 @@ const mapStateToProps = ({
 
 export default connect(mapStateToProps, {
   cloneFromInventoryItem,
-  deleteFormTemplateItem,
   getFormTemplateItems,
   getFormTemplate,
   getInventoryItems,

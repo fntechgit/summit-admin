@@ -1,4 +1,8 @@
-import { getMediaInputValue, normalizeSelectAllField } from "../methods";
+import {
+  getMediaInputValue,
+  isImageUrl,
+  normalizeSelectAllField
+} from "../methods";
 
 const FIXED_NOW = 1_772_551_911_231;
 beforeAll(() => jest.spyOn(Date, "now").mockReturnValue(FIXED_NOW));
@@ -118,6 +122,35 @@ describe("getMediaInputValue", () => {
         apply_to_all: false,
         items: [1, 2]
       });
+    });
+  });
+
+  describe("isImageUrl", () => {
+    it.each(["jpg", "jpeg", "png", "gif", "webp", "svg", "bmp"])(
+      "returns true for .%s extension",
+      (ext) => {
+        expect(isImageUrl(`https://example.com/file.${ext}`)).toBe(true);
+      }
+    );
+
+    it("is case-insensitive", () => {
+      expect(isImageUrl("https://example.com/file.JPG")).toBe(true);
+      expect(isImageUrl("https://example.com/file.PNG")).toBe(true);
+    });
+
+    it("works with query strings", () => {
+      expect(isImageUrl("https://example.com/file.png?v=123")).toBe(true);
+    });
+
+    it.each(["pdf", "mp4", "doc", "csv", "pptx"])(
+      "returns false for .%s extension",
+      (ext) => {
+        expect(isImageUrl(`https://example.com/file.${ext}`)).toBe(false);
+      }
+    );
+
+    it("returns false for empty string", () => {
+      expect(isImageUrl("")).toBe(false);
     });
   });
 });
