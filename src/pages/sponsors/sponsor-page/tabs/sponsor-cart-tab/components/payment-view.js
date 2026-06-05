@@ -59,11 +59,11 @@ const PaymentView = ({
   )
     return null;
 
-  const redirectUrl = `/app/summits/${currentSummit.id}/sponsors/${sponsor.id}/cart`;
+  const redirectUrl = `/app/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases`;
 
   const handlePaymentSuccess = () =>
-    confirmPayment().then(() => {
-      history.push(redirectUrl);
+    confirmPayment().then((purchase) => {
+      history.push(`${redirectUrl}/${purchase.purchase_id}`);
     });
 
   const handlePaymentError = (error) => {
