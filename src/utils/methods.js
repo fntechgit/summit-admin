@@ -637,7 +637,9 @@ export const formatDate = (
 export const getFileUploadAllowedExtensions = () => {
   const ext = window.FILE_UPLOAD_ALLOWED_EXTENSIONS;
   if (!ext) return [];
-  return (Array.isArray(ext) ? ext : String(ext).split(",")).filter(Boolean);
+  return (Array.isArray(ext) ? ext : String(ext).split(","))
+    .map((s) => String(s).trim())
+    .filter(Boolean);
 };
 
 export const isImageUrl = (url) =>

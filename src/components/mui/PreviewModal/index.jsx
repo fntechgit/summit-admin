@@ -32,7 +32,7 @@ const PreviewModal = ({ title, open, onClose, url, filename, uploadDate }) => {
 
   useEffect(() => {
     if (open) setImageError(false);
-  }, [open, url]);
+  }, [open]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>

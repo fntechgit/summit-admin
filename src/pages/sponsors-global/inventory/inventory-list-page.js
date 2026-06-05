@@ -40,7 +40,6 @@ import {
 import SponsorInventoryDialog from "../form-templates/sponsor-inventory-popup";
 import { ImagePreviewCell } from "../../../components/image-preview-cell";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
-import { isImageUrl } from "../../../utils/methods";
 
 const InventoryListPage = ({
   inventoryItems,
@@ -175,7 +174,7 @@ const InventoryListPage = ({
         const imageUrl = row.images?.[0]?.file_url;
         const itemName = row.name;
 
-        if (!hasImages || !imageUrl || !isImageUrl(imageUrl)) return null;
+        if (!hasImages || !imageUrl) return null;
 
         return <ImagePreviewCell imageUrl={imageUrl} itemName={itemName} />;
       }

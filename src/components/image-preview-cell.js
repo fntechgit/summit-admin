@@ -16,15 +16,22 @@ import IconButton from "@mui/material/IconButton";
 import ImageIcon from "@mui/icons-material/Image";
 import T from "i18n-react/dist/i18n-react";
 import PreviewModal from "./mui/PreviewModal";
+import { isImageUrl } from "../utils/methods";
 
 export const ImagePreviewCell = React.memo(
   ({ imageUrl, itemName, fileName, uploadDate }) => {
     const [open, setOpen] = useState(false);
 
-    if (!imageUrl) return null;
+    if (!imageUrl || !isImageUrl(imageUrl)) return null;
 
-    const resolvedFileName =
-      fileName || decodeURIComponent(imageUrl.split("/").pop().split("?")[0]);
+    const rawSegment = imageUrl.split("/").pop().split("?")[0];
+    let decoded = rawSegment;
+    try {
+      decoded = decodeURIComponent(rawSegment);
+    } catch {
+      /* malformed encoding — keep raw */
+    }
+    const resolvedFileName = fileName || decoded;
 
     return (
       <>

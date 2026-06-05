@@ -42,7 +42,6 @@ import AddFormTemplateItemDialog from "./add-form-template-item-popup";
 import SponsorInventoryDialog from "./sponsor-inventory-popup";
 import { getInventoryItems } from "../../../actions/inventory-item-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
-import { isImageUrl } from "../../../utils/methods";
 
 const FormTemplateItemListPage = ({
   formTemplateId,
@@ -207,9 +206,8 @@ const FormTemplateItemListPage = ({
       width: 40,
       align: "center",
       render: (row) => {
-        if (!row.images?.length) return null;
-        const { file_url: url } = row.images[0];
-        if (!isImageUrl(url)) return null;
+        const url = row.images?.[0]?.file_url;
+        if (!url) return null;
         return <ImagePreviewCell imageUrl={url} />;
       }
     }

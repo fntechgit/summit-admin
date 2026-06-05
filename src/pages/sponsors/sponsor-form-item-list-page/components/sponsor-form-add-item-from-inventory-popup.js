@@ -19,7 +19,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import Box from "@mui/material/Box";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
-import { isImageUrl } from "../../../../utils/methods";
 import { ImagePreviewCell } from "../../../../components/image-preview-cell";
 import { formatRateFromCents } from "../../../../utils/rate-helpers";
 import { addInventoryItems } from "../../../../actions/sponsor-forms-actions";
@@ -148,7 +147,7 @@ const SponsorFormAddItemFromInventoryPopup = ({
       align: "center",
       render: (row) => {
         const url = row.images?.[0]?.file_url ?? row.images?.[0]?.file_path;
-        if (!url || !isImageUrl(url)) return null;
+        if (!url) return null;
         return <ImagePreviewCell imageUrl={url} />;
       }
     }

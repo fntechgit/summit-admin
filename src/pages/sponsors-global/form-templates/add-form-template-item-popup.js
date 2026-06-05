@@ -21,7 +21,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { ImagePreviewCell } from "../../../components/image-preview-cell";
-import { isImageUrl } from "../../../utils/methods";
 import MenuButton from "../../../components/mui/menu-button";
 import {
   clearAllSelectedInventoryItems,
@@ -162,7 +161,7 @@ const AddFormTemplateItemDialog = ({
       align: "center",
       render: (row) => {
         const url = row.images?.[0]?.file_url ?? row.images?.[0]?.file_path;
-        if (!url || !isImageUrl(url)) return null;
+        if (!url) return null;
         return <ImagePreviewCell imageUrl={url} />;
       }
     }
