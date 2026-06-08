@@ -75,13 +75,7 @@ const PaymentView = ({
       <Box sx={{ width: "100%" }}>
         <Card sx={{ borderRadius: "10px", height: "100%" }} variant="outlined">
           <CardContent>
-            <SponsorOrderGrid
-              lines={cart.forms || []}
-              notes={cart?.notes || []}
-              fees={cart?.fees || []}
-              total={cart?.total}
-              withDescription
-            />
+            <SponsorOrderGrid order={cart} />
           </CardContent>
         </Card>
       </Box>
