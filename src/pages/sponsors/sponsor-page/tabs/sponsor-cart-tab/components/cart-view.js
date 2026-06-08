@@ -170,6 +170,7 @@ const CartView = ({
     },
     {
       columnKey: "amount",
+      align: "right",
       header: T.translate("edit_sponsor.cart_tab.amount")
     },
     {
@@ -244,12 +245,7 @@ const CartView = ({
               }
               confirmButtonColor="error"
             >
-              <TotalRow
-                columns={tableColumns}
-                total={cart?.total}
-                targetCol="amount"
-                trailing={2}
-              />
+              <TotalRow total={cart?.total} colGap={5} trailing={3} />
             </MuiTable>
             <Box
               sx={{

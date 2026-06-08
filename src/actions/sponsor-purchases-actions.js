@@ -395,7 +395,7 @@ export const updateClientInfo =
   };
 
 export const cancelSponsorForm =
-  (orderId, lineId) => async (dispatch, getState) => {
+  (orderId, lineId, lineName) => async (dispatch, getState) => {
     const { currentSummitState, currentSponsorState } = getState();
     const { currentSummit } = currentSummitState;
     const { entity: sponsor } = currentSponsorState;
@@ -414,7 +414,17 @@ export const cancelSponsorForm =
       null,
       snackbarErrorHandler
     )(params)(dispatch)
-      .then(() => dispatch(getSponsorOrder(orderId)))
+      .then(() => {
+        dispatch(getSponsorOrder(orderId));
+        dispatch(
+          snackbarSuccessHandler({
+            html: T.translate(
+              "edit_sponsor.purchase_tab.order_details.line_cancelled",
+              { lineName }
+            )
+          })
+        );
+      })
       .catch(console.log) // need to catch promise reject
       .finally(() => {
         dispatch(stopLoading());
