@@ -54,9 +54,7 @@ const CustomizedForm = ({
   isSaving = false,
   onSubmit
 }) => {
-  const sponsorships = sponsor.sponsorships_collection.sponsorships.map(
-    (e) => e.id
-  );
+  const sponsorshipIds = sponsor.sponsorships.map((e) => e.id);
 
   const formik = useFormik(
     {
@@ -126,7 +124,7 @@ const CustomizedForm = ({
                 name="allowed_add_ons"
                 queryFunction={querySponsorAddons}
                 // params for function, except input
-                queryParams={[summitId, sponsor.id, sponsorships]}
+                queryParams={[summitId, sponsor.id, sponsorshipIds]}
                 showSelectAll
                 getGroupId={(addon) => addon.sponsorship.type.id}
                 getGroupLabel={(addon) => addon.sponsorship.type.type.name}

@@ -28,7 +28,6 @@ const Sponsorship = ({
   onSponsorshipPaginate,
   onSponsorshipAdd,
   onSponsorshipDelete,
-  getSponsorshipAddons,
   onSponsorshipSelect,
   onSponsorshipAddonSave,
   onSponsorshipAddonRemove
@@ -186,7 +185,6 @@ const Sponsorship = ({
           sponsorship={selectedSponsorship}
           summitId={summitId}
           open={showManageTierAddonsPopup}
-          getSponsorshipAddons={getSponsorshipAddons}
           onSponsorshipAddonRemove={onSponsorshipAddonRemove}
           onClose={handleCloseManageAddonsPopup}
           onSubmit={handleAddSponsorshipAddon}

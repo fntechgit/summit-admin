@@ -73,7 +73,7 @@ jest.mock("../../../../../../actions/summit-actions", () => ({
 
 const createSponsor = (overrides = {}) => ({
   id: 1,
-  sponsorships_collection: { sponsorships: [] },
+  sponsorships: [],
   ...overrides
 });
 
@@ -125,7 +125,7 @@ const defaultState = {
     }
   },
   currentSponsorState: {
-    entity: { id: 1, sponsorships_collection: { sponsorships: [] } },
+    entity: { id: 1, sponsorships: [] },
     errors: {}
   }
 };
