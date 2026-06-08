@@ -54,7 +54,7 @@ const CustomizedForm = ({
   isSaving = false,
   onSubmit
 }) => {
-  const sponsorshipIds = sponsor.sponsorships.map((e) => e.id);
+  const sponsorshipIds = sponsor.sponsorships?.map((e) => e.id) || [];
 
   const formik = useFormik(
     {
