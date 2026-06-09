@@ -160,9 +160,16 @@ const AddFormTemplateItemDialog = ({
       width: 40,
       align: "center",
       render: (row) => {
-        const url = row.images?.[0]?.file_url ?? row.images?.[0]?.file_path;
+        const img = row.images?.[0];
+        const url = img?.file_url ?? img?.file_path;
         if (!url) return null;
-        return <ImagePreviewCell imageUrl={url} />;
+        return (
+          <ImagePreviewCell
+            imageUrl={url}
+            itemName={row.name}
+            uploadDate={img?.created}
+          />
+        );
       }
     }
   ];

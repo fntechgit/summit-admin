@@ -43,14 +43,16 @@ export const ImagePreviewCell = React.memo(
           <ImageIcon fontSize="small" />
         </IconButton>
 
-        <PreviewModal
-          title={itemName || T.translate("preview_modal.title")}
-          open={open}
-          onClose={() => setOpen(false)}
-          url={imageUrl}
-          filename={resolvedFileName}
-          uploadDate={uploadDate}
-        />
+        {open && (
+          <PreviewModal
+            title={itemName || T.translate("preview_modal.title")}
+            open
+            onClose={() => setOpen(false)}
+            url={imageUrl}
+            filename={resolvedFileName}
+            uploadDate={uploadDate}
+          />
+        )}
       </>
     );
   }

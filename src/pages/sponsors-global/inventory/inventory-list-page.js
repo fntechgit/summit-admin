@@ -170,13 +170,18 @@ const InventoryListPage = ({
       width: 40,
       align: "center",
       render: (row) => {
-        const hasImages = Array.isArray(row.images) && row.images.length > 0;
-        const imageUrl = row.images?.[0]?.file_url;
-        const itemName = row.name;
+        const img = row.images?.[0];
+        const imageUrl = img?.file_url ?? img?.file_path;
 
-        if (!hasImages || !imageUrl) return null;
+        if (!imageUrl) return null;
 
-        return <ImagePreviewCell imageUrl={imageUrl} itemName={itemName} />;
+        return (
+          <ImagePreviewCell
+            imageUrl={imageUrl}
+            itemName={row.name}
+            uploadDate={img?.created}
+          />
+        );
       }
     }
   ];
