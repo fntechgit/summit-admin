@@ -21,7 +21,7 @@ import {
   getSponsorLeadReportSettingsMeta,
   getSponsorMaterials,
   getSponsorSocialNetworks,
-  getSponsorTiers,
+  getSponsorSponsorships,
   resetSponsorForm
 } from "../../../actions/sponsor-actions";
 import { getSponsorPurchasesMeta } from "../../../actions/sponsor-settings-actions";
@@ -39,7 +39,7 @@ const SponsorPage = ({
   getSponsorMaterials,
   getSponsorSocialNetworks,
   getSponsorLeadReportSettingsMeta,
-  getSponsorTiers,
+  getSponsorSponsorships,
   getExtraQuestionMeta,
   getSponsorPurchasesMeta
 }) => {
@@ -49,7 +49,7 @@ const SponsorPage = ({
       getSponsorMaterials(entity.id);
       getSponsorSocialNetworks(entity.id);
       getSponsorLeadReportSettingsMeta(entity.id);
-      getSponsorTiers(entity.id);
+      getSponsorSponsorships(entity.id);
       getExtraQuestionMeta();
       getSponsorPurchasesMeta();
     } else {
@@ -103,7 +103,7 @@ export default connect(mapStateToProps, {
   getSponsorMaterials,
   getSponsorSocialNetworks,
   getSponsorLeadReportSettingsMeta,
-  getSponsorTiers,
+  getSponsorSponsorships,
   getExtraQuestionMeta,
   getSponsorPurchasesMeta
 })(SponsorPage);
