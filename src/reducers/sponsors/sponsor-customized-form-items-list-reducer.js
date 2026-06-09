@@ -114,7 +114,7 @@ const sponsorCustomizedFormItemsListReducer = (
           ...img,
           file_path: img.file_url
         })),
-        meta_fields: item.meta_fields.length > 0 ? item.meta_fields : []
+        meta_fields: (item.meta_fields ?? []).length > 0 ? item.meta_fields : []
       };
       return { ...state, currentItem };
     }

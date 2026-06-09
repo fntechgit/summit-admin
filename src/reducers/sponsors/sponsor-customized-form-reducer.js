@@ -44,6 +44,11 @@ const sponsorCustomizedFormReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case RECEIVE_SPONSOR_CUSTOMIZED_FORM: {
+      // this actions is dispatched by getSponsorManagedForm and getSponsorCustomizedForm
+      // getSponsorManagedForm expands items.images, getSponsorCustomizedForm not,
+      // so items is absent here for the customized path.
+      // Add expand=items,items.images to that action if item display is ever needed in
+      // the customized-form popup.
       const entity = {
         ...payload.response,
         items: (payload.response.items || []).map((it) => ({
