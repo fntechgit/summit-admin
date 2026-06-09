@@ -42,10 +42,26 @@ export const UNSELECT_ALL_SUMMIT_SUBMITTERS = "UNSELECT_ALL_SUMMIT_SUBMITTERS";
 export const SEND_SUBMITTERS_EMAILS = "SEND_SUBMITTERS_EMAILS";
 export const SET_SUBMITTERS_CURRENT_FLOW_EVENT =
   "SET_SUBMITTERS_CURRENT_FLOW_EVENT";
+export const REQUEST_SUBMITTERS_ACTIVITIES_COUNT =
+  "REQUEST_SUBMITTERS_ACTIVITIES_COUNT";
+export const RECEIVE_SUBMITTERS_ACTIVITIES_COUNT =
+  "RECEIVE_SUBMITTERS_ACTIVITIES_COUNT";
 
 export const initSubmittersList = () => async (dispatch) => {
   dispatch(createAction(INIT_SUBMITTERS_LIST_PARAMS)());
 };
+
+const getSubmittersActivitiesCount =
+  (summitId, filter, accessToken) => (dispatch) => {
+    const params = { access_token: accessToken };
+    if (filter.length > 0) params["filter[]"] = filter;
+    return getRequest(
+      createAction(REQUEST_SUBMITTERS_ACTIVITIES_COUNT),
+      createAction(RECEIVE_SUBMITTERS_ACTIVITIES_COUNT),
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/submitters/all/events/count`,
+      authErrorHandler
+    )(params)(dispatch);
+  };
 
 export const getSubmittersBySummit =
   (
@@ -96,6 +112,10 @@ export const getSubmittersBySummit =
       const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
       params.order = `${orderDirSign}${order}`;
     }
+
+    dispatch(
+      getSubmittersActivitiesCount(currentSummit.id, filter, accessToken)
+    );
 
     return getRequest(
       createAction(REQUEST_SUBMITTERS_BY_SUMMIT),

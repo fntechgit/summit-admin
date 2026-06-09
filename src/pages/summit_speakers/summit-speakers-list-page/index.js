@@ -404,9 +404,13 @@ const SummitSpeakersListPage = ({
     order,
     orderDir,
     totalItems,
+    totalActivities,
     selectedCount,
-    selectedAll
+    selectedAll,
+    excludedItems
   } = subjectProps;
+
+  const activitiesCountAccurate = selectedAll && excludedItems.length === 0;
 
   const columns = [
     {
@@ -455,7 +459,11 @@ const SummitSpeakersListPage = ({
         {isSpeakerMode
           ? T.translate("summit_speakers_list.summit_speakers_list")
           : T.translate("summit_submitters_list.summit_submitters_list")}{" "}
-        ({totalItems})
+        ({totalItems}{" "}
+        {isSpeakerMode
+          ? T.translate("summit_speakers_list.speakers")
+          : T.translate("summit_submitters_list.submitters")}{" "}
+        | {totalActivities} {T.translate("general.activities")})
       </h3>
       <div className="row">
         <div className="col-md-6">
@@ -507,9 +515,19 @@ const SummitSpeakersListPage = ({
         <div style={{ marginTop: "40px" }}>
           <span>
             <b>
-              {T.translate("summit_speakers_list.items_qty", {
-                qty: selectedCount
-              })}
+              {activitiesCountAccurate
+                ? T.translate(
+                    isSpeakerMode
+                      ? "summit_speakers_list.items_qty"
+                      : "summit_submitters_list.items_qty",
+                    { qty: selectedCount, activitiesQty: totalActivities }
+                  )
+                : T.translate(
+                    isSpeakerMode
+                      ? "summit_speakers_list.items_qty_no_activities"
+                      : "summit_submitters_list.items_qty_no_activities",
+                    { qty: selectedCount }
+                  )}
             </b>
           </span>
           <SelectableTable
