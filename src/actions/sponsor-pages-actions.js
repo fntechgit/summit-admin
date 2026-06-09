@@ -297,7 +297,7 @@ const normalizeSponsorManagedPage = (entity) => {
   return normalizedEntity;
 };
 
-const normalizeSponsorManagedPageToCustomize = (entity) => {
+export const normalizeSponsorManagedPageToCustomize = (entity) => {
   const normalizedEntity = {
     ...entity,
     ...normalizeSelectAllField(
