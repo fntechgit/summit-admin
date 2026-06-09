@@ -637,8 +637,11 @@ const normalizeSponsorManagedForm = (entity) => {
 };
 
 export const getSponsorManagedForm = (formId) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
+  const { currentSummitState, currentSponsorState } = getState();
   const { currentSummit } = currentSummitState;
+  const {
+    entity: { id: sponsorId }
+  } = currentSponsorState;
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
@@ -654,7 +657,7 @@ export const getSponsorManagedForm = (formId) => async (dispatch, getState) => {
   return getRequest(
     null,
     createAction(RECEIVE_SPONSOR_CUSTOMIZED_FORM),
-    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}`,
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-forms/${formId}`,
     snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());

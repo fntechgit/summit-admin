@@ -23,7 +23,7 @@ jest.mock("../../../actions/sponsor-actions", () => ({
   getSponsorMaterials: jest.fn(() => ({ type: "MOCK_ACTION" })),
   getSponsorSocialNetworks: jest.fn(() => ({ type: "MOCK_ACTION" })),
   getSponsorLeadReportSettingsMeta: jest.fn(() => ({ type: "MOCK_ACTION" })),
-  getSponsorTiers: jest.fn(() => ({ type: "MOCK_ACTION" })),
+  getSponsorSponsorships: jest.fn(() => ({ type: "MOCK_ACTION" })),
   getExtraQuestionMeta: jest.fn(() => ({ type: "MOCK_ACTION" })),
   resetSponsorForm: jest.fn(() => ({ type: "MOCK_ACTION" }))
 }));

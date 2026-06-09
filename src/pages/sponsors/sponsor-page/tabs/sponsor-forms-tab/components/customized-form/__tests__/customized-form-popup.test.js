@@ -18,15 +18,24 @@ jest.mock("actions/sponsor-forms-actions", () => ({
 
 jest.mock("../customized-form", () => ({
   __esModule: true,
-  default: ({ onSubmit, isSaving }) => (
-    <button
-      type="button"
-      disabled={isSaving}
-      onClick={() => onSubmit({ code: "111" })}
-    >
-      submit-customized-form
-    </button>
-  )
+  default: ({ onSubmit, isSaving, sponsor, summitId }) => {
+    const sponsorshipIds = (sponsor?.sponsorships || []).map((s) => s.id);
+    return (
+      <>
+        <button
+          type="button"
+          disabled={isSaving}
+          onClick={() => onSubmit({ code: "111" })}
+        >
+          submit-customized-form
+        </button>
+        <span
+          data-testid="addon-query-params"
+          data-params={JSON.stringify([summitId, sponsor?.id, sponsorshipIds])}
+        />
+      </>
+    );
+  }
 }));
 
 describe("CustomizedFormPopup", () => {
@@ -41,15 +50,32 @@ describe("CustomizedFormPopup", () => {
     }
   };
 
-  const sponsor = {
+  const createSponsor = (overrides = {}) => ({
     id: 1,
-    sponsorships_collection: {
-      sponsorships: []
-    }
-  };
+    sponsorships: [{ id: 42 }],
+    ...overrides
+  });
+
+  const sponsor = createSponsor();
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it("passes sponsorship ids and summitId to the form as queryParams", () => {
+    renderWithRedux(
+      <CustomizedFormPopup
+        formId={null}
+        open
+        onClose={jest.fn()}
+        sponsor={createSponsor({ sponsorships: [{ id: 42 }, { id: 99 }] })}
+        summitId={69}
+      />,
+      { initialState }
+    );
+
+    const el = screen.getByTestId("addon-query-params");
+    expect(JSON.parse(el.dataset.params)).toEqual([69, 1, [42, 99]]);
   });
 
   it("keeps modal open when save fails", async () => {

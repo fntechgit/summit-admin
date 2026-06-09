@@ -129,6 +129,7 @@ export const DEFAULT_ENTITY = {
   extra_questions: [],
   lead_report_setting: {},
   available_lead_report_columns: [],
+  sponsorships: [],
   sponsorships_collection: DEFAULT_SPONSORHIPS_STATE
 };
 
@@ -161,6 +162,10 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         if (entity.hasOwnProperty(key)) {
           entity[key] = entity[key] == null ? "" : entity[key];
         }
+      }
+
+      if (!Array.isArray(entity.sponsorships)) {
+        entity.sponsorships = [];
       }
 
       if (!entity.lead_report_setting) entity.lead_report_setting = {};
