@@ -661,12 +661,13 @@ export const confirmPayment = () => async (dispatch, getState) => {
     `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/payments/${paymentIntent.id}/confirm`,
     {},
     snackbarErrorHandler
-  )(params)(dispatch).then(() => {
+  )(params)(dispatch).then(({ response }) => {
     dispatch(
       snackbarSuccessHandler({
         title: T.translate("general.success"),
         html: T.translate("edit_sponsor.cart_tab.payment_view.payment_success")
       })
     );
+    return response;
   });
 };
