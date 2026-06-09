@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
@@ -30,15 +30,23 @@ const SponsorGlobalNewUserPopup = ({
   sendSponsorUserInvite,
   getSponsorUsers
 }) => {
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleClose = () => {
+    if (isSaving) return;
     onClose();
   };
 
   const handleOnSave = (values) => {
-    sendSponsorUserInvite(values.email, values.sponsor.id).finally(() => {
-      getSponsorUsers();
-      handleClose();
-    });
+    if (isSaving) return;
+    setIsSaving(true);
+    sendSponsorUserInvite(values.email, values.sponsor.id)
+      .then(() => {
+        getSponsorUsers();
+        handleClose();
+      })
+      .catch(() => {})
+      .finally(() => setIsSaving(false));
   };
 
   const formik = useFormik({
@@ -58,7 +66,13 @@ const SponsorGlobalNewUserPopup = ({
   });
 
   return (
-    <Dialog open onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      disableEscapeKeyDown={isSaving}
+    >
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between" }}
         component="div"
@@ -66,7 +80,12 @@ const SponsorGlobalNewUserPopup = ({
         <Typography variant="h5">
           {T.translate("sponsor_users.new_user.add_user")}
         </Typography>
-        <IconButton size="large" sx={{ p: 0 }} onClick={handleClose}>
+        <IconButton
+          size="large"
+          sx={{ p: 0 }}
+          onClick={handleClose}
+          disabled={isSaving}
+        >
           <CloseIcon fontSize="large" />
         </IconButton>
       </DialogTitle>
@@ -98,7 +117,12 @@ const SponsorGlobalNewUserPopup = ({
           </DialogContent>
           <Divider />
           <DialogActions>
-            <Button type="submit" fullWidth variant="contained">
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={isSaving}
+            >
               {T.translate("sponsor_users.new_user.invite")}
             </Button>
           </DialogActions>

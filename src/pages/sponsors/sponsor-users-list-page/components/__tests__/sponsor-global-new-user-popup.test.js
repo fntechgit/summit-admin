@@ -138,6 +138,35 @@ describe("SponsorGlobalNewUserPopup", () => {
     });
   });
 
+  it("keeps dialog open and does not refresh users when invite fails", async () => {
+    const onClose = jest.fn();
+    sponsorUsersActions.sendSponsorUserInvite.mockReturnValue(() =>
+      Promise.reject(new Error("already exists"))
+    );
+    renderPopup({ onClose });
+
+    await act(async () => {
+      await userEvent.click(screen.getByTestId("sponsor-input"));
+    });
+    await act(async () => {
+      await userEvent.type(
+        screen.getByTestId("field-email"),
+        "user@example.com"
+      );
+    });
+    await act(async () => {
+      await userEvent.click(
+        screen.getByRole("button", { name: "sponsor_users.new_user.invite" })
+      );
+    });
+
+    await waitFor(() => {
+      expect(sponsorUsersActions.sendSponsorUserInvite).toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
+      expect(sponsorUsersActions.getSponsorUsers).not.toHaveBeenCalled();
+    });
+  });
+
   it("does not submit when email is invalid", async () => {
     renderPopup();
 

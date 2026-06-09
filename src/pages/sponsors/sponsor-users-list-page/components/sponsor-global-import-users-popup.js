@@ -24,6 +24,7 @@ import {
 import SummitsDropdown from "../../../../components/mui/summits-dropdown";
 import MuiFormikAsyncAutocomplete from "../../../../components/mui/formik-inputs/mui-formik-async-select";
 import { querySponsors } from "../../../../actions/sponsor-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 
 const SponsorGlobalImportUsersPopup = ({
   currentSummit,
@@ -33,6 +34,7 @@ const SponsorGlobalImportUsersPopup = ({
   const [selectedSummit, setSelectedSummit] = useState(null);
   const [userOptions, setUserOptions] = useState(null);
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   const formik = useFormik({
     initialValues: { sponsor: { id: "", name: "" } },
@@ -51,11 +53,13 @@ const SponsorGlobalImportUsersPopup = ({
 
   useEffect(() => {
     if (selectedSummit && sponsorId && companyId) {
+      setUserOptions(null);
+      setSelectedUsers([]);
       fetchSponsorUsersBySummit(
         currentSummit.id,
         selectedSummit,
         companyId,
-        1
+        DEFAULT_CURRENT_PAGE
       ).then((userData) => {
         setUserOptions(userData);
         setSelectedUsers([]);
@@ -80,18 +84,16 @@ const SponsorGlobalImportUsersPopup = ({
   };
 
   const handleClose = () => {
+    if (isSaving) return;
     onClose();
   };
 
   const handleImport = async () => {
-    importSponsorUsers(
-      sponsorId,
-      companyId,
-      selectedSummit,
-      selectedUsers
-    ).then(() => {
-      onClose();
-    });
+    if (isSaving) return;
+    setIsSaving(true);
+    importSponsorUsers(sponsorId, companyId, selectedSummit, selectedUsers)
+      .then(() => onClose())
+      .finally(() => setIsSaving(false));
   };
 
   const handleSelectOnChange = (items, all = false) => {
@@ -103,7 +105,13 @@ const SponsorGlobalImportUsersPopup = ({
   };
 
   return (
-    <Dialog open onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      disableEscapeKeyDown={isSaving}
+    >
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between", p: 2 }}
         component="div"
@@ -111,7 +119,12 @@ const SponsorGlobalImportUsersPopup = ({
         <Typography variant="h5">
           {T.translate("sponsor_users.import_users.title")}
         </Typography>
-        <IconButton size="large" sx={{ p: 0 }} onClick={handleClose}>
+        <IconButton
+          size="large"
+          sx={{ p: 0 }}
+          onClick={handleClose}
+          disabled={isSaving}
+        >
           <CloseIcon fontSize="large" />
         </IconButton>
       </DialogTitle>
@@ -184,7 +197,7 @@ const SponsorGlobalImportUsersPopup = ({
           fullWidth
           variant="contained"
           onClick={handleImport}
-          disabled={selectedUsers.length === 0}
+          disabled={selectedUsers.length === 0 || isSaving}
         >
           {T.translate("sponsor_users.import_users.import_users")}
         </Button>
