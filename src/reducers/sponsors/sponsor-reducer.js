@@ -129,6 +129,7 @@ export const DEFAULT_ENTITY = {
   extra_questions: [],
   lead_report_setting: {},
   available_lead_report_columns: [],
+  sponsorships: [],
   sponsorships_collection: DEFAULT_SPONSORHIPS_STATE
 };
 
