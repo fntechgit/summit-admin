@@ -19,8 +19,8 @@ import {
 } from "../../actions/speaker-actions";
 
 const DEFAULT_STATE = {
-  speakers: {},
-  term: null,
+  speakers: [],
+  term: "",
   order: "id",
   orderDir: 1,
   currentPage: 1,
@@ -36,8 +36,8 @@ const speakerListReducer = (state = DEFAULT_STATE, action = {}) => {
       return state;
     }
     case REQUEST_SPEAKERS: {
-      const { order, orderDir, term, page } = payload;
-      return { ...state, order, orderDir, term, currentPage: page };
+      const { order, orderDir, term, page, perPage } = payload;
+      return { ...state, order, orderDir, term, currentPage: page, perPage };
     }
     case RECEIVE_SPEAKERS: {
       const {
