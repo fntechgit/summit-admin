@@ -47,22 +47,27 @@ jest.mock("../../../../../components/mui/summits-dropdown", () => ({
 jest.mock(
   "../../../../../components/mui/formik-inputs/mui-formik-async-select",
   () => {
+    const React = require("react");
     const { useFormikContext } = require("formik");
+    // Two entries so successive clicks return different values — required for the
+    // "sponsor changes" test, which relies on the useEffect seeing a new sponsorId/companyId.
+    const sponsors = [
+      { value: 1, label: "Test Sponsor", companyId: 42 },
+      { value: 2, label: "Other Sponsor", companyId: 99 }
+    ];
     return {
       __esModule: true,
       default: ({ name }) => {
         const { setFieldValue } = useFormikContext();
+        const [clickCount, setClickCount] = React.useState(0);
         return (
           <button
             data-testid="sponsor-async-select"
             type="button"
-            onClick={() =>
-              setFieldValue(name, {
-                value: 1,
-                label: "Test Sponsor",
-                companyId: 42
-              })
-            }
+            onClick={() => {
+              setFieldValue(name, sponsors[clickCount % sponsors.length]);
+              setClickCount((c) => c + 1);
+            }}
           >
             Select Sponsor
           </button>
@@ -276,5 +281,35 @@ describe("SponsorGlobalImportUsersPopup", () => {
         "all"
       );
     });
+  });
+
+  it("clears user list and selection immediately when sponsor changes", async () => {
+    renderPopup();
+
+    // first sponsor selection — loads users, picks one
+    await selectSummitAndSponsor();
+    await act(async () => {
+      await userEvent.click(screen.getByTestId("user-item-10"));
+    });
+    expect(
+      screen.getByRole("button", {
+        name: "sponsor_users.import_users.import_users"
+      })
+    ).not.toBeDisabled();
+
+    // change sponsor — user list must disappear before the new fetch resolves
+    sponsorUsersActions.fetchSponsorUsersBySummit.mockReturnValueOnce(
+      new Promise(() => {})
+    ); // never resolves
+    await act(async () => {
+      await userEvent.click(screen.getByTestId("sponsor-async-select"));
+    });
+
+    expect(screen.queryByTestId("user-item-10")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "sponsor_users.import_users.import_users"
+      })
+    ).toBeDisabled();
   });
 });
