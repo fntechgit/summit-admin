@@ -12,7 +12,6 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   REQUEST_SPONSOR_MANAGED_PAGES,
   RECEIVE_SPONSOR_MANAGED_PAGES,
@@ -28,10 +27,8 @@ import {
   SET_CURRENT_SUMMIT,
   RECEIVE_SUMMIT_SPONSORSHIP_TYPES
 } from "../../actions/summit-actions";
-import {
-  PAGE_MODULES_DOWNLOAD,
-  PAGES_MODULE_KINDS
-} from "../../utils/constants";
+import { PAGES_MODULE_KINDS } from "../../utils/constants";
+import { denormalizePageModules } from "../../utils/page-template";
 
 const DEFAULT_PAGE = {
   code: "",
@@ -182,54 +179,20 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
     case RECEIVE_SPONSOR_MANAGED_PAGE: {
       const editPage = payload.response;
 
-      const currentEditPage = {
-        ...editPage,
-        modules: editPage.modules.map((m) => ({
-          ...m,
-          ...(m.upload_deadline
-            ? {
-                upload_deadline: epochToMomentTimeZone(
-                  m.upload_deadline,
-                  state.summitTZ || "UTC"
-                )
-              }
-            : {})
-        }))
-      };
-      return { ...state, currentEditPage };
+      const modules = denormalizePageModules(
+        editPage.modules,
+        state.summitTZ || "UTC"
+      );
+
+      return { ...state, currentEditPage: { ...editPage, modules } };
     }
     case RECEIVE_SPONSOR_CUSTOMIZED_PAGE: {
       const customizedPage = payload.response;
 
-      const modules = customizedPage.modules.map((module) => {
-        const tmpModule = {
-          ...module,
-          ...(module.upload_deadline
-            ? {
-                upload_deadline: epochToMomentTimeZone(
-                  module.upload_deadline,
-                  state.summitTZ || "UTC"
-                )
-              }
-            : {})
-        };
-
-        if (module.kind === PAGES_MODULE_KINDS.DOCUMENT) {
-          if (module.file) {
-            tmpModule.file = [
-              {
-                ...module.file,
-                file_path: module.file.storage_key,
-                public_url: module.file.file_url
-              }
-            ];
-            tmpModule.type = PAGE_MODULES_DOWNLOAD.FILE;
-          } else {
-            tmpModule.type = PAGE_MODULES_DOWNLOAD.URL;
-          }
-        }
-        return tmpModule;
-      });
+      const modules = denormalizePageModules(
+        customizedPage.modules,
+        state.summitTZ || "UTC"
+      );
 
       return { ...state, currentEditPage: { ...customizedPage, modules } };
     }
