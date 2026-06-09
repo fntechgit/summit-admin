@@ -164,6 +164,10 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         }
       }
 
+      if (!Array.isArray(entity.sponsorships)) {
+        entity.sponsorships = [];
+      }
+
       if (!entity.lead_report_setting) entity.lead_report_setting = {};
 
       return {
