@@ -681,7 +681,14 @@
       "search_comment": "Search by Comment, Creator ID",
       "allowed_ticket_types": "Select ticket types",
       "select_submission_source": "Select a Submission Source"
-    }
+    },
+    "draft_state_label": "DRAFT STATE: NOT SUBMITTED BY SUBMITTER",
+    "draft_state_badge": "Pending Complete Details",
+    "draft_state_missing_fields": "Missing required fields:",
+    "draft_state_note": "This activity was saved as a draft by the submitter and contains missing required fields. To make partial changes (e.g., re-categorize or assign tags) without filling out missing fields, use the Save as Incomplete button below. This preserves the draft status.",
+    "save_as_incomplete": "Save as Incomplete",
+    "save_and_mark_complete": "Save & Mark Complete",
+    "event_saved_as_draft": "Activity saved as draft successfully."
   },
   "edit_event_material": {
     "material": "Material",
