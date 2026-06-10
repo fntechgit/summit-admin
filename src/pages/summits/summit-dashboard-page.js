@@ -16,21 +16,18 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardHeader from "@mui/material/CardHeader";
 import Container from "@mui/material/Container";
-import Divider from "@mui/material/Divider";
 import Grid2 from "@mui/material/Grid2";
 import Stack from "@mui/material/Stack";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
+import DashboardStatSection from "./components/dashboard-stat-section";
 import { getSummitById } from "../../actions/summit-actions";
 import { getRegistrationData } from "../../actions/summit-stats-actions";
 import Member from "../../models/member";
 import SummitDashboardDateRange from "./components/summit-dashboard-date-range";
-import SummitDashboardSectionHeader from "./components/summit-dashboard-section-header";
-import SummitDashboardStat from "./components/summit-dashboard-stat";
+import DashboardSection from "./components/dashboard-section";
 
 const TAB_KEYS = [
   "dashboard.dashboard",
@@ -53,12 +50,10 @@ function SummitDashboardPage({
 }) {
   useEffect(() => {
     fetchRegistrationData();
-  }, []);
-
-  if (!currentSummit.id || !currentSummit.time_zone?.name) return null;
+  }, [currentSummit.id]);
 
   const canEditSummit = new Member(member).canEditSummit();
-  const tz = currentSummit.time_zone.name;
+  const tz = currentSummit.time_zone?.name;
   const venueCount = currentSummit.locations.filter(
     (l) => l.class_name === "SummitVenue"
   ).length;
@@ -86,29 +81,26 @@ function SummitDashboardPage({
 
       <Grid2 container spacing={3}>
         <Grid2 size={6}>
-          <Card elevation={0}>
-            <CardHeader title={T.translate("dashboard.dates")} />
-            <Divider />
-            <SummitDashboardSectionHeader>
-              {T.translate("dashboard.general_dates")}
-            </SummitDashboardSectionHeader>
-            <SummitDashboardDateRange
-              label={T.translate("general.summit")}
-              startTs={currentSummit.start_date}
-              endTs={currentSummit.end_date}
-              tzName={tz}
-            />
-            <SummitDashboardDateRange
-              label={T.translate("dashboard.registration")}
-              startTs={currentSummit.registration_begin_date}
-              endTs={currentSummit.registration_end_date}
-              tzName={tz}
-            />
+          <DashboardSection
+            title={T.translate("dashboard.dates")}
+            variant="card"
+          >
+            <DashboardSection title={T.translate("dashboard.general_dates")}>
+              <SummitDashboardDateRange
+                label={T.translate("general.summit")}
+                startTs={currentSummit.start_date}
+                endTs={currentSummit.end_date}
+                tzName={tz}
+              />
+              <SummitDashboardDateRange
+                label={T.translate("dashboard.registration")}
+                startTs={currentSummit.registration_begin_date}
+                endTs={currentSummit.registration_end_date}
+                tzName={tz}
+              />
+            </DashboardSection>
             {currentSummit.selection_plans.map((sp) => (
-              <Box key={`sp_${sp.id}`}>
-                <SummitDashboardSectionHeader>
-                  {sp.name}
-                </SummitDashboardSectionHeader>
+              <DashboardSection key={`sp_${sp.id}`} title={sp.name}>
                 <SummitDashboardDateRange
                   label={T.translate("dashboard.submission")}
                   startTs={sp.submission_begin_date}
@@ -127,126 +119,86 @@ function SummitDashboardPage({
                   endTs={sp.selection_end_date}
                   tzName={tz}
                 />
-              </Box>
+              </DashboardSection>
             ))}
-          </Card>
+          </DashboardSection>
         </Grid2>
 
         {canEditSummit && (
           <Grid2 size={6}>
             <Stack spacing={3}>
-              <Card elevation={0}>
-                <CardHeader title={T.translate("dashboard.events")} />
-                <Divider />
-                <Grid2 container>
-                  <Grid2 size={6}>
-                    <SummitDashboardStat
-                      label={T.translate("general.speakers")}
-                      value={currentSummit.speakers_count}
-                    />
-                  </Grid2>
-                  <Grid2 size={6}>
-                    <SummitDashboardStat
-                      label={T.translate("dashboard.submitted_events")}
-                      value={currentSummit.presentations_submitted_count}
-                    />
-                  </Grid2>
-                </Grid2>
-                <Divider />
-                <Grid2 container>
-                  <Grid2 size={6}>
-                    <SummitDashboardStat
-                      label={T.translate("dashboard.published_events")}
-                      value={currentSummit.published_events_count}
-                    />
-                  </Grid2>
-                  <Grid2 size={6}>
-                    <SummitDashboardStat
-                      label={T.translate("dashboard.venues")}
-                      value={venueCount}
-                    />
-                  </Grid2>
-                </Grid2>
-              </Card>
+              <DashboardStatSection
+                title={T.translate("dashboard.events")}
+                rows={[
+                  [
+                    {
+                      title: T.translate("general.speakers"),
+                      stat: currentSummit.speakers_count
+                    },
+                    {
+                      title: T.translate("dashboard.submitted_events"),
+                      stat: currentSummit.presentations_submitted_count
+                    }
+                  ],
+                  [
+                    {
+                      title: T.translate("dashboard.published_events"),
+                      stat: currentSummit.published_events_count
+                    },
+                    { title: T.translate("dashboard.venues"), stat: venueCount }
+                  ]
+                ]}
+              />
 
-              <Card elevation={0}>
-                <CardHeader
-                  title={T.translate("dashboard.registration_stats")}
-                />
-                <Divider />
-                <Grid2 container>
-                  <Grid2 size={6}>
-                    <SummitDashboardStat
-                      label={T.translate("dashboard.orders")}
-                      value={totalOrders}
-                    />
-                  </Grid2>
-                  <Grid2 size={6}>
-                    <SummitDashboardStat
-                      label={T.translate("dashboard.total_tickets")}
-                      value={totalActiveTickets}
-                    />
-                  </Grid2>
-                </Grid2>
-              </Card>
+              <DashboardStatSection
+                title={T.translate("dashboard.registration_stats")}
+                rows={[
+                  [
+                    {
+                      title: T.translate("dashboard.orders"),
+                      stat: totalOrders
+                    },
+                    {
+                      title: T.translate("dashboard.total_tickets"),
+                      stat: totalActiveTickets
+                    }
+                  ]
+                ]}
+              />
 
-              <Card elevation={0}>
-                <CardHeader title={T.translate("dashboard.emails")} />
-                <Divider />
-                <Grid2 container>
-                  <Grid2 size={4}>
-                    <SummitDashboardStat
-                      label={T.translate("dashboard.accepted")}
-                      value={
-                        currentSummit.speaker_announcement_email_accepted_count
-                      }
-                    />
-                  </Grid2>
-                  <Grid2 size={4}>
-                    <SummitDashboardStat
-                      label={T.translate("dashboard.rejected")}
-                      value={
-                        currentSummit.speaker_announcement_email_rejected_count
-                      }
-                    />
-                  </Grid2>
-                  <Grid2 size={4}>
-                    <SummitDashboardStat
-                      label={T.translate("dashboard.alternate")}
-                      value={
-                        currentSummit.speaker_announcement_email_alternate_count
-                      }
-                    />
-                  </Grid2>
-                </Grid2>
-                <Divider />
-                <Grid2 container>
-                  <Grid2 size={4}>
-                    <SummitDashboardStat
-                      label={T.translate("dashboard.accepted_alternate")}
-                      value={
-                        currentSummit.speaker_announcement_email_accepted_alternate_count
-                      }
-                    />
-                  </Grid2>
-                  <Grid2 size={4}>
-                    <SummitDashboardStat
-                      label={T.translate("dashboard.accepted_rejected")}
-                      value={
-                        currentSummit.speaker_announcement_email_accepted_rejected_count
-                      }
-                    />
-                  </Grid2>
-                  <Grid2 size={4}>
-                    <SummitDashboardStat
-                      label={T.translate("dashboard.alternate_rejected")}
-                      value={
-                        currentSummit.speaker_announcement_email_alternate_rejected_count
-                      }
-                    />
-                  </Grid2>
-                </Grid2>
-              </Card>
+              <DashboardStatSection
+                title={T.translate("dashboard.emails")}
+                rows={[
+                  [
+                    {
+                      title: T.translate("dashboard.accepted"),
+                      stat: currentSummit.speaker_announcement_email_accepted_count
+                    },
+                    {
+                      title: T.translate("dashboard.rejected"),
+                      stat: currentSummit.speaker_announcement_email_rejected_count
+                    },
+                    {
+                      title: T.translate("dashboard.alternate"),
+                      stat: currentSummit.speaker_announcement_email_alternate_count
+                    }
+                  ],
+                  [
+                    {
+                      title: T.translate("dashboard.accepted_alternate"),
+                      stat: currentSummit.speaker_announcement_email_accepted_alternate_count
+                    },
+                    {
+                      title: T.translate("dashboard.accepted_rejected"),
+                      stat: currentSummit.speaker_announcement_email_accepted_rejected_count
+                    },
+                    {
+                      title: T.translate("dashboard.alternate_rejected"),
+                      stat: currentSummit.speaker_announcement_email_alternate_rejected_count
+                    }
+                  ]
+                ]}
+              />
             </Stack>
           </Grid2>
         )}

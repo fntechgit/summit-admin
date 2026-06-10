@@ -3,13 +3,12 @@ import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import RemoveIcon from "@mui/icons-material/Remove";
-import moment from "moment-timezone";
-
-function formatDate(ts, tzName) {
-  return moment.unix(ts).tz(tzName).format("YYYY/MM/DD  hh:mm A");
-}
+import { parseAndFormat } from "../../../utils/methods";
+import { DATETIME_FORMAT } from "../../../utils/constants";
 
 function SummitDashboardDateRange({ label, startTs, endTs, tzName }) {
+  if (!startTs || !endTs) return null;
+
   return (
     <Box
       sx={{
@@ -24,18 +23,28 @@ function SummitDashboardDateRange({ label, startTs, endTs, tzName }) {
       <Box sx={{ minWidth: 120 }}>
         <Typography variant="body2">{label}</Typography>
       </Box>
-      <Typography variant="body1">{formatDate(startTs, tzName)}</Typography>
+      <Typography variant="body1">
+        {parseAndFormat(String(startTs), "X", DATETIME_FORMAT, "UTC", tzName)}
+      </Typography>
       <RemoveIcon sx={{ mx: 2, fontSize: 16 }} />
-      <Typography variant="body1">{formatDate(endTs, tzName)}</Typography>
+      <Typography variant="body1">
+        {parseAndFormat(String(endTs), "X", DATETIME_FORMAT, "UTC", tzName)}
+      </Typography>
     </Box>
   );
 }
 
 SummitDashboardDateRange.propTypes = {
   label: PropTypes.string.isRequired,
-  startTs: PropTypes.number.isRequired,
-  endTs: PropTypes.number.isRequired,
-  tzName: PropTypes.string.isRequired
+  startTs: PropTypes.number,
+  endTs: PropTypes.number,
+  tzName: PropTypes.string
+};
+
+SummitDashboardDateRange.defaultProps = {
+  startTs: null,
+  endTs: null,
+  tzName: undefined
 };
 
 export default SummitDashboardDateRange;
