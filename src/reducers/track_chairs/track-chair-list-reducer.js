@@ -9,7 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 import {
   RECEIVE_TRACK_CHAIRS,
@@ -18,9 +20,7 @@ import {
   TRACK_CHAIR_DELETED,
   TRACK_CHAIR_UPDATED
 } from "../../actions/track-chair-actions";
-
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
   trackChairs: [],
@@ -42,9 +42,9 @@ const trackChairListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_TRACK_CHAIRS: {
-      const { order, orderDir, term, trackId } = payload;
+      const { order, orderDir, term, trackId, perPage } = payload;
 
-      return { ...state, order, orderDir, term, trackId };
+      return { ...state, order, orderDir, term, trackId, perPage };
     }
     case RECEIVE_TRACK_CHAIRS: {
       const { total, last_page, current_page, data } = payload.response;
@@ -57,7 +57,7 @@ const trackChairListReducer = (state = DEFAULT_STATE, action) => {
 
       return {
         ...state,
-        trackChairs: trackChairs,
+        trackChairs,
         currentPage: current_page,
         totalTrackChairs: total,
         lastPage: last_page
