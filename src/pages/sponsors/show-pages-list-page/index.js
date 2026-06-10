@@ -77,7 +77,14 @@ const ShowPagesListPage = ({
   };
 
   const handlePerPageChange = (newPerPage) => {
-    getShowPages(term, currentPage, newPerPage, order, orderDir, showArchived);
+    getShowPages(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir,
+      showArchived
+    );
   };
 
   const handleRowDelete = (itemId) => {

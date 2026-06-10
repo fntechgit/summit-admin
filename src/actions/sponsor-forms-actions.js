@@ -111,7 +111,7 @@ export const SPONSOR_FORM_ITEM_UNARCHIVED = "SPONSOR_FORM_ITEM_UNARCHIVED";
 export const getSponsorForms =
   (
     term = "",
-    currentPage = DEFAULT_CURRENT_PAGE,
+    page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
@@ -132,7 +132,7 @@ export const getSponsorForms =
     }
 
     const params = {
-      page: currentPage,
+      page,
       fields:
         "id,code,name,level,expire_date,is_archived,sponsorship_types,apply_to_all_types,opens_at,expires_at",
       relations: "items,sponsorship_types",
@@ -164,7 +164,7 @@ export const getSponsorForms =
       createAction(RECEIVE_SPONSOR_FORMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms`,
       authErrorHandler,
-      { order, orderDir, currentPage, perPage, term, showArchived }
+      { order, orderDir, page, perPage, term, showArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -552,7 +552,7 @@ export const getSponsorManagedForms =
       createAction(RECEIVE_SPONSOR_MANAGED_FORMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-forms`,
       authErrorHandler,
-      { order, orderDir, page, term, summitTZ, showArchived }
+      { order, orderDir, page, perPage, term, summitTZ, showArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -720,7 +720,7 @@ export const getSponsorCustomizedForms =
       createAction(RECEIVE_SPONSOR_CUSTOMIZED_FORMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms`,
       authErrorHandler,
-      { order, orderDir, page, term, summitTZ, showArchived }
+      { order, orderDir, page, perPage, term, summitTZ, showArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
