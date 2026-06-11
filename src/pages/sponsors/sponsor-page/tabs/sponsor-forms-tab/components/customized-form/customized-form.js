@@ -19,7 +19,8 @@ import {
   addIssAfterDateFieldValidator,
   formMetafieldsValidation,
   opensAtValidation,
-  requiredStringValidation
+  requiredStringValidation,
+  requiredHTMLValidation
 } from "../../../../../../../utils/yup";
 import MuiFormikTextField from "../../../../../../../components/mui/formik-inputs/mui-formik-textfield";
 import useScrollToError from "../../../../../../../hooks/useScrollToError";
@@ -62,7 +63,7 @@ const CustomizedForm = ({
       validationSchema: yup.object().shape({
         name: requiredStringValidation(),
         code: requiredStringValidation(),
-        instructions: requiredStringValidation(),
+        instructions: requiredHTMLValidation(),
         opens_at: opensAtValidation(),
         expires_at: yup
           .date(T.translate("validation.date"))
