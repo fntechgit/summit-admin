@@ -912,8 +912,10 @@ export const normalizeSponsorCustomizedForm = (entity, summitTZ) => {
     ...normalizedEntity
   } = entity;
 
-  normalizedEntity.opens_at = moment.tz(opens_at, summitTZ).unix();
-  normalizedEntity.expires_at = moment.tz(expires_at, summitTZ).unix();
+  if (opens_at)
+    normalizedEntity.opens_at = moment.tz(opens_at, summitTZ).unix();
+  if (expires_at)
+    normalizedEntity.expires_at = moment.tz(expires_at, summitTZ).unix();
 
   Object.assign(
     normalizedEntity,
