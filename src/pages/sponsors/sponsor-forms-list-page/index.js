@@ -366,12 +366,15 @@ const SponsorFormsListPage = ({
                 <Checkbox
                   checked={showArchived}
                   onChange={handleShowArchivedForms}
-                  inputProps={{
-                    "aria-label": T.translate("sponsor_forms.show_archived")
+                  slotProps={{
+                    input: {
+                      "aria-label": T.translate("sponsor_forms.show_archived")
+                    }
                   }}
                 />
               }
               label={T.translate("sponsor_forms.show_archived")}
+              sx={{ whiteSpace: "nowrap", mb: 0 }}
             />
           </FormGroup>
         </Grid2>

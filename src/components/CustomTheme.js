@@ -1,9 +1,10 @@
 import React from "react";
 import { ThemeProvider } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
+import { CustomThemeBase } from "openstack-uicore-foundation/lib/utils/theme";
 import PropTypes from "prop-types";
 
-const theme = createTheme({
+const theme = createTheme(CustomThemeBase, {
   palette: {
     primary: {
       main: "#2196F3",
@@ -77,6 +78,10 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ ownerState }) => ({
           fontWeight: 500,
+          boxShadow: "none",
+          "&:hover": { boxShadow: "none" },
+          "&:active": { boxShadow: "none" },
+          "&:focus": { boxShadow: "none" },
           ...(ownerState.size === "small" && {
             fontSize: "13px",
             lineHeight: "18px",
@@ -126,8 +131,14 @@ const theme = createTheme({
         root: {
           fontSize: "12px"
         },
+        message: {
+          fontWeight: "normal"
+        },
         standardInfo: ({ theme }) => ({
-          color: theme.palette.primary.dark
+          color: theme.palette.primary.dark,
+          "& .MuiAlert-message": {
+            color: theme.palette.primary.dark
+          }
         })
       }
     }
