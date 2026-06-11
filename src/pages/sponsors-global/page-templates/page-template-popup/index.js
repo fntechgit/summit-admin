@@ -69,7 +69,11 @@ const PageTemplatePopup = ({
     }),
     file: yup.array().when("type", {
       is: PAGE_MODULES_DOWNLOAD.FILE,
-      then: (schema) => schema.min(1, T.translate("validation.file_required")),
+      then: (schema) =>
+        schema
+          .nullable()
+          .required(T.translate("validation.file_required"))
+          .min(1, T.translate("validation.file_required")),
       otherwise: (schema) => schema.nullable()
     })
   });
