@@ -48,6 +48,7 @@ import {
 import { rateCellValidation } from "../../../../../../../utils/yup";
 import { rateToCents } from "../../../../../../../utils/rate-helpers";
 import Restrict from "../../../../../../../routes/restrict";
+import { getSafePageAfterRemove } from "../../../../../../../utils/methods";
 
 const SponsorFormsManageItems = ({
   term,
@@ -151,9 +152,37 @@ const SponsorFormsManageItems = ({
   };
 
   const handleArchiveItem = (item) =>
-    item.is_archived
+    (item.is_archived
       ? unarchiveSponsorCustomizedFormItem(formId, item.id)
-      : archiveSponsorCustomizedFormItem(formId, item.id);
+      : archiveSponsorCustomizedFormItem(formId, item.id)
+    )
+      .then(() => {
+        const safePage = getSafePageAfterRemove(
+          totalCount,
+          perPage,
+          currentPage
+        );
+        getSponsorCustomizedFormItems(
+          formId,
+          term,
+          safePage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        );
+      })
+      .catch(() =>
+        getSponsorCustomizedFormItems(
+          formId,
+          term,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        )
+      );
 
   const handleShowArchivedItems = (ev) => {
     getSponsorCustomizedFormItems(

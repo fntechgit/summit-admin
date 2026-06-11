@@ -108,7 +108,10 @@ const formTemplateItemListReducer = (state = DEFAULT_STATE, action = {}) => {
           ? { ...item, is_archived: true }
           : item
       );
-      return { ...state, formTemplateItems: updatedFormTemplatesItems };
+      return {
+        ...state,
+        formTemplateItems: updatedFormTemplatesItems
+      };
     }
     case FORM_TEMPLATE_ITEM_UNARCHIVED: {
       const updatedFormTemplateItemId = payload;
@@ -118,7 +121,10 @@ const formTemplateItemListReducer = (state = DEFAULT_STATE, action = {}) => {
           ? { ...item, is_archived: false }
           : item
       );
-      return { ...state, formTemplateItems: updatedFormTemplatesItems };
+      return {
+        ...state,
+        formTemplateItems: updatedFormTemplatesItems
+      };
     }
     default:
       return state;
