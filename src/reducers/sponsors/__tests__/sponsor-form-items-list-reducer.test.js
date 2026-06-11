@@ -310,7 +310,7 @@ describe("SponsorFormItemsListReducer", () => {
       );
       expect(result).toStrictEqual({
         ...initialState,
-        totalCount: 1,
+        totalCount: 2,
         items: [
           {
             id: "A",
@@ -379,7 +379,7 @@ describe("SponsorFormItemsListReducer", () => {
       );
       expect(result).toStrictEqual({
         ...initialState,
-        totalCount: 1,
+        totalCount: 2,
         items: [
           {
             id: "A",
