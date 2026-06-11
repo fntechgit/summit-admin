@@ -24,8 +24,12 @@ import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 const DEFAULT_STATE = {
   paymentProfiles: [],
+  term: "",
   order: "id",
   orderDir: 1,
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10,
   totalPaymentProfiles: 0
 };
 
@@ -37,17 +41,23 @@ const paymentProfileListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_PAYMENT_PROFILES: {
-      const { order, orderDir } = payload;
-      return { ...state, order, orderDir };
+      const { term, page, perPage, order, orderDir } = payload;
+      return { ...state, term, currentPage: page, perPage, order, orderDir };
     }
     case RECEIVE_PAYMENT_PROFILES: {
-      const { total } = payload.response;
+      const {
+        current_page: currentPage,
+        total,
+        last_page: lastPage
+      } = payload.response;
       const paymentProfiles = payload.response.data;
 
       return {
         ...state,
         paymentProfiles,
-        totalPaymentProfiles: total
+        totalPaymentProfiles: total,
+        currentPage,
+        lastPage
       };
     }
     case PAYMENT_PROFILE_ADDED: {
