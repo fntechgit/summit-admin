@@ -648,7 +648,7 @@ export const getSponsorManagedForm = (formId) => async (dispatch, getState) => {
 
   const params = {
     fields:
-      "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons",
+      "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons,instructions",
     expand:
       "allowed_add_ons,meta_fields,meta_fields.values,items,items.meta_fields,items.meta_fields.values,items.images",
     access_token: accessToken
