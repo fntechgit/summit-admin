@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
@@ -23,10 +23,13 @@ import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   getEventTypes as getEventTypesAction,
+  getEventType as getEventTypeAction,
   deleteEventType as deleteEventTypeAction,
-  seedEventTypes as seedEventTypesAction
+  seedEventTypes as seedEventTypesAction,
+  resetEventTypeForm as resetEventTypeFormAction
 } from "../../actions/event-type-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+import EventTypeDialog from "./components/event-type-dialog";
 
 const EventTypeListPage = ({
   currentSummit,
@@ -38,20 +41,24 @@ const EventTypeListPage = ({
   orderDir,
   totalEventTypes,
   getEventTypes,
+  getEventType,
   deleteEventType,
   seedEventTypes,
-  history
+  resetEventTypeForm
 }) => {
+  const [openPopup, setOpenPopup] = useState(null);
+
   useEffect(() => {
     getEventTypes();
   }, []);
 
   const handleEdit = (row) => {
-    history.push(`/app/summits/${currentSummit.id}/event-types/${row.id}`);
+    getEventType(row.id).then(() => setOpenPopup("eventTypeForm"));
   };
 
   const handleNew = () => {
-    history.push(`/app/summits/${currentSummit.id}/event-types/new`);
+    resetEventTypeForm();
+    setOpenPopup("eventTypeForm");
   };
 
   const handleDelete = (eventTypeId) => {
@@ -175,6 +182,10 @@ const EventTypeListPage = ({
       {eventTypes.length === 0 && (
         <div>{T.translate("event_type_list.no_items")}</div>
       )}
+
+      {openPopup === "eventTypeForm" && (
+        <EventTypeDialog onClose={() => setOpenPopup(null)} />
+      )}
     </div>
   );
 };
@@ -196,9 +207,10 @@ EventTypeListPage.propTypes = {
   orderDir: PropTypes.number,
   totalEventTypes: PropTypes.number,
   getEventTypes: PropTypes.func.isRequired,
+  getEventType: PropTypes.func.isRequired,
   deleteEventType: PropTypes.func.isRequired,
   seedEventTypes: PropTypes.func.isRequired,
-  history: PropTypes.shape({ push: PropTypes.func }).isRequired
+  resetEventTypeForm: PropTypes.func.isRequired
 };
 
 EventTypeListPage.defaultProps = {
@@ -220,6 +232,8 @@ const mapStateToProps = ({
 
 export default connect(mapStateToProps, {
   getEventTypes: getEventTypesAction,
+  getEventType: getEventTypeAction,
   deleteEventType: deleteEventTypeAction,
-  seedEventTypes: seedEventTypesAction
+  seedEventTypes: seedEventTypesAction,
+  resetEventTypeForm: resetEventTypeFormAction
 })(EventTypeListPage);
