@@ -28,8 +28,11 @@ import {
 import RequestTable from "./components/request-table";
 import UsersTable from "./components/users-table";
 import EditUserPopup from "./components/edit-user-popup";
+import SponsorGlobalNewUserPopup from "./components/sponsor-global-new-user-popup";
+import SponsorGlobalImportUsersPopup from "./components/sponsor-global-import-users-popup";
 
 const SponsorUsersListPage = ({
+  summitId,
   match,
   requests,
   users,
@@ -130,9 +133,19 @@ const SponsorUsersListPage = ({
         onEdit={handleUserEdit}
       />
 
-      {openPopup === "new" && <div />}
+      {openPopup === "new" && (
+        <SponsorGlobalNewUserPopup
+          summitId={summitId}
+          onClose={() => setOpenPopup(null)}
+        />
+      )}
 
-      {openPopup === "import" && <div />}
+      {openPopup === "import" && (
+        <SponsorGlobalImportUsersPopup
+          summitId={summitId}
+          onClose={() => setOpenPopup(null)}
+        />
+      )}
 
       {userEdit && (
         <EditUserPopup user={userEdit} onClose={() => setUserEdit(null)} />
@@ -141,8 +154,9 @@ const SponsorUsersListPage = ({
   );
 };
 
-const mapStateToProps = ({ sponsorUsersListState }) => ({
-  ...sponsorUsersListState
+const mapStateToProps = ({ sponsorUsersListState, currentSummitState }) => ({
+  ...sponsorUsersListState,
+  summitId: currentSummitState.currentSummit.id
 });
 
 export default connect(mapStateToProps, {

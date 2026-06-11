@@ -191,7 +191,8 @@ export const querySponsors = debounce(async (input, summitId, callback) => {
     .then((json) => {
       const options = [...json.data].map((sp) => ({
         id: sp.id,
-        name: sp.company.name
+        name: sp.company.name,
+        companyId: sp.company.id
       }));
       callback(options);
     })
