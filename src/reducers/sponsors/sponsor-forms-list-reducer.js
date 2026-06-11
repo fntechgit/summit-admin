@@ -157,7 +157,7 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
         item.id === formId ? { ...item, is_archived: true } : item
       );
 
-      return { ...state, sponsorForms, totalCount: state.totalCount - 1 };
+      return { ...state, sponsorForms };
     }
     case SPONSOR_FORM_UNARCHIVED: {
       const { formId } = payload;
@@ -166,7 +166,7 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
         item.id === formId ? { ...item, is_archived: false } : item
       );
 
-      return { ...state, sponsorForms, totalCount: state.totalCount - 1 };
+      return { ...state, sponsorForms };
     }
     case SPONSOR_FORM_DELETED: {
       const { formId } = payload;

@@ -110,8 +110,7 @@ const formTemplateItemListReducer = (state = DEFAULT_STATE, action = {}) => {
       );
       return {
         ...state,
-        formTemplateItems: updatedFormTemplatesItems,
-        totalFormTemplateItems: state.totalFormTemplateItems - 1
+        formTemplateItems: updatedFormTemplatesItems
       };
     }
     case FORM_TEMPLATE_ITEM_UNARCHIVED: {
@@ -124,8 +123,7 @@ const formTemplateItemListReducer = (state = DEFAULT_STATE, action = {}) => {
       );
       return {
         ...state,
-        formTemplateItems: updatedFormTemplatesItems,
-        totalFormTemplateItems: state.totalFormTemplateItems - 1
+        formTemplateItems: updatedFormTemplatesItems
       };
     }
     default:

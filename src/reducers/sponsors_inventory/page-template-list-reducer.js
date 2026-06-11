@@ -114,8 +114,7 @@ const pageTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
       );
       return {
         ...state,
-        pageTemplates: updatedPageTemplates,
-        totalPageTemplates: state.totalPageTemplates - 1
+        pageTemplates: updatedPageTemplates
       };
     }
     case PAGE_TEMPLATE_UNARCHIVED: {
@@ -126,8 +125,7 @@ const pageTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
       );
       return {
         ...state,
-        pageTemplates: updatedPageTemplates,
-        totalPageTemplates: state.totalPageTemplates - 1
+        pageTemplates: updatedPageTemplates
       };
     }
     default:

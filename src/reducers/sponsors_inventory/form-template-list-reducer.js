@@ -107,8 +107,7 @@ const formTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
       );
       return {
         ...state,
-        formTemplates: updatedFormTemplates,
-        totalFormTemplates: state.totalFormTemplates - 1
+        formTemplates: updatedFormTemplates
       };
     }
     case FORM_TEMPLATE_UNARCHIVED: {
@@ -121,8 +120,7 @@ const formTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
       );
       return {
         ...state,
-        formTemplates: updatedFormTemplates,
-        totalFormTemplates: state.totalFormTemplates - 1
+        formTemplates: updatedFormTemplates
       };
     }
     case CHANGE_FORM_TEMPLATE_SEARCH_TERM: {

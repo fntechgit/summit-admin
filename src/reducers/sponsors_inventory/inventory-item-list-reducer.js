@@ -205,8 +205,7 @@ const inventoryItemListReducer = (state = DEFAULT_STATE, action = {}) => {
       );
       return {
         ...state,
-        inventoryItems: updatedInventoryItems,
-        totalInventoryItems: state.totalInventoryItems - 1
+        inventoryItems: updatedInventoryItems
       };
     }
     case INVENTORY_ITEM_UNARCHIVED: {
@@ -217,8 +216,7 @@ const inventoryItemListReducer = (state = DEFAULT_STATE, action = {}) => {
       );
       return {
         ...state,
-        inventoryItems: updatedInventoryItems,
-        totalInventoryItems: state.totalInventoryItems - 1
+        inventoryItems: updatedInventoryItems
       };
     }
     case INVENTORY_ITEM_IMAGE_SAVED: {
