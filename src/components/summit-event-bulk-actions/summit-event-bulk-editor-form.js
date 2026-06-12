@@ -466,16 +466,10 @@ class SummitEventBulkEditorForm extends React.Component {
                 }}
                 onChange={this.handleChangeBulkStartDate}
                 className="bulk-edit-date-picker"
-                slotProps={{
-                  textField: {
-                    slotProps: {
-                      htmlInput: {
-                        placeholder: T.translate(
-                          "bulk_actions_page.placeholders.start_date"
-                        )
-                      }
-                    }
-                  }
+                inputProps={{
+                  placeholder: T.translate(
+                    "bulk_actions_page.placeholders.start_date"
+                  )
                 }}
               />
             </div>
@@ -498,16 +492,10 @@ class SummitEventBulkEditorForm extends React.Component {
                 }}
                 onChange={this.handleChangeBulkEndDate}
                 className="bulk-edit-date-picker"
-                slotProps={{
-                  textField: {
-                    slotProps: {
-                      htmlInput: {
-                        placeholder: T.translate(
-                          "bulk_actions_page.placeholders.end_date"
-                        )
-                      }
-                    }
-                  }
+                inputProps={{
+                  placeholder: T.translate(
+                    "bulk_actions_page.placeholders.end_date"
+                  )
                 }}
               />
             </div>

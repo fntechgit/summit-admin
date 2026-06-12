@@ -454,16 +454,10 @@ const TicketTypeListPage = function ({
                   currentSummit.time
                 )}
                 className="event-list-date-picker"
-                slotProps={{
-                  textField: {
-                    slotProps: {
-                      htmlInput: {
-                        placeholder: T.translate(
-                          "ticket_type_list.placeholders.sale_period_from"
-                        )
-                      }
-                    }
-                  }
+                inputProps={{
+                  placeholder: T.translate(
+                    "ticket_type_list.placeholders.sale_period_from"
+                  )
                 }}
               />
             </div>
@@ -478,16 +472,10 @@ const TicketTypeListPage = function ({
                   currentSummit.time_zone_id
                 )}
                 className="event-list-date-picker"
-                slotProps={{
-                  textField: {
-                    slotProps: {
-                      htmlInput: {
-                        placeholder: T.translate(
-                          "ticket_type_list.placeholders.sale_period_to"
-                        )
-                      }
-                    }
-                  }
+                inputProps={{
+                  placeholder: T.translate(
+                    "ticket_type_list.placeholders.sale_period_to"
+                  )
                 }}
               />
             </div>

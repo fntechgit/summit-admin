@@ -1590,16 +1590,10 @@ class SummitEventListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
-                  slotProps={{
-                    textField: {
-                      slotProps: {
-                        htmlInput: {
-                          placeholder: T.translate(
-                            "event_list.placeholders.start_date_from"
-                          )
-                        }
-                      }
-                    }
+                  inputProps={{
+                    placeholder: T.translate(
+                      "event_list.placeholders.start_date_from"
+                    )
                   }}
                 />
               </div>
@@ -1614,16 +1608,10 @@ class SummitEventListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
-                  slotProps={{
-                    textField: {
-                      slotProps: {
-                        htmlInput: {
-                          placeholder: T.translate(
-                            "event_list.placeholders.start_date_to"
-                          )
-                        }
-                      }
-                    }
+                  inputProps={{
+                    placeholder: T.translate(
+                      "event_list.placeholders.start_date_to"
+                    )
                   }}
                 />
               </div>
@@ -1642,16 +1630,10 @@ class SummitEventListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
-                  slotProps={{
-                    textField: {
-                      slotProps: {
-                        htmlInput: {
-                          placeholder: T.translate(
-                            "event_list.placeholders.end_date_from"
-                          )
-                        }
-                      }
-                    }
+                  inputProps={{
+                    placeholder: T.translate(
+                      "event_list.placeholders.end_date_from"
+                    )
                   }}
                 />
               </div>
@@ -1666,16 +1648,10 @@ class SummitEventListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
-                  slotProps={{
-                    textField: {
-                      slotProps: {
-                        htmlInput: {
-                          placeholder: T.translate(
-                            "event_list.placeholders.end_date_to"
-                          )
-                        }
-                      }
-                    }
+                  inputProps={{
+                    placeholder: T.translate(
+                      "event_list.placeholders.end_date_to"
+                    )
                   }}
                 />
               </div>
@@ -1694,16 +1670,10 @@ class SummitEventListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
-                  slotProps={{
-                    textField: {
-                      slotProps: {
-                        htmlInput: {
-                          placeholder: T.translate(
-                            "event_list.placeholders.created_from"
-                          )
-                        }
-                      }
-                    }
+                  inputProps={{
+                    placeholder: T.translate(
+                      "event_list.placeholders.created_from"
+                    )
                   }}
                 />
               </div>
@@ -1718,16 +1688,10 @@ class SummitEventListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
-                  slotProps={{
-                    textField: {
-                      slotProps: {
-                        htmlInput: {
-                          placeholder: T.translate(
-                            "event_list.placeholders.created_to"
-                          )
-                        }
-                      }
-                    }
+                  inputProps={{
+                    placeholder: T.translate(
+                      "event_list.placeholders.created_to"
+                    )
                   }}
                 />
               </div>
@@ -1746,16 +1710,10 @@ class SummitEventListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
-                  slotProps={{
-                    textField: {
-                      slotProps: {
-                        htmlInput: {
-                          placeholder: T.translate(
-                            "event_list.placeholders.modified_from"
-                          )
-                        }
-                      }
-                    }
+                  inputProps={{
+                    placeholder: T.translate(
+                      "event_list.placeholders.modified_from"
+                    )
                   }}
                 />
               </div>
@@ -1770,16 +1728,10 @@ class SummitEventListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
-                  slotProps={{
-                    textField: {
-                      slotProps: {
-                        htmlInput: {
-                          placeholder: T.translate(
-                            "event_list.placeholders.modified_to"
-                          )
-                        }
-                      }
-                    }
+                  inputProps={{
+                    placeholder: T.translate(
+                      "event_list.placeholders.modified_to"
+                    )
                   }}
                 />
               </div>

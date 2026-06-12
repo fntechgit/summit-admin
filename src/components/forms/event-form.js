@@ -1172,16 +1172,10 @@ class EventForm extends React.Component {
                     currentSummit.start_date,
                     currentSummit.time_zone_id
                   )}
-                  slotProps={{
-                    textField: {
-                      slotProps: {
-                        htmlInput: {
-                          placeholder: T.translate(
-                            "edit_event.placeholders.start_date"
-                          )
-                        }
-                      }
-                    }
+                  inputProps={{
+                    placeholder: T.translate(
+                      "edit_event.placeholders.start_date"
+                    )
                   }}
                 />
               </div>
@@ -1205,16 +1199,8 @@ class EventForm extends React.Component {
                     currentSummit.start_date,
                     currentSummit.time_zone_id
                   )}
-                  slotProps={{
-                    textField: {
-                      slotProps: {
-                        htmlInput: {
-                          placeholder: T.translate(
-                            "edit_event.placeholders.end_date"
-                          )
-                        }
-                      }
-                    }
+                  inputProps={{
+                    placeholder: T.translate("edit_event.placeholders.end_date")
                   }}
                 />
               </div>

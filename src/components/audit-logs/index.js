@@ -265,16 +265,10 @@ const AuditLogs = ({
                   currentSummit.time_zone_id
                 )}
                 className="event-list-date-picker"
-                slotProps={{
-                  textField: {
-                    slotProps: {
-                      htmlInput: {
-                        placeholder: T.translate(
-                          "audit_log.placeholders.created_date_from"
-                        )
-                      }
-                    }
-                  }
+                inputProps={{
+                  placeholder: T.translate(
+                    "audit_log.placeholders.created_date_from"
+                  )
                 }}
               />
             </div>
@@ -289,16 +283,10 @@ const AuditLogs = ({
                   currentSummit.time_zone_id
                 )}
                 className="event-list-date-picker"
-                slotProps={{
-                  textField: {
-                    slotProps: {
-                      htmlInput: {
-                        placeholder: T.translate(
-                          "audit_log.placeholders.created_date_to"
-                        )
-                      }
-                    }
-                  }
+                inputProps={{
+                  placeholder: T.translate(
+                    "audit_log.placeholders.created_date_to"
+                  )
                 }}
               />
             </div>

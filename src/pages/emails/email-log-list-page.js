@@ -315,16 +315,10 @@ const SentEmailListPage = function ({
                   "UTC"
                 )}
                 className="event-list-date-picker"
-                slotProps={{
-                  textField: {
-                    slotProps: {
-                      htmlInput: {
-                        placeholder: T.translate(
-                          "email_logs.placeholders.sent_date_from"
-                        )
-                      }
-                    }
-                  }
+                inputProps={{
+                  placeholder: T.translate(
+                    "email_logs.placeholders.sent_date_from"
+                  )
                 }}
               />
             </div>
@@ -339,16 +333,10 @@ const SentEmailListPage = function ({
                   "UTC"
                 )}
                 className="event-list-date-picker"
-                slotProps={{
-                  textField: {
-                    slotProps: {
-                      htmlInput: {
-                        placeholder: T.translate(
-                          "email_logs.placeholders.sent_date_to"
-                        )
-                      }
-                    }
-                  }
+                inputProps={{
+                  placeholder: T.translate(
+                    "email_logs.placeholders.sent_date_to"
+                  )
                 }}
               />
             </div>

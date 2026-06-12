@@ -1046,16 +1046,10 @@ class SummitAttendeeListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
-                  slotProps={{
-                    textField: {
-                      slotProps: {
-                        htmlInput: {
-                          placeholder: T.translate(
-                            "attendee_list.placeholders.checkin_date_from"
-                          )
-                        }
-                      }
-                    }
+                  inputProps={{
+                    placeholder: T.translate(
+                      "attendee_list.placeholders.checkin_date_from"
+                    )
                   }}
                 />
               </div>
@@ -1073,16 +1067,10 @@ class SummitAttendeeListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
-                  slotProps={{
-                    textField: {
-                      slotProps: {
-                        htmlInput: {
-                          placeholder: T.translate(
-                            "attendee_list.placeholders.checkin_date_to"
-                          )
-                        }
-                      }
-                    }
+                  inputProps={{
+                    placeholder: T.translate(
+                      "attendee_list.placeholders.checkin_date_to"
+                    )
                   }}
                 />
               </div>
