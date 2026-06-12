@@ -11,7 +11,7 @@ import {
   DialogTitle,
   Divider,
   FormControlLabel,
-  Grid2,
+  Grid as Grid2,
   IconButton,
   Radio,
   Typography

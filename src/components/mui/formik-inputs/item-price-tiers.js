@@ -5,7 +5,7 @@ import {
   Box,
   Checkbox,
   FormControlLabel,
-  Grid2,
+  Grid as Grid2,
   InputLabel,
   TextField
 } from "@mui/material";

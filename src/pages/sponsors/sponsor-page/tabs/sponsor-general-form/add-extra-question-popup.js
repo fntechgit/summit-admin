@@ -12,7 +12,7 @@ import {
   Button,
   IconButton,
   Divider,
-  Grid2,
+  Grid as Grid2,
   Typography,
   InputLabel,
   Box,

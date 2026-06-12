@@ -18,7 +18,7 @@ import {
   Card,
   CardContent,
   Divider,
-  Grid2,
+  Grid as Grid2,
   IconButton,
   Typography
 } from "@mui/material";
