@@ -16,10 +16,10 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
-import ActionDropdown from "openstack-uicore-foundation/lib/components/inputs/action-dropdown"
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import Table from "openstack-uicore-foundation/lib/components/table"
+import ActionDropdown from "openstack-uicore-foundation/lib/components/inputs/action-dropdown";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import Table from "openstack-uicore-foundation/lib/components/table";
 import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { getSummitById } from "../../actions/summit-actions";
@@ -447,11 +447,6 @@ const TicketTypeListPage = function ({
               <DateTimePicker
                 id="sale_period_filter"
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                inputProps={{
-                  placeholder: T.translate(
-                    "ticket_type_list.placeholders.sale_period_from"
-                  )
-                }}
                 onChange={(ev) => handleChangeDateFilter(ev, false)}
                 timezone={currentSummit.time_zone_id}
                 value={epochToMomentTimeZone(
@@ -459,17 +454,23 @@ const TicketTypeListPage = function ({
                   currentSummit.time
                 )}
                 className="event-list-date-picker"
+                slotProps={{
+                  textField: {
+                    slotProps: {
+                      htmlInput: {
+                        placeholder: T.translate(
+                          "ticket_type_list.placeholders.sale_period_from"
+                        )
+                      }
+                    }
+                  }
+                }}
               />
             </div>
             <div className="col-md-3">
               <DateTimePicker
                 id="sale_period_filter"
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                inputProps={{
-                  placeholder: T.translate(
-                    "ticket_type_list.placeholders.sale_period_to"
-                  )
-                }}
                 onChange={(ev) => handleChangeDateFilter(ev, true)}
                 timezone={currentSummit.time_zone_id}
                 value={epochToMomentTimeZone(
@@ -477,6 +478,17 @@ const TicketTypeListPage = function ({
                   currentSummit.time_zone_id
                 )}
                 className="event-list-date-picker"
+                slotProps={{
+                  textField: {
+                    slotProps: {
+                      htmlInput: {
+                        placeholder: T.translate(
+                          "ticket_type_list.placeholders.sale_period_to"
+                        )
+                      }
+                    }
+                  }
+                }}
               />
             </div>
           </>
@@ -501,11 +513,9 @@ const TicketTypeListPage = function ({
           />
         </div>
       </div>
-
       {ticketTypes.length === 0 && (
         <div>{T.translate("ticket_type_list.no_ticket_types")}</div>
       )}
-
       {ticketTypes.length > 0 && (
         <div>
           <Table

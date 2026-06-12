@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import Table from "openstack-uicore-foundation/lib/components/table"
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
+import Table from "openstack-uicore-foundation/lib/components/table";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input";
 import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
 import T from "i18n-react";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
@@ -215,9 +215,7 @@ const AuditLogs = ({
           />
         </div>
       </div>
-
       <hr />
-
       <div className="row">
         <div className="col-md-6">
           <Dropdown
@@ -260,11 +258,6 @@ const AuditLogs = ({
               <DateTimePicker
                 id="created_date_filter"
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                inputProps={{
-                  placeholder: T.translate(
-                    "audit_log.placeholders.created_date_from"
-                  )
-                }}
                 onChange={(ev) => handleChangeDateFilter(ev, false)}
                 timezone={currentSummit.time_zone_id}
                 value={epochToMomentTimeZone(
@@ -272,17 +265,23 @@ const AuditLogs = ({
                   currentSummit.time_zone_id
                 )}
                 className="event-list-date-picker"
+                slotProps={{
+                  textField: {
+                    slotProps: {
+                      htmlInput: {
+                        placeholder: T.translate(
+                          "audit_log.placeholders.created_date_from"
+                        )
+                      }
+                    }
+                  }
+                }}
               />
             </div>
             <div className="col-md-3">
               <DateTimePicker
                 id="created_date_filter"
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                inputProps={{
-                  placeholder: T.translate(
-                    "audit_log.placeholders.created_date_to"
-                  )
-                }}
                 onChange={(ev) => handleChangeDateFilter(ev, true)}
                 timezone={currentSummit.time_zone_id}
                 value={epochToMomentTimeZone(
@@ -290,16 +289,25 @@ const AuditLogs = ({
                   currentSummit.time_zone_id
                 )}
                 className="event-list-date-picker"
+                slotProps={{
+                  textField: {
+                    slotProps: {
+                      htmlInput: {
+                        placeholder: T.translate(
+                          "audit_log.placeholders.created_date_to"
+                        )
+                      }
+                    }
+                  }
+                }}
               />
             </div>
           </>
         )}
       </div>
-
       {logEntries.length === 0 && (
         <div>{T.translate("audit_log.no_log_entries")}</div>
       )}
-
       {logEntries.length > 0 && (
         <>
           <Table

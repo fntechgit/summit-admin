@@ -1,4 +1,4 @@
-/**
+/* *
  * Copyright 2017 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
@@ -22,10 +22,11 @@ import {
   ToggleButtonGroup
 } from "react-bootstrap";
 import { Breadcrumb } from "react-breadcrumbs";
-import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
 import Table from "openstack-uicore-foundation/lib/components/table";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   getLocations,
   getSign,
@@ -39,7 +40,6 @@ import {
 } from "../../actions/signage-actions";
 import LocationGroupedDropdown from "../../components/inputs/location-grouped-dropdown";
 import { BannersTable } from "../../components/tables/signagebannerstable";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import styles from "../../styles/signage-page.module.less";
 
 const SignagePage = ({
@@ -114,7 +114,7 @@ const SignagePage = ({
     }
   };
 
-  const onSort = (index, key, dir, func) => {
+  const onSort = (index, key, dir) => {
     if (view === "activities") {
       getEvents(null, null, null, key, dir);
     } else if (view === "banners") {
@@ -219,7 +219,7 @@ const SignagePage = ({
                 onClick={viewSign}
                 disabled={!sign?.template}
               >
-                {T.translate(`signage.view_sign`)}
+                {T.translate("signage.view_sign")}
               </button>
             </div>
           </div>
@@ -230,13 +230,21 @@ const SignagePage = ({
                 <InputGroup>
                   <DateTimePicker
                     format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                    inputProps={{
-                      placeholder: T.translate("signage.placeholders.date")
-                    }}
                     timezone={summit.time_zone_id}
                     onChange={(ev) => setJumpDate(ev.target.value.unix())}
                     value={epochToMomentTimeZone(jumpDate, summit.time_zone_id)}
                     disabled={!locationId}
+                    slotProps={{
+                      textField: {
+                        slotProps: {
+                          htmlInput: {
+                            placeholder: T.translate(
+                              "signage.placeholders.date"
+                            )
+                          }
+                        }
+                      }
+                    }}
                   />
                   <InputGroup.Button>
                     <button
@@ -244,7 +252,7 @@ const SignagePage = ({
                       onClick={jumpToDate}
                       disabled={!locationId || !jumpDate}
                     >
-                      {T.translate(`signage.jump`)}
+                      {T.translate("signage.jump")}
                     </button>
                   </InputGroup.Button>
                 </InputGroup>
@@ -267,7 +275,7 @@ const SignagePage = ({
                       onClick={saveStaticBanner}
                       disabled={!locationId}
                     >
-                      {T.translate(`signage.set`)}
+                      {T.translate("signage.set")}
                     </button>
                   </InputGroup.Button>
                 </InputGroup>
@@ -279,7 +287,7 @@ const SignagePage = ({
                 onClick={reloadSign}
                 disabled={!locationId}
               >
-                {T.translate(`signage.reload_sign`)}
+                {T.translate("signage.reload_sign")}
               </button>
             </div>
           </div>
@@ -297,10 +305,10 @@ const SignagePage = ({
                       onChange={setView}
                     >
                       <ToggleButton value="activities">
-                        {T.translate(`signage.activities`)}
+                        {T.translate("signage.activities")}
                       </ToggleButton>
                       <ToggleButton value="banners">
-                        {T.translate(`signage.banners`)}
+                        {T.translate("signage.banners")}
                       </ToggleButton>
                     </ToggleButtonGroup>
                   </ButtonToolbar>

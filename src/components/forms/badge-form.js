@@ -401,11 +401,6 @@ class BadgeForm extends React.Component {
                           <DateTimePicker
                             id="printDateFromFilter"
                             format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                            inputProps={{
-                              placeholder: T.translate(
-                                "edit_ticket.placeholders.print_date_from"
-                              )
-                            }}
                             timezone={userTimeZone}
                             onChange={(ev) =>
                               this.handleChangePrintDate(ev, false)
@@ -416,15 +411,21 @@ class BadgeForm extends React.Component {
                             )}
                             className="badge-print-date-picker"
                             renderInput={renderInput}
+                            slotProps={{
+                              textField: {
+                                slotProps: {
+                                  htmlInput: {
+                                    placeholder: T.translate(
+                                      "edit_ticket.placeholders.print_date_from"
+                                    )
+                                  }
+                                }
+                              }
+                            }}
                           />
                           <DateTimePicker
                             id="printDateToFilter"
                             format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                            inputProps={{
-                              placeholder: T.translate(
-                                "edit_ticket.placeholders.print_date_to"
-                              )
-                            }}
                             timezone={userTimeZone}
                             onChange={(ev) =>
                               this.handleChangePrintDate(ev, true)
@@ -435,6 +436,17 @@ class BadgeForm extends React.Component {
                             )}
                             className="badge-print-date-picker"
                             renderInput={renderInput}
+                            slotProps={{
+                              textField: {
+                                slotProps: {
+                                  htmlInput: {
+                                    placeholder: T.translate(
+                                      "edit_ticket.placeholders.print_date_to"
+                                    )
+                                  }
+                                }
+                              }
+                            }}
                           />
                           <button
                             className="btn btn-default"
@@ -532,7 +544,6 @@ class BadgeForm extends React.Component {
             </div>
           </div>
         )}
-
         <hr />
         {entity.id !== 0 && (
           <SimpleLinkList
