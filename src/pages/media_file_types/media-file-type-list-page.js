@@ -14,7 +14,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button, Grid as Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
@@ -85,7 +85,8 @@ const MediaFileTypeListPage = ({
     setOpen(false);
   };
 
-  const handleSave = (entity) => saveMediaFileType(entity)
+  const handleSave = (entity) =>
+    saveMediaFileType(entity)
       .then(() =>
         getMediaFileTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
       )

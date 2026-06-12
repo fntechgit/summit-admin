@@ -6,38 +6,46 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
   translate: (key) => key
 }));
 
-jest.mock("react-select", () => function MockSelect({ id, value, options, onChange }) {
-    return (
-      <select
-        aria-label={id}
-        data-testid="operator-select"
-        value={value?.value || ""}
-        onChange={(e) => {
-          const option =
-            options.find((o) => o.value === e.target.value) || null;
-          onChange(option);
-        }}
-      >
-        <option value="">none</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    );
-  });
+jest.mock(
+  "react-select",
+  () =>
+    function MockSelect({ id, value, options, onChange }) {
+      return (
+        <select
+          aria-label={id}
+          data-testid="operator-select"
+          value={value?.value || ""}
+          onChange={(e) => {
+            const option =
+              options.find((o) => o.value === e.target.value) || null;
+            onChange(option);
+          }}
+        >
+          <option value="">none</option>
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      );
+    }
+);
 
-jest.mock("../../../inputs/media-upload-type-input", () => function MockMediaUploadTypeInput({ id, value, onChange }) {
-    return (
-      <input
-        data-testid="media-upload-type-input"
-        id={id}
-        value={value || ""}
-        onChange={(e) => onChange({ target: { value: e.target.value } })}
-      />
-    );
-  });
+jest.mock(
+  "../../../inputs/media-upload-type-input",
+  () =>
+    function MockMediaUploadTypeInput({ id, value, onChange }) {
+      return (
+        <input
+          data-testid="media-upload-type-input"
+          id={id}
+          value={value || ""}
+          onChange={(e) => onChange({ target: { value: e.target.value } })}
+        />
+      );
+    }
+);
 
 describe("MediaTypeFilter", () => {
   const baseProps = {

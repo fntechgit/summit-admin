@@ -13,7 +13,7 @@
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Divider, Grid2, Typography } from "@mui/material";
+import { Box, Divider, Grid as Grid2, Typography } from "@mui/material";
 import Member from "../../../../../models/member";
 import ChipSelectInput from "../../../../../components/mui/chip-select-input";
 import {

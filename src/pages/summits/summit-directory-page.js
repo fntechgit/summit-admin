@@ -23,7 +23,7 @@ import Checkbox from "@mui/material/Checkbox";
 import Chip from "@mui/material/Chip";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
-import Grid2 from "@mui/material/Grid2";
+import { Grid as Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import {
   loadSummits,

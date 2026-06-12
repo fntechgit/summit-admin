@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import { Grid2, Box, InputLabel } from "@mui/material";
+import { Grid as Grid2, Box, InputLabel } from "@mui/material";
 
 import FormikTextEditor from "../../../../../components/inputs/formik-text-editor";
 

@@ -15,7 +15,7 @@ import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { useFormik, FormikProvider } from "formik";
 import * as yup from "yup";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button, Grid as Grid2 } from "@mui/material";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import MuiFormikDatepicker from "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker";
 import MuiFormikTextField from "../../mui/formik-inputs/mui-formik-textfield";
