@@ -1061,8 +1061,8 @@ export const getSponsorFormItems =
     const params = {
       page,
       fields:
-        "id,code,name,early_bird_rate,standard_rate,onsite_rate,default_quantity,images,is_archived",
-      relations: "images",
+        "id,code,name,early_bird_rate,standard_rate,onsite_rate,default_quantity,images,images.file_url,images.created,is_archived",
+      expand: "images",
       per_page: perPage,
       access_token: accessToken
     };
@@ -1100,7 +1100,7 @@ export const getSponsorFormItem =
 
     const params = {
       access_token: accessToken,
-      expands: "meta_fields,meta_fields.values,images"
+      expand: "meta_fields,meta_fields.values,images"
     };
 
     return getRequest(

@@ -4230,6 +4230,7 @@
     "cancel": "Cancel"
   },
   "preview_modal": {
+    "title": "Image Preview",
     "file_name": "File name",
     "uploaded": "Uploaded"
   }
