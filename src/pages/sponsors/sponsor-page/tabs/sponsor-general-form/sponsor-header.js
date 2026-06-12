@@ -18,7 +18,7 @@ import {
   Button,
   Checkbox,
   Divider,
-  Grid2,
+  Grid as Grid2,
   Typography
 } from "@mui/material";
 

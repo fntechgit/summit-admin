@@ -1,4 +1,4 @@
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import React from "react";
 import ConfirmDialog from "./confirm-dialog";
 
@@ -14,9 +14,10 @@ const showConfirmDialog = ({
   new Promise((resolve) => {
     const container = document.createElement("div");
     document.body.appendChild(container);
+    const root = createRoot(container);
 
     const close = (answer) => {
-      ReactDOM.unmountComponentAtNode(container);
+      root.unmount();
       container.remove();
       resolve(answer);
     };
@@ -24,7 +25,7 @@ const showConfirmDialog = ({
     const handleConfirm = () => close(true);
     const handleCancel = () => close(false);
 
-    ReactDOM.render(
+    root.render(
       <ConfirmDialog
         open
         title={title}
@@ -36,8 +37,7 @@ const showConfirmDialog = ({
         cancelButtonColor={cancelButtonColor}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
-      />,
-      container
+      />
     );
   });
 

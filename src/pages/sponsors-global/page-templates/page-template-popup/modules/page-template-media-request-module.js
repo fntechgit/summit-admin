@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
 import { getIn, useFormikContext } from "formik";
-import { Divider, Grid2, InputLabel, MenuItem } from "@mui/material";
+import { Divider, Grid as Grid2, InputLabel, MenuItem } from "@mui/material";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikRadioGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/radio-group";
 import MuiFormikFilesizeField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/file-size-field";

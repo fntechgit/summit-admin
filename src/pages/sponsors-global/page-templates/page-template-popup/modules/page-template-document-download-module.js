@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { useField } from "formik";
-import { Divider, Grid2, InputLabel } from "@mui/material";
+import { Divider, Grid as Grid2, InputLabel } from "@mui/material";
 import MuiFormikUpload from "openstack-uicore-foundation/lib/components/mui/formik-inputs/upload";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikRadioGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/radio-group";

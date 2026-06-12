@@ -13,7 +13,7 @@
 
 import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2, Typography } from "@mui/material";
+import { Box, Button, Grid as Grid2, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import AddTierPopup from "./add-tier-popup";
