@@ -120,7 +120,7 @@ class EventTypeForm extends React.Component {
 
   render() {
     const { entity, errors, showSection } = this.state;
-    const { getMediaUploads, currentSummit } = this.props;
+    const { getMediaUploads, currentSummit, isSaving } = this.props;
     const event_types_ddl = [
       { label: "Presentation", value: "PRESENTATION_TYPE" },
       { label: "Event", value: "EVENT_TYPE" }
@@ -618,6 +618,7 @@ class EventTypeForm extends React.Component {
               onClick={this.handleSubmit}
               className="btn btn-primary pull-right"
               value={T.translate("general.save")}
+              disabled={isSaving}
             />
           </div>
         </div>
