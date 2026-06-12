@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useState } from "react";
+import React from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
@@ -33,12 +33,13 @@ const EventTypeDialog = ({
   currentSummit,
   entity,
   errors,
+  loading,
   onClose,
   saveEventType,
   linkToPresentationType,
   unlinkFromPresentationType
 }) => {
-  const [isSaving, setIsSaving] = useState(false);
+  const isSaving = Boolean(loading);
 
   const handleClose = () => {
     if (isSaving) return;
@@ -47,13 +48,11 @@ const EventTypeDialog = ({
 
   const handleOnSave = (eventTypeEntity) => {
     if (isSaving) return;
-    setIsSaving(true);
     saveEventType(eventTypeEntity)
       .then(() => onClose())
       .catch(() => {
         // keep dialog open on save error to preserve user input
-      })
-      .finally(() => setIsSaving(false));
+      });
   };
 
   const getMediaUploads = (input, callback) => {
@@ -107,6 +106,7 @@ EventTypeDialog.propTypes = {
   currentSummit: PropTypes.shape({ id: PropTypes.number }).isRequired,
   entity: PropTypes.shape({ id: PropTypes.number }).isRequired,
   errors: PropTypes.shape({}),
+  loading: PropTypes.number,
   onClose: PropTypes.func.isRequired,
   saveEventType: PropTypes.func.isRequired,
   linkToPresentationType: PropTypes.func.isRequired,
@@ -114,11 +114,17 @@ EventTypeDialog.propTypes = {
 };
 
 EventTypeDialog.defaultProps = {
-  errors: {}
+  errors: {},
+  loading: 0
 };
 
-const mapStateToProps = ({ currentSummitState, currentEventTypeState }) => ({
+const mapStateToProps = ({
+  baseState,
+  currentSummitState,
+  currentEventTypeState
+}) => ({
   currentSummit: currentSummitState.currentSummit,
+  loading: baseState.loading,
   ...currentEventTypeState
 });
 
