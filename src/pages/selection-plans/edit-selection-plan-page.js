@@ -35,13 +35,14 @@ import {
   updateRatingTypeOrder,
   updateSelectionPlanExtraQuestionOrder
 } from "../../actions/selection-plan-actions";
-import AddNewButton from "../../components/buttons/add-new-button";
 
 const EditSelectionPlanPage = ({
   currentSummit,
   entity,
   allowedMembers,
   errors,
+  onSaved,
+  onSavingChange,
   history,
   extraQuestionsOrder,
   extraQuestionsOrderDir,
@@ -64,10 +65,6 @@ const EditSelectionPlanPage = ({
   importAllowedMembersCSV,
   removeAllowedMemberFromSelectionPlan
 }) => {
-  const title = entity.id
-    ? T.translate("general.edit")
-    : T.translate("general.add");
-
   const onDeleteExtraQuestion = (questionId) => {
     const extraQuestion = entity.extra_questions.find(
       (t) => t.id === questionId
@@ -184,45 +181,40 @@ const EditSelectionPlanPage = ({
   };
 
   return (
-    <div className="container">
-      <h3>
-        {title} {T.translate("edit_selection_plan.selection_plan")}
-        <AddNewButton entity={entity} />
-      </h3>
-      <hr />
-      <SelectionPlanForm
-        entity={entity}
-        allowedMembers={allowedMembers}
-        currentSummit={currentSummit}
-        errors={errors}
-        extraQuestionsOrder={extraQuestionsOrder}
-        extraQuestionsOrderDir={extraQuestionsOrderDir}
-        onTrackGroupLink={addTrackGroupToSelectionPlan}
-        onTrackGroupUnLink={removeTrackGroupFromSelectionPlan}
-        onSubmit={saveSelectionPlan}
-        saveSelectionPlanSettings={saveSelectionPlanSettings}
-        updateExtraQuestionOrder={onUpdateExtraQuestionOrder}
-        onAddNewExtraQuestion={onAddNewExtraQuestion}
-        onDeleteExtraQuestion={onDeleteExtraQuestion}
-        onAddEventType={addEventTypeSelectionPlan}
-        onDeleteEventType={deleteEventTypeSelectionPlan}
-        onEditExtraQuestion={onEditExtraQuestion}
-        onAddRatingType={onAddRatingType}
-        onEditRatingType={onEditRatingType}
-        onUpdateRatingTypeOrder={onUpdateRatingTypeOrder}
-        onDeleteRatingType={onDeleteRatingType}
-        onAssignExtraQuestion2SelectionPlan={assignExtraQuestion2SelectionPlan}
-        onAddProgressFlag={onAddProgressFlag}
-        onEditProgressFlag={onEditProgressFlag}
-        onAssignProgressFlag2SelectionPlan={assignProgressFlag2SelectionPlan}
-        onUnassignProgressFlag={onUnassignProgressFlag}
-        onUpdateProgressFlagOrder={onUpdateProgressFlagOrder}
-        onAllowedMemberAdd={addAllowedMemberToSelectionPlan}
-        onAllowedMemberDelete={removeAllowedMemberFromSelectionPlan}
-        onAllowedMembersPageChange={getAllowedMembers}
-        onImportAllowedMembers={importAllowedMembersCSV}
-      />
-    </div>
+    <SelectionPlanForm
+      entity={entity}
+      allowedMembers={allowedMembers}
+      currentSummit={currentSummit}
+      errors={errors}
+      onSaved={onSaved}
+      onSavingChange={onSavingChange}
+      extraQuestionsOrder={extraQuestionsOrder}
+      extraQuestionsOrderDir={extraQuestionsOrderDir}
+      onTrackGroupLink={addTrackGroupToSelectionPlan}
+      onTrackGroupUnLink={removeTrackGroupFromSelectionPlan}
+      onSubmit={saveSelectionPlan}
+      saveSelectionPlanSettings={saveSelectionPlanSettings}
+      updateExtraQuestionOrder={onUpdateExtraQuestionOrder}
+      onAddNewExtraQuestion={onAddNewExtraQuestion}
+      onDeleteExtraQuestion={onDeleteExtraQuestion}
+      onAddEventType={addEventTypeSelectionPlan}
+      onDeleteEventType={deleteEventTypeSelectionPlan}
+      onEditExtraQuestion={onEditExtraQuestion}
+      onAddRatingType={onAddRatingType}
+      onEditRatingType={onEditRatingType}
+      onUpdateRatingTypeOrder={onUpdateRatingTypeOrder}
+      onDeleteRatingType={onDeleteRatingType}
+      onAssignExtraQuestion2SelectionPlan={assignExtraQuestion2SelectionPlan}
+      onAddProgressFlag={onAddProgressFlag}
+      onEditProgressFlag={onEditProgressFlag}
+      onAssignProgressFlag2SelectionPlan={assignProgressFlag2SelectionPlan}
+      onUnassignProgressFlag={onUnassignProgressFlag}
+      onUpdateProgressFlagOrder={onUpdateProgressFlagOrder}
+      onAllowedMemberAdd={addAllowedMemberToSelectionPlan}
+      onAllowedMemberDelete={removeAllowedMemberFromSelectionPlan}
+      onAllowedMembersPageChange={getAllowedMembers}
+      onImportAllowedMembers={importAllowedMembersCSV}
+    />
   );
 };
 

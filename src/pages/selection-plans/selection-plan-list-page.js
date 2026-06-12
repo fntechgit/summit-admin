@@ -11,155 +11,283 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import { Pagination } from "react-bootstrap";
-import Table from "openstack-uicore-foundation/lib/components/table"
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Divider from "@mui/material/Divider";
+import Grid2 from "@mui/material/Grid2";
+import IconButton from "@mui/material/IconButton";
+import Button from "@mui/material/Button";
+import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
   deleteSelectionPlan,
-  getSelectionPlans
+  getSelectionPlan,
+  getSelectionPlans,
+  resetSelectionPlanForm
 } from "../../actions/selection-plan-actions";
+import { getMarketingSettingsBySelectionPlan } from "../../actions/marketing-actions";
+import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../utils/constants";
+import EditSelectionPlanPage from "./edit-selection-plan-page";
 
 const SelectionPlanListPage = ({
   currentSummit,
   history,
+  match,
   selectionPlans,
+  currentSelectionPlan,
+  currentSelectionPlanErrors,
   totalSelectionPlans,
+  perPage,
   term,
   order,
   orderDir,
-  lastPage,
   currentPage,
+  getSelectionPlan,
   getSelectionPlans,
+  resetSelectionPlanForm,
+  getMarketingSettingsBySelectionPlan,
   deleteSelectionPlan
 }) => {
-  useEffect(() => {
-    getSelectionPlans();
-  }, []);
+  const [openSelectionPlanPopup, setOpenSelectionPlanPopup] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const isSavingRef = useRef(false);
+  const routeSelectionPlanId = match?.params?.selection_plan_id;
 
-  const handleEdit = (selectionPlanId) => {
-    history.push(
-      `/app/summits/${currentSummit.id}/selection-plans/${selectionPlanId}`
-    );
+  const openEditModal = useCallback(
+    (selectionPlanId) => {
+      if (!selectionPlanId) return;
+
+      getSelectionPlan(selectionPlanId)
+        .then(() =>
+          getMarketingSettingsBySelectionPlan(
+            selectionPlanId,
+            null,
+            DEFAULT_CURRENT_PAGE,
+            MAX_PER_PAGE
+          )
+        )
+        .then(() => setOpenSelectionPlanPopup(true));
+    },
+    [getMarketingSettingsBySelectionPlan, getSelectionPlan]
+  );
+
+  useEffect(() => {
+    if (currentSummit?.id) {
+      getSelectionPlans(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+    }
+  }, [currentSummit]);
+
+  useEffect(() => {
+    if (routeSelectionPlanId) {
+      openEditModal(routeSelectionPlanId);
+    }
+  }, [openEditModal, routeSelectionPlanId]);
+
+  const refreshSelectionPlans = () =>
+    getSelectionPlans(term, currentPage, perPage, order, orderDir);
+
+  const handleEdit = (selectionPlan) => {
+    if (!selectionPlan?.id) return;
+    openEditModal(selectionPlan.id);
   };
 
-  const handleDelete = (selectionPlanId) => {
-    const selectionPlan = selectionPlans.find((s) => s.id === selectionPlanId);
+  const handleDelete = (selectionPlan) => {
+    if (!selectionPlan?.id) return;
 
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("selection_plan_list.remove_warning")} ${
-        selectionPlan.name
-      }`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteSelectionPlan(selectionPlanId);
-      }
-    });
+    deleteSelectionPlan(selectionPlan.id)
+      .finally(() => refreshSelectionPlans())
+      .catch(() => {});
   };
 
   const handleNew = () => {
-    history.push(`/app/summits/${currentSummit.id}/selection-plans/new`);
+    resetSelectionPlanForm();
+    setOpenSelectionPlanPopup(true);
   };
 
-  const handleSort = (index, key, dir) => {
-    getSelectionPlans(term, currentPage, key, dir);
+  const handleClosePopup = () => {
+    if (isSavingRef.current) return;
+    resetSelectionPlanForm();
+    setOpenSelectionPlanPopup(false);
+
+    if (routeSelectionPlanId) {
+      history.replace(`/app/summits/${currentSummit.id}/selection-plans`);
+    }
   };
 
-  const handlePageChange = (newPage) => {
-    getSelectionPlans(term, newPage, order, orderDir);
+  const handleSavingChange = (saving) => {
+    isSavingRef.current = saving;
+    setIsSaving(saving);
+  };
+
+  const handleSelectionPlanSaved = () => {
+    setOpenSelectionPlanPopup(false);
+    refreshSelectionPlans();
+
+    if (routeSelectionPlanId) {
+      history.replace(`/app/summits/${currentSummit.id}/selection-plans`);
+    }
+  };
+
+  const handleSort = (key, dir) => {
+    getSelectionPlans(term, currentPage, perPage, key, dir);
+  };
+
+  const handlePageChange = (page) => {
+    getSelectionPlans(term, page, perPage, order, orderDir);
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    getSelectionPlans(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      parseInt(newPerPage, 10),
+      order,
+      orderDir
+    );
   };
 
   const handleSearch = (newTerm) => {
-    getSelectionPlans(newTerm, 1, order, orderDir);
+    getSelectionPlans(newTerm, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
   };
 
   const columns = [
-    { columnKey: "id", value: T.translate("selection_plan_list.id") },
+    {
+      columnKey: "id",
+      header: T.translate("selection_plan_list.id"),
+      width: 120,
+      sortable: true
+    },
     {
       columnKey: "name",
-      value: T.translate("selection_plan_list.name")
+      header: T.translate("selection_plan_list.name")
     },
     {
       columnKey: "type",
-      value: T.translate("selection_plan_list.type")
+      header: T.translate("selection_plan_list.type")
     },
     {
       columnKey: "is_enabled",
-      value: T.translate("selection_plan_list.is_enabled")
+      header: T.translate("selection_plan_list.is_enabled")
     },
     {
       columnKey: "is_hidden",
-      value: T.translate("selection_plan_list.is_hidden")
+      header: T.translate("selection_plan_list.is_hidden")
     }
   ];
 
   const tableOptions = {
     sortCol: order,
-    sortDir: orderDir,
-    actions: {
-      edit: { onClick: handleEdit },
-      delete: { onClick: handleDelete }
-    }
+    sortDir: orderDir
   };
 
   if (!currentSummit.id) return <div />;
 
   return (
     <div className="container">
-      <h3>
-        {" "}
-        {T.translate("selection_plan_list.selection_plan_list")} (
-        {totalSelectionPlans})
-      </h3>
+      <h3>{T.translate("selection_plan_list.selection_plan_list")}</h3>
 
-      <div className="row">
-        <div className="col-md-6">
-          <FreeTextSearch
-            value={term}
-            placeholder={T.translate("selection_plan_list.placeholders.search")}
-            onSearch={handleSearch}
-          />
-        </div>
-        <div className="col-md-6 text-right">
-          <button className="btn btn-primary right-space" onClick={handleNew}>
-            {T.translate("selection_plan_list.add_selection_plan")}
-          </button>
-        </div>
-      </div>
+      <Grid2
+        container
+        spacing={2}
+        sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}
+      >
+        <Grid2 size={{ xs: 12, md: 2 }}>
+          <span>{totalSelectionPlans} items</span>
+        </Grid2>
+        <Grid2
+          container
+          size={{ xs: 12, md: 10 }}
+          spacing={1}
+          sx={{ justifyContent: "flex-end", alignItems: "center" }}
+        >
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <SearchInput
+              onSearch={handleSearch}
+              term={term}
+              placeholder={T.translate(
+                "selection_plan_list.placeholders.search"
+              )}
+            />
+          </Grid2>
+          <Grid2>
+            <Button
+              variant="contained"
+              onClick={handleNew}
+              startIcon={<AddIcon />}
+            >
+              {T.translate("selection_plan_list.add_selection_plan")}
+            </Button>
+          </Grid2>
+        </Grid2>
+      </Grid2>
+
       {selectionPlans.length === 0 && (
         <div>{T.translate("selection_plan_list.no_selection_plans")}</div>
       )}
 
       {selectionPlans.length > 0 && (
         <div>
-          <Table
-            options={tableOptions}
+          <MuiTable
             data={selectionPlans}
             columns={columns}
+            options={tableOptions}
+            perPage={perPage}
+            currentPage={currentPage}
+            totalRows={totalSelectionPlans}
+            onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
             onSort={handleSort}
-          />
-          <Pagination
-            bsSize="medium"
-            prev
-            next
-            first
-            last
-            ellipsis
-            boundaryLinks
-            maxButtons={10}
-            items={lastPage}
-            activePage={currentPage}
-            onSelect={handlePageChange}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            confirmButtonColor="error"
           />
         </div>
+      )}
+
+      {openSelectionPlanPopup && (
+        <Dialog
+          open
+          onClose={handleClosePopup}
+          disableEscapeKeyDown={isSaving}
+          maxWidth="xl"
+          fullWidth
+          disableEnforceFocus
+          disableAutoFocus
+          disableRestoreFocus
+        >
+          <DialogTitle
+            sx={{ display: "flex", justifyContent: "space-between" }}
+          >
+            {currentSelectionPlan?.id
+              ? T.translate("general.edit")
+              : T.translate("general.add")}{" "}
+            {T.translate("edit_selection_plan.selection_plan")}
+            <IconButton
+              size="small"
+              onClick={handleClosePopup}
+              disabled={isSaving}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </DialogTitle>
+          <Divider />
+          <DialogContent>
+            <EditSelectionPlanPage
+              onSaved={handleSelectionPlanSaved}
+              onSavingChange={handleSavingChange}
+              history={history}
+              currentSummit={currentSummit}
+              entity={currentSelectionPlan}
+              errors={currentSelectionPlanErrors}
+            />
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
@@ -167,13 +295,19 @@ const SelectionPlanListPage = ({
 
 const mapStateToProps = ({
   currentSummitState,
-  currentSelectionPlanListState
+  currentSelectionPlanListState,
+  currentSelectionPlanState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
-  ...currentSelectionPlanListState
+  ...currentSelectionPlanListState,
+  currentSelectionPlan: currentSelectionPlanState.entity,
+  currentSelectionPlanErrors: currentSelectionPlanState.errors
 });
 
 export default connect(mapStateToProps, {
   getSelectionPlans,
+  getSelectionPlan,
+  resetSelectionPlanForm,
+  getMarketingSettingsBySelectionPlan,
   deleteSelectionPlan
 })(SelectionPlanListPage);
