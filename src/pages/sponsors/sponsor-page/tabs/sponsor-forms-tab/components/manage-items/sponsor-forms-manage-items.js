@@ -20,7 +20,7 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid2,
+  Grid as Grid2,
   IconButton,
   Tooltip
 } from "@mui/material";

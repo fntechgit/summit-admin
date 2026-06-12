@@ -16,15 +16,15 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Modal, Pagination } from "react-bootstrap";
-import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input"
-import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
-import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
-import OperatorInput from "openstack-uicore-foundation/lib/components/inputs/operator-input"
-import SpeakerInput from "openstack-uicore-foundation/lib/components/inputs/speaker-input"
-import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input"
+import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input";
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
+import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input";
+import OperatorInput from "openstack-uicore-foundation/lib/components/inputs/operator-input";
+import SpeakerInput from "openstack-uicore-foundation/lib/components/inputs/speaker-input";
+import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input";
 import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
 import { SegmentedControl } from "segmented-control";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
@@ -1583,11 +1583,6 @@ class SummitEventListPage extends React.Component {
                 <DateTimePicker
                   id="start_date_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                  inputProps={{
-                    placeholder: T.translate(
-                      "event_list.placeholders.start_date_from"
-                    )
-                  }}
                   timezone={currentSummit.time_zone.name}
                   onChange={(ev) => this.handleChangeDateFilter(ev, false)}
                   value={epochToMomentTimeZone(
@@ -1595,17 +1590,17 @@ class SummitEventListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
+                  inputProps={{
+                    placeholder: T.translate(
+                      "event_list.placeholders.start_date_from"
+                    )
+                  }}
                 />
               </div>
               <div className="col-md-3">
                 <DateTimePicker
                   id="start_date_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                  inputProps={{
-                    placeholder: T.translate(
-                      "event_list.placeholders.start_date_to"
-                    )
-                  }}
                   timezone={currentSummit.time_zone.name}
                   onChange={(ev) => this.handleChangeDateFilter(ev, true)}
                   value={epochToMomentTimeZone(
@@ -1613,6 +1608,11 @@ class SummitEventListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
+                  inputProps={{
+                    placeholder: T.translate(
+                      "event_list.placeholders.start_date_to"
+                    )
+                  }}
                 />
               </div>
             </>
@@ -1623,11 +1623,6 @@ class SummitEventListPage extends React.Component {
                 <DateTimePicker
                   id="end_date_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                  inputProps={{
-                    placeholder: T.translate(
-                      "event_list.placeholders.end_date_from"
-                    )
-                  }}
                   timezone={currentSummit.time_zone.name}
                   onChange={(ev) => this.handleChangeDateFilter(ev, false)}
                   value={epochToMomentTimeZone(
@@ -1635,17 +1630,17 @@ class SummitEventListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
+                  inputProps={{
+                    placeholder: T.translate(
+                      "event_list.placeholders.end_date_from"
+                    )
+                  }}
                 />
               </div>
               <div className="col-md-3">
                 <DateTimePicker
                   id="end_date_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                  inputProps={{
-                    placeholder: T.translate(
-                      "event_list.placeholders.end_date_to"
-                    )
-                  }}
                   timezone={currentSummit.time_zone.name}
                   onChange={(ev) => this.handleChangeDateFilter(ev, true)}
                   value={epochToMomentTimeZone(
@@ -1653,6 +1648,11 @@ class SummitEventListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
+                  inputProps={{
+                    placeholder: T.translate(
+                      "event_list.placeholders.end_date_to"
+                    )
+                  }}
                 />
               </div>
             </>
@@ -1663,11 +1663,6 @@ class SummitEventListPage extends React.Component {
                 <DateTimePicker
                   id="created_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                  inputProps={{
-                    placeholder: T.translate(
-                      "event_list.placeholders.created_from"
-                    )
-                  }}
                   timezone={currentSummit.time_zone.name}
                   onChange={(ev) => this.handleChangeDateFilter(ev, false)}
                   value={epochToMomentTimeZone(
@@ -1675,17 +1670,17 @@ class SummitEventListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
+                  inputProps={{
+                    placeholder: T.translate(
+                      "event_list.placeholders.created_from"
+                    )
+                  }}
                 />
               </div>
               <div className="col-md-3">
                 <DateTimePicker
                   id="created_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                  inputProps={{
-                    placeholder: T.translate(
-                      "event_list.placeholders.created_to"
-                    )
-                  }}
                   timezone={currentSummit.time_zone.name}
                   onChange={(ev) => this.handleChangeDateFilter(ev, true)}
                   value={epochToMomentTimeZone(
@@ -1693,6 +1688,11 @@ class SummitEventListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
+                  inputProps={{
+                    placeholder: T.translate(
+                      "event_list.placeholders.created_to"
+                    )
+                  }}
                 />
               </div>
             </>
@@ -1703,11 +1703,6 @@ class SummitEventListPage extends React.Component {
                 <DateTimePicker
                   id="modified_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                  inputProps={{
-                    placeholder: T.translate(
-                      "event_list.placeholders.modified_from"
-                    )
-                  }}
                   timezone={currentSummit.time_zone.name}
                   onChange={(ev) => this.handleChangeDateFilter(ev, false)}
                   value={epochToMomentTimeZone(
@@ -1715,17 +1710,17 @@ class SummitEventListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
+                  inputProps={{
+                    placeholder: T.translate(
+                      "event_list.placeholders.modified_from"
+                    )
+                  }}
                 />
               </div>
               <div className="col-md-3">
                 <DateTimePicker
                   id="modified_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                  inputProps={{
-                    placeholder: T.translate(
-                      "event_list.placeholders.modified_to"
-                    )
-                  }}
                   timezone={currentSummit.time_zone.name}
                   onChange={(ev) => this.handleChangeDateFilter(ev, true)}
                   value={epochToMomentTimeZone(
@@ -1733,6 +1728,11 @@ class SummitEventListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
+                  inputProps={{
+                    placeholder: T.translate(
+                      "event_list.placeholders.modified_to"
+                    )
+                  }}
                 />
               </div>
             </>
@@ -1922,9 +1922,7 @@ class SummitEventListPage extends React.Component {
             </div>
           )}
         </div>
-
         <hr />
-
         <div className="row" style={{ marginBottom: 15 }}>
           <div className="col-md-12">
             <label htmlFor="select_fields">
@@ -1941,11 +1939,9 @@ class SummitEventListPage extends React.Component {
             />
           </div>
         </div>
-
         {events.length === 0 && (
           <div>{T.translate("event_list.no_events")}</div>
         )}
-
         {events.length > 0 && (
           <div>
             <div className="summit-event-list-table-wrapper">
@@ -1976,7 +1972,6 @@ class SummitEventListPage extends React.Component {
             />
           </div>
         )}
-
         <Modal
           show={showImportModal}
           onHide={() => this.setState({ showImportModal: false })}
@@ -2047,7 +2042,6 @@ class SummitEventListPage extends React.Component {
             </button>
           </Modal.Footer>
         </Modal>
-
         <Modal
           show={showImportFromMUXModal}
           onHide={() => this.setState({ showImportFromMUXModal: false })}

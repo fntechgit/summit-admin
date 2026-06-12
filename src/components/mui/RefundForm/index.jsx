@@ -15,7 +15,7 @@ import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button, Grid as Grid2 } from "@mui/material";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikPriceField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/price-field";
 import InfoNote from "openstack-uicore-foundation/lib/components/mui/info-note";

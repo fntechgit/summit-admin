@@ -22,7 +22,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid2
+  Grid as Grid2
 } from "@mui/material";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 

@@ -13,7 +13,7 @@
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Divider, Grid2, Typography } from "@mui/material";
+import { Box, Divider, Grid as Grid2, Typography } from "@mui/material";
 
 const SponsorHeader = ({ sponsor }) => (
   <Box sx={{ px: 2, py: 0, backgroundColor: "#FFF" }}>

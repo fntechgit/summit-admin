@@ -95,15 +95,18 @@ const MuiFormikAsyncAutocomplete = ({
           error={Boolean(error)}
           helperText={error || ""}
           slotProps={{
+            ...params.slotProps,
+
             input: {
-              ...params.InputProps,
+              ...params.slotProps.input,
               endAdornment: (
                 <>
                   {loading && <CircularProgress color="inherit" size={20} />}
-                  {params.InputProps?.endAdornment}
+                  {params.slotProps.input?.endAdornment}
                 </>
               )
             },
+
             inputLabel: { shrink: false }
           }}
           sx={{

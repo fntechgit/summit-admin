@@ -12,8 +12,8 @@
  * */
 import React from "react";
 import { FormGroup, FormControl } from "react-bootstrap";
-import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
-import SummitVenuesSelect from "openstack-uicore-foundation/lib/components/inputs/summit-venues-select"
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
+import SummitVenuesSelect from "openstack-uicore-foundation/lib/components/inputs/summit-venues-select";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import { SummitEvent } from "openstack-uicore-foundation/lib/models";
 import moment from "moment-timezone";
@@ -309,11 +309,6 @@ class SummitEventBulkEditorItem extends React.Component {
             <DateTimePicker
               id="start_date"
               format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-              inputProps={{
-                placeholder: T.translate(
-                  "bulk_actions_page.placeholders.start_date"
-                )
-              }}
               timezone={currentSummit.time_zone.name}
               timeConstraints={{ hours: { min: 7, max: 22 } }}
               validation={{
@@ -324,6 +319,11 @@ class SummitEventBulkEditorItem extends React.Component {
               onChange={this.onTimeLocalChanged}
               value={this.getFormattedTime(event.start_date)}
               className="bulk-edit-date-picker"
+              inputProps={{
+                placeholder: T.translate(
+                  "bulk_actions_page.placeholders.start_date"
+                )
+              }}
             />
             <FormControl.Feedback />
           </FormGroup>
@@ -334,11 +334,6 @@ class SummitEventBulkEditorItem extends React.Component {
               id="end_date"
               format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
               timeConstraints={{ hours: { min: 7, max: 22 } }}
-              inputProps={{
-                placeholder: T.translate(
-                  "bulk_actions_page.placeholders.end_date"
-                )
-              }}
               timezone={currentSummit.time_zone.name}
               validation={{
                 after:
@@ -348,6 +343,11 @@ class SummitEventBulkEditorItem extends React.Component {
               onChange={this.onTimeLocalChanged}
               value={this.getFormattedTime(event.end_date)}
               className="bulk-edit-date-picker"
+              inputProps={{
+                placeholder: T.translate(
+                  "bulk_actions_page.placeholders.end_date"
+                )
+              }}
             />
             <FormControl.Feedback />
           </FormGroup>

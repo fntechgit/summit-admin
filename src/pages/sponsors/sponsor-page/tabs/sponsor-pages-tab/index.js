@@ -20,7 +20,7 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid2
+  Grid as Grid2
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";

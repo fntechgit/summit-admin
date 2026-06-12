@@ -13,7 +13,7 @@ import {
   Box,
   IconButton,
   Divider,
-  Grid2
+  Grid as Grid2
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";

@@ -14,7 +14,13 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Card, CardContent, Grid2, Typography } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardContent,
+  Grid as Grid2,
+  Typography
+} from "@mui/material";
 import { ListCard } from "openstack-uicore-foundation/lib/components/mui/cards";
 import SponsorOrderGrid from "openstack-uicore-foundation/lib/components/mui/sponsor-order-grid";
 import {

@@ -6,7 +6,7 @@ import {
   DialogContent,
   Divider,
   FormLabel,
-  Grid2,
+  Grid as Grid2,
   InputLabel,
   Typography
 } from "@mui/material";

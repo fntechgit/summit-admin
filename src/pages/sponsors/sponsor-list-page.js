@@ -14,7 +14,13 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Button, Grid2, Typography, Badge, Tooltip } from "@mui/material";
+import {
+  Button,
+  Grid as Grid2,
+  Typography,
+  Badge,
+  Tooltip
+} from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";

@@ -9,27 +9,40 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
-import { Modal, Button, FormGroup, FormControl } from "react-bootstrap";
+ */
 import React from "react";
-import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
-import SummitVenuesSelect from "openstack-uicore-foundation/lib/components/inputs/summit-venues-select";
-import moment from "moment-timezone";
+import { Modal, Button, FormGroup, FormControl } from "react-bootstrap";
 import T from "i18n-react/dist/i18n-react";
+import moment from "moment-timezone";
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
+import SummitVenuesSelect from "openstack-uicore-foundation/lib/components/inputs/summit-venues-select";
+import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
+
+const DEFAULT_START_HOUR = 7;
+const DEFAULT_END_HOUR = 19;
+const END_OF_DAY_HOUR = 23;
+const END_OF_HOUR = 59;
+const MIN_GAP_MINUTES = 5;
 
 class ScheduleAdminEmptySpotsModal extends React.Component {
   constructor(props) {
     super(props);
 
     const { currentSummit } = this.props;
-    let defaultValueStart = moment
-      .tz(currentSummit.start_date * 1000, currentSummit.time_zone.name)
-      .hour(7)
+    const defaultValueStart = moment
+      .tz(
+        currentSummit.start_date * MILLISECONDS_IN_SECOND,
+        currentSummit.time_zone.name
+      )
+      .hour(DEFAULT_START_HOUR)
       .minute(0)
       .second(0);
-    let defaultValueEnd = moment
-      .tz(currentSummit.start_date * 1000, currentSummit.time_zone.name)
-      .hour(19)
+    const defaultValueEnd = moment
+      .tz(
+        currentSummit.start_date * MILLISECONDS_IN_SECOND,
+        currentSummit.time_zone.name
+      )
+      .hour(DEFAULT_END_HOUR)
       .minute(0)
       .second(0);
 
@@ -56,7 +69,7 @@ class ScheduleAdminEmptySpotsModal extends React.Component {
 
   isValidForm() {
     let valid = true;
-    for (var key in this.validationState) {
+    for (const key in this.validationState) {
       valid = valid && this.validationState[key];
     }
     return valid;
@@ -66,32 +79,32 @@ class ScheduleAdminEmptySpotsModal extends React.Component {
     if (!this.isValidForm()) return;
     this.props.onFindEmptySpots({
       currentLocation: this.state.currentLocation.value,
-      dateFrom: this.state.dateFrom.valueOf() / 1000,
-      dateTo: this.state.dateTo.valueOf() / 1000,
+      dateFrom: this.state.dateFrom.valueOf() / MILLISECONDS_IN_SECOND,
+      dateTo: this.state.dateTo.valueOf() / MILLISECONDS_IN_SECOND,
       gapSize: this.state.gapSize
     });
   }
 
   handleChangeDateFrom(ev) {
-    let { value, id } = ev.target;
+    const { value } = ev.target;
     this.setState({ ...this.state, dateFrom: value });
   }
 
   getValidationDateFrom() {
-    let { dateFrom } = this.state;
-    let isValid = dateFrom != null && dateFrom !== "";
+    const { dateFrom } = this.state;
+    const isValid = dateFrom != null && dateFrom !== "";
     this.validationState = { ...this.validationState, dateFrom: isValid };
     return isValid ? "success" : "warning";
   }
 
   handleChangeDateTo(ev) {
-    let { value, id } = ev.target;
+    const { value } = ev.target;
     this.setState({ ...this.state, dateTo: value });
   }
 
   getValidationDateTo() {
-    let { dateTo, dateFrom } = this.state;
-    let isValid =
+    const { dateTo, dateFrom } = this.state;
+    const isValid =
       dateTo != null &&
       dateTo !== "" &&
       dateFrom != null &&
@@ -101,15 +114,15 @@ class ScheduleAdminEmptySpotsModal extends React.Component {
   }
 
   onVenueChanged(location) {
-    let option =
+    const option =
       location != null ? { value: location, label: location.name } : null;
     this.setState({ ...this.state, currentLocation: option });
   }
 
   getValidationStateVenue() {
-    let { currentLocation } = this.state;
+    const { currentLocation } = this.state;
 
-    let isValid = currentLocation != null;
+    const isValid = currentLocation != null;
     this.validationState = {
       ...this.validationState,
       currentLocation: isValid
@@ -124,51 +137,47 @@ class ScheduleAdminEmptySpotsModal extends React.Component {
   getValidationStateGapSize() {
     let { gapSize } = this.state;
     gapSize = parseInt(gapSize);
-    let isValid = gapSize >= 5;
+    const isValid = gapSize >= MIN_GAP_MINUTES;
     this.validationState = { ...this.validationState, gapSize: isValid };
     return isValid ? "success" : "warning";
   }
 
   render() {
-    let { showModal, onCloseModal, currentSummit } = this.props;
-    let { currentLocation, dateFrom, dateTo, gapSize } = this.state;
+    const { showModal, onCloseModal, currentSummit } = this.props;
+    const { currentLocation, dateFrom, dateTo, gapSize } = this.state;
 
     // process venues
-    let venues = [];
+    const venues = [];
     for (let i = 0; i < currentSummit.locations.length; i++) {
-      let location = currentSummit.locations[i];
+      const location = currentSummit.locations[i];
       if (location.class_name !== "SummitVenue") continue;
-      let option = { value: location, label: location.name };
+      const option = { value: location, label: location.name };
       venues.push(option);
       if (!location.hasOwnProperty("rooms")) continue;
       for (let j = 0; j < location.rooms.length; j++) {
-        let subOption = {
+        const subOption = {
           value: location.rooms[j],
           label: location.rooms[j].name
         };
         venues.push(subOption);
       }
     }
-    let currenSummitStartDate = moment
-      .tz(currentSummit.start_date * 1000, currentSummit.time_zone.name)
+    const currenSummitStartDate = moment
+      .tz(
+        currentSummit.start_date * MILLISECONDS_IN_SECOND,
+        currentSummit.time_zone.name
+      )
       .hour(0)
       .minute(0)
       .second(0);
-    let currenSummitEndDate = moment
-      .tz(currentSummit.end_date * 1000, currentSummit.time_zone.name)
-      .hour(23)
-      .minute(59)
-      .second(59);
-    let defaultValueStart = moment
-      .tz(currentSummit.start_date * 1000, currentSummit.time_zone.name)
-      .hour(7)
-      .minute(0)
-      .second(0);
-    let defaultValueEnd = moment
-      .tz(currentSummit.start_date * 1000, currentSummit.time_zone.name)
-      .hour(22)
-      .minute(0)
-      .second(0);
+    const currenSummitEndDate = moment
+      .tz(
+        currentSummit.end_date * MILLISECONDS_IN_SECOND,
+        currentSummit.time_zone.name
+      )
+      .hour(END_OF_DAY_HOUR)
+      .minute(END_OF_HOUR)
+      .second(END_OF_HOUR);
     return (
       <Modal show={showModal} onHide={onCloseModal}>
         <Modal.Header closeButton>
@@ -201,19 +210,22 @@ class ScheduleAdminEmptySpotsModal extends React.Component {
                   <DateTimePicker
                     id="start_date"
                     format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
+                    timezone={currentSummit.time_zone.name}
+                    timeConstraints={{ hours: { min: 7, max: 22 } }}
+                    validation={{
+                      after:
+                        currenSummitStartDate.valueOf() /
+                        MILLISECONDS_IN_SECOND,
+                      before:
+                        currenSummitEndDate.valueOf() / MILLISECONDS_IN_SECOND
+                    }}
+                    onChange={this.handleChangeDateFrom}
+                    value={dateFrom}
                     inputProps={{
                       placeholder: T.translate(
                         "empty_spots_modal.placeholders.start_date"
                       )
                     }}
-                    timezone={currentSummit.time_zone.name}
-                    timeConstraints={{ hours: { min: 7, max: 22 } }}
-                    validation={{
-                      after: currenSummitStartDate.valueOf() / 1000,
-                      before: currenSummitEndDate.valueOf() / 1000
-                    }}
-                    onChange={this.handleChangeDateFrom}
-                    value={dateFrom}
                   />
                   <FormControl.Feedback />
                 </FormGroup>
@@ -225,18 +237,21 @@ class ScheduleAdminEmptySpotsModal extends React.Component {
                     id="end_date"
                     format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
                     timeConstraints={{ hours: { min: 7, max: 22 } }}
+                    timezone={currentSummit.time_zone.name}
+                    validation={{
+                      after:
+                        currenSummitStartDate.valueOf() /
+                        MILLISECONDS_IN_SECOND,
+                      before:
+                        currenSummitEndDate.valueOf() / MILLISECONDS_IN_SECOND
+                    }}
+                    onChange={this.handleChangeDateTo}
+                    value={dateTo}
                     inputProps={{
                       placeholder: T.translate(
                         "empty_spots_modal.placeholders.end_date"
                       )
                     }}
-                    timezone={currentSummit.time_zone.name}
-                    validation={{
-                      after: currenSummitStartDate.valueOf() / 1000,
-                      before: currenSummitEndDate.valueOf() / 1000
-                    }}
-                    onChange={this.handleChangeDateTo}
-                    value={dateTo}
                   />
                   <FormControl.Feedback />
                 </FormGroup>
