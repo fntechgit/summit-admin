@@ -18,7 +18,7 @@ import { Breadcrumb } from "react-breadcrumbs";
 import {
   Box,
   Button,
-  Grid2,
+  Grid as Grid2,
   IconButton,
   MenuItem,
   Select

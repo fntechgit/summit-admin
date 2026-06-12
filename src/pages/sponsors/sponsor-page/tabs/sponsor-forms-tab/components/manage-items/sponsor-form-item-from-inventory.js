@@ -12,7 +12,7 @@ import {
   DialogTitle,
   Divider,
   FormControlLabel,
-  Grid2,
+  Grid as Grid2,
   IconButton,
   Tooltip,
   Typography

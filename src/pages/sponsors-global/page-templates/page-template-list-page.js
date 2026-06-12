@@ -18,7 +18,7 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid2
+  Grid as Grid2
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";

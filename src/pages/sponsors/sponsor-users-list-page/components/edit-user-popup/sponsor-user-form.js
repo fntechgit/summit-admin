@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   Divider,
-  Grid2
+  Grid as Grid2
 } from "@mui/material";
 import T from "i18n-react";
 import * as yup from "yup";

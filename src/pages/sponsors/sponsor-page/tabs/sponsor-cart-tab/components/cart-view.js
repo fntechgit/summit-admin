@@ -17,7 +17,7 @@ import { connect } from "react-redux";
 import {
   Box,
   Button,
-  Grid2,
+  Grid as Grid2,
   IconButton,
   Paper,
   Typography

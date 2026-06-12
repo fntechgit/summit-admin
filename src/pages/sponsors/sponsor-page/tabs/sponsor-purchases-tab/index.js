@@ -17,7 +17,7 @@ import T from "i18n-react/dist/i18n-react";
 import {
   Box,
   Button,
-  Grid2,
+  Grid as Grid2,
   IconButton,
   MenuItem,
   Select

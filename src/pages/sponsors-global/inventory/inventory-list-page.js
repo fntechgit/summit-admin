@@ -18,7 +18,7 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid2,
+  Grid as Grid2,
   Popover,
   Typography
 } from "@mui/material";
