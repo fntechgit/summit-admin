@@ -25,8 +25,12 @@ const TagsDialog = ({ onClose, onSave, initialData }) => {
     }),
     enableReinitialize: true,
     onSubmit: (values) => {
+      if (isSaving) return;
       setIsSaving(true);
       onSave({ ...initialData, tag: values.tag.trim() })
+        .then(() => {
+          onClose();
+        })
         .catch(() => {
           /* keep dialog open on API failure */
         })

@@ -74,8 +74,8 @@ const TagListPage = ({
     resetTagForm();
   };
 
-  const handleSaveTag = (entity) => saveTag(entity).then(() => {
-      handleCloseDialog();
+  const handleSaveTag = (entity) =>
+    saveTag(entity).then(() => {
       getTags(search, currentPage, perPage, order, orderDir);
     });
 

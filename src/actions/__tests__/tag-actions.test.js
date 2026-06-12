@@ -5,15 +5,17 @@ import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
 import {
+  getRequest,
   postRequest,
   putRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { saveTag } from "../tag-actions";
+import { getTags, saveTag } from "../tag-actions";
 import * as methods from "../../utils/methods";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   __esModule: true,
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
+  getRequest: jest.fn(),
   postRequest: jest.fn(),
   putRequest: jest.fn()
 }));
@@ -32,6 +34,38 @@ const requestMock =
       resolve({ response: {} });
     });
   };
+
+describe("getTags", () => {
+  const middlewares = [thunk];
+  const mockStore = configureStore(middlewares);
+
+  beforeEach(() => {
+    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
+    getRequest.mockImplementation(
+      (requestAction, _receiveAction, _url, _errorHandler, payload) =>
+        () =>
+        (dispatch) => {
+          dispatch(requestAction(payload));
+          return Promise.resolve();
+        }
+    );
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("includes perPage in REQUEST_TAGS payload", async () => {
+    const store = mockStore({});
+    await store.dispatch(getTags("", 1, 25));
+
+    const requestAction = store
+      .getActions()
+      .find((a) => a.type === "REQUEST_TAGS");
+    expect(requestAction).toBeDefined();
+    expect(requestAction.payload.perPage).toBe(25);
+  });
+});
 
 describe("saveTag", () => {
   const middlewares = [thunk];
