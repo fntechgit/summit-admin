@@ -13,9 +13,9 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
-import SummitVenuesSelect from "openstack-uicore-foundation/lib/components/inputs/summit-venues-select"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
+import SummitVenuesSelect from "openstack-uicore-foundation/lib/components/inputs/summit-venues-select";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import moment from "moment-timezone";
@@ -451,11 +451,6 @@ class SummitEventBulkEditorForm extends React.Component {
               <DateTimePicker
                 id="start_date"
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                inputProps={{
-                  placeholder: T.translate(
-                    "bulk_actions_page.placeholders.start_date"
-                  )
-                }}
                 timezone={currentSummit.time_zone.name}
                 value={epochToMomentTimeZone(
                   currentBulkStartDate,
@@ -471,6 +466,17 @@ class SummitEventBulkEditorForm extends React.Component {
                 }}
                 onChange={this.handleChangeBulkStartDate}
                 className="bulk-edit-date-picker"
+                slotProps={{
+                  textField: {
+                    slotProps: {
+                      htmlInput: {
+                        placeholder: T.translate(
+                          "bulk_actions_page.placeholders.start_date"
+                        )
+                      }
+                    }
+                  }
+                }}
               />
             </div>
             <div className="bulk-edit-col">
@@ -478,11 +484,6 @@ class SummitEventBulkEditorForm extends React.Component {
                 id="end_date"
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
                 timeConstraints={{ hours: { min: 7, max: 22 } }}
-                inputProps={{
-                  placeholder: T.translate(
-                    "bulk_actions_page.placeholders.end_date"
-                  )
-                }}
                 timezone={currentSummit.time_zone.name}
                 value={epochToMomentTimeZone(
                   currentBulkEndDate,
@@ -497,6 +498,17 @@ class SummitEventBulkEditorForm extends React.Component {
                 }}
                 onChange={this.handleChangeBulkEndDate}
                 className="bulk-edit-date-picker"
+                slotProps={{
+                  textField: {
+                    slotProps: {
+                      htmlInput: {
+                        placeholder: T.translate(
+                          "bulk_actions_page.placeholders.end_date"
+                        )
+                      }
+                    }
+                  }
+                }}
               />
             </div>
             <div className="bulk-edit-col">

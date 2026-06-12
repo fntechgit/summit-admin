@@ -14,10 +14,10 @@ import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Pagination } from "react-bootstrap";
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
-import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input"
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
+import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input";
 import Table from "openstack-uicore-foundation/lib/components/table";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { SegmentedControl } from "segmented-control";
@@ -423,11 +423,6 @@ class PurchaseOrderListPage extends React.Component {
                 <DateTimePicker
                   id="purchase_date_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                  inputProps={{
-                    placeholder: T.translate(
-                      "purchase_order_list.placeholders.purchased_from"
-                    )
-                  }}
                   timezone={currentSummit.time_zone.name}
                   onChange={(ev) => this.handleChangeDateFilter(ev, false)}
                   value={epochToMomentTimeZone(
@@ -435,17 +430,23 @@ class PurchaseOrderListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
+                  slotProps={{
+                    textField: {
+                      slotProps: {
+                        htmlInput: {
+                          placeholder: T.translate(
+                            "purchase_order_list.placeholders.purchased_from"
+                          )
+                        }
+                      }
+                    }
+                  }}
                 />
               </div>
               <div className="col-md-3">
                 <DateTimePicker
                   id="purchase_date_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                  inputProps={{
-                    placeholder: T.translate(
-                      "purchase_order_list.placeholders.purchased_to"
-                    )
-                  }}
                   timezone={currentSummit.time_zone.name}
                   onChange={(ev) => this.handleChangeDateFilter(ev, true)}
                   value={epochToMomentTimeZone(
@@ -453,6 +454,17 @@ class PurchaseOrderListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
+                  slotProps={{
+                    textField: {
+                      slotProps: {
+                        htmlInput: {
+                          placeholder: T.translate(
+                            "purchase_order_list.placeholders.purchased_to"
+                          )
+                        }
+                      }
+                    }
+                  }}
                 />
               </div>
             </>
@@ -473,11 +485,9 @@ class PurchaseOrderListPage extends React.Component {
             </div>
           )}
         </div>
-
         {purchaseOrders.length === 0 && (
           <div>{T.translate("purchase_order_list.no_orders")}</div>
         )}
-
         {purchaseOrders.length > 0 && (
           <div>
             <Table

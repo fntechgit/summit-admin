@@ -17,7 +17,7 @@ import T from "i18n-react/dist/i18n-react";
 import {
   Box,
   FormControl,
-  Grid2,
+  Grid as Grid2,
   InputLabel,
   MenuItem,
   OutlinedInput,
@@ -231,7 +231,6 @@ const SentEmailListPage = ({
       </Grid2>
 
       {emails.length === 0 && <div>{T.translate("emails.no_emails")}</div>}
-
       {emails.length > 0 && (
         <MuiTable
           options={table_options}

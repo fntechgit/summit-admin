@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Grid2 } from "@mui/material";
+import { Grid as Grid2 } from "@mui/material";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
@@ -205,7 +205,6 @@ const AuditLogs = ({
       {logEntries.length === 0 && (
         <div>{T.translate("audit_log.no_log_entries")}</div>
       )}
-
       {logEntries.length > 0 && (
         <MuiTable
           columns={showColumns}

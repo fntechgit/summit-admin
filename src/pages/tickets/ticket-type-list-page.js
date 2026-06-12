@@ -19,7 +19,7 @@ import {
   Button,
   Divider,
   FormControl,
-  Grid2,
+  Grid as Grid2,
   MenuItem,
   Select
 } from "@mui/material";

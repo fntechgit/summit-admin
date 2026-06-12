@@ -16,13 +16,13 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import SelectableTable from "openstack-uicore-foundation/lib/components/table-selectable"
-import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
-import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input"
-import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
+import SelectableTable from "openstack-uicore-foundation/lib/components/table-selectable";
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
+import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input";
+import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input";
 import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { SegmentedControl } from "segmented-control";
@@ -1039,11 +1039,6 @@ class SummitAttendeeListPage extends React.Component {
                 <DateTimePicker
                   id="checkin_date_from_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                  inputProps={{
-                    placeholder: T.translate(
-                      "attendee_list.placeholders.checkin_date_from"
-                    )
-                  }}
                   timezone={currentSummit.time_zone.name}
                   onChange={(ev) => this.handleCheckInDate(ev, false)}
                   value={epochToMomentTimeZone(
@@ -1051,6 +1046,17 @@ class SummitAttendeeListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
+                  slotProps={{
+                    textField: {
+                      slotProps: {
+                        htmlInput: {
+                          placeholder: T.translate(
+                            "attendee_list.placeholders.checkin_date_from"
+                          )
+                        }
+                      }
+                    }
+                  }}
                 />
               </div>
               <div
@@ -1060,11 +1066,6 @@ class SummitAttendeeListPage extends React.Component {
                 <DateTimePicker
                   id="checkin_date_to_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                  inputProps={{
-                    placeholder: T.translate(
-                      "attendee_list.placeholders.checkin_date_to"
-                    )
-                  }}
                   timezone={currentSummit.time_zone.name}
                   onChange={(ev) => this.handleCheckInDate(ev, true)}
                   value={epochToMomentTimeZone(
@@ -1072,6 +1073,17 @@ class SummitAttendeeListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
+                  slotProps={{
+                    textField: {
+                      slotProps: {
+                        htmlInput: {
+                          placeholder: T.translate(
+                            "attendee_list.placeholders.checkin_date_to"
+                          )
+                        }
+                      }
+                    }
+                  }}
                 />
               </div>
             </>
@@ -1135,7 +1147,6 @@ class SummitAttendeeListPage extends React.Component {
         {attendees.length === 0 && (
           <div>{T.translate("attendee_list.no_attendees")}</div>
         )}
-
         <div className="row" style={{ marginBottom: 15, marginTop: 15 }}>
           <div className="col-md-6">
             <Dropdown
@@ -1225,7 +1236,6 @@ class SummitAttendeeListPage extends React.Component {
             />
           </div>
         </div>
-
         {attendees.length > 0 && (
           <div>
             {selectedCount > 0 && (
