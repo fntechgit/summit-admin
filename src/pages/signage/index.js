@@ -234,16 +234,8 @@ const SignagePage = ({
                     onChange={(ev) => setJumpDate(ev.target.value.unix())}
                     value={epochToMomentTimeZone(jumpDate, summit.time_zone_id)}
                     disabled={!locationId}
-                    slotProps={{
-                      textField: {
-                        slotProps: {
-                          htmlInput: {
-                            placeholder: T.translate(
-                              "signage.placeholders.date"
-                            )
-                          }
-                        }
-                      }
+                    inputProps={{
+                      placeholder: T.translate("signage.placeholders.date")
                     }}
                   />
                   <InputGroup.Button>

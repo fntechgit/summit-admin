@@ -346,13 +346,7 @@ class SummitPresentationsVotesPage extends React.Component {
                       begin_presentation_attendee_vote_date,
                       currentSummit.time_zone_id
                     )}
-                    slotProps={{
-                      textField: {
-                        slotProps: {
-                          htmlInput: { placeholder: "From" }
-                        }
-                      }
-                    }}
+                    inputProps={{ placeholder: "From" }}
                   />
                 </div>
                 <div className="col-md-2">
@@ -365,13 +359,7 @@ class SummitPresentationsVotesPage extends React.Component {
                       end_presentation_attendee_vote_date,
                       currentSummit.time_zone_id
                     )}
-                    slotProps={{
-                      textField: {
-                        slotProps: {
-                          htmlInput: { placeholder: "To" }
-                        }
-                      }
-                    }}
+                    inputProps={{ placeholder: "To" }}
                   />
                 </div>
                 <div className="col-md-2">

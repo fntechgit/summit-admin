@@ -430,16 +430,10 @@ class PurchaseOrderListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
-                  slotProps={{
-                    textField: {
-                      slotProps: {
-                        htmlInput: {
-                          placeholder: T.translate(
-                            "purchase_order_list.placeholders.purchased_from"
-                          )
-                        }
-                      }
-                    }
+                  inputProps={{
+                    placeholder: T.translate(
+                      "purchase_order_list.placeholders.purchased_from"
+                    )
                   }}
                 />
               </div>
@@ -454,16 +448,10 @@ class PurchaseOrderListPage extends React.Component {
                     currentSummit.time_zone_id
                   )}
                   className="event-list-date-picker"
-                  slotProps={{
-                    textField: {
-                      slotProps: {
-                        htmlInput: {
-                          placeholder: T.translate(
-                            "purchase_order_list.placeholders.purchased_to"
-                          )
-                        }
-                      }
-                    }
+                  inputProps={{
+                    placeholder: T.translate(
+                      "purchase_order_list.placeholders.purchased_to"
+                    )
                   }}
                 />
               </div>

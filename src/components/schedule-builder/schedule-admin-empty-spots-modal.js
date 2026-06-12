@@ -221,16 +221,10 @@ class ScheduleAdminEmptySpotsModal extends React.Component {
                     }}
                     onChange={this.handleChangeDateFrom}
                     value={dateFrom}
-                    slotProps={{
-                      textField: {
-                        slotProps: {
-                          htmlInput: {
-                            placeholder: T.translate(
-                              "empty_spots_modal.placeholders.start_date"
-                            )
-                          }
-                        }
-                      }
+                    inputProps={{
+                      placeholder: T.translate(
+                        "empty_spots_modal.placeholders.start_date"
+                      )
                     }}
                   />
                   <FormControl.Feedback />
@@ -253,16 +247,10 @@ class ScheduleAdminEmptySpotsModal extends React.Component {
                     }}
                     onChange={this.handleChangeDateTo}
                     value={dateTo}
-                    slotProps={{
-                      textField: {
-                        slotProps: {
-                          htmlInput: {
-                            placeholder: T.translate(
-                              "empty_spots_modal.placeholders.end_date"
-                            )
-                          }
-                        }
-                      }
+                    inputProps={{
+                      placeholder: T.translate(
+                        "empty_spots_modal.placeholders.end_date"
+                      )
                     }}
                   />
                   <FormControl.Feedback />
