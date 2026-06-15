@@ -14,7 +14,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid as Grid2 } from "@mui/material";
+import { Box, Button, Grid } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
@@ -92,7 +92,7 @@ const SponsorUsersListPerSponsorPage = ({
         />
       )}
       <CustomAlert message={T.translate("sponsor_users.alert_info")} />
-      <Grid2
+      <Grid
         container
         spacing={2}
         sx={{
@@ -101,13 +101,13 @@ const SponsorUsersListPerSponsorPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={2}>
+        <Grid size={2}>
           <Box component="span">
             {users.totalCount}{" "}
             {T.translate("sponsor_users.users").toLowerCase()}
           </Box>
-        </Grid2>
-        <Grid2
+        </Grid>
+        <Grid
           container
           size={10}
           sx={{
@@ -115,9 +115,9 @@ const SponsorUsersListPerSponsorPage = ({
             alignItems: "center"
           }}
         >
-          <Grid2 size={3}>
+          <Grid size={3}>
             <SearchInput term={term} onSearch={handleSearch} />
-          </Grid2>
+          </Grid>
           <Button
             variant="contained"
             size="medium"
@@ -136,8 +136,8 @@ const SponsorUsersListPerSponsorPage = ({
           >
             {T.translate("sponsor_users.add_user")}
           </Button>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       <UsersTable
         sponsorId={sponsor.id}

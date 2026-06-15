@@ -13,7 +13,7 @@ import {
   Box,
   IconButton,
   Divider,
-  Grid as Grid2
+  Grid
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
@@ -96,8 +96,8 @@ const MediaFileTypeDialog = ({ entity: initialEntity, onClose, onSave }) => {
           autoComplete="off"
         >
           <DialogContent sx={{ p: 0 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
-              <Grid2 size={12}>
+            <Grid container spacing={2} size={12} sx={{ p: 3 }}>
+              <Grid size={12}>
                 <InputLabel htmlFor="name">
                   {T.translate("media_file_type.name")} *
                 </InputLabel>
@@ -109,8 +109,8 @@ const MediaFileTypeDialog = ({ entity: initialEntity, onClose, onSave }) => {
                   fullWidth
                   required
                 />
-              </Grid2>
-              <Grid2 size={12} sx={{ mt: 2 }}>
+              </Grid>
+              <Grid size={12} sx={{ mt: 2 }}>
                 <InputLabel htmlFor="description">
                   {T.translate("media_file_type.description")}
                 </InputLabel>
@@ -123,8 +123,8 @@ const MediaFileTypeDialog = ({ entity: initialEntity, onClose, onSave }) => {
                   multiline
                   rows={3}
                 />
-              </Grid2>
-              <Grid2 size={12} sx={{ mt: 2 }}>
+              </Grid>
+              <Grid size={12} sx={{ mt: 2 }}>
                 <InputLabel htmlFor="allowed_extensions">
                   {T.translate("media_file_type.allowed_extensions_input")}
                 </InputLabel>
@@ -137,8 +137,8 @@ const MediaFileTypeDialog = ({ entity: initialEntity, onClose, onSave }) => {
                   multiline
                   rows={2}
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
           </DialogContent>
           <Divider />
           <DialogActions>

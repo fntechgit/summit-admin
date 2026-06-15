@@ -11,7 +11,7 @@ import {
   Button,
   IconButton,
   Divider,
-  Grid as Grid2,
+  Grid,
   Typography,
   InputLabel,
   Box
@@ -129,8 +129,8 @@ const EditBadgeScanPopup = ({ badgeScan, open, onClose, onSubmit }) => {
           autoComplete="off"
         >
           <DialogContent sx={{ p: 1 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid
                 container
                 spacing={2}
                 size={6}
@@ -148,8 +148,8 @@ const EditBadgeScanPopup = ({ badgeScan, open, onClose, onSubmit }) => {
                     margin="none"
                   />
                 </Box>
-              </Grid2>
-              <Grid2
+              </Grid>
+              <Grid
                 container
                 spacing={2}
                 size={6}
@@ -167,8 +167,8 @@ const EditBadgeScanPopup = ({ badgeScan, open, onClose, onSubmit }) => {
                     margin="none"
                   />
                 </Box>
-              </Grid2>
-              <Grid2
+              </Grid>
+              <Grid
                 container
                 spacing={2}
                 size={12}
@@ -188,11 +188,11 @@ const EditBadgeScanPopup = ({ badgeScan, open, onClose, onSubmit }) => {
                     margin="none"
                   />
                 </Box>
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
             <Divider />
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2 spacing={2} size={12} sx={{ alignItems: "baseline" }}>
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid spacing={2} size={12} sx={{ alignItems: "baseline" }}>
                 <Typography>
                   {T.translate("edit_badge_scan.extra_questions")}
                 </Typography>
@@ -203,8 +203,8 @@ const EditBadgeScanPopup = ({ badgeScan, open, onClose, onSubmit }) => {
                   formik={formik}
                   allowEdit
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
           </DialogContent>
           <DialogActions sx={{ p: 2 }}>
             <Button type="submit" fullWidth variant="contained">

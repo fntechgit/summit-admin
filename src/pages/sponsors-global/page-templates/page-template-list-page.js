@@ -18,7 +18,7 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid as Grid2
+  Grid
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
@@ -195,7 +195,7 @@ const PageTemplateListPage = ({
         {T.translate("page_template_list.alert_info")}
       </Alert>
 
-      <Grid2
+      <Grid
         container
         spacing={1}
         sx={{
@@ -204,10 +204,10 @@ const PageTemplateListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={2}>
+        <Grid size={2}>
           <Box component="span">{totalPageTemplates} pages</Box>
-        </Grid2>
-        <Grid2
+        </Grid>
+        <Grid
           container
           size={10}
           sx={{
@@ -226,7 +226,7 @@ const PageTemplateListPage = ({
               label={T.translate("page_template_list.show_archived")}
             />
           </FormGroup>
-          <Grid2 size={3}>
+          <Grid size={3}>
             <SearchInput
               onSearch={handleSearch}
               term={term}
@@ -234,7 +234,7 @@ const PageTemplateListPage = ({
                 "page_template_list.placeholders.search"
               )}
             />
-          </Grid2>
+          </Grid>
           <Button
             variant="contained"
             size="medium"
@@ -251,8 +251,8 @@ const PageTemplateListPage = ({
           >
             {T.translate("page_template_list.add_new")}
           </Button>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       <Box sx={{ mt: 4, mb: 2 }}>
         {pageTemplates.length === 0 && (

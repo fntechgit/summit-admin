@@ -13,7 +13,7 @@
 
 import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid as Grid2, Typography } from "@mui/material";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import AddTierPopup from "./add-tier-popup";
@@ -141,8 +141,8 @@ const Sponsorship = ({
   return (
     <>
       <Box sx={{ px: 2, py: 0, mt: 2, backgroundColor: "white" }}>
-        <Grid2 container size={12} sx={{ height: "68px" }}>
-          <Grid2
+        <Grid container size={12} sx={{ height: "68px" }}>
+          <Grid
             container
             size={12}
             sx={{ justifyContent: "space-between", alignItems: "center" }}
@@ -167,8 +167,8 @@ const Sponsorship = ({
                 {T.translate("edit_sponsor.add_tier")}
               </Button>
             )}
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
       </Box>
       {showAddTierPopup && (
         <AddTierPopup

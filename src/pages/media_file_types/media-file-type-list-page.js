@@ -14,7 +14,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid as Grid2 } from "@mui/material";
+import { Box, Button, Grid } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
@@ -125,7 +125,7 @@ const MediaFileTypeListPage = ({
   return (
     <div className="container">
       <h3>{T.translate("media_file_type.media_file_type_list")}</h3>
-      <Grid2
+      <Grid
         container
         spacing={1}
         sx={{
@@ -134,13 +134,13 @@ const MediaFileTypeListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={2}>
+        <Grid size={2}>
           <Box component="span">
             {totalMediaFileTypes}{" "}
             {T.translate("media_file_type.media_file_types")}
           </Box>
-        </Grid2>
-        <Grid2
+        </Grid>
+        <Grid
           container
           size={10}
           gap={1}
@@ -149,9 +149,9 @@ const MediaFileTypeListPage = ({
             alignItems: "center"
           }}
         >
-          <Grid2 size={4}>
+          <Grid size={4}>
             <SearchInput term={term} onSearch={handleSearch} />
-          </Grid2>
+          </Grid>
           <Button
             variant="contained"
             onClick={handleNew}
@@ -166,8 +166,8 @@ const MediaFileTypeListPage = ({
           >
             {T.translate("media_file_type.add")}
           </Button>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       {media_file_types.length > 0 && (
         <MuiTable

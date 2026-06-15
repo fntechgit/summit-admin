@@ -22,7 +22,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid as Grid2
+  Grid
 } from "@mui/material";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 
@@ -76,56 +76,56 @@ const EditAddressDialog = ({ open, onClose, onSubmit, address }) => {
           autoComplete="off"
         >
           <DialogContent>
-            <Grid2 container spacing={2}>
-              <Grid2 size={12}>
+            <Grid container spacing={2}>
+              <Grid size={12}>
                 <MuiFormikTextField
                   name="line1"
                   fullWidth
                   size="small"
                   label={T.translate("client_card.line1")}
                 />
-              </Grid2>
-              <Grid2 size={12}>
+              </Grid>
+              <Grid size={12}>
                 <MuiFormikTextField
                   name="line2"
                   fullWidth
                   size="small"
                   label={T.translate("client_card.line2")}
                 />
-              </Grid2>
-              <Grid2 size={4}>
+              </Grid>
+              <Grid size={4}>
                 <MuiFormikTextField
                   name="postal_code"
                   fullWidth
                   size="small"
                   label={T.translate("client_card.postal_code")}
                 />
-              </Grid2>
-              <Grid2 size={4}>
+              </Grid>
+              <Grid size={4}>
                 <MuiFormikTextField
                   name="city"
                   fullWidth
                   size="small"
                   label={T.translate("client_card.city")}
                 />
-              </Grid2>
-              <Grid2 size={4}>
+              </Grid>
+              <Grid size={4}>
                 <MuiFormikTextField
                   name="state"
                   fullWidth
                   size="small"
                   label={T.translate("client_card.state")}
                 />
-              </Grid2>
-              <Grid2 size={12}>
+              </Grid>
+              <Grid size={12}>
                 <MuiFormikTextField
                   name="country"
                   fullWidth
                   size="small"
                   label={T.translate("client_card.country")}
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>

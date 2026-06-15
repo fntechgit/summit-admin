@@ -11,7 +11,7 @@ import {
   Box,
   IconButton,
   Divider,
-  Grid as Grid2
+  Grid
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useFormik, FormikProvider } from "formik";
@@ -126,8 +126,8 @@ const FormTemplateDialog = ({
           autoComplete="off"
         >
           <DialogContent sx={{ p: 0 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
-              <Grid2 size={4}>
+            <Grid container spacing={2} size={12} sx={{ p: 3 }}>
+              <Grid size={4}>
                 <InputLabel htmlFor="code">
                   {T.translate("edit_form_template.code")} *
                 </InputLabel>
@@ -137,8 +137,8 @@ const FormTemplateDialog = ({
                   formik={formik}
                   fullWidth
                 />
-              </Grid2>
-              <Grid2 size={8}>
+              </Grid>
+              <Grid size={8}>
                 <InputLabel htmlFor="name">
                   {T.translate("edit_form_template.name")} *
                 </InputLabel>
@@ -148,11 +148,11 @@ const FormTemplateDialog = ({
                   formik={formik}
                   fullWidth
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
             <Divider />
-            <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
-              <Grid2 size={12}>
+            <Grid container spacing={2} size={12} sx={{ p: 3 }}>
+              <Grid size={12}>
                 <InputLabel htmlFor="instructions">
                   {T.translate("edit_form_template.instructions")} *
                 </InputLabel>
@@ -160,8 +160,8 @@ const FormTemplateDialog = ({
                   name="instructions"
                   options={{ zIndex: 9999999 }}
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
 
             <Divider />
             <DialogTitle sx={{ p: 3 }}>

@@ -173,22 +173,22 @@ const CompanyInputMUI = ({
           helperText={error || ""}
           slotProps={{
             ...params.slotProps,
-            ...params.slotProps.input,
-            inputLabel: { shrink: false },
-
-            sx: {
-              "& input::placeholder": {
-                color: "#00000061",
-                opacity: 1
-              }
+            input: {
+              ...(params.slotProps?.input || {}),
+              sx: {
+                "& input::placeholder": {
+                  color: "#00000061",
+                  opacity: 1
+                }
+              },
+              endAdornment: (
+                <>
+                  {loading && <CircularProgress color="inherit" size={20} />}
+                  {params.slotProps.input?.endAdornment}
+                </>
+              )
             },
-
-            endAdornment: (
-              <>
-                {loading && <CircularProgress color="inherit" size={20} />}
-                {params.slotProps.input?.endAdornment}
-              </>
-            )
+            inputLabel: { shrink: false }
           }}
         />
       )}

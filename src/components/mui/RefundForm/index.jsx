@@ -15,7 +15,7 @@ import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
-import { Box, Button, Grid as Grid2 } from "@mui/material";
+import { Box, Button, Grid } from "@mui/material";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikPriceField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/price-field";
 import InfoNote from "openstack-uicore-foundation/lib/components/mui/info-note";
@@ -50,8 +50,8 @@ const RefundForm = ({ onSubmit, disabled = false }) => {
         noValidate
         autoComplete="off"
       >
-        <Grid2 container spacing={2}>
-          <Grid2 size={6}>
+        <Grid container spacing={2}>
+          <Grid size={6}>
             <MuiFormikTextField
               name="reason"
               fullWidth
@@ -59,8 +59,8 @@ const RefundForm = ({ onSubmit, disabled = false }) => {
               label={T.translate("refund_form.reason")}
               disabled={disabled}
             />
-          </Grid2>
-          <Grid2 size={4}>
+          </Grid>
+          <Grid size={4}>
             <MuiFormikPriceField
               name="amount"
               fullWidth
@@ -69,8 +69,8 @@ const RefundForm = ({ onSubmit, disabled = false }) => {
               label={T.translate("refund_form.amount")}
               disabled={disabled}
             />
-          </Grid2>
-          <Grid2 size={2} sx={{ pt: 2 }}>
+          </Grid>
+          <Grid size={2} sx={{ pt: 2 }}>
             <Button
               type="submit"
               variant="contained"
@@ -81,8 +81,8 @@ const RefundForm = ({ onSubmit, disabled = false }) => {
             >
               {T.translate("refund_form.queue_refund")}
             </Button>
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
       </Box>
       <Box sx={{ mt: 2 }}>
         {disabled ? (

@@ -11,7 +11,7 @@ import {
   Button,
   IconButton,
   Divider,
-  Grid as Grid2,
+  Grid,
   Typography,
   InputLabel,
   Box
@@ -199,7 +199,7 @@ const ManageTierAddonsPopup = ({
               {`${sponsorship.tier} ${T.translate("edit_sponsor.sponsorship")}`}
             </Typography>
             {formik.values.addons.map((addon, index) => (
-              <Grid2
+              <Grid
                 key={addon?.id || index}
                 container
                 spacing={3}
@@ -211,7 +211,7 @@ const ManageTierAddonsPopup = ({
                   border: "1px solid rgba(0, 0, 0, 0.12)"
                 }}
               >
-                <Grid2
+                <Grid
                   container
                   spacing={2}
                   rowSpacing={editingRow === index ? "14px" : "6px"}
@@ -238,8 +238,8 @@ const ManageTierAddonsPopup = ({
                   ) : (
                     <Typography>{`${formik.values.addons[index].type}`}</Typography>
                   )}
-                </Grid2>
-                <Grid2
+                </Grid>
+                <Grid
                   container
                   spacing={2}
                   rowSpacing={editingRow === index ? "14px" : "6px"}
@@ -259,11 +259,11 @@ const ManageTierAddonsPopup = ({
                   ) : (
                     <Typography>{`${formik.values.addons[index].name}`}</Typography>
                   )}
-                </Grid2>
-                <Grid2 container size={2} spacing={2} sx={{ display: "flex" }}>
+                </Grid>
+                <Grid container size={2} spacing={2} sx={{ display: "flex" }}>
                   {editingRow !== index && (
                     <>
-                      <Grid2
+                      <Grid
                         className="dottedBorderLeft"
                         size={6}
                         sx={{ alignContent: "center" }}
@@ -274,8 +274,8 @@ const ManageTierAddonsPopup = ({
                         >
                           <EditIcon />
                         </IconButton>
-                      </Grid2>
-                      <Grid2
+                      </Grid>
+                      <Grid
                         className="dottedBorderLeft"
                         size={6}
                         sx={{ alignContent: "center" }}
@@ -286,11 +286,11 @@ const ManageTierAddonsPopup = ({
                         >
                           <DeleteIcon />
                         </IconButton>
-                      </Grid2>
+                      </Grid>
                     </>
                   )}
-                </Grid2>
-              </Grid2>
+                </Grid>
+              </Grid>
             ))}
             {!formik.errors.addons &&
               typeof formik.errors.addons === "string" && (
@@ -300,7 +300,7 @@ const ManageTierAddonsPopup = ({
                   </Typography>
                 </Box>
               )}
-            <Grid2
+            <Grid
               container
               spacing={3}
               size={12}
@@ -310,7 +310,7 @@ const ManageTierAddonsPopup = ({
                 border: "1px solid rgba(0, 0, 0, 0.12)"
               }}
             >
-              <Grid2
+              <Grid
                 container
                 spacing={2}
                 size={5}
@@ -332,8 +332,8 @@ const ManageTierAddonsPopup = ({
                     }}
                   />
                 </Box>
-              </Grid2>
-              <Grid2
+              </Grid>
+              <Grid
                 container
                 spacing={2}
                 size={5}
@@ -349,8 +349,8 @@ const ManageTierAddonsPopup = ({
                   margin="none"
                   placeholder={T.translate("edit_sponsor.name")}
                 />
-              </Grid2>
-              <Grid2 size={2} sx={{ display: "flex" }}>
+              </Grid>
+              <Grid size={2} sx={{ display: "flex" }}>
                 <Button
                   variant="contained"
                   aria-label="add"
@@ -367,7 +367,7 @@ const ManageTierAddonsPopup = ({
                 >
                   <AddIcon />
                 </Button>
-              </Grid2>
+              </Grid>
               {formik.errors.newAddon &&
                 typeof formik.errors.newAddon === "string" && (
                   <Box mb={2} pl={2}>
@@ -376,7 +376,7 @@ const ManageTierAddonsPopup = ({
                     </Typography>
                   </Box>
                 )}
-            </Grid2>
+            </Grid>
           </DialogContent>
           <Divider />
           <DialogActions sx={{ p: 2 }}>

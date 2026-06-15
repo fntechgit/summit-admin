@@ -13,7 +13,7 @@
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Divider, Grid as Grid2, Typography } from "@mui/material";
+import { Box, Divider, Grid, Typography } from "@mui/material";
 import Member from "../../../../../models/member";
 import ChipSelectInput from "../../../../../components/mui/chip-select-input";
 import {
@@ -57,8 +57,8 @@ const BadgeScanSettings = ({
 
   return (
     <Box sx={{ px: 2, py: 0, backgroundColor: "#FFF" }}>
-      <Grid2 container size={12} sx={{ height: "68px", alignItems: "center" }}>
-        <Grid2 size={12}>
+      <Grid container size={12} sx={{ height: "68px", alignItems: "center" }}>
+        <Grid size={12}>
           <Typography
             sx={{
               fontWeight: "500",
@@ -69,11 +69,11 @@ const BadgeScanSettings = ({
           >
             {T.translate("edit_sponsor.badge_scan_settings")}
           </Typography>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
       <Divider />
-      <Grid2 container size={12} sx={{ height: "68px", alignItems: "center" }}>
-        <Grid2 size={12}>
+      <Grid container size={12} sx={{ height: "68px", alignItems: "center" }}>
+        <Grid size={12}>
           <Typography
             sx={{
               fontWeight: "400",
@@ -85,11 +85,11 @@ const BadgeScanSettings = ({
           >
             {selectedCount} {T.translate("edit_sponsor.badge_scan_settings")}
           </Typography>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
       <Divider />
-      <Grid2 container size={12} sx={{ py: 3, alignItems: "center" }}>
-        <Grid2 size={12}>
+      <Grid container size={12} sx={{ py: 3, alignItems: "center" }}>
+        <Grid size={12}>
           <ChipSelectInput
             availableOptions={availableLeadReportColumns}
             canAdd={canAddSponsors}
@@ -101,8 +101,8 @@ const BadgeScanSettings = ({
             renderSelectedOptions={renderOptions}
             denormalizeSettings={denormalizeLeadReportSettings}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

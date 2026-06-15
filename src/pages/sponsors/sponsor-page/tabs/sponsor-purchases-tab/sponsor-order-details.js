@@ -14,13 +14,7 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Box,
-  Card,
-  CardContent,
-  Grid as Grid2,
-  Typography
-} from "@mui/material";
+import { Box, Card, CardContent, Grid, Typography } from "@mui/material";
 import { ListCard } from "openstack-uicore-foundation/lib/components/mui/cards";
 import SponsorOrderGrid from "openstack-uicore-foundation/lib/components/mui/sponsor-order-grid";
 import {
@@ -144,32 +138,32 @@ const SponsorOrderDetails = ({
         {T.translate("edit_sponsor.purchase_tab.order_details.order")}{" "}
         {currentOrder.number}
       </Typography>
-      <Grid2 container spacing={2} size={12} sx={{ mb: 4 }}>
-        <Grid2 size={6}>
+      <Grid container spacing={2} size={12} sx={{ mb: 4 }}>
+        <Grid size={6}>
           <ListCard
             title={T.translate(
               "edit_sponsor.purchase_tab.order_details.general_info"
             )}
             rows={dashInfoRows}
           />
-        </Grid2>
-        <Grid2 size={6}>
+        </Grid>
+        <Grid size={6}>
           <ListCard
             title={T.translate(
               "edit_sponsor.purchase_tab.order_details.payment_info"
             )}
             rows={paymentInfoRows}
           />
-        </Grid2>
-        <Grid2 size={12}>
+        </Grid>
+        <Grid size={12}>
           <ClientCard
             client={client}
             address={address}
             onAddressSubmit={handleAddressSave}
             onClientSubmit={handleClientSave}
           />
-        </Grid2>
-        <Grid2 size={12}>
+        </Grid>
+        <Grid size={12}>
           <Card
             sx={{ minWidth: 275, borderRadius: "10px", height: "100%" }}
             variant="outlined"
@@ -184,8 +178,8 @@ const SponsorOrderDetails = ({
               />
             </CardContent>
           </Card>
-        </Grid2>
-        <Grid2 size={12}>
+        </Grid>
+        <Grid size={12}>
           <Card
             sx={{ minWidth: 275, borderRadius: "10px", height: "100%" }}
             variant="outlined"
@@ -202,8 +196,8 @@ const SponsorOrderDetails = ({
               />
             </CardContent>
           </Card>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

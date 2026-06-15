@@ -451,7 +451,7 @@ const TicketTypeListPage = function ({
                 timezone={currentSummit.time_zone_id}
                 value={epochToMomentTimeZone(
                   ticketTypeFilters.sale_period_filter[0],
-                  currentSummit.time
+                  currentSummit.time_zone_id
                 )}
                 className="event-list-date-picker"
                 inputProps={{

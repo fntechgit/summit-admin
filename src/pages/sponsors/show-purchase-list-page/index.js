@@ -15,14 +15,7 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
-import {
-  Box,
-  Button,
-  Grid as Grid2,
-  IconButton,
-  MenuItem,
-  Select
-} from "@mui/material";
+import { Box, Button, Grid, IconButton, MenuItem, Select } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
@@ -203,7 +196,7 @@ const ShowPurchaseListPage = ({
         />
       </div>
       <h3>{T.translate("sponsor_show_purchases.purchases")}</h3>
-      <Grid2
+      <Grid
         container
         spacing={2}
         sx={{
@@ -212,25 +205,25 @@ const ShowPurchaseListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={2}>
+        <Grid size={2}>
           <Box component="span">
             {totalCount}{" "}
             {T.translate("sponsor_show_purchases.purchases").toLowerCase()}
           </Box>
-        </Grid2>
-        <Grid2 size={2} offset={6}>
+        </Grid>
+        <Grid size={2} offset={6}>
           <SearchInput
             term={term}
             onSearch={handleSearch}
             placeholder={T.translate("general.placeholders.search")}
           />
-        </Grid2>
-        <Grid2 size={2}>
+        </Grid>
+        <Grid size={2}>
           <Button variant="contained" onClick={handleExport}>
             {T.translate("general.export")}
           </Button>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
       <div>
         <MuiTable
           columns={tableColumns}

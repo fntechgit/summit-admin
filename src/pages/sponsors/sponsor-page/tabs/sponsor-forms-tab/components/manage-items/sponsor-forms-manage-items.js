@@ -20,7 +20,7 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid as Grid2,
+  Grid,
   IconButton,
   Tooltip
 } from "@mui/material";
@@ -289,7 +289,7 @@ const SponsorFormsManageItems = ({
         )}
         hideIcon
       />
-      <Grid2
+      <Grid
         container
         spacing={2}
         sx={{
@@ -298,10 +298,10 @@ const SponsorFormsManageItems = ({
           mb: 2
         }}
       >
-        <Grid2 size={2}>
+        <Grid size={2}>
           <Box component="span">{totalCount} items</Box>
-        </Grid2>
-        <Grid2 size={2} offset={1}>
+        </Grid>
+        <Grid size={2} offset={1}>
           <FormGroup>
             <FormControlLabel
               control={
@@ -320,15 +320,15 @@ const SponsorFormsManageItems = ({
               )}
             />
           </FormGroup>
-        </Grid2>
-        <Grid2 size={2}>
+        </Grid>
+        <Grid size={2}>
           <SearchInput
             term={term}
             onSearch={handleSearch}
             placeholder={T.translate("edit_sponsor.placeholders.search")}
           />
-        </Grid2>
-        <Grid2 size={2}>
+        </Grid>
+        <Grid size={2}>
           <Button
             variant="contained"
             size="medium"
@@ -339,8 +339,8 @@ const SponsorFormsManageItems = ({
           >
             {T.translate("edit_sponsor.forms_tab.form_manage_items.add_item")}
           </Button>
-        </Grid2>
-        <Grid2 size={3}>
+        </Grid>
+        <Grid size={3}>
           <Button
             variant="contained"
             size="medium"
@@ -353,8 +353,8 @@ const SponsorFormsManageItems = ({
               "edit_sponsor.forms_tab.form_manage_items.add_item_inventory"
             )}
           </Button>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       <div>
         <MuiTableEditable

@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   Divider,
-  Grid as Grid2,
+  Grid,
   InputLabel,
   Typography
 } from "@mui/material";
@@ -83,23 +83,23 @@ const FormTemplateForm = ({
         autoComplete="off"
       >
         <DialogContent sx={{ p: 0 }}>
-          <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
-            <Grid2 size={4}>
+          <Grid container spacing={2} size={12} sx={{ p: 3 }}>
+            <Grid size={4}>
               <MuiFormikTextField
                 name="code"
                 label={T.translate("sponsor_forms.form_template_popup.code")}
                 fullWidth
                 required
               />
-            </Grid2>
-            <Grid2 size={4}>
+            </Grid>
+            <Grid size={4}>
               <MuiFormikTextField
                 name="name"
                 label={T.translate("sponsor_forms.form_template_popup.name")}
                 fullWidth
               />
-            </Grid2>
-            <Grid2 size={4}>
+            </Grid>
+            <Grid size={4}>
               <MuiDropdownCheckbox
                 name="sponsorship_types"
                 label={T.translate(
@@ -112,8 +112,8 @@ const FormTemplateForm = ({
                 options={sponsorships.items}
                 onChange={formik.handleChange}
               />
-            </Grid2>
-            <Grid2 size={4}>
+            </Grid>
+            <Grid size={4}>
               <MuiFormikDatepicker
                 name="opens_at"
                 required
@@ -121,8 +121,8 @@ const FormTemplateForm = ({
                   "sponsor_forms.form_template_popup.opens_at"
                 )}
               />
-            </Grid2>
-            <Grid2 size={4}>
+            </Grid>
+            <Grid size={4}>
               <MuiFormikDatepicker
                 required
                 name="expires_at"
@@ -130,8 +130,8 @@ const FormTemplateForm = ({
                   "sponsor_forms.form_template_popup.expires_at"
                 )}
               />
-            </Grid2>
-            <Grid2 size={12}>
+            </Grid>
+            <Grid size={12}>
               <InputLabel htmlFor="instructions">
                 {T.translate("sponsor_forms.form_template_popup.instructions")}{" "}
                 *
@@ -140,8 +140,8 @@ const FormTemplateForm = ({
                 name="instructions"
                 options={{ zIndex: 9999999 }}
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
           <Typography variant="h6" sx={{ ml: "26px", mt: "20px" }}>
             {T.translate("sponsor_forms.form_template_popup.additional_fields")}
           </Typography>

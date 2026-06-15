@@ -12,7 +12,7 @@ import {
   DialogTitle,
   Divider,
   FormControlLabel,
-  Grid as Grid2,
+  Grid,
   IconButton,
   Tooltip,
   Typography
@@ -195,12 +195,12 @@ const SponsorFormItemFromInventoryPopup = ({
       </DialogTitle>
       <Divider />
       <DialogContent sx={{ p: 0 }}>
-        <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-          <Grid2 container spacing={2} size={4} sx={{ alignItems: "baseline" }}>
+        <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+          <Grid container spacing={2} size={4} sx={{ alignItems: "baseline" }}>
             {selectedRows.length} items selected
-          </Grid2>
-          <Grid2 container spacing={2} size={8}>
-            <Grid2 size={3}>
+          </Grid>
+          <Grid container spacing={2} size={8}>
+            <Grid size={3}>
               <MenuButton
                 buttonId="sort-button"
                 menuId="sort-menu"
@@ -222,16 +222,16 @@ const SponsorFormItemFromInventoryPopup = ({
                 <SwapVertIcon fontSize="large" sx={{ mr: 1 }} />{" "}
                 {T.translate("general.sort_by")}
               </MenuButton>
-            </Grid2>
-            <Grid2 size={9}>
+            </Grid>
+            <Grid size={9}>
               <SearchInput
                 onSearch={handleOnSearch}
                 term={term}
                 placeholder={T.translate("edit_sponsor.placeholders.search")}
               />
-            </Grid2>
-          </Grid2>
-        </Grid2>
+            </Grid>
+          </Grid>
+        </Grid>
 
         {inventoryItems.length > 0 && (
           <Box sx={{ p: 2 }}>

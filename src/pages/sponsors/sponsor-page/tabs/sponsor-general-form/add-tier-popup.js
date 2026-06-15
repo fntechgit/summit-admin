@@ -11,7 +11,7 @@ import {
   Button,
   IconButton,
   Divider,
-  Grid as Grid2,
+  Grid,
   Typography,
   InputLabel,
   Box
@@ -86,8 +86,8 @@ const AddTierPopup = ({ sponsor, open, onClose, onSubmit, summitId }) => {
           autoComplete="off"
         >
           <DialogContent sx={{ p: 1 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid
                 container
                 spacing={2}
                 size={12}
@@ -105,8 +105,8 @@ const AddTierPopup = ({ sponsor, open, onClose, onSubmit, summitId }) => {
                     margin="none"
                   />
                 </Box>
-              </Grid2>
-              <Grid2
+              </Grid>
+              <Grid
                 container
                 spacing={2}
                 size={12}
@@ -123,8 +123,8 @@ const AddTierPopup = ({ sponsor, open, onClose, onSubmit, summitId }) => {
                   placeholder={T.translate("edit_sponsor.placeholders.select")}
                   hiddenOptions={sponsor.sponsorships.map((e) => e.type.id)}
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
           </DialogContent>
           <Divider />
           <DialogActions sx={{ p: 2 }}>

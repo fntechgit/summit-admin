@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   Divider,
-  Grid as Grid2,
+  Grid,
   Typography
 } from "@mui/material";
 import T from "i18n-react";
@@ -42,38 +42,38 @@ const SponsorUserForm = ({ user, userGroups, onSubmit }) => {
         autoComplete="off"
       >
         <DialogContent sx={{ p: 2 }}>
-          <Grid2 container spacing={2} size={12}>
-            <Grid2 size={6}>
+          <Grid container spacing={2} size={12}>
+            <Grid size={6}>
               <MuiFormikTextField
                 name="first_name"
                 disabled
                 label={T.translate("sponsor_users.edit_user.name")}
                 fullWidth
               />
-            </Grid2>
-            <Grid2 size={6}>
+            </Grid>
+            <Grid size={6}>
               <MuiFormikTextField
                 name="email"
                 disabled
                 label={T.translate("sponsor_users.edit_user.email")}
                 fullWidth
               />
-            </Grid2>
-            <Grid2 size={6}>
+            </Grid>
+            <Grid size={6}>
               <MuiFormikTextField
                 name="sponsor"
                 disabled
                 label={T.translate("sponsor_users.edit_user.sponsor")}
                 fullWidth
               />
-            </Grid2>
-            <Grid2 size={6}>
+            </Grid>
+            <Grid size={6}>
               <MuiFormikSwitch
                 name="is_active"
                 label={T.translate("sponsor_users.edit_user.active")}
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
           <Divider sx={{ margin: "10px -16px 20px -16px" }} />
           <Typography variant="h6" gutterBottom>
             {T.translate("sponsor_users.edit_user.access")}

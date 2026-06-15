@@ -14,13 +14,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Button,
-  Grid as Grid2,
-  Typography,
-  Badge,
-  Tooltip
-} from "@mui/material";
+import { Button, Grid, Typography, Badge, Tooltip } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
@@ -206,7 +200,7 @@ const SponsorListPage = ({
     <div className="container">
       <h3> {T.translate("sponsor_list.sponsor_list")}</h3>
 
-      <Grid2
+      <Grid
         container
         spacing={2}
         sx={{
@@ -215,10 +209,10 @@ const SponsorListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={6}>
+        <Grid size={6}>
           <Box component="span">{totalSponsors} sponsors</Box>
-        </Grid2>
-        <Grid2
+        </Grid>
+        <Grid
           container
           size={6}
           spacing={1}
@@ -227,8 +221,8 @@ const SponsorListPage = ({
             alignItems: "center"
           }}
         >
-          <Grid2 size={2} />
-          <Grid2 size={6}>
+          <Grid size={2} />
+          <Grid size={6}>
             <SearchInput
               onSearch={handleOnSearch}
               term={term}
@@ -237,8 +231,8 @@ const SponsorListPage = ({
               )}
               debounced
             />
-          </Grid2>
-          <Grid2 size={4}>
+          </Grid>
+          <Grid size={4}>
             {canAddSponsors && (
               <Button
                 variant="contained"
@@ -250,9 +244,9 @@ const SponsorListPage = ({
                 {T.translate("sponsor_list.add_sponsor")}
               </Button>
             )}
-          </Grid2>
-        </Grid2>
-      </Grid2>
+          </Grid>
+        </Grid>
+      </Grid>
 
       {sponsors.length === 0 && (
         <div>{T.translate("sponsor_list.no_sponsors")}</div>

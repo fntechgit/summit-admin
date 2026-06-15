@@ -13,7 +13,7 @@
 
 import React, { useState, useEffect } from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Divider, Grid as Grid2, Typography } from "@mui/material";
+import { Box, Button, Divider, Grid, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTableSortable from "openstack-uicore-foundation/lib/components/mui/sortable-table";
 import {
@@ -112,12 +112,8 @@ const SponsorExtraQuestions = ({
   return (
     <>
       <Box sx={{ px: 2, py: 0, mt: 2, backgroundColor: "#FFF" }}>
-        <Grid2
-          container
-          size={12}
-          sx={{ height: "68px", alignItems: "center" }}
-        >
-          <Grid2 size={12}>
+        <Grid container size={12} sx={{ height: "68px", alignItems: "center" }}>
+          <Grid size={12}>
             <Typography
               sx={{
                 fontWeight: "500",
@@ -128,15 +124,15 @@ const SponsorExtraQuestions = ({
             >
               {T.translate("edit_sponsor.extra_questions")}
             </Typography>
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
         <Divider />
-        <Grid2
+        <Grid
           container
           size={12}
           sx={{ py: 2, height: "68px", alignItems: "center" }}
         >
-          <Grid2 size={12}>
+          <Grid size={12}>
             <Box
               sx={{
                 p: 2,
@@ -148,14 +144,10 @@ const SponsorExtraQuestions = ({
             >
               {T.translate("edit_sponsor.extra_questions_info")}
             </Box>
-          </Grid2>
-        </Grid2>
-        <Grid2
-          container
-          size={12}
-          sx={{ height: "68px", alignItems: "center" }}
-        >
-          <Grid2 size={9}>
+          </Grid>
+        </Grid>
+        <Grid container size={12} sx={{ height: "68px", alignItems: "center" }}>
+          <Grid size={9}>
             <Typography
               sx={{
                 fontWeight: "400",
@@ -168,8 +160,8 @@ const SponsorExtraQuestions = ({
               {extraQuestions.length}{" "}
               {T.translate("edit_sponsor.extra_questions")}
             </Typography>
-          </Grid2>
-          <Grid2
+          </Grid>
+          <Grid
             size={3}
             sx={{ py: 3, display: "flex", justifyContent: "flex-end" }}
           >
@@ -181,9 +173,9 @@ const SponsorExtraQuestions = ({
             >
               {T.translate("edit_sponsor.add_question")}
             </Button>
-          </Grid2>
-        </Grid2>
-        <Grid2 container size={12} sx={{ py: 3 }}>
+          </Grid>
+        </Grid>
+        <Grid container size={12} sx={{ py: 3 }}>
           {extraQuestions.length === 0 && (
             <div>{T.translate("edit_sponsor.no_extra_questions")}</div>
           )}
@@ -205,7 +197,7 @@ const SponsorExtraQuestions = ({
               }
             />
           )}
-        </Grid2>
+        </Grid>
       </Box>
       {showAddExtraQuestionPopup && (
         <AddSponsorExtraQuestionPopup
