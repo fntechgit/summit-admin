@@ -79,7 +79,7 @@ const fieldNames = (
     customStyle: { minWidth: "350px" },
     editableField: (extraProps) => {
       const useSpeakers = extraProps.row.type?.use_speakers;
-      return useSpeakers ? (
+      return useSpeakers && (
         <SpeakerInput
           id="speakers"
           value={extraProps.rowData}
@@ -101,8 +101,6 @@ const fieldNames = (
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...extraProps}
         />
-      ) : (
-        false
       );
     }
   },

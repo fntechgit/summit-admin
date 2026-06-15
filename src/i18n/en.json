@@ -4254,5 +4254,9 @@
     "title": "Image Preview",
     "file_name": "File name",
     "uploaded": "Uploaded"
+  },
+  "grid_display_control": {
+    "show_hide": "Show / Hide All",
+    "reset": "Reset"
   }
 }
