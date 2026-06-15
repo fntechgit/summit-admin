@@ -4398,5 +4398,9 @@
     "pivot_no_tier": "(No tier)",
     "pivot_no_page": "(No page)",
     "pivot_unnamed_component": "(Unnamed)"
+  },
+  "grid_display_control": {
+    "show_hide": "Show / Hide All",
+    "reset": "Reset"
   }
 }
