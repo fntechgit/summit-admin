@@ -18,7 +18,7 @@ import {
   Card,
   CardActionArea,
   CardContent,
-  Grid2,
+  Grid,
   Typography
 } from "@mui/material";
 
@@ -43,9 +43,9 @@ const CARDS = [
 const ReportsLandingPage = ({ match }) => (
   <div className="container">
     <h3>{T.translate("sponsor_reports_page.landing_title")}</h3>
-    <Grid2 container spacing={2}>
+    <Grid container spacing={2}>
       {CARDS.map((card) => (
-        <Grid2 key={card.id} size={{ xs: 12, sm: 6 }}>
+        <Grid key={card.id} size={{ xs: 12, sm: 6 }}>
           <Card
             data-testid={`report-card-${card.id}`}
             variant="outlined"
@@ -62,9 +62,9 @@ const ReportsLandingPage = ({ match }) => (
               </CardContent>
             </CardActionArea>
           </Card>
-        </Grid2>
+        </Grid>
       ))}
-    </Grid2>
+    </Grid>
   </div>
 );
 

@@ -16,7 +16,7 @@ import { useFormikContext } from "formik";
 import Box from "@mui/material/Box";
 import FormLabel from "@mui/material/FormLabel";
 import Typography from "@mui/material/Typography";
-import { Grid2 } from "@mui/material";
+import { Grid } from "@mui/material";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import useScrollToError from "../../../hooks/useScrollToError";
 import EmailTemplateInput from "../../inputs/email-template-input";
@@ -35,25 +35,25 @@ const EmailFlowEventForm = ({ entity }) => {
 
   return (
     <Box>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 6 }}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Typography variant="label">
             {T.translate("edit_email_flow_event.flow_name")}
           </Typography>
           {entity.flow_name}
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 6 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Typography variant="label">
             {T.translate("edit_email_flow_event.event_type")}
           </Typography>
           <Box sx={{ overflowWrap: "break-word" }}>
             {entity.event_type_name}
           </Box>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 6 }}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <FormLabel htmlFor="email_template_identifier">
             {T.translate("edit_email_flow_event.email_template_identifier")} *
             {values.email_template_identifier && (
@@ -83,8 +83,8 @@ const EmailFlowEventForm = ({ entity }) => {
             onChange={handleTemplateChange}
             plainValue
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 6 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
           <FormLabel htmlFor="recipients">
             {T.translate("edit_email_flow_event.recipient")}
           </FormLabel>
@@ -94,14 +94,14 @@ const EmailFlowEventForm = ({ entity }) => {
             fullWidth
             size="small"
           />
-        </Grid2>
-        <Grid2 size={12}>
+        </Grid>
+        <Grid size={12}>
           <Typography variant="label">
             {T.translate("edit_email_flow_event.variables")}
           </Typography>
           <TemplateSchemaTree templateSchema={entity.template_schema} />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

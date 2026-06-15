@@ -15,7 +15,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { useFormikContext } from "formik";
-import { Box, Grid2, InputLabel } from "@mui/material";
+import { Box, Grid, InputLabel } from "@mui/material";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import FormikTextEditor from "openstack-uicore-foundation/lib/components/mui/formik-inputs/texteditor";
 import UploadInputV3 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v3";
@@ -60,8 +60,8 @@ const BadgeFeatureTypeForm = ({ entity, onRemoveImage, onUploadingChange }) => {
 
   return (
     <Box>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={12}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={12}>
           <InputLabel htmlFor="name">
             {T.translate("edit_badge_feature.name")} *
           </InputLabel>
@@ -71,11 +71,11 @@ const BadgeFeatureTypeForm = ({ entity, onRemoveImage, onUploadingChange }) => {
             fullWidth
             size="small"
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={12}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={12}>
           <InputLabel htmlFor="description">
             {T.translate("edit_badge_feature.description")} *
           </InputLabel>
@@ -83,11 +83,11 @@ const BadgeFeatureTypeForm = ({ entity, onRemoveImage, onUploadingChange }) => {
             name="description"
             licence={process.env.JODIT_LICENSE_KEY}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={12}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={12}>
           <InputLabel htmlFor="template_content">
             {T.translate("edit_badge_feature.template_content")} *
           </InputLabel>
@@ -95,11 +95,11 @@ const BadgeFeatureTypeForm = ({ entity, onRemoveImage, onUploadingChange }) => {
             name="template_content"
             licence={process.env.JODIT_LICENSE_KEY}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={12}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={12}>
           <InputLabel>{T.translate("edit_badge_feature.image")}</InputLabel>
           <UploadInputV3
             id="image"
@@ -120,8 +120,8 @@ const BadgeFeatureTypeForm = ({ entity, onRemoveImage, onUploadingChange }) => {
               }
             }}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

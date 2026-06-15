@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import Divider from "@mui/material/Divider";
-import Grid2 from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import DashboardSection from "./dashboard-section";
 import SummitDashboardStat from "./summit-dashboard-stat";
 
@@ -17,13 +17,13 @@ function DashboardStatSection({ title, rows }) {
         return (
           <React.Fragment key={key}>
             {i > 0 && <Divider />}
-            <Grid2 container>
+            <Grid container>
               {group.map(({ title: label, stat: value }) => (
-                <Grid2 key={label} size={size}>
+                <Grid key={label} size={size}>
                   <SummitDashboardStat label={label} value={value} />
-                </Grid2>
+                </Grid>
               ))}
-            </Grid2>
+            </Grid>
           </React.Fragment>
         );
       })}

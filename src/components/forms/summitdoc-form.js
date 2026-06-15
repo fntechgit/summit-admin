@@ -16,7 +16,7 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { useFormikContext } from "formik";
 import Box from "@mui/material/Box";
-import { Grid2 } from "@mui/material";
+import { Grid } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -79,8 +79,8 @@ const SummitDocForm = ({
 
   return (
     <Box>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 3 }}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={{ xs: 12, md: 3 }}>
           <label htmlFor="name">{T.translate("summitdoc.name")} *</label>
           <MuiFormikTextField
             name="name"
@@ -88,8 +88,8 @@ const SummitDocForm = ({
             fullWidth
             size="small"
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 3 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 3 }}>
           <label htmlFor="label">{T.translate("summitdoc.label")} *</label>
           <MuiFormikTextField
             name="label"
@@ -97,8 +97,8 @@ const SummitDocForm = ({
             fullWidth
             size="small"
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 3 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 3 }}>
           <label htmlFor="event_types">
             {T.translate("summitdoc.event_types")} *{" "}
             <Tooltip title={T.translate("summitdoc.event_types_info")}>
@@ -128,18 +128,18 @@ const SummitDocForm = ({
               </MenuItem>
             ))}
           </MuiFormikSelect>
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 3 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 3 }}>
           <MuiFormikCheckbox
             name="show_always"
             label={T.translate("summitdoc.show_always")}
             onChange={handleShowAlwaysChange}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 9 }}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={{ xs: 12, md: 9 }}>
           <label htmlFor="description">
             {T.translate("summitdoc.description")} *
           </label>
@@ -151,8 +151,8 @@ const SummitDocForm = ({
             minRows={3}
             size="small"
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 3 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 3 }}>
           <label htmlFor="selection_plan_id">
             {T.translate("summitdoc.selection_plan")}
           </label>
@@ -176,11 +176,11 @@ const SummitDocForm = ({
               </MenuItem>
             ))}
           </MuiFormikSelect>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12 }}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={{ xs: 12 }}>
           <label>{T.translate("summitdoc.file")} *</label>
           {/* need this styles to adapt bootstrap to MUI */}
           <Box
@@ -203,11 +203,11 @@ const SummitDocForm = ({
               disabled={values.web_link?.length > 0}
             />
           </Box>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={12}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={12}>
           <label htmlFor="web_link">
             {T.translate("summitdoc.web_link")} *
           </label>
@@ -219,8 +219,8 @@ const SummitDocForm = ({
             placeholder={T.translate("summitdoc.placeholders.web_link")}
             disabled={!!(values.file_preview || values.file)}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

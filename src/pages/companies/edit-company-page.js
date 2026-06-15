@@ -17,7 +17,7 @@ import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button, Grid } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CompanyForm from "../../components/forms/company-form";
 import {
@@ -123,17 +123,17 @@ const EditCompanyPage = ({
   return (
     <div className="container">
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-      <Grid2
+      <Grid
         container
         sx={{ justifyContent: "space-between", alignItems: "center" }}
       >
-        <Grid2>
+        <Grid>
           <h3>
             {title} {T.translate("edit_company.company")}
           </h3>
-        </Grid2>
+        </Grid>
         {initialEntity?.id > 0 && (
-          <Grid2>
+          <Grid>
             <Button
               variant="contained"
               onClick={() => history.push("/app/companies/new")}
@@ -141,9 +141,9 @@ const EditCompanyPage = ({
             >
               {T.translate("general.add_new")}
             </Button>
-          </Grid2>
+          </Grid>
         )}
-      </Grid2>
+      </Grid>
       <hr />
       <FormikProvider value={formik}>
         <Box
@@ -162,14 +162,14 @@ const EditCompanyPage = ({
             isSaving={isSaving}
             setIsSaving={setIsSaving}
           />
-          <Grid2
+          <Grid
             size={12}
             sx={{ p: 3, pt: 0, display: "flex", justifyContent: "flex-end" }}
           >
             <Button type="submit" variant="contained" disabled={isSaving}>
               {T.translate("general.save")}
             </Button>
-          </Grid2>
+          </Grid>
         </Box>
       </FormikProvider>
     </div>

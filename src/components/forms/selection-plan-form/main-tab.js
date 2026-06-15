@@ -18,7 +18,7 @@ import { useFormikContext } from "formik";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import Grid2 from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import MuiFormikDatetimepicker from "../../mui/formik-inputs/mui-formik-datetimepicker";
 
@@ -35,8 +35,8 @@ const MainTab = ({ hidden, currentSummit }) => {
 
   return (
     <div role="tabpanel" id="tabpanel-main" hidden={hidden}>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 4 }}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <label> {T.translate("edit_selection_plan.name")} *</label>
           <TextField
             id="name"
@@ -48,8 +48,8 @@ const MainTab = ({ hidden, currentSummit }) => {
             onChange={handleChange}
             value={values.name}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
           <FormControlLabel
             control={
               <Checkbox
@@ -61,8 +61,8 @@ const MainTab = ({ hidden, currentSummit }) => {
             }
             label={T.translate("edit_selection_plan.enabled")}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
           <FormControlLabel
             control={
               <Checkbox
@@ -74,8 +74,8 @@ const MainTab = ({ hidden, currentSummit }) => {
             }
             label={T.translate("edit_selection_plan.hidden")}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
           <FormControlLabel
             control={
               <Checkbox
@@ -87,8 +87,8 @@ const MainTab = ({ hidden, currentSummit }) => {
             }
             label={T.translate("edit_selection_plan.allow_proposed_schedules")}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
           <FormControlLabel
             control={
               <Checkbox
@@ -100,11 +100,11 @@ const MainTab = ({ hidden, currentSummit }) => {
             }
             label={T.translate("edit_selection_plan.allow_new_presentations")}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 6 }}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <label>
             {T.translate("edit_selection_plan.submission_begin_date")}
           </label>
@@ -112,8 +112,8 @@ const MainTab = ({ hidden, currentSummit }) => {
             name="submission_begin_date"
             timezone={currentSummit.time_zone_id}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 6 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
           <label>
             {T.translate("edit_selection_plan.submission_end_date")}
           </label>
@@ -121,11 +121,11 @@ const MainTab = ({ hidden, currentSummit }) => {
             name="submission_end_date"
             timezone={currentSummit.time_zone_id}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 6 }}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <label>{T.translate("edit_selection_plan.max_submissions")}</label>
           <TextField
             id="max_submission_allowed_per_user"
@@ -141,8 +141,8 @@ const MainTab = ({ hidden, currentSummit }) => {
             onChange={handleChange}
             slotProps={{ htmlInput: { min: 0 } }}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 6 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
           <label>
             {T.translate(
               "edit_selection_plan.submission_lock_down_presentation_status_date"
@@ -160,28 +160,28 @@ const MainTab = ({ hidden, currentSummit }) => {
             name="submission_lock_down_presentation_status_date"
             timezone={currentSummit.time_zone_id}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 6 }}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <label>{T.translate("edit_selection_plan.voting_begin_date")}</label>
           <MuiFormikDatetimepicker
             name="voting_begin_date"
             timezone={currentSummit.time_zone_id}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 6 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
           <label>{T.translate("edit_selection_plan.voting_end_date")}</label>
           <MuiFormikDatetimepicker
             name="voting_end_date"
             timezone={currentSummit.time_zone_id}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 6 }}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <label>
             {T.translate("edit_selection_plan.selection_begin_date")}
           </label>
@@ -189,18 +189,18 @@ const MainTab = ({ hidden, currentSummit }) => {
             name="selection_begin_date"
             timezone={currentSummit.time_zone_id}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 6 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
           <label>{T.translate("edit_selection_plan.selection_end_date")}</label>
           <MuiFormikDatetimepicker
             name="selection_end_date"
             timezone={currentSummit.time_zone_id}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={12}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={12}>
           <label>
             {T.translate("edit_selection_plan.submission_period_disclaimer")} *
           </label>
@@ -212,8 +212,8 @@ const MainTab = ({ hidden, currentSummit }) => {
             error={hasErrors("submission_period_disclaimer")}
             license={process.env.JODIT_LICENSE_KEY}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </div>
   );
 };

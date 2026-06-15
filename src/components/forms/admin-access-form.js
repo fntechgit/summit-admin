@@ -17,7 +17,7 @@ import * as yup from "yup";
 import T from "i18n-react/dist/i18n-react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Grid2 from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input";
 import SummitInput from "openstack-uicore-foundation/lib/components/inputs/summit-input";
@@ -72,17 +72,17 @@ const AdminAccessForm = ({
         sx={{ width: "100%" }}
       >
         <input type="hidden" name="id" value={formik.values.id} />
-        <Grid2 container spacing={2}>
-          <Grid2 size={12}>
+        <Grid container spacing={2}>
+          <Grid size={12}>
             <MuiFormikTextField
               name="title"
               label={T.translate("admin_access.title")}
               required
               fullWidth
             />
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, md: 6 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Typography component="label" sx={{ display: "block", mb: 0.5 }}>
               {T.translate("admin_access.members")} *
             </Typography>
@@ -110,9 +110,9 @@ const AdminAccessForm = ({
                 {formik.errors.members}
               </Typography>
             )}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, md: 6 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Typography component="label" sx={{ display: "block", mb: 0.5 }}>
               {T.translate("admin_access.summits")} *
             </Typography>
@@ -133,17 +133,17 @@ const AdminAccessForm = ({
                 {formik.errors.summits}
               </Typography>
             )}
-          </Grid2>
+          </Grid>
 
-          <Grid2
+          <Grid
             size={12}
             sx={{ display: "flex", justifyContent: "flex-end", pt: 1 }}
           >
             <Button type="submit" variant="contained" disabled={isSaving}>
               {T.translate("general.save")}
             </Button>
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
       </Box>
     </FormikProvider>
   );

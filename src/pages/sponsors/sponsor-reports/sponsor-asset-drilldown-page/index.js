@@ -32,7 +32,7 @@ import {
   Button,
   Card,
   CardContent,
-  Grid2,
+  Grid,
   Stack,
   Typography
 } from "@mui/material";
@@ -209,9 +209,9 @@ const SponsorAssetDrilldownPage = ({
                 {T.translate("sponsor_reports_page.download_csv")}
               </Button>
             </Box>
-            <Grid2 container spacing={2}>
+            <Grid container spacing={2}>
               {section.modules?.map((row) => (
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={row.module?.id}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={row.module?.id}>
                   <Box
                     sx={{
                       border: 1,
@@ -247,9 +247,9 @@ const SponsorAssetDrilldownPage = ({
                     </Stack>
                     <ContentCell row={row} />
                   </Box>
-                </Grid2>
+                </Grid>
               ))}
-            </Grid2>
+            </Grid>
           </CardContent>
         </Card>
       ))}

@@ -8,7 +8,7 @@ import {
   DialogTitle,
   Button,
   Divider,
-  Grid2,
+  Grid,
   IconButton,
   InputAdornment,
   MenuItem,
@@ -282,8 +282,8 @@ const PaymentProfileDialog = ({
       <Divider />
       <FormikProvider value={formik}>
         <DialogContent>
-          <Grid2 container spacing={2} mb={2}>
-            <Grid2 size={6}>
+          <Grid container spacing={2} mb={2}>
+            <Grid size={6}>
               <InputLabel htmlFor="application_type">
                 {T.translate("edit_payment_profile.application_type")}
               </InputLabel>
@@ -300,8 +300,8 @@ const PaymentProfileDialog = ({
                   </MenuItem>
                 ))}
               </MuiFormikSelect>
-            </Grid2>
-            <Grid2 size={6}>
+            </Grid>
+            <Grid size={6}>
               <InputLabel htmlFor="provider">
                 {T.translate("edit_payment_profile.provider")}
               </InputLabel>
@@ -312,15 +312,15 @@ const PaymentProfileDialog = ({
                   </MenuItem>
                 ))}
               </MuiFormikSelect>
-            </Grid2>
+            </Grid>
 
-            <Grid2 size={4}>
+            <Grid size={4}>
               <MuiFormikCheckbox
                 name="is_active"
                 label={T.translate("edit_payment_profile.active")}
               />
-            </Grid2>
-            <Grid2 size={4} sx={{ display: "flex" }}>
+            </Grid>
+            <Grid size={4} sx={{ display: "flex" }}>
               <MuiFormikCheckbox
                 name="test_mode_enabled"
                 label={
@@ -334,9 +334,9 @@ const PaymentProfileDialog = ({
                   </>
                 }
               />
-            </Grid2>
+            </Grid>
             {formik.values.provider === "Stripe" && (
-              <Grid2 size={4}>
+              <Grid size={4}>
                 <MuiFormikCheckbox
                   name="send_email_receipt"
                   label={
@@ -350,11 +350,11 @@ const PaymentProfileDialog = ({
                     </>
                   }
                 />
-              </Grid2>
+              </Grid>
             )}
 
             {formik.values.provider === "LawPay" && (
-              <Grid2 size={12}>
+              <Grid size={12}>
                 <InputLabel htmlFor="merchant_account_id">
                   {T.translate("edit_payment_profile.merchant_account_id")}
                 </InputLabel>
@@ -363,10 +363,10 @@ const PaymentProfileDialog = ({
                   fullWidth
                   variant="outlined"
                 />
-              </Grid2>
+              </Grid>
             )}
 
-            <Grid2 size={6}>
+            <Grid size={6}>
               <InputLabel htmlFor="live_secret_key">
                 {T.translate("edit_payment_profile.live_secret_key")}
                 <InfoTooltip
@@ -379,8 +379,8 @@ const PaymentProfileDialog = ({
                 fullWidth
                 variant="outlined"
               />
-            </Grid2>
-            <Grid2 size={6}>
+            </Grid>
+            <Grid size={6}>
               <InputLabel htmlFor="live_publishable_key">
                 {T.translate("edit_payment_profile.live_publishable_key")}
                 <InfoTooltip
@@ -393,8 +393,8 @@ const PaymentProfileDialog = ({
                 fullWidth
                 variant="outlined"
               />
-            </Grid2>
-            <Grid2 size={6}>
+            </Grid>
+            <Grid size={6}>
               <InputLabel htmlFor="test_secret_key">
                 {T.translate("edit_payment_profile.test_secret_key")}
                 <InfoTooltip
@@ -406,8 +406,8 @@ const PaymentProfileDialog = ({
                 fullWidth
                 variant="outlined"
               />
-            </Grid2>
-            <Grid2 size={6}>
+            </Grid>
+            <Grid size={6}>
               <InputLabel htmlFor="test_publishable_key">
                 {T.translate("edit_payment_profile.test_publishable_key")}
                 <InfoTooltip
@@ -419,8 +419,8 @@ const PaymentProfileDialog = ({
                 fullWidth
                 variant="outlined"
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
           {formik.values.id !== 0 &&
             formik.values.provider === "Stripe" &&
             formik.values.application_type === "SponsorServices" && (
@@ -430,18 +430,18 @@ const PaymentProfileDialog = ({
                   <h5>
                     {T.translate("edit_payment_profile.payment_type_fee")}
                   </h5>
-                  <Grid2
+                  <Grid
                     size={12}
                     container
                     mb={2}
                     justifyContent="space-between"
                     alignItems="center"
                   >
-                    <Grid2>
+                    <Grid>
                       {paymentFeeTypes.totalPaymentFeeTypes}{" "}
                       {T.translate("edit_payment_profile.payment_type_fees")}
-                    </Grid2>
-                    <Grid2>
+                    </Grid>
+                    <Grid>
                       {!showFeeTypeForm && (
                         <Button
                           variant="contained"
@@ -454,12 +454,12 @@ const PaymentProfileDialog = ({
                           {T.translate("edit_payment_profile.new_fee_type")}
                         </Button>
                       )}
-                    </Grid2>
-                  </Grid2>
+                    </Grid>
+                  </Grid>
                   <FormikProvider value={feeTypeFormik}>
                     {showFeeTypeForm && (
-                      <Grid2 size={12} container spacing={2} mb={2}>
-                        <Grid2 size={4}>
+                      <Grid size={12} container spacing={2} mb={2}>
+                        <Grid size={4}>
                           <InputLabel htmlFor="name">
                             {T.translate(
                               "edit_payment_profile.payment_type_fee_name"
@@ -471,8 +471,8 @@ const PaymentProfileDialog = ({
                             variant="outlined"
                             margin="none"
                           />
-                        </Grid2>
-                        <Grid2 size={4}>
+                        </Grid>
+                        <Grid size={4}>
                           <InputLabel htmlFor="kind">
                             {T.translate(
                               "edit_payment_profile.payment_type_fee_kind"
@@ -505,8 +505,8 @@ const PaymentProfileDialog = ({
                               </MenuItem>
                             ))}
                           </MuiFormikSelect>
-                        </Grid2>
-                        <Grid2 size={4}>
+                        </Grid>
+                        <Grid size={4}>
                           <InputLabel htmlFor="payment_method">
                             {T.translate(
                               "edit_payment_profile.payment_type_fee_method"
@@ -538,8 +538,8 @@ const PaymentProfileDialog = ({
                               </MenuItem>
                             ))}
                           </MuiFormikSelect>
-                        </Grid2>
-                        <Grid2 size={4}>
+                        </Grid>
+                        <Grid size={4}>
                           <InputLabel htmlFor="value">
                             {T.translate(
                               "edit_payment_profile.payment_type_fee_value"
@@ -596,8 +596,8 @@ const PaymentProfileDialog = ({
                               }}
                             />
                           )}
-                        </Grid2>
-                        <Grid2 size={4}>
+                        </Grid>
+                        <Grid size={4}>
                           <InputLabel htmlFor="max_cents">
                             {T.translate(
                               "edit_payment_profile.payment_type_fee_max_cents"
@@ -610,8 +610,8 @@ const PaymentProfileDialog = ({
                             margin="none"
                             inCents
                           />
-                        </Grid2>
-                        <Grid2 size={4}>
+                        </Grid>
+                        <Grid size={4}>
                           <InputLabel htmlFor="min_cents">
                             {T.translate(
                               "edit_payment_profile.payment_type_fee_min_cents"
@@ -624,8 +624,8 @@ const PaymentProfileDialog = ({
                             margin="none"
                             inCents
                           />
-                        </Grid2>
-                        <Grid2
+                        </Grid>
+                        <Grid
                           size={12}
                           sx={{
                             display: "flex",
@@ -652,8 +652,8 @@ const PaymentProfileDialog = ({
                           >
                             {T.translate("edit_payment_profile.save_fee_type")}
                           </Button>
-                        </Grid2>
-                      </Grid2>
+                        </Grid>
+                      </Grid>
                     )}
                   </FormikProvider>
                   <MuiTable

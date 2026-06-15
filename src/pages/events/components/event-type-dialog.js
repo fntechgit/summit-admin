@@ -28,7 +28,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Divider from "@mui/material/Divider";
-import Grid2 from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -253,8 +253,8 @@ const EventTypeDialog = ({
               id="tabpanel-main"
               hidden={activeTab !== "main"}
             >
-              <Grid2 container spacing={2} sx={{ mb: 2 }}>
-                <Grid2 size={{ xs: 12, md: 4 }}>
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid size={{ xs: 12, md: 4 }}>
                   <InputLabel htmlFor="class_name">
                     {T.translate("edit_event_type.class")} *
                   </InputLabel>
@@ -286,31 +286,31 @@ const EventTypeDialog = ({
                       </MenuItem>
                     ))}
                   </MuiFormikSelect>
-                </Grid2>
+                </Grid>
                 {isEventType && (
-                  <Grid2 size={{ xs: 12, md: 4 }} sx={{ mt: "8px" }}>
+                  <Grid size={{ xs: 12, md: 4 }} sx={{ mt: "8px" }}>
                     <MuiFormikCheckbox
                       name="allows_attachment"
                       label={T.translate("edit_event_type.allows_attachment")}
                     />
-                  </Grid2>
+                  </Grid>
                 )}
-              </Grid2>
+              </Grid>
 
-              <Grid2 container spacing={2} sx={{ mb: 2 }}>
-                <Grid2 size={{ xs: 12, md: 4 }}>
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid size={{ xs: 12, md: 4 }}>
                   <InputLabel htmlFor="name">
                     {T.translate("edit_event_type.name")} *
                   </InputLabel>
                   <MuiFormikTextField name="name" margin="none" fullWidth />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 4 }}>
+                </Grid>
+                <Grid size={{ xs: 12, md: 4 }}>
                   <InputLabel htmlFor="color">
                     {T.translate("edit_event_type.color")}
                   </InputLabel>
                   <MuiFormikColorField name="color" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 4 }}>
+                </Grid>
+                <Grid size={{ xs: 12, md: 4 }}>
                   <InputLabel htmlFor="black_out_times">
                     {T.translate("edit_event_type.black_out_times")}
                   </InputLabel>
@@ -329,82 +329,82 @@ const EventTypeDialog = ({
                       </MenuItem>
                     ))}
                   </MuiFormikSelect>
-                </Grid2>
-              </Grid2>
+                </Grid>
+              </Grid>
 
-              <Grid2 container spacing={2} sx={{ mb: 2 }}>
-                <Grid2 size={{ xs: 12, md: 4 }}>
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid size={{ xs: 12, md: 4 }}>
                   <MuiFormikCheckbox
                     name="use_sponsors"
                     label={T.translate("edit_event_type.use_sponsors")}
                   />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 4 }}>
+                </Grid>
+                <Grid size={{ xs: 12, md: 4 }}>
                   <MuiFormikCheckbox
                     name="are_sponsors_mandatory"
                     label={T.translate(
                       "edit_event_type.are_sponsors_mandatory"
                     )}
                   />
-                </Grid2>
+                </Grid>
                 {isPresentationType && (
-                  <Grid2 size={{ xs: 12, md: 4 }}>
+                  <Grid size={{ xs: 12, md: 4 }}>
                     <MuiFormikCheckbox
                       name="allows_speaker_event_collision"
                       label={T.translate(
                         "edit_event_type.allows_speaker_event_collision"
                       )}
                     />
-                  </Grid2>
+                  </Grid>
                 )}
-              </Grid2>
+              </Grid>
 
-              <Grid2 container spacing={2} sx={{ mb: 2 }}>
-                <Grid2 size={{ xs: 12, md: 4 }}>
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid size={{ xs: 12, md: 4 }}>
                   <MuiFormikCheckbox
                     name="allows_location"
                     label={T.translate("edit_event_type.allows_location")}
                   />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 4 }}>
+                </Grid>
+                <Grid size={{ xs: 12, md: 4 }}>
                   <MuiFormikCheckbox
                     name="allows_publishing_dates"
                     label={T.translate(
                       "edit_event_type.allows_publishing_dates"
                     )}
                   />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 4 }}>
+                </Grid>
+                <Grid size={{ xs: 12, md: 4 }}>
                   <MuiFormikCheckbox
                     name="allows_location_timeframe_collision"
                     label={T.translate(
                       "edit_event_type.allows_location_timeframe_collision"
                     )}
                   />
-                </Grid2>
-              </Grid2>
+                </Grid>
+              </Grid>
 
               {isPresentationType && (
                 <>
                   <Divider sx={{ mb: 2 }} />
-                  <Grid2 container spacing={2} sx={{ mb: 2 }}>
-                    <Grid2 size={{ xs: 12, md: 4 }}>
+                  <Grid container spacing={2} sx={{ mb: 2 }}>
+                    <Grid size={{ xs: 12, md: 4 }}>
                       <MuiFormikCheckbox
                         name="use_speakers"
                         label={T.translate("edit_event_type.use_speakers")}
                       />
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, md: 4 }}>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 4 }}>
                       <MuiFormikCheckbox
                         name="are_speakers_mandatory"
                         label={T.translate(
                           "edit_event_type.are_speakers_mandatory"
                         )}
                       />
-                    </Grid2>
-                  </Grid2>
-                  <Grid2 container spacing={2} sx={{ mb: 2 }}>
-                    <Grid2 size={{ xs: 12, md: 4 }}>
+                    </Grid>
+                  </Grid>
+                  <Grid container spacing={2} sx={{ mb: 2 }}>
+                    <Grid size={{ xs: 12, md: 4 }}>
                       <InputLabel htmlFor="min_speakers">
                         {T.translate("edit_event_type.min_speakers")}
                       </InputLabel>
@@ -414,8 +414,8 @@ const EventTypeDialog = ({
                         margin="none"
                         fullWidth
                       />
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, md: 4 }}>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 4 }}>
                       <InputLabel htmlFor="max_speakers">
                         {T.translate("edit_event_type.max_speakers")}
                       </InputLabel>
@@ -425,28 +425,28 @@ const EventTypeDialog = ({
                         margin="none"
                         fullWidth
                       />
-                    </Grid2>
-                  </Grid2>
+                    </Grid>
+                  </Grid>
 
                   <Divider sx={{ mb: 2 }} />
-                  <Grid2 container spacing={2} sx={{ mb: 2 }}>
-                    <Grid2 size={{ xs: 12, md: 4 }}>
+                  <Grid container spacing={2} sx={{ mb: 2 }}>
+                    <Grid size={{ xs: 12, md: 4 }}>
                       <MuiFormikCheckbox
                         name="use_moderator"
                         label={T.translate("edit_event_type.use_moderator")}
                       />
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, md: 4 }}>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 4 }}>
                       <MuiFormikCheckbox
                         name="is_moderator_mandatory"
                         label={T.translate(
                           "edit_event_type.moderator_mandatory"
                         )}
                       />
-                    </Grid2>
-                  </Grid2>
-                  <Grid2 container spacing={2} sx={{ mb: 2 }}>
-                    <Grid2 size={{ xs: 12, md: 4 }}>
+                    </Grid>
+                  </Grid>
+                  <Grid container spacing={2} sx={{ mb: 2 }}>
+                    <Grid size={{ xs: 12, md: 4 }}>
                       <InputLabel htmlFor="moderator_label">
                         {T.translate("edit_event_type.moderator_label")}
                       </InputLabel>
@@ -455,8 +455,8 @@ const EventTypeDialog = ({
                         margin="none"
                         fullWidth
                       />
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, md: 4 }}>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 4 }}>
                       <InputLabel htmlFor="min_moderators">
                         {T.translate("edit_event_type.min_moderators")}
                       </InputLabel>
@@ -466,8 +466,8 @@ const EventTypeDialog = ({
                         margin="none"
                         fullWidth
                       />
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, md: 4 }}>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 4 }}>
                       <InputLabel htmlFor="max_moderators">
                         {T.translate("edit_event_type.max_moderators")}
                       </InputLabel>
@@ -477,32 +477,32 @@ const EventTypeDialog = ({
                         margin="none"
                         fullWidth
                       />
-                    </Grid2>
-                  </Grid2>
+                    </Grid>
+                  </Grid>
 
                   <Divider sx={{ mb: 2 }} />
-                  <Grid2 container spacing={2} sx={{ mb: 2 }}>
-                    <Grid2 size={{ xs: 12, md: 4 }}>
+                  <Grid container spacing={2} sx={{ mb: 2 }}>
+                    <Grid size={{ xs: 12, md: 4 }}>
                       <MuiFormikCheckbox
                         name="allow_custom_ordering"
                         label={T.translate(
                           "edit_event_type.allow_custom_ordering"
                         )}
                       />
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, md: 4 }}>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 4 }}>
                       <MuiFormikCheckbox
                         name="allow_attendee_vote"
                         label={T.translate(
                           "edit_event_type.allow_attendee_vote"
                         )}
                       />
-                    </Grid2>
-                  </Grid2>
+                    </Grid>
+                  </Grid>
 
                   <Divider sx={{ mb: 2 }} />
-                  <Grid2 container spacing={2} sx={{ mb: 2 }}>
-                    <Grid2 size={{ xs: 12, md: 4 }}>
+                  <Grid container spacing={2} sx={{ mb: 2 }}>
+                    <Grid size={{ xs: 12, md: 4 }}>
                       <InputLabel
                         htmlFor="min_duration"
                         title={T.translate(
@@ -517,8 +517,8 @@ const EventTypeDialog = ({
                         margin="none"
                         fullWidth
                       />
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, md: 4 }}>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 4 }}>
                       <InputLabel
                         htmlFor="max_duration"
                         title={T.translate(
@@ -533,18 +533,18 @@ const EventTypeDialog = ({
                         margin="none"
                         fullWidth
                       />
-                    </Grid2>
-                  </Grid2>
+                    </Grid>
+                  </Grid>
 
                   {showMediaUploadTypes && (
                     <>
                       <Divider sx={{ mb: 2 }} />
-                      <Grid2
+                      <Grid
                         container
                         spacing={1}
                         sx={{ mb: 2, alignItems: "center" }}
                       >
-                        <Grid2 size={{ xs: 12, md: 6 }}>
+                        <Grid size={{ xs: 12, md: 6 }}>
                           <Autocomplete
                             size="small"
                             value={selectedMediaUpload}
@@ -571,8 +571,8 @@ const EventTypeDialog = ({
                               />
                             )}
                           />
-                        </Grid2>
-                        <Grid2>
+                        </Grid>
+                        <Grid>
                           <Button
                             type="button"
                             variant="outlined"
@@ -581,8 +581,8 @@ const EventTypeDialog = ({
                           >
                             {T.translate("general.add")}
                           </Button>
-                        </Grid2>
-                      </Grid2>
+                        </Grid>
+                      </Grid>
                       {values.allowed_media_upload_types?.length > 0 && (
                         <MuiTable
                           columns={mediaUploadColumns}
@@ -609,8 +609,8 @@ const EventTypeDialog = ({
               id="tabpanel-schedule_settings"
               hidden={activeTab !== "schedule_settings"}
             >
-              <Grid2 container spacing={2}>
-                <Grid2 size={12} sx={{ mt: "8px" }}>
+              <Grid container spacing={2}>
+                <Grid size={12} sx={{ mt: "8px" }}>
                   <MuiFormikCheckbox
                     name="show_always_on_schedule"
                     label={T.translate(
@@ -618,8 +618,8 @@ const EventTypeDialog = ({
                     )}
                     onChange={handleShowAlwaysChange}
                   />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 8 }}>
+                </Grid>
+                <Grid size={{ xs: 12, md: 8 }}>
                   <InputLabel htmlFor="allowed_ticket_types">
                     {T.translate("edit_event_type.allowed_ticket_types")}
                   </InputLabel>
@@ -646,8 +646,8 @@ const EventTypeDialog = ({
                       label: s.label
                     })}
                   />
-                </Grid2>
-              </Grid2>
+                </Grid>
+              </Grid>
             </div>
           </DialogContent>
           <Divider />

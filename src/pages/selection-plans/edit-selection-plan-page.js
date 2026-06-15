@@ -13,7 +13,7 @@
 import React, { useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Button, Grid2 } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import AddNewButton from "openstack-uicore-foundation/lib/components/mui/add-new-button";
 import SelectionPlanForm from "../../components/forms/selection-plan-form";
 import {
@@ -71,17 +71,17 @@ const EditSelectionPlanPage = ({
 
   return (
     <div className="container">
-      <Grid2
+      <Grid
         container
         sx={{ justifyContent: "space-between", alignItems: "center" }}
       >
-        <Grid2>
+        <Grid>
           <h3>
             {title} {T.translate("edit_selection_plan.selection_plan")}
           </h3>
-        </Grid2>
+        </Grid>
         {entity?.id > 0 && (
-          <Grid2>
+          <Grid>
             <AddNewButton
               onClick={() =>
                 history.push(
@@ -89,12 +89,12 @@ const EditSelectionPlanPage = ({
                 )
               }
             />
-          </Grid2>
+          </Grid>
         )}
-      </Grid2>
+      </Grid>
       <hr />
       <SelectionPlanForm history={history} onSave={onSave} />
-      <Grid2
+      <Grid
         size={12}
         sx={{ p: 3, pt: 0, display: "flex", justifyContent: "flex-end" }}
       >
@@ -106,7 +106,7 @@ const EditSelectionPlanPage = ({
         >
           {T.translate("general.save")}
         </Button>
-      </Grid2>
+      </Grid>
     </div>
   );
 };

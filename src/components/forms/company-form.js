@@ -18,7 +18,7 @@ import { useFormikContext } from "formik";
 import {
   Button,
   FormControl,
-  Grid2,
+  Grid,
   InputLabel,
   MenuItem,
   Select
@@ -172,25 +172,25 @@ const CompanyForm = ({
     formik.values.id > 0 && window.APP_CLIENT_NAME === "openstack";
 
   return (
-    <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
-      <Grid2 size={4}>
+    <Grid container spacing={2} size={12} sx={{ p: 3 }}>
+      <Grid size={4}>
         <InputLabel htmlFor="name">
           {T.translate("edit_company.name")} *
         </InputLabel>
         <MuiFormikTextField name="name" margin="none" fullWidth />
-      </Grid2>
-      <Grid2 size={4}>
+      </Grid>
+      <Grid size={4}>
         <InputLabel htmlFor="url">{T.translate("edit_company.url")}</InputLabel>
         <MuiFormikTextField name="url" margin="none" fullWidth />
-      </Grid2>
-      <Grid2 size={4}>
+      </Grid>
+      <Grid size={4}>
         <InputLabel htmlFor="contact_email">
           {T.translate("edit_company.contact_email")}
         </InputLabel>
         <MuiFormikTextField name="contact_email" margin="none" fullWidth />
-      </Grid2>
+      </Grid>
 
-      <Grid2 size={4}>
+      <Grid size={4}>
         <InputLabel htmlFor="member_level">
           {T.translate("edit_company.member_level")}
         </InputLabel>
@@ -201,33 +201,33 @@ const CompanyForm = ({
             </MenuItem>
           ))}
         </MuiFormikSelect>
-      </Grid2>
-      <Grid2 size={4}>
+      </Grid>
+      <Grid size={4}>
         <InputLabel htmlFor="color">
           {T.translate("edit_company.color")}
         </InputLabel>
         <MuiFormikColorField name="color" />
-      </Grid2>
-      <Grid2 size={4}>
+      </Grid>
+      <Grid size={4}>
         <InputLabel htmlFor="admin_email">
           {T.translate("edit_company.admin_email")}
         </InputLabel>
         <MuiFormikTextField name="admin_email" margin="none" fullWidth />
-      </Grid2>
+      </Grid>
 
-      <Grid2 size={4}>
+      <Grid size={4}>
         <InputLabel htmlFor="city">
           {T.translate("edit_company.city")}
         </InputLabel>
         <MuiFormikTextField name="city" margin="none" fullWidth />
-      </Grid2>
-      <Grid2 size={4}>
+      </Grid>
+      <Grid size={4}>
         <InputLabel htmlFor="state">
           {T.translate("edit_company.state")}
         </InputLabel>
         <MuiFormikTextField name="state" margin="none" fullWidth />
-      </Grid2>
-      <Grid2 size={4}>
+      </Grid>
+      <Grid size={4}>
         <InputLabel htmlFor="country">
           {T.translate("edit_company.country")}
         </InputLabel>
@@ -242,48 +242,48 @@ const CompanyForm = ({
           })}
           defaultOptions
         />
-      </Grid2>
-      <Grid2 size={4}>
+      </Grid>
+      <Grid size={4}>
         <InputLabel htmlFor="industry">
           {T.translate("edit_company.industry")}
         </InputLabel>
         <MuiFormikTextField name="industry" margin="none" fullWidth />
-      </Grid2>
-      <Grid2 size={4}>
+      </Grid>
+      <Grid size={4}>
         <InputLabel htmlFor="products">
           {T.translate("edit_company.products")}
         </InputLabel>
         <MuiFormikTextField name="products" margin="none" fullWidth />
-      </Grid2>
-      <Grid2 size={4}>
+      </Grid>
+      <Grid size={4}>
         <InputLabel htmlFor="contributions">
           {T.translate("edit_company.contributions")}
         </InputLabel>
         <MuiFormikTextField name="contributions" margin="none" fullWidth />
-      </Grid2>
+      </Grid>
 
-      <Grid2 size={12}>
+      <Grid size={12}>
         <InputLabel htmlFor="description">
           {T.translate("edit_company.description")}
         </InputLabel>
         <FormikTextEditor name="description" />
-      </Grid2>
-      <Grid2 size={12}>
+      </Grid>
+      <Grid size={12}>
         <InputLabel htmlFor="overview">
           {T.translate("edit_company.overview")}
         </InputLabel>
         <FormikTextEditor name="overview" />
-      </Grid2>
-      <Grid2 size={12}>
+      </Grid>
+      <Grid size={12}>
         <InputLabel htmlFor="commitment">
           {T.translate("edit_company.commitment")}
         </InputLabel>
         <FormikTextEditor name="commitment" />
-      </Grid2>
+      </Grid>
 
       {showOpenStackSection && (
-        <Grid2 container size={12} mt={2} mb={2} alignItems="end">
-          <Grid2 size={4}>
+        <Grid container size={12} mt={2} mb={2} alignItems="end">
+          <Grid size={4}>
             <InputLabel htmlFor="sponsored_project">
               {T.translate("edit_company.project_name")}
             </InputLabel>
@@ -313,9 +313,9 @@ const CompanyForm = ({
                 ))}
               </Select>
             </FormControl>
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={4}>
+          <Grid size={4}>
             <InputLabel htmlFor="sponsorship_type">
               {T.translate("edit_company.sponsorship_type")}
             </InputLabel>
@@ -339,8 +339,8 @@ const CompanyForm = ({
                 )}
               </Select>
             </FormControl>
-          </Grid2>
-          <Grid2 size={4}>
+          </Grid>
+          <Grid size={4}>
             <InputLabel sx={{ visibility: "hidden" }}>&nbsp;</InputLabel>
             <Button
               variant="contained"
@@ -350,12 +350,12 @@ const CompanyForm = ({
             >
               {T.translate("edit_company.add_project_sponsorship")}
             </Button>
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
       )}
       {initialEntity?.project_sponsorships?.length > 0 &&
         window.APP_CLIENT_NAME === "openstack" && (
-          <Grid2 size={12} mb={2}>
+          <Grid size={12} mb={2}>
             <Table
               data={initialEntity.project_sponsorships.map((sp) => ({
                 ...sp,
@@ -364,11 +364,11 @@ const CompanyForm = ({
               columns={sponsored_project_columns}
               onDelete={handleDeleteSponsorship}
             />
-          </Grid2>
+          </Grid>
         )}
 
-      <Grid2 container size={12} mt={2} mb={2}>
-        <Grid2 size={6}>
+      <Grid container size={12} mt={2} mb={2}>
+        <Grid size={6}>
           <InputLabel>{T.translate("edit_company.logo")}</InputLabel>
           <UploadInputV3
             id="logo"
@@ -386,8 +386,8 @@ const CompanyForm = ({
               type: { allowed_extensions: ["jpg", "jpeg", "png", "gif", "svg"] }
             }}
           />
-        </Grid2>
-        <Grid2 size={6}>
+        </Grid>
+        <Grid size={6}>
           <InputLabel>{T.translate("edit_company.big_logo")}</InputLabel>
           <UploadInputV3
             id="big_logo"
@@ -405,9 +405,9 @@ const CompanyForm = ({
               type: { allowed_extensions: ["jpg", "jpeg", "png", "gif", "svg"] }
             }}
           />
-        </Grid2>
-      </Grid2>
-    </Grid2>
+        </Grid>
+      </Grid>
+    </Grid>
   );
 };
 

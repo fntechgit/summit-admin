@@ -11,7 +11,7 @@ import {
   Button,
   IconButton,
   Divider,
-  Grid as Grid2,
+  Grid,
   InputLabel,
   Box
 } from "@mui/material";
@@ -106,8 +106,8 @@ const AddSponsorDialog = ({ onClose, onSubmit, summitId }) => {
           autoComplete="off"
         >
           <DialogContent sx={{ p: 1 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid
                 container
                 spacing={2}
                 size={12}
@@ -125,8 +125,8 @@ const AddSponsorDialog = ({ onClose, onSubmit, summitId }) => {
                     )}
                   />
                 </Box>
-              </Grid2>
-              <Grid2
+              </Grid>
+              <Grid
                 container
                 spacing={2}
                 size={12}
@@ -142,8 +142,8 @@ const AddSponsorDialog = ({ onClose, onSubmit, summitId }) => {
                   isMulti
                   placeholder={T.translate("sponsor_list.placeholders.select")}
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
           </DialogContent>
           <Divider />
           <DialogActions sx={{ p: 2 }}>

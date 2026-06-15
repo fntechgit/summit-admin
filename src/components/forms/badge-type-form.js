@@ -18,7 +18,7 @@ import * as yup from "yup";
 import T from "i18n-react/dist/i18n-react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Grid2 from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
@@ -80,24 +80,24 @@ const BadgeTypeForm = ({
   return (
     <FormikProvider value={formik}>
       <Box>
-        <Grid2 container spacing={2} sx={{ mb: 2, alignItems: "center" }}>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+        <Grid container spacing={2} sx={{ mb: 2, alignItems: "center" }}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <MuiFormikTextField
               name="name"
               label={T.translate("edit_badge_type.name")}
               required
               fullWidth
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
             <MuiFormikCheckbox
               name="is_default"
               label={T.translate("edit_badge_type.default")}
             />
-          </Grid2>
-        </Grid2>
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={{ xs: 12, md: 10 }}>
+          </Grid>
+        </Grid>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid size={{ xs: 12, md: 10 }}>
             <MuiFormikTextField
               name="description"
               label={T.translate("edit_badge_type.description")}
@@ -107,8 +107,8 @@ const BadgeTypeForm = ({
               rows={DESCRIPTION_ROWS}
               fullWidth
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
         {entity.id !== 0 && (
           <>

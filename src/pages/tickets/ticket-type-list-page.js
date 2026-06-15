@@ -19,7 +19,7 @@ import {
   Button,
   Divider,
   FormControl,
-  Grid as Grid2,
+  Grid,
   MenuItem,
   Select
 } from "@mui/material";
@@ -315,11 +315,11 @@ const TicketTypeListPage = function ({
           </Button>
         )}
       </GridToolbar>
-      <Grid2 size={2}>
+      <Grid size={2}>
         <Box component="span">
           {totalTicketTypes} {T.translate("ticket_type_list.ticket_types")}
         </Box>
-      </Grid2>
+      </Grid>
       <Divider sx={{ my: 2 }} />
       <Box sx={{ my: 2 }}>
         <MuiDropdown

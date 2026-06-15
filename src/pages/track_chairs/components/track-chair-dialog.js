@@ -28,7 +28,7 @@ import {
   Divider,
   FormControl,
   FormHelperText,
-  Grid2,
+  Grid,
   IconButton,
   InputLabel,
   ListItemText,
@@ -129,8 +129,8 @@ const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
           autoComplete="off"
         >
           <DialogContent sx={{ p: 0 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
-              <Grid2 size={12}>
+            <Grid container spacing={2} size={12} sx={{ p: 3 }}>
+              <Grid size={12}>
                 <InputLabel>
                   {T.translate("track_chairs.placeholders.select_track_chair")}{" "}
                   *
@@ -144,8 +144,8 @@ const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
                   )}
                   disabled={entity?.id > 0}
                 />
-              </Grid2>
-              <Grid2 size={12}>
+              </Grid>
+              <Grid size={12}>
                 <InputLabel htmlFor="trackIds">
                   {T.translate("track_chairs.track")} *
                 </InputLabel>
@@ -217,8 +217,8 @@ const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
                     <FormHelperText>{formik.errors.trackIds}</FormHelperText>
                   )}
                 </FormControl>
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
           </DialogContent>
           <Divider />
           <DialogActions>

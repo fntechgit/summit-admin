@@ -17,7 +17,7 @@ import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
-import Grid2 from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
@@ -81,8 +81,8 @@ function SummitDashboardPage({
         </Tabs>
       </Box>
 
-      <Grid2 container spacing={3}>
-        <Grid2 size={6}>
+      <Grid container spacing={3}>
+        <Grid size={6}>
           <DashboardSection
             title={T.translate("dashboard.dates")}
             variant="card"
@@ -124,10 +124,10 @@ function SummitDashboardPage({
               </DashboardSection>
             ))}
           </DashboardSection>
-        </Grid2>
+        </Grid>
 
         {canEditSummit && (
-          <Grid2 size={6}>
+          <Grid size={6}>
             <Stack spacing={3}>
               <DashboardStatSection
                 title={T.translate("dashboard.events")}
@@ -202,9 +202,9 @@ function SummitDashboardPage({
                 ]}
               />
             </Stack>
-          </Grid2>
+          </Grid>
         )}
-      </Grid2>
+      </Grid>
     </Container>
   );
 }

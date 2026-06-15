@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Grid2 } from "@mui/material";
+import { Grid } from "@mui/material";
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
 import { TreeItem } from "@mui/x-tree-view/TreeItem";
 
@@ -84,21 +84,21 @@ const TemplateSchemaTree = ({ templateSchema }) => {
   const columns = [treeData.slice(0, midpoint), treeData.slice(midpoint)];
 
   return (
-    <Grid2 container spacing={2}>
+    <Grid container spacing={2}>
       {columns.map(
         (columnNodes, columnIndex) =>
           columnNodes.length > 0 && (
             // eslint-disable-next-line react/no-array-index-key
-            <Grid2 key={columnIndex} size={{ xs: 12, md: 6 }}>
+            <Grid key={columnIndex} size={{ xs: 12, md: 6 }}>
               <SimpleTreeView
                 aria-label={`Template schema tree ${columnIndex + 1}`}
               >
                 {toTreeItems(columnNodes, `col${columnIndex}`)}
               </SimpleTreeView>
-            </Grid2>
+            </Grid>
           )
       )}
-    </Grid2>
+    </Grid>
   );
 };
 

@@ -10,7 +10,7 @@ import {
   DialogTitle,
   Divider,
   FormControlLabel,
-  Grid as Grid2,
+  Grid,
   IconButton,
   Typography
 } from "@mui/material";
@@ -185,7 +185,7 @@ const SponsorFormAddItemFromInventoryPopup = ({
       </DialogTitle>
       <Divider />
       <DialogContent sx={{ p: 3 }}>
-        <Grid2
+        <Grid
           container
           spacing={2}
           sx={{
@@ -194,13 +194,13 @@ const SponsorFormAddItemFromInventoryPopup = ({
             mb: 2
           }}
         >
-          <Grid2 size={2}>
+          <Grid size={2}>
             <Box component="span">{selectedRows.length} items selected</Box>
-          </Grid2>
-          <Grid2 size={3} offset={7}>
+          </Grid>
+          <Grid size={3} offset={7}>
             <SearchInput term={term} onSearch={handleSearch} />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
         {items.length > 0 && (
           <div>
             <MuiTable

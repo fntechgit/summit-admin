@@ -16,7 +16,7 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { useFormikContext } from "formik";
 import Box from "@mui/material/Box";
-import { Grid2 } from "@mui/material";
+import { Grid } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import FormHelperText from "@mui/material/FormHelperText";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
@@ -78,8 +78,8 @@ const MarketingSettingForm = ({ onDeleteImage }) => {
 
   return (
     <Box>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 4 }}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <label htmlFor="type">{T.translate("marketing.type")} *</label>
           <MuiFormikSelect
             name="type"
@@ -99,12 +99,12 @@ const MarketingSettingForm = ({ onDeleteImage }) => {
               </MenuItem>
             ))}
           </MuiFormikSelect>
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
           <label htmlFor="key">{T.translate("marketing.key")} *</label>
           <MuiFormikTextField name="key" margin="none" fullWidth size="small" />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
           <label htmlFor="selection_plan_id">
             {T.translate("marketing.selection_plan")}
           </label>
@@ -114,12 +114,12 @@ const MarketingSettingForm = ({ onDeleteImage }) => {
             fullWidth
             size="small"
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
         {values.type === MARKETING_SETTING_TYPE_TEXT && (
-          <Grid2 size={{ xs: 12, md: 4 }}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <label htmlFor="value">
               {T.translate("marketing.plain_text")} *
             </label>
@@ -129,10 +129,10 @@ const MarketingSettingForm = ({ onDeleteImage }) => {
               fullWidth
               size="small"
             />
-          </Grid2>
+          </Grid>
         )}
         {values.type === MARKETING_SETTING_TYPE_TEXTAREA && (
-          <Grid2 size={12}>
+          <Grid size={12}>
             <label htmlFor="value">{T.translate("marketing.html")} *</label>
             <TextEditorV3
               id="value"
@@ -141,10 +141,10 @@ const MarketingSettingForm = ({ onDeleteImage }) => {
               error={valueError}
               license={process.env.JODIT_LICENSE_KEY}
             />
-          </Grid2>
+          </Grid>
         )}
         {values.type === MARKETING_SETTING_TYPE_FILE && (
-          <Grid2 size={12}>
+          <Grid size={12}>
             <label htmlFor="file">{T.translate("marketing.file")} *</label>
             {/* need this styles to adapt bootstrap to MUI */}
             <Box
@@ -167,17 +167,17 @@ const MarketingSettingForm = ({ onDeleteImage }) => {
               />
               {fileError && <FormHelperText error>{fileError}</FormHelperText>}
             </Box>
-          </Grid2>
+          </Grid>
         )}
         {values.type === MARKETING_SETTING_TYPE_HEX_COLOR && (
-          <Grid2 size={{ xs: 12, md: 4 }}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <label htmlFor="value">
               {T.translate("marketing.hex_color")} *
             </label>
             <MuiFormikColorField name="value" />
-          </Grid2>
+          </Grid>
         )}
-      </Grid2>
+      </Grid>
     </Box>
   );
 };

@@ -16,7 +16,7 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { useFormikContext } from "formik";
 import Box from "@mui/material/Box";
-import Grid2 from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import EmailTemplateInput from "../../inputs/email-template-input";
 
 const EmailTemplatesTab = ({ hidden }) => {
@@ -27,8 +27,8 @@ const EmailTemplatesTab = ({ hidden }) => {
   return (
     <div role="tabpanel" id="tabpanel-email_templates" hidden={hidden}>
       <Box sx={{ pt: 2 }}>
-        <Grid2 container spacing={2}>
-          <Grid2 size={{ xs: 12, md: 6 }}>
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, md: 6 }}>
             {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
             <label>
               {T.translate(
@@ -46,8 +46,8 @@ const EmailTemplatesTab = ({ hidden }) => {
               isClearable
               plainValue
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 6 }}>
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
             {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
             <label>
               {T.translate(
@@ -65,8 +65,8 @@ const EmailTemplatesTab = ({ hidden }) => {
               isClearable
               plainValue
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 6 }}>
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
             {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
             <label>
               {T.translate(
@@ -84,8 +84,8 @@ const EmailTemplatesTab = ({ hidden }) => {
               isClearable
               plainValue
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
       </Box>
     </div>
   );

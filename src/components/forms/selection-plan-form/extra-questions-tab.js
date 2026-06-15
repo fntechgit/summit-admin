@@ -18,7 +18,7 @@ import { useFormikContext } from "formik";
 import SortableTable from "openstack-uicore-foundation/lib/components/mui/sortable-table";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Grid2 from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Many2ManyDropDown from "../../inputs/many-2-many-dropdown";
 import { querySelectionPlanExtraQuestions } from "../../../actions/selection-plan-actions";
 import { stripTags } from "../../../utils/methods";
@@ -67,8 +67,8 @@ const ExtraQuestionsTab = ({
   return (
     <div role="tabpanel" id="tabpanel-extra_questions" hidden={hidden}>
       <Box sx={{ pt: 2 }}>
-        <Grid2 container spacing={2} sx={{ alignItems: "center", mb: 2 }}>
-          <Grid2 size={{ xs: 12, md: 6 }}>
+        <Grid container spacing={2} sx={{ alignItems: "center", mb: 2 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Many2ManyDropDown
               id="addAllowedExtraQuestions"
               isClearable
@@ -79,8 +79,8 @@ const ExtraQuestionsTab = ({
               fetchOptions={fetchOptions}
               onAdd={handleLink}
             />
-          </Grid2>
-          <Grid2
+          </Grid>
+          <Grid
             size={{ xs: 12, md: 6 }}
             sx={{ display: "flex", justifyContent: "flex-end" }}
           >
@@ -91,8 +91,8 @@ const ExtraQuestionsTab = ({
             >
               {T.translate("edit_selection_plan.add_extra_questions")}
             </Button>
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
         {values.extra_questions.length === 0 && (
           <div>{T.translate("edit_selection_plan.no_extra_questions")}</div>
         )}
