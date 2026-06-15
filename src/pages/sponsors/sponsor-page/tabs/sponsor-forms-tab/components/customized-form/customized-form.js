@@ -157,7 +157,6 @@ const CustomizedForm = ({
                 label={T.translate(
                   "edit_sponsor.forms_tab.customized_form.opens_at"
                 )}
-                required
               />
             </Grid2>
             <Grid2 size={4}>
@@ -166,7 +165,6 @@ const CustomizedForm = ({
                 label={T.translate(
                   "edit_sponsor.forms_tab.customized_form.expires_at"
                 )}
-                required
               />
             </Grid2>
             <Grid2 size={12}>
