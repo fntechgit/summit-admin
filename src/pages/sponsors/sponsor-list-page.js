@@ -99,8 +99,12 @@ const SponsorListPage = ({
   const canDeleteSponsors = memberObj.canDeleteSponsors();
 
   const columns = [
-    { columnKey: "id", header: T.translate("sponsor_list.id") },
-    { columnKey: "company_name", header: T.translate("sponsor_list.company") },
+    { columnKey: "id", header: T.translate("sponsor_list.id"), sortable: true },
+    {
+      columnKey: "company_name",
+      header: T.translate("sponsor_list.company"),
+      sortable: true
+    },
     {
       columnKey: "sponsorships",
       header: T.translate("sponsor_list.sponsorships"),
@@ -191,11 +195,6 @@ const SponsorListPage = ({
 
   if (!currentSummit.id) return <div />;
 
-  const sortedSponsors = [...sponsors];
-  sortedSponsors.sort((a, b) =>
-    a.order > b.order ? 1 : a.order < b.order ? -1 : 0
-  );
-
   return (
     <div className="container">
       <h3> {T.translate("sponsor_list.sponsor_list")}</h3>
@@ -255,8 +254,9 @@ const SponsorListPage = ({
       {sponsors.length > 0 && (
         <div>
           <MuiTable
-            data={sortedSponsors}
+            data={sponsors}
             columns={columns}
+            options={{ sortCol: order, sortDir: orderDir }}
             totalRows={totalSponsors}
             perPage={perPage}
             currentPage={currentPage}
