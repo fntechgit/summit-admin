@@ -54,7 +54,7 @@ export const getSubmittersBySummit =
     perPage = DEFAULT_PER_PAGE,
     order = "full_name",
     orderDir = DEFAULT_ORDER_DIR,
-    filters = [],
+    filters = {},
     source = null
   ) =>
   async (dispatch, getState) => {
@@ -62,7 +62,7 @@ export const getSubmittersBySummit =
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
 
-    const filter = [...filters];
+    const filter = parseFilters(filters);
 
     if (source === sources.submitters_no_speakers) {
       filter.push("is_speaker==false");
@@ -108,6 +108,7 @@ export const getSubmittersBySummit =
         page,
         perPage,
         term,
+        ...filters,
         currentSummitId: currentSummit.id
       }
     )(params)(dispatch).then(() => {
@@ -120,7 +121,7 @@ export const exportSummitSubmitters =
     term = null,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    filters = [],
+    filters = {},
     source = null
   ) =>
   async (dispatch, getState) => {
@@ -132,7 +133,7 @@ export const exportSummitSubmitters =
       access_token: accessToken
     };
 
-    const filter = [...filters];
+    const filter = parseFilters(filters);
 
     if (source === sources.submitters_no_speakers) {
       filter.push("is_speaker==false");
@@ -179,7 +180,7 @@ export const sendSubmitterEmails =
   (
     /* eslint-disable */
     term = null,
-    filters = [],
+    filters = {},
     testRecipient = "",
     excerptRecipient = "",
     // not used only left to keep the signature
@@ -208,7 +209,7 @@ export const sendSubmitterEmails =
     if (!selectedAll && selectedItems.length > 0) {
       // we don't need the filter criteria, we have the ids
       filter.push(`id==${selectedItems.join("||")}`);
-      const originalFilters = [...filters];
+      const originalFilters = parseFilters(filters);
 
       if (source && source === sources.submitters_no_speakers) {
         originalFilters.push("is_speaker==false");
@@ -221,7 +222,7 @@ export const sendSubmitterEmails =
 
       payload.original_filter = originalFilters;
     } else {
-      filter = [...filters];
+      filter = parseFilters(filters);
 
       if (source && source === sources.submitters_no_speakers) {
         filter.push("is_speaker==false");
@@ -289,6 +290,132 @@ export const unselectAllSummitSubmitters = () => (dispatch) => {
 
 export const setCurrentSubmitterFlowEvent = (value) => (dispatch) => {
   dispatch(createAction(SET_SUBMITTERS_CURRENT_FLOW_EVENT)(value));
+};
+
+const parseFilters = (filters) => {
+  const filter = [];
+
+  if (
+    filters.hasOwnProperty("selectionPlanFilter") &&
+    Array.isArray(filters.selectionPlanFilter) &&
+    filters.selectionPlanFilter.length > 0
+  ) {
+    filter.push(
+      `presentations_selection_plan_id==${filters.selectionPlanFilter.reduce(
+        (accumulator, sp) =>
+          `${accumulator + (accumulator !== "" ? "||" : "")}${sp}`,
+        ""
+      )}`
+    );
+  }
+
+  if (
+    filters.hasOwnProperty("trackFilter") &&
+    Array.isArray(filters.trackFilter) &&
+    filters.trackFilter.length > 0
+  ) {
+    filter.push(
+      `presentations_track_id==${filters.trackFilter.reduce(
+        (accumulator, t) =>
+          `${accumulator + (accumulator !== "" ? "||" : "")}${t}`,
+        ""
+      )}`
+    );
+  }
+
+  if (
+    filters.hasOwnProperty("trackGroupFilter") &&
+    Array.isArray(filters.trackGroupFilter) &&
+    filters.trackGroupFilter.length > 0
+  ) {
+    filter.push(
+      `presentations_track_group_id==${filters.trackGroupFilter.reduce(
+        (accumulator, t) =>
+          `${accumulator + (accumulator !== "" ? "||" : "")}${t}`,
+        ""
+      )}`
+    );
+  }
+
+  if (
+    filters.hasOwnProperty("activityTypeFilter") &&
+    Array.isArray(filters.activityTypeFilter) &&
+    filters.activityTypeFilter.length > 0
+  ) {
+    filter.push(
+      `presentations_type_id==${filters.activityTypeFilter.reduce(
+        (accumulator, at) =>
+          `${accumulator + (accumulator !== "" ? "||" : "")}${at}`,
+        ""
+      )}`
+    );
+  }
+
+  if (
+    filters.hasOwnProperty("selectionStatusFilter") &&
+    Array.isArray(filters.selectionStatusFilter) &&
+    filters.selectionStatusFilter.length > 0
+  ) {
+    // exclusive filters
+    if (filters.selectionStatusFilter.includes("only_rejected")) {
+      filter.push("has_rejected_presentations==true");
+      filter.push("has_accepted_presentations==false");
+      filter.push("has_alternate_presentations==false");
+    } else if (filters.selectionStatusFilter.includes("only_accepted")) {
+      filter.push("has_rejected_presentations==false");
+      filter.push("has_accepted_presentations==true");
+      filter.push("has_alternate_presentations==false");
+    } else if (filters.selectionStatusFilter.includes("only_alternate")) {
+      filter.push("has_rejected_presentations==false");
+      filter.push("has_accepted_presentations==false");
+      filter.push("has_alternate_presentations==true");
+    } else if (filters.selectionStatusFilter.includes("accepted_alternate")) {
+      filter.push("has_rejected_presentations==false");
+      filter.push("has_accepted_presentations==true");
+      filter.push("has_alternate_presentations==true");
+    } else if (filters.selectionStatusFilter.includes("accepted_rejected")) {
+      filter.push("has_rejected_presentations==true");
+      filter.push("has_accepted_presentations==true");
+      filter.push("has_alternate_presentations==false");
+    } else if (filters.selectionStatusFilter.includes("alternate_rejected")) {
+      filter.push("has_rejected_presentations==true");
+      filter.push("has_accepted_presentations==false");
+      filter.push("has_alternate_presentations==true");
+    } else {
+      filter.push(
+        filters.selectionStatusFilter.reduce(
+          (accumulator, at) =>
+            `${
+              accumulator + (accumulator !== "" ? "," : "")
+            }has_${at}_presentations==true`,
+          ""
+        )
+      );
+    }
+  }
+
+  if (
+    filters.hasOwnProperty("mediaUploadTypeFilter") &&
+    filters.mediaUploadTypeFilter.operator !== null &&
+    Array.isArray(filters.mediaUploadTypeFilter.value) &&
+    filters.mediaUploadTypeFilter.value.length > 0
+  ) {
+    filter.push(
+      `${
+        filters.mediaUploadTypeFilter.operator
+      }${filters.mediaUploadTypeFilter.value
+        .map((v) => v.id)
+        .join(
+          filters.mediaUploadTypeFilter.operator ===
+            "has_media_upload_with_type=="
+            ? "||"
+            : "&&"
+        )}`
+    );
+  }
+
+  // return checkOrFilter(filters, filter);
+  return filter;
 };
 
 const buildTermFilter = (term) => {
