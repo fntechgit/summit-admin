@@ -29,12 +29,8 @@ import MuiFormikPriceField from "openstack-uicore-foundation/lib/components/mui/
 import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import useScrollToError from "../../../../hooks/useScrollToError";
-import { decimalValidation } from "../../../../utils/yup";
-import {
-  MAX_CENTS,
-  ONE_HUNDRED,
-  TEN_THOUSAND
-} from "../../../../utils/constants";
+import { nullableDecimalValidation } from "../../../../utils/yup";
+import { ONE_HUNDRED, TEN_THOUSAND } from "../../../../utils/constants";
 
 const InfoTooltip = ({ title }) => (
   <Tooltip
@@ -136,8 +132,8 @@ const PaymentProfileDialog = ({
       kind: "",
       payment_method: "",
       value: 0,
-      max_cents: 0,
-      min_cents: 0
+      max_cents: null,
+      min_cents: null
     },
     validationSchema: yup.object().shape({
       name: yup.string().required(T.translate("validation.required")),
@@ -160,14 +156,8 @@ const PaymentProfileDialog = ({
           otherwise: (schema) =>
             schema.min(0, T.translate("validation.non_negative"))
         }),
-      max_cents: decimalValidation().max(
-        MAX_CENTS,
-        T.translate("validation.maximum", { maximum: 99 })
-      ),
-      min_cents: decimalValidation().max(
-        MAX_CENTS,
-        T.translate("validation.maximum", { maximum: 99 })
-      )
+      max_cents: nullableDecimalValidation(),
+      min_cents: nullableDecimalValidation()
     }),
     onSubmit: (values) => {
       onSaveFeeType(values).then(() => {
@@ -476,13 +466,21 @@ const PaymentProfileDialog = ({
                             placeholder={T.translate(
                               "edit_payment_profile.payment_type_fee_kind"
                             )}
-                            onChange={(e) =>
-                              feeTypeFormik.setValues({
-                                ...feeTypeFormik.values,
-                                kind: e.target.value,
-                                value: 0
-                              })
-                            }
+                            onChange={(e) => {
+                              feeTypeFormik.setValues(
+                                {
+                                  ...feeTypeFormik.values,
+                                  kind: e.target.value,
+                                  value: 0
+                                },
+                                false
+                              );
+                              feeTypeFormik.setFieldTouched(
+                                "value",
+                                false,
+                                false
+                              );
+                            }}
                           >
                             {PAYMENT_TYPE_FEE_KIND.map((opt) => (
                               <MenuItem key={opt.value} value={opt.value}>
