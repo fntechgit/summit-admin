@@ -736,7 +736,10 @@ class EventForm extends React.Component {
 
   isComplete() {
     const { entity } = this.state;
-    return entity?.status === "Received" && entity?.progress === "COMPLETE";
+    return (
+      ["Accepted", "Received"].includes(entity?.status) &&
+      entity?.progress === "COMPLETE"
+    );
   }
 
   getMissingDraftFields() {
