@@ -25,7 +25,7 @@ import DocumentDownloadModule from "./modules/page-template-document-download-mo
 import MediaRequestModule from "./modules/page-template-media-request-module";
 import { getAllMediaFileTypes } from "../../../../actions/media-file-type-actions";
 
-const PageModules = ({ name = "modules", getAllMediaFileTypes }) => {
+const PageModules = ({ name = "modules", getAllMediaFileTypes, isGlobal }) => {
   const { values, setFieldValue, errors, submitCount } = useFormikContext();
   const modules = getIn(values, name) || [];
   const moduleErrors = getIn(errors, name);
@@ -129,7 +129,13 @@ const PageModules = ({ name = "modules", getAllMediaFileTypes }) => {
       case PAGES_MODULE_KINDS.DOCUMENT:
         return <DocumentDownloadModule baseName={name} index={index} />;
       case PAGES_MODULE_KINDS.MEDIA:
-        return <MediaRequestModule baseName={name} index={index} />;
+        return (
+          <MediaRequestModule
+            baseName={name}
+            index={index}
+            isGlobal={isGlobal}
+          />
+        );
       default:
         return null;
     }
@@ -225,7 +231,8 @@ const PageModules = ({ name = "modules", getAllMediaFileTypes }) => {
 };
 
 PageModules.propTypes = {
-  name: PropTypes.string
+  name: PropTypes.string,
+  isGlobal: PropTypes.bool
 };
 
 const mapStateToProps = () => ({});

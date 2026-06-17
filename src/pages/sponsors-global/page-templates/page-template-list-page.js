@@ -285,6 +285,7 @@ const PageTemplateListPage = ({
           pageTemplate={pageTemplate}
           onClose={handleClosePageDialog}
           onSave={handleSavePageTemplate}
+          isGlobal
         />
       )}
       {openCloneDialog && (
