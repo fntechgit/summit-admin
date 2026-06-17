@@ -41,7 +41,8 @@ const PageTemplatePopup = ({
   summitId,
   sponsorId,
   sponsorshipIds,
-  title
+  title,
+  isGlobal
 }) => {
   const popupTitle =
     title ??
@@ -82,7 +83,7 @@ const PageTemplatePopup = ({
     kind: yup.string().equals([PAGES_MODULE_KINDS.MEDIA]),
     name: yup.string().required(T.translate("validation.required")),
     type: yup.string().required(T.translate("validation.required")),
-    upload_deadline: yup.date().required(T.translate("validation.required")),
+    upload_deadline: yup.date().nullable(),
     description: yup.string().required(T.translate("validation.required")),
     max_file_size: yup.number().when("type", {
       is: PAGE_MODULES_MEDIA_TYPES.FILE,
@@ -301,7 +302,7 @@ const PageTemplatePopup = ({
             </Grid2>
             <Divider sx={{ mb: 2 }} />
             <Box sx={{ py: 2 }}>
-              <PageModules name="modules" />
+              <PageModules name="modules" isGlobal={isGlobal} />
             </Box>
           </DialogContent>
           <Divider />
@@ -323,7 +324,8 @@ PageTemplatePopup.propTypes = {
   sponsorshipIds: PropTypes.array,
   summitId: PropTypes.number,
   sponsorId: PropTypes.number,
-  title: PropTypes.string
+  title: PropTypes.string,
+  isGlobal: PropTypes.bool
 };
 
 export default PageTemplatePopup;
