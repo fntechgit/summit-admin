@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { FormikProvider, useFormik } from "formik";
@@ -57,6 +57,25 @@ const MEMBER_LEVELS = [
 const getLogoValue = (value) =>
   value ? [{ filename: value, file_path: value }] : [];
 
+const ColorPickerField = React.memo(({ initialValue, onChange }) => {
+  const [value, setValue] = useState(initialValue || "");
+
+  const handleChange = (newValue) => {
+    setValue(newValue);
+    onChange(newValue);
+  };
+
+  return (
+    <MuiColorInput
+      value={value}
+      format="hex"
+      margin="none"
+      fullWidth
+      onChange={handleChange}
+    />
+  );
+});
+
 const CompanyDialog = ({
   entity: initialEntity,
   sponsoredProjects = [],
@@ -71,7 +90,7 @@ const CompanyDialog = ({
   const [selectedSponsorShipType, setSelectedSponsorShipType] = useState(null);
   const [sponsorShipTypes, setSponsorShipTypes] = useState([]);
 
-  const [colorValue, setColorValue] = useState(initialEntity?.color || "");
+  const colorRef = useRef(initialEntity?.color || "");
 
   const formik = useFormik({
     initialValues: {
@@ -98,7 +117,7 @@ const CompanyDialog = ({
       name: yup.string().required(T.translate("validation.required"))
     }),
     onSubmit: (values) => {
-      const valuesToSave = { ...values, color: colorValue };
+      const valuesToSave = { ...values, color: colorRef.current };
       onSave(valuesToSave);
     }
   });
@@ -165,9 +184,9 @@ const CompanyDialog = ({
       );
   };
 
-  const handleColorChange = (newValue) => {
-    setColorValue(newValue);
-  };
+  const handleColorChange = useCallback((newValue) => {
+    colorRef.current = newValue;
+  }, []);
 
   const sponsored_project_columns = [
     {
@@ -254,12 +273,8 @@ const CompanyDialog = ({
                 <InputLabel htmlFor="color">
                   {T.translate("edit_company.color")}
                 </InputLabel>
-                <MuiColorInput
-                  name="color"
-                  value={colorValue}
-                  format="hex"
-                  margin="none"
-                  fullWidth
+                <ColorPickerField
+                  initialValue={initialEntity?.color}
                   onChange={handleColorChange}
                 />
               </Grid2>
