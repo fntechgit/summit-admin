@@ -119,6 +119,8 @@ class SummitSpeakersListPage extends React.Component {
 
     this.getSubjectProps = this.getSubjectProps.bind(this);
     this.getSelectedActivityCount = this.getSelectedActivityCount.bind(this);
+    this.getFilters = this.getFilters.bind(this);
+    this.callBySummit = this.callBySummit.bind(this);
     this.export = this.export.bind(this);
     this.getBySummit = this.getBySummit.bind(this);
     this.handleSpeakerSubmitterSourceChange =
@@ -147,6 +149,8 @@ class SummitSpeakersListPage extends React.Component {
     this.handleOrAndFilter = this.handleOrAndFilter.bind(this);
     this.handleChangeMediaUploadTypeFilter =
       this.handleChangeMediaUploadTypeFilter.bind(this);
+    this.handleChangePendingSubmissionsFilter =
+      this.handleChangePendingSubmissionsFilter.bind(this);
 
     this.state = {
       testRecipient: "",
@@ -165,31 +169,7 @@ class SummitSpeakersListPage extends React.Component {
     initSubmittersList();
     initSpeakersList();
     if (currentSummit) {
-      const {
-        term,
-        page,
-        order,
-        orderDir,
-        perPage,
-        selectionPlanFilter,
-        trackFilter,
-        trackGroupFilter,
-        activityTypeFilter,
-        selectionStatusFilter,
-        mediaUploadTypeFilter
-      } = this.getSubjectProps();
-      const {
-        speakerFilters: { orAndFilter }
-      } = this.state;
-      this.getBySummit(term, page, perPage, order, orderDir, {
-        selectionPlanFilter,
-        trackFilter,
-        trackGroupFilter,
-        activityTypeFilter,
-        selectionStatusFilter,
-        orAndFilter,
-        mediaUploadTypeFilter
-      });
+      this.callBySummit();
     }
   }
 
@@ -230,6 +210,44 @@ class SummitSpeakersListPage extends React.Component {
     callable(term, page, perPage, order, orderDir, filters, source);
   }
 
+  getFilters(filterOverrides = {}) {
+    const {
+      selectionPlanFilter,
+      trackFilter,
+      trackGroupFilter,
+      activityTypeFilter,
+      selectionStatusFilter,
+      mediaUploadTypeFilter,
+      pendingSubmissionsFilter
+    } = this.getSubjectProps();
+    const {
+      speakerFilters: { orAndFilter }
+    } = this.state;
+    return {
+      selectionPlanFilter,
+      trackFilter,
+      trackGroupFilter,
+      activityTypeFilter,
+      selectionStatusFilter,
+      orAndFilter,
+      mediaUploadTypeFilter,
+      pendingSubmissionsFilter,
+      ...filterOverrides
+    };
+  }
+
+  callBySummit(posOverrides = {}, filterOverrides = {}) {
+    const { term, page, perPage, order, orderDir } = this.getSubjectProps();
+    this.getBySummit(
+      posOverrides.term ?? term,
+      posOverrides.page ?? page,
+      posOverrides.perPage ?? perPage,
+      posOverrides.order ?? order,
+      posOverrides.orderDir ?? orderDir,
+      this.getFilters(filterOverrides)
+    );
+  }
+
   export(term, order, orderDir, filters) {
     const { source } = this.state;
     const callable =
@@ -251,7 +269,8 @@ class SummitSpeakersListPage extends React.Component {
       trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
-      mediaUploadTypeFilter
+      mediaUploadTypeFilter,
+      pendingSubmissionsFilter
     } = this.getSubjectProps();
     const {
       speakerFilters: { orAndFilter }
@@ -267,7 +286,8 @@ class SummitSpeakersListPage extends React.Component {
         activityTypeFilter,
         selectionStatusFilter,
         orAndFilter,
-        mediaUploadTypeFilter
+        mediaUploadTypeFilter,
+        pendingSubmissionsFilter
       });
     });
   }
@@ -280,236 +300,44 @@ class SummitSpeakersListPage extends React.Component {
   }
 
   handlePageChange(page) {
-    const {
-      term,
-      order,
-      orderDir,
-      perPage,
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      mediaUploadTypeFilter
-    } = this.getSubjectProps();
-    const {
-      speakerFilters: { orAndFilter }
-    } = this.state;
-    this.getBySummit(term, page, perPage, order, orderDir, {
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      orAndFilter,
-      mediaUploadTypeFilter
-    });
+    this.callBySummit({ page });
   }
 
   handleSort(index, key, dir) {
-    const {
-      term,
-      page,
-      perPage,
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      mediaUploadTypeFilter
-    } = this.getSubjectProps();
-    const {
-      speakerFilters: { orAndFilter }
-    } = this.state;
-    this.getBySummit(term, page, perPage, key, dir, {
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      orAndFilter,
-      mediaUploadTypeFilter
-    });
+    this.callBySummit({ order: key, orderDir: dir });
   }
 
   handleSearch(term) {
-    const {
-      order,
-      orderDir,
-      page,
-      perPage,
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      mediaUploadTypeFilter
-    } = this.getSubjectProps();
-    const {
-      speakerFilters: { orAndFilter }
-    } = this.state;
-    this.getBySummit(term, page, perPage, order, orderDir, {
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      orAndFilter,
-      mediaUploadTypeFilter
-    });
+    this.callBySummit({ term });
   }
 
   handleChangeSelectionPlanFilter(ev) {
-    const { value: newSelectionPlanFilter } = ev.target;
-    const {
-      term,
-      order,
-      page,
-      orderDir,
-      perPage,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      mediaUploadTypeFilter
-    } = this.getSubjectProps();
-    const {
-      speakerFilters: { orAndFilter }
-    } = this.state;
-    this.getBySummit(term, page, perPage, order, orderDir, {
-      selectionPlanFilter: newSelectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      orAndFilter,
-      mediaUploadTypeFilter
-    });
+    this.callBySummit({}, { selectionPlanFilter: ev.target.value });
   }
 
   handleChangeTrackFilter(ev) {
-    const { value: newTrackFilter } = ev.target;
-    const {
-      term,
-      order,
-      page,
-      orderDir,
-      perPage,
-      selectionPlanFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      mediaUploadTypeFilter
-    } = this.getSubjectProps();
-    const {
-      speakerFilters: { orAndFilter }
-    } = this.state;
-    this.getBySummit(term, page, perPage, order, orderDir, {
-      selectionPlanFilter,
-      trackFilter: newTrackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      orAndFilter,
-      mediaUploadTypeFilter
-    });
+    this.callBySummit({}, { trackFilter: ev.target.value });
   }
 
   handleChangeTrackGroupFilter(ev) {
-    const { value: newTrackGroupFilter } = ev.target;
-    const {
-      term,
-      order,
-      page,
-      orderDir,
-      perPage,
-      selectionPlanFilter,
-      trackFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      mediaUploadTypeFilter
-    } = this.getSubjectProps();
-    const {
-      speakerFilters: { orAndFilter }
-    } = this.state;
-    this.getBySummit(term, page, perPage, order, orderDir, {
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter: newTrackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      orAndFilter,
-      mediaUploadTypeFilter
-    });
+    this.callBySummit({}, { trackGroupFilter: ev.target.value });
   }
 
   handleChangeActivityTypeFilter(ev) {
-    const { value: newActivityTypeFilter } = ev.target;
-    const {
-      term,
-      order,
-      page,
-      orderDir,
-      perPage,
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      selectionStatusFilter,
-      mediaUploadTypeFilter
-    } = this.getSubjectProps();
-    const {
-      speakerFilters: { orAndFilter }
-    } = this.state;
-    this.getBySummit(term, page, perPage, order, orderDir, {
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter: newActivityTypeFilter,
-      selectionStatusFilter,
-      orAndFilter,
-      mediaUploadTypeFilter
-    });
+    this.callBySummit({}, { activityTypeFilter: ev.target.value });
   }
 
   handleChangeMediaUploadTypeFilter(ev) {
     const { value, operator } = ev.target;
-    const {
-      term,
-      order,
-      page,
-      orderDir,
-      perPage,
-      activityTypeFilter,
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      selectionStatusFilter,
-      mediaUploadTypeFilter
-    } = this.getSubjectProps();
-    const {
-      speakerFilters: { orAndFilter }
-    } = this.state;
+    const { mediaUploadTypeFilter } = this.getSubjectProps();
     if (operator && value.length > 0) {
-      this.getBySummit(term, page, perPage, order, orderDir, {
-        selectionPlanFilter,
-        trackFilter,
-        trackGroupFilter,
-        activityTypeFilter,
-        selectionStatusFilter,
-        orAndFilter,
-        mediaUploadTypeFilter: { operator, value }
-      });
+      this.callBySummit({}, { mediaUploadTypeFilter: { operator, value } });
       // get speakers if the media upload types filter is clear
     } else if (mediaUploadTypeFilter.value.length > 0 && value.length === 0) {
-      this.getBySummit(term, page, perPage, order, orderDir, {
-        selectionPlanFilter,
-        trackFilter,
-        trackGroupFilter,
-        activityTypeFilter,
-        selectionStatusFilter,
-        orAndFilter,
-        mediaUploadTypeFilter: { operator: null, value: [] }
-      });
+      this.callBySummit(
+        {},
+        { mediaUploadTypeFilter: { operator: null, value: [] } }
+      );
     }
   }
 
@@ -526,7 +354,8 @@ class SummitSpeakersListPage extends React.Component {
       trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter: previousSelectionStatusFilter,
-      mediaUploadTypeFilter
+      mediaUploadTypeFilter,
+      pendingSubmissionsFilter
     } = this.getSubjectProps();
 
     const newSelectionStatusFilter = resolveExclusiveSelectionStatusFilter(
@@ -544,8 +373,14 @@ class SummitSpeakersListPage extends React.Component {
       activityTypeFilter,
       orAndFilter,
       selectionStatusFilter: newSelectionStatusFilter,
-      mediaUploadTypeFilter
+      mediaUploadTypeFilter,
+      pendingSubmissionsFilter
     });
+  }
+
+  handleChangePendingSubmissionsFilter(ev) {
+    const { value } = ev.target;
+    this.callBySummit({}, { pendingSubmissionsFilter: value });
   }
 
   handleChangeFlowEvent(ev) {
@@ -567,18 +402,7 @@ class SummitSpeakersListPage extends React.Component {
     const excerptRecipient = this.ingestEmailRef.value;
     const shouldSendCopy2Submitter =
       isSpeakerMode && this.shouldSendCopy2SubmitterRef.checked;
-    const {
-      term,
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      mediaUploadTypeFilter
-    } = this.getSubjectProps();
-    const {
-      speakerFilters: { orAndFilter }
-    } = this.state;
+    const { term } = this.getSubjectProps();
 
     this.props.validateSpecs(
       promoCodeStrategy,
@@ -598,15 +422,7 @@ class SummitSpeakersListPage extends React.Component {
 
         callable(
           term,
-          {
-            selectionPlanFilter,
-            trackFilter,
-            trackGroupFilter,
-            activityTypeFilter,
-            selectionStatusFilter,
-            orAndFilter,
-            mediaUploadTypeFilter
-          },
+          this.getFilters(),
           testRecipient,
           excerptRecipient,
           shouldSendCopy2Submitter,
@@ -666,30 +482,9 @@ class SummitSpeakersListPage extends React.Component {
   }
 
   handleExport(ev) {
-    const {
-      term,
-      order,
-      orderDir,
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      mediaUploadTypeFilter
-    } = this.getSubjectProps();
-    const {
-      speakerFilters: { orAndFilter }
-    } = this.state;
     ev.preventDefault();
-    this.export(term, order, orderDir, {
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      orAndFilter,
-      mediaUploadTypeFilter
-    });
+    const { term, order, orderDir } = this.getSubjectProps();
+    this.export(term, order, orderDir, this.getFilters());
   }
 
   handleSelected(item_id, isSelected) {
@@ -728,32 +523,11 @@ class SummitSpeakersListPage extends React.Component {
   }
 
   handleOrAndFilter(ev) {
-    const {
-      term,
-      order,
-      page,
-      orderDir,
-      perPage,
-      trackFilter,
-      trackGroupFilter,
-      selectionPlanFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      mediaUploadTypeFilter
-    } = this.getSubjectProps();
     this.setState({
       ...this.state,
       speakerFilters: { ...this.state.speakerFilters, orAndFilter: ev }
     });
-    this.getBySummit(term, page, perPage, order, orderDir, {
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      mediaUploadTypeFilter,
-      selectionStatusFilter,
-      orAndFilter: ev
-    });
+    this.callBySummit({}, { orAndFilter: ev });
   }
 
   render() {
@@ -779,6 +553,7 @@ class SummitSpeakersListPage extends React.Component {
       activityTypeFilter,
       selectionStatusFilter,
       mediaUploadTypeFilter,
+      pendingSubmissionsFilter,
       currentFlowEvent,
       totalActivities
     } = this.getSubjectProps();
@@ -829,6 +604,11 @@ class SummitSpeakersListPage extends React.Component {
 
     const selectionStatusDDL = SELECTION_STATUS_OPTIONS;
 
+    const pendingSubmissionsDDL = [
+      { label: "Has Pending Submissions", value: true },
+      { label: "No Pending Submissions", value: false }
+    ];
+
     const speakerSubmitterSourceSelectorDDL = [
       {
         label: T.translate("summit_speakers_list.speakers"),
@@ -847,70 +627,70 @@ class SummitSpeakersListPage extends React.Component {
     const emailFlowDDL =
       this.state.source === sources.speakers
         ? [
-            { label: "-- SELECT EMAIL EVENT --", value: "" },
-            {
-              label:
-                "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ALTERNATE",
-              value:
-                "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ALTERNATE"
-            },
-            {
-              label:
-                "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_REJECTED",
-              value: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_REJECTED"
-            },
-            {
-              label:
-                "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_REJECTED",
-              value:
-                "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_REJECTED"
-            },
-            {
-              label: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ONLY",
-              value: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ONLY"
-            },
-            {
-              label: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_ONLY",
-              value: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_ONLY"
-            },
-            {
-              label: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_REJECTED_ONLY",
-              value: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_REJECTED_ONLY"
-            }
-          ]
+          { label: "-- SELECT EMAIL EVENT --", value: "" },
+          {
+            label:
+              "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ALTERNATE",
+            value:
+              "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ALTERNATE"
+          },
+          {
+            label:
+              "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_REJECTED",
+            value: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_REJECTED"
+          },
+          {
+            label:
+              "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_REJECTED",
+            value:
+              "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_REJECTED"
+          },
+          {
+            label: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ONLY",
+            value: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ONLY"
+          },
+          {
+            label: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_ONLY",
+            value: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_ONLY"
+          },
+          {
+            label: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_REJECTED_ONLY",
+            value: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_REJECTED_ONLY"
+          }
+        ]
         : [
-            { label: "-- SELECT EMAIL EVENT --", value: "" },
-            {
-              label:
-                "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ALTERNATE",
-              value:
-                "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ALTERNATE"
-            },
-            {
-              label:
-                "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_REJECTED",
-              value:
-                "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_REJECTED"
-            },
-            {
-              label:
-                "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_REJECTED",
-              value:
-                "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_REJECTED"
-            },
-            {
-              label: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ONLY",
-              value: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ONLY"
-            },
-            {
-              label: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_ONLY",
-              value: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_ONLY"
-            },
-            {
-              label: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_REJECTED_ONLY",
-              value: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_REJECTED_ONLY"
-            }
-          ];
+          { label: "-- SELECT EMAIL EVENT --", value: "" },
+          {
+            label:
+              "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ALTERNATE",
+            value:
+              "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ALTERNATE"
+          },
+          {
+            label:
+              "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_REJECTED",
+            value:
+              "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_REJECTED"
+          },
+          {
+            label:
+              "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_REJECTED",
+            value:
+              "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_REJECTED"
+          },
+          {
+            label: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ONLY",
+            value: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ONLY"
+          },
+          {
+            label: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_ONLY",
+            value: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_ONLY"
+          },
+          {
+            label: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_REJECTED_ONLY",
+            value: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_REJECTED_ONLY"
+          }
+        ];
 
     const promoCodeStrategiesDDL = [
       {
@@ -1054,6 +834,18 @@ class SummitSpeakersListPage extends React.Component {
               isMulti
             />
           </div>
+          <div className="col-md-3 speaker-list-filter-col">
+            <Dropdown
+              id="pendingSubmissionsFilter"
+              value={pendingSubmissionsFilter}
+              onChange={this.handleChangePendingSubmissionsFilter}
+              options={pendingSubmissionsDDL}
+              isClearable
+              placeholder="Filter By Pending Submissions"
+            />
+          </div>
+        </div>
+        <div className="row">
           <div className="col-md-9 speaker-list-filter-col">
             <MediaTypeFilter
               id="media_upload_with_type"
