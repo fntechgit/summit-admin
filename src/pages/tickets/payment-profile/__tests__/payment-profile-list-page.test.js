@@ -86,7 +86,32 @@ describe("PaymentProfileListPage popup behavior", () => {
     );
   };
 
-  test("popup stays open after a fee type is successfully saved", async () => {
+  test("dialog is not rendered before the add button is clicked", () => {
+    renderWithRedux(<PaymentProfileListPage />, { initialState: baseState });
+    expect(
+      screen.queryByTestId("payment-profile-dialog")
+    ).not.toBeInTheDocument();
+  });
+
+  test("popup closes after profile save succeeds", async () => {
+    renderWithRedux(<PaymentProfileListPage />, { initialState: baseState });
+    await openPopup();
+
+    await act(async () => {
+      await capturedDialogProps.onSave({
+        id: 0,
+        application_type: "Registration",
+        provider: "Stripe"
+      });
+      await flushPromises();
+    });
+
+    expect(
+      screen.queryByTestId("payment-profile-dialog")
+    ).not.toBeInTheDocument();
+  });
+
+  test("fee type save keeps popup open and refreshes fee types", async () => {
     renderWithRedux(<PaymentProfileListPage />, { initialState: baseState });
     await openPopup();
 
@@ -104,6 +129,9 @@ describe("PaymentProfileListPage popup behavior", () => {
     });
 
     expect(screen.getByTestId("payment-profile-dialog")).toBeInTheDocument();
+    expect(getPaymentFeeTypes).toHaveBeenCalledWith(
+      baseState.currentPaymentProfileState.entity.id
+    );
   });
 
   test("popup stays open when profile save fails", async () => {

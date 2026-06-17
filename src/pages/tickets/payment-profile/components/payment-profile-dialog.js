@@ -94,13 +94,13 @@ const PAYMENT_TYPE_FEE_METHOD = [
 const PaymentProfileDialog = ({
   onSave,
   onClose,
-  isSaving = false,
   entity: initialEntity,
   paymentFeeTypes,
   onDeleteFeeType,
   onSaveFeeType
 }) => {
   const [showFeeTypeForm, setShowFeeTypeForm] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -122,7 +122,13 @@ const PaymentProfileDialog = ({
         .required(T.translate("validation.required")),
       provider: yup.string().required(T.translate("validation.required"))
     }),
-    onSubmit: (values) => onSave(values)
+    onSubmit: (values) => {
+      if (isSaving) return;
+      setIsSaving(true);
+      onSave(values)
+        .catch(() => {})
+        .finally(() => setIsSaving(false));
+    }
   });
 
   const feeTypeFormik = useFormik({
@@ -160,10 +166,15 @@ const PaymentProfileDialog = ({
       min_cents: nullableDecimalValidation()
     }),
     onSubmit: (values) => {
-      onSaveFeeType(values).then(() => {
-        feeTypeFormik.resetForm();
-        setShowFeeTypeForm(false);
-      });
+      if (isSaving) return;
+      setIsSaving(true);
+      onSaveFeeType(values)
+        .then(() => {
+          feeTypeFormik.resetForm();
+          setShowFeeTypeForm(false);
+        })
+        .catch(() => {})
+        .finally(() => setIsSaving(false));
     }
   });
 
@@ -214,11 +225,13 @@ const PaymentProfileDialog = ({
   ];
 
   const handleClose = () => {
+    if (isSaving) return;
     formik.resetForm();
     onClose();
   };
 
   const handleFeeTypeDelete = (feeTypeId) => {
+    if (isSaving) return;
     onDeleteFeeType(feeTypeId);
   };
 
@@ -254,6 +267,7 @@ const PaymentProfileDialog = ({
           size="small"
           onClick={handleClose}
           sx={{ mr: 1 }}
+          aria-label="close"
           disabled={isSaving}
         >
           <CloseIcon fontSize="small" />
@@ -676,7 +690,6 @@ PaymentProfileDialog.propTypes = {
   onSave: PropTypes.func.isRequired,
   entity: PropTypes.object,
   paymentFeeTypes: PropTypes.array,
-  isSaving: PropTypes.bool,
   onSaveFeeType: PropTypes.func.isRequired,
   onDeleteFeeType: PropTypes.func.isRequired
 };

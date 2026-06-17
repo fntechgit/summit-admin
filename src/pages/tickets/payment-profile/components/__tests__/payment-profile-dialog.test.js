@@ -3,7 +3,13 @@
  */
 
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act
+} from "@testing-library/react";
 import PaymentProfileDialog from "../payment-profile-dialog";
 
 jest.mock("../../../../../hooks/useScrollToError", () => ({
@@ -21,7 +27,7 @@ jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => {
   const React = require("react");
   return {
     __esModule: true,
-    default: function MockMuiTable({ columns, data }) {
+    default: function MockMuiTable({ columns, data, onEdit }) {
       return (
         <table data-testid="fee-types-table">
           <tbody>
@@ -35,6 +41,16 @@ jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => {
                     {col.render ? col.render(row) : row[col.columnKey]}
                   </td>
                 ))}
+                {onEdit && (
+                  <td>
+                    <button
+                      data-testid={`edit-row-${row.id}`}
+                      onClick={() => onEdit(row)}
+                    >
+                      edit
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -191,7 +207,6 @@ const defaultProps = {
   onClose: jest.fn(),
   onSaveFeeType: jest.fn().mockResolvedValue({}),
   onDeleteFeeType: jest.fn().mockResolvedValue({}),
-  isSaving: false,
   entity: {},
   paymentFeeTypes: defaultPaymentFeeTypes
 };
@@ -415,6 +430,146 @@ describe("PaymentProfileDialog", () => {
       await waitFor(() => {
         expect(screen.getByTestId("price-value")).toHaveValue(0);
       });
+    });
+  });
+
+  describe("isSaving behavior", () => {
+    test("close button calls onClose when not saving", () => {
+      renderDialog({ entity: {} });
+      fireEvent.click(screen.getByRole("button", { name: "close" }));
+      expect(defaultProps.onClose).toHaveBeenCalled();
+    });
+
+    test("save and close buttons are both disabled while a save is in flight", async () => {
+      let resolveOnSave;
+      defaultProps.onSave.mockReturnValue(
+        new Promise((r) => {
+          resolveOnSave = r;
+        })
+      );
+
+      renderDialog({ entity: {} });
+      fireEvent.change(screen.getByTestId("select-application_type"), {
+        target: { value: "Registration" }
+      });
+      fireEvent.change(screen.getByTestId("select-provider"), {
+        target: { value: "Stripe" }
+      });
+      submitProfileForm();
+
+      await waitFor(() => expect(defaultProps.onSave).toHaveBeenCalled());
+
+      expect(
+        screen.getByRole("button", { name: "general.save" })
+      ).toBeDisabled();
+      expect(screen.getByRole("button", { name: "close" })).toBeDisabled();
+
+      await act(async () => {
+        resolveOnSave({});
+      });
+    });
+
+    test("save button re-enables after onSave rejects", async () => {
+      defaultProps.onSave.mockRejectedValue(new Error("save failed"));
+
+      renderDialog({ entity: {} });
+      fireEvent.change(screen.getByTestId("select-application_type"), {
+        target: { value: "Registration" }
+      });
+      fireEvent.change(screen.getByTestId("select-provider"), {
+        target: { value: "Stripe" }
+      });
+      submitProfileForm();
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: "general.save" })
+        ).not.toBeDisabled();
+      });
+    });
+  });
+
+  describe("fee type form actions", () => {
+    const fillValidFeeTypeForm = async () => {
+      fireEvent.change(screen.getByTestId("input-name"), {
+        target: { value: "Processing Fee" }
+      });
+      fireEvent.change(screen.getByTestId("select-kind"), {
+        target: { value: "Amount" }
+      });
+      fireEvent.change(screen.getByTestId("select-payment_method"), {
+        target: { value: "card" }
+      });
+      await waitFor(() =>
+        expect(screen.getByTestId("price-value")).toBeInTheDocument()
+      );
+      fireEvent.change(screen.getByTestId("price-value"), {
+        target: { value: 1500 }
+      });
+    };
+
+    beforeEach(() => {
+      renderDialog({ entity: feeTypeSectionEntity });
+      openFeeTypeForm();
+    });
+
+    test("submitting calls onSaveFeeType with the entered values", async () => {
+      await fillValidFeeTypeForm();
+      submitFeeTypeForm();
+
+      await waitFor(() => {
+        expect(defaultProps.onSaveFeeType).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: "Processing Fee",
+            kind: "Amount",
+            payment_method: "card"
+          })
+        );
+      });
+    });
+
+    test("form hides after successful fee type save", async () => {
+      await fillValidFeeTypeForm();
+      submitFeeTypeForm();
+
+      await waitFor(() => {
+        expect(
+          screen.queryByRole("button", { name: /save_fee_type/i })
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    test("cancel hides the form without calling onSaveFeeType", () => {
+      fireEvent.click(screen.getByRole("button", { name: /general.cancel/i }));
+
+      expect(
+        screen.queryByRole("button", { name: /save_fee_type/i })
+      ).not.toBeInTheDocument();
+      expect(defaultProps.onSaveFeeType).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("fee type edit", () => {
+    test("clicking edit on a row opens and pre-fills the form with that fee type", async () => {
+      renderDialog({
+        entity: feeTypeSectionEntity,
+        paymentFeeTypes: {
+          paymentFeeTypes: [rateFeeType],
+          totalPaymentFeeTypes: 1,
+          order: "id",
+          orderDir: 1
+        }
+      });
+
+      fireEvent.click(screen.getByTestId(`edit-row-${rateFeeType.id}`));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("input-name")).toHaveValue(rateFeeType.name);
+      });
+      expect(screen.getByTestId("select-kind")).toHaveValue(rateFeeType.kind);
+      expect(screen.getByTestId("select-payment_method")).toHaveValue(
+        rateFeeType.payment_method
+      );
     });
   });
 });

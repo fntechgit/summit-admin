@@ -57,7 +57,6 @@ const PaymentProfileListPage = ({
   }, [currentSummit?.id]);
 
   const [paymentProfilePopup, setPaymentProfilePopup] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
 
   const handleEdit = (paymentProfile) => {
     getPaymentProfile(paymentProfile.id).then(() => {
@@ -66,22 +65,11 @@ const PaymentProfileListPage = ({
     });
   };
 
-  const handleSave = (entity) => {
-    if (isSaving) return;
-    setIsSaving(true);
-    return savePaymentProfile(entity)
-      .then(() => {
-        getPaymentProfiles(
-          term,
-          DEFAULT_CURRENT_PAGE,
-          perPage,
-          order,
-          orderDir
-        );
-        setPaymentProfilePopup(false);
-      })
-      .finally(() => setIsSaving(false));
-  };
+  const handleSave = (entity) =>
+    savePaymentProfile(entity).then(() => {
+      getPaymentProfiles(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+      setPaymentProfilePopup(false);
+    });
 
   const handleDelete = (paymentProfileId) =>
     deletePaymentProfile(paymentProfileId).then(() =>
@@ -104,25 +92,19 @@ const PaymentProfileListPage = ({
   };
 
   const handleClose = () => {
-    if (isSaving) return;
     resetPaymentProfileForm();
     setPaymentProfilePopup(false);
   };
 
-  const handleSaveFeeType = (entity) => {
-    if (isSaving) return;
-    setIsSaving(true);
-    return savePaymentFeeType(entity)
-      .then(() => {
-        getPaymentFeeTypes(currentPaymentProfile.id);
-      })
-      .finally(() => setIsSaving(false));
-  };
-
-  const handleDeleteFeeType = (feeTypeId) =>
-    deletePaymentFeeType(feeTypeId).then(() => {
+  const handleSaveFeeType = (entity) =>
+    savePaymentFeeType(entity).then(() => {
       getPaymentFeeTypes(currentPaymentProfile.id);
     });
+
+  const handleDeleteFeeType = (feeTypeId) =>
+    deletePaymentFeeType(feeTypeId)
+      .then(() => getPaymentFeeTypes(currentPaymentProfile.id))
+      .catch(() => {});
 
   const handleNewPaymentProfile = () => {
     resetPaymentProfileForm();
@@ -238,7 +220,6 @@ const PaymentProfileListPage = ({
         <PaymentProfileDialog
           entity={currentPaymentProfile}
           paymentFeeTypes={paymentFeeTypes}
-          isSaving={isSaving}
           onClose={handleClose}
           onSave={handleSave}
           onSaveFeeType={handleSaveFeeType}
