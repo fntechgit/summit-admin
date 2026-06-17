@@ -15,7 +15,6 @@ import React, { useState, useEffect } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { useFormik, FormikProvider } from "formik";
 import moment from "moment-timezone";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   queryTrackGroups,
@@ -29,12 +28,14 @@ import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
 import Table from "openstack-uicore-foundation/lib/components/mui/table";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
-import Switch from "react-switch";
-import { Pagination } from "react-bootstrap";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import Grid2 from "@mui/material/Grid2";
+import MuiSwitch from "@mui/material/Switch";
+import Pagination from "@mui/material/Pagination";
+import TextField from "@mui/material/TextField";
 import { scrollToError, stripTags } from "../../utils/methods";
 import EmailTemplateInput from "../inputs/email-template-input";
 import ImportModal from "../inputs/import-modal";
@@ -358,8 +359,9 @@ const SelectionPlanForm = (props) => {
         onSubmit={formik.handleSubmit}
       >
         <input type="hidden" id="id" value={formik.values.id} />
-        <div className="row form-group">
-          <div className="col-md-4">
+
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 4 }}>
             <label> {T.translate("edit_selection_plan.name")} *</label>
             <Input
               id="name"
@@ -368,8 +370,8 @@ const SelectionPlanForm = (props) => {
               onChange={handleChange}
               value={formik.values.name}
             />
-          </div>
-          <div className="col-md-2 checkboxes-div">
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
             <FormControlLabel
               control={
                 <Checkbox
@@ -380,8 +382,8 @@ const SelectionPlanForm = (props) => {
               }
               label={T.translate("edit_selection_plan.enabled")}
             />
-          </div>
-          <div className="col-md-2 checkboxes-div">
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
             <FormControlLabel
               control={
                 <Checkbox
@@ -392,8 +394,8 @@ const SelectionPlanForm = (props) => {
               }
               label={T.translate("edit_selection_plan.hidden")}
             />
-          </div>
-          <div className="col-md-2 checkboxes-div">
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
             <FormControlLabel
               control={
                 <Checkbox
@@ -406,8 +408,8 @@ const SelectionPlanForm = (props) => {
                 "edit_selection_plan.allow_proposed_schedules"
               )}
             />
-          </div>
-          <div className="col-md-2 checkboxes-div">
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
             <FormControlLabel
               control={
                 <Checkbox
@@ -418,25 +420,26 @@ const SelectionPlanForm = (props) => {
               }
               label={T.translate("edit_selection_plan.allow_new_presentations")}
             />
-          </div>
-        </div>
+          </Grid2>
+        </Grid2>
 
-        <div className="row form-group">
-          <div className="col-md-6">
-            <MuiFormikDatepicker
-              name="submission_begin_date"
-              label={T.translate("edit_selection_plan.submission_begin_date")}
-            />
-          </div>
-          <div className="col-md-6">
-            <MuiFormikDatepicker
-              name="submission_end_date"
-              label={T.translate("edit_selection_plan.submission_end_date")}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-6">
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 6 }}>
+            <label>
+              {T.translate("edit_selection_plan.submission_begin_date")}
+            </label>
+            <MuiFormikDatepicker name="submission_begin_date" />
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 6 }}>
+            <label>
+              {T.translate("edit_selection_plan.submission_end_date")}
+            </label>
+            <MuiFormikDatepicker name="submission_end_date" />
+          </Grid2>
+        </Grid2>
+
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 6 }}>
             <label> {T.translate("edit_selection_plan.max_submissions")}</label>
             <Input
               className="form-control"
@@ -447,64 +450,57 @@ const SelectionPlanForm = (props) => {
               onChange={handleChange}
               min={0}
             />
-          </div>
-          <div className="col-md-6">
-            <MuiFormikDatepicker
-              name="submission_lock_down_presentation_status_date"
-              label={
-                <>
-                  {T.translate(
-                    "edit_selection_plan.submission_lock_down_presentation_status_date"
-                  )}{" "}
-                  &nbsp;
-                  <i
-                    className="fa fa-info-circle"
-                    aria-hidden="true"
-                    title={T.translate(
-                      "edit_selection_plan.submission_lock_down_presentation_status_date_info"
-                    )}
-                  />
-                </>
-              }
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-6">
-            <MuiFormikDatepicker
-              name="voting_begin_date"
-              label={T.translate("edit_selection_plan.voting_begin_date")}
-            />
-          </div>
-          <div className="col-md-6">
-            <MuiFormikDatepicker
-              name="voting_end_date"
-              label={T.translate("edit_selection_plan.voting_end_date")}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-6">
-            <MuiFormikDatepicker
-              name="selection_begin_date"
-              label={T.translate("edit_selection_plan.selection_begin_date")}
-            />
-          </div>
-          <div className="col-md-6">
-            <MuiFormikDatepicker
-              name="selection_end_date"
-              label={T.translate("edit_selection_plan.selection_end_date")}
-            />
-          </div>
-        </div>
-
-        <div className="row form-group">
-          <div className="col-md-12">
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 6 }}>
             <label>
-              {" "}
               {T.translate(
-                "edit_selection_plan.submission_period_disclaimer"
+                "edit_selection_plan.submission_lock_down_presentation_status_date"
               )}{" "}
+              &nbsp;
+              <i
+                className="fa fa-info-circle"
+                aria-hidden="true"
+                title={T.translate(
+                  "edit_selection_plan.submission_lock_down_presentation_status_date_info"
+                )}
+              />
+            </label>
+            <MuiFormikDatepicker name="submission_lock_down_presentation_status_date" />
+          </Grid2>
+        </Grid2>
+
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 6 }}>
+            <label>
+              {T.translate("edit_selection_plan.voting_begin_date")}
+            </label>
+            <MuiFormikDatepicker name="voting_begin_date" />
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 6 }}>
+            <label>{T.translate("edit_selection_plan.voting_end_date")}</label>
+            <MuiFormikDatepicker name="voting_end_date" />
+          </Grid2>
+        </Grid2>
+
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 6 }}>
+            <label>
+              {T.translate("edit_selection_plan.selection_begin_date")}
+            </label>
+            <MuiFormikDatepicker name="selection_begin_date" />
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 6 }}>
+            <label>
+              {T.translate("edit_selection_plan.selection_end_date")}
+            </label>
+            <MuiFormikDatepicker name="selection_end_date" />
+          </Grid2>
+        </Grid2>
+
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={12}>
+            <label>
+              {T.translate("edit_selection_plan.submission_period_disclaimer")}{" "}
               *
             </label>
             <TextEditorV3
@@ -514,8 +510,8 @@ const SelectionPlanForm = (props) => {
               error={hasErrors("submission_period_disclaimer")}
               license={process.env.JODIT_LICENSE_KEY}
             />
-          </div>
-        </div>
+          </Grid2>
+        </Grid2>
 
         <hr />
 
@@ -532,6 +528,7 @@ const SelectionPlanForm = (props) => {
                 options={trackGroupsOptions}
               />
             </Panel>
+
             <Panel
               show={showSection === "event_types"}
               title={T.translate("edit_selection_plan.event_types")}
@@ -543,32 +540,38 @@ const SelectionPlanForm = (props) => {
                 options={eventTypesOptions}
               />
             </Panel>
+
             <Panel
               show={showSection === "extra_questions"}
               title={T.translate("edit_selection_plan.extra_questions")}
               handleClick={() => toggleSection("extra_questions")}
             >
-              <div className="row">
-                <Many2ManyDropDown
-                  id="addAllowedExtraQuestions"
-                  isClearable
-                  placeholder={T.translate(
-                    "edit_selection_plan.placeholders.link_question"
-                  )}
-                  fetchOptions={fetchSummitSelectionPlanExtraQuestions}
-                  onAdd={linkSummitSelectionPlanExtraQuestion}
-                />
-                <div className="col-md-6 text-right col-md-offset-6">
+              <Grid2 container spacing={2} sx={{ alignItems: "center", mb: 2 }}>
+                <Grid2 size={{ xs: 12, md: 6 }}>
+                  <Many2ManyDropDown
+                    id="addAllowedExtraQuestions"
+                    isClearable
+                    CSSClass=""
+                    placeholder={T.translate(
+                      "edit_selection_plan.placeholders.link_question"
+                    )}
+                    fetchOptions={fetchSummitSelectionPlanExtraQuestions}
+                    onAdd={linkSummitSelectionPlanExtraQuestion}
+                  />
+                </Grid2>
+                <Grid2
+                  size={{ xs: 12, md: 6 }}
+                  sx={{ display: "flex", justifyContent: "flex-end" }}
+                >
                   <Button
                     type="button"
                     variant="contained"
-                    className="right-space"
                     onClick={handleNewExtraQuestion}
                   >
                     {T.translate("edit_selection_plan.add_extra_questions")}
                   </Button>
-                </div>
-              </div>
+                </Grid2>
+              </Grid2>
               {formik.values.extra_questions.length === 0 && (
                 <div>
                   {T.translate("edit_selection_plan.no_extra_questions")}
@@ -587,15 +590,15 @@ const SelectionPlanForm = (props) => {
                 />
               )}
             </Panel>
+
             <Panel
               show={showSection === "email_templates"}
               title={T.translate("edit_selection_plan.email_templates")}
               handleClick={() => toggleSection("email_templates")}
             >
-              <div className="row form-group">
-                <div className="col-md-6">
+              <Grid2 container spacing={2}>
+                <Grid2 size={{ xs: 12, md: 6 }}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.creator_notification_email_template"
                     )}
@@ -613,10 +616,9 @@ const SelectionPlanForm = (props) => {
                     isClearable
                     plainValue
                   />
-                </div>
-                <div className="col-md-6">
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.moderator_notification_email_template"
                     )}
@@ -634,12 +636,9 @@ const SelectionPlanForm = (props) => {
                     isClearable
                     plainValue
                   />
-                </div>
-              </div>
-              <div className="row form-group">
-                <div className="col-md-6">
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.speaker_notification_email_template"
                     )}
@@ -657,43 +656,37 @@ const SelectionPlanForm = (props) => {
                     isClearable
                     plainValue
                   />
-                </div>
-              </div>
+                </Grid2>
+              </Grid2>
             </Panel>
+
             <Panel
               show={showSection === "track_chair_settings"}
               title={T.translate("track_chair_settings.title")}
               handleClick={() => toggleSection("track_chair_settings")}
             >
-              <div className="row">
-                <div className="col-md-4 checkboxes-div">
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        id="allow_track_change_requests"
-                        checked={formik.values.allow_track_change_requests}
-                        onChange={handleChange}
-                      />
-                    }
-                    label={T.translate(
-                      "track_chair_settings.allow_change_requests"
-                    )}
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    id="allow_track_change_requests"
+                    checked={formik.values.allow_track_change_requests}
+                    onChange={handleChange}
                   />
-                </div>
-              </div>
+                }
+                label={T.translate(
+                  "track_chair_settings.allow_change_requests"
+                )}
+              />
               <hr />
-              <div className="row">
-                <div className="col-md-6 text-right col-md-offset-6">
-                  <Button
-                    type="button"
-                    variant="contained"
-                    className="right-space"
-                    onClick={handleAddRatingType}
-                  >
-                    {T.translate("track_chair_settings.add_rating_type")}
-                  </Button>
-                </div>
-              </div>
+              <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+                <Button
+                  type="button"
+                  variant="contained"
+                  onClick={handleAddRatingType}
+                >
+                  {T.translate("track_chair_settings.add_rating_type")}
+                </Button>
+              </Box>
               <SortableTable
                 options={ratingTypesOptions}
                 data={formik.values.track_chair_rating_types}
@@ -702,6 +695,7 @@ const SelectionPlanForm = (props) => {
                 updateOrderKey="order"
               />
             </Panel>
+
             <Panel
               show={showSection === "presentation_action_types"}
               title={T.translate(
@@ -709,18 +703,20 @@ const SelectionPlanForm = (props) => {
               )}
               handleClick={() => toggleSection("presentation_action_types")}
             >
-              <div className="row">
-                <Many2ManyDropDown
-                  id="addAllowedPresentationActionType"
-                  isClearable
-                  CSSClass="col-md-9"
-                  placeholder={T.translate(
-                    "edit_selection_plan.placeholders.link_presentation_action_type"
-                  )}
-                  fetchOptions={fetchSummitPresentationActionTypes}
-                  onAdd={linkSummitProgressFlag}
-                />
-              </div>
+              <Grid2 container spacing={2} sx={{ mb: 2 }}>
+                <Grid2 size={{ xs: 12, md: 9 }}>
+                  <Many2ManyDropDown
+                    id="addAllowedPresentationActionType"
+                    isClearable
+                    CSSClass=""
+                    placeholder={T.translate(
+                      "edit_selection_plan.placeholders.link_presentation_action_type"
+                    )}
+                    fetchOptions={fetchSummitPresentationActionTypes}
+                    onAdd={linkSummitProgressFlag}
+                  />
+                </Grid2>
+              </Grid2>
               {formik.values.allowed_presentation_action_types.length === 0 && (
                 <div>
                   {T.translate(
@@ -738,6 +734,7 @@ const SelectionPlanForm = (props) => {
                 />
               )}
             </Panel>
+
             {!formik.values.is_hidden && (
               <Panel
                 show={showSection === "allowed_members"}
@@ -745,66 +742,62 @@ const SelectionPlanForm = (props) => {
                 handleClick={() => toggleSection("allowed_members")}
                 className="allowed-members-panel"
               >
-                <div className="allowed-members-header">
-                  <div className="pull-right input-group">
-                    <input
-                      className="form-control"
-                      onChange={(ev) => setNewMemberEmail(ev.target.value)}
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 2
+                  }}
+                >
+                  <Button
+                    type="button"
+                    variant="contained"
+                    onClick={() => setShowImportModal(true)}
+                  >
+                    {T.translate("edit_selection_plan.import")}
+                  </Button>
+                  <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                    <TextField
+                      size="small"
                       value={newMemberEmail}
+                      onChange={(ev) => setNewMemberEmail(ev.target.value)}
                     />
-                    <span className="input-group-btn">
-                      <Button
-                        type="button"
-                        variant="outlined"
-                        className="add-button"
-                        onClick={handleAddAllowedMember}
-                        disabled={!newMemberEmail}
-                      >
-                        {T.translate("general.add")}
-                      </Button>
-                    </span>
-                  </div>
-
-                  <div className="pull-left input-group">
                     <Button
                       type="button"
-                      variant="contained"
-                      onClick={() => setShowImportModal(true)}
+                      variant="outlined"
+                      onClick={handleAddAllowedMember}
+                      disabled={!newMemberEmail}
                     >
-                      {T.translate("edit_selection_plan.import")}
+                      {T.translate("general.add")}
                     </Button>
-                  </div>
-                </div>
-
+                  </Box>
+                </Box>
                 <Table
                   data={allowedMembers.data}
                   columns={allowedMembersColumns}
                   options={allowedMembersOptions}
                 />
-                <Pagination
-                  bsSize="medium"
-                  prev
-                  next
-                  first
-                  last
-                  ellipsis
-                  boundaryLinks
-                  maxButtons={10}
-                  items={allowedMembers.lastPage}
-                  activePage={allowedMembers.currentPage}
-                  onSelect={handleAllowedMembersPageChange}
-                />
+                <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                  <Pagination
+                    count={allowedMembers.lastPage}
+                    page={allowedMembers.currentPage}
+                    onChange={(_, page) => handleAllowedMembersPageChange(page)}
+                    showFirstButton
+                    showLastButton
+                  />
+                </Box>
               </Panel>
             )}
+
             <Panel
               show={showSection === "cfp_settings"}
               title={T.translate("edit_selection_plan.cfp_settings")}
               handleClick={() => toggleSection("cfp_settings")}
             >
-              <div className="row form-group">
-                <div className="col-md-12">
+              <Grid2 container spacing={2}>
+                <Grid2 size={12}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.cfp_presentation_edition_custom_message"
                     )}
@@ -827,12 +820,9 @@ const SelectionPlanForm = (props) => {
                     }
                     license={process.env.JODIT_LICENSE_KEY}
                   />
-                </div>
-              </div>
-              <div className="row form-group">
-                <div className="col-md-12">
+                </Grid2>
+                <Grid2 size={12}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.allowed_presentation_questions"
                     )}
@@ -847,12 +837,9 @@ const SelectionPlanForm = (props) => {
                     options={DEFAULT_ALLOWED_QUESTIONS}
                     isMulti
                   />
-                </div>
-              </div>
-              <div className="row form-group">
-                <div className="col-md-12">
+                </Grid2>
+                <Grid2 size={12}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.allowed_presentation_editable_questions"
                     )}{" "}
@@ -870,12 +857,9 @@ const SelectionPlanForm = (props) => {
                     options={DEFAULT_ALLOWED_EDITABLE_QUESTIONS}
                     isMulti
                   />
-                </div>
-              </div>
-              <div className="row form-group">
-                <div className="col-md-12">
+                </Grid2>
+                <Grid2 size={12}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.cfp_presentation_edition_default_tab"
                     )}
@@ -894,12 +878,9 @@ const SelectionPlanForm = (props) => {
                     isMulti={false}
                     isClearable
                   />
-                </div>
-              </div>
-              <div className="row form-group">
-                <div className="col-md-6">
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
                   <label>
-                    {" "}
                     {T.translate("edit_selection_plan.cfp_landing_page_title")}
                     &nbsp;
                     <i
@@ -920,10 +901,9 @@ const SelectionPlanForm = (props) => {
                         ?.value || ""
                     }
                   />
-                </div>
-                <div className="col-md-6">
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.cfp_track_question_label"
                     )}
@@ -946,12 +926,9 @@ const SelectionPlanForm = (props) => {
                         ?.value || ""
                     }
                   />
-                </div>
-              </div>
-              <div className="row form-group">
-                <div className="col-md-6">
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.cfp_speakers_singular_label"
                     )}
@@ -974,10 +951,9 @@ const SelectionPlanForm = (props) => {
                         .cfp_speakers_singular_label?.value || ""
                     }
                   />
-                </div>
-                <div className="col-md-6">
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.cfp_speakers_plural_label"
                     )}
@@ -1000,12 +976,9 @@ const SelectionPlanForm = (props) => {
                         ?.value || ""
                     }
                   />
-                </div>
-              </div>
-              <div className="row form-group">
-                <div className="col-md-6">
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.cfp_presentations_singular_label"
                     )}
@@ -1028,10 +1001,9 @@ const SelectionPlanForm = (props) => {
                         .cfp_presentations_singular_label?.value || ""
                     }
                   />
-                </div>
-                <div className="col-md-6">
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.cfp_presentations_plural_label"
                     )}
@@ -1054,12 +1026,9 @@ const SelectionPlanForm = (props) => {
                         .cfp_presentations_plural_label?.value || ""
                     }
                   />
-                </div>
-              </div>
-              <div className="row form-group">
-                <div className="col-md-6">
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.cfp_presentation_summary_title_label"
                     )}
@@ -1082,10 +1051,9 @@ const SelectionPlanForm = (props) => {
                         .cfp_presentation_summary_title_label?.value || ""
                     }
                   />
-                </div>
-                <div className="col-md-6">
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.cfp_presentation_summary_abstract_label"
                     )}
@@ -1108,12 +1076,9 @@ const SelectionPlanForm = (props) => {
                         .cfp_presentation_summary_abstract_label?.value || ""
                     }
                   />
-                </div>
-              </div>
-              <div className="row form-group">
-                <div className="col-md-6">
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.cfp_presentation_summary_social_summary_label"
                     )}
@@ -1139,10 +1104,9 @@ const SelectionPlanForm = (props) => {
                       ""
                     }
                   />
-                </div>
-                <div className="col-md-6">
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.cfp_presentation_summary_links_label"
                     )}
@@ -1165,12 +1129,9 @@ const SelectionPlanForm = (props) => {
                         .cfp_presentation_summary_links_label?.value || ""
                     }
                   />
-                </div>
-              </div>
-              <div className="row form-group">
-                <div className="col-md-6">
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.cfp_presentation_summary_hide_track_selection"
                     )}
@@ -1182,28 +1143,24 @@ const SelectionPlanForm = (props) => {
                         "edit_selection_plan.cfp_presentation_summary_hide_track_selection_info"
                       )}
                     />
-                  </label>{" "}
+                  </label>
                   <br />
-                  <Switch
+                  <MuiSwitch
                     checked={
                       formik.values.marketing_settings
                         .cfp_presentation_summary_hide_track_selection?.value ||
                       false
                     }
-                    onChange={(val) => {
+                    onChange={(ev) =>
                       handleOnSwitchChange(
                         "cfp_presentation_summary_hide_track_selection",
-                        val
-                      );
-                    }}
-                    uncheckedIcon={false}
-                    checkedIcon={false}
-                    className="react-switch"
+                        ev.target.checked
+                      )
+                    }
                   />
-                </div>
-                <div className="col-md-6">
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
                   <label>
-                    {" "}
                     {T.translate(
                       "edit_selection_plan.cfp_presentation_summary_hide_activity_type_selection"
                     )}
@@ -1215,78 +1172,68 @@ const SelectionPlanForm = (props) => {
                         "edit_selection_plan.cfp_presentation_summary_hide_activity_type_selection_info"
                       )}
                     />
-                  </label>{" "}
+                  </label>
                   <br />
-                  <Switch
+                  <MuiSwitch
                     checked={
                       formik.values.marketing_settings
                         .cfp_presentation_summary_hide_activity_type_selection
                         ?.value || false
                     }
-                    onChange={(val) => {
+                    onChange={(ev) =>
                       handleOnSwitchChange(
                         "cfp_presentation_summary_hide_activity_type_selection",
-                        val
-                      );
-                    }}
-                    uncheckedIcon={false}
-                    checkedIcon={false}
-                    className="react-switch"
+                        ev.target.checked
+                      )
+                    }
                   />
-                </div>
-              </div>
-              {window.CFP_APP_BASE_URL && (
-                <div className="row form-group">
-                  <div className="col-md-6">
-                    <label>
-                      {T.translate(
-                        "edit_selection_plan.cfp_presentation_selection_plan_link"
-                      )}
-                    </label>
-                    <br />
-                    <a
-                      className="text-table-link"
-                      href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${formik.values.id}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${formik.values.id}`}
-                    </a>
-                  </div>
-                  <div className="col-md-6">
-                    <label>
-                      {T.translate(
-                        "edit_selection_plan.cfp_presentation_all_selection_plan_link"
-                      )}
-                    </label>
-                    <br />
-                    <a
-                      className="text-table-link"
-                      href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
-                    </a>
-                  </div>
-                </div>
-              )}
+                </Grid2>
+                {window.CFP_APP_BASE_URL && (
+                  <>
+                    <Grid2 size={{ xs: 12, md: 6 }}>
+                      <label>
+                        {T.translate(
+                          "edit_selection_plan.cfp_presentation_selection_plan_link"
+                        )}
+                      </label>
+                      <br />
+                      <a
+                        className="text-table-link"
+                        href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${formik.values.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${formik.values.id}`}
+                      </a>
+                    </Grid2>
+                    <Grid2 size={{ xs: 12, md: 6 }}>
+                      <label>
+                        {T.translate(
+                          "edit_selection_plan.cfp_presentation_all_selection_plan_link"
+                        )}
+                      </label>
+                      <br />
+                      <a
+                        className="text-table-link"
+                        href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
+                      </a>
+                    </Grid2>
+                  </>
+                )}
+              </Grid2>
             </Panel>
           </>
         )}
 
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <Button
-              type="submit"
-              variant="contained"
-              className="pull-right"
-              disabled={isSaving}
-            >
-              {T.translate("general.save")}
-            </Button>
-          </div>
-        </div>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 4 }}>
+          <Button type="submit" variant="contained" disabled={isSaving}>
+            {T.translate("general.save")}
+          </Button>
+        </Box>
 
         <ImportModal
           title={T.translate("edit_selection_plan.import_allowed_members")}
