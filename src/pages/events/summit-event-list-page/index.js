@@ -26,13 +26,20 @@ import {
   useGridFilter
 } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import {
+  queryTags,
+  queryMembers
+} from "openstack-uicore-foundation/lib/utils/query-actions";
+import {
   bulkUpdateEvents,
   changeEventListSearchTerm,
   exportEvents,
   getEvents,
   deleteEvent,
   importEventsCSV,
-  importMP4AssetsFromMUX
+  importMP4AssetsFromMUX,
+  querySpeakerCompany,
+  querySubmitterCompany,
+  queryAllCompanies
 } from "../../../actions/event-actions";
 import { getMediaUploads } from "../../../actions/media-upload-actions";
 import { handleDDLSortByLabel } from "../../../utils/methods";
@@ -463,6 +470,14 @@ const submissionSourceOptions = [
   { label: "Submission", value: "Submission" }
 ];
 
+// queryTags' response shape differs depending on whether it's summit-scoped
+// (nested `tag.tag`) or global (flat `tag`); handle both defensively.
+const tagFormatOption = (item) => ({
+  value: item.id,
+  label:
+    typeof item.tag === "string" ? item.tag : item.tag?.tag || String(item.id)
+});
+
 const getCriterias = (summit, mediaUploadTypes) => [
   {
     key: "event_type_capacity",
@@ -472,7 +487,6 @@ const getCriterias = (summit, mediaUploadTypes) => [
       type: "select",
       props: {
         options: eventTypeCapacityOptions,
-        placeholder: T.translate("event_list.placeholders.event_type_capacity"),
         multiple: true
       }
     },
@@ -503,7 +517,6 @@ const getCriterias = (summit, mediaUploadTypes) => [
           label: sp.name,
           value: sp.id
         })),
-        placeholder: T.translate("event_list.placeholders.selection_plan"),
         multiple: true
       }
     }
@@ -519,7 +532,6 @@ const getCriterias = (summit, mediaUploadTypes) => [
           label: sp.name,
           value: sp.id
         })),
-        placeholder: T.translate("event_list.placeholders.location"),
         multiple: true
       }
     }
@@ -532,7 +544,6 @@ const getCriterias = (summit, mediaUploadTypes) => [
       type: "select",
       props: {
         options: selectionStatusOptions,
-        placeholder: T.translate("event_list.placeholders.selection_status"),
         multiple: true
       }
     }
@@ -545,7 +556,6 @@ const getCriterias = (summit, mediaUploadTypes) => [
       type: "select",
       props: {
         options: summit.tracks.map((t) => ({ label: t.name, value: t.id })),
-        placeholder: T.translate("event_list.placeholders.track"),
         multiple: true
       }
     }
@@ -561,7 +571,6 @@ const getCriterias = (summit, mediaUploadTypes) => [
           label: type.name,
           value: type.id
         })),
-        placeholder: T.translate("event_list.placeholders.event_type"),
         multiple: true
       }
     }
@@ -571,29 +580,30 @@ const getCriterias = (summit, mediaUploadTypes) => [
     label: "Speakers",
     operators: [OPERATORS.IS],
     values: {
-      type: "select", // need async dropdown type
+      type: "speaker",
       props: {
-        options: [],
-        placeholder: T.translate("event_list.placeholders.speaker"),
+        summitId: summit.id,
         multiple: true
       }
-    }
+    },
+    customParser: (f) => [
+      `speaker_id==${f.value.map((s) => s.value).join("||")}`
+    ]
   },
   {
     key: "speaker_company",
     label: "Speaker Company",
     operators: [OPERATORS.IS],
     values: {
-      type: "select", // need async dropdown type
+      type: "company",
       props: {
-        options: [],
-        placeholder: T.translate("event_list.placeholders.speaker_company"),
+        queryFunction: querySpeakerCompany,
         multiple: true
       }
     },
     customParser: (f) => [
       `speaker_company==${f.value
-        .map((c) => escapeFilterValue(c.name))
+        .map((c) => escapeFilterValue(c.raw.name))
         .join("||")}`
     ]
   },
@@ -605,7 +615,6 @@ const getCriterias = (summit, mediaUploadTypes) => [
       type: "select",
       props: {
         options: levelOptions,
-        placeholder: T.translate("event_list.placeholders.level"),
         multiple: true
       }
     }
@@ -615,13 +624,17 @@ const getCriterias = (summit, mediaUploadTypes) => [
     label: "Tags",
     operators: [OPERATORS.IS],
     values: {
-      type: "select", // need async dropdown type
+      type: "asyncSelect",
       props: {
-        options: [],
-        placeholder: T.translate("event_list.placeholders.tags"),
+        queryFunction: (input, callback) =>
+          queryTags(summit.id, input, callback),
+        formatOption: tagFormatOption,
         multiple: true
       }
-    }
+    },
+    customParser: (f) => [
+      `tags==${f.value.map((t) => escapeFilterValue(t.label)).join("||")}`
+    ]
   },
   {
     key: "published",
@@ -630,8 +643,7 @@ const getCriterias = (summit, mediaUploadTypes) => [
     values: {
       type: "select",
       props: {
-        options: publishedStatusOptions,
-        placeholder: "Filter by Published Status"
+        options: publishedStatusOptions
       }
     }
   },
@@ -642,8 +654,7 @@ const getCriterias = (summit, mediaUploadTypes) => [
     values: {
       type: "select",
       props: {
-        options: rsvpOptions,
-        placeholder: "Filter by RSVP Status"
+        options: rsvpOptions
       }
     },
     customParser: (f) => [`rsvp_type${f.value ? "<>" : "=="}None`]
@@ -659,7 +670,6 @@ const getCriterias = (summit, mediaUploadTypes) => [
           value: pf.id,
           label: pf.label
         })),
-        placeholder: T.translate("event_list.placeholders.progress_flag"),
         multiple: true
       }
     },
@@ -672,8 +682,10 @@ const getCriterias = (summit, mediaUploadTypes) => [
     label: "Created",
     operators: [OPERATORS.BEFORE, OPERATORS.AFTER],
     values: {
-      type: "date", // need date input value type
-      props: { placeholder: T.translate("event_list.placeholders.created") }
+      type: "datetime",
+      props: {
+        mode: "datetime"
+      }
     }
   },
   {
@@ -681,8 +693,10 @@ const getCriterias = (summit, mediaUploadTypes) => [
     label: "Modified",
     operators: [OPERATORS.BEFORE, OPERATORS.AFTER],
     values: {
-      type: "date", // need date input value type
-      props: { placeholder: T.translate("event_list.placeholders.modified") }
+      type: "datetime",
+      props: {
+        mode: "datetime"
+      }
     }
   },
   {
@@ -690,8 +704,10 @@ const getCriterias = (summit, mediaUploadTypes) => [
     label: "Start Date",
     operators: [OPERATORS.BEFORE, OPERATORS.AFTER],
     values: {
-      type: "date", // need date input value type
-      props: { placeholder: T.translate("event_list.placeholders.start_date") }
+      type: "datetime",
+      props: {
+        mode: "datetime"
+      }
     }
   },
   {
@@ -699,8 +715,10 @@ const getCriterias = (summit, mediaUploadTypes) => [
     label: "End Date",
     operators: [OPERATORS.BEFORE, OPERATORS.AFTER],
     values: {
-      type: "date", // need date input value type
-      props: { placeholder: T.translate("event_list.placeholders.end_date") }
+      type: "datetime",
+      props: {
+        mode: "datetime"
+      }
     }
   },
   {
@@ -708,8 +726,11 @@ const getCriterias = (summit, mediaUploadTypes) => [
     label: "Duration",
     operators: [OPERATORS.IS, OPERATORS.LESS, OPERATORS.GREATER],
     values: {
-      type: "text", // maybe need number ? or custom validation
-      props: { placeholder: T.translate("event_list.placeholders.duration") }
+      type: "number",
+      props: {
+        min: 0,
+        integer: true
+      }
     }
   },
   {
@@ -717,9 +738,10 @@ const getCriterias = (summit, mediaUploadTypes) => [
     label: "Speaker Count",
     operators: [OPERATORS.IS, OPERATORS.LESS, OPERATORS.GREATER],
     values: {
-      type: "text", // maybe need number ? or custom validation
+      type: "number",
       props: {
-        placeholder: T.translate("event_list.placeholders.speaker_count")
+        min: 0,
+        integer: true
       }
     }
   },
@@ -728,39 +750,44 @@ const getCriterias = (summit, mediaUploadTypes) => [
     label: "Submitters",
     operators: [OPERATORS.IS],
     values: {
-      type: "select", // need async dropdown type
+      type: "asyncSelect",
       props: {
-        options: [],
-        placeholder: T.translate("event_list.placeholders.submitters"),
+        queryFunction: queryMembers,
+        formatOption: (m) => ({
+          value: m.id,
+          label: `${m.first_name} ${m.last_name} (${m.email})`
+        }),
         multiple: true
       }
     },
-    customParser: (f) =>
-      f.value.map((s) => {
-        const escapedFullName = escapeFilterValue(
-          `${s.first_name} ${s.last_name}`
-        );
-        const escapedEmail = escapeFilterValue(s.email);
-        const fullNameFilter = `created_by_fullname==${escapedFullName}`;
-        const emailFilter = `created_by_email==${escapedEmail}`;
-        return [fullNameFilter, emailFilter];
-      })
+    customParser: (f) => [
+      f.value
+        .flatMap((s) => {
+          const escapedFullName = escapeFilterValue(
+            `${s.raw.first_name} ${s.raw.last_name}`
+          );
+          const escapedEmail = escapeFilterValue(s.raw.email);
+          const fullNameFilter = `created_by_fullname==${escapedFullName}`;
+          const emailFilter = `created_by_email==${escapedEmail}`;
+          return [fullNameFilter, emailFilter];
+        })
+        .join(",")
+    ]
   },
   {
     key: "created_by_company",
     label: "Submitter Company",
     operators: [OPERATORS.IS],
     values: {
-      type: "select", // need async dropdown type
+      type: "company",
       props: {
-        options: [],
-        placeholder: T.translate("event_list.placeholders.submitter_company"),
+        queryFunction: querySubmitterCompany,
         multiple: true
       }
     },
     customParser: (f) => [
       `created_by_company==${f.value
-        .map((c) => escapeFilterValue(c.name))
+        .map((c) => escapeFilterValue(c.raw.name))
         .join("||")}`
     ]
   },
@@ -769,8 +796,8 @@ const getCriterias = (summit, mediaUploadTypes) => [
     label: "Streaming URL",
     operators: [OPERATORS.IS, OPERATORS.LIKE_START, OPERATORS.LIKE],
     values: {
-      type: "text", // maybe need url ? or custom validation
-      props: { placeholder: T.translate("event_list.placeholders.url") }
+      type: "text", // TODO: maybe need url ? or custom validation
+      props: {}
     }
   },
   {
@@ -778,8 +805,8 @@ const getCriterias = (summit, mediaUploadTypes) => [
     label: "Meeting URL",
     operators: [OPERATORS.IS, OPERATORS.LIKE_START, OPERATORS.LIKE],
     values: {
-      type: "text", // maybe need url ? or custom validation
-      props: { placeholder: T.translate("event_list.placeholders.url") }
+      type: "text", // TODO: maybe need url ? or custom validation
+      props: {}
     }
   },
   {
@@ -787,8 +814,8 @@ const getCriterias = (summit, mediaUploadTypes) => [
     label: "Etherpad Link",
     operators: [OPERATORS.IS, OPERATORS.LIKE_START, OPERATORS.LIKE],
     values: {
-      type: "text", // maybe need url ? or custom validation
-      props: { placeholder: T.translate("event_list.placeholders.url") }
+      type: "text", // TODO: maybe need url ? or custom validation
+      props: {}
     }
   },
   {
@@ -798,8 +825,7 @@ const getCriterias = (summit, mediaUploadTypes) => [
     values: {
       type: "select",
       props: {
-        options: streamingTypeOptions,
-        placeholder: T.translate("event_list.placeholders.streaming_type")
+        options: streamingTypeOptions
       }
     }
   },
@@ -808,30 +834,29 @@ const getCriterias = (summit, mediaUploadTypes) => [
     label: "Sponsor",
     operators: [OPERATORS.IS],
     values: {
-      type: "select", // need async dropdown type
+      type: "company",
       props: {
-        options: [],
-        placeholder: T.translate("event_list.placeholders.sponsor"),
         multiple: true
       }
     },
-    customParser: (f) => [`sponsor==${f.value.map((s) => s.name).join("||")}`]
+    customParser: (f) => [
+      `sponsor==${f.value.map((s) => escapeFilterValue(s.raw.name)).join("||")}`
+    ]
   },
   {
     key: "all_companies",
     label: "All Companies",
     operators: [OPERATORS.IS],
     values: {
-      type: "select", // need async dropdown type
+      type: "company",
       props: {
-        options: [],
-        placeholder: T.translate("event_list.placeholders.all_companies"),
+        queryFunction: queryAllCompanies,
         multiple: true
       }
     },
     customParser: (f) => {
       const companies = f.value
-        .map((c) => escapeFilterValue(c.name))
+        .map((c) => escapeFilterValue(c.raw.name))
         .join("||");
       return [
         `speaker_company==${companies},created_by_company==${companies},sponsor==${companies}`
@@ -845,8 +870,7 @@ const getCriterias = (summit, mediaUploadTypes) => [
     values: {
       type: "select",
       props: {
-        options: submissionStatusOptions,
-        placeholder: T.translate("event_list.placeholders.submission_status")
+        options: submissionStatusOptions
       }
     }
   },
@@ -861,7 +885,6 @@ const getCriterias = (summit, mediaUploadTypes) => [
           value: type.id,
           label: type.name
         })),
-        placeholder: T.translate("event_list.placeholders.media_upload_type"),
         multiple: true
       }
     },
@@ -887,7 +910,6 @@ const getCriterias = (summit, mediaUploadTypes) => [
       type: "select",
       props: {
         options: reviewStatusOptions,
-        placeholder: T.translate("event_list.placeholders.review_status"),
         multiple: true
       }
     }
@@ -899,8 +921,7 @@ const getCriterias = (summit, mediaUploadTypes) => [
     values: {
       type: "select",
       props: {
-        options: submissionSourceOptions,
-        placeholder: T.translate("event_list.placeholders.submission_source")
+        options: submissionSourceOptions
       }
     }
   }
@@ -937,8 +958,11 @@ const SummitEventListPage = ({
   const { parsedFilter, resetFilters, filterValues } = useGridFilter(FILTER_ID);
 
   useEffect(() => {
+    getMediaUploads("", 1, MAX_PER_PAGE, "name", 1);
+  }, []);
+
+  useEffect(() => {
     if (currentSummit) {
-      getMediaUploads("", 1, MAX_PER_PAGE, "name", 1);
       getEvents(
         term,
         currentPage,
@@ -949,7 +973,7 @@ const SummitEventListPage = ({
         extraColumns
       );
     }
-  }, [currentSummit]);
+  }, [currentSummit, parsedFilter.join(",")]);
 
   useEffect(() => {
     setSelectedColumns(extraColumns);
@@ -1064,7 +1088,7 @@ const SummitEventListPage = ({
       id,
       show_id: currentSummit.id,
       name,
-      enabled_filters: [],
+      enabled_filters: filterValues.map((f) => f.criteria),
       // only save criteria for enabled filters
       criteria: filterValues,
       context: CONTEXT_ACTIVITIES,

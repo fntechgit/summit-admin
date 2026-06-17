@@ -36,11 +36,9 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 import URI from "urijs";
 import history from "../history";
 import {
-  checkOrFilter,
   getAccessTokenSafely,
   isNumericString,
-  joinCVSChunksAndNormalizeHeaders,
-  parseDateRangeFilter
+  joinCVSChunksAndNormalizeHeaders
 } from "../utils/methods";
 import { getQAUsersBySummitEvent } from "./user-chat-roles-actions";
 import { getAuditLog } from "./audit-log-actions";
@@ -51,9 +49,7 @@ import {
   DEFAULT_PER_PAGE,
   EXPORT_PAGE_SIZE_200,
   FIVE_PER_PAGE,
-  HOUR_AND_HALF,
-  SECONDS_TO_MINUTES,
-  TWO
+  HOUR_AND_HALF
 } from "../utils/constants";
 import { getIdValue } from "../utils/summitUtils";
 
@@ -98,323 +94,6 @@ const fieldsBoundToQuestions = [
   LEVEL,
   SOCIAL_DESCRIPTION
 ];
-
-const parseFilters = (filters, term = null) => {
-  const filter = [];
-
-  if (
-    filters.hasOwnProperty("event_type_capacity_filter") &&
-    Array.isArray(filters.event_type_capacity_filter) &&
-    filters.event_type_capacity_filter.length > 0
-  ) {
-    if (
-      filters.event_type_capacity_filter.includes("allows_attendee_vote_filter")
-    ) {
-      filter.push("type_allows_attendee_vote==1");
-    }
-    if (filters.event_type_capacity_filter.includes("allows_location_filter")) {
-      filter.push("type_allows_location==1");
-    }
-    if (
-      filters.event_type_capacity_filter.includes(
-        "allows_publishing_dates_filter"
-      )
-    ) {
-      filter.push("type_allows_publishing_dates==1");
-    }
-  }
-
-  if (
-    filters.hasOwnProperty("selection_plan_id_filter") &&
-    Array.isArray(filters.selection_plan_id_filter) &&
-    filters.selection_plan_id_filter.length > 0
-  ) {
-    filter.push(
-      `selection_plan_id==${filters.selection_plan_id_filter.join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("location_id_filter") &&
-    Array.isArray(filters.location_id_filter) &&
-    filters.location_id_filter.length > 0
-  ) {
-    filter.push(`location_id==${filters.location_id_filter.join("||")}`);
-  }
-
-  if (
-    filters.hasOwnProperty("selection_status_filter") &&
-    Array.isArray(filters.selection_status_filter) &&
-    filters.selection_status_filter.length > 0
-  ) {
-    filter.push(
-      `selection_status==${filters.selection_status_filter.join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("review_status_filter") &&
-    Array.isArray(filters.review_status_filter) &&
-    filters.review_status_filter.length > 0
-  ) {
-    filter.push(`review_status==${filters.review_status_filter.join("||")}`);
-  }
-
-  if (filters?.progress_flag?.length > 0) {
-    filter.push(
-      filters.progress_flag
-        .map((pf) => `actions==type_id==${pf}&&is_completed==1`)
-        .join(",")
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("track_id_filter") &&
-    Array.isArray(filters.track_id_filter) &&
-    filters.track_id_filter.length > 0
-  ) {
-    filter.push(`track_id==${filters.track_id_filter.join("||")}`);
-  }
-
-  if (
-    filters.hasOwnProperty("event_type_id_filter") &&
-    Array.isArray(filters.event_type_id_filter) &&
-    filters.event_type_id_filter.length > 0
-  ) {
-    filter.push(`event_type_id==${filters.event_type_id_filter.join("||")}`);
-  }
-
-  if (
-    filters.hasOwnProperty("speaker_id_filter") &&
-    Array.isArray(filters.speaker_id_filter) &&
-    filters.speaker_id_filter.length > 0
-  ) {
-    filter.push(
-      `speaker_id==${filters.speaker_id_filter
-        .map((speaker) => speaker.id)
-        .join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("level_filter") &&
-    Array.isArray(filters.level_filter) &&
-    filters.level_filter.length > 0
-  ) {
-    filter.push(`level==${filters.level_filter.join("||")}`);
-  }
-
-  if (
-    filters.hasOwnProperty("tags_filter") &&
-    Array.isArray(filters.tags_filter) &&
-    filters.tags_filter.length > 0
-  ) {
-    filter.push(`tags==${filters.tags_filter.map((t) => t.tag).join("||")}`);
-  }
-
-  if (filters.published_filter) {
-    filter.push(
-      `published==${filters.published_filter === "published" ? "1" : "0"}`
-    );
-  }
-
-  if (filters.has_rsvp_filter) {
-    filter.push(
-      `rsvp_type${filters.has_rsvp_filter === "yes" ? "<>" : "=="}None`
-    );
-  }
-
-  if (filters.start_date_filter) {
-    parseDateRangeFilter(filter, filters.start_date_filter, "start_date");
-  }
-
-  if (filters.end_date_filter) {
-    parseDateRangeFilter(filter, filters.end_date_filter, "end_date");
-  }
-
-  if (filters.created_filter) {
-    parseDateRangeFilter(filter, filters.created_filter, "created");
-  }
-
-  if (filters.modified_filter) {
-    parseDateRangeFilter(filter, filters.modified_filter, "last_edited");
-  }
-
-  if (filters.duration_filter) {
-    // multiply values to send the minutes in seconds
-    if (Array.isArray(filters.duration_filter)) {
-      // between
-      filter.push(
-        `duration[]${filters.duration_filter[0] * SECONDS_TO_MINUTES}&&${
-          filters.duration_filter[1] * SECONDS_TO_MINUTES
-        }`
-      );
-    } else {
-      filter.push(
-        `duration${filters.duration_filter.replace(/\d/g, "")}${
-          filters.duration_filter.replace(/\D/g, "") * SECONDS_TO_MINUTES
-        }`
-      );
-    }
-  }
-
-  if (filters.speakers_count_filter) {
-    if (
-      Array.isArray(filters.speakers_count_filter) &&
-      filters.speakers_count_filter.length === TWO
-    ) {
-      // between
-      filter.push(
-        `speakers_count[]${filters.speakers_count_filter[0]}&&${filters.speakers_count_filter[1]}`
-      );
-    } else {
-      filter.push(`speakers_count${filters.speakers_count_filter}`);
-    }
-  }
-
-  if (
-    filters.hasOwnProperty("submitters") &&
-    Array.isArray(filters.submitters) &&
-    filters.submitters.length > 0
-  ) {
-    // created by fullname | created_by_email
-    filter.push(
-      filters.submitters.map((tt) => {
-        const escapedFullName = escapeFilterValue(
-          `${tt.first_name} ${tt.last_name}`
-        );
-        const escapedEmail = escapeFilterValue(tt.email);
-        const fullNameFilter = `created_by_fullname==${escapedFullName}`;
-        const emailFilter = `created_by_email==${escapedEmail}`;
-        return [fullNameFilter, emailFilter];
-      }, "")
-    );
-  }
-
-  if (filters.hasOwnProperty("streaming_url") && filters.streaming_url) {
-    const searchString = escapeFilterValue(filters.streaming_url);
-    filter.push(`streaming_url@@${searchString}`);
-  }
-  if (filters.hasOwnProperty("meeting_url") && filters.meeting_url) {
-    const searchString = escapeFilterValue(filters.meeting_url);
-    filter.push(`meeting_url@@${searchString}`);
-  }
-  if (filters.hasOwnProperty("etherpad_link") && filters.etherpad_link) {
-    const searchString = escapeFilterValue(filters.etherpad_link);
-    filter.push(`etherpad_link@@${searchString}`);
-  }
-
-  if (filters.hasOwnProperty("streaming_type") && filters.streaming_type) {
-    filter.push(`streaming_type==${filters.streaming_type}`);
-  }
-
-  if (
-    filters.hasOwnProperty("submission_source_filter") &&
-    filters.submission_source_filter
-  ) {
-    filter.push(`submission_source==${filters.submission_source_filter}`);
-  }
-
-  if (
-    filters.hasOwnProperty("speaker_company") &&
-    Array.isArray(filters.speaker_company) &&
-    filters.speaker_company.length > 0
-  ) {
-    filter.push(
-      `speaker_company==${filters.speaker_company
-        .map((c) => escapeFilterValue(c.name))
-        .join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("submitter_company") &&
-    Array.isArray(filters.submitter_company) &&
-    filters.submitter_company.length > 0
-  ) {
-    filter.push(
-      `created_by_company==${filters.submitter_company
-        .map((c) => escapeFilterValue(c.name))
-        .join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("sponsor") &&
-    Array.isArray(filters.sponsor) &&
-    filters.sponsor.length > 0
-  ) {
-    filter.push(
-      `sponsor==${filters.sponsor.map((sponsor) => sponsor.name).join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("all_companies") &&
-    Array.isArray(filters.all_companies) &&
-    filters.all_companies.length > 0
-  ) {
-    const companies = filters.all_companies
-      .map((c) => escapeFilterValue(c.name))
-      .join("||");
-    filter.push(
-      `speaker_company==${companies},created_by_company==${companies},sponsor==${companies}`
-    );
-  }
-
-  if (filters.is_public) {
-    filter.push("is_public==1");
-  }
-
-  if (filters.is_activity) {
-    filter.push("is_activity==1");
-  }
-
-  if (
-    filters.hasOwnProperty("submission_status_filter") &&
-    Array.isArray(filters.submission_status_filter) &&
-    filters.submission_status_filter.length > 0
-  ) {
-    filter.push(
-      `submission_status==${filters.submission_status_filter.join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("media_upload_with_type") &&
-    filters.media_upload_with_type.operator !== null &&
-    Array.isArray(filters.media_upload_with_type.value) &&
-    filters.media_upload_with_type.value.length > 0
-  ) {
-    const concatOperator =
-      filters.media_upload_with_type.operator === "has_media_upload_with_type=="
-        ? "||"
-        : "&&";
-    filter.push(
-      `${
-        filters.media_upload_with_type.operator
-      }${filters.media_upload_with_type.value
-        .map((v) => v.id)
-        .join(concatOperator)}`
-    );
-  }
-
-  if (term) {
-    const escapedTerm = escapeFilterValue(term);
-    let searchString =
-      `title=@${escapedTerm},` +
-      `abstract=@${escapedTerm},` +
-      `speaker_title=@${escapedTerm}`;
-
-    if (isNumericString(term)) {
-      searchString += `,id==${term}`;
-    }
-
-    filter.push(searchString);
-  }
-
-  return checkOrFilter(filters, filter);
-};
 
 export const normalizeEvent = (entity, eventTypeConfig, summit) => {
   const normalizedEntity = { ...entity };
@@ -550,7 +229,7 @@ export const getEvents =
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    filters = {},
+    filters = [],
     extraColumns = []
   ) =>
   async (dispatch, getState) => {
@@ -558,10 +237,23 @@ export const getEvents =
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const summitTZ = currentSummit.time_zone.name;
+    const filter = [...filters];
 
     dispatch(startLoading());
 
-    const filter = parseFilters(filters, term);
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      let searchString =
+        `title=@${escapedTerm},` +
+        `abstract=@${escapedTerm},` +
+        `speaker_title=@${escapedTerm}`;
+
+      if (isNumericString(term)) {
+        searchString += `,id==${term}`;
+      }
+
+      filter.push(searchString);
+    }
 
     const params = {
       expand:
@@ -1236,26 +928,35 @@ export const deleteEvent = (eventId) => async (dispatch, getState) => {
 };
 
 export const exportEvents =
-  (
-    term = null,
-    order = "id",
-    orderDir = DEFAULT_ORDER_DIR,
-    extraFilters = {}
-  ) =>
+  (term = null, order = "id", orderDir = DEFAULT_ORDER_DIR, filters = []) =>
   async (dispatch, getState) => {
     dispatch(startLoading());
     const { currentSummitState, currentEventListState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const { totalEvents } = currentEventListState;
-
     const csvMIME = "text/csv;charset=utf-8";
     const filename = `${currentSummit.name}-Activities.csv`;
     const totalPages = Math.ceil(totalEvents / EXPORT_PAGE_SIZE_200);
-
     const endpoint = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/csv`;
 
-    const filter = parseFilters(extraFilters, term);
+    const filter = [...filters];
+
+    dispatch(startLoading());
+
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      let searchString =
+        `title=@${escapedTerm},` +
+        `abstract=@${escapedTerm},` +
+        `speaker_title=@${escapedTerm}`;
+
+      if (isNumericString(term)) {
+        searchString += `,id==${term}`;
+      }
+
+      filter.push(searchString);
+    }
 
     const params = Array.from({ length: totalPages }, (_, i) => {
       const res = {
@@ -1489,19 +1190,23 @@ export const getEventComments =
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
     const summitTZ = currentSummit.time_zone_id;
+    const filter = [];
 
     dispatch(startLoading());
 
-    const filter = parseFilters(filters);
+    if (filters.is_public) {
+      filter.push("is_public==1");
+    }
+
+    if (filters.is_activity) {
+      filter.push("is_activity==1");
+    }
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
       const searchString = `body=@${escapedTerm},creator_id==${escapedTerm},`;
       filter.push(searchString);
     }
-
-    // `is_public==${escapedTerm},`;
-    // `is_activity==${escapedTerm},`;
 
     const params = {
       page,
