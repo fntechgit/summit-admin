@@ -729,6 +729,11 @@ class EventForm extends React.Component {
     onSaveIncomplete({ ...entity });
   }
 
+  isPresentation() {
+    const { entity } = this.state;
+    return entity.class_name === "Presentation";
+  }
+
   isNew() {
     const { entity } = this.state;
     return !entity.id;
@@ -1081,12 +1086,14 @@ class EventForm extends React.Component {
     ];
 
     const missingDraftFields =
-      this.isNew() || this.isComplete() ? [] : this.getMissingDraftFields();
+      !this.isPresentation() || this.isNew() || this.isComplete()
+        ? []
+        : this.getMissingDraftFields();
 
     return (
       <div>
         <input type="hidden" id="id" value={entity.id} />
-        {!this.isNew() && !this.isComplete() && (
+        {this.isPresentation() && !this.isNew() && !this.isComplete() && (
           <div className="alert alert-warning" role="alert">
             <div
               style={{
@@ -2147,14 +2154,16 @@ class EventForm extends React.Component {
                   className="btn btn-success pull-right"
                   value={T.translate("general.save_and_publish")}
                 />
-                {!this.isNew() && !this.isComplete() && (
-                  <input
-                    type="button"
-                    onClick={this.handleSaveIncomplete}
-                    className="btn btn-warning pull-right"
-                    value={T.translate("edit_event.save_as_incomplete")}
-                  />
-                )}
+                {this.isPresentation() &&
+                  !this.isNew() &&
+                  !this.isComplete() && (
+                    <input
+                      type="button"
+                      onClick={this.handleSaveIncomplete}
+                      className="btn btn-warning pull-right"
+                      value={T.translate("edit_event.save_as_incomplete")}
+                    />
+                  )}
               </div>
             )}
 
