@@ -227,10 +227,11 @@ export const getSponsors =
       page: currentPage,
       per_page: perPage,
       expand:
-        "company,sponsorships,sponsorships.type,sponsorships.type.type,sponsorships.add_ons",
-      relations: "company.none,sponsorships.none,sponsorships.type.none,none",
+        "company,sponsorships,sponsorships.type,sponsorships.type.type,sponsorships.add_ons,sponsorservices_statistics",
+      relations:
+        "company.none,sponsorships.none,sponsorships.type.none,none,sponsorservices_statistics",
       fields:
-        "id,company.name,company.id,sponsorships.id,sponsorships.type.type.name,sponsorships.add_ons.name,sponsorships.add_ons.type",
+        "id,company.name,company.id,sponsorships.id,sponsorships.type.type.name,sponsorships.add_ons.name,sponsorships.add_ons.type,sponsorservices_statistics.forms_qty,sponsorservices_statistics.purchases_qty,sponsorservices_statistics.pages_qty,sponsorservices_statistics.documents_qty",
       access_token: accessToken
     };
 
