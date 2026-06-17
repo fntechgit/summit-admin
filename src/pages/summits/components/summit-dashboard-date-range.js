@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import RemoveIcon from "@mui/icons-material/Remove";
-import { parseAndFormat } from "../../../utils/methods";
+import { formatDate } from "../../../utils/methods";
 import { DATETIME_FORMAT } from "../../../utils/constants";
 
 function SummitDashboardDateRange({ label, startTs, endTs, tzName }) {
@@ -24,11 +24,11 @@ function SummitDashboardDateRange({ label, startTs, endTs, tzName }) {
         <Typography variant="body2">{label}</Typography>
       </Box>
       <Typography variant="body1">
-        {parseAndFormat(String(startTs), "X", DATETIME_FORMAT, "UTC", tzName)}
+        {formatDate(startTs, tzName, DATETIME_FORMAT)}
       </Typography>
       <RemoveIcon sx={{ mx: 2, fontSize: 16 }} />
       <Typography variant="body1">
-        {parseAndFormat(String(endTs), "X", DATETIME_FORMAT, "UTC", tzName)}
+        {formatDate(endTs, tzName, DATETIME_FORMAT)}
       </Typography>
     </Box>
   );
