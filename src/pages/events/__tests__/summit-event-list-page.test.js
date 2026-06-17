@@ -86,6 +86,9 @@ describe("SummitEventListPage", () => {
             presentation_action_types: []
           }
         },
+        mediaUploadListState: {
+          media_uploads: []
+        },
         currentEventListState: {
           events: [
             {
@@ -104,8 +107,7 @@ describe("SummitEventListPage", () => {
           term: "",
           filters: {},
           extraColumns: ["media_uploads"],
-          perPage: 10,
-          enabledFilters: []
+          perPage: 10
         }
       }
     });
@@ -134,6 +136,9 @@ describe("SummitEventListPage", () => {
             presentation_action_types: []
           }
         },
+        mediaUploadListState: {
+          media_uploads: []
+        },
         currentEventListState: {
           events: [
             {
@@ -161,8 +166,7 @@ describe("SummitEventListPage", () => {
           term: "",
           filters: {},
           extraColumns: ["media_uploads"],
-          perPage: 10,
-          enabledFilters: []
+          perPage: 10
         }
       }
     });
@@ -215,6 +219,9 @@ describe("SummitEventListPage", () => {
             presentation_action_types: []
           }
         },
+        mediaUploadListState: {
+          media_uploads: []
+        },
         currentEventListState: {
           events: [
             {
@@ -239,8 +246,7 @@ describe("SummitEventListPage", () => {
           term: "",
           filters: {},
           extraColumns: ["media_uploads"],
-          perPage: 10,
-          enabledFilters: []
+          perPage: 10
         }
       }
     });
@@ -290,6 +296,9 @@ describe("SummitEventListPage", () => {
             presentation_action_types: []
           }
         },
+        mediaUploadListState: {
+          media_uploads: []
+        },
         currentEventListState: {
           events: [
             {
@@ -315,8 +324,7 @@ describe("SummitEventListPage", () => {
           term: "",
           filters: {},
           extraColumns: ["media_uploads"],
-          perPage: 10,
-          enabledFilters: []
+          perPage: 10
         }
       }
     });

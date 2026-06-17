@@ -52,7 +52,7 @@ describe("Event Actions", () => {
     capturedParams = null;
   });
 
-  test("builds speakers_count between filter using [] syntax", async () => {
+  test("passes pre-built [] range filter strings through to the request", async () => {
     const store = mockStore({
       currentSummitState: {
         currentSummit: {
@@ -63,7 +63,7 @@ describe("Event Actions", () => {
     });
 
     store.dispatch(
-      getEvents(null, 1, 10, "id", 1, { speakers_count_filter: [1, 3] }, [])
+      getEvents(null, 1, 10, "id", 1, ["speakers_count[]1&&3"], [])
     );
 
     await flushPromises();
@@ -71,7 +71,6 @@ describe("Event Actions", () => {
     expect(getRequest).toHaveBeenCalledTimes(1);
     expect(capturedParams).toBeTruthy();
     expect(capturedParams["filter[]"]).toContain("speakers_count[]1&&3");
-    expect(capturedParams["filter[]"]).not.toContain("speakers_count[]]1&&3");
   });
 
   test("requests type.use_speakers in fields for event list", async () => {
@@ -93,7 +92,7 @@ describe("Event Actions", () => {
     expect(capturedParams.fields).toContain("type.use_speakers");
   });
 
-  test("builds speakers_count operator filter when value is not an array", async () => {
+  test("passes pre-built operator filter strings through to the request", async () => {
     const store = mockStore({
       currentSummitState: {
         currentSummit: {
@@ -103,9 +102,7 @@ describe("Event Actions", () => {
       }
     });
 
-    store.dispatch(
-      getEvents(null, 1, 10, "id", 1, { speakers_count_filter: ">=2" }, [])
-    );
+    store.dispatch(getEvents(null, 1, 10, "id", 1, ["speakers_count>=2"], []));
 
     await flushPromises();
 
