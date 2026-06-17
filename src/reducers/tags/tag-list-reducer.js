@@ -41,7 +41,15 @@ const tagListReducer = (state = DEFAULT_STATE, action) => {
     }
     case REQUEST_TAGS: {
       const { order, orderDir, term, page, perPage } = payload;
-      return { ...state, order, orderDir, term, currentPage: page, perPage };
+      return {
+        ...state,
+        order,
+        orderDir,
+        term,
+        currentPage: page,
+        perPage,
+        tags: []
+      };
     }
     case RECEIVE_TAGS: {
       const { current_page, total, last_page } = payload.response;

@@ -181,6 +181,23 @@ describe("TagListPage", () => {
     expect(getTags).toHaveBeenLastCalledWith("", 1, 25, "id", 1);
   });
 
+  // Regression: users who visited /app/tags before the MUI migration had
+  // tags: {} persisted in localStorage. The component must not crash on
+  // the initial render when the rehydrated state has tags as an object.
+  it("renders without crashing when stale persisted state has tags as an object", () => {
+    const staleState = {
+      ...initialState,
+      currentTagListState: {
+        ...initialState.currentTagListState,
+        tags: {}
+      }
+    };
+
+    expect(() =>
+      renderWithRedux(<TagListPage />, { initialState: staleState })
+    ).not.toThrow();
+  });
+
   it("calls resetTagForm when dialog is closed without saving", async () => {
     renderWithRedux(<TagListPage />, { initialState });
 
