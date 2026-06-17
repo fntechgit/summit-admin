@@ -38,7 +38,6 @@ import {
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 import PageTemplatePopup from "./page-template-popup";
 import PageTemplateClonePopup from "./page-template-clone-popup";
-import { getSafePageAfterRemove } from "../../../utils/methods";
 
 const PageTemplateListPage = ({
   pageTemplates,
@@ -125,14 +124,9 @@ const PageTemplateListPage = ({
       : archivePageTemplate(item.id)
     )
       .then(() => {
-        const safePage = getSafePageAfterRemove(
-          totalPageTemplates,
-          perPage,
-          currentPage
-        );
         getPageTemplates(
           term,
-          safePage,
+          currentPage,
           perPage,
           order,
           orderDir,

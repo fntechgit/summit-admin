@@ -29,6 +29,7 @@ import {
 } from "../../actions/summit-actions";
 import { PAGES_MODULE_KINDS } from "../../utils/constants";
 import { denormalizePageModules } from "../../utils/page-template";
+import { getSafePageAfterRemove } from "../../utils/methods";
 
 const DEFAULT_PAGE = {
   code: "",
@@ -198,6 +199,9 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
     }
     case SPONSOR_CUSTOMIZED_PAGE_ARCHIVED: {
       const { pageId } = payload;
+      const {
+        customizedPages: { totalItems, currentPage, perPage }
+      } = state;
       const pages = state.customizedPages.pages.map((page) =>
         page.id === pageId ? { ...page, is_archived: true } : page
       );
@@ -205,12 +209,16 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         customizedPages: {
           ...state.customizedPages,
-          pages: [...pages]
+          pages: [...pages],
+          currentPage: getSafePageAfterRemove(totalItems, perPage, currentPage)
         }
       };
     }
     case SPONSOR_CUSTOMIZED_PAGE_UNARCHIVED: {
       const { pageId } = payload;
+      const {
+        customizedPages: { totalItems, currentPage, perPage }
+      } = state;
       const pages = state.customizedPages.pages.map((page) =>
         page.id === pageId ? { ...page, is_archived: false } : page
       );
@@ -218,7 +226,8 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         customizedPages: {
           ...state.customizedPages,
-          pages: [...pages]
+          pages: [...pages],
+          currentPage: getSafePageAfterRemove(totalItems, perPage, currentPage)
         }
       };
     }

@@ -23,6 +23,7 @@ import {
   SPONSOR_FORM_ITEM_UNARCHIVED
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { getSafePageAfterRemove } from "../../utils/methods";
 
 const DEFAULT_STATE = {
   items: [],
@@ -117,21 +118,31 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
     }
     case SPONSOR_FORM_ITEM_ARCHIVED: {
       const { id: itemId } = payload.response;
+      const { totalCount, perPage, currentPage } = state;
 
       const items = state.items.map((item) =>
         item.id === itemId ? { ...item, is_archived: true } : item
       );
 
-      return { ...state, items };
+      return {
+        ...state,
+        items,
+        currentPage: getSafePageAfterRemove(totalCount, perPage, currentPage)
+      };
     }
     case SPONSOR_FORM_ITEM_UNARCHIVED: {
       const { itemId } = payload;
+      const { totalCount, perPage, currentPage } = state;
 
       const items = state.items.map((item) =>
         item.id === itemId ? { ...item, is_archived: false } : item
       );
 
-      return { ...state, items };
+      return {
+        ...state,
+        items,
+        currentPage: getSafePageAfterRemove(totalCount, perPage, currentPage)
+      };
     }
     default:
       return state;

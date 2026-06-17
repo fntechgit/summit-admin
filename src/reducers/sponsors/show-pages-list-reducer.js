@@ -27,6 +27,7 @@ import {
   RECEIVE_SUMMIT_SPONSORSHIP_TYPES
 } from "../../actions/summit-actions";
 import { denormalizePageModules } from "../../utils/page-template";
+import { getSafePageAfterRemove } from "../../utils/methods";
 
 const DEFAULT_SHOW_PAGE = {
   code: "",
@@ -109,22 +110,26 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
     }
     case SHOW_PAGE_ARCHIVED: {
       const { pageId } = payload;
+      const { totalCount, perPage, currentPage } = state;
       const pages = state.showPages.map((page) =>
         page.id === pageId ? { ...page, is_archived: true } : page
       );
       return {
         ...state,
-        showPages: [...pages]
+        showPages: [...pages],
+        currentPage: getSafePageAfterRemove(totalCount, perPage, currentPage)
       };
     }
     case SHOW_PAGE_UNARCHIVED: {
       const { pageId } = payload;
+      const { totalCount, perPage, currentPage } = state;
       const pages = state.showPages.map((page) =>
         page.id === pageId ? { ...page, is_archived: false } : page
       );
       return {
         ...state,
-        showPages: [...pages]
+        showPages: [...pages],
+        currentPage: getSafePageAfterRemove(totalCount, perPage, currentPage)
       };
     }
     case RECEIVE_SHOW_PAGE: {

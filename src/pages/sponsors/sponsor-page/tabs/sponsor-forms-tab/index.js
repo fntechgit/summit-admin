@@ -39,7 +39,6 @@ import CustomAlert from "../../../../../components/mui/custom-alert";
 import AddSponsorFormTemplatePopup from "./components/add-sponsor-form-template-popup";
 import CustomizedFormPopup from "./components/customized-form/customized-form-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../../../utils/constants";
-import { getSafePageAfterRemove } from "../../../../../utils/methods";
 
 const SponsorFormsTab = ({
   term,
@@ -153,16 +152,10 @@ const SponsorFormsTab = ({
       : archiveSponsorCustomizedForm(item.id)
     )
       .then(() => {
-        const { perPage, order, orderDir, currentPage, totalCount } =
-          customizedForms;
-        const safePage = getSafePageAfterRemove(
-          totalCount,
-          perPage,
-          currentPage
-        );
+        const { perPage, order, orderDir, currentPage } = customizedForms;
         getSponsorCustomizedForms(
           term,
-          safePage,
+          currentPage,
           perPage,
           order,
           orderDir,

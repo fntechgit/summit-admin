@@ -20,6 +20,7 @@ import {
   FORM_TEMPLATE_ARCHIVED,
   FORM_TEMPLATE_UNARCHIVED
 } from "../../actions/form-template-actions";
+import { getSafePageAfterRemove } from "../../utils/methods";
 
 const DEFAULT_STATE = {
   formTemplates: [],
@@ -99,6 +100,7 @@ const formTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
     }
     case FORM_TEMPLATE_ARCHIVED: {
       const updatedFormTemplate = payload.response;
+      const { totalFormTemplates, currentPage, perPage } = state;
 
       const updatedFormTemplates = state.formTemplates.map((item) =>
         item.id === updatedFormTemplate.id
@@ -107,11 +109,17 @@ const formTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
       );
       return {
         ...state,
-        formTemplates: updatedFormTemplates
+        formTemplates: updatedFormTemplates,
+        currentPage: getSafePageAfterRemove(
+          totalFormTemplates,
+          perPage,
+          currentPage
+        )
       };
     }
     case FORM_TEMPLATE_UNARCHIVED: {
       const updatedFormTemplateId = payload;
+      const { totalFormTemplates, currentPage, perPage } = state;
 
       const updatedFormTemplates = state.formTemplates.map((item) =>
         item.id === updatedFormTemplateId
@@ -120,7 +128,12 @@ const formTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
       );
       return {
         ...state,
-        formTemplates: updatedFormTemplates
+        formTemplates: updatedFormTemplates,
+        currentPage: getSafePageAfterRemove(
+          totalFormTemplates,
+          perPage,
+          currentPage
+        )
       };
     }
     case CHANGE_FORM_TEMPLATE_SEARCH_TERM: {

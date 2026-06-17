@@ -169,11 +169,15 @@ describe("getSafePageAfterRemove", () => {
     expect(getSafePageAfterRemove(12, 10, 2)).toBe(2);
   });
 
-  it("should go back one page when removing the last item on the last page", () => {
+  it("should go back one page when the removal empties the last page", () => {
     expect(getSafePageAfterRemove(21, 10, 3)).toBe(2);
   });
 
   it("should never return a page lower than 1", () => {
     expect(getSafePageAfterRemove(1, 10, 1)).toBe(1);
+  });
+
+  it("should stay on current page when removal does not reduce page count", () => {
+    expect(getSafePageAfterRemove(20, 10, 2)).toBe(2);
   });
 });

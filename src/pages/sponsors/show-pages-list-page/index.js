@@ -40,7 +40,6 @@ import CustomAlert from "../../../components/mui/custom-alert";
 import GlobalPagePopup from "./components/global-page/global-page-popup";
 import PageTemplatePopup from "../../sponsors-global/page-templates/page-template-popup";
 import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
-import { getSafePageAfterRemove } from "../../../utils/methods";
 
 const ShowPagesListPage = ({
   match,
@@ -104,12 +103,7 @@ const ShowPagesListPage = ({
   const handleArchiveItem = (item) =>
     (item.is_archived ? unarchiveShowPage(item.id) : archiveShowPage(item.id))
       .then(() => {
-        const safePage = getSafePageAfterRemove(
-          totalCount,
-          perPage,
-          currentPage
-        );
-        getShowPages(term, safePage, perPage, order, orderDir, showArchived);
+        getShowPages(term, currentPage, perPage, order, orderDir, showArchived);
       })
       .catch(() =>
         getShowPages(term, currentPage, perPage, order, orderDir, showArchived)

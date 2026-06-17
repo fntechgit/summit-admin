@@ -42,7 +42,6 @@ import FormTemplateDialog from "./form-template-popup";
 import history from "../../../history";
 import FormTemplateFromDuplicateDialog from "./form-template-from-duplicate-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
-import { getSafePageAfterRemove } from "../../../utils/methods";
 
 const FormTemplateListPage = ({
   formTemplates,
@@ -156,14 +155,9 @@ const FormTemplateListPage = ({
   const handleArchiveItem = (item) =>
     (item.is_archived ? unarchiveFormTemplate(item) : archiveFormTemplate(item))
       .then(() => {
-        const safePage = getSafePageAfterRemove(
-          totalFormTemplates,
-          perPage,
-          currentPage
-        );
         getFormTemplates(
           term,
-          safePage,
+          currentPage,
           perPage,
           order,
           orderDir,

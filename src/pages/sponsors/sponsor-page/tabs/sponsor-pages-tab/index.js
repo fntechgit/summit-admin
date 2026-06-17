@@ -44,7 +44,6 @@ import {
   DEFAULT_CURRENT_PAGE,
   SPONSOR_MANAGED_PAGE_ASSIGNMENT
 } from "../../../../../utils/constants";
-import { getSafePageAfterRemove } from "../../../../../utils/methods";
 import AddSponsorPageTemplatePopup from "./components/add-sponsor-page-template-popup";
 import PageTemplatePopup from "../../../../sponsors-global/page-templates/page-template-popup";
 
@@ -186,16 +185,10 @@ const SponsorPagesTab = ({
       : archiveCustomizedPage(item.id)
     )
       .then(() => {
-        const { perPage, order, orderDir, currentPage, totalItems } =
-          customizedPages;
-        const safePage = getSafePageAfterRemove(
-          totalItems,
-          perPage,
-          currentPage
-        );
+        const { perPage, order, orderDir, currentPage } = customizedPages;
         return getSponsorCustomizedPages(
           term,
-          safePage,
+          currentPage,
           perPage,
           order,
           orderDir,

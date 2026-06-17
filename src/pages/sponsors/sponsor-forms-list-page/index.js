@@ -42,7 +42,6 @@ import GlobalTemplatePopup from "./components/global-template/global-template-po
 import FormTemplatePopup from "./components/form-template/form-template-popup";
 import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
 import { normalizeTiers, sameTierSet } from "./utils";
-import { getSafePageAfterRemove } from "../../../utils/methods";
 
 const SponsorFormsListPage = ({
   sponsorForms,
@@ -124,12 +123,14 @@ const SponsorFormsListPage = ({
       : archiveSponsorForm(item.id)
     )
       .then(() => {
-        const safePage = getSafePageAfterRemove(
-          totalCount,
+        getSponsorForms(
+          term,
+          currentPage,
           perPage,
-          currentPage
+          order,
+          orderDir,
+          showArchived
         );
-        getSponsorForms(term, safePage, perPage, order, orderDir, showArchived);
       })
       .catch(() =>
         getSponsorForms(

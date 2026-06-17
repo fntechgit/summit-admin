@@ -42,7 +42,6 @@ import AddFormTemplateItemDialog from "./add-form-template-item-popup";
 import SponsorInventoryDialog from "./sponsor-inventory-popup";
 import { getInventoryItems } from "../../../actions/inventory-item-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
-import { getSafePageAfterRemove } from "../../../utils/methods";
 
 const FormTemplateItemListPage = ({
   formTemplateId,
@@ -164,15 +163,10 @@ const FormTemplateItemListPage = ({
       : archiveFormTemplateItem(formTemplateId, item)
     )
       .then(() => {
-        const safePage = getSafePageAfterRemove(
-          totalFormTemplateItems,
-          perPage,
-          currentPage
-        );
         getFormTemplateItems(
           formTemplateId,
           term,
-          safePage,
+          currentPage,
           perPage,
           order,
           orderDir,

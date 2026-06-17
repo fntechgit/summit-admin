@@ -40,7 +40,6 @@ import SponsorFormAddItemFromInventoryPopup from "./components/sponsor-form-add-
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 import { rateCellValidation } from "../../../utils/yup";
 import { rateToCents } from "../../../utils/rate-helpers";
-import { getSafePageAfterRemove } from "../../../utils/methods";
 
 const SponsorFormItemListPage = ({
   match,
@@ -114,14 +113,9 @@ const SponsorFormItemListPage = ({
       : archiveSponsorFormItem(formId, item.id)
     )
       .then(() => {
-        const safePage = getSafePageAfterRemove(
-          totalCount,
-          perPage,
-          currentPage
-        );
         getSponsorFormItems(
           formId,
-          safePage,
+          currentPage,
           perPage,
           order,
           orderDir,

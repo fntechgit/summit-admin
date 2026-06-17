@@ -646,8 +646,6 @@ export const isImageUrl = (url) =>
   /\.(jpe?g|png|gif|webp|svg|bmp)(\?|$)/i.test(url);
 
 export const getSafePageAfterRemove = (totalCount, perPage, currentPage) => {
-  const totalAfter = totalCount - 1;
-  const totalPages = Math.ceil(totalAfter / perPage);
-  const lastValidPage = Math.max(1, totalPages);
-  return Math.min(currentPage, lastValidPage);
+  const pageCountDecreases = Number.isInteger((totalCount - 1) / perPage);
+  return pageCountDecreases && currentPage > 1 ? currentPage - 1 : currentPage;
 };

@@ -24,6 +24,7 @@ import {
   SPONSOR_CUSTOMIZED_FORM_UPDATED
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { getSafePageAfterRemove } from "../../utils/methods";
 
 export const DEFAULT_STATE = {
   managedForms: {
@@ -238,6 +239,10 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
     }
     case SPONSOR_CUSTOMIZED_FORM_ARCHIVED_CHANGED: {
       const { formId, isArchived } = payload;
+      const {
+        customizedForms: { totalCount, currentPage, perPage }
+      } = state;
+
       const forms = state.customizedForms.forms.map((form) => {
         if (form.id === formId) {
           return {
@@ -252,7 +257,8 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         customizedForms: {
           ...state.customizedForms,
-          forms
+          forms,
+          currentPage: getSafePageAfterRemove(totalCount, perPage, currentPage)
         }
       };
     }

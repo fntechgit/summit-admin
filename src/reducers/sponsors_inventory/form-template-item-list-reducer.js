@@ -20,6 +20,7 @@ import {
   FORM_TEMPLATE_ITEM_ARCHIVED,
   FORM_TEMPLATE_ITEM_UNARCHIVED
 } from "../../actions/form-template-item-actions";
+import { getSafePageAfterRemove } from "../../utils/methods";
 
 const DEFAULT_STATE = {
   formTemplateItems: [],
@@ -89,10 +90,16 @@ const formTemplateItemListReducer = (state = DEFAULT_STATE, action = {}) => {
     }
     case FORM_TEMPLATE_ITEM_DELETED: {
       const { formTemplateItemId } = payload;
+      const { totalFormTemplateItems, perPage, currentPage } = state;
       return {
         ...state,
         formTemplateItems: state.formTemplateItems.filter(
           (a) => a.id !== formTemplateItemId
+        ),
+        currentPage: getSafePageAfterRemove(
+          totalFormTemplateItems,
+          perPage,
+          currentPage
         )
       };
     }
@@ -102,7 +109,7 @@ const formTemplateItemListReducer = (state = DEFAULT_STATE, action = {}) => {
     }
     case FORM_TEMPLATE_ITEM_ARCHIVED: {
       const updatedFormTemplateItem = payload.response;
-
+      const { totalFormTemplateItems, perPage, currentPage } = state;
       const updatedFormTemplatesItems = state.formTemplateItems.map((item) =>
         item.id === updatedFormTemplateItem.id
           ? { ...item, is_archived: true }
@@ -110,12 +117,17 @@ const formTemplateItemListReducer = (state = DEFAULT_STATE, action = {}) => {
       );
       return {
         ...state,
-        formTemplateItems: updatedFormTemplatesItems
+        formTemplateItems: updatedFormTemplatesItems,
+        currentPage: getSafePageAfterRemove(
+          totalFormTemplateItems,
+          perPage,
+          currentPage
+        )
       };
     }
     case FORM_TEMPLATE_ITEM_UNARCHIVED: {
       const updatedFormTemplateItemId = payload;
-
+      const { totalFormTemplateItems, perPage, currentPage } = state;
       const updatedFormTemplatesItems = state.formTemplateItems.map((item) =>
         item.id === updatedFormTemplateItemId
           ? { ...item, is_archived: false }
@@ -123,7 +135,12 @@ const formTemplateItemListReducer = (state = DEFAULT_STATE, action = {}) => {
       );
       return {
         ...state,
-        formTemplateItems: updatedFormTemplatesItems
+        formTemplateItems: updatedFormTemplatesItems,
+        currentPage: getSafePageAfterRemove(
+          totalFormTemplateItems,
+          perPage,
+          currentPage
+        )
       };
     }
     default:
