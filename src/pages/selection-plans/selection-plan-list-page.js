@@ -80,10 +80,10 @@ const SelectionPlanListPage = ({
     openEditModal(selectionPlan.id);
   };
 
-  const handleDelete = (selectionPlan) => {
-    if (!selectionPlan?.id) return;
+  const handleDelete = (id) => {
+    if (!id) return;
 
-    deleteSelectionPlan(selectionPlan.id)
+    deleteSelectionPlan(id)
       .finally(() => refreshSelectionPlans())
       .catch(() => {});
   };

@@ -21,13 +21,11 @@ import {
   queryEventTypes
 } from "openstack-uicore-foundation/lib/utils/query-actions";
 import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
-import MuiFormikDatepicker from "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker";
-import SimpleLinkList from "openstack-uicore-foundation/lib/components/simple-link-list";
 import SortableTable from "openstack-uicore-foundation/lib/components/mui/sortable-table";
-import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
 import Table from "openstack-uicore-foundation/lib/components/mui/table";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
+import Autocomplete from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
@@ -35,7 +33,10 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid2 from "@mui/material/Grid2";
 import MuiSwitch from "@mui/material/Switch";
 import Pagination from "@mui/material/Pagination";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
+import MuiFormikDatetimepicker from "../mui/formik-inputs/mui-formik-datetimepicker";
 import { scrollToError, stripTags } from "../../utils/methods";
 import EmailTemplateInput from "../inputs/email-template-input";
 import ImportModal from "../inputs/import-modal";
@@ -67,6 +68,14 @@ const buildInitialValues = (entity, timezone) => {
       : null;
   });
   return values;
+};
+
+const TAB_SX = {
+  fontSize: "1.4rem",
+  lineHeight: "1.8rem",
+  minHeight: "36px",
+  px: 2,
+  py: 1
 };
 
 const SelectionPlanForm = (props) => {
@@ -105,13 +114,15 @@ const SelectionPlanForm = (props) => {
     onAllowedMembersPageChange
   } = props;
 
-  const [showSection, setShowSection] = useState("main");
+  const [activeTab, setActiveTab] = useState("main");
   const [newMemberEmail, setNewMemberEmail] = useState("");
   const [showImportModal, setShowImportModal] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [trackGroupSelection, setTrackGroupSelection] = useState(null);
+  const [trackGroupSearchOptions, setTrackGroupSearchOptions] = useState([]);
+  const [eventTypeSelection, setEventTypeSelection] = useState(null);
+  const [eventTypeSearchOptions, setEventTypeSearchOptions] = useState([]);
 
   const handleFormikSubmit = (values) => {
-    setIsSaving(true);
     if (onSavingChange) onSavingChange(true);
 
     const normalized = { ...values };
@@ -138,7 +149,6 @@ const SelectionPlanForm = (props) => {
         // errors are surfaced via error handler
       })
       .finally(() => {
-        setIsSaving(false);
         if (onSavingChange) onSavingChange(false);
       });
   };
@@ -156,6 +166,13 @@ const SelectionPlanForm = (props) => {
       formik.setErrors(propsErrors);
     }
   }, [propsErrors]);
+
+  // Reset tab if allowed_members becomes unavailable
+  useEffect(() => {
+    if (formik.values.is_hidden && activeTab === "allowed_members") {
+      setActiveTab("main");
+    }
+  }, [formik.values.is_hidden]);
 
   const hasErrors = (field) => formik.errors[field] ?? "";
 
@@ -243,52 +260,21 @@ const SelectionPlanForm = (props) => {
     });
   };
 
-  const toggleSection = (section) => {
-    setShowSection((prev) => (prev === section ? "main" : section));
-  };
-
   const trackGroupsColumns = [
-    { columnKey: "name", value: T.translate("edit_selection_plan.name") },
+    { columnKey: "name", header: T.translate("edit_selection_plan.name") },
     {
       columnKey: "description",
-      value: T.translate("edit_selection_plan.description")
+      header: T.translate("edit_selection_plan.description")
     }
   ];
 
-  const trackGroupsOptions = {
-    valueKey: "name",
-    labelKey: "name",
-    defaultOptions: true,
-    actions: {
-      search: (input, callback) => {
-        queryTrackGroups(currentSummit.id, input, callback);
-      },
-      delete: { onClick: handleTrackGroupUnLink },
-      add: { onClick: handleTrackGroupLink }
-    }
-  };
+  const trackGroupsOptions = {};
 
   const eventTypesColumns = [
-    { columnKey: "name", value: T.translate("edit_selection_plan.name") }
+    { columnKey: "name", header: T.translate("edit_selection_plan.name") }
   ];
 
-  const eventTypesOptions = {
-    valueKey: "name",
-    labelKey: "name",
-    defaultOptions: true,
-    actions: {
-      search: (input, callback) => {
-        queryEventTypes(
-          currentSummit.id,
-          input,
-          callback,
-          PresentationTypeClassName
-        );
-      },
-      delete: { onClick: handleDeleteEventType },
-      add: { onClick: handleAddEventType }
-    }
-  };
+  const eventTypesOptions = {};
 
   const extraQuestionColumns = [
     {
@@ -307,11 +293,7 @@ const SelectionPlanForm = (props) => {
 
   const extraQuestionsOptions = {
     sortCol: extraQuestionsOrder,
-    sortDir: extraQuestionsOrderDir,
-    actions: {
-      edit: { onClick: handleEditExtraQuestion },
-      delete: { onClick: handleDeleteExtraQuestion }
-    }
+    sortDir: extraQuestionsOrderDir
   };
 
   const ratingTypesColumns = [
@@ -319,12 +301,7 @@ const SelectionPlanForm = (props) => {
     { columnKey: "weight", header: T.translate("rating_type_list.weight") }
   ];
 
-  const ratingTypesOptions = {
-    actions: {
-      edit: { onClick: handleEditRatingType },
-      delete: { onClick: handleDeleteRatingType }
-    }
-  };
+  const ratingTypesOptions = {};
 
   const actionTypesColumns = [
     { columnKey: "label", header: T.translate("progress_flags.label") }
@@ -332,10 +309,7 @@ const SelectionPlanForm = (props) => {
 
   const actionTypesOptions = {
     sortCol: actionTypesOrder,
-    sortDir: actionTypesOrderDir,
-    actions: {
-      delete: { onClick: handleRemoveProgressFlag }
-    }
+    sortDir: actionTypesOrderDir
   };
 
   const allowedMembersColumns = [
@@ -345,895 +319,1147 @@ const SelectionPlanForm = (props) => {
 
   const allowedMembersOptions = {
     sortCol: "email",
-    sortDir: 1,
-    actions: {
-      delete: { onClick: handleDeleteAllowedMember }
-    }
+    sortDir: 1
   };
+
+  const tabs = [
+    { value: "main", label: "Main" },
+    {
+      value: "track_groups",
+      label: T.translate("edit_selection_plan.track_groups")
+    },
+    {
+      value: "event_types",
+      label: T.translate("edit_selection_plan.event_types")
+    },
+    {
+      value: "extra_questions",
+      label: T.translate("edit_selection_plan.extra_questions")
+    },
+    {
+      value: "email_templates",
+      label: T.translate("edit_selection_plan.email_templates")
+    },
+    {
+      value: "track_chair_settings",
+      label: T.translate("track_chair_settings.title")
+    },
+    {
+      value: "presentation_action_types",
+      label: T.translate("edit_selection_plan.presentation_action_types")
+    },
+    ...(!formik.values.is_hidden
+      ? [
+          {
+            value: "allowed_members",
+            label: T.translate("edit_selection_plan.allowed_members")
+          }
+        ]
+      : []),
+    {
+      value: "cfp_settings",
+      label: T.translate("edit_selection_plan.cfp_settings")
+    }
+  ];
 
   return (
     <FormikProvider value={formik}>
       <Box
+        id="selection-plan-form"
         component="form"
         className="selection-plan-form"
         onSubmit={formik.handleSubmit}
       >
         <input type="hidden" id="id" value={formik.values.id} />
 
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={{ xs: 12, md: 4 }}>
-            <label> {T.translate("edit_selection_plan.name")} *</label>
-            <Input
-              id="name"
-              className="form-control"
-              error={hasErrors("name")}
-              onChange={handleChange}
-              value={formik.values.name}
-            />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  id="is_enabled"
-                  checked={formik.values.is_enabled}
-                  onChange={handleChange}
-                />
-              }
-              label={T.translate("edit_selection_plan.enabled")}
-            />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  id="is_hidden"
-                  checked={formik.values.is_hidden}
-                  onChange={handleChange}
-                />
-              }
-              label={T.translate("edit_selection_plan.hidden")}
-            />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  id="allow_proposed_schedules"
-                  checked={formik.values.allow_proposed_schedules}
-                  onChange={handleChange}
-                />
-              }
-              label={T.translate(
-                "edit_selection_plan.allow_proposed_schedules"
-              )}
-            />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  id="allow_new_presentations"
-                  checked={formik.values.allow_new_presentations}
-                  onChange={handleChange}
-                />
-              }
-              label={T.translate("edit_selection_plan.allow_new_presentations")}
-            />
-          </Grid2>
-        </Grid2>
-
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={{ xs: 12, md: 6 }}>
-            <label>
-              {T.translate("edit_selection_plan.submission_begin_date")}
-            </label>
-            <MuiFormikDatepicker name="submission_begin_date" />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 6 }}>
-            <label>
-              {T.translate("edit_selection_plan.submission_end_date")}
-            </label>
-            <MuiFormikDatepicker name="submission_end_date" />
-          </Grid2>
-        </Grid2>
-
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={{ xs: 12, md: 6 }}>
-            <label> {T.translate("edit_selection_plan.max_submissions")}</label>
-            <Input
-              className="form-control"
-              type="number"
-              error={hasErrors("max_submission_allowed_per_user")}
-              id="max_submission_allowed_per_user"
-              value={formik.values.max_submission_allowed_per_user}
-              onChange={handleChange}
-              min={0}
-            />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 6 }}>
-            <label>
-              {T.translate(
-                "edit_selection_plan.submission_lock_down_presentation_status_date"
-              )}{" "}
-              &nbsp;
-              <i
-                className="fa fa-info-circle"
-                aria-hidden="true"
-                title={T.translate(
-                  "edit_selection_plan.submission_lock_down_presentation_status_date_info"
-                )}
-              />
-            </label>
-            <MuiFormikDatepicker name="submission_lock_down_presentation_status_date" />
-          </Grid2>
-        </Grid2>
-
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={{ xs: 12, md: 6 }}>
-            <label>
-              {T.translate("edit_selection_plan.voting_begin_date")}
-            </label>
-            <MuiFormikDatepicker name="voting_begin_date" />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 6 }}>
-            <label>{T.translate("edit_selection_plan.voting_end_date")}</label>
-            <MuiFormikDatepicker name="voting_end_date" />
-          </Grid2>
-        </Grid2>
-
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={{ xs: 12, md: 6 }}>
-            <label>
-              {T.translate("edit_selection_plan.selection_begin_date")}
-            </label>
-            <MuiFormikDatepicker name="selection_begin_date" />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 6 }}>
-            <label>
-              {T.translate("edit_selection_plan.selection_end_date")}
-            </label>
-            <MuiFormikDatepicker name="selection_end_date" />
-          </Grid2>
-        </Grid2>
-
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={12}>
-            <label>
-              {T.translate("edit_selection_plan.submission_period_disclaimer")}{" "}
-              *
-            </label>
-            <TextEditorV3
-              id="submission_period_disclaimer"
-              value={formik.values.submission_period_disclaimer}
-              onChange={handleChange}
-              error={hasErrors("submission_period_disclaimer")}
-              license={process.env.JODIT_LICENSE_KEY}
-            />
-          </Grid2>
-        </Grid2>
-
-        <hr />
-
         {formik.values.id !== 0 && (
-          <>
-            <Panel
-              show={showSection === "track_groups"}
-              title={T.translate("edit_selection_plan.track_groups")}
-              handleClick={() => toggleSection("track_groups")}
+          <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
+            <Tabs
+              value={activeTab}
+              onChange={(_, val) => setActiveTab(val)}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{
+                "& .MuiTabScrollButton-root.Mui-disabled": { display: "none" }
+              }}
             >
-              <SimpleLinkList
-                values={formik.values.track_groups}
-                columns={trackGroupsColumns}
-                options={trackGroupsOptions}
-              />
-            </Panel>
-
-            <Panel
-              show={showSection === "event_types"}
-              title={T.translate("edit_selection_plan.event_types")}
-              handleClick={() => toggleSection("event_types")}
-            >
-              <SimpleLinkList
-                values={formik.values.event_types}
-                columns={eventTypesColumns}
-                options={eventTypesOptions}
-              />
-            </Panel>
-
-            <Panel
-              show={showSection === "extra_questions"}
-              title={T.translate("edit_selection_plan.extra_questions")}
-              handleClick={() => toggleSection("extra_questions")}
-            >
-              <Grid2 container spacing={2} sx={{ alignItems: "center", mb: 2 }}>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <Many2ManyDropDown
-                    id="addAllowedExtraQuestions"
-                    isClearable
-                    CSSClass=""
-                    placeholder={T.translate(
-                      "edit_selection_plan.placeholders.link_question"
-                    )}
-                    fetchOptions={fetchSummitSelectionPlanExtraQuestions}
-                    onAdd={linkSummitSelectionPlanExtraQuestion}
-                  />
-                </Grid2>
-                <Grid2
-                  size={{ xs: 12, md: 6 }}
-                  sx={{ display: "flex", justifyContent: "flex-end" }}
-                >
-                  <Button
-                    type="button"
-                    variant="contained"
-                    onClick={handleNewExtraQuestion}
-                  >
-                    {T.translate("edit_selection_plan.add_extra_questions")}
-                  </Button>
-                </Grid2>
-              </Grid2>
-              {formik.values.extra_questions.length === 0 && (
-                <div>
-                  {T.translate("edit_selection_plan.no_extra_questions")}
-                </div>
-              )}
-              {formik.values.extra_questions.length > 0 && (
-                <SortableTable
-                  options={extraQuestionsOptions}
-                  data={formik.values.extra_questions.map((q) => ({
-                    ...q,
-                    label: stripTags(q.label)
-                  }))}
-                  columns={extraQuestionColumns}
-                  onReorder={updateExtraQuestionOrder}
-                  updateOrderKey="order"
+              {tabs.map((tab) => (
+                <Tab
+                  key={tab.value}
+                  value={tab.value}
+                  label={tab.label}
+                  id={`tab-${tab.value}`}
+                  aria-controls={`tabpanel-${tab.value}`}
+                  sx={TAB_SX}
                 />
-              )}
-            </Panel>
+              ))}
+            </Tabs>
+          </Box>
+        )}
 
-            <Panel
-              show={showSection === "email_templates"}
-              title={T.translate("edit_selection_plan.email_templates")}
-              handleClick={() => toggleSection("email_templates")}
-            >
-              <Grid2 container spacing={2}>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.creator_notification_email_template"
-                    )}
-                  </label>
-                  <EmailTemplateInput
-                    id="presentation_creator_notification_email_template"
-                    value={
-                      formik.values
-                        .presentation_creator_notification_email_template
-                    }
-                    placeholder={T.translate(
-                      "edit_selection_plan.placeholders.creator_notification_email_select_template"
-                    )}
-                    onChange={handleNotificationEmailTemplateChange}
-                    isClearable
-                    plainValue
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.moderator_notification_email_template"
-                    )}
-                  </label>
-                  <EmailTemplateInput
-                    id="presentation_moderator_notification_email_template"
-                    value={
-                      formik.values
-                        .presentation_moderator_notification_email_template
-                    }
-                    placeholder={T.translate(
-                      "edit_selection_plan.placeholders.moderator_notification_email_select_template"
-                    )}
-                    onChange={handleNotificationEmailTemplateChange}
-                    isClearable
-                    plainValue
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.speaker_notification_email_template"
-                    )}
-                  </label>
-                  <EmailTemplateInput
-                    id="presentation_speaker_notification_email_template"
-                    value={
-                      formik.values
-                        .presentation_speaker_notification_email_template
-                    }
-                    placeholder={T.translate(
-                      "edit_selection_plan.placeholders.speaker_notification_email_select_template"
-                    )}
-                    onChange={handleNotificationEmailTemplateChange}
-                    isClearable
-                    plainValue
-                  />
-                </Grid2>
-              </Grid2>
-            </Panel>
-
-            <Panel
-              show={showSection === "track_chair_settings"}
-              title={T.translate("track_chair_settings.title")}
-              handleClick={() => toggleSection("track_chair_settings")}
-            >
+        {/* Main tab — always in DOM so the rich text editor is not re-initialized on tab switch */}
+        <div
+          role="tabpanel"
+          id="tabpanel-main"
+          hidden={formik.values.id !== 0 && activeTab !== "main"}
+        >
+          <Grid2 container spacing={2} sx={{ mb: 2 }}>
+            <Grid2 size={{ xs: 12, md: 4 }}>
+              <label> {T.translate("edit_selection_plan.name")} *</label>
+              <Input
+                id="name"
+                className="form-control"
+                error={hasErrors("name")}
+                onChange={handleChange}
+                value={formik.values.name}
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
               <FormControlLabel
                 control={
                   <Checkbox
-                    id="allow_track_change_requests"
-                    checked={formik.values.allow_track_change_requests}
+                    id="is_enabled"
+                    checked={formik.values.is_enabled}
+                    onChange={handleChange}
+                  />
+                }
+                label={T.translate("edit_selection_plan.enabled")}
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    id="is_hidden"
+                    checked={formik.values.is_hidden}
+                    onChange={handleChange}
+                  />
+                }
+                label={T.translate("edit_selection_plan.hidden")}
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    id="allow_proposed_schedules"
+                    checked={formik.values.allow_proposed_schedules}
                     onChange={handleChange}
                   />
                 }
                 label={T.translate(
-                  "track_chair_settings.allow_change_requests"
+                  "edit_selection_plan.allow_proposed_schedules"
                 )}
               />
-              <hr />
-              <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-                <Button
-                  type="button"
-                  variant="contained"
-                  onClick={handleAddRatingType}
-                >
-                  {T.translate("track_chair_settings.add_rating_type")}
-                </Button>
-              </Box>
-              <SortableTable
-                options={ratingTypesOptions}
-                data={formik.values.track_chair_rating_types}
-                columns={ratingTypesColumns}
-                onReorder={onUpdateRatingTypeOrder}
-                updateOrderKey="order"
-              />
-            </Panel>
-
-            <Panel
-              show={showSection === "presentation_action_types"}
-              title={T.translate(
-                "edit_selection_plan.presentation_action_types"
-              )}
-              handleClick={() => toggleSection("presentation_action_types")}
-            >
-              <Grid2 container spacing={2} sx={{ mb: 2 }}>
-                <Grid2 size={{ xs: 12, md: 9 }}>
-                  <Many2ManyDropDown
-                    id="addAllowedPresentationActionType"
-                    isClearable
-                    CSSClass=""
-                    placeholder={T.translate(
-                      "edit_selection_plan.placeholders.link_presentation_action_type"
-                    )}
-                    fetchOptions={fetchSummitPresentationActionTypes}
-                    onAdd={linkSummitProgressFlag}
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 2 }} sx={{ mt: "30px" }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    id="allow_new_presentations"
+                    checked={formik.values.allow_new_presentations}
+                    onChange={handleChange}
                   />
-                </Grid2>
-              </Grid2>
-              {formik.values.allowed_presentation_action_types.length === 0 && (
-                <div>
-                  {T.translate(
-                    "edit_selection_plan.no_presentation_action_types"
-                  )}
-                </div>
-              )}
-              {formik.values.allowed_presentation_action_types.length > 0 && (
-                <SortableTable
-                  options={actionTypesOptions}
-                  data={formik.values.allowed_presentation_action_types}
-                  columns={actionTypesColumns}
-                  onReorder={onUpdateProgressFlagOrder}
-                  updateOrderKey="order"
-                />
-              )}
-            </Panel>
+                }
+                label={T.translate(
+                  "edit_selection_plan.allow_new_presentations"
+                )}
+              />
+            </Grid2>
+          </Grid2>
 
-            {!formik.values.is_hidden && (
-              <Panel
-                show={showSection === "allowed_members"}
-                title={T.translate("edit_selection_plan.allowed_members")}
-                handleClick={() => toggleSection("allowed_members")}
-                className="allowed-members-panel"
-              >
+          <Grid2 container spacing={2} sx={{ mb: 2 }}>
+            <Grid2 size={{ xs: 12, md: 6 }}>
+              <label>
+                {T.translate("edit_selection_plan.submission_begin_date")}
+              </label>
+              <MuiFormikDatetimepicker
+                name="submission_begin_date"
+                timezone={currentSummit.time_zone_id}
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 6 }}>
+              <label>
+                {T.translate("edit_selection_plan.submission_end_date")}
+              </label>
+              <MuiFormikDatetimepicker
+                name="submission_end_date"
+                timezone={currentSummit.time_zone_id}
+              />
+            </Grid2>
+          </Grid2>
+
+          <Grid2 container spacing={2} sx={{ mb: 2 }}>
+            <Grid2 size={{ xs: 12, md: 6 }}>
+              <label>
+                {T.translate("edit_selection_plan.max_submissions")}
+              </label>
+              <Input
+                className="form-control"
+                type="number"
+                error={hasErrors("max_submission_allowed_per_user")}
+                id="max_submission_allowed_per_user"
+                value={formik.values.max_submission_allowed_per_user}
+                onChange={handleChange}
+                min={0}
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 6 }}>
+              <label>
+                {T.translate(
+                  "edit_selection_plan.submission_lock_down_presentation_status_date"
+                )}{" "}
+                &nbsp;
+                <i
+                  className="fa fa-info-circle"
+                  aria-hidden="true"
+                  title={T.translate(
+                    "edit_selection_plan.submission_lock_down_presentation_status_date_info"
+                  )}
+                />
+              </label>
+              <MuiFormikDatetimepicker
+                name="submission_lock_down_presentation_status_date"
+                timezone={currentSummit.time_zone_id}
+              />
+            </Grid2>
+          </Grid2>
+
+          <Grid2 container spacing={2} sx={{ mb: 2 }}>
+            <Grid2 size={{ xs: 12, md: 6 }}>
+              <label>
+                {T.translate("edit_selection_plan.voting_begin_date")}
+              </label>
+              <MuiFormikDatetimepicker
+                name="voting_begin_date"
+                timezone={currentSummit.time_zone_id}
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 6 }}>
+              <label>
+                {T.translate("edit_selection_plan.voting_end_date")}
+              </label>
+              <MuiFormikDatetimepicker
+                name="voting_end_date"
+                timezone={currentSummit.time_zone_id}
+              />
+            </Grid2>
+          </Grid2>
+
+          <Grid2 container spacing={2} sx={{ mb: 2 }}>
+            <Grid2 size={{ xs: 12, md: 6 }}>
+              <label>
+                {T.translate("edit_selection_plan.selection_begin_date")}
+              </label>
+              <MuiFormikDatetimepicker
+                name="selection_begin_date"
+                timezone={currentSummit.time_zone_id}
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 6 }}>
+              <label>
+                {T.translate("edit_selection_plan.selection_end_date")}
+              </label>
+              <MuiFormikDatetimepicker
+                name="selection_end_date"
+                timezone={currentSummit.time_zone_id}
+              />
+            </Grid2>
+          </Grid2>
+
+          <Grid2 container spacing={2} sx={{ mb: 2 }}>
+            <Grid2 size={12}>
+              <label>
+                {T.translate(
+                  "edit_selection_plan.submission_period_disclaimer"
+                )}{" "}
+                *
+              </label>
+              <TextEditorV3
+                id="submission_period_disclaimer"
+                value={formik.values.submission_period_disclaimer}
+                onChange={handleChange}
+                error={hasErrors("submission_period_disclaimer")}
+                license={process.env.JODIT_LICENSE_KEY}
+              />
+            </Grid2>
+          </Grid2>
+        </div>
+
+        {formik.values.id !== 0 && (
+          <>
+            <div
+              role="tabpanel"
+              id="tabpanel-track_groups"
+              hidden={activeTab !== "track_groups"}
+            >
+              <Box sx={{ pt: 2 }}>
                 <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 2
-                  }}
+                  sx={{ display: "flex", gap: 1, alignItems: "center", mb: 2 }}
+                >
+                  <Autocomplete
+                    size="small"
+                    value={trackGroupSelection}
+                    options={trackGroupSearchOptions}
+                    getOptionLabel={(opt) => opt.name ?? ""}
+                    filterOptions={(x) => x}
+                    onInputChange={(_, val) => {
+                      if (val)
+                        queryTrackGroups(
+                          currentSummit.id,
+                          val,
+                          setTrackGroupSearchOptions
+                        );
+                    }}
+                    onChange={(_, val) => setTrackGroupSelection(val)}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        size="small"
+                        placeholder={T.translate(
+                          "edit_selection_plan.placeholders.track_groups_search"
+                        )}
+                      />
+                    )}
+                    sx={{ width: 320 }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outlined"
+                    disabled={!trackGroupSelection}
+                    onClick={() => {
+                      handleTrackGroupLink(trackGroupSelection);
+                      setTrackGroupSelection(null);
+                      setTrackGroupSearchOptions([]);
+                    }}
+                  >
+                    {T.translate("general.add")}
+                  </Button>
+                </Box>
+                {formik.values.track_groups.length === 0 && (
+                  <div>
+                    {T.translate("edit_selection_plan.no_track_groups")}
+                  </div>
+                )}
+                {formik.values.track_groups.length > 0 && (
+                  <Table
+                    data={formik.values.track_groups.map((tg) => ({
+                      ...tg,
+                      description: stripTags(tg.description ?? "")
+                    }))}
+                    columns={trackGroupsColumns}
+                    options={trackGroupsOptions}
+                    onDelete={handleTrackGroupUnLink}
+                    confirmButtonColor="error"
+                    deleteDialogBody={(name) =>
+                      `${T.translate(
+                        "edit_selection_plan.delete_confirm.track_group"
+                      )} ${name}`
+                    }
+                  />
+                )}
+              </Box>
+            </div>
+
+            <div
+              role="tabpanel"
+              id="tabpanel-event_types"
+              hidden={activeTab !== "event_types"}
+            >
+              <Box sx={{ pt: 2 }}>
+                <Box
+                  sx={{ display: "flex", gap: 1, alignItems: "center", mb: 2 }}
+                >
+                  <Autocomplete
+                    size="small"
+                    value={eventTypeSelection}
+                    options={eventTypeSearchOptions}
+                    getOptionLabel={(opt) => opt.name ?? ""}
+                    filterOptions={(x) => x}
+                    onInputChange={(_, val) => {
+                      if (val)
+                        queryEventTypes(
+                          currentSummit.id,
+                          val,
+                          setEventTypeSearchOptions,
+                          PresentationTypeClassName
+                        );
+                    }}
+                    onChange={(_, val) => setEventTypeSelection(val)}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        size="small"
+                        placeholder={T.translate(
+                          "edit_selection_plan.placeholders.event_type_search"
+                        )}
+                      />
+                    )}
+                    sx={{ width: 320 }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outlined"
+                    disabled={!eventTypeSelection}
+                    onClick={() => {
+                      handleAddEventType(eventTypeSelection);
+                      setEventTypeSelection(null);
+                      setEventTypeSearchOptions([]);
+                    }}
+                  >
+                    {T.translate("general.add")}
+                  </Button>
+                </Box>
+                {formik.values.event_types.length === 0 && (
+                  <div>{T.translate("edit_selection_plan.no_event_types")}</div>
+                )}
+                {formik.values.event_types.length > 0 && (
+                  <Table
+                    data={formik.values.event_types}
+                    columns={eventTypesColumns}
+                    options={eventTypesOptions}
+                    onDelete={handleDeleteEventType}
+                    confirmButtonColor="error"
+                    deleteDialogBody={(name) =>
+                      `${T.translate(
+                        "edit_selection_plan.delete_confirm.event_type"
+                      )} ${name}`
+                    }
+                  />
+                )}
+              </Box>
+            </div>
+
+            <div
+              role="tabpanel"
+              id="tabpanel-extra_questions"
+              hidden={activeTab !== "extra_questions"}
+            >
+              <Box sx={{ pt: 2 }}>
+                <Grid2
+                  container
+                  spacing={2}
+                  sx={{ alignItems: "center", mb: 2 }}
+                >
+                  <Grid2 size={{ xs: 12, md: 6 }}>
+                    <Many2ManyDropDown
+                      id="addAllowedExtraQuestions"
+                      isClearable
+                      CSSClass=""
+                      placeholder={T.translate(
+                        "edit_selection_plan.placeholders.link_question"
+                      )}
+                      fetchOptions={fetchSummitSelectionPlanExtraQuestions}
+                      onAdd={linkSummitSelectionPlanExtraQuestion}
+                    />
+                  </Grid2>
+                  <Grid2
+                    size={{ xs: 12, md: 6 }}
+                    sx={{ display: "flex", justifyContent: "flex-end" }}
+                  >
+                    <Button
+                      type="button"
+                      variant="contained"
+                      onClick={handleNewExtraQuestion}
+                    >
+                      {T.translate("edit_selection_plan.add_extra_questions")}
+                    </Button>
+                  </Grid2>
+                </Grid2>
+                {formik.values.extra_questions.length === 0 && (
+                  <div>
+                    {T.translate("edit_selection_plan.no_extra_questions")}
+                  </div>
+                )}
+                {formik.values.extra_questions.length > 0 && (
+                  <SortableTable
+                    options={extraQuestionsOptions}
+                    data={formik.values.extra_questions.map((q) => ({
+                      ...q,
+                      label: stripTags(q.label)
+                    }))}
+                    columns={extraQuestionColumns}
+                    onReorder={updateExtraQuestionOrder}
+                    updateOrderKey="order"
+                    onEdit={(item) => handleEditExtraQuestion(item.id)}
+                    onDelete={handleDeleteExtraQuestion}
+                    confirmButtonColor="error"
+                  />
+                )}
+              </Box>
+            </div>
+
+            <div
+              role="tabpanel"
+              id="tabpanel-email_templates"
+              hidden={activeTab !== "email_templates"}
+            >
+              <Box sx={{ pt: 2 }}>
+                <Grid2 container spacing={2}>
+                  <Grid2 size={{ xs: 12, md: 6 }}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.creator_notification_email_template"
+                      )}
+                    </label>
+                    <EmailTemplateInput
+                      id="presentation_creator_notification_email_template"
+                      value={
+                        formik.values
+                          .presentation_creator_notification_email_template
+                      }
+                      placeholder={T.translate(
+                        "edit_selection_plan.placeholders.creator_notification_email_select_template"
+                      )}
+                      onChange={handleNotificationEmailTemplateChange}
+                      isClearable
+                      plainValue
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, md: 6 }}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.moderator_notification_email_template"
+                      )}
+                    </label>
+                    <EmailTemplateInput
+                      id="presentation_moderator_notification_email_template"
+                      value={
+                        formik.values
+                          .presentation_moderator_notification_email_template
+                      }
+                      placeholder={T.translate(
+                        "edit_selection_plan.placeholders.moderator_notification_email_select_template"
+                      )}
+                      onChange={handleNotificationEmailTemplateChange}
+                      isClearable
+                      plainValue
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, md: 6 }}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.speaker_notification_email_template"
+                      )}
+                    </label>
+                    <EmailTemplateInput
+                      id="presentation_speaker_notification_email_template"
+                      value={
+                        formik.values
+                          .presentation_speaker_notification_email_template
+                      }
+                      placeholder={T.translate(
+                        "edit_selection_plan.placeholders.speaker_notification_email_select_template"
+                      )}
+                      onChange={handleNotificationEmailTemplateChange}
+                      isClearable
+                      plainValue
+                    />
+                  </Grid2>
+                </Grid2>
+              </Box>
+            </div>
+
+            <div
+              role="tabpanel"
+              id="tabpanel-track_chair_settings"
+              hidden={activeTab !== "track_chair_settings"}
+            >
+              <Box sx={{ pt: 2 }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      id="allow_track_change_requests"
+                      checked={formik.values.allow_track_change_requests}
+                      onChange={handleChange}
+                    />
+                  }
+                  label={T.translate(
+                    "track_chair_settings.allow_change_requests"
+                  )}
+                />
+                <hr />
+                <Box
+                  sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}
                 >
                   <Button
                     type="button"
                     variant="contained"
-                    onClick={() => setShowImportModal(true)}
+                    onClick={handleAddRatingType}
                   >
-                    {T.translate("edit_selection_plan.import")}
+                    {T.translate("track_chair_settings.add_rating_type")}
                   </Button>
-                  <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                    <TextField
-                      size="small"
-                      value={newMemberEmail}
-                      onChange={(ev) => setNewMemberEmail(ev.target.value)}
+                </Box>
+                <SortableTable
+                  options={ratingTypesOptions}
+                  data={formik.values.track_chair_rating_types}
+                  columns={ratingTypesColumns}
+                  onReorder={onUpdateRatingTypeOrder}
+                  updateOrderKey="order"
+                  onEdit={(item) => handleEditRatingType(item.id)}
+                  onDelete={handleDeleteRatingType}
+                  confirmButtonColor="error"
+                />
+              </Box>
+            </div>
+
+            <div
+              role="tabpanel"
+              id="tabpanel-presentation_action_types"
+              hidden={activeTab !== "presentation_action_types"}
+            >
+              <Box sx={{ pt: 2 }}>
+                <Grid2 container spacing={2} sx={{ mb: 2 }}>
+                  <Grid2 size={{ xs: 12, md: 9 }}>
+                    <Many2ManyDropDown
+                      id="addAllowedPresentationActionType"
+                      isClearable
+                      CSSClass=""
+                      placeholder={T.translate(
+                        "edit_selection_plan.placeholders.link_presentation_action_type"
+                      )}
+                      fetchOptions={fetchSummitPresentationActionTypes}
+                      onAdd={linkSummitProgressFlag}
                     />
+                  </Grid2>
+                </Grid2>
+                {formik.values.allowed_presentation_action_types.length ===
+                  0 && (
+                  <div>
+                    {T.translate(
+                      "edit_selection_plan.no_presentation_action_types"
+                    )}
+                  </div>
+                )}
+                {formik.values.allowed_presentation_action_types.length > 0 && (
+                  <SortableTable
+                    options={actionTypesOptions}
+                    data={formik.values.allowed_presentation_action_types}
+                    columns={actionTypesColumns}
+                    onReorder={onUpdateProgressFlagOrder}
+                    updateOrderKey="order"
+                    onDelete={handleRemoveProgressFlag}
+                    confirmButtonColor="error"
+                  />
+                )}
+              </Box>
+            </div>
+
+            {!formik.values.is_hidden && (
+              <div
+                role="tabpanel"
+                id="tabpanel-allowed_members"
+                hidden={activeTab !== "allowed_members"}
+              >
+                <Box sx={{ pt: 2 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      mb: 2
+                    }}
+                  >
                     <Button
                       type="button"
-                      variant="outlined"
-                      onClick={handleAddAllowedMember}
-                      disabled={!newMemberEmail}
+                      variant="contained"
+                      onClick={() => setShowImportModal(true)}
                     >
-                      {T.translate("general.add")}
+                      {T.translate("edit_selection_plan.import")}
                     </Button>
+                    <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                      <TextField
+                        size="small"
+                        value={newMemberEmail}
+                        onChange={(ev) => setNewMemberEmail(ev.target.value)}
+                      />
+                      <Button
+                        type="button"
+                        variant="outlined"
+                        onClick={handleAddAllowedMember}
+                        disabled={!newMemberEmail}
+                      >
+                        {T.translate("general.add")}
+                      </Button>
+                    </Box>
+                  </Box>
+                  <Table
+                    data={allowedMembers.data}
+                    columns={allowedMembersColumns}
+                    options={allowedMembersOptions}
+                    onDelete={handleDeleteAllowedMember}
+                    confirmButtonColor="error"
+                    getName={(item) => item.email}
+                    deleteDialogBody={(email) =>
+                      `${T.translate(
+                        "edit_selection_plan.delete_confirm.allowed_member"
+                      )} ${email}`
+                    }
+                  />
+                  <Box
+                    sx={{ display: "flex", justifyContent: "center", mt: 2 }}
+                  >
+                    <Pagination
+                      count={allowedMembers.lastPage}
+                      page={allowedMembers.currentPage}
+                      onChange={(_, page) =>
+                        handleAllowedMembersPageChange(page)
+                      }
+                      showFirstButton
+                      showLastButton
+                    />
                   </Box>
                 </Box>
-                <Table
-                  data={allowedMembers.data}
-                  columns={allowedMembersColumns}
-                  options={allowedMembersOptions}
-                />
-                <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-                  <Pagination
-                    count={allowedMembers.lastPage}
-                    page={allowedMembers.currentPage}
-                    onChange={(_, page) => handleAllowedMembersPageChange(page)}
-                    showFirstButton
-                    showLastButton
-                  />
-                </Box>
-              </Panel>
+              </div>
             )}
 
-            <Panel
-              show={showSection === "cfp_settings"}
-              title={T.translate("edit_selection_plan.cfp_settings")}
-              handleClick={() => toggleSection("cfp_settings")}
+            {/* cfp_settings kept in DOM always (contains TextEditorV3) */}
+            <div
+              role="tabpanel"
+              id="tabpanel-cfp_settings"
+              hidden={activeTab !== "cfp_settings"}
             >
-              <Grid2 container spacing={2}>
-                <Grid2 size={12}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.cfp_presentation_edition_custom_message"
-                    )}
-                    &nbsp;
-                    <i
-                      className="fa fa-info-circle"
-                      aria-hidden="true"
-                      title={T.translate(
-                        "edit_selection_plan.cfp_presentation_edition_custom_message_info"
+              <Box sx={{ pt: 2 }}>
+                <Grid2 container spacing={2}>
+                  <Grid2 size={12}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_presentation_edition_custom_message"
                       )}
-                    />
-                  </label>
-                  <TextEditorV3
-                    id="cfp_presentation_edition_custom_message"
-                    error={hasErrors("cfp_presentation_edition_custom_message")}
-                    onChange={handleChange}
-                    value={
-                      formik.values.marketing_settings
-                        .cfp_presentation_edition_custom_message?.value || ""
-                    }
-                    license={process.env.JODIT_LICENSE_KEY}
-                  />
-                </Grid2>
-                <Grid2 size={12}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.allowed_presentation_questions"
-                    )}
-                  </label>
-                  <Dropdown
-                    id="allowed_presentation_questions"
-                    value={formik.values.allowed_presentation_questions}
-                    placeholder={T.translate(
-                      "edit_selection_plan.placeholders.allowed_presentation_questions"
-                    )}
-                    onChange={handleChange}
-                    options={DEFAULT_ALLOWED_QUESTIONS}
-                    isMulti
-                  />
-                </Grid2>
-                <Grid2 size={12}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.allowed_presentation_editable_questions"
-                    )}{" "}
-                    *
-                  </label>
-                  <Dropdown
-                    id="allowed_presentation_editable_questions"
-                    value={
-                      formik.values.allowed_presentation_editable_questions
-                    }
-                    placeholder={T.translate(
-                      "edit_selection_plan.placeholders.allowed_presentation_editable_questions"
-                    )}
-                    onChange={handleChange}
-                    options={DEFAULT_ALLOWED_EDITABLE_QUESTIONS}
-                    isMulti
-                  />
-                </Grid2>
-                <Grid2 size={12}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.cfp_presentation_edition_default_tab"
-                    )}
-                  </label>
-                  <Dropdown
-                    id="cfp_presentation_edition_default_tab"
-                    value={
-                      formik.values.marketing_settings
-                        .cfp_presentation_edition_default_tab?.value || ""
-                    }
-                    placeholder={T.translate(
-                      "edit_selection_plan.placeholders.cfp_presentation_edition_default_tab"
-                    )}
-                    onChange={handleChange}
-                    options={DEFAULT_CFP_PRESENTATION_EDITION_TABS}
-                    isMulti={false}
-                    isClearable
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <label>
-                    {T.translate("edit_selection_plan.cfp_landing_page_title")}
-                    &nbsp;
-                    <i
-                      className="fa fa-info-circle"
-                      aria-hidden="true"
-                      title={T.translate(
-                        "edit_selection_plan.cfp_landing_page_title_info"
-                      )}
-                    />
-                  </label>
-                  <Input
-                    id="cfp_landing_page_title"
-                    className="form-control"
-                    error={hasErrors("cfp_landing_page_title")}
-                    onChange={handleChange}
-                    value={
-                      formik.values.marketing_settings.cfp_landing_page_title
-                        ?.value || ""
-                    }
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.cfp_track_question_label"
-                    )}
-                    &nbsp;
-                    <i
-                      className="fa fa-info-circle"
-                      aria-hidden="true"
-                      title={T.translate(
-                        "edit_selection_plan.cfp_track_question_label_info"
-                      )}
-                    />
-                  </label>
-                  <Input
-                    id="cfp_track_question_label"
-                    className="form-control"
-                    error={hasErrors("cfp_track_question_label")}
-                    onChange={handleChange}
-                    value={
-                      formik.values.marketing_settings.cfp_track_question_label
-                        ?.value || ""
-                    }
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.cfp_speakers_singular_label"
-                    )}
-                    &nbsp;
-                    <i
-                      className="fa fa-info-circle"
-                      aria-hidden="true"
-                      title={T.translate(
-                        "edit_selection_plan.cfp_speakers_singular_label_info"
-                      )}
-                    />
-                  </label>
-                  <Input
-                    id="cfp_speakers_singular_label"
-                    className="form-control"
-                    error={hasErrors("cfp_speakers_singular_label")}
-                    onChange={handleChange}
-                    value={
-                      formik.values.marketing_settings
-                        .cfp_speakers_singular_label?.value || ""
-                    }
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.cfp_speakers_plural_label"
-                    )}
-                    &nbsp;
-                    <i
-                      className="fa fa-info-circle"
-                      aria-hidden="true"
-                      title={T.translate(
-                        "edit_selection_plan.cfp_speakers_plural_label_info"
-                      )}
-                    />
-                  </label>
-                  <Input
-                    id="cfp_speakers_plural_label"
-                    className="form-control"
-                    error={hasErrors("cfp_speakers_plural_label")}
-                    onChange={handleChange}
-                    value={
-                      formik.values.marketing_settings.cfp_speakers_plural_label
-                        ?.value || ""
-                    }
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.cfp_presentations_singular_label"
-                    )}
-                    &nbsp;
-                    <i
-                      className="fa fa-info-circle"
-                      aria-hidden="true"
-                      title={T.translate(
-                        "edit_selection_plan.cfp_presentations_singular_label_info"
-                      )}
-                    />
-                  </label>
-                  <Input
-                    id="cfp_presentations_singular_label"
-                    className="form-control"
-                    error={hasErrors("cfp_presentations_singular_label")}
-                    onChange={handleChange}
-                    value={
-                      formik.values.marketing_settings
-                        .cfp_presentations_singular_label?.value || ""
-                    }
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.cfp_presentations_plural_label"
-                    )}
-                    &nbsp;
-                    <i
-                      className="fa fa-info-circle"
-                      aria-hidden="true"
-                      title={T.translate(
-                        "edit_selection_plan.cfp_presentations_plural_label_info"
-                      )}
-                    />
-                  </label>
-                  <Input
-                    id="cfp_presentations_plural_label"
-                    className="form-control"
-                    error={hasErrors("cfp_presentations_plural_label")}
-                    onChange={handleChange}
-                    value={
-                      formik.values.marketing_settings
-                        .cfp_presentations_plural_label?.value || ""
-                    }
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.cfp_presentation_summary_title_label"
-                    )}
-                    &nbsp;
-                    <i
-                      className="fa fa-info-circle"
-                      aria-hidden="true"
-                      title={T.translate(
-                        "edit_selection_plan.cfp_presentation_summary_title_label_info"
-                      )}
-                    />
-                  </label>
-                  <Input
-                    id="cfp_presentation_summary_title_label"
-                    className="form-control"
-                    error={hasErrors("cfp_presentation_summary_title_label")}
-                    onChange={handleChange}
-                    value={
-                      formik.values.marketing_settings
-                        .cfp_presentation_summary_title_label?.value || ""
-                    }
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.cfp_presentation_summary_abstract_label"
-                    )}
-                    &nbsp;
-                    <i
-                      className="fa fa-info-circle"
-                      aria-hidden="true"
-                      title={T.translate(
-                        "edit_selection_plan.cfp_presentation_summary_abstract_label_info"
-                      )}
-                    />
-                  </label>
-                  <Input
-                    id="cfp_presentation_summary_abstract_label"
-                    className="form-control"
-                    error={hasErrors("cfp_presentation_summary_abstract_label")}
-                    onChange={handleChange}
-                    value={
-                      formik.values.marketing_settings
-                        .cfp_presentation_summary_abstract_label?.value || ""
-                    }
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.cfp_presentation_summary_social_summary_label"
-                    )}
-                    &nbsp;
-                    <i
-                      className="fa fa-info-circle"
-                      aria-hidden="true"
-                      title={T.translate(
-                        "edit_selection_plan.cfp_presentation_summary_social_summary_label_info"
-                      )}
-                    />
-                  </label>
-                  <Input
-                    id="cfp_presentation_summary_social_summary_label"
-                    className="form-control"
-                    error={hasErrors(
-                      "cfp_presentation_summary_social_summary_label"
-                    )}
-                    onChange={handleChange}
-                    value={
-                      formik.values.marketing_settings
-                        .cfp_presentation_summary_social_summary_label?.value ||
-                      ""
-                    }
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.cfp_presentation_summary_links_label"
-                    )}
-                    &nbsp;
-                    <i
-                      className="fa fa-info-circle"
-                      aria-hidden="true"
-                      title={T.translate(
-                        "edit_selection_plan.cfp_presentation_summary_links_label_info"
-                      )}
-                    />
-                  </label>
-                  <Input
-                    id="cfp_presentation_summary_links_label"
-                    className="form-control"
-                    error={hasErrors("cfp_presentation_summary_links_label")}
-                    onChange={handleChange}
-                    value={
-                      formik.values.marketing_settings
-                        .cfp_presentation_summary_links_label?.value || ""
-                    }
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.cfp_presentation_summary_hide_track_selection"
-                    )}
-                    &nbsp;
-                    <i
-                      className="fa fa-info-circle"
-                      aria-hidden="true"
-                      title={T.translate(
-                        "edit_selection_plan.cfp_presentation_summary_hide_track_selection_info"
-                      )}
-                    />
-                  </label>
-                  <br />
-                  <MuiSwitch
-                    checked={
-                      formik.values.marketing_settings
-                        .cfp_presentation_summary_hide_track_selection?.value ||
-                      false
-                    }
-                    onChange={(ev) =>
-                      handleOnSwitchChange(
-                        "cfp_presentation_summary_hide_track_selection",
-                        ev.target.checked
-                      )
-                    }
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.cfp_presentation_summary_hide_activity_type_selection"
-                    )}
-                    &nbsp;
-                    <i
-                      className="fa fa-info-circle"
-                      aria-hidden="true"
-                      title={T.translate(
-                        "edit_selection_plan.cfp_presentation_summary_hide_activity_type_selection_info"
-                      )}
-                    />
-                  </label>
-                  <br />
-                  <MuiSwitch
-                    checked={
-                      formik.values.marketing_settings
-                        .cfp_presentation_summary_hide_activity_type_selection
-                        ?.value || false
-                    }
-                    onChange={(ev) =>
-                      handleOnSwitchChange(
-                        "cfp_presentation_summary_hide_activity_type_selection",
-                        ev.target.checked
-                      )
-                    }
-                  />
-                </Grid2>
-                {window.CFP_APP_BASE_URL && (
-                  <>
-                    <Grid2 size={{ xs: 12, md: 6 }}>
-                      <label>
-                        {T.translate(
-                          "edit_selection_plan.cfp_presentation_selection_plan_link"
+                      &nbsp;
+                      <i
+                        className="fa fa-info-circle"
+                        aria-hidden="true"
+                        title={T.translate(
+                          "edit_selection_plan.cfp_presentation_edition_custom_message_info"
                         )}
-                      </label>
-                      <br />
-                      <a
-                        className="text-table-link"
-                        href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${formik.values.id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${formik.values.id}`}
-                      </a>
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, md: 6 }}>
-                      <label>
-                        {T.translate(
-                          "edit_selection_plan.cfp_presentation_all_selection_plan_link"
+                      />
+                    </label>
+                    <TextEditorV3
+                      id="cfp_presentation_edition_custom_message"
+                      error={hasErrors(
+                        "cfp_presentation_edition_custom_message"
+                      )}
+                      onChange={handleChange}
+                      value={
+                        formik.values.marketing_settings
+                          .cfp_presentation_edition_custom_message?.value || ""
+                      }
+                      license={process.env.JODIT_LICENSE_KEY}
+                    />
+                  </Grid2>
+                  <Grid2 size={12}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.allowed_presentation_questions"
+                      )}
+                    </label>
+                    <Dropdown
+                      id="allowed_presentation_questions"
+                      value={formik.values.allowed_presentation_questions}
+                      placeholder={T.translate(
+                        "edit_selection_plan.placeholders.allowed_presentation_questions"
+                      )}
+                      onChange={handleChange}
+                      options={DEFAULT_ALLOWED_QUESTIONS}
+                      isMulti
+                    />
+                  </Grid2>
+                  <Grid2 size={12}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.allowed_presentation_editable_questions"
+                      )}{" "}
+                      *
+                    </label>
+                    <Dropdown
+                      id="allowed_presentation_editable_questions"
+                      value={
+                        formik.values.allowed_presentation_editable_questions
+                      }
+                      placeholder={T.translate(
+                        "edit_selection_plan.placeholders.allowed_presentation_editable_questions"
+                      )}
+                      onChange={handleChange}
+                      options={DEFAULT_ALLOWED_EDITABLE_QUESTIONS}
+                      isMulti
+                    />
+                  </Grid2>
+                  <Grid2 size={12}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_presentation_edition_default_tab"
+                      )}
+                    </label>
+                    <Dropdown
+                      id="cfp_presentation_edition_default_tab"
+                      value={
+                        formik.values.marketing_settings
+                          .cfp_presentation_edition_default_tab?.value || ""
+                      }
+                      placeholder={T.translate(
+                        "edit_selection_plan.placeholders.cfp_presentation_edition_default_tab"
+                      )}
+                      onChange={handleChange}
+                      options={DEFAULT_CFP_PRESENTATION_EDITION_TABS}
+                      isMulti={false}
+                      isClearable
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, md: 6 }}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_landing_page_title"
+                      )}
+                      &nbsp;
+                      <i
+                        className="fa fa-info-circle"
+                        aria-hidden="true"
+                        title={T.translate(
+                          "edit_selection_plan.cfp_landing_page_title_info"
                         )}
-                      </label>
-                      <br />
-                      <a
-                        className="text-table-link"
-                        href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
-                      </a>
-                    </Grid2>
-                  </>
-                )}
-              </Grid2>
-            </Panel>
+                      />
+                    </label>
+                    <Input
+                      id="cfp_landing_page_title"
+                      className="form-control"
+                      error={hasErrors("cfp_landing_page_title")}
+                      onChange={handleChange}
+                      value={
+                        formik.values.marketing_settings.cfp_landing_page_title
+                          ?.value || ""
+                      }
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, md: 6 }}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_track_question_label"
+                      )}
+                      &nbsp;
+                      <i
+                        className="fa fa-info-circle"
+                        aria-hidden="true"
+                        title={T.translate(
+                          "edit_selection_plan.cfp_track_question_label_info"
+                        )}
+                      />
+                    </label>
+                    <Input
+                      id="cfp_track_question_label"
+                      className="form-control"
+                      error={hasErrors("cfp_track_question_label")}
+                      onChange={handleChange}
+                      value={
+                        formik.values.marketing_settings
+                          .cfp_track_question_label?.value || ""
+                      }
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, md: 6 }}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_speakers_singular_label"
+                      )}
+                      &nbsp;
+                      <i
+                        className="fa fa-info-circle"
+                        aria-hidden="true"
+                        title={T.translate(
+                          "edit_selection_plan.cfp_speakers_singular_label_info"
+                        )}
+                      />
+                    </label>
+                    <Input
+                      id="cfp_speakers_singular_label"
+                      className="form-control"
+                      error={hasErrors("cfp_speakers_singular_label")}
+                      onChange={handleChange}
+                      value={
+                        formik.values.marketing_settings
+                          .cfp_speakers_singular_label?.value || ""
+                      }
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, md: 6 }}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_speakers_plural_label"
+                      )}
+                      &nbsp;
+                      <i
+                        className="fa fa-info-circle"
+                        aria-hidden="true"
+                        title={T.translate(
+                          "edit_selection_plan.cfp_speakers_plural_label_info"
+                        )}
+                      />
+                    </label>
+                    <Input
+                      id="cfp_speakers_plural_label"
+                      className="form-control"
+                      error={hasErrors("cfp_speakers_plural_label")}
+                      onChange={handleChange}
+                      value={
+                        formik.values.marketing_settings
+                          .cfp_speakers_plural_label?.value || ""
+                      }
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, md: 6 }}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_presentations_singular_label"
+                      )}
+                      &nbsp;
+                      <i
+                        className="fa fa-info-circle"
+                        aria-hidden="true"
+                        title={T.translate(
+                          "edit_selection_plan.cfp_presentations_singular_label_info"
+                        )}
+                      />
+                    </label>
+                    <Input
+                      id="cfp_presentations_singular_label"
+                      className="form-control"
+                      error={hasErrors("cfp_presentations_singular_label")}
+                      onChange={handleChange}
+                      value={
+                        formik.values.marketing_settings
+                          .cfp_presentations_singular_label?.value || ""
+                      }
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, md: 6 }}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_presentations_plural_label"
+                      )}
+                      &nbsp;
+                      <i
+                        className="fa fa-info-circle"
+                        aria-hidden="true"
+                        title={T.translate(
+                          "edit_selection_plan.cfp_presentations_plural_label_info"
+                        )}
+                      />
+                    </label>
+                    <Input
+                      id="cfp_presentations_plural_label"
+                      className="form-control"
+                      error={hasErrors("cfp_presentations_plural_label")}
+                      onChange={handleChange}
+                      value={
+                        formik.values.marketing_settings
+                          .cfp_presentations_plural_label?.value || ""
+                      }
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, md: 6 }}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_presentation_summary_title_label"
+                      )}
+                      &nbsp;
+                      <i
+                        className="fa fa-info-circle"
+                        aria-hidden="true"
+                        title={T.translate(
+                          "edit_selection_plan.cfp_presentation_summary_title_label_info"
+                        )}
+                      />
+                    </label>
+                    <Input
+                      id="cfp_presentation_summary_title_label"
+                      className="form-control"
+                      error={hasErrors("cfp_presentation_summary_title_label")}
+                      onChange={handleChange}
+                      value={
+                        formik.values.marketing_settings
+                          .cfp_presentation_summary_title_label?.value || ""
+                      }
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, md: 6 }}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_presentation_summary_abstract_label"
+                      )}
+                      &nbsp;
+                      <i
+                        className="fa fa-info-circle"
+                        aria-hidden="true"
+                        title={T.translate(
+                          "edit_selection_plan.cfp_presentation_summary_abstract_label_info"
+                        )}
+                      />
+                    </label>
+                    <Input
+                      id="cfp_presentation_summary_abstract_label"
+                      className="form-control"
+                      error={hasErrors(
+                        "cfp_presentation_summary_abstract_label"
+                      )}
+                      onChange={handleChange}
+                      value={
+                        formik.values.marketing_settings
+                          .cfp_presentation_summary_abstract_label?.value || ""
+                      }
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, md: 6 }}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_presentation_summary_social_summary_label"
+                      )}
+                      &nbsp;
+                      <i
+                        className="fa fa-info-circle"
+                        aria-hidden="true"
+                        title={T.translate(
+                          "edit_selection_plan.cfp_presentation_summary_social_summary_label_info"
+                        )}
+                      />
+                    </label>
+                    <Input
+                      id="cfp_presentation_summary_social_summary_label"
+                      className="form-control"
+                      error={hasErrors(
+                        "cfp_presentation_summary_social_summary_label"
+                      )}
+                      onChange={handleChange}
+                      value={
+                        formik.values.marketing_settings
+                          .cfp_presentation_summary_social_summary_label
+                          ?.value || ""
+                      }
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, md: 6 }}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_presentation_summary_links_label"
+                      )}
+                      &nbsp;
+                      <i
+                        className="fa fa-info-circle"
+                        aria-hidden="true"
+                        title={T.translate(
+                          "edit_selection_plan.cfp_presentation_summary_links_label_info"
+                        )}
+                      />
+                    </label>
+                    <Input
+                      id="cfp_presentation_summary_links_label"
+                      className="form-control"
+                      error={hasErrors("cfp_presentation_summary_links_label")}
+                      onChange={handleChange}
+                      value={
+                        formik.values.marketing_settings
+                          .cfp_presentation_summary_links_label?.value || ""
+                      }
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, md: 6 }}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_presentation_summary_hide_track_selection"
+                      )}
+                      &nbsp;
+                      <i
+                        className="fa fa-info-circle"
+                        aria-hidden="true"
+                        title={T.translate(
+                          "edit_selection_plan.cfp_presentation_summary_hide_track_selection_info"
+                        )}
+                      />
+                    </label>
+                    <br />
+                    <MuiSwitch
+                      checked={
+                        formik.values.marketing_settings
+                          .cfp_presentation_summary_hide_track_selection
+                          ?.value || false
+                      }
+                      onChange={(ev) =>
+                        handleOnSwitchChange(
+                          "cfp_presentation_summary_hide_track_selection",
+                          ev.target.checked
+                        )
+                      }
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, md: 6 }}>
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_presentation_summary_hide_activity_type_selection"
+                      )}
+                      &nbsp;
+                      <i
+                        className="fa fa-info-circle"
+                        aria-hidden="true"
+                        title={T.translate(
+                          "edit_selection_plan.cfp_presentation_summary_hide_activity_type_selection_info"
+                        )}
+                      />
+                    </label>
+                    <br />
+                    <MuiSwitch
+                      checked={
+                        formik.values.marketing_settings
+                          .cfp_presentation_summary_hide_activity_type_selection
+                          ?.value || false
+                      }
+                      onChange={(ev) =>
+                        handleOnSwitchChange(
+                          "cfp_presentation_summary_hide_activity_type_selection",
+                          ev.target.checked
+                        )
+                      }
+                    />
+                  </Grid2>
+                  {window.CFP_APP_BASE_URL && (
+                    <>
+                      <Grid2 size={{ xs: 12, md: 6 }}>
+                        <label>
+                          {T.translate(
+                            "edit_selection_plan.cfp_presentation_selection_plan_link"
+                          )}
+                        </label>
+                        <br />
+                        <a
+                          className="text-table-link"
+                          href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${formik.values.id}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${formik.values.id}`}
+                        </a>
+                      </Grid2>
+                      <Grid2 size={{ xs: 12, md: 6 }}>
+                        <label>
+                          {T.translate(
+                            "edit_selection_plan.cfp_presentation_all_selection_plan_link"
+                          )}
+                        </label>
+                        <br />
+                        <a
+                          className="text-table-link"
+                          href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
+                        </a>
+                      </Grid2>
+                    </>
+                  )}
+                </Grid2>
+              </Box>
+            </div>
           </>
         )}
-
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 4 }}>
-          <Button type="submit" variant="contained" disabled={isSaving}>
-            {T.translate("general.save")}
-          </Button>
-        </Box>
 
         <ImportModal
           title={T.translate("edit_selection_plan.import_allowed_members")}

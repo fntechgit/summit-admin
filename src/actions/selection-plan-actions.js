@@ -22,7 +22,6 @@ import {
   stopLoading,
   startLoading,
   showMessage,
-  showSuccessMessage,
   authErrorHandler,
   postFile
 } from "openstack-uicore-foundation/lib/utils/actions";
@@ -35,6 +34,7 @@ import {
   fetchErrorHandler
 } from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";
+import { snackbarSuccessHandler } from "./base-actions";
 import {
   DEBOUNCE_WAIT,
   DEFAULT_CURRENT_PAGE,
@@ -166,9 +166,10 @@ export const saveSelectionPlan = (entity) => async (dispatch, getState) => {
     )({})(dispatch)
       .then((payload) => {
         dispatch(
-          showSuccessMessage(
-            T.translate("edit_selection_plan.selection_plan_saved")
-          )
+          snackbarSuccessHandler({
+            title: T.translate("general.done"),
+            html: T.translate("edit_selection_plan.selection_plan_saved")
+          })
         );
         return payload.response;
       })
@@ -186,9 +187,10 @@ export const saveSelectionPlan = (entity) => async (dispatch, getState) => {
   )({})(dispatch)
     .then((payload) => {
       dispatch(
-        showSuccessMessage(
-          T.translate("edit_selection_plan.selection_plan_created")
-        )
+        snackbarSuccessHandler({
+          title: T.translate("general.done"),
+          html: T.translate("edit_selection_plan.selection_plan_created")
+        })
       );
       return payload.response;
     })
@@ -751,9 +753,10 @@ export const assignExtraQuestion2SelectionPlan =
     )({})(dispatch).then(() => {
       dispatch(stopLoading());
       dispatch(
-        showSuccessMessage(
-          T.translate("edit_selection_plan.selection_plan_saved")
-        )
+        snackbarSuccessHandler({
+          title: T.translate("general.done"),
+          html: T.translate("edit_selection_plan.selection_plan_saved")
+        })
       );
     });
   };
@@ -855,9 +858,12 @@ export const importAllowedMembersCSV =
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
       dispatch(
-        showSuccessMessage(
-          T.translate("edit_selection_plan.import_allowed_members_success")
-        )
+        snackbarSuccessHandler({
+          title: T.translate("general.done"),
+          html: T.translate(
+            "edit_selection_plan.import_allowed_members_success"
+          )
+        })
       );
     });
   };
@@ -900,9 +906,10 @@ export const assignProgressFlag2SelectionPlan =
     )({})(dispatch).then(() => {
       dispatch(stopLoading());
       dispatch(
-        showSuccessMessage(
-          T.translate("edit_selection_plan.selection_plan_saved")
-        )
+        snackbarSuccessHandler({
+          title: T.translate("general.done"),
+          html: T.translate("edit_selection_plan.selection_plan_saved")
+        })
       );
     });
   };

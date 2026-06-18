@@ -13,7 +13,9 @@
 
 import React, { useRef, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
+import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Divider from "@mui/material/Divider";
@@ -45,6 +47,7 @@ const SelectionPlanPopup = ({ isEditing, onClose, onSaved, history }) => {
       disableEnforceFocus
       disableAutoFocus
       disableRestoreFocus
+      PaperProps={{ sx: { height: "90vh" } }}
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         {isEditing ? T.translate("general.edit") : T.translate("general.add")}{" "}
@@ -54,13 +57,24 @@ const SelectionPlanPopup = ({ isEditing, onClose, onSaved, history }) => {
         </IconButton>
       </DialogTitle>
       <Divider />
-      <DialogContent>
+      <DialogContent sx={{ overflowY: "auto" }}>
         <EditSelectionPlanPage
           onSaved={onSaved}
           onSavingChange={handleSavingChange}
           history={history}
         />
       </DialogContent>
+      <Divider />
+      <DialogActions>
+        <Button
+          type="submit"
+          form="selection-plan-form"
+          variant="contained"
+          disabled={isSaving}
+        >
+          {T.translate("general.save")}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 };

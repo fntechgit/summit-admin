@@ -127,6 +127,27 @@ const defaultProps = {
   onEditProgressFlag: jest.fn()
 };
 
+// Mirrors the popup: form renders without a button; an external button submits
+// via the `form` attribute and tracks saving state via onSavingChange.
+const FormWithExternalButton = ({
+  onSavingChange: onSavingChangeProp,
+  ...rest
+}) => {
+  const [saving, setSaving] = React.useState(false);
+  const handleSavingChange = (s) => {
+    setSaving(s);
+    onSavingChangeProp(s);
+  };
+  return (
+    <>
+      <SelectionPlanForm {...rest} onSavingChange={handleSavingChange} />
+      <button type="submit" form="selection-plan-form" disabled={saving}>
+        general.save
+      </button>
+    </>
+  );
+};
+
 describe("SelectionPlanForm — save guard", () => {
   let onSubmit;
   let onSavingChange;
@@ -139,7 +160,7 @@ describe("SelectionPlanForm — save guard", () => {
 
   const renderForm = (props = {}) =>
     render(
-      <SelectionPlanForm
+      <FormWithExternalButton
         {...defaultProps}
         onSubmit={onSubmit}
         onSavingChange={onSavingChange}
