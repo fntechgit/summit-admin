@@ -24,7 +24,7 @@ import {
   fetchResponseHandler,
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import debounce from "lodash/debounce"
+import debounce from "lodash/debounce";
 import URI from "urijs";
 import history from "../history";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
@@ -153,7 +153,7 @@ export const saveCompany = (entity) => async (dispatch) => {
   const normalizedEntity = normalizeEntity(entity);
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_COMPANY),
       createAction(COMPANY_UPDATED),
       `${window.API_BASE_URL}/api/v1/companies/${entity.id}`,
@@ -170,25 +170,25 @@ export const saveCompany = (entity) => async (dispatch) => {
         );
       })
       .finally(() => dispatch(stopLoading()));
-  } else {
-    postRequest(
-      createAction(UPDATE_COMPANY),
-      createAction(COMPANY_ADDED),
-      `${window.API_BASE_URL}/api/v1/companies`,
-      normalizedEntity,
-      snackbarErrorHandler,
-      entity
-    )(params)(dispatch)
-      .then(() => {
-        dispatch(
-          snackbarSuccessHandler({
-            title: T.translate("general.success"),
-            html: T.translate("edit_company.company_created")
-          })
-        );
-      })
-      .finally(() => dispatch(stopLoading()));
   }
+
+  return postRequest(
+    createAction(UPDATE_COMPANY),
+    createAction(COMPANY_ADDED),
+    `${window.API_BASE_URL}/api/v1/companies`,
+    normalizedEntity,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_company.company_created")
+        })
+      );
+    })
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const attachLogo = (entity, file, picAttr) => async (dispatch) => {

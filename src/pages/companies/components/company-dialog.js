@@ -79,7 +79,6 @@ const ColorPickerField = React.memo(({ initialValue, onChange }) => {
 const CompanyDialog = ({
   entity: initialEntity,
   sponsoredProjects = [],
-  isSaving = false,
   onSave,
   onClose,
   onDeleteSponsorship,
@@ -89,6 +88,7 @@ const CompanyDialog = ({
     useState(null);
   const [selectedSponsorShipType, setSelectedSponsorShipType] = useState(null);
   const [sponsorShipTypes, setSponsorShipTypes] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   const colorRef = useRef(initialEntity?.color || "");
 
@@ -117,8 +117,12 @@ const CompanyDialog = ({
       name: yup.string().required(T.translate("validation.required"))
     }),
     onSubmit: (values) => {
+      if (isSaving) return;
       const valuesToSave = { ...values, color: colorRef.current };
-      onSave(valuesToSave);
+      setIsSaving(true);
+      onSave(valuesToSave)
+        .then(() => onClose())
+        .finally(() => setIsSaving(false));
     }
   });
 
@@ -153,15 +157,17 @@ const CompanyDialog = ({
   };
 
   const handleAddSponsorshipType = () => {
-    if (!selectedSponsoredProject || !selectedSponsorShipType) return;
+    if (!selectedSponsoredProject || !selectedSponsorShipType || isSaving)
+      return;
+    setIsSaving(true);
     onAddSponsorship(
       formik.values.id,
       selectedSponsoredProject,
       selectedSponsorShipType
-    );
+    ).finally(() => setIsSaving(false));
   };
 
-  const handleDeleteSponsorship = (sponsorshipId) => {
+  const handleDeleteSponsorship = async (sponsorshipId) => {
     const sponsorship = initialEntity?.project_sponsorships?.find(
       (ps) => ps.id === sponsorshipId
     );
@@ -171,17 +177,20 @@ const CompanyDialog = ({
     );
     if (!supportingCompany) return;
 
-    const confirm = showConfirmDialog({
+    const confirmed = await showConfirmDialog({
       title: T.translate("general.are_you_sure"),
       text: T.translate("edit_company.delete_supporting_company_warning")
     });
 
-    if (confirm)
+    if (confirmed) {
+      if (isSaving) return;
+      setIsSaving(true);
       onDeleteSponsorship(
         sponsorship.sponsored_project.id,
         sponsorshipId,
         supportingCompany.id
-      );
+      ).finally(() => setIsSaving(false));
+    }
   };
 
   const handleColorChange = useCallback((newValue) => {
