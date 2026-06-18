@@ -153,27 +153,19 @@ const FormTemplateListPage = ({
   };
 
   const handleArchiveItem = (item) =>
-    (item.is_archived ? unarchiveFormTemplate(item) : archiveFormTemplate(item))
-      .then(() => {
-        getFormTemplates(
-          term,
-          currentPage,
-          perPage,
-          order,
-          orderDir,
-          showArchived
-        );
-      })
-      .catch(() =>
-        getFormTemplates(
-          term,
-          currentPage,
-          perPage,
-          order,
-          orderDir,
-          showArchived
-        )
+    (item.is_archived
+      ? unarchiveFormTemplate(item)
+      : archiveFormTemplate(item)
+    ).then(() => {
+      getFormTemplates(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
       );
+    });
 
   const handleShowArchivedForms = (value) => {
     getFormTemplates(

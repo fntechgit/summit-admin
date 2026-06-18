@@ -183,29 +183,17 @@ const SponsorPagesTab = ({
     (item.is_archived
       ? unarchiveCustomizedPage(item.id)
       : archiveCustomizedPage(item.id)
-    )
-      .then(() => {
-        const { perPage, order, orderDir, currentPage } = customizedPages;
-        return getSponsorCustomizedPages(
-          term,
-          currentPage,
-          perPage,
-          order,
-          orderDir,
-          showArchived
-        );
-      })
-      .catch(() => {
-        const { perPage, order, orderDir, currentPage } = customizedPages;
-        getSponsorCustomizedPages(
-          term,
-          currentPage,
-          perPage,
-          order,
-          orderDir,
-          showArchived
-        );
-      });
+    ).then(() => {
+      const { perPage, order, orderDir, currentPage } = customizedPages;
+      return getSponsorCustomizedPages(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      );
+    });
 
   const handleManagedEdit = (item) => {
     getSponsorManagedPage(item.id).then(() => setOpenPopup("managedPagePopup"));

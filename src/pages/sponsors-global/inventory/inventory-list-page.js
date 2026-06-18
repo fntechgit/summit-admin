@@ -40,7 +40,6 @@ import {
 import SponsorInventoryDialog from "../form-templates/sponsor-inventory-popup";
 import { ImagePreviewCell } from "../../../components/image-preview-cell";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
-import { getSafePageAfterRemove } from "../../../utils/methods";
 
 const InventoryListPage = ({
   inventoryItems,
@@ -152,32 +151,16 @@ const InventoryListPage = ({
     (item.is_archived
       ? unarchiveInventoryItem(item)
       : archiveInventoryItem(item)
-    )
-      .then(() => {
-        const safePage = getSafePageAfterRemove(
-          totalInventoryItems,
-          perPage,
-          currentPage
-        );
-        getInventoryItems(
-          term,
-          safePage,
-          perPage,
-          order,
-          orderDir,
-          showArchived
-        );
-      })
-      .catch(() =>
-        getInventoryItems(
-          term,
-          currentPage,
-          perPage,
-          order,
-          orderDir,
-          showArchived
-        )
+    ).then(() => {
+      getInventoryItems(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
       );
+    });
 
   const columns = [
     {
