@@ -26,27 +26,25 @@ import {
   useGridFilter
 } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import {
-  queryTags,
-  queryMembers
+  queryMembers,
+  queryTags
 } from "openstack-uicore-foundation/lib/utils/query-actions";
 import {
   bulkUpdateEvents,
   changeEventListSearchTerm,
+  deleteEvent,
   exportEvents,
   getEvents,
-  deleteEvent,
   importEventsCSV,
   importMP4AssetsFromMUX,
+  queryAllCompanies,
   querySpeakerCompany,
-  querySubmitterCompany,
-  queryAllCompanies
+  querySubmitterCompany
 } from "../../../actions/event-actions";
 import { getMediaUploads } from "../../../actions/media-upload-actions";
 import { handleDDLSortByLabel } from "../../../utils/methods";
-import "../../../styles/summit-event-list-page.less";
 import {
   DEFAULT_CURRENT_PAGE,
-  DEFAULT_PER_PAGE,
   DEFAULT_Z_INDEX,
   HIGH_Z_INDEX,
   MAX_PER_PAGE
@@ -796,7 +794,7 @@ const getCriterias = (summit, mediaUploadTypes) => [
     label: "Streaming URL",
     operators: [OPERATORS.IS, OPERATORS.LIKE_START, OPERATORS.LIKE],
     values: {
-      type: "text", // TODO: maybe need url ? or custom validation
+      type: "text",
       props: {}
     }
   },
@@ -805,7 +803,7 @@ const getCriterias = (summit, mediaUploadTypes) => [
     label: "Meeting URL",
     operators: [OPERATORS.IS, OPERATORS.LIKE_START, OPERATORS.LIKE],
     values: {
-      type: "text", // TODO: maybe need url ? or custom validation
+      type: "text",
       props: {}
     }
   },
@@ -814,7 +812,7 @@ const getCriterias = (summit, mediaUploadTypes) => [
     label: "Etherpad Link",
     operators: [OPERATORS.IS, OPERATORS.LIKE_START, OPERATORS.LIKE],
     values: {
-      type: "text", // TODO: maybe need url ? or custom validation
+      type: "text",
       props: {}
     }
   },
@@ -955,41 +953,57 @@ const SummitEventListPage = ({
   const [showImportFromMUXModal, setShowImportFromMUXModal] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState([]);
   const [selectedFilterCriteria, setSelectedFilterCriteria] = useState(null);
-  const { parsedFilter, resetFilters, filterValues } = useGridFilter(FILTER_ID);
+  const { parsedFilter, resetFilters, filterValues, setFilters } =
+    useGridFilter(FILTER_ID);
 
-  useEffect(() => {
-    getMediaUploads("", 1, MAX_PER_PAGE, "name", 1);
-  }, []);
+  // eslint-disable-next-line no-underscore-dangle
+  const _getEvents = (params = {}) => {
+    const mergedParams = {
+      term,
+      page: currentPage,
+      perPage,
+      order,
+      orderDir,
+      ...params
+    };
+
+    const {
+      term: t,
+      page: p,
+      perPage: pp,
+      order: o,
+      orderDir: od
+    } = mergedParams;
+
+    getEvents(t, p, pp, o, od, parsedFilter, extraColumns);
+  };
 
   useEffect(() => {
     if (currentSummit) {
-      getEvents(
-        term,
-        currentPage,
-        perPage,
-        order,
-        orderDir,
-        parsedFilter,
-        extraColumns
-      );
+      getMediaUploads("", 1, MAX_PER_PAGE, "name", 1);
+      getEvents();
+      // GridFilter persists criteria to localStorage under a summit-agnostic
+      // FILTER_ID, so it survives a summit switch unless cleared explicitly here.
+      setSelectedFilterCriteria(null);
+      resetFilters();
     }
-  }, [currentSummit, parsedFilter.join(",")]);
+  }, [currentSummit?.id]);
+
+  useEffect(() => {
+    _getEvents();
+  }, [parsedFilter.join(",")]);
+
+  useEffect(() => {
+    if (selectedFilterCriteria) {
+      setFilters(selectedFilterCriteria.criteria);
+    } else {
+      resetFilters();
+    }
+  }, [selectedFilterCriteria]);
 
   useEffect(() => {
     setSelectedColumns(extraColumns);
   }, [extraColumns]);
-
-  useEffect(() => {
-    getEvents(
-      term,
-      currentPage,
-      perPage,
-      order,
-      orderDir,
-      parsedFilter,
-      extraColumns
-    );
-  }, [selectedFilterCriteria]);
 
   const handleMUXImport = (ev) => {
     ev.preventDefault();
@@ -1006,15 +1020,7 @@ const SummitEventListPage = ({
   };
 
   const handlePageChange = (page) => {
-    getEvents(
-      term,
-      page,
-      perPage,
-      order,
-      orderDir,
-      parsedFilter,
-      selectedColumns
-    );
+    _getEvents({ page });
   };
 
   const handleSort = (index, key, dir) => {
@@ -1033,27 +1039,11 @@ const SummitEventListPage = ({
         break;
     }
 
-    getEvents(
-      term,
-      DEFAULT_CURRENT_PAGE,
-      DEFAULT_PER_PAGE,
-      translatedKey,
-      dir,
-      parsedFilter,
-      selectedColumns
-    );
+    _getEvents({ order: translatedKey, orderDir: dir });
   };
 
   const handleSearch = (newTerm) => {
-    getEvents(
-      newTerm,
-      DEFAULT_CURRENT_PAGE,
-      DEFAULT_PER_PAGE,
-      order,
-      orderDir,
-      parsedFilter,
-      selectedColumns
-    );
+    _getEvents({ term: newTerm, page: DEFAULT_CURRENT_PAGE });
   };
 
   const handleNewEvent = () => {
@@ -1082,8 +1072,6 @@ const SummitEventListPage = ({
   };
 
   const handleFilterCriteriaSave = ({ name, id, visibility }) => {
-    // TODO: need to change this so that it works with new GridFilter
-
     const filterToSave = {
       id,
       show_id: currentSummit.id,
@@ -1133,20 +1121,11 @@ const SummitEventListPage = ({
   };
 
   const handleFilterCriteriaChange = (filterCriteria) => {
-    let newEventFilters = {};
-    if (filterCriteria) {
-      // TODO: need to change this so that it works with new GridFilter
-      Object.entries(filterCriteria.criteria).forEach(([key, values]) => {
-        newEventFilters = { ...newEventFilters, [key]: values };
-      });
-    }
-
     setSelectedFilterCriteria(filterCriteria);
   };
 
   const handleFilterCriteriaDelete = (filterCriteriaId) => {
     deleteFilterCriteria(filterCriteriaId).then(() => {
-      resetFilters();
       setSelectedFilterCriteria(null);
     });
   };
@@ -1336,11 +1315,16 @@ const SummitEventListPage = ({
   return (
     <div className="container summit-event-list-filters">
       <h3>
-        {" "}
         {T.translate("event_list.event_list")} ({totalEvents})
       </h3>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <div style={{ minWidth: "200px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          gap: "20px"
+        }}
+      >
+        <div style={{ flex: 1 }}>
           <FreeTextSearch
             value={term ?? ""}
             placeholder={T.translate("event_list.placeholders.search_events")}
@@ -1349,19 +1333,6 @@ const SummitEventListPage = ({
             onChange={handleTermChange}
           />
         </div>
-        <div style={{ minWidth: "230px" }}>
-          <SelectFilterCriteria
-            summitId={currentSummit.id}
-            context={CONTEXT_ACTIVITIES}
-            onDelete={handleFilterCriteriaDelete}
-            selectedFilterCriteria={selectedFilterCriteria}
-            onChange={handleFilterCriteriaChange}
-          />
-        </div>
-        <GridFilter
-          id={FILTER_ID}
-          criterias={getCriterias(currentSummit, mediaUploadTypes)}
-        />
         <button
           className="btn btn-primary"
           onClick={handleNewEvent}
@@ -1392,6 +1363,21 @@ const SummitEventListPage = ({
         </button>
       </div>
       <hr />
+      <div style={{ display: "flex", gap: "20px" }}>
+        <div style={{ minWidth: "50%" }}>
+          <SelectFilterCriteria
+            summitId={currentSummit.id}
+            context={CONTEXT_ACTIVITIES}
+            onDelete={handleFilterCriteriaDelete}
+            selectedFilterCriteria={selectedFilterCriteria}
+            onChange={handleFilterCriteriaChange}
+          />
+        </div>
+        <GridFilter
+          id={FILTER_ID}
+          criterias={getCriterias(currentSummit, mediaUploadTypes)}
+        />
+      </div>
       <SaveFilterCriteria
         onSave={handleFilterCriteriaSave}
         selectedFilterCriteria={selectedFilterCriteria}

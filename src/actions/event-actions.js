@@ -224,7 +224,7 @@ export const normalizeBulkEvents = (entity) => {
 
 export const getEvents =
   (
-    term = null,
+    term = "",
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
