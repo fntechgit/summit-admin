@@ -6,16 +6,26 @@ import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
 import {
   postRequest,
-  putRequest
+  putRequest,
+  getRequest,
+  deleteRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { saveEmailTemplate } from "../email-actions";
+import {
+  saveEmailTemplate,
+  getEmailTemplates,
+  deleteEmailTemplate
+} from "../email-actions";
 import * as methods from "../../utils/methods";
+
+jest.mock("../../history", () => ({ push: jest.fn() }));
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   __esModule: true,
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
   postRequest: jest.fn(),
-  putRequest: jest.fn()
+  putRequest: jest.fn(),
+  getRequest: jest.fn(),
+  deleteRequest: jest.fn()
 }));
 
 jest.mock("../marketing-actions", () => ({
@@ -36,6 +46,34 @@ const requestMock =
       resolve({ response: { id: 1 } });
     });
   };
+
+const getRequestMock =
+  (requestActionCreator, receiveActionCreator, _url, _handler, syncPayload) =>
+  () =>
+  (dispatch) => {
+    if (requestActionCreator && typeof requestActionCreator === "function") {
+      dispatch(requestActionCreator(syncPayload || {}));
+    }
+    return new Promise((resolve) => {
+      if (typeof receiveActionCreator === "function") {
+        dispatch(receiveActionCreator({ response: {} }));
+      } else {
+        dispatch(receiveActionCreator);
+      }
+      resolve({});
+    });
+  };
+
+const deleteRequestMock =
+  (_requestActionCreator, receiveAction) => () => (dispatch) =>
+    new Promise((resolve) => {
+      if (typeof receiveAction === "function") {
+        dispatch(receiveAction({ response: {} }));
+      } else {
+        dispatch(receiveAction);
+      }
+      resolve({});
+    });
 
 describe("saveEmailTemplate", () => {
   const middlewares = [thunk];
@@ -97,5 +135,54 @@ describe("saveEmailTemplate", () => {
         actionTypes.indexOf("TEMPLATE_UPDATED")
       );
     });
+  });
+});
+
+describe("getEmailTemplates", () => {
+  const middlewares = [thunk];
+  const mockStore = configureStore(middlewares);
+
+  beforeEach(() => {
+    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
+    getRequest.mockImplementation(getRequestMock);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("dispatches REQUEST_TEMPLATES with page and perPage", async () => {
+    const store = mockStore({});
+    store.dispatch(getEmailTemplates("foo", 2, 25));
+    await flushPromises();
+
+    const req = store.getActions().find((a) => a.type === "REQUEST_TEMPLATES");
+    expect(req.payload).toMatchObject({ page: 2, perPage: 25 });
+  });
+});
+
+describe("deleteEmailTemplate", () => {
+  const middlewares = [thunk];
+  const mockStore = configureStore(middlewares);
+
+  beforeEach(() => {
+    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
+    deleteRequest.mockImplementation(deleteRequestMock);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("dispatches TEMPLATE_DELETED with the correct templateId", async () => {
+    const store = mockStore({});
+    store.dispatch(deleteEmailTemplate(42));
+    await flushPromises();
+
+    const deleted = store
+      .getActions()
+      .find((a) => a.type === "TEMPLATE_DELETED");
+    expect(deleted).toBeDefined();
+    expect(deleted.payload).toMatchObject({ templateId: 42 });
   });
 });

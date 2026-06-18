@@ -29,6 +29,7 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
 import debounce from "lodash/debounce";
+import history from "../history";
 import { checkOrFilter, getAccessTokenSafely } from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";
 import {
@@ -150,22 +151,22 @@ export const saveEmailTemplate =
         .finally(() => {
           dispatch(stopLoading());
         });
-    } 
-      return postRequest(
-        null,
-        createAction(TEMPLATE_ADDED),
-        `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates`,
-        normalizedEntity,
-        customErrorHandler,
-        entity
-      )(params)(dispatch)
-        .then(() => {
-          dispatch(showSuccessMessage(T.translate("emails.template_created")));
-        })
-        .finally(() => {
-          dispatch(stopLoading());
-        });
-    
+    }
+    return postRequest(
+      null,
+      createAction(TEMPLATE_ADDED),
+      `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates`,
+      normalizedEntity,
+      customErrorHandler,
+      entity
+    )(params)(dispatch)
+      .then((payload) => {
+        dispatch(showSuccessMessage(T.translate("emails.template_created")));
+        history.push(`/app/emails/templates/${payload.response.id}`);
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 export const deleteEmailTemplate = (templateId) => async (dispatch) => {
