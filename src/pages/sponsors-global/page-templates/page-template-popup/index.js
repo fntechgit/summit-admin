@@ -11,7 +11,7 @@ import {
   Divider,
   FormControl,
   FormHelperText,
-  Grid2,
+  Grid,
   IconButton,
   Typography
 } from "@mui/material";
@@ -196,15 +196,15 @@ const PageTemplatePopup = ({
           autoComplete="off"
         >
           <DialogContent sx={{ p: 0 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2 size={4}>
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid size={4}>
                 <MuiFormikTextField
                   name="code"
                   label={T.translate("page_template_list.code")}
                   fullWidth
                 />
-              </Grid2>
-              <Grid2
+              </Grid>
+              <Grid
                 spacing={2}
                 size={
                   showSponsorships || showAllowedAddons ? COLUMN_4 : COLUMN_8
@@ -215,9 +215,9 @@ const PageTemplatePopup = ({
                   label={T.translate("page_template_list.name")}
                   fullWidth
                 />
-              </Grid2>
+              </Grid>
               {showSponsorships && (
-                <Grid2 spacing={2} size={4}>
+                <Grid spacing={2} size={4}>
                   <FormControl
                     fullWidth
                     error={
@@ -247,10 +247,10 @@ const PageTemplatePopup = ({
                         </FormHelperText>
                       )}
                   </FormControl>
-                </Grid2>
+                </Grid>
               )}
               {showAllowedAddons && (
-                <Grid2 spacing={2} size={4} sx={{ py: 2 }}>
+                <Grid spacing={2} size={4} sx={{ py: 2 }}>
                   <MuiFormikSelectGroup
                     name="allowed_add_ons"
                     queryFunction={querySponsorAddons}
@@ -263,12 +263,12 @@ const PageTemplatePopup = ({
                       "edit_sponsor.placeholders.select_add_ons"
                     )}
                   />
-                </Grid2>
+                </Grid>
               )}
-            </Grid2>
+            </Grid>
             <Divider sx={{ mb: 2 }} />
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2 size={4}>
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid size={4}>
                 <Button
                   variant="contained"
                   fullWidth
@@ -277,8 +277,8 @@ const PageTemplatePopup = ({
                 >
                   {T.translate("page_template_list.page_crud.add_info")}
                 </Button>
-              </Grid2>
-              <Grid2 size={4}>
+              </Grid>
+              <Grid size={4}>
                 <Button
                   variant="contained"
                   fullWidth
@@ -287,8 +287,8 @@ const PageTemplatePopup = ({
                 >
                   {T.translate("page_template_list.page_crud.add_doc")}
                 </Button>
-              </Grid2>
-              <Grid2 size={4}>
+              </Grid>
+              <Grid size={4}>
                 <Button
                   variant="contained"
                   fullWidth
@@ -297,8 +297,8 @@ const PageTemplatePopup = ({
                 >
                   {T.translate("page_template_list.page_crud.add_media")}
                 </Button>
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
             <Divider sx={{ mb: 2 }} />
             <Box sx={{ py: 2 }}>
               <PageModules name="modules" />

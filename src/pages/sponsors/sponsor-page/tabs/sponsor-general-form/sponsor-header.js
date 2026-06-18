@@ -13,12 +13,12 @@
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Divider, Grid2, Typography } from "@mui/material";
+import { Box, Divider, Grid, Typography } from "@mui/material";
 
 const SponsorHeader = ({ sponsor }) => (
   <Box sx={{ px: 2, py: 0, backgroundColor: "#FFF" }}>
-    <Grid2 container size={12} sx={{ height: "68px", alignItems: "center" }}>
-      <Grid2 size={12}>
+    <Grid container size={12} sx={{ height: "68px", alignItems: "center" }}>
+      <Grid size={12}>
         <Typography
           sx={{
             fontWeight: "500",
@@ -29,15 +29,15 @@ const SponsorHeader = ({ sponsor }) => (
         >
           {T.translate("edit_sponsor.general_information")}
         </Typography>
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
     <Divider />
-    <Grid2
+    <Grid
       container
       size={12}
       sx={{ height: "75px", gap: "10px", alignItems: "center" }}
     >
-      <Grid2 size={3}>
+      <Grid size={3}>
         <Typography
           sx={{
             fontSize: "1.4rem",
@@ -47,16 +47,16 @@ const SponsorHeader = ({ sponsor }) => (
         >
           {T.translate("edit_sponsor.sponsor_name")}
         </Typography>
-      </Grid2>
-      <Grid2>{sponsor.company?.name}</Grid2>
-    </Grid2>
+      </Grid>
+      <Grid>{sponsor.company?.name}</Grid>
+    </Grid>
     <Divider />
-    <Grid2
+    <Grid
       container
       size={12}
       sx={{ height: "75px", gap: "10px", alignItems: "center" }}
     >
-      <Grid2 size={3}>
+      <Grid size={3}>
         <Typography
           sx={{
             fontSize: "1.4rem",
@@ -66,8 +66,8 @@ const SponsorHeader = ({ sponsor }) => (
         >
           {T.translate("edit_sponsor.sponsor_address")}
         </Typography>
-      </Grid2>
-      <Grid2>
+      </Grid>
+      <Grid>
         {[
           sponsor.company?.city,
           sponsor.company?.state,
@@ -84,8 +84,8 @@ const SponsorHeader = ({ sponsor }) => (
             </a>
           </>
         )}
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   </Box>
 );
 

@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { useField } from "formik";
-import { Divider, Grid2, InputLabel } from "@mui/material";
+import { Divider, Grid, InputLabel } from "@mui/material";
 import MuiFormikUpload from "openstack-uicore-foundation/lib/components/mui/formik-inputs/upload";
 import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
 import { PAGE_MODULES_DOWNLOAD } from "../../../../../utils/constants";
@@ -27,21 +27,21 @@ const DocumentDownloadModule = ({ baseName, index }) => {
   ];
 
   return (
-    <Grid2 container spacing={2} size={12}>
+    <Grid container spacing={2} size={12}>
       <InputLabel htmlFor={buildFieldName("name")}>
         {T.translate("page_template_list.page_crud.document_name")}
       </InputLabel>
-      <Grid2 size={12}>
+      <Grid size={12}>
         <MuiFormikTextField
           name={buildFieldName("name")}
           fullWidth
           margin="none"
         />
-      </Grid2>
+      </Grid>
       <InputLabel htmlFor={buildFieldName("description")}>
         {T.translate("page_template_list.page_crud.description")}
       </InputLabel>
-      <Grid2 size={12}>
+      <Grid size={12}>
         <MuiFormikTextField
           name={buildFieldName("description")}
           fullWidth
@@ -49,20 +49,20 @@ const DocumentDownloadModule = ({ baseName, index }) => {
           rows={2}
           margin="none"
         />
-      </Grid2>
-      <Grid2 size={12}>
+      </Grid>
+      <Grid size={12}>
         <MuiFormikRadioGroup
           name={buildFieldName("type")}
           options={downloadTypeOptions}
           row
           marginWrapper="none"
         />
-      </Grid2>
-      <Grid2 size={12}>
+      </Grid>
+      <Grid size={12}>
         <Divider />
-      </Grid2>
+      </Grid>
       {downloadTypeVal === PAGE_MODULES_DOWNLOAD.URL && (
-        <Grid2 size={12}>
+        <Grid size={12}>
           <InputLabel htmlFor={buildFieldName("external_url")}>
             {T.translate("page_template_list.page_crud.external_url")}
           </InputLabel>
@@ -72,19 +72,19 @@ const DocumentDownloadModule = ({ baseName, index }) => {
             fullWidth
             margin="none"
           />
-        </Grid2>
+        </Grid>
       )}
       {downloadTypeVal === PAGE_MODULES_DOWNLOAD.FILE && (
-        <Grid2 size={12}>
+        <Grid size={12}>
           <MuiFormikUpload
             id={`document-module-upload-${index}`}
             name={buildFieldName("file")}
             maxFiles={1}
             allowedExtensions={getFileUploadAllowedExtensions()}
           />
-        </Grid2>
+        </Grid>
       )}
-    </Grid2>
+    </Grid>
   );
 };
 

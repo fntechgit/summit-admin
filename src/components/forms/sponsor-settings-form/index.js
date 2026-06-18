@@ -15,7 +15,7 @@ import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { useFormik, FormikProvider } from "formik";
 import * as yup from "yup";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button, Grid } from "@mui/material";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import MuiFormikDatepicker from "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker";
 import MuiFormikTextField from "../../mui/formik-inputs/mui-formik-textfield";
@@ -121,32 +121,32 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
         className={styles.formWrapper}
         autoComplete="off"
       >
-        <Grid2 container spacing={2}>
-          <Grid2 size={4}>
+        <Grid container spacing={2}>
+          <Grid size={4}>
             <MuiFormikDatepicker
               name="early_bird_end_date"
               label={T.translate("sponsor_settings.early_bird_end_date")}
             />
-          </Grid2>
-          <Grid2 size={4}>
+          </Grid>
+          <Grid size={4}>
             <MuiFormikDatepicker
               name="standard_price_end_date"
               label={T.translate("sponsor_settings.standard_price_end_date")}
             />
-          </Grid2>
-          <Grid2 size={4}>
+          </Grid>
+          <Grid size={4}>
             <MuiFormikDatepicker
               name="onsite_price_start_date"
               label={T.translate("sponsor_settings.onsite_price_start_date")}
             />
-          </Grid2>
-          <Grid2 size={4}>
+          </Grid>
+          <Grid size={4}>
             <MuiFormikDatepicker
               name="onsite_price_end_date"
               label={T.translate("sponsor_settings.onsite_price_end_date")}
             />
-          </Grid2>
-          <Grid2 size={4}>
+          </Grid>
+          <Grid size={4}>
             <MuiFormikTextField
               name="wire_transfer_notification_email"
               label={T.translate(
@@ -155,8 +155,8 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
               fullWidth
               margin="none"
             />
-          </Grid2>
-          <Grid2 size={12}>
+          </Grid>
+          <Grid size={12}>
             <MuiFormikTextField
               name="access_request_notification_email"
               label={T.translate(
@@ -164,8 +164,8 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
               )}
               fullWidth
             />
-          </Grid2>
-          <Grid2 size={12}>
+          </Grid>
+          <Grid size={12}>
             <MuiFormikTextField
               name="wire_transfer_detail"
               label={T.translate("sponsor_settings.wire_transfer_detail")}
@@ -174,8 +174,8 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
               rows={4}
               type="text"
             />
-          </Grid2>
-          <Grid2 size={12}>
+          </Grid>
+          <Grid size={12}>
             <MuiFormikTextField
               name="cart_checkout_cancel_policy"
               label={T.translate(
@@ -186,20 +186,20 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
               rows={4}
               type="text"
             />
-          </Grid2>
-          <Grid2 size={4}>
+          </Grid>
+          <Grid size={4}>
             <MuiFormikCheckbox
               name="is_wire_transfer_enabled"
               label={T.translate("sponsor_settings.is_wire_transfer_enabled")}
             />
-          </Grid2>
-          <Grid2 size={4}>
+          </Grid>
+          <Grid size={4}>
             <MuiFormikCheckbox
               name="is_access_request_enabled"
               label={T.translate("sponsor_settings.is_access_request_enabled")}
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
         <Box className={styles.footer}>
           <Button
             type="submit"

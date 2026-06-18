@@ -18,7 +18,7 @@ import {
   Card,
   CardContent,
   Divider,
-  Grid2,
+  Grid,
   IconButton,
   Typography
 } from "@mui/material";
@@ -44,8 +44,8 @@ const ClientCard = ({ client, address, onClientSubmit, onAddressSubmit }) => {
           <Typography variant="h6" gutterBottom>
             {T.translate("client_card.title")}
           </Typography>
-          <Grid2 container>
-            <Grid2 size="grow">
+          <Grid container>
+            <Grid size="grow">
               <Box sx={{ position: "relative", pr: 4 }}>
                 <Typography
                   variant="caption"
@@ -65,9 +65,9 @@ const ClientCard = ({ client, address, onClientSubmit, onAddressSubmit }) => {
                   <EditIcon />
                 </IconButton>
               </Box>
-            </Grid2>
+            </Grid>
             <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
-            <Grid2 size="grow">
+            <Grid size="grow">
               <Box sx={{ position: "relative", pr: 4 }}>
                 <Typography
                   variant="caption"
@@ -87,8 +87,8 @@ const ClientCard = ({ client, address, onClientSubmit, onAddressSubmit }) => {
                   <EditIcon />
                 </IconButton>
               </Box>
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
         </CardContent>
       </Card>
 

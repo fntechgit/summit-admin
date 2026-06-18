@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   Divider,
-  Grid2,
+  Grid,
   InputLabel,
   Typography
 } from "@mui/material";
@@ -116,8 +116,8 @@ const CustomizedForm = ({
         autoComplete="off"
       >
         <DialogContent sx={{ p: 0 }}>
-          <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
-            <Grid2 size={4}>
+          <Grid container spacing={2} size={12} sx={{ p: 3 }}>
+            <Grid size={4}>
               <MuiFormikTextField
                 name="code"
                 label={T.translate(
@@ -126,8 +126,8 @@ const CustomizedForm = ({
                 fullWidth
                 required
               />
-            </Grid2>
-            <Grid2 size={4}>
+            </Grid>
+            <Grid size={4}>
               <MuiFormikTextField
                 name="name"
                 label={T.translate(
@@ -136,8 +136,8 @@ const CustomizedForm = ({
                 fullWidth
                 required
               />
-            </Grid2>
-            <Grid2 size={4} sx={{ pt: "16px" }}>
+            </Grid>
+            <Grid size={4} sx={{ pt: "16px" }}>
               <MuiFormikSelectGroup
                 name="allowed_add_ons"
                 queryFunction={querySponsorAddons}
@@ -150,24 +150,24 @@ const CustomizedForm = ({
                   "edit_sponsor.placeholders.select_add_ons"
                 )}
               />
-            </Grid2>
-            <Grid2 size={4}>
+            </Grid>
+            <Grid size={4}>
               <MuiFormikDatepicker
                 name="opens_at"
                 label={T.translate(
                   "edit_sponsor.forms_tab.customized_form.opens_at"
                 )}
               />
-            </Grid2>
-            <Grid2 size={4}>
+            </Grid>
+            <Grid size={4}>
               <MuiFormikDatepicker
                 name="expires_at"
                 label={T.translate(
                   "edit_sponsor.forms_tab.customized_form.expires_at"
                 )}
               />
-            </Grid2>
-            <Grid2 size={12}>
+            </Grid>
+            <Grid size={12}>
               <InputLabel htmlFor="instructions">
                 {T.translate(
                   "edit_sponsor.forms_tab.customized_form.instructions"
@@ -175,8 +175,8 @@ const CustomizedForm = ({
                 *
               </InputLabel>
               <FormikTextEditor name="instructions" />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
           <Typography variant="h6" sx={{ ml: "26px", mt: "20px" }}>
             {T.translate(
               "edit_sponsor.forms_tab.customized_form.additional_fields"

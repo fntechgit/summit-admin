@@ -6,7 +6,7 @@ import {
   DialogContent,
   Divider,
   FormLabel,
-  Grid2,
+  Grid,
   InputLabel,
   Typography
 } from "@mui/material";
@@ -66,24 +66,24 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
         autoComplete="off"
       >
         <DialogContent sx={{ p: 0 }}>
-          <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
-            <Grid2 size={4}>
+          <Grid container spacing={2} size={12} sx={{ p: 3 }}>
+            <Grid size={4}>
               <MuiFormikTextField
                 name="code"
                 label={T.translate("sponsor_form_item_list.edit_item.code")}
                 fullWidth
                 required
               />
-            </Grid2>
-            <Grid2 size={8}>
+            </Grid>
+            <Grid size={8}>
               <MuiFormikTextField
                 name="name"
                 label={T.translate("sponsor_form_item_list.edit_item.name")}
                 fullWidth
                 required
               />
-            </Grid2>
-            <Grid2 size={12}>
+            </Grid>
+            <Grid size={12}>
               <InputLabel htmlFor="description">
                 {T.translate("sponsor_form_item_list.edit_item.description")}
               </InputLabel>
@@ -91,9 +91,9 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
                 name="description"
                 options={{ zIndex: 9999999 }}
               />
-            </Grid2>
+            </Grid>
             <ItemPriceTiers />
-            <Grid2 size={4}>
+            <Grid size={4}>
               <MuiFormikQuantityField
                 name="quantity_limit_per_show"
                 label={T.translate(
@@ -103,8 +103,8 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
                 type="number"
                 inputProps={{ min: 0 }}
               />
-            </Grid2>
-            <Grid2 size={4}>
+            </Grid>
+            <Grid size={4}>
               <MuiFormikQuantityField
                 name="quantity_limit_per_sponsor"
                 label={T.translate(
@@ -114,8 +114,8 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
                 type="number"
                 inputProps={{ min: 0 }}
               />
-            </Grid2>
-            <Grid2 size={4}>
+            </Grid>
+            <Grid size={4}>
               <MuiFormikQuantityField
                 name="default_quantity"
                 label={T.translate(
@@ -126,9 +126,9 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
                 inputProps={{ min: 0 }}
                 required
               />
-            </Grid2>
-          </Grid2>
-          <Grid2 size={12}>
+            </Grid>
+          </Grid>
+          <Grid size={12}>
             <Box sx={{ px: 3, my: "10px" }}>
               <Typography variant="h5">
                 {T.translate(
@@ -137,8 +137,8 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
               </Typography>
               <AdditionalInputList name="meta_fields" />
             </Box>
-          </Grid2>
-          <Grid2 size={12}>
+          </Grid>
+          <Grid size={12}>
             <Box sx={{ px: 3, my: "10px" }}>
               <FormLabel>
                 {T.translate("sponsor_form_item_list.edit_item.images")}
@@ -150,7 +150,7 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
                 allowedExtensions={getFileUploadAllowedExtensions()}
               />
             </Box>
-          </Grid2>
+          </Grid>
         </DialogContent>
         <Divider />
         <DialogActions>

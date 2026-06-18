@@ -21,7 +21,7 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid2
+  Grid
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
@@ -246,7 +246,7 @@ const FormTemplateItemListPage = ({
       >
         {T.translate("form_template_item_list.alert_info")}
       </Alert>
-      <Grid2
+      <Grid
         container
         spacing={2}
         sx={{
@@ -255,10 +255,10 @@ const FormTemplateItemListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={6}>
+        <Grid size={6}>
           <Box component="span">{totalFormTemplateItems} items</Box>
-        </Grid2>
-        <Grid2
+        </Grid>
+        <Grid
           container
           size={6}
           spacing={1}
@@ -267,7 +267,7 @@ const FormTemplateItemListPage = ({
             alignItems: "center"
           }}
         >
-          <Grid2 size={4} offset={4}>
+          <Grid size={4} offset={4}>
             <FormGroup>
               <FormControlLabel
                 control={
@@ -284,8 +284,8 @@ const FormTemplateItemListPage = ({
                 label={T.translate("form_template_item_list.show_archived")}
               />
             </FormGroup>
-          </Grid2>
-          <Grid2 size={4}>
+          </Grid>
+          <Grid size={4}>
             <Button
               variant="contained"
               fullWidth
@@ -294,9 +294,9 @@ const FormTemplateItemListPage = ({
             >
               {T.translate("form_template_item_list.add_item")}
             </Button>
-          </Grid2>
-        </Grid2>
-      </Grid2>
+          </Grid>
+        </Grid>
+      </Grid>
 
       {formTemplateItems.length > 0 && (
         <div>

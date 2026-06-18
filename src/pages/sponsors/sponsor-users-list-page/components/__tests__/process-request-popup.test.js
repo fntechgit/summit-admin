@@ -116,13 +116,17 @@ describe("ProcessRequestPopup", () => {
       }
     );
 
+    // Flush the fetchSponsorByCompany microtask so the form reinitialises with
+    // sponsor_type=EXISTING before we click submit.
+    await act(async () => {
+      await Promise.resolve();
+    });
+
     const processRequestButton = screen.getAllByText(
       "sponsor_users.process_request.save"
     )[0];
 
-    await act(async () => {
-      await userEvent.click(processRequestButton);
-    });
+    await userEvent.click(processRequestButton);
     expect(sponsorUsersActions.processSponsorUserRequest).toHaveBeenCalled();
     expect(onCloseMock).toHaveBeenCalled();
   });

@@ -11,7 +11,7 @@ import {
   Button,
   IconButton,
   Divider,
-  Grid2,
+  Grid,
   Typography,
   InputLabel,
   Box
@@ -88,8 +88,8 @@ const AddSponsorDialog = ({ open, onClose, onSubmit, summitId }) => {
           autoComplete="off"
         >
           <DialogContent sx={{ p: 1 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid
                 container
                 spacing={2}
                 size={12}
@@ -107,8 +107,8 @@ const AddSponsorDialog = ({ open, onClose, onSubmit, summitId }) => {
                     )}
                   />
                 </Box>
-              </Grid2>
-              <Grid2
+              </Grid>
+              <Grid
                 container
                 spacing={2}
                 size={12}
@@ -124,8 +124,8 @@ const AddSponsorDialog = ({ open, onClose, onSubmit, summitId }) => {
                   isMulti
                   placeholder={T.translate("sponsor_list.placeholders.select")}
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
           </DialogContent>
           <Divider />
           <DialogActions sx={{ p: 2 }}>

@@ -14,7 +14,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button, Grid } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DownloadIcon from "@mui/icons-material/Download";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
@@ -167,7 +167,7 @@ const SponsorBadgeScans = ({
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Grid2
+      <Grid
         container
         spacing={1}
         sx={{
@@ -176,20 +176,20 @@ const SponsorBadgeScans = ({
           mb: 2
         }}
       >
-        <Grid2 size={3}>
+        <Grid size={3}>
           <Box component="span">
             {totalBadgeScans} {T.translate("sponsor_badge_scans.badge_scanned")}
           </Box>
-        </Grid2>
-        <Grid2 size={9} justifyContent="flex-end" gap={1} container>
-          <Grid2 size={4}>
+        </Grid>
+        <Grid size={9} justifyContent="flex-end" gap={1} container>
+          <Grid size={4}>
             <SearchInput
               onSearch={handleSearch}
               placeholder={T.translate(
                 "inventory_item_list.placeholders.search_inventory_items"
               )}
             />
-          </Grid2>
+          </Grid>
           <Button
             variant="contained"
             size="medium"
@@ -220,8 +220,8 @@ const SponsorBadgeScans = ({
           >
             {T.translate("sponsor_badge_scans.export")}
           </Button>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       {badgeScans.length > 0 && (
         <div>

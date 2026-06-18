@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   Divider,
-  Grid2,
+  Grid,
   InputLabel,
   Typography
 } from "@mui/material";
@@ -115,58 +115,58 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
           <Typography variant="h6" gutterBottom>
             {T.translate("sponsor_users.process_request.request_details")}
           </Typography>
-          <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-            <Grid2 size={6}>
+          <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+            <Grid size={6}>
               <Typography variant="body2">
                 {T.translate("sponsor_users.process_request.request_time")}
               </Typography>
-            </Grid2>
-            <Grid2 size={6}>
+            </Grid>
+            <Grid size={6}>
               <Typography variant="body1">{request.created}</Typography>
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
           <Divider />
-          <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-            <Grid2 size={6}>
+          <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+            <Grid size={6}>
               <Typography variant="body2">
                 {T.translate("sponsor_users.process_request.show")}
               </Typography>
-            </Grid2>
-            <Grid2 size={6}>
+            </Grid>
+            <Grid size={6}>
               <Typography variant="body1">{summit.name}</Typography>
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
           <Divider />
-          <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-            <Grid2 size={6}>
+          <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+            <Grid size={6}>
               <Typography variant="body2">
                 {T.translate("sponsor_users.process_request.company")}
               </Typography>
-            </Grid2>
-            <Grid2 size={6}>
+            </Grid>
+            <Grid size={6}>
               <Typography variant="body1">{request.company_name}</Typography>
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
           <Divider sx={{ margin: "10px -16px 20px -16px" }} />
           <Typography variant="h6" gutterBottom>
             {T.translate("sponsor_users.process_request.new_user")}
           </Typography>
-          <Grid2 container spacing={2} size={12}>
-            <Grid2 size={6}>
+          <Grid container spacing={2} size={12}>
+            <Grid size={6}>
               <MuiFormikTextField
                 name="name"
                 label={T.translate("sponsor_users.process_request.name")}
                 fullWidth
               />
-            </Grid2>
-            <Grid2 size={6}>
+            </Grid>
+            <Grid size={6}>
               <MuiFormikTextField
                 name="email"
                 label={T.translate("sponsor_users.process_request.email")}
                 fullWidth
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
           <MuiFormikSwitch
             name="send_email"
             label={T.translate("sponsor_users.process_request.send_email")}
@@ -199,8 +199,8 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
               }
             ]}
           />
-          <Grid2 container spacing={2} size={12}>
-            <Grid2 size={6}>
+          <Grid container spacing={2} size={12}>
+            <Grid size={6}>
               <MuiSponsorInput
                 name="sponsor"
                 disabled={
@@ -212,8 +212,8 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
                   "sponsor_users.process_request.select_sponsor"
                 )}
               />
-            </Grid2>
-            <Grid2 size={6}>
+            </Grid>
+            <Grid size={6}>
               <CompanyInputMUI
                 name="company"
                 disabled={
@@ -225,8 +225,8 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
                 )}
                 allowCreate
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
           <Divider sx={{ margin: "10px -16px 20px -16px" }} />
           {formik.values.sponsor_type === SPONSOR_USER_ASSIGNMENT_TYPE.NEW && (
             <>

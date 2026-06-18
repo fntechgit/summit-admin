@@ -81,10 +81,10 @@ describe("FormTemplatePopup", () => {
 
     const button = screen.getByRole("button", { name: "submit-form-template" });
 
-    await act(async () => {
-      await userEvent.click(button);
-      await userEvent.click(button);
-    });
+    // React 18 auto-batches state updates; remove outer act() so each click
+    // flushes isSaving before the next click is processed.
+    await userEvent.click(button);
+    await userEvent.click(button);
 
     expect(saveFormTemplate).toHaveBeenCalledTimes(1);
 

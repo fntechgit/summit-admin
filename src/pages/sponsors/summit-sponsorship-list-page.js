@@ -14,7 +14,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Alert, Box, Button, Grid2 } from "@mui/material";
+import { Alert, Box, Button, Grid } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTableSortable from "openstack-uicore-foundation/lib/components/mui/sortable-table";
 import { getSummitById } from "../../actions/summit-actions";
@@ -133,7 +133,7 @@ const SummitSponsorshipListPage = ({
       >
         {T.translate("summit_sponsorship_list.alert_info")}
       </Alert>
-      <Grid2
+      <Grid
         container
         spacing={2}
         sx={{
@@ -142,10 +142,10 @@ const SummitSponsorshipListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={6}>
+        <Grid size={6}>
           <Box component="span">{totalSponsorships} summit tiers</Box>
-        </Grid2>
-        <Grid2
+        </Grid>
+        <Grid
           container
           size={6}
           spacing={1}
@@ -154,8 +154,8 @@ const SummitSponsorshipListPage = ({
             alignItems: "center"
           }}
         >
-          <Grid2 size={{ xs: 0, sm: 4, lg: 6, xl: 7 }} />
-          <Grid2 size={{ xs: 12, sm: 8, lg: 6, xl: 5 }}>
+          <Grid size={{ xs: 0, sm: 4, lg: 6, xl: 7 }} />
+          <Grid size={{ xs: 12, sm: 8, lg: 6, xl: 5 }}>
             <Button
               variant="contained"
               fullWidth
@@ -165,9 +165,9 @@ const SummitSponsorshipListPage = ({
             >
               {T.translate("summit_sponsorship_list.add_sponsorship")}
             </Button>
-          </Grid2>
-        </Grid2>
-      </Grid2>
+          </Grid>
+        </Grid>
+      </Grid>
 
       {sponsorships.length === 0 && (
         <div>{T.translate("summit_sponsorship_list.no_sponsorships")}</div>

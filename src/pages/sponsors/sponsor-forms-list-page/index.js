@@ -21,7 +21,7 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid2
+  Grid
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiDropdownCheckbox from "openstack-uicore-foundation/lib/components/mui/dropdown-checkbox";
@@ -347,7 +347,7 @@ const SponsorFormsListPage = ({
     <div className="container">
       <h1>{T.translate("sponsor_forms.forms")}</h1>
       <CustomAlert message={T.translate("sponsor_forms.alert_info")} hideIcon />
-      <Grid2
+      <Grid
         container
         spacing={2}
         sx={{
@@ -356,10 +356,10 @@ const SponsorFormsListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={1}>
+        <Grid size={1}>
           <Box component="span">{totalCount} forms</Box>
-        </Grid2>
-        <Grid2 size={2} offset={1}>
+        </Grid>
+        <Grid size={2} offset={1}>
           <FormGroup>
             <FormControlLabel
               control={
@@ -374,15 +374,15 @@ const SponsorFormsListPage = ({
               label={T.translate("sponsor_forms.show_archived")}
             />
           </FormGroup>
-        </Grid2>
-        <Grid2 size={2}>
+        </Grid>
+        <Grid size={2}>
           <SearchInput
             term={term}
             onSearch={handleSearch}
             placeholder={T.translate("sponsor_forms.placeholders.search")}
           />
-        </Grid2>
-        <Grid2 size={3}>
+        </Grid>
+        <Grid size={3}>
           <Button
             variant="contained"
             size="medium"
@@ -393,8 +393,8 @@ const SponsorFormsListPage = ({
           >
             {T.translate("sponsor_forms.using_global")}
           </Button>
-        </Grid2>
-        <Grid2 size={3}>
+        </Grid>
+        <Grid size={3}>
           <Button
             variant="contained"
             size="medium"
@@ -405,8 +405,8 @@ const SponsorFormsListPage = ({
           >
             {T.translate("sponsor_forms.add_form")}
           </Button>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       {sponsorForms.length > 0 && (
         <div>

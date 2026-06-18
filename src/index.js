@@ -12,7 +12,7 @@
  * */
 
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/es/integration/react";
 import { GlobalConfirmDialog } from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
@@ -30,7 +30,9 @@ const onBeforeLift = () => {
   console.log("reading state ...");
 };
 
-ReactDOM.render(
+const container = document.querySelector("#root");
+const root = createRoot(container);
+root.render(
   <Provider store={store}>
     <PersistGate onBeforeLift={onBeforeLift} persistor={persistor}>
       <CustomTheme>
@@ -40,6 +42,5 @@ ReactDOM.render(
         </MuiSnackbarNotification>
       </CustomTheme>
     </PersistGate>
-  </Provider>,
-  document.querySelector("#root")
+  </Provider>
 );

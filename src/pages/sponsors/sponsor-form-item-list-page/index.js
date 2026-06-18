@@ -22,7 +22,7 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid2
+  Grid
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
@@ -231,7 +231,7 @@ const SponsorFormItemListPage = ({
       >
         {T.translate("sponsor_form_item_list.alert_info")}
       </Alert>
-      <Grid2
+      <Grid
         container
         spacing={2}
         sx={{
@@ -240,10 +240,10 @@ const SponsorFormItemListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={4}>
+        <Grid size={4}>
           <Box component="span">{totalCount} items</Box>
-        </Grid2>
-        <Grid2
+        </Grid>
+        <Grid
           container
           size={8}
           sx={{
@@ -281,8 +281,8 @@ const SponsorFormItemListPage = ({
           >
             {T.translate("sponsor_form_item_list.add_item_from_inventory")}
           </Button>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       {items.length > 0 && (
         <div>

@@ -17,7 +17,7 @@ import { connect } from "react-redux";
 import {
   Box,
   Button,
-  Grid2,
+  Grid,
   IconButton,
   Paper,
   Typography
@@ -190,7 +190,7 @@ const CartView = ({
 
   return (
     <>
-      <Grid2
+      <Grid
         container
         spacing={2}
         sx={{
@@ -199,19 +199,19 @@ const CartView = ({
           mb: 2
         }}
       >
-        <Grid2 size={4}>
+        <Grid size={4}>
           {cart && (
             <Box component="span">{cart?.forms.length} forms in Cart</Box>
           )}
-        </Grid2>
-        <Grid2 size={2} offset={4}>
+        </Grid>
+        <Grid size={2} offset={4}>
           <SearchInput
             term={term}
             onSearch={handleSearch}
             placeholder={T.translate("edit_sponsor.placeholders.search")}
           />
-        </Grid2>
-        <Grid2 size={2}>
+        </Grid>
+        <Grid size={2}>
           <Button
             variant="contained"
             size="medium"
@@ -222,8 +222,8 @@ const CartView = ({
           >
             {T.translate("edit_sponsor.cart_tab.add_form")}
           </Button>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
       {!cart && (
         <Typography variant="h6" textAlign="center" sx={{ mb: 2, mt: 4 }}>
           {T.translate("edit_sponsor.cart_tab.no_cart")}

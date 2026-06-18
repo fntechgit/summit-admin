@@ -12,7 +12,7 @@ import {
   DialogTitle,
   Divider,
   FormControlLabel,
-  Grid2,
+  Grid,
   IconButton,
   Typography
 } from "@mui/material";
@@ -203,7 +203,7 @@ const AddSponsorFormTemplatePopup = ({
           autoComplete="off"
         >
           <DialogContent sx={{ p: 0 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
               <MuiFormikSelectGroup
                 name="add_ons"
                 formik={formik}
@@ -216,18 +216,18 @@ const AddSponsorFormTemplatePopup = ({
                   "edit_sponsor.placeholders.select_add_ons"
                 )}
               />
-            </Grid2>
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2
+            </Grid>
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid
                 container
                 spacing={2}
                 size={6}
                 sx={{ alignItems: "baseline" }}
               >
-                <Grid2 size={4}>{selectedForms.length} items selected</Grid2>
-              </Grid2>
-              <Grid2 container spacing={2} size={6}>
-                <Grid2 size={4}>
+                <Grid size={4}>{selectedForms.length} items selected</Grid>
+              </Grid>
+              <Grid container spacing={2} size={6}>
+                <Grid size={4}>
                   <MenuButton
                     buttonId="sort-button"
                     menuId="sort-menu"
@@ -245,17 +245,17 @@ const AddSponsorFormTemplatePopup = ({
                     <SwapVertIcon fontSize="large" sx={{ mr: 1 }} />{" "}
                     {T.translate("general.sort_by")}
                   </MenuButton>
-                </Grid2>
-                <Grid2 size={8}>
+                </Grid>
+                <Grid size={8}>
                   <SearchInput
                     onSearch={handleOnSearch}
                     placeholder={T.translate(
                       "edit_sponsor.placeholders.search"
                     )}
                   />
-                </Grid2>
-              </Grid2>
-            </Grid2>
+                </Grid>
+              </Grid>
+            </Grid>
             {Array.isArray(sponsorForms) && sponsorForms.length > 0 && (
               <Box sx={{ p: 2 }}>
                 <MuiTable

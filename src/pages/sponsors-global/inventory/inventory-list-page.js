@@ -18,7 +18,7 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid2,
+  Grid,
   Popover,
   Typography
 } from "@mui/material";
@@ -315,7 +315,7 @@ const InventoryListPage = ({
       >
         {T.translate("inventory_item_list.alert_info")}
       </Alert>
-      <Grid2
+      <Grid
         container
         spacing={2}
         sx={{
@@ -324,10 +324,10 @@ const InventoryListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={2}>
+        <Grid size={2}>
           <Box component="span">{totalInventoryItems} items</Box>
-        </Grid2>
-        <Grid2
+        </Grid>
+        <Grid
           container
           size={10}
           spacing={1}
@@ -353,14 +353,14 @@ const InventoryListPage = ({
               label={T.translate("inventory_item_list.show_archived")}
             />
           </FormGroup>
-          <Grid2 size={3}>
+          <Grid size={3}>
             <SearchInput
               onSearch={handleSearch}
               placeholder={T.translate(
                 "inventory_item_list.placeholders.search_inventory_items"
               )}
             />
-          </Grid2>
+          </Grid>
           <Button
             variant="contained"
             onClick={() => handleNewInventoryItem()}
@@ -375,8 +375,8 @@ const InventoryListPage = ({
           >
             {T.translate("inventory_item_list.add_inventory_item")}
           </Button>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       {inventoryItems.length > 0 && (
         <div>

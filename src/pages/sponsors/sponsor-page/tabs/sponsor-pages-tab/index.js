@@ -20,7 +20,7 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid2
+  Grid
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -389,7 +389,7 @@ const SponsorPagesTab = ({
         message={T.translate("edit_sponsor.pages_tab.alert_info")}
         hideIcon
       />
-      <Grid2
+      <Grid
         container
         spacing={2}
         sx={{
@@ -398,13 +398,13 @@ const SponsorPagesTab = ({
           mb: 2
         }}
       >
-        <Grid2 size={1}>
+        <Grid size={1}>
           <Box component="span">
             {managedPages.totalItems + customizedPages.totalItems}{" "}
             {T.translate("edit_sponsor.pages_tab.pages")}
           </Box>
-        </Grid2>
-        <Grid2 size={2} offset={1}>
+        </Grid>
+        <Grid size={2} offset={1}>
           <FormGroup>
             <FormControlLabel
               control={
@@ -421,15 +421,15 @@ const SponsorPagesTab = ({
               label={T.translate("edit_sponsor.pages_tab.show_archived")}
             />
           </FormGroup>
-        </Grid2>
-        <Grid2 size={2}>
+        </Grid>
+        <Grid size={2}>
           <SearchInput
             term={term}
             onSearch={handleSearch}
             placeholder={T.translate("edit_sponsor.placeholders.search")}
           />
-        </Grid2>
-        <Grid2 size={3}>
+        </Grid>
+        <Grid size={3}>
           <Button
             variant="contained"
             size="medium"
@@ -440,8 +440,8 @@ const SponsorPagesTab = ({
           >
             {T.translate("edit_sponsor.pages_tab.using_template")}
           </Button>
-        </Grid2>
-        <Grid2 size={3}>
+        </Grid>
+        <Grid size={3}>
           <Button
             variant="contained"
             size="medium"
@@ -452,8 +452,8 @@ const SponsorPagesTab = ({
           >
             {T.translate("edit_sponsor.pages_tab.new_page")}
           </Button>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
       <div>
         <MuiTable
           columns={customizedPagesColumns}

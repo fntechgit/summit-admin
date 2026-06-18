@@ -14,7 +14,7 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button, Grid } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
@@ -91,7 +91,7 @@ const SummitSpeakerListPage = ({
   return (
     <div className="container">
       <h3>{T.translate("speaker_list.speaker_list")}</h3>
-      <Grid2
+      <Grid
         container
         spacing={1}
         sx={{
@@ -100,12 +100,12 @@ const SummitSpeakerListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={2}>
+        <Grid size={2}>
           <Box component="span">
             {totalSpeakers} {T.translate("speaker_list.speakers")}
           </Box>
-        </Grid2>
-        <Grid2
+        </Grid>
+        <Grid
           container
           size={10}
           gap={1}
@@ -114,13 +114,13 @@ const SummitSpeakerListPage = ({
             alignItems: "center"
           }}
         >
-          <Grid2 size={4}>
+          <Grid size={4}>
             <SearchInput
               term={term}
               onSearch={handleSearch}
               placeholder={T.translate("general.placeholders.search_speakers")}
             />
-          </Grid2>
+          </Grid>
           {memberObj.canAddSpeakers() && (
             <Button
               variant="contained"
@@ -137,8 +137,8 @@ const SummitSpeakerListPage = ({
               {T.translate("speaker_list.add_speaker")}
             </Button>
           )}
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       {speakers.length > 0 && (
         <MuiTable

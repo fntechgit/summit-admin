@@ -14,7 +14,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button, Grid } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
@@ -119,7 +119,7 @@ const SponsorshipListPage = ({
   return (
     <div className="container">
       <h3>{T.translate("sponsorship_list.sponsorship_types_list")}</h3>
-      <Grid2
+      <Grid
         container
         spacing={1}
         sx={{
@@ -128,13 +128,13 @@ const SponsorshipListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={2}>
+        <Grid size={2}>
           <Box component="span">
             {totalSponsorships}{" "}
             {T.translate("sponsorship_list.sponsorship_types")}
           </Box>
-        </Grid2>
-        <Grid2
+        </Grid>
+        <Grid
           container
           size={10}
           spacing={1}
@@ -144,13 +144,13 @@ const SponsorshipListPage = ({
             alignItems: "center"
           }}
         >
-          <Grid2 size={5}>
+          <Grid size={5}>
             <SearchInput
               onSearch={handleSearch}
               term={term}
               placeholder={T.translate("sponsorship_list.placeholders.search")}
             />
-          </Grid2>
+          </Grid>
           <Button
             variant="contained"
             onClick={handleNew}
@@ -165,8 +165,8 @@ const SponsorshipListPage = ({
           >
             {T.translate("sponsorship_list.add_sponsorship")}
           </Button>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       {sponsorships.length > 0 && (
         <MuiTable

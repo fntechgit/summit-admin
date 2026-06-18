@@ -23,7 +23,7 @@ import Checkbox from "@mui/material/Checkbox";
 import Chip from "@mui/material/Chip";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import {
   loadSummits,
@@ -160,7 +160,7 @@ const SummitDirectoryPage = ({
     return (
       <Box className="container">
         <h3>{T.translate("directory.summits")}</h3>
-        <Grid2
+        <Grid
           container
           sx={{
             mb: 2,
@@ -213,7 +213,7 @@ const SummitDirectoryPage = ({
               </Button>
             )}
           </Box>
-        </Grid2>
+        </Grid>
         <MuiTable
           columns={columns}
           data={safeSummits}

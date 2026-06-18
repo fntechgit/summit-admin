@@ -1253,17 +1253,17 @@ class EventForm extends React.Component {
                     entity.start_date,
                     currentSummit.time_zone_id
                   )}
-                  inputProps={{
-                    placeholder: T.translate(
-                      "edit_event.placeholders.start_date"
-                    )
-                  }}
                   timezone={currentSummit.time_zone_id}
                   error={hasErrors("start_date", errors)}
                   viewDate={epochToMomentTimeZone(
                     currentSummit.start_date,
                     currentSummit.time_zone_id
                   )}
+                  inputProps={{
+                    placeholder: T.translate(
+                      "edit_event.placeholders.start_date"
+                    )
+                  }}
                 />
               </div>
               <div className="col-md-4">
@@ -1280,15 +1280,15 @@ class EventForm extends React.Component {
                     entity.end_date,
                     currentSummit.time_zone_id
                   )}
-                  inputProps={{
-                    placeholder: T.translate("edit_event.placeholders.end_date")
-                  }}
                   timezone={currentSummit.time_zone_id}
                   error={hasErrors("end_date", errors)}
                   viewDate={epochToMomentTimeZone(
                     currentSummit.start_date,
                     currentSummit.time_zone_id
                   )}
+                  inputProps={{
+                    placeholder: T.translate("edit_event.placeholders.end_date")
+                  }}
                 />
               </div>
               <div className="col-md-4">
@@ -1636,7 +1636,6 @@ class EventForm extends React.Component {
               />
             </div>
           )}
-
         {this.shouldShowField("allows_attachment") && (
           <div className="row form-group">
             <div className="col-md-12">
@@ -1847,7 +1846,6 @@ class EventForm extends React.Component {
             />
           </Panel>
         )}
-
         {entity.id !== 0 &&
           entity.selection_plan?.extra_questions?.length > 0 && (
             <Panel
@@ -1866,7 +1864,6 @@ class EventForm extends React.Component {
               />
             </Panel>
           )}
-
         {entity.id !== 0 && entity.allow_feedback && (
           <Panel
             show={showSection === "feedback"}
@@ -1919,7 +1916,6 @@ class EventForm extends React.Component {
             </div>
           </Panel>
         )}
-
         <Panel
           show={showSection === "audit_log"}
           title={T.translate("audit_log.title")}
@@ -2112,7 +2108,6 @@ class EventForm extends React.Component {
             </div>
           </Panel>
         )}
-
         <Panel
           show={showSection === "schedule_settings"}
           title={T.translate("edit_event.schedule_settings")}
@@ -2137,7 +2132,6 @@ class EventForm extends React.Component {
             </div>
           </div>
         </Panel>
-
         <div className="row">
           <div className="col-md-12 submit-buttons">
             {!entity.is_published && (

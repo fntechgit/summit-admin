@@ -12,7 +12,7 @@ import {
   Button,
   IconButton,
   Divider,
-  Grid2,
+  Grid,
   Typography,
   InputLabel,
   Box,
@@ -199,7 +199,7 @@ const AddSponsorExtraQuestionPopup = ({
   };
 
   const renderValueItem = (valueItem, index, provided, snapshot, remove) => (
-    <Grid2
+    <Grid
       container
       spacing={2}
       sx={{
@@ -211,7 +211,7 @@ const AddSponsorExtraQuestionPopup = ({
       }}
       size={12}
     >
-      <Grid2 size={4.5}>
+      <Grid size={4.5}>
         <MuiFormikTextField
           name={`values[${index}].value`}
           formik={formik}
@@ -220,8 +220,8 @@ const AddSponsorExtraQuestionPopup = ({
           placeholder={T.translate("edit_sponsor.hidden_value")}
           onChange={(e) => handleValueChange(index, "value", e.target.value)}
         />
-      </Grid2>
-      <Grid2 size={4.5}>
+      </Grid>
+      <Grid size={4.5}>
         <MuiFormikTextField
           name={`values[${index}].label`}
           formik={formik}
@@ -230,8 +230,8 @@ const AddSponsorExtraQuestionPopup = ({
           placeholder={T.translate("edit_sponsor.visible_value")}
           onChange={(e) => handleValueChange(index, "label", e.target.value)}
         />
-      </Grid2>
-      <Grid2
+      </Grid>
+      <Grid
         size={2}
         sx={{
           display: "flex",
@@ -249,8 +249,8 @@ const AddSponsorExtraQuestionPopup = ({
           }
           label={T.translate("edit_sponsor.is_default")}
         />
-      </Grid2>
-      <Grid2
+      </Grid>
+      <Grid
         size={0.5}
         sx={{
           display: "flex",
@@ -272,8 +272,8 @@ const AddSponsorExtraQuestionPopup = ({
         >
           <CloseIcon />
         </IconButton>
-      </Grid2>
-      <Grid2
+      </Grid>
+      <Grid
         size={0.5}
         sx={{
           display: "flex",
@@ -283,8 +283,8 @@ const AddSponsorExtraQuestionPopup = ({
         }}
       >
         <DragIndicatorIcon sx={{ color: "#666" }} />
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   );
 
   const badge_features_ddl =
@@ -316,13 +316,13 @@ const AddSponsorExtraQuestionPopup = ({
           autoComplete="off"
         >
           <DialogContent sx={{ p: 1 }}>
-            <Grid2
+            <Grid
               container
               spacing={2}
               size={12}
               sx={{ p: 2, alignItems: "flex-start" }}
             >
-              <Grid2
+              <Grid
                 container
                 spacing={2}
                 size={6}
@@ -359,8 +359,8 @@ const AddSponsorExtraQuestionPopup = ({
                     ))}
                   </MuiFormikSelect>
                 </Box>
-              </Grid2>
-              <Grid2
+              </Grid>
+              <Grid
                 container
                 spacing={2}
                 size={6}
@@ -377,11 +377,11 @@ const AddSponsorExtraQuestionPopup = ({
                     margin="none"
                   />
                 </Box>
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
             {formik.values.type === "CheckBoxList" && (
-              <Grid2 container spacing={2} size={6} sx={{ p: 2 }}>
-                <Grid2
+              <Grid container spacing={2} size={6} sx={{ p: 2 }}>
+                <Grid
                   container
                   spacing={2}
                   size={12}
@@ -399,12 +399,12 @@ const AddSponsorExtraQuestionPopup = ({
                       margin="none"
                     />
                   </Box>
-                </Grid2>
-              </Grid2>
+                </Grid>
+              </Grid>
             )}
             <Divider />
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid
                 container
                 spacing={2}
                 size={12}
@@ -421,11 +421,11 @@ const AddSponsorExtraQuestionPopup = ({
                     margin="none"
                   />
                 </Box>
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
             {shouldShowField("values") && (
-              <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-                <Grid2
+              <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+                <Grid
                   container
                   spacing={2}
                   sx={{
@@ -436,18 +436,18 @@ const AddSponsorExtraQuestionPopup = ({
                   }}
                   size={12}
                 >
-                  <Grid2 size={4.5}>
+                  <Grid size={4.5}>
                     {T.translate("edit_sponsor.hidden_value")}
-                  </Grid2>
-                  <Grid2 size={4.5}>
+                  </Grid>
+                  <Grid size={4.5}>
                     {T.translate("edit_sponsor.visible_value")}
-                  </Grid2>
-                  <Grid2 size={2} />
-                </Grid2>
+                  </Grid>
+                  <Grid size={2} />
+                </Grid>
                 <FieldArray name="values">
                   {({ push, remove }) => (
                     <>
-                      <Grid2 container spacing={2} size={12}>
+                      <Grid container spacing={2} size={12}>
                         <DragAndDropList
                           items={formik.values.values.sort(
                             (a, b) => a.order - b.order
@@ -466,7 +466,7 @@ const AddSponsorExtraQuestionPopup = ({
                           updateOrderKey="order"
                           droppableId="sponsor-extra-question-values"
                         />
-                      </Grid2>
+                      </Grid>
                       <Button
                         variant="text"
                         startIcon={<AddIcon />}
@@ -506,12 +506,12 @@ const AddSponsorExtraQuestionPopup = ({
                     </>
                   )}
                 </FieldArray>
-              </Grid2>
+              </Grid>
             )}
             <Divider />
             {formik.values.type === "Text" && (
-              <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-                <Grid2
+              <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+                <Grid
                   container
                   spacing={2}
                   size={6}
@@ -528,11 +528,11 @@ const AddSponsorExtraQuestionPopup = ({
                       margin="none"
                     />
                   </Box>
-                </Grid2>
-              </Grid2>
+                </Grid>
+              </Grid>
             )}
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid
                 container
                 spacing={2}
                 size={6}
@@ -549,15 +549,15 @@ const AddSponsorExtraQuestionPopup = ({
                     />
                   </Box>
                 )}
-              </Grid2>
+              </Grid>
               {badge_features_ddl.length > 0 && (
-                <Grid2
+                <Grid
                   container
                   spacing={2}
                   size={6}
                   sx={{ alignItems: "baseline" }}
                 >
-                  <Grid2
+                  <Grid
                     container
                     spacing={2}
                     size={12}
@@ -607,7 +607,7 @@ const AddSponsorExtraQuestionPopup = ({
                         />
                       </IconButton>
                     </Tooltip>
-                  </Grid2>
+                  </Grid>
                   <Box width="100%">
                     <MuiFormikSelect
                       name="allowed_badge_features_types"
@@ -634,9 +634,9 @@ const AddSponsorExtraQuestionPopup = ({
                       ))}
                     </MuiFormikSelect>
                   </Box>
-                </Grid2>
+                </Grid>
               )}
-            </Grid2>
+            </Grid>
           </DialogContent>
           <Divider />
           <DialogActions sx={{ p: 2 }}>

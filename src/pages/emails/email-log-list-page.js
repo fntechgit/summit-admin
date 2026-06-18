@@ -15,9 +15,9 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Pagination } from "react-bootstrap";
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import Table from "openstack-uicore-foundation/lib/components/table"
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
+import Table from "openstack-uicore-foundation/lib/components/table";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { SegmentedControl } from "segmented-control";
@@ -37,11 +37,9 @@ const SentEmailListPage = function ({
   order,
   orderDir,
   totalEmails,
-  match,
   perPage,
   filters,
-  getSentEmails,
-  ...props
+  getSentEmails
 }) {
   useEffect(() => {
     getSentEmails(term, currentPage, perPage, order, orderDir, filters);
@@ -70,7 +68,7 @@ const SentEmailListPage = function ({
     getSentEmails(term, newPage, perPage, order, orderDir, emailFilters);
   };
 
-  const handleSort = (index, key, dir, func) => {
+  const handleSort = (index, key, dir) => {
     getSentEmails(term, currentPage, perPage, key, dir, emailFilters);
   };
 
@@ -310,11 +308,6 @@ const SentEmailListPage = function ({
               <DateTimePicker
                 id="sent_date_filter"
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                inputProps={{
-                  placeholder: T.translate(
-                    "email_logs.placeholders.sent_date_from"
-                  )
-                }}
                 onChange={(ev) => handleChangeDateFilter(ev, false)}
                 timezone="UTC"
                 value={epochToMomentTimeZone(
@@ -322,17 +315,17 @@ const SentEmailListPage = function ({
                   "UTC"
                 )}
                 className="event-list-date-picker"
+                inputProps={{
+                  placeholder: T.translate(
+                    "email_logs.placeholders.sent_date_from"
+                  )
+                }}
               />
             </div>
             <div className="col-md-3">
               <DateTimePicker
                 id="sent_date_filter"
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                inputProps={{
-                  placeholder: T.translate(
-                    "email_logs.placeholders.sent_date_to"
-                  )
-                }}
                 onChange={(ev) => handleChangeDateFilter(ev, true)}
                 timezone="UTC"
                 value={epochToMomentTimeZone(
@@ -340,6 +333,11 @@ const SentEmailListPage = function ({
                   "UTC"
                 )}
                 className="event-list-date-picker"
+                inputProps={{
+                  placeholder: T.translate(
+                    "email_logs.placeholders.sent_date_to"
+                  )
+                }}
               />
             </div>
           </>
@@ -375,9 +373,7 @@ const SentEmailListPage = function ({
           />
         </div>
       </div>
-
       {emails.length === 0 && <div>{T.translate("emails.no_emails")}</div>}
-
       {emails.length > 0 && (
         <>
           <div className="email-logs-table-wrapper">

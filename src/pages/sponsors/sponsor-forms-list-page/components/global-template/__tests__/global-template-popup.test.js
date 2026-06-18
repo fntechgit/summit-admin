@@ -65,15 +65,14 @@ describe("GlobalTemplatePopup", () => {
       initialState: {}
     });
 
-    await act(async () => {
-      await userEvent.click(
-        screen.getByRole("button", { name: "go-sponsorships" })
-      );
-      await userEvent.click(
-        screen.getByRole("button", { name: "apply-sponsorships" })
-      );
-      await Promise.resolve();
-    });
+    // React 18 auto-batches state updates; remove outer act() so setStage()
+    // flushes before the second click queries the DOM for apply-sponsorships.
+    await userEvent.click(
+      screen.getByRole("button", { name: "go-sponsorships" })
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "apply-sponsorships" })
+    );
 
     expect(cloneGlobalTemplate).toHaveBeenCalledTimes(1);
     expect(onClose).not.toHaveBeenCalled();
@@ -129,10 +128,10 @@ describe("GlobalTemplatePopup", () => {
     const applyButton = screen.getByRole("button", {
       name: "apply-sponsorships"
     });
-    await act(async () => {
-      await userEvent.click(applyButton);
-      await userEvent.click(applyButton);
-    });
+    // React 18 auto-batches state updates; remove outer act() so isSaving
+    // flushes to true after the first click before the second fires.
+    await userEvent.click(applyButton);
+    await userEvent.click(applyButton);
 
     expect(cloneGlobalTemplate).toHaveBeenCalledTimes(1);
 
