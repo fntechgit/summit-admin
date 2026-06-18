@@ -4,19 +4,6 @@ import { renderWithRedux } from "../../../utils/test-utils";
 
 const mockEditableTableSpy = jest.fn(() => null);
 
-jest.mock("openstack-uicore-foundation/lib/components", () => ({
-  CompanyInput: () => null,
-  DateTimePicker: () => null,
-  Dropdown: () => null,
-  FreeTextSearch: () => null,
-  Input: () => null,
-  MemberInput: () => null,
-  OperatorInput: () => null,
-  SpeakerInput: () => null,
-  TagInput: () => null,
-  UploadInput: () => null
-}));
-
 jest.mock(
   "../../../components/tables/editable-table/EditableTable",
   () =>
@@ -51,8 +38,6 @@ jest.mock("react-bootstrap", () => {
   };
 });
 
-jest.mock("../../../components/filters/media-type-filter", () => () => null);
-jest.mock("../../../components/filters/or-and-filter", () => () => null);
 jest.mock("../../../components/filters/save-filter-criteria", () => () => null);
 jest.mock(
   "../../../components/filters/select-filter-criteria",
