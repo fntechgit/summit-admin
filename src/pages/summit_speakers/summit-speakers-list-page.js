@@ -711,8 +711,11 @@ class SummitSpeakersListPage extends React.Component {
       selectionStatusFilter,
       mediaUploadTypeFilter,
       currentFlowEvent,
-      totalActivities
+      totalActivities,
+      excludedItems
     } = this.getSubjectProps();
+
+    const activitiesCountAccurate = selectedAll && excludedItems.length === 0;
 
     const columns = [
       {
@@ -1049,9 +1052,19 @@ class SummitSpeakersListPage extends React.Component {
           <div>
             <span>
               <b>
-                {T.translate("summit_speakers_list.items_qty", {
-                  qty: selectedCount
-                })}
+                {activitiesCountAccurate
+                  ? T.translate(
+                      this.state.source === sources.speakers
+                        ? "summit_speakers_list.items_qty"
+                        : "summit_submitters_list.items_qty",
+                      { qty: selectedCount, activitiesQty: totalActivities }
+                    )
+                  : T.translate(
+                      this.state.source === sources.speakers
+                        ? "summit_speakers_list.items_qty_no_activities"
+                        : "summit_submitters_list.items_qty_no_activities",
+                      { qty: selectedCount }
+                    )}
               </b>
             </span>
             <SelectableTable
