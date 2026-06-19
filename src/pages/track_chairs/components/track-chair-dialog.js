@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { FormikProvider, useFormik } from "formik";
@@ -54,13 +54,9 @@ const toMemberOption = (member) => {
   return formatMemberOption(member);
 };
 
-const TrackChairDialog = ({
-  entity,
-  tracks,
-  isSaving = false,
-  onSave,
-  onClose
-}) => {
+const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
+  const [isSaving, setIsSaving] = useState(false);
+
   const formik = useFormik({
     initialValues: {
       id: entity?.id ?? 0,
@@ -78,7 +74,13 @@ const TrackChairDialog = ({
         .min(1, T.translate("validation.required"))
         .required(T.translate("validation.required"))
     }),
-    onSubmit: (values) => onSave(values)
+    onSubmit: (values) => {
+      if (isSaving) return;
+      setIsSaving(true);
+      onSave(values)
+        .catch(() => {})
+        .finally(() => setIsSaving(false));
+    }
   });
 
   useScrollToError(formik, true);
@@ -133,6 +135,7 @@ const TrackChairDialog = ({
                   placeholder={T.translate(
                     "track_chairs.placeholders.select_track_chair"
                   )}
+                  disabled={entity?.id > 0}
                 />
               </Grid2>
               <Grid2 size={12}>
@@ -230,7 +233,6 @@ const TrackChairDialog = ({
 TrackChairDialog.propTypes = {
   entity: PropTypes.object,
   tracks: PropTypes.array.isRequired,
-  isSaving: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired
 };
