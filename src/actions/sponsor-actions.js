@@ -1128,7 +1128,7 @@ export const saveSummitSponsorship = (entity) => async (dispatch, getState) => {
   const normalizedEntity = normalizeSponsorship(entity);
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_SUMMIT_SPONSORSHIP),
       createAction(SUMMIT_SPONSORSHIP_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types/${entity.id}`,
@@ -1140,14 +1140,14 @@ export const saveSummitSponsorship = (entity) => async (dispatch, getState) => {
         showSuccessMessage(T.translate("edit_sponsorship.sponsorship_saved"))
       );
     });
-  } else {
+  } 
     const success_message = {
       title: T.translate("general.done"),
       html: T.translate("edit_sponsorship.sponsorship_created"),
       type: "success"
     };
 
-    postRequest(
+    return postRequest(
       createAction(UPDATE_SUMMIT_SPONSORSHIP),
       createAction(SUMMIT_SPONSORSHIP_ADDED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
@@ -1157,7 +1157,7 @@ export const saveSummitSponsorship = (entity) => async (dispatch, getState) => {
     )(params)(dispatch).then(() => {
       dispatch(showMessage(success_message));
     });
-  }
+  
 };
 
 export const uploadSponsorshipBadgeImage =
