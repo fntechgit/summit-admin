@@ -1209,9 +1209,11 @@ export const getPaymentProfiles =
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
-      filter.push(
-        `provider=@${escapedTerm},id=@${escapedTerm},application_type=@${escapedTerm}`
-      );
+      filter.push(`provider=@${escapedTerm},application_type=@${escapedTerm}`);
+      const numericId = parseInt(escapedTerm, 10);
+      if (!Number.isNaN(numericId)) {
+        filter.push(`id==${numericId}`);
+      }
     }
 
     // order
@@ -1241,6 +1243,8 @@ export const savePaymentProfile = (entity) => async (dispatch, getState) => {
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
 
+  dispatch(startLoading());
+
   const params = {
     access_token: accessToken
   };
@@ -1253,14 +1257,16 @@ export const savePaymentProfile = (entity) => async (dispatch, getState) => {
       entity,
       snackbarErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(
-        snackbarSuccessHandler({
-          title: T.translate("general.success"),
-          html: T.translate("edit_payment_profile.payment_profile_saved")
-        })
-      );
-    });
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_payment_profile.payment_profile_saved")
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
   }
 
   return postRequest(
@@ -1269,14 +1275,16 @@ export const savePaymentProfile = (entity) => async (dispatch, getState) => {
     `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles`,
     entity,
     snackbarErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(
-      snackbarSuccessHandler({
-        title: T.translate("general.success"),
-        html: T.translate("edit_payment_profile.payment_profile_created")
-      })
-    );
-  });
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_payment_profile.payment_profile_created")
+        })
+      );
+    })
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const deletePaymentProfile =

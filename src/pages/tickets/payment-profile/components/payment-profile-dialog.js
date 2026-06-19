@@ -126,6 +126,7 @@ const PaymentProfileDialog = ({
       if (isSaving) return;
       setIsSaving(true);
       onSave(values)
+        .then(() => onClose())
         .catch(() => {})
         .finally(() => setIsSaving(false));
     }
