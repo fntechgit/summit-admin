@@ -114,7 +114,7 @@ const PageTemplateListPage = ({
     setOpenCloneDialog(true);
   };
 
-  const handleSavePageTemplate = (entity) => {
+  const handleSavePageTemplate = (entity) =>
     savePageTemplate(entity).then(() =>
       getPageTemplates(
         term,
@@ -125,7 +125,6 @@ const PageTemplateListPage = ({
         showArchived
       )
     );
-  };
 
   const handleArchive = (item) =>
     item.is_archived

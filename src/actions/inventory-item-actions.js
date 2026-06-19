@@ -233,7 +233,7 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
           promises.push(saveItemMetaFieldTypes(normalizedEntity)(dispatch));
         }
 
-        Promise.all(promises)
+        return Promise.all(promises)
           .then(() => {
             dispatch(
               showSuccessMessage(
@@ -241,15 +241,13 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
               )
             );
           })
-          .catch((err) => {
-            console.error(err);
-          })
           .finally(() => {
             dispatch(stopLoading());
           });
       })
       .catch((err) => {
         console.error(err);
+        throw err;
       });
   }
 
