@@ -126,7 +126,7 @@ const TrackChairListPage = ({
       !id || newMember
         ? addTrackChair({ id: member.value }, trackIds)
         : saveTrackChair(id, trackIds);
-    return action.then(() => setDialogEntity(null));
+    return action;
   };
 
   const handleClose = () => {

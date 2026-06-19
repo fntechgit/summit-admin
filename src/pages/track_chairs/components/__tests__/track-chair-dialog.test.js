@@ -110,7 +110,7 @@ describe("TrackChairDialog", () => {
   });
 
   describe("valid submit", () => {
-    it("calls onSave with { id, member, trackIds } on valid submit", async () => {
+    it("calls onSave with { id, member, trackIds } and then onClose on valid submit", async () => {
       renderDialog();
       await selectMember();
       await selectTrack("Track A");
@@ -120,6 +120,7 @@ describe("TrackChairDialog", () => {
         member: { value: 42, label: "John Doe (john@example.com)" },
         trackIds: [1]
       });
+      expect(onClose).toHaveBeenCalledTimes(1);
     });
 
     it("pre-fills entity values and submits member as { value, label }", async () => {

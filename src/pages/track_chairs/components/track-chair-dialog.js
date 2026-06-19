@@ -78,6 +78,7 @@ const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
       if (isSaving) return;
       setIsSaving(true);
       onSave(values)
+        .then(() => onClose())
         .catch(() => {})
         .finally(() => setIsSaving(false));
     }

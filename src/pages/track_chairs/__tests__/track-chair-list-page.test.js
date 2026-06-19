@@ -203,27 +203,5 @@ describe("TrackChairListPage", () => {
       expect(saveTrackChair).toHaveBeenCalledWith(mockTrackChair.id, [1, 2]);
       expect(addTrackChair).not.toHaveBeenCalled();
     });
-
-    it("closes the dialog after save succeeds", async () => {
-      renderPage();
-
-      await act(async () => {
-        await userEvent.click(screen.getByRole("button", { name: /add/i }));
-      });
-
-      expect(screen.getByTestId("track-chair-dialog")).toBeInTheDocument();
-
-      await act(async () => {
-        await capturedDialogProps.onSave({
-          id: 0,
-          member: { value: 99 },
-          trackIds: [1]
-        });
-      });
-
-      expect(
-        screen.queryByTestId("track-chair-dialog")
-      ).not.toBeInTheDocument();
-    });
   });
 });
