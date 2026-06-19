@@ -1,9 +1,9 @@
 import React from "react";
 import userEvent from "@testing-library/user-event";
 import { act, render, screen, waitFor } from "@testing-library/react";
-import EditableTable from "../EditableTable";
+import BulkEditTable from "../BulkEditTable";
 
-describe("EditableTable", () => {
+describe("BulkEditTable", () => {
   const baseProps = {
     options: {
       className: "test-table",
@@ -40,7 +40,7 @@ describe("EditableTable", () => {
     const user = userEvent.setup();
     const updateData = jest.fn(() => Promise.resolve());
 
-    render(<EditableTable {...baseProps} updateData={updateData} />);
+    render(<BulkEditTable {...baseProps} updateData={updateData} />);
 
     const checkboxes = screen.getAllByRole("checkbox");
 
@@ -65,7 +65,7 @@ describe("EditableTable", () => {
     const afterUpdateAction = jest.fn(() => Promise.resolve());
 
     render(
-      <EditableTable
+      <BulkEditTable
         {...baseProps}
         updateData={updateData}
         afterUpdate={[

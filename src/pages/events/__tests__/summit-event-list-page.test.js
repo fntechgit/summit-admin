@@ -5,9 +5,9 @@ import { renderWithRedux } from "../../../utils/test-utils";
 const mockEditableTableSpy = jest.fn(() => null);
 
 jest.mock(
-  "../../../components/tables/editable-table/EditableTable",
+  "../../../components/tables/BulkEditTable",
   () =>
-    function EditableTableMock(props) {
+    function BulkEditTableMock(props) {
       mockEditableTableSpy(props);
       return null;
     }

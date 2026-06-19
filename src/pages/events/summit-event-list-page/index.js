@@ -61,7 +61,7 @@ import {
   saveFilterCriteria
 } from "../../../actions/filter-criteria-actions";
 import { CONTEXT_ACTIVITIES } from "../../../utils/filter-criteria-constants";
-import EditableTable from "../../../components/tables/editable-table/EditableTable";
+import BulkEditTable from "../../../components/tables/BulkEditTable";
 import { buildNameIdDDL } from "../../../utils/events/summit-event-list-page.utils";
 import ImportModal from "./components/ImportModal";
 import ImportMUXModal from "./components/ImportMUXModal";
@@ -1405,7 +1405,7 @@ const SummitEventListPage = ({
       {events.length > 0 && (
         <div>
           <div className="summit-event-list-table-wrapper">
-            <EditableTable
+            <BulkEditTable
               currentSummit={currentSummit}
               page={currentPage}
               options={tableOptions}
