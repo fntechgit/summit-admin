@@ -248,21 +248,18 @@ const SponsorPagesTab = ({
     );
   };
 
-  const handleSaveManagedPageFromTemplate = (entity) => {
-    saveSponsorManagedPage(entity)
-      .then(() => {
-        const { perPage, order, orderDir } = managedPages;
-        getSponsorManagedPages(
-          term,
-          DEFAULT_CURRENT_PAGE,
-          perPage,
-          order,
-          orderDir,
-          showArchived
-        );
-      })
-      .finally(() => setOpenPopup(null));
-  };
+  const handleSaveManagedPageFromTemplate = (entity) =>
+    saveSponsorManagedPage(entity).then(() => {
+      const { perPage, order, orderDir } = managedPages;
+      getSponsorManagedPages(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      );
+    });
 
   const handleSaveCustomizedPage = (entity) =>
     saveSponsorCustomizedPage(entity).then(() => {

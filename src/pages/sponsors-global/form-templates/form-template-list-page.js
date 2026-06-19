@@ -212,17 +212,17 @@ const FormTemplateListPage = ({
     sortDir: orderDir
   };
 
-  const handleOnSave = async (values) => {
-    await saveFormTemplate(values);
-    getFormTemplates(
-      "",
-      DEFAULT_CURRENT_PAGE,
-      perPage,
-      order,
-      orderDir,
-      showArchived
+  const handleOnSave = (values) =>
+    saveFormTemplate(values).then(() =>
+      getFormTemplates(
+        "",
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
     );
-  };
 
   return (
     <div className="container">

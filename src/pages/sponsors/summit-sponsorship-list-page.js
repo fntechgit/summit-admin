@@ -96,7 +96,9 @@ const SummitSponsorshipListPage = ({
   };
 
   const handleSaveSummitSponsorship = (sponsorship) => {
-    saveSummitSponsorship(sponsorship).then(() => setShowAddTierModal(false));
+    saveSummitSponsorship(sponsorship).then(() =>
+      getSummitSponsorships(DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+    );
   };
 
   const columns = [
@@ -193,14 +195,15 @@ const SummitSponsorshipListPage = ({
         />
       )}
 
-      <EditTierPopup
-        open={showAddTierModal}
-        onClose={() => setShowAddTierModal(false)}
-        onSubmit={handleSaveSummitSponsorship}
-        onBadgeImageAttach={uploadSponsorshipBadgeImage}
-        onBadgeImageRemove={removeSponsorshipBadgeImage}
-        entity={currentEntity}
-      />
+      {showAddTierModal && (
+        <EditTierPopup
+          onClose={() => setShowAddTierModal(false)}
+          onSubmit={handleSaveSummitSponsorship}
+          onBadgeImageAttach={uploadSponsorshipBadgeImage}
+          onBadgeImageRemove={removeSponsorshipBadgeImage}
+          entity={currentEntity}
+        />
+      )}
     </div>
   );
 };

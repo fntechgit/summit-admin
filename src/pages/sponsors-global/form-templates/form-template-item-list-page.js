@@ -174,7 +174,7 @@ const FormTemplateItemListPage = ({
     );
   };
 
-  const handleFormTemplateSave = (item) => {
+  const handleFormTemplateSave = (item) =>
     saveFormTemplateItem(formTemplateId, item).then(() =>
       getFormTemplateItems(
         formTemplateId,
@@ -186,8 +186,6 @@ const FormTemplateItemListPage = ({
         showArchived
       )
     );
-    setShowInventoryItemModal(false);
-  };
 
   const columns = [
     {

@@ -59,6 +59,7 @@ const AddSponsorPageTemplatePopup = ({
   summitId
 }) => {
   const [selectedPages, setSelectedPages] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   const sponsorshipIds = sponsor.sponsorships.map((e) => e.id);
 
@@ -72,12 +73,16 @@ const AddSponsorPageTemplatePopup = ({
       add_ons: yup.array()
     }),
     onSubmit: (values) => {
+      if (isSaving) return;
+      setIsSaving(true);
       const { add_ons } = values;
       const entity = {
         pages: selectedPages,
         add_ons
       };
-      onSubmit(entity);
+      onSubmit(entity)
+        .then(() => onClose())
+        .finally(() => setIsSaving(false));
     },
     enableReinitialize: true
   });
@@ -140,6 +145,7 @@ const AddSponsorPageTemplatePopup = ({
   };
 
   const handleClose = () => {
+    if (isSaving) return;
     onClose();
   };
 
@@ -190,12 +196,23 @@ const AddSponsorPageTemplatePopup = ({
   ];
 
   return (
-    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog
+      open
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      disableEscapeKeyDown={isSaving}
+    >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {T.translate("edit_sponsor.pages_tab.add_page_using_template")}
         </Typography>
-        <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
+        <IconButton
+          size="small"
+          onClick={() => handleClose()}
+          sx={{ mr: 1 }}
+          disabled={isSaving}
+        >
           <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
@@ -293,7 +310,7 @@ const AddSponsorPageTemplatePopup = ({
           <DialogActions>
             <Button
               type="submit"
-              disabled={selectedPages.length === 0}
+              disabled={selectedPages.length === 0 || isSaving}
               fullWidth
               variant="contained"
             >
