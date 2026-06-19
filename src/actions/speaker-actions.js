@@ -887,14 +887,19 @@ const parseFilters = (filters) => {
   return filter;
 };
 
-const getSpeakersActivitiesCount =
-  (summitId, filter, accessToken) => (dispatch) => {
+export const getSpeakersActivitiesCount =
+  (filters = {}) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const filter = parseFilters(filters);
     const params = { access_token: accessToken };
     if (filter.length > 0) params["filter[]"] = filter;
     return getRequest(
       createAction(REQUEST_SPEAKERS_ACTIVITIES_COUNT),
       createAction(RECEIVE_SPEAKERS_ACTIVITIES_COUNT),
-      `${window.API_BASE_URL}/api/v1/summits/${summitId}/speakers/all/events/count`,
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/speakers/all/events/count`,
       authErrorHandler
     )(params)(dispatch);
   };
@@ -944,8 +949,6 @@ export const getSpeakersBySummit =
       const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
       params.order = `${orderDirSign}${order}`;
     }
-
-    dispatch(getSpeakersActivitiesCount(currentSummit.id, filter, accessToken));
 
     return getRequest(
       createAction(REQUEST_SPEAKERS_BY_SUMMIT),
