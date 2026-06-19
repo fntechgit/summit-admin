@@ -245,7 +245,7 @@ describe("PaymentProfileDialog", () => {
       expect(defaultProps.onSave).not.toHaveBeenCalled();
     });
 
-    test("submitting with all required fields filled calls onSave with form values", async () => {
+    test("submitting with all required fields filled calls onSave then onClose", async () => {
       renderDialog({ entity: {} });
 
       fireEvent.change(screen.getByTestId("select-application_type"), {
@@ -263,34 +263,32 @@ describe("PaymentProfileDialog", () => {
             provider: "Stripe"
           })
         );
+        expect(defaultProps.onClose).toHaveBeenCalledTimes(1);
       });
     });
 
-    test("selecting LawPay provider shows merchant_account_id and hides send_email_receipt", () => {
+    test("provider selection shows the correct provider-specific fields", () => {
       renderDialog({ entity: {} });
 
       fireEvent.change(screen.getByTestId("select-provider"), {
         target: { value: "LawPay" }
       });
-
       expect(
         screen.getByTestId("input-merchant_account_id")
       ).toBeInTheDocument();
       expect(
         screen.queryByTestId("checkbox-send_email_receipt")
       ).not.toBeInTheDocument();
-    });
-
-    test("selecting Stripe provider shows the send_email_receipt checkbox", () => {
-      renderDialog({ entity: {} });
 
       fireEvent.change(screen.getByTestId("select-provider"), {
         target: { value: "Stripe" }
       });
-
       expect(
         screen.getByTestId("checkbox-send_email_receipt")
       ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("input-merchant_account_id")
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -302,7 +300,7 @@ describe("PaymentProfileDialog", () => {
       orderDir: 1
     };
 
-    test("renders one row per fee type with the correct name", () => {
+    test("renders fee type rows with correct names and formatted values", () => {
       renderDialog({ entity: feeTypeSectionEntity, paymentFeeTypes });
 
       expect(screen.getByTestId("fee-types-table")).toBeInTheDocument();
@@ -312,6 +310,10 @@ describe("PaymentProfileDialog", () => {
         "Processing Fee"
       );
       expect(screen.getByTestId("cell-name-1")).toHaveTextContent("Flat Fee");
+      // rateFeeType: value = 250 → 250/100 = 2.5%
+      expect(screen.getByTestId("cell-value-0")).toHaveTextContent("2.5%");
+      // amountFeeType: value = 1500 cents → $15.00
+      expect(screen.getByTestId("cell-value-1")).toHaveTextContent("$15.00");
     });
 
     test.each([
@@ -328,15 +330,6 @@ describe("PaymentProfileDialog", () => {
       });
 
       expect(screen.queryByTestId("fee-types-table")).not.toBeInTheDocument();
-    });
-
-    test("formats Rate value as a percentage and Amount value as money", () => {
-      renderDialog({ entity: feeTypeSectionEntity, paymentFeeTypes });
-
-      // rateFeeType row 0: value = 250 → 250/100 = 2.5%
-      expect(screen.getByTestId("cell-value-0")).toHaveTextContent("2.5%");
-      // amountFeeType row 1: value = 1500 cents → $15.00
-      expect(screen.getByTestId("cell-value-1")).toHaveTextContent("$15.00");
     });
   });
 
@@ -394,19 +387,15 @@ describe("PaymentProfileDialog", () => {
       openFeeTypeForm();
     });
 
-    test("selecting Amount kind renders the price field for value", () => {
+    test("kind selection renders price field for Amount and percentage input for Rate", () => {
       fireEvent.change(screen.getByTestId("select-kind"), {
         target: { value: "Amount" }
       });
-
       expect(screen.getByTestId("price-value")).toBeInTheDocument();
-    });
 
-    test("selecting Rate kind renders a plain text input with % adornment for value", () => {
       fireEvent.change(screen.getByTestId("select-kind"), {
         target: { value: "Rate" }
       });
-
       expect(screen.queryByTestId("price-value")).not.toBeInTheDocument();
       expect(screen.getByText("%")).toBeInTheDocument();
     });
@@ -469,7 +458,7 @@ describe("PaymentProfileDialog", () => {
       });
     });
 
-    test("save button re-enables after onSave rejects", async () => {
+    test("re-enables buttons and does not call onClose after save rejects", async () => {
       defaultProps.onSave.mockRejectedValue(new Error("save failed"));
 
       renderDialog({ entity: {} });
@@ -486,6 +475,7 @@ describe("PaymentProfileDialog", () => {
           screen.getByRole("button", { name: "general.save" })
         ).not.toBeDisabled();
       });
+      expect(defaultProps.onClose).not.toHaveBeenCalled();
     });
   });
 
@@ -513,7 +503,7 @@ describe("PaymentProfileDialog", () => {
       openFeeTypeForm();
     });
 
-    test("submitting calls onSaveFeeType with the entered values", async () => {
+    test("submitting a valid fee type form calls onSaveFeeType and hides the form", async () => {
       await fillValidFeeTypeForm();
       submitFeeTypeForm();
 
@@ -525,14 +515,6 @@ describe("PaymentProfileDialog", () => {
             payment_method: "card"
           })
         );
-      });
-    });
-
-    test("form hides after successful fee type save", async () => {
-      await fillValidFeeTypeForm();
-      submitFeeTypeForm();
-
-      await waitFor(() => {
         expect(
           screen.queryByRole("button", { name: /save_fee_type/i })
         ).not.toBeInTheDocument();

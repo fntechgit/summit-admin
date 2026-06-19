@@ -85,21 +85,28 @@ describe("getPaymentProfiles", () => {
     expect(capturedParams).not.toHaveProperty("filter[]");
   });
 
-  test("adds filter[] array with provider, id, application_type for non-empty term", async () => {
+  test("adds provider and application_type string filters for non-numeric term", async () => {
     store.dispatch(getPaymentProfiles("stripe"));
     await flushPromises();
 
     expect(capturedParams["filter[]"]).toEqual([
-      "provider=@stripe,id=@stripe,application_type=@stripe"
+      "provider=@stripe,application_type=@stripe"
+    ]);
+  });
+
+  test("adds exact-match id filter alongside string filters for numeric term", async () => {
+    store.dispatch(getPaymentProfiles("42"));
+    await flushPromises();
+
+    expect(capturedParams["filter[]"]).toEqual([
+      "provider=@42,application_type=@42",
+      "id==42"
     ]);
   });
 
   test.each([
-    [
-      "foo,bar",
-      "provider=@foo\\,bar,id=@foo\\,bar,application_type=@foo\\,bar"
-    ],
-    ["foo;bar", "provider=@foo\\;bar,id=@foo\\;bar,application_type=@foo\\;bar"]
+    ["foo,bar", "provider=@foo\\,bar,application_type=@foo\\,bar"],
+    ["foo;bar", "provider=@foo\\;bar,application_type=@foo\\;bar"]
   ])(
     "escapeFilterValue escapes special chars in %p",
     async (term, expected) => {

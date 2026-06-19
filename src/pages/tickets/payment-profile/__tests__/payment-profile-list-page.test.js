@@ -5,8 +5,10 @@ import PaymentProfileListPage from "../payment-profile-list-page";
 import { renderWithRedux } from "../../../../utils/test-utils";
 import {
   savePaymentProfile,
+  getPaymentProfiles,
   savePaymentFeeType,
-  getPaymentFeeTypes
+  getPaymentFeeTypes,
+  resetPaymentProfileForm
 } from "../../../../actions/ticket-actions";
 
 let capturedDialogProps = null;
@@ -72,8 +74,10 @@ describe("PaymentProfileListPage popup behavior", () => {
   beforeEach(() => {
     capturedDialogProps = null;
     savePaymentProfile.mockReturnValue(() => Promise.resolve());
+    getPaymentProfiles.mockReturnValue(() => Promise.resolve());
     savePaymentFeeType.mockReturnValue(() => Promise.resolve());
     getPaymentFeeTypes.mockReturnValue(() => Promise.resolve());
+    resetPaymentProfileForm.mockReturnValue(() => undefined);
   });
 
   const openPopup = async () => {
@@ -86,14 +90,24 @@ describe("PaymentProfileListPage popup behavior", () => {
     );
   };
 
-  test("dialog is not rendered before the add button is clicked", () => {
+  test("dialog is not shown before Add is clicked, and closes when onClose is called", async () => {
     renderWithRedux(<PaymentProfileListPage />, { initialState: baseState });
     expect(
       screen.queryByTestId("payment-profile-dialog")
     ).not.toBeInTheDocument();
+
+    await openPopup();
+
+    await act(async () => {
+      capturedDialogProps.onClose();
+    });
+    expect(
+      screen.queryByTestId("payment-profile-dialog")
+    ).not.toBeInTheDocument();
+    expect(resetPaymentProfileForm).toHaveBeenCalled();
   });
 
-  test("popup closes after profile save succeeds", async () => {
+  test("handleSave calls savePaymentProfile and refreshes the list on success", async () => {
     renderWithRedux(<PaymentProfileListPage />, { initialState: baseState });
     await openPopup();
 
@@ -106,9 +120,13 @@ describe("PaymentProfileListPage popup behavior", () => {
       await flushPromises();
     });
 
-    expect(
-      screen.queryByTestId("payment-profile-dialog")
-    ).not.toBeInTheDocument();
+    expect(savePaymentProfile).toHaveBeenCalledWith(
+      expect.objectContaining({
+        application_type: "Registration",
+        provider: "Stripe"
+      })
+    );
+    expect(getPaymentProfiles).toHaveBeenCalled();
   });
 
   test("fee type save keeps popup open and refreshes fee types", async () => {
@@ -132,26 +150,5 @@ describe("PaymentProfileListPage popup behavior", () => {
     expect(getPaymentFeeTypes).toHaveBeenCalledWith(
       baseState.currentPaymentProfileState.entity.id
     );
-  });
-
-  test("popup stays open when profile save fails", async () => {
-    savePaymentProfile.mockReturnValue(() =>
-      Promise.reject(new Error("Save failed"))
-    );
-
-    renderWithRedux(<PaymentProfileListPage />, { initialState: baseState });
-    await openPopup();
-
-    await act(async () => {
-      await capturedDialogProps
-        .onSave({
-          id: 0,
-          application_type: "Registration",
-          provider: "Stripe"
-        })
-        .catch(() => {});
-    });
-
-    expect(screen.getByTestId("payment-profile-dialog")).toBeInTheDocument();
   });
 });
