@@ -74,9 +74,9 @@ const FormTemplateDialog = ({
       if (isSaving) return;
 
       setIsSaving(true);
-      Promise.resolve(onSave(finalValues))
+      onSave(finalValues)
         .then(() => {
-          closePopup();
+          onClose();
         })
         .catch(() => {
           // keep dialog open on save error to preserve user input

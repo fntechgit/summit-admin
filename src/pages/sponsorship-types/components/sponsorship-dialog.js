@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import PropTypes from "prop-types";
 import { FormikProvider, useFormik } from "formik";
@@ -28,12 +28,9 @@ const SIZE_OPTIONS_DDL = [
   { label: "Big", value: "Big" }
 ];
 
-const SponsorshipDialog = ({
-  entity: initialEntity,
-  onClose,
-  onSave,
-  isSaving = false
-}) => {
+const SponsorshipDialog = ({ entity: initialEntity, onClose, onSave }) => {
+  const [isSaving, setIsSaving] = useState(false);
+
   const formik = useFormik({
     initialValues: {
       id: initialEntity?.id ?? 0,
@@ -45,12 +42,19 @@ const SponsorshipDialog = ({
     validationSchema: yup.object().shape({
       name: requiredStringValidation()
     }),
-    onSubmit: (values) => onSave(values)
+    onSubmit: (values) => {
+      if (isSaving) return;
+      setIsSaving(true);
+      onSave(values)
+        .then(() => onClose())
+        .finally(() => setIsSaving(false));
+    }
   });
 
   useScrollToError(formik);
 
   const handleClose = () => {
+    if (isSaving) return;
     formik.resetForm();
     onClose();
   };

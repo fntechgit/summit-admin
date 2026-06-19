@@ -44,7 +44,6 @@ const SponsorshipListPage = ({
   resetSponsorshipForm
 }) => {
   const [open, setOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     getSponsorships();
@@ -76,21 +75,14 @@ const SponsorshipListPage = ({
   };
 
   const handleClose = () => {
-    if (isSaving) return;
     resetSponsorshipForm();
     setOpen(false);
   };
 
-  const handleSave = (entity) => {
-    if (isSaving) return;
-    setIsSaving(true);
-    saveSponsorship(entity)
-      .then(() =>
-        getSponsorships(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
-      )
-      .then(() => setOpen(false))
-      .finally(() => setIsSaving(false));
-  };
+  const handleSave = (entity) =>
+    saveSponsorship(entity).then(() =>
+      getSponsorships(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+    );
 
   const handleDelete = (sponsorshipId) => {
     deleteSponsorship(sponsorshipId);
@@ -196,7 +188,6 @@ const SponsorshipListPage = ({
           entity={currentSponsorship}
           onSave={handleSave}
           onClose={handleClose}
-          isSaving={isSaving}
         />
       )}
     </div>

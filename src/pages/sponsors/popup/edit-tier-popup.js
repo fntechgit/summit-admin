@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { useFormik, FormikProvider } from "formik";
 import * as yup from "yup";
@@ -27,13 +27,14 @@ import MuiFormikSelect from "../../../components/mui/formik-inputs/mui-formik-se
 import MuiFormikCheckbox from "../../../components/mui/formik-inputs/mui-formik-checkbox";
 
 const EditTierDialog = ({
-  open,
   onClose,
   onSubmit,
   onBadgeImageAttach,
   onBadgeImageRemove,
   entity: initialEntity
 }) => {
+  const [isSaving, setIsSaving] = useState(false);
+
   const formik = useFormik({
     initialValues: initialEntity,
     validationSchema: yup.object({
@@ -69,7 +70,13 @@ const EditTierDialog = ({
       ),
       should_display_on_lobby_page: yup.bool(T.translate("validation.boolean"))
     }),
-    onSubmit,
+    onSubmit: (values) => {
+      if (isSaving) return;
+      setIsSaving(true);
+      onSubmit(values)
+        .then(() => onClose())
+        .finally(() => setIsSaving(false));
+    },
     enableReinitialize: true
   });
 
@@ -88,6 +95,7 @@ const EditTierDialog = ({
   };
 
   const handleClose = () => {
+    if (isSaving) return;
     formik.resetForm();
     onClose();
   };
@@ -123,14 +131,25 @@ const EditTierDialog = ({
   ];
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog
+      open
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      disableEscapeKeyDown={isSaving}
+    >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {`${initialEntity.id ? "Edit" : "Add"} ${T.translate(
             "edit_summit_sponsorship.tier"
           )}`}
         </Typography>
-        <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
+        <IconButton
+          size="small"
+          onClick={() => handleClose()}
+          sx={{ mr: 1 }}
+          disabled={isSaving}
+        >
           <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
@@ -512,7 +531,12 @@ const EditTierDialog = ({
           </DialogContent>
           <Divider />
           <DialogActions sx={{ p: 2 }}>
-            <Button type="submit" fullWidth variant="contained">
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={isSaving}
+            >
               {T.translate("edit_summit_sponsorship.save")}
             </Button>
           </DialogActions>
@@ -523,7 +547,6 @@ const EditTierDialog = ({
 };
 
 EditTierDialog.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired
 };
