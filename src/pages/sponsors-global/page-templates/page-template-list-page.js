@@ -115,7 +115,16 @@ const PageTemplateListPage = ({
   };
 
   const handleSavePageTemplate = (entity) => {
-    savePageTemplate(entity).then(() => setOpenPageDialog(false));
+    savePageTemplate(entity).then(() =>
+      getPageTemplates(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
   };
 
   const handleArchive = (item) =>
