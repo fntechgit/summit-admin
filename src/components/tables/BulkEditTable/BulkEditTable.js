@@ -13,6 +13,7 @@ import Heading from "./components/Heading";
 import Row from "./components/Row";
 import useRowSelection from "./hooks/useRowSelection";
 import { SORT_ASCENDING, SORT_DESCENDING } from "../../../utils/constants";
+import styles from "./BulkEditTable.module.less";
 
 const defaults = {
   sortFunc: (a, b) => {
@@ -28,43 +29,6 @@ const defaults = {
   sortCol: 0,
   sortDir: 1,
   colWidth: ""
-};
-
-// The table keeps its default auto layout (so the many dynamic data columns
-// size to content and scroll horizontally), but the checkbox/action columns
-// need an explicit fixed width so `position: sticky` has something exact to pin.
-const ACTION_COLUMN_WIDTH = 40;
-
-const CHECK_CELL_SX = {
-  p: 0,
-  width: ACTION_COLUMN_WIDTH,
-  minWidth: ACTION_COLUMN_WIDTH,
-  maxWidth: ACTION_COLUMN_WIDTH,
-  textAlign: "center",
-  verticalAlign: "middle",
-  position: "sticky",
-  left: 0,
-  zIndex: 2,
-  backgroundColor: "#EAEDF4"
-};
-
-const actionColumnCount = (actions) =>
-  (actions?.edit ? 1 : 0) + (actions?.delete ? 1 : 0);
-
-const getActionHeaderSx = (actions) => {
-  const width = actionColumnCount(actions) * ACTION_COLUMN_WIDTH;
-  return {
-    p: 0,
-    width,
-    minWidth: width,
-    maxWidth: width,
-    textAlign: "center",
-    verticalAlign: "middle",
-    position: "sticky",
-    right: 0,
-    zIndex: 2,
-    backgroundColor: "#EAEDF4"
-  };
 };
 
 function BulkEditTable(props) {
@@ -150,16 +114,17 @@ function BulkEditTable(props) {
       <Paper elevation={0} sx={{ width: "100%", mb: 2 }}>
         <TableContainer
           component={Paper}
+          className={styles.tableWrapper}
           sx={{ borderRadius: 0, boxShadow: "none" }}
         >
-          {/* width: "auto" overrides MUI's default width: 100%, so the table
-              doesn't stretch wider than its content when there are few columns
-              — otherwise the sticky checkbox/action cells pin to the
-              *container's* edge instead of the *content's* edge, leaving a gap. */}
-          <Table sx={{ width: "auto" }}>
+          <Table>
             <TableHead sx={{ backgroundColor: "#EAEDF4" }}>
               <TableRow>
-                <TableCell align="center" sx={CHECK_CELL_SX}>
+                <TableCell
+                  align="center"
+                  className={styles.checkColumn}
+                  sx={{ backgroundColor: "#EAEDF4" }}
+                >
                   <Checkbox
                     checked={isAllSelected(data)}
                     onChange={() => toggleAll(data)}
@@ -207,7 +172,8 @@ function BulkEditTable(props) {
                 {options.actions && (
                   <TableCell
                     align="center"
-                    sx={getActionHeaderSx(options.actions)}
+                    className={styles.actionColumn}
+                    sx={{ backgroundColor: "#EAEDF4" }}
                   >
                     {options.actionsHeader || " "}
                   </TableCell>

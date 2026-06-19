@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import Box from "@mui/material/Box";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import Checkbox from "@mui/material/Checkbox";
@@ -10,43 +11,12 @@ import history from "../../../../history";
 import Cell from "./Cell";
 import styles from "../BulkEditTable.module.less";
 
-// Same dimensions as openstack-uicore-foundation's mui-table.js ACTION_CELL_SX,
-// plus `position: sticky` (unlike mui-table.js) so these columns stay visible
-// while the many data columns scroll horizontally, matching the original table.
-const ACTION_COLUMN_WIDTH = 40;
-
-const CHECK_CELL_SX = {
-  p: 0,
-  textAlign: "center",
-  verticalAlign: "middle",
-  width: ACTION_COLUMN_WIDTH,
-  minWidth: ACTION_COLUMN_WIDTH,
-  maxWidth: ACTION_COLUMN_WIDTH,
-  position: "sticky",
-  left: 0,
-  zIndex: 2,
-  backgroundColor: "inherit"
-};
-
-const getActionCellSx = (rightOffset) => ({
-  p: 0,
-  textAlign: "center",
-  verticalAlign: "middle",
-  width: ACTION_COLUMN_WIDTH,
-  minWidth: ACTION_COLUMN_WIDTH,
-  maxWidth: ACTION_COLUMN_WIDTH,
-  position: "sticky",
-  right: rightOffset,
-  zIndex: 2,
-  backgroundColor: "inherit"
-});
-
-const getCellSx = (col, isEditingRow) => ({
-  fontWeight: "normal",
+const getCellStyle = (col, isEditingRow) => ({
   ...(isEditingRow && col.editableField ? { minWidth: 250 } : {}),
   ...(col.width
     ? { width: col.width, minWidth: col.width, maxWidth: col.width }
-    : {})
+    : {}),
+  ...col.customStyle
 });
 
 function Row(props) {
@@ -91,7 +61,11 @@ function Row(props) {
 
   return (
     <TableRow role="row" hover>
-      <TableCell align="center" sx={CHECK_CELL_SX}>
+      <TableCell
+        align="center"
+        className={styles.checkColumn}
+        sx={{ backgroundColor: "#fff" }}
+      >
         <Checkbox
           checked={isSelected}
           onChange={onToggle}
@@ -104,8 +78,13 @@ function Row(props) {
         .map((col) => (
           <TableCell
             key={`${row.id}_${col.columnKey}`}
-            sx={getCellSx(col, isEditingRow)}
-            style={col.customStyle}
+            className={
+              isEditingRow && col.editableField
+                ? styles.bulkEditCol
+                : styles.dataColumn
+            }
+            sx={{ fontWeight: "normal" }}
+            style={getCellStyle(col, isEditingRow)}
           >
             <Cell
               col={col}
@@ -118,38 +97,38 @@ function Row(props) {
             />
           </TableCell>
         ))}
-      {actions?.edit && (
+      {(actions?.edit || actions?.delete) && (
         <TableCell
           align="center"
-          className={styles.dottedBorderLeft}
-          sx={getActionCellSx(actions.delete ? ACTION_COLUMN_WIDTH : 0)}
+          className={`${styles.actionColumn} ${styles.dottedBorderLeft}`}
+          sx={{ backgroundColor: "#fff" }}
         >
-          <IconButton
-            size="medium"
-            onClick={() =>
-              history.push(`/app/summits/${currentSummit.id}/events/${row.id}`)
-            }
-            sx={{ padding: 0 }}
-            aria-label={`Edit event ${row.id}`}
-          >
-            <EditIcon fontSize="large" />
-          </IconButton>
-        </TableCell>
-      )}
-      {actions?.delete && (
-        <TableCell
-          align="center"
-          className={styles.dottedBorderLeft}
-          sx={getActionCellSx(0)}
-        >
-          <IconButton
-            size="medium"
-            onClick={() => deleteRow(row.id)}
-            sx={{ padding: 0 }}
-            aria-label={`Delete event ${row.id}`}
-          >
-            <DeleteIcon fontSize="large" />
-          </IconButton>
+          <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
+            {actions.edit && (
+              <IconButton
+                size="medium"
+                onClick={() =>
+                  history.push(
+                    `/app/summits/${currentSummit.id}/events/${row.id}`
+                  )
+                }
+                sx={{ padding: 0 }}
+                aria-label={`Edit event ${row.id}`}
+              >
+                <EditIcon fontSize="large" />
+              </IconButton>
+            )}
+            {actions.delete && (
+              <IconButton
+                size="medium"
+                onClick={() => deleteRow(row.id)}
+                sx={{ padding: 0 }}
+                aria-label={`Delete event ${row.id}`}
+              >
+                <DeleteIcon fontSize="large" />
+              </IconButton>
+            )}
+          </Box>
         </TableCell>
       )}
     </TableRow>
