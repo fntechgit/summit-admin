@@ -12,16 +12,15 @@ import Toolbar from "./components/Toolbar";
 import Heading from "./components/Heading";
 import Row from "./components/Row";
 import useRowSelection from "./hooks/useRowSelection";
-import { SORT_ASCENDING, SORT_DESCENDING } from "../../../utils/constants";
 import styles from "./BulkEditTable.module.less";
 
 const defaults = {
   sortFunc: (a, b) => {
     if (a < b) {
-      return SORT_DESCENDING;
+      return -1;
     }
     if (a > b) {
-      return SORT_ASCENDING;
+      return 1;
     }
     return 0;
   },
@@ -39,10 +38,7 @@ function BulkEditTable(props) {
     page,
     data,
     handleSort,
-    updateData,
-    handleDeleteRow,
-    formattingFunction,
-    afterUpdate = []
+    updateData
   } = props;
 
   const {
@@ -73,29 +69,10 @@ function BulkEditTable(props) {
     return null;
   };
 
-  const handledAfterUpdateData = () => {
-    const actionsAfterUpdate = [];
-    if (afterUpdate.length > 0) {
-      afterUpdate.forEach(({ action, propertyName }) => {
-        selectedRows.forEach((row) => {
-          if (Array.isArray(row[propertyName])) {
-            row[propertyName].forEach((e) => {
-              actionsAfterUpdate.push(action(e));
-            });
-          } else {
-            actionsAfterUpdate.push(action(row[propertyName]));
-          }
-        });
-      });
-    }
-    return Promise.all(actionsAfterUpdate);
-  };
-
   const onUpdateEvents = (evt) => {
     evt.stopPropagation();
     evt.preventDefault();
     updateData(currentSummit.id, selectedRows)
-      .then(() => handledAfterUpdateData())
       .then(() => reset())
       .catch((error) => {
         console.error("Error updating events:", error);
@@ -194,7 +171,6 @@ function BulkEditTable(props) {
                     <Row
                       key={`row_${row.id}`}
                       row={row}
-                      currentSummit={currentSummit}
                       editEnabled={editEnabled}
                       isSelected={isSelected(row.id)}
                       editRow={selectedRows.find((r) => r.id === row.id) || row}
@@ -202,10 +178,8 @@ function BulkEditTable(props) {
                       onFieldChange={(key, value) =>
                         editField(row.id, key, value)
                       }
-                      deleteRow={handleDeleteRow}
                       columns={columns}
                       actions={options.actions}
-                      formattingFunction={formattingFunction}
                     />
                   );
                 })}

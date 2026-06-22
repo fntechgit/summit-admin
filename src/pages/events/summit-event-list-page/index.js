@@ -15,6 +15,7 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
+import moment from "moment-timezone";
 import { Pagination } from "react-bootstrap";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
@@ -47,13 +48,10 @@ import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_Z_INDEX,
   HIGH_Z_INDEX,
-  MAX_PER_PAGE
+  MAX_PER_PAGE,
+  MILLISECONDS_IN_SECOND
 } from "../../../utils/constants";
-import {
-  defaultColumns,
-  editableColumns,
-  formatEventData
-} from "../../../utils/summitUtils";
+import { defaultColumns, editableColumns } from "../../../utils/summitUtils";
 import SaveFilterCriteria from "../../../components/filters/save-filter-criteria";
 import SelectFilterCriteria from "../../../components/filters/select-filter-criteria";
 import {
@@ -68,6 +66,101 @@ import ImportMUXModal from "./components/ImportMUXModal";
 
 const FILTER_ID = "summit_activity_list";
 
+const formatDuration = (duration) => {
+  const d = moment.duration(duration, "seconds");
+  return d.format("mm:ss") !== "00" ? d.format("mm:ss") : "TBD";
+};
+
+const formatTimestamp = (timestamp, tz) =>
+  timestamp
+    ? moment(timestamp * MILLISECONDS_IN_SECOND)
+        .tz(tz)
+        .format("MMMM Do YYYY, h:mm a")
+    : null;
+
+// Adds display-only fields for the table to render; never overwrites a real
+// event field, since the same row object is sent back as-is to bulkUpdateEvents.
+export const formatEventData = (e, summit) => {
+  let speakers_companies =
+    Array.isArray(e.speakers) && e.speakers.length > 0
+      ? e.speakers.map((s) => s.company)
+      : [];
+  speakers_companies =
+    speakers_companies.length > 0
+      ? speakers_companies.filter(
+          (item, index) =>
+            item !== "" && speakers_companies.indexOf(item) === index
+        )
+      : [];
+
+  const event_type_capacity = [];
+
+  if (e.type?.allows_location) event_type_capacity.push("Allows Location");
+  if (e.type?.allows_attendee_vote)
+    event_type_capacity.push("Allows Attendee Vote");
+  if (e.type?.allows_publishing_dates)
+    event_type_capacity.push("Allows Publishing Dates");
+
+  let speakers_count;
+
+  if (e.type?.use_speakers) {
+    if (e.speakers && e.speakers.length > 0) {
+      speakers_count = e.speakers.length;
+    } else {
+      speakers_count = "0";
+    }
+  } else {
+    speakers_count = "N/A";
+  }
+
+  return {
+    ...e,
+    created_by_fullname: e.hasOwnProperty("created_by")
+      ? `${e.created_by.first_name} ${e.created_by.last_name} (${e.created_by.email})`
+      : "TBD",
+    submitter_company: e.hasOwnProperty("created_by")
+      ? e.created_by.company
+      : "N/A",
+    speaker_names:
+      Array.isArray(e.speakers) && e.speakers.length > 0
+        ? e.speakers.map((s) => `${s.first_name} ${s.last_name}`).join(", ")
+        : "N/A",
+    speaker_company:
+      speakers_companies.length > 0
+        ? speakers_companies.reduce(
+            (accumulator, company) =>
+              accumulator + (accumulator !== "" ? ", " : "") + company,
+            ""
+          )
+        : "N/A",
+    speakers_count,
+    event_type_capacity: event_type_capacity.reduce(
+      (accumulator, capacity) =>
+        accumulator + (accumulator !== "" ? ", " : "") + capacity,
+      ""
+    ),
+    track_name: e?.track?.name ? e.track.name : "TBD",
+    sponsor:
+      Array.isArray(e.sponsors) && e.sponsors.length > 0
+        ? e.sponsors.map((s) => s.name).join(", ")
+        : "N/A",
+    progress_flags: e?.actions
+      ?.map((a) => `${a.type.label} (${a.is_completed ? "ON" : "OFF"})`)
+      .join(", "),
+    published_date_display: e.is_published
+      ? moment(e.published_date * MILLISECONDS_IN_SECOND)
+          .tz(summit.time_zone.name)
+          .format("MMMM Do YYYY, h:mm a")
+      : "No",
+    start_date_display:
+      formatTimestamp(e.start_date, summit.time_zone.name) ?? "TBD",
+    end_date_display:
+      formatTimestamp(e.end_date, summit.time_zone.name) ?? "TBD",
+    created_display: formatTimestamp(e.created, summit.time_zone_id) ?? "TBD",
+    modified: formatTimestamp(e.last_edited, summit.time_zone_id) ?? "TBD"
+  };
+};
+
 const fieldNames = (
   allSelectionPlans,
   allTracks,
@@ -75,7 +168,7 @@ const fieldNames = (
   currentSummitId
 ) => [
   {
-    columnKey: "speakers",
+    columnKey: "speaker_names",
     value: "speakers",
     customStyle: { minWidth: "350px" },
     editableField: (extraProps) => {
@@ -84,7 +177,6 @@ const fieldNames = (
         useSpeakers && (
           <SpeakerInput
             id="speakers"
-            value={extraProps.rowData}
             isClearable
             isMulti
             placeholder={T.translate("edit_event.search_speakers")}
@@ -102,18 +194,32 @@ const fieldNames = (
             }
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...extraProps}
+            value={extraProps.row.speakers}
           />
         )
       );
     }
   },
   { columnKey: "created_by_fullname", value: "created_by", sortable: true },
-  { columnKey: "published_date", value: "published", sortable: true },
-  { columnKey: "duration", value: "duration", sortable: true },
+  {
+    columnKey: "published_date",
+    value: "published",
+    sortable: true,
+    render: (_, row) => row.published_date_display
+  },
+  {
+    columnKey: "duration",
+    value: "duration",
+    sortable: true,
+    render: (duration, row) =>
+      row.type?.allows_publishing_dates && duration
+        ? formatDuration(duration)
+        : "N/A"
+  },
   { columnKey: "speakers_count", value: "speakers_count", sortable: true },
   { columnKey: "speaker_company", value: "speaker_company", sortable: true },
   {
-    columnKey: "track",
+    columnKey: "track_name",
     value: "track",
     sortable: true,
     editableField: (extraProps) => {
@@ -122,7 +228,6 @@ const fieldNames = (
       return (
         <Dropdown
           id="track"
-          value={extraProps.value}
           options={trackOptions}
           menuPortalTarget={document.body}
           menuPosition="fixed"
@@ -135,12 +240,23 @@ const fieldNames = (
           }}
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...extraProps}
+          value={extraProps.row.track?.id}
         />
       );
     }
   },
-  { columnKey: "start_date", value: "start_date", sortable: true },
-  { columnKey: "end_date", value: "end_date", sortable: true },
+  {
+    columnKey: "start_date",
+    value: "start_date",
+    sortable: true,
+    render: (_, row) => row.start_date_display
+  },
+  {
+    columnKey: "end_date",
+    value: "end_date",
+    sortable: true,
+    render: (_, row) => row.end_date_display
+  },
   { columnKey: "submitters", value: "submitters" },
   {
     columnKey: "submitter_company",
@@ -205,42 +321,74 @@ const fieldNames = (
     },
     render: (e) => (e?.name ? e.name : "N/A")
   },
-  { columnKey: "location", value: "location", sortable: true },
-  { columnKey: "level", value: "level", sortable: true },
-  { columnKey: "tags", value: "tags", sortable: true },
+  {
+    columnKey: "location",
+    value: "location",
+    sortable: true,
+    render: (location) => (location?.name ? location.name : "N/A")
+  },
+  {
+    columnKey: "level",
+    value: "level",
+    sortable: true,
+    render: (level) => level || "N/A"
+  },
+  {
+    columnKey: "tags",
+    value: "tags",
+    sortable: true,
+    render: (tags) =>
+      Array.isArray(tags) && tags.length > 0
+        ? tags.reduce(
+            (accumulator, t) =>
+              accumulator + (accumulator !== "" ? ", " : "") + t.tag,
+            ""
+          )
+        : "N/A"
+  },
   {
     columnKey: "streaming_url",
     value: "streaming_url",
     sortable: true,
     title: true,
-    editableField: true
+    editableField: true,
+    render: (url) => url || "N/A"
   },
   {
     columnKey: "meeting_url",
     value: "meeting_url",
     sortable: true,
     title: true,
-    editableField: true
+    editableField: true,
+    render: (url) => url || "N/A"
   },
   {
     columnKey: "etherpad_link",
     value: "etherpad_link",
     sortable: true,
     title: true,
-    editableField: true
+    editableField: true,
+    render: (link) => link || "N/A"
   },
-  { columnKey: "streaming_type", value: "streaming_type", sortable: true },
+  {
+    columnKey: "streaming_type",
+    value: "streaming_type",
+    sortable: true,
+    render: (type) => type || "N/A"
+  },
   {
     columnKey: "review_status",
     value: "review_status",
     sortable: true,
-    title: true
+    title: true,
+    render: (status) => status ?? "N/A"
   },
   {
     columnKey: "status",
     value: "submission_status",
     sortable: true,
-    title: true
+    title: true,
+    render: (status) => status ?? "Not Submitted"
   },
   {
     columnKey: "progress_flags",
@@ -248,12 +396,18 @@ const fieldNames = (
     sortable: true,
     title: true
   },
-  { columnKey: "created", value: "created", sortable: true },
+  {
+    columnKey: "created",
+    value: "created",
+    sortable: true,
+    render: (_, row) => row.created_display
+  },
   { columnKey: "modified", value: "modified", sortable: true },
   {
     columnKey: "submission_source",
     value: "submission_source",
-    sortable: true
+    sortable: true,
+    render: (source) => source || "N/A"
   },
   {
     columnKey: "media_uploads",
@@ -1010,8 +1164,8 @@ const SummitEventListPage = ({
     setShowImportFromMUXModal(true);
   };
 
-  const handleEdit = (eventId) => {
-    history.push(`/app/summits/${currentSummit.id}/events/${eventId}`);
+  const handleEdit = (row) => {
+    history.push(`/app/summits/${currentSummit.id}/events/${row.id}`);
   };
 
   const handleExport = (ev) => {
@@ -1035,6 +1189,9 @@ const SummitEventListPage = ({
       case "progress_flags":
         translatedKey = "actions";
         break;
+      case "track_name":
+        translatedKey = "track";
+        break;
       default:
         break;
     }
@@ -1050,19 +1207,17 @@ const SummitEventListPage = ({
     history.push(`/app/summits/${currentSummit.id}/events/new`);
   };
 
-  const handleDeleteEvent = (eventId) => {
-    const event = events.find((e) => e.id === eventId);
-
+  const handleDeleteEvent = (row) => {
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text: `${T.translate("event_list.delete_event_warning")} ${event.title}`,
+      text: `${T.translate("event_list.delete_event_warning")} ${row.title}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
     }).then((result) => {
       if (result.value) {
-        deleteEvent(eventId);
+        deleteEvent(row.id);
       }
     });
   };
@@ -1138,6 +1293,8 @@ const SummitEventListPage = ({
         return "submitter_company";
       case "actions":
         return "progress_flags";
+      case "track":
+        return "track_name";
       default:
         break;
     }
@@ -1184,7 +1341,11 @@ const SummitEventListPage = ({
     {
       columnKey: "selection_status",
       value: T.translate("event_list.selection_status"),
-      sortable: true
+      sortable: true,
+      render: (status, row) =>
+        status === "unaccepted" && row.is_published === true
+          ? "accepted"
+          : status
     }
   ];
 
@@ -1203,7 +1364,7 @@ const SummitEventListPage = ({
       value: "event_type_capacity",
       label: T.translate("event_list.event_type_capacity")
     },
-    { value: "speakers", label: T.translate("event_list.speakers") },
+    { value: "speaker_names", label: T.translate("event_list.speakers") },
     {
       value: "all_companies",
       label: T.translate("event_list.all_companies")
@@ -1249,7 +1410,7 @@ const SummitEventListPage = ({
       value: "submitter_company",
       label: T.translate("event_list.submitter_company")
     },
-    { value: "track", label: T.translate("event_list.track") },
+    { value: "track_name", label: T.translate("event_list.track") },
     { value: "status", label: T.translate("event_list.submission_status") },
     {
       value: "submission_source",
@@ -1311,6 +1472,8 @@ const SummitEventListPage = ({
   columns = [...columns, ...showColumns];
 
   if (!currentSummit.id) return <div />;
+
+  const tableData = events.map((e) => formatEventData(e, currentSummit));
 
   return (
     <div className="container summit-event-list-filters">
@@ -1409,12 +1572,10 @@ const SummitEventListPage = ({
               currentSummit={currentSummit}
               page={currentPage}
               options={tableOptions}
-              data={events}
+              data={tableData}
               columns={columns}
               handleSort={handleSort}
               updateData={bulkUpdateEvents}
-              handleDeleteRow={handleDeleteEvent}
-              formattingFunction={formatEventData}
             />
           </div>
           <Pagination

@@ -3,15 +3,7 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import TextField from "@mui/material/TextField";
 
-function Cell({
-  col,
-  row,
-  editRow,
-  isEditingRow,
-  onChange,
-  onRemoveOption,
-  formattedData
-}) {
+function Cell({ col, row, editRow, isEditingRow, onChange, onRemoveOption }) {
   if (isEditingRow && col.editableField === true) {
     return (
       <TextField
@@ -51,9 +43,7 @@ function Cell({
   }
 
   return (
-    <span style={{ fontWeight: "normal" }}>
-      {formattedData[col.columnKey] ?? null}
-    </span>
+    <span style={{ fontWeight: "normal" }}>{row[col.columnKey] ?? null}</span>
   );
 }
 
@@ -63,8 +53,7 @@ Cell.propTypes = {
   editRow: PropTypes.object.isRequired,
   isEditingRow: PropTypes.bool,
   onChange: PropTypes.func,
-  onRemoveOption: PropTypes.func,
-  formattedData: PropTypes.object
+  onRemoveOption: PropTypes.func
 };
 
 export default Cell;

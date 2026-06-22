@@ -5,7 +5,6 @@ import Box from "@mui/material/Box";
 import TableCell from "@mui/material/TableCell";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import { visuallyHidden } from "@mui/utils";
-import { SORT_ASCENDING, SORT_DESCENDING } from "../../../../utils/constants";
 
 function Heading(props) {
   const {
@@ -23,12 +22,7 @@ function Heading(props) {
   const handleSort = () => {
     if (!onSort || !sortable || editEnabled) return;
 
-    onSort(
-      columnIndex,
-      columnKey,
-      sortDir ? sortDir * SORT_DESCENDING : SORT_ASCENDING,
-      sortFunc
-    );
+    onSort(columnIndex, columnKey, sortDir ? sortDir * -1 : 1, sortFunc);
   };
 
   const headerSx = width ? { width, minWidth: width, maxWidth: width } : {};
@@ -41,13 +35,13 @@ function Heading(props) {
     <TableCell sx={headerSx}>
       <TableSortLabel
         active={!!sortDir}
-        direction={sortDir === SORT_DESCENDING ? "desc" : "asc"}
+        direction={sortDir === -1 ? "desc" : "asc"}
         onClick={handleSort}
       >
         {children}
         {sortDir ? (
           <Box component="span" sx={visuallyHidden}>
-            {sortDir === SORT_DESCENDING
+            {sortDir === -1
               ? T.translate("mui_table.sorted_desc")
               : T.translate("mui_table.sorted_asc")}
           </Box>

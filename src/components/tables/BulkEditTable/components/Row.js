@@ -7,7 +7,6 @@ import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import history from "../../../../history";
 import Cell from "./Cell";
 import styles from "../BulkEditTable.module.less";
 
@@ -28,13 +27,9 @@ function Row(props) {
     editRow,
     onToggle,
     onFieldChange,
-    deleteRow,
-    currentSummit,
-    actions,
-    formattingFunction
+    actions
   } = props;
 
-  const formattedData = formattingFunction(row, currentSummit);
   const isEditingRow = isSelected && editEnabled;
 
   const onRowChange = (ev) => {
@@ -93,7 +88,6 @@ function Row(props) {
               isEditingRow={isEditingRow}
               onChange={onRowChange}
               onRemoveOption={onRemoveOption}
-              formattedData={formattedData}
             />
           </TableCell>
         ))}
@@ -107,11 +101,7 @@ function Row(props) {
             {actions.edit && (
               <IconButton
                 size="medium"
-                onClick={() =>
-                  history.push(
-                    `/app/summits/${currentSummit.id}/events/${row.id}`
-                  )
-                }
+                onClick={() => actions.edit.onClick(row)}
                 sx={{ padding: 0 }}
                 aria-label={`Edit event ${row.id}`}
               >
@@ -121,7 +111,7 @@ function Row(props) {
             {actions.delete && (
               <IconButton
                 size="medium"
-                onClick={() => deleteRow(row.id)}
+                onClick={() => actions.delete.onClick(row)}
                 sx={{ padding: 0 }}
                 aria-label={`Delete event ${row.id}`}
               >
@@ -143,10 +133,7 @@ Row.propTypes = {
   editRow: PropTypes.object.isRequired,
   onToggle: PropTypes.func,
   onFieldChange: PropTypes.func,
-  deleteRow: PropTypes.func,
-  currentSummit: PropTypes.object,
-  actions: PropTypes.object,
-  formattingFunction: PropTypes.func.isRequired
+  actions: PropTypes.object
 };
 
 export default Row;
