@@ -352,6 +352,7 @@ const fieldNames = (
     sortable: true,
     title: true,
     editableField: true,
+    placeholder: T.translate("bulk_actions_page.placeholders.streaming_url"),
     render: (url) => url || "N/A"
   },
   {
@@ -360,6 +361,7 @@ const fieldNames = (
     sortable: true,
     title: true,
     editableField: true,
+    placeholder: T.translate("bulk_actions_page.placeholders.meeting_url"),
     render: (url) => url || "N/A"
   },
   {
@@ -368,6 +370,7 @@ const fieldNames = (
     sortable: true,
     title: true,
     editableField: true,
+    placeholder: T.translate("bulk_actions_page.placeholders.etherpad_link"),
     render: (link) => link || "N/A"
   },
   {
@@ -1336,7 +1339,8 @@ const SummitEventListPage = ({
       columnKey: "title",
       value: T.translate("event_list.title"),
       sortable: true,
-      editableField: true
+      editableField: true,
+      placeholder: T.translate("bulk_actions_page.placeholders.event_title")
     },
     {
       columnKey: "selection_status",
@@ -1569,13 +1573,11 @@ const SummitEventListPage = ({
         <div>
           <div className="summit-event-list-table-wrapper">
             <BulkEditTable
-              currentSummit={currentSummit}
-              page={currentPage}
               options={tableOptions}
               data={tableData}
               columns={columns}
-              handleSort={handleSort}
-              updateData={bulkUpdateEvents}
+              onSort={handleSort}
+              onUpdate={(rows) => bulkUpdateEvents(currentSummit.id, rows)}
             />
           </div>
           <Pagination

@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -15,32 +16,13 @@ import useRowSelection from "./hooks/useRowSelection";
 import styles from "./BulkEditTable.module.less";
 
 const defaults = {
-  sortFunc: (a, b) => {
-    if (a < b) {
-      return -1;
-    }
-    if (a > b) {
-      return 1;
-    }
-    return 0;
-  },
   sortable: false,
   sortCol: 0,
   sortDir: 1,
   colWidth: ""
 };
 
-function BulkEditTable(props) {
-  const {
-    options,
-    columns,
-    currentSummit,
-    page,
-    data,
-    handleSort,
-    updateData
-  } = props;
-
+const BulkEditTable = ({ options, columns, data, onSort, onUpdate }) => {
   const {
     selectedRows,
     isSelected,
@@ -54,12 +36,18 @@ function BulkEditTable(props) {
     reset
   } = useRowSelection();
 
-  // reset selection/edit state on data changes/pagination
+  const dataIds = data.map((row) => row.id).join(",");
+
+  // reset selection/edit state whenever the set of rows shown changes
+  // (pagination, filtering, sorting, search, etc.)
   useEffect(() => {
     reset();
-  }, [page]);
+  }, [dataIds]);
 
-  const getSortDir = (columnKey, columnIndex, sortCol, sortDir) => {
+  const sortCol = options.sortCol ?? defaults.sortCol;
+  const sortDir = options.sortDir ?? defaults.sortDir;
+
+  const getSortDir = (columnKey, columnIndex) => {
     if (columnKey && columnKey === sortCol) {
       return sortDir;
     }
@@ -69,10 +57,10 @@ function BulkEditTable(props) {
     return null;
   };
 
-  const onUpdateEvents = (evt) => {
+  const handleUpdateEvents = (evt) => {
     evt.stopPropagation();
     evt.preventDefault();
-    updateData(currentSummit.id, selectedRows)
+    onUpdate(selectedRows)
       .then(() => reset())
       .catch((error) => {
         console.error("Error updating events:", error);
@@ -85,7 +73,7 @@ function BulkEditTable(props) {
         editEnabled={editEnabled}
         hasSelection={selectedRows.length > 0}
         onEdit={enterEditMode}
-        onApply={onUpdateEvents}
+        onApply={handleUpdateEvents}
         onCancel={cancel}
       />
       <Paper elevation={0} sx={{ width: "100%", mb: 2 }}>
@@ -105,38 +93,19 @@ function BulkEditTable(props) {
                   <Checkbox
                     checked={isAllSelected(data)}
                     onChange={() => toggleAll(data)}
-                    inputProps={{ "aria-label": "select all" }}
+                    slotProps={{ input: { "aria-label": "select all" } }}
                   />
                 </TableCell>
                 {columns.map((col, i) => {
-                  const sortCol =
-                    typeof options.sortCol !== "undefined"
-                      ? options.sortCol
-                      : defaults.sortCol;
-                  const sortDir =
-                    typeof options.sortDir !== "undefined"
-                      ? options.sortDir
-                      : defaults.sortDir;
-                  const sortFunc =
-                    typeof options.sortFunc !== "undefined"
-                      ? options.sortFunc
-                      : defaults.sortFunc;
-                  const sortable =
-                    typeof col.sortable !== "undefined"
-                      ? col.sortable
-                      : defaults.sortable;
-                  const colWidth =
-                    typeof col.width !== "undefined"
-                      ? col.width
-                      : defaults.colWidth;
+                  const sortable = col.sortable ?? defaults.sortable;
+                  const colWidth = col.width ?? defaults.colWidth;
 
                   return (
                     <Heading
                       editEnabled={editEnabled}
-                      onSort={handleSort}
-                      sortDir={getSortDir(col.columnKey, i, sortCol, sortDir)}
+                      onSort={onSort}
+                      sortDir={getSortDir(col.columnKey, i)}
                       sortable={sortable}
-                      sortFunc={sortFunc}
                       columnIndex={i}
                       columnKey={col.columnKey}
                       width={colWidth}
@@ -159,36 +128,35 @@ function BulkEditTable(props) {
             </TableHead>
             <TableBody>
               {columns.length > 0 &&
-                data.map((row, i) => {
-                  if (Array.isArray(row) && row.length !== columns.length) {
-                    console.warn(
-                      `Data at row ${i} is ${row.length}. It should be ${columns.length}.`
-                    );
-                    return <TableRow key={`row_${row.id}`} />;
-                  }
-
-                  return (
-                    <Row
-                      key={`row_${row.id}`}
-                      row={row}
-                      editEnabled={editEnabled}
-                      isSelected={isSelected(row.id)}
-                      editRow={selectedRows.find((r) => r.id === row.id) || row}
-                      onToggle={() => toggleRow(row)}
-                      onFieldChange={(key, value) =>
-                        editField(row.id, key, value)
-                      }
-                      columns={columns}
-                      actions={options.actions}
-                    />
-                  );
-                })}
+                data.map((row) => (
+                  <Row
+                    key={`row_${row.id}`}
+                    row={row}
+                    editEnabled={editEnabled}
+                    isSelected={isSelected(row.id)}
+                    editRow={selectedRows.find((r) => r.id === row.id) || row}
+                    onToggle={() => toggleRow(row)}
+                    onFieldChange={(key, value) =>
+                      editField(row.id, key, value)
+                    }
+                    columns={columns}
+                    actions={options.actions}
+                  />
+                ))}
             </TableBody>
           </Table>
         </TableContainer>
       </Paper>
     </Box>
   );
-}
+};
+
+BulkEditTable.propTypes = {
+  options: PropTypes.object.isRequired,
+  columns: PropTypes.array.isRequired,
+  data: PropTypes.array.isRequired,
+  onSort: PropTypes.func.isRequired,
+  onUpdate: PropTypes.func.isRequired
+};
 
 export default BulkEditTable;

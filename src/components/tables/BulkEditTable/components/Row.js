@@ -10,15 +10,16 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import Cell from "./Cell";
 import styles from "../BulkEditTable.module.less";
 
-const getCellStyle = (col, isEditingRow) => ({
-  ...(isEditingRow && col.editableField ? { minWidth: 250 } : {}),
+// the 250px min-width while editing comes from the .bulkEditCol class
+// (applied via className below) so it isn't duplicated here
+const getCellStyle = (col) => ({
   ...(col.width
     ? { width: col.width, minWidth: col.width, maxWidth: col.width }
     : {}),
   ...col.customStyle
 });
 
-function Row(props) {
+const Row = (props) => {
   const {
     row,
     columns,
@@ -34,24 +35,7 @@ function Row(props) {
 
   const onRowChange = (ev) => {
     const { value, id } = ev.target;
-
-    if (id.includes("___")) {
-      const [arrayProp, elementIdRaw, prop] = id.split("___"); // ['array property', '<element Id>', 'element property']
-      const elementId = parseInt(elementIdRaw, 10);
-      const arrayToChange = (editRow[arrayProp] || []).map((elem) =>
-        elem.id === elementId ? { ...elem, [prop]: value } : elem
-      );
-      onFieldChange(arrayProp, arrayToChange);
-    } else {
-      onFieldChange(id, value);
-    }
-  };
-
-  const onRemoveOption = (optionId, columnKey) => {
-    const newOptions = (editRow[columnKey] || []).filter(
-      (option) => option.id !== optionId
-    );
-    onFieldChange(columnKey, newOptions);
+    onFieldChange(id, value);
   };
 
   return (
@@ -64,7 +48,7 @@ function Row(props) {
         <Checkbox
           checked={isSelected}
           onChange={onToggle}
-          inputProps={{ "aria-label": `Select row ${row.id}` }}
+          slotProps={{ input: { "aria-label": `Select row ${row.id}` } }}
         />
       </TableCell>
       <TableCell sx={{ fontWeight: "normal" }}>{row.id}</TableCell>
@@ -79,7 +63,7 @@ function Row(props) {
                 : styles.dataColumn
             }
             sx={{ fontWeight: "normal" }}
-            style={getCellStyle(col, isEditingRow)}
+            style={getCellStyle(col)}
           >
             <Cell
               col={col}
@@ -87,7 +71,6 @@ function Row(props) {
               editRow={editRow}
               isEditingRow={isEditingRow}
               onChange={onRowChange}
-              onRemoveOption={onRemoveOption}
             />
           </TableCell>
         ))}
@@ -123,7 +106,7 @@ function Row(props) {
       )}
     </TableRow>
   );
-}
+};
 
 Row.propTypes = {
   row: PropTypes.object.isRequired,

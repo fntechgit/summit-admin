@@ -1,16 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
-import T from "i18n-react/dist/i18n-react";
 import TextField from "@mui/material/TextField";
 
-function Cell({ col, row, editRow, isEditingRow, onChange, onRemoveOption }) {
+const DEFAULT_PLACEHOLDER = "Enter text...";
+
+const Cell = ({ col, row, editRow, isEditingRow, onChange }) => {
   if (isEditingRow && col.editableField === true) {
     return (
       <TextField
         id={col.columnKey}
-        placeholder={T.translate(
-          `bulk_actions_page.placeholders.${col.columnKey}`
-        )}
+        placeholder={col.placeholder || DEFAULT_PLACEHOLDER}
         multiline
         minRows={2}
         fullWidth
@@ -27,13 +26,12 @@ function Cell({ col, row, editRow, isEditingRow, onChange, onRemoveOption }) {
     return (
       col.editableField({
         value:
-          editRow[col.columnKey]?.id ||
-          editRow[col.columnKey]?.value ||
+          editRow[col.columnKey]?.id ??
+          editRow[col.columnKey]?.value ??
           editRow[col.columnKey],
         onChange,
         row: editRow,
-        rowData: editRow[col.columnKey],
-        onRemoveOption
+        rowData: editRow[col.columnKey]
       }) ?? null
     );
   }
@@ -45,15 +43,14 @@ function Cell({ col, row, editRow, isEditingRow, onChange, onRemoveOption }) {
   return (
     <span style={{ fontWeight: "normal" }}>{row[col.columnKey] ?? null}</span>
   );
-}
+};
 
 Cell.propTypes = {
   col: PropTypes.object.isRequired,
   row: PropTypes.object.isRequired,
   editRow: PropTypes.object.isRequired,
   isEditingRow: PropTypes.bool,
-  onChange: PropTypes.func,
-  onRemoveOption: PropTypes.func
+  onChange: PropTypes.func
 };
 
 export default Cell;

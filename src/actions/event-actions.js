@@ -299,66 +299,65 @@ export const getEvents =
     });
   };
 
-export const bulkUpdateEvents =
-  (summitId, events) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    dispatch(startLoading());
+export const bulkUpdateEvents = (events) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  dispatch(startLoading());
 
-    const normalizedEvents = normalizeBulkEvents(
-      events.map((event) =>
-        normalizeEvent(
-          event,
-          currentSummit.event_types.find((et) => et.id === event.type_id)
-        )
+  const normalizedEvents = normalizeBulkEvents(
+    events.map((event) =>
+      normalizeEvent(
+        event,
+        currentSummit.event_types.find((et) => et.id === event.type_id)
       )
-    );
+    )
+  );
 
-    return putRequest(
-      null,
-      createAction(UPDATED_REMOTE_EVENTS)({}),
-      `${window.API_BASE_URL}/api/v1/summits/${summitId}/events/?access_token=${accessToken}`,
-      {
-        events: normalizedEvents
-      },
-      authErrorHandler
-    )({})(dispatch)
-      .then(() => {
-        dispatch(stopLoading());
-        dispatch(
-          showSuccessMessage(
-            T.translate("bulk_actions_page.messages.update_success"),
-            () => history.push(`/app/summits/${currentSummit.id}/events/`)
-          )
-        );
-        const {
-          currentEventListState: {
-            term,
-            currentPage,
-            perPage,
-            order,
-            orderDir,
-            filters,
-            extraColumns
-          }
-        } = getState();
-        dispatch(
-          getEvents(
-            term,
-            currentPage,
-            perPage,
-            order,
-            orderDir,
-            filters,
-            extraColumns
-          )
-        );
-      })
-      .catch(() => {
-        console.log("ERROR");
-      });
-  };
+  return putRequest(
+    null,
+    createAction(UPDATED_REMOTE_EVENTS)({}),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/?access_token=${accessToken}`,
+    {
+      events: normalizedEvents
+    },
+    authErrorHandler
+  )({})(dispatch)
+    .then(() => {
+      dispatch(stopLoading());
+      dispatch(
+        showSuccessMessage(
+          T.translate("bulk_actions_page.messages.update_success"),
+          () => history.push(`/app/summits/${currentSummit.id}/events/`)
+        )
+      );
+      const {
+        currentEventListState: {
+          term,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          filters,
+          extraColumns
+        }
+      } = getState();
+      dispatch(
+        getEvents(
+          term,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          filters,
+          extraColumns
+        )
+      );
+    })
+    .catch(() => {
+      console.log("ERROR");
+    });
+};
 
 export const getActionTypes =
   (selectionPlanId) => async (dispatch, getState) => {

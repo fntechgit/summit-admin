@@ -13,9 +13,7 @@ describe("BulkEditTable", () => {
       { columnKey: "id", value: "id", sortable: true },
       { columnKey: "title", value: "title", sortable: true }
     ],
-    currentSummit: { id: 99 },
-    page: 1,
-    handleSort: jest.fn(),
+    onSort: jest.fn(),
     data: [
       { id: 1, title: "Event 1" },
       { id: 2, title: "Event 2" }
@@ -28,9 +26,9 @@ describe("BulkEditTable", () => {
 
   test("applies bulk updates to selected rows", async () => {
     const user = userEvent.setup();
-    const updateData = jest.fn(() => Promise.resolve());
+    const onUpdate = jest.fn(() => Promise.resolve());
 
-    render(<BulkEditTable {...baseProps} updateData={updateData} />);
+    render(<BulkEditTable {...baseProps} onUpdate={onUpdate} />);
 
     const checkboxes = screen.getAllByRole("checkbox");
 
@@ -41,9 +39,8 @@ describe("BulkEditTable", () => {
     });
 
     await waitFor(() => {
-      expect(updateData).toHaveBeenCalledTimes(1);
-      expect(updateData).toHaveBeenCalledWith(
-        99,
+      expect(onUpdate).toHaveBeenCalledTimes(1);
+      expect(onUpdate).toHaveBeenCalledWith(
         expect.arrayContaining([expect.objectContaining({ id: 1 })])
       );
     });

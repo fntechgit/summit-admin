@@ -6,7 +6,7 @@ import TableCell from "@mui/material/TableCell";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import { visuallyHidden } from "@mui/utils";
 
-function Heading(props) {
+const Heading = (props) => {
   const {
     editEnabled,
     sortable,
@@ -14,7 +14,6 @@ function Heading(props) {
     onSort,
     columnIndex,
     columnKey,
-    sortFunc,
     width,
     children
   } = props;
@@ -22,7 +21,7 @@ function Heading(props) {
   const handleSort = () => {
     if (!onSort || !sortable || editEnabled) return;
 
-    onSort(columnIndex, columnKey, sortDir ? sortDir * -1 : 1, sortFunc);
+    onSort(columnIndex, columnKey, sortDir ? sortDir * -1 : 1);
   };
 
   const headerSx = width ? { width, minWidth: width, maxWidth: width } : {};
@@ -49,16 +48,15 @@ function Heading(props) {
       </TableSortLabel>
     </TableCell>
   );
-}
+};
 
 Heading.propTypes = {
   editEnabled: PropTypes.bool,
   onSort: PropTypes.func,
   sortDir: PropTypes.number,
   columnIndex: PropTypes.number,
-  columnKey: PropTypes.any,
+  columnKey: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   sortable: PropTypes.bool,
-  sortFunc: PropTypes.func,
   width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   children: PropTypes.node
 };
