@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -10,430 +10,201 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * */
-import React from "react";
+import React, { useEffect } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import moment from "moment-timezone";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import Grid2 from "@mui/material/Grid2";
+import Stack from "@mui/material/Stack";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import Typography from "@mui/material/Typography";
+import DashboardStatSection from "./components/dashboard-stat-section";
 import { getSummitById } from "../../actions/summit-actions";
+import { getRegistrationData } from "../../actions/summit-stats-actions";
 import Member from "../../models/member";
-import "../../styles/summit-dashboard-page.less";
+import SummitDashboardDateRange from "./components/summit-dashboard-date-range";
+import DashboardSection from "./components/dashboard-section";
 
-class SummitDashboardPage extends React.Component {
-  constructor(props) {
-    super(props);
+const TAB_KEYS = [
+  "dashboard.dashboard",
+  "dashboard.ordering",
+  "dashboard.important_documents",
+  "dashboard.sponsor_levels",
+  "dashboard.pages",
+  "dashboard.tab_badge_types",
+  "dashboard.media_uploads",
+  "dashboard.booth_layout_types"
+];
 
-    this.interval = null;
+function SummitDashboardPage({
+  currentSummit,
+  member,
+  match,
+  totalOrders,
+  totalActiveTickets,
+  getRegistrationData: fetchRegistrationData
+}) {
+  useEffect(() => {
+    fetchRegistrationData();
+  }, [currentSummit.id]);
 
-    this.state = {
-      localtime: moment(),
-      collapseState: {
-        emails: true,
-        events: true,
-        voting: true
-      }
-    };
-    this.onCollapseChange = this.onCollapseChange.bind(this);
-  }
+  const canEditSummit = new Member(member).canEditSummit();
+  const tz = currentSummit.time_zone?.name;
+  const venueCount = currentSummit.locations.filter(
+    (l) => l.class_name === "SummitVenue"
+  ).length;
 
-  onCollapseChange(section) {
-    const newCollapseState = { ...this.state.collapseState };
-    newCollapseState[section] = !newCollapseState[section];
-    this.setState({ ...this.state, collapseState: newCollapseState });
-  }
+  return (
+    <Container>
+      <Breadcrumb
+        data={{
+          title: T.translate("dashboard.dashboard"),
+          pathname: match.url
+        }}
+      />
 
-  componentDidMount() {
-    const { currentSummit } = this.props;
-    this.interval = setInterval(
-      this.localTimer.bind(this),
-      moment.duration(1, "second").asMilliseconds()
-    );
+      <Typography variant="h4" gutterBottom>
+        {currentSummit.name}
+      </Typography>
 
-    if (currentSummit?.time_zone?.name) {
-      const localtime = moment().tz(currentSummit.time_zone.name);
-      this.setState({ ...this.state, localtime });
-    }
-  }
+      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
+        <Tabs value={0} onChange={() => {}}>
+          {TAB_KEYS.map((key, i) => (
+            <Tab key={key} label={T.translate(key)} disabled={i !== 0} />
+          ))}
+        </Tabs>
+      </Box>
 
-  componentWillUnmount() {
-    clearInterval(this.interval);
-  }
-
-  localTimer() {
-    this.setState({
-      localtime: this.state.localtime.add(1, "second")
-    });
-  }
-
-  getFormattedTime(atime) {
-    return moment
-      .unix(atime)
-      .tz(this.props.currentSummit.time_zone.name)
-      .format("MMMM Do YYYY, h:mm:ss a");
-  }
-
-  getTimeClass(start_time, end_time) {
-    if (this.state.localtime.isBefore(moment(start_time))) return "future";
-    if (this.state.localtime.isAfter(moment(end_time))) return "past";
-    return "present";
-  }
-
-  render() {
-    const { currentSummit, match, member } = this.props;
-    const memberObj = new Member(member);
-    const canEditSummit = memberObj.canEditSummit();
-
-    if (!currentSummit.id || !currentSummit.time_zone?.name) return <div />;
-
-    return (
-      <div>
-        <Breadcrumb
-          data={{
-            title: T.translate("dashboard.dashboard"),
-            pathname: match.url
-          }}
-        />
-        <div className="container dashboard">
-          <h3>
-            {currentSummit.name} {T.translate("general.summit")}
-          </h3>
-          <hr />
-          <h4>{T.translate("dashboard.dates")}</h4>
-          <div className="row">
-            <div className="col-md-6"> {currentSummit.time_zone.name} </div>
-            <div className="col-md-6">
-              {" "}
-              {this.getFormattedTime(this.state.localtime.unix())}{" "}
-            </div>
-          </div>
-          <div
-            className={
-              `row ${ 
-              this.getTimeClass(
-                currentSummit.start_date,
-                currentSummit.end_date
-              )}`
-            }
+      <Grid2 container spacing={3}>
+        <Grid2 size={6}>
+          <DashboardSection
+            title={T.translate("dashboard.dates")}
+            variant="card"
           >
-            <div className="col-md-2">
-              {" "}
-              <i className="fa fa-calendar" /> {T.translate("general.summit")}{" "}
-            </div>
-            <div className="col-md-4">
-              {" "}
-              {this.getFormattedTime(currentSummit.start_date)}{" "}
-            </div>
-            <div className="col-md-1">
-              {" "}
-              <i className="fa fa-angle-double-right" />{" "}
-            </div>
-            <div className="col-md-4">
-              {" "}
-              {this.getFormattedTime(currentSummit.end_date)}{" "}
-            </div>
-          </div>
-          <div
-            className={
-              `row ${ 
-              this.getTimeClass(
-                currentSummit.start_date,
-                currentSummit.end_date
-              )}`
-            }
-          >
-            <div className="col-md-2">
-              {" "}
-              <i className="fa fa-calendar" />{" "}
-              {T.translate("dashboard.registration")}{" "}
-            </div>
-            <div className="col-md-4">
-              {" "}
-              {this.getFormattedTime(
-                currentSummit.registration_begin_date
-              )}{" "}
-            </div>
-            <div className="col-md-1">
-              {" "}
-              <i className="fa fa-angle-double-right" />{" "}
-            </div>
-            <div className="col-md-4">
-              {" "}
-              {this.getFormattedTime(currentSummit.registration_end_date)}{" "}
-            </div>
-          </div>
-          {canEditSummit &&
-            currentSummit.selection_plans.map((sp) => (
-              <div key={`seleplan_${  sp.id}`} className="selection-plan row">
-                <div className="col-md-12">{sp.name}</div>
-                <div className="col-md-12">
-                  <div
-                    className={
-                      `row ${ 
-                      this.getTimeClass(
-                        currentSummit.start_date,
-                        currentSummit.end_date
-                      )}`
-                    }
-                  >
-                    <div className="col-md-2">
-                      {" "}
-                      <i className="fa fa-calendar" />{" "}
-                      {T.translate("dashboard.submission")}{" "}
-                    </div>
-                    <div className="col-md-4">
-                      {" "}
-                      {this.getFormattedTime(sp.submission_begin_date)}{" "}
-                    </div>
-                    <div className="col-md-1">
-                      {" "}
-                      <i className="fa fa-angle-double-right" />{" "}
-                    </div>
-                    <div className="col-md-4">
-                      {" "}
-                      {this.getFormattedTime(sp.submission_end_date)}{" "}
-                    </div>
-                  </div>
-                  <div
-                    className={
-                      `row ${ 
-                      this.getTimeClass(
-                        currentSummit.start_date,
-                        currentSummit.end_date
-                      )}`
-                    }
-                  >
-                    <div className="col-md-2">
-                      {" "}
-                      <i className="fa fa-calendar" />{" "}
-                      {T.translate("dashboard.voting")}{" "}
-                    </div>
-                    <div className="col-md-4">
-                      {" "}
-                      {this.getFormattedTime(sp.voting_begin_date)}{" "}
-                    </div>
-                    <div className="col-md-1">
-                      {" "}
-                      <i className="fa fa-angle-double-right" />{" "}
-                    </div>
-                    <div className="col-md-4">
-                      {" "}
-                      {this.getFormattedTime(sp.voting_end_date)}{" "}
-                    </div>
-                  </div>
-                  <div
-                    className={
-                      `row ${ 
-                      this.getTimeClass(
-                        currentSummit.start_date,
-                        currentSummit.end_date
-                      )}`
-                    }
-                  >
-                    <div className="col-md-2">
-                      {" "}
-                      <i className="fa fa-calendar" />{" "}
-                      {T.translate("dashboard.selection")}{" "}
-                    </div>
-                    <div className="col-md-4">
-                      {" "}
-                      {this.getFormattedTime(sp.selection_begin_date)}{" "}
-                    </div>
-                    <div className="col-md-1">
-                      {" "}
-                      <i className="fa fa-angle-double-right" />{" "}
-                    </div>
-                    <div className="col-md-4">
-                      {" "}
-                      {this.getFormattedTime(sp.selection_end_date)}{" "}
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <DashboardSection title={T.translate("dashboard.general_dates")}>
+              <SummitDashboardDateRange
+                label={T.translate("general.summit")}
+                startTs={currentSummit.start_date}
+                endTs={currentSummit.end_date}
+                tzName={tz}
+              />
+              <SummitDashboardDateRange
+                label={T.translate("dashboard.registration")}
+                startTs={currentSummit.registration_begin_date}
+                endTs={currentSummit.registration_end_date}
+                tzName={tz}
+              />
+            </DashboardSection>
+            {currentSummit.selection_plans.map((sp) => (
+              <DashboardSection key={`sp_${sp.id}`} title={sp.name}>
+                <SummitDashboardDateRange
+                  label={T.translate("dashboard.submission")}
+                  startTs={sp.submission_begin_date}
+                  endTs={sp.submission_end_date}
+                  tzName={tz}
+                />
+                <SummitDashboardDateRange
+                  label={T.translate("dashboard.voting")}
+                  startTs={sp.voting_begin_date}
+                  endTs={sp.voting_end_date}
+                  tzName={tz}
+                />
+                <SummitDashboardDateRange
+                  label={T.translate("dashboard.selection")}
+                  startTs={sp.selection_begin_date}
+                  endTs={sp.selection_end_date}
+                  tzName={tz}
+                />
+              </DashboardSection>
             ))}
+          </DashboardSection>
+        </Grid2>
 
-          {canEditSummit && (
-            <div>
-              <hr />
-              <h4>
-                {T.translate("dashboard.events")}&nbsp;
-                {this.state.collapseState.events && (
-                  <i
-                    title={T.translate("dashboard.expand")}
-                    onClick={() => this.onCollapseChange("events")}
-                    className="fa fa-plus-square clickable"
-                    aria-hidden="true"
-                   />
-                )}
-                {!this.state.collapseState.events && (
-                  <i
-                    title={T.translate("dashboard.collapse")}
-                    onClick={() => this.onCollapseChange("events")}
-                    className="fa fa-minus-square clickable"
-                    aria-hidden="true"
-                   />
-                )}
-              </h4>
-              {!this.state.collapseState.events && (
-                <div>
-                  <div className="row">
-                    <div className="col-md-4">
-                      <i className="fa fa-users" />
-                      &nbsp;{T.translate("general.speakers")}&nbsp;
-                      <strong>{currentSummit.speakers_count}</strong>
-                    </div>
-                    <div className="col-md-4">
-                      <i className="fa fa-calendar-plus-o" />
-                      &nbsp;{T.translate("dashboard.submitted_events")}&nbsp;
-                      <strong>
-                        {currentSummit.presentations_submitted_count}
-                      </strong>
-                    </div>
-                    <div className="col-md-4">
-                      <i className="fa fa-calendar-check-o" />
-                      &nbsp;{T.translate("dashboard.published_events")}&nbsp;
-                      <strong>{currentSummit.published_events_count}</strong>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-md-6">
-                      <i className="fa fa-building" />
-                      &nbsp;{T.translate("dashboard.venues")}&nbsp;
-                      <strong>
-                        {
-                          currentSummit.locations.filter(
-                            (l) => l.class_name === "SummitVenue"
-                          ).length
-                        }
-                      </strong>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <hr />
-              <h4>
-                {T.translate("dashboard.voting")}&nbsp;
-                {this.state.collapseState.voting && (
-                  <i
-                    title={T.translate("dashboard.expand")}
-                    onClick={() => this.onCollapseChange("voting")}
-                    className="fa fa-plus-square clickable"
-                    aria-hidden="true"
-                   />
-                )}
-                {!this.state.collapseState.voting && (
-                  <i
-                    title={T.translate("dashboard.collapse")}
-                    onClick={() => this.onCollapseChange("voting")}
-                    className="fa fa-minus-square clickable"
-                    aria-hidden="true"
-                   />
-                )}
-              </h4>
-              {!this.state.collapseState.voting && (
-                <div>
-                  <div className="row">
-                    <div className="col-md-6">
-                      <i className="fa fa-users" />
-                      &nbsp;{T.translate("dashboard.voters")}&nbsp;
-                      <strong>{currentSummit.presentation_voters_count}</strong>
-                    </div>
-                    <div className="col-md-6">
-                      <i className="fa fa fa-thumbs-o-up" />
-                      &nbsp;{T.translate("dashboard.votes")}&nbsp;
-                      <strong>{currentSummit.presentation_votes_count}</strong>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <hr />
-              <h4>
-                {T.translate("dashboard.emails")}&nbsp;
-                {this.state.collapseState.emails && (
-                  <i
-                    title={T.translate("dashboard.expand")}
-                    onClick={() => this.onCollapseChange("emails")}
-                    className="fa fa-plus-square clickable"
-                    aria-hidden="true"
-                   />
-                )}
-                {!this.state.collapseState.emails && (
-                  <i
-                    title={T.translate("dashboard.collapse")}
-                    onClick={() => this.onCollapseChange("emails")}
-                    className="fa fa-minus-square clickable"
-                    aria-hidden="true"
-                   />
-                )}
-              </h4>
-              {!this.state.collapseState.emails && (
-                <div>
-                  <div className="row">
-                    <div className="col-md-4">
-                      <i className="fa fa-paper-plane" />
-                      &nbsp;{T.translate("dashboard.accepted")}&nbsp;
-                      <strong>
-                        {
-                          currentSummit.speaker_announcement_email_accepted_count
-                        }
-                      </strong>
-                    </div>
-                    <div className="col-md-4">
-                      <i className="fa fa-paper-plane" />
-                      &nbsp;{T.translate("dashboard.rejected")}&nbsp;
-                      <strong>
-                        {
-                          currentSummit.speaker_announcement_email_rejected_count
-                        }
-                      </strong>
-                    </div>
-                    <div className="col-md-4">
-                      <i className="fa fa-paper-plane" />
-                      &nbsp;{T.translate("dashboard.alternate")}&nbsp;
-                      <strong>
-                        {
-                          currentSummit.speaker_announcement_email_alternate_count
-                        }
-                      </strong>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-md-4">
-                      <i className="fa fa-paper-plane" />
-                      &nbsp;{T.translate("dashboard.accepted_alternate")}&nbsp;
-                      <strong>
-                        {
-                          currentSummit.speaker_announcement_email_accepted_alternate_count
-                        }
-                      </strong>
-                    </div>
-                    <div className="col-md-4">
-                      <i className="fa fa-paper-plane" />
-                      &nbsp;{T.translate("dashboard.accepted_rejected")}&nbsp;
-                      <strong>
-                        {
-                          currentSummit.speaker_announcement_email_accepted_rejected_count
-                        }
-                      </strong>
-                    </div>
-                    <div className="col-md-4">
-                      <i className="fa fa-paper-plane" />
-                      &nbsp;{T.translate("dashboard.alternate_rejected")}&nbsp;
-                      <strong>
-                        {
-                          currentSummit.speaker_announcement_email_alternate_rejected_count
-                        }
-                      </strong>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+        {canEditSummit && (
+          <Grid2 size={6}>
+            <Stack spacing={3}>
+              <DashboardStatSection
+                title={T.translate("dashboard.events")}
+                rows={[
+                  [
+                    {
+                      title: T.translate("general.speakers"),
+                      stat: currentSummit.speakers_count
+                    },
+                    {
+                      title: T.translate("dashboard.submitted_events"),
+                      stat: currentSummit.presentations_submitted_count
+                    }
+                  ],
+                  [
+                    {
+                      title: T.translate("dashboard.published_events"),
+                      stat: currentSummit.published_events_count
+                    },
+                    { title: T.translate("dashboard.venues"), stat: venueCount }
+                  ]
+                ]}
+              />
+
+              <DashboardStatSection
+                title={T.translate("dashboard.registration_stats")}
+                rows={[
+                  [
+                    {
+                      title: T.translate("dashboard.orders"),
+                      stat: totalOrders
+                    },
+                    {
+                      title: T.translate("dashboard.total_tickets"),
+                      stat: totalActiveTickets
+                    }
+                  ]
+                ]}
+              />
+
+              <DashboardStatSection
+                title={T.translate("dashboard.emails")}
+                rows={[
+                  [
+                    {
+                      title: T.translate("dashboard.accepted"),
+                      stat: currentSummit.speaker_announcement_email_accepted_count
+                    },
+                    {
+                      title: T.translate("dashboard.rejected"),
+                      stat: currentSummit.speaker_announcement_email_rejected_count
+                    },
+                    {
+                      title: T.translate("dashboard.alternate"),
+                      stat: currentSummit.speaker_announcement_email_alternate_count
+                    }
+                  ],
+                  [
+                    {
+                      title: T.translate("dashboard.accepted_alternate"),
+                      stat: currentSummit.speaker_announcement_email_accepted_alternate_count
+                    },
+                    {
+                      title: T.translate("dashboard.accepted_rejected"),
+                      stat: currentSummit.speaker_announcement_email_accepted_rejected_count
+                    },
+                    {
+                      title: T.translate("dashboard.alternate_rejected"),
+                      stat: currentSummit.speaker_announcement_email_alternate_rejected_count
+                    }
+                  ]
+                ]}
+              />
+            </Stack>
+          </Grid2>
+        )}
+      </Grid2>
+    </Container>
+  );
 }
 
 SummitDashboardPage.propTypes = {
@@ -447,13 +218,11 @@ SummitDashboardPage.propTypes = {
     end_date: PropTypes.number,
     registration_begin_date: PropTypes.number,
     registration_end_date: PropTypes.number,
-    selection_plans: PropTypes.arrayOf(PropTypes.object),
-    locations: PropTypes.arrayOf(PropTypes.object),
+    selection_plans: PropTypes.arrayOf(PropTypes.shape({})),
+    locations: PropTypes.arrayOf(PropTypes.shape({})),
     speakers_count: PropTypes.number,
     presentations_submitted_count: PropTypes.number,
     published_events_count: PropTypes.number,
-    presentation_voters_count: PropTypes.number,
-    presentation_votes_count: PropTypes.number,
     speaker_announcement_email_accepted_count: PropTypes.number,
     speaker_announcement_email_rejected_count: PropTypes.number,
     speaker_announcement_email_alternate_count: PropTypes.number,
@@ -461,17 +230,33 @@ SummitDashboardPage.propTypes = {
     speaker_announcement_email_accepted_rejected_count: PropTypes.number,
     speaker_announcement_email_alternate_rejected_count: PropTypes.number
   }).isRequired,
-  member: PropTypes.object,
+  member: PropTypes.shape({}),
   match: PropTypes.shape({
     url: PropTypes.string
-  }).isRequired
+  }).isRequired,
+  totalOrders: PropTypes.number,
+  totalActiveTickets: PropTypes.number,
+  getRegistrationData: PropTypes.func.isRequired
 };
 
-const mapStateToProps = ({ currentSummitState, loggedUserState }) => ({
+SummitDashboardPage.defaultProps = {
+  member: null,
+  totalOrders: 0,
+  totalActiveTickets: 0
+};
+
+const mapStateToProps = ({
+  currentSummitState,
+  loggedUserState,
+  summitStatsState
+}) => ({
   currentSummit: currentSummitState.currentSummit,
-  member: loggedUserState.member
+  member: loggedUserState.member,
+  totalOrders: summitStatsState.total_orders,
+  totalActiveTickets: summitStatsState.total_active_tickets
 });
 
 export default connect(mapStateToProps, {
-  getSummitById
+  getSummitById,
+  getRegistrationData
 })(SummitDashboardPage);

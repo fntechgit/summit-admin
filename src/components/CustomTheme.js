@@ -11,7 +11,8 @@ const theme = createTheme({
       contrast: "#FFFFFF"
     },
     background: {
-      light: "#F7F7F9"
+      light: "#F7F7F9",
+      light_gray: "#eaeaea"
     },
     text: {
       primary: "#000000DE",
@@ -34,10 +35,10 @@ const theme = createTheme({
       fontSize: "12px",
       fontWeight: 400
     },
-    subtitle2: ({ theme }) => ({
+    subtitle2: ({ theme: t }) => ({
       fontSize: "14px",
       fontWeight: 500,
-      color: theme.palette.text.primary
+      color: t.palette.text.primary
     }),
     h4: {
       fontSize: "34px",
@@ -126,8 +127,8 @@ const theme = createTheme({
         root: {
           fontSize: "12px"
         },
-        standardInfo: ({ theme }) => ({
-          color: theme.palette.primary.dark
+        standardInfo: ({ theme: t }) => ({
+          color: t.palette.primary.dark
         })
       }
     }
