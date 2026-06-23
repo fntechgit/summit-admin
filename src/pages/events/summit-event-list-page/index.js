@@ -15,13 +15,13 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import { Pagination } from "react-bootstrap";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
 import {
   GridFilter,
   useGridFilter
 } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
+import BulkEditTable from "openstack-uicore-foundation/lib/components/mui/bulk-edit-table";
 import {
   bulkUpdateEvents,
   changeEventListSearchTerm,
@@ -46,7 +46,6 @@ import {
   saveFilterCriteria
 } from "../../../actions/filter-criteria-actions";
 import { CONTEXT_ACTIVITIES } from "../../../utils/filter-criteria-constants";
-import BulkEditTable from "../../../components/tables/BulkEditTable";
 import { buildNameIdDDL } from "../../../utils/events/summit-event-list-page.utils";
 import ImportModal from "./components/ImportModal";
 import ImportMUXModal from "./components/ImportMUXModal";
@@ -67,7 +66,6 @@ const SummitEventListPage = ({
   term,
   currentPage,
   perPage,
-  lastPage,
   order,
   orderDir,
   totalEvents,
@@ -156,6 +154,10 @@ const SummitEventListPage = ({
 
   const handlePageChange = (page) => {
     _getEvents({ page });
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    _getEvents({ perPage: newPerPage });
   };
 
   const handleSort = (index, key, dir) => {
@@ -430,28 +432,18 @@ const SummitEventListPage = ({
       {events.length === 0 && <div>{T.translate("event_list.no_events")}</div>}
 
       {events.length > 0 && (
-        <div>
-          <div className="summit-event-list-table-wrapper">
-            <BulkEditTable
-              options={tableOptions}
-              data={tableData}
-              columns={tableColumns}
-              onSort={handleSort}
-              onUpdate={bulkUpdateEvents}
-            />
-          </div>
-          <Pagination
-            bsSize="medium"
-            prev
-            next
-            first
-            last
-            ellipsis
-            boundaryLinks
-            maxButtons={10}
-            items={lastPage}
-            activePage={currentPage}
-            onSelect={handlePageChange}
+        <div className="summit-event-list-table-wrapper">
+          <BulkEditTable
+            options={tableOptions}
+            data={tableData}
+            columns={tableColumns}
+            onSort={handleSort}
+            onUpdate={bulkUpdateEvents}
+            totalRows={totalEvents}
+            perPage={perPage}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
           />
         </div>
       )}
