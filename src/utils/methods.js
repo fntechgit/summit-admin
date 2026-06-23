@@ -634,5 +634,10 @@ export const formatDate = (
     .format(format);
 };
 
+export const formatDuration = (duration) => {
+  const d = moment.duration(duration, "seconds");
+  return d.format("mm:ss") !== "00" ? d.format("mm:ss") : "TBD";
+};
+
 export const getFileUploadAllowedExtensions = () =>
   window.FILE_UPLOAD_ALLOWED_EXTENSIONS?.split(",").filter(Boolean) ?? [];

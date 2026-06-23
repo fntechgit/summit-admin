@@ -15,13 +15,6 @@ import Row from "./components/Row";
 import useRowSelection from "./hooks/useRowSelection";
 import styles from "./BulkEditTable.module.less";
 
-const defaults = {
-  sortable: false,
-  sortCol: 0,
-  sortDir: 1,
-  colWidth: ""
-};
-
 const BulkEditTable = ({ options, columns, data, onSort, onUpdate }) => {
   const {
     selectedRows,
@@ -44,18 +37,8 @@ const BulkEditTable = ({ options, columns, data, onSort, onUpdate }) => {
     reset();
   }, [dataIds]);
 
-  const sortCol = options.sortCol ?? defaults.sortCol;
-  const sortDir = options.sortDir ?? defaults.sortDir;
-
-  const getSortDir = (columnKey, columnIndex) => {
-    if (columnKey && columnKey === sortCol) {
-      return sortDir;
-    }
-    if (sortCol === columnIndex) {
-      return sortDir;
-    }
-    return null;
-  };
+  const getSortDir = (columnKey) =>
+    columnKey === options.sortCol ? options.sortDir : null;
 
   const handleUpdateEvents = (evt) => {
     evt.stopPropagation();
@@ -97,21 +80,21 @@ const BulkEditTable = ({ options, columns, data, onSort, onUpdate }) => {
                   />
                 </TableCell>
                 {columns.map((col, i) => {
-                  const sortable = col.sortable ?? defaults.sortable;
-                  const colWidth = col.width ?? defaults.colWidth;
+                  const sortable = !!col.sortable;
+                  const colWidth = col.width ?? "";
 
                   return (
                     <Heading
                       editEnabled={editEnabled}
                       onSort={onSort}
-                      sortDir={getSortDir(col.columnKey, i)}
+                      sortDir={getSortDir(col.columnKey)}
                       sortable={sortable}
                       columnIndex={i}
                       columnKey={col.columnKey}
                       width={colWidth}
-                      key={`heading_${col.columnKey}_${col.value}`}
+                      key={`heading_${col.columnKey}`}
                     >
-                      {col.value}
+                      {col.label}
                     </Heading>
                   );
                 })}

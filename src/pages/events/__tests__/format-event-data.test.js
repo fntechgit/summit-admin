@@ -1,4 +1,4 @@
-import { formatEventData } from "../summit-event-list-page";
+import { formatEventData } from "../summit-event-list-page/helpers";
 
 describe("summit-event-list-page.formatEventData", () => {
   const summit = {
@@ -31,7 +31,7 @@ describe("summit-event-list-page.formatEventData", () => {
     expect(result.speakers_count).toBe(2);
   });
 
-  test("returns \"0\" when type.use_speakers is true and speakers list is empty", () => {
+  test("returns 0 when type.use_speakers is true and speakers list is empty", () => {
     const event = {
       id: 12,
       summit_id: 1,
@@ -50,7 +50,7 @@ describe("summit-event-list-page.formatEventData", () => {
 
     const result = formatEventData(event, summit);
 
-    expect(result.speakers_count).toBe("0");
+    expect(result.speakers_count).toBe(0);
   });
 
   test("returns N/A and does not throw when event type is missing", () => {

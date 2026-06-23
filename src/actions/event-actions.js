@@ -51,7 +51,6 @@ import {
   FIVE_PER_PAGE,
   HOUR_AND_HALF
 } from "../utils/constants";
-import { getIdValue } from "../utils/summitUtils";
 
 URI.escapeQuerySpace = false;
 
@@ -195,12 +194,12 @@ export const normalizeBulkEvents = (entity) => {
     const normalizedEvent = {
       id: e.id,
       title: e.title,
-      selection_plan_id: getIdValue(e.selection_plan) || e.selection_plan_id,
+      selection_plan_id: e.selection_plan?.id || e.selection_plan_id,
       location_id: e.location?.id || e.location_id,
       start_date: e.start_date,
       end_date: e.end_date,
-      type_id: getIdValue(e.type) || e.type_id,
-      track_id: getIdValue(e.track) || e.track_id,
+      type_id: e.type?.id || e.type_id,
+      track_id: e.track?.id || e.track_id,
       duration: e.duration,
       streaming_url: e.streaming_url,
       streaming_type: e.streaming_type,
