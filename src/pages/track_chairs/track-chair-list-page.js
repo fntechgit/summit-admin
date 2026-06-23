@@ -126,7 +126,16 @@ const TrackChairListPage = ({
       !id || newMember
         ? addTrackChair({ id: member.value }, trackIds)
         : saveTrackChair(id, trackIds);
-    return action;
+    return action.then(() =>
+      getTrackChairs(
+        trackId,
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir
+      )
+    );
   };
 
   const handleClose = () => {

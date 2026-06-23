@@ -63,7 +63,6 @@ const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
       member: toMemberOption(entity?.member ?? null),
       trackIds: entity?.trackIds ?? []
     },
-    enableReinitialize: true,
     validationSchema: yup.object().shape({
       member: yup
         .object()
@@ -84,6 +83,10 @@ const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
     }
   });
 
+  const handleOnClose = () => {
+    if (isSaving) return;
+    onClose();
+  };
   useScrollToError(formik, true);
 
   const title = entity?.id
@@ -97,7 +100,7 @@ const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
   return (
     <Dialog
       open
-      onClose={onClose}
+      onClose={handleOnClose}
       maxWidth="sm"
       fullWidth
       disableEscapeKeyDown={isSaving}
@@ -106,7 +109,7 @@ const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
         <Typography fontSize="1.5rem">{title}</Typography>
         <IconButton
           size="small"
-          onClick={onClose}
+          onClick={handleOnClose}
           sx={{ mr: 1 }}
           aria-label="close"
           disabled={isSaving}

@@ -23,7 +23,7 @@ import {
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
-import debounce from "lodash/debounce"
+import debounce from "lodash/debounce";
 import {
   fetchErrorHandler,
   fetchResponseHandler,
@@ -175,7 +175,7 @@ export const saveTrackChair =
       createAction(TRACK_CHAIR_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-chairs/${trackChairId}`,
       { categories: trackIds },
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
