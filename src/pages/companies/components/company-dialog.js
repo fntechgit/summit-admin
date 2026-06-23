@@ -54,8 +54,11 @@ const MEMBER_LEVELS = [
   { label: "None", value: "None" }
 ];
 
-const getLogoValue = (value) =>
-  value ? [{ filename: value, file_path: value }] : [];
+const getLogoValue = (value) => {
+  if (!value) return [];
+  if (typeof value === "string") return [{ filename: value, file_path: value }];
+  return [{ filename: value.filename, file_path: value.filepath }];
+};
 
 const ColorPickerField = React.memo(({ initialValue, onChange }) => {
   const [value, setValue] = useState(initialValue || "");
@@ -81,6 +84,7 @@ const CompanyDialog = ({
   sponsoredProjects = [],
   onSave,
   onClose,
+  onAttach,
   onDeleteSponsorship,
   onAddSponsorship
 }) => {
@@ -103,6 +107,7 @@ const CompanyDialog = ({
       admin_email: initialEntity?.admin_email ?? "",
       city: initialEntity?.city ?? "",
       state: initialEntity?.state ?? "",
+      country: initialEntity?.country ?? "",
       industry: initialEntity?.industry ?? "",
       products: initialEntity?.products ?? "",
       contributions: initialEntity?.contributions ?? "",
@@ -118,7 +123,11 @@ const CompanyDialog = ({
     }),
     onSubmit: (values) => {
       if (isSaving) return;
-      const valuesToSave = { ...values, color: colorRef.current };
+      const valuesToSave = {
+        ...values,
+        color: colorRef.current,
+        country: values.country?.value
+      };
       setIsSaving(true);
       onSave(valuesToSave)
         .then(() => onClose())
@@ -137,7 +146,20 @@ const CompanyDialog = ({
       response.path && response.name
         ? `${response.path}${response.name}`
         : response.file_url ?? response.path ?? "";
-    formik.setFieldValue(field, path);
+    const uploadLogo = {
+      ...response,
+      filepath: path,
+      filename: response.name
+    };
+    delete uploadLogo.path;
+    delete uploadLogo.name;
+    formik.setFieldValue(field, uploadLogo);
+    if (initialEntity?.id) {
+      setIsSaving(true);
+      onAttach(initialEntity, uploadLogo, field).finally(() =>
+        setIsSaving(false)
+      );
+    }
   };
 
   const handleLogoRemove = (field) => () => {
@@ -524,6 +546,7 @@ CompanyDialog.propTypes = {
   sponsoredProjects: PropTypes.array,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
+  onAttach: PropTypes.func.isRequired,
   onDeleteSponsorship: PropTypes.func,
   onAddSponsorship: PropTypes.func
 };

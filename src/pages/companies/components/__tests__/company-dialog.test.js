@@ -1,0 +1,193 @@
+import React from "react";
+import { render, screen, waitFor, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import CompanyDialog from "../company-dialog";
+
+jest.mock("i18n-react/dist/i18n-react", () => ({
+  translate: jest.fn((key) => key)
+}));
+
+jest.mock("openstack-uicore-foundation/lib/utils/query-actions", () => ({
+  getCountryList: jest.fn((callback) => {
+    callback([
+      { iso_code: "AR", name: "Argentina" },
+      { iso_code: "US", name: "United States" }
+    ]);
+    return Promise.resolve();
+  })
+}));
+
+jest.mock("openstack-uicore-foundation/lib/components", () => ({
+  UploadInputV3: () => <div data-testid="upload-input" />
+}));
+
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield",
+  () =>
+    function MockTextField({ name }) {
+      return <input data-testid={`textfield-${name}`} name={name} />;
+    }
+);
+
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/select",
+  () =>
+    function MockSelect({ name, children }) {
+      return <div data-testid={`select-${name}`}>{children}</div>;
+    }
+);
+
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/table",
+  () =>
+    function MockTable() {
+      return <div data-testid="mui-table" />;
+    }
+);
+
+jest.mock(
+  "../../../../components/inputs/formik-text-editor",
+  () =>
+    function MockTextEditor({ name }) {
+      return <textarea data-testid={`editor-${name}`} name={name} />;
+    }
+);
+
+jest.mock("../../../../components/mui/showConfirmDialog", () =>
+  jest.fn(() => Promise.resolve(true))
+);
+
+jest.mock("../../../../hooks/useScrollToError", () => jest.fn());
+
+jest.mock("mui-color-input", () => ({
+  MuiColorInput: ({ value, onChange }) => (
+    <input
+      data-testid="color-input"
+      value={value || ""}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  )
+}));
+
+const BASE_ENTITY = {
+  id: 0,
+  name: "",
+  url: "",
+  contact_email: "",
+  member_level: "",
+  color: "",
+  admin_email: "",
+  city: "",
+  state: "",
+  country: "",
+  industry: "",
+  products: "",
+  contributions: "",
+  description: "",
+  overview: "",
+  commitment: "",
+  logo: "",
+  big_logo: "",
+  project_sponsorships: []
+};
+
+describe("CompanyDialog", () => {
+  let onSave;
+  let onClose;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    onSave = jest.fn(() => Promise.resolve());
+    onClose = jest.fn();
+    window.APP_CLIENT_NAME = "";
+  });
+
+  test.each([
+    [
+      "resolves a stored ISO code to its label when editing",
+      { ...BASE_ENTITY, id: 1, name: "Acme Corp", country: "AR" },
+      "Argentina"
+    ],
+    ["leaves the country field empty for a new company", BASE_ENTITY, ""]
+  ])("%s", async (_label, entity, expectedValue) => {
+    render(<CompanyDialog entity={entity} onSave={onSave} onClose={onClose} />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("combobox")).toHaveValue(expectedValue);
+    });
+  });
+
+  it("calls onSave with the ISO country code and then onClose on valid submit", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <CompanyDialog
+        entity={{ ...BASE_ENTITY, id: 1, name: "Acme Corp", country: "AR" }}
+        onSave={onSave}
+        onClose={onClose}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole("combobox")).toHaveValue("Argentina");
+    });
+
+    await act(async () => {
+      await user.click(screen.getByText("general.save"));
+    });
+
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ country: "AR" })
+    );
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("disables the save button while saving and re-enables after resolve", async () => {
+    let resolve;
+    onSave = jest.fn(
+      () =>
+        new Promise((res) => {
+          resolve = res;
+        })
+    );
+
+    const user = userEvent.setup();
+
+    render(
+      <CompanyDialog
+        entity={{ ...BASE_ENTITY, id: 1, name: "Acme Corp" }}
+        onSave={onSave}
+        onClose={onClose}
+      />
+    );
+
+    const saveButton = screen.getByText("general.save").closest("button");
+    expect(saveButton).not.toBeDisabled();
+
+    await act(async () => {
+      await user.click(saveButton);
+    });
+
+    expect(saveButton).toBeDisabled();
+
+    await act(async () => {
+      resolve();
+    });
+
+    await waitFor(() => expect(saveButton).not.toBeDisabled());
+  });
+
+  it("calls onClose when the close icon button is clicked and not saving", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <CompanyDialog entity={BASE_ENTITY} onSave={onSave} onClose={onClose} />
+    );
+
+    await act(async () => {
+      await user.click(screen.getByLabelText("close"));
+    });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+});

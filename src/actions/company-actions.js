@@ -26,7 +26,6 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import debounce from "lodash/debounce";
 import URI from "urijs";
-import history from "../history";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
@@ -227,18 +226,14 @@ const uploadLogo = (entity, file) => async (dispatch) => {
     access_token: accessToken
   };
 
-  postRequest(
+  return postRequest(
     null,
     createAction(LOGO_ATTACHED),
     `${window.API_BASE_URL}/api/v1/companies/${entity.id}/logo`,
     file,
     snackbarErrorHandler,
     { pic: entity.pic }
-  )(params)(dispatch)
-    .then(() => {
-      history.push(`/app/companies/${entity.id}`);
-    })
-    .finally(() => dispatch(stopLoading()));
+  )(params)(dispatch).finally(() => dispatch(stopLoading()));
 };
 
 const uploadBigLogo = (entity, file) => async (dispatch) => {
@@ -248,18 +243,14 @@ const uploadBigLogo = (entity, file) => async (dispatch) => {
     access_token: accessToken
   };
 
-  postRequest(
+  return postRequest(
     null,
     createAction(BIG_LOGO_ATTACHED),
     `${window.API_BASE_URL}/api/v1/companies/${entity.id}/logo/big`,
     file,
     snackbarErrorHandler,
     { pic: entity.pic }
-  )(params)(dispatch)
-    .then(() => {
-      history.push(`/app/companies/${entity.id}`);
-    })
-    .finally(() => dispatch(stopLoading()));
+  )(params)(dispatch).finally(() => dispatch(stopLoading()));
 };
 
 const normalizeEntity = (entity) => {
@@ -268,8 +259,10 @@ const normalizeEntity = (entity) => {
   // remove # from color hexa
   normalizedEntity.color = normalizedEntity.color.substr(1);
 
-  delete normalizedEntity.logo;
-  delete normalizedEntity.big_logo;
+  if (entity.id > 0) {
+    delete normalizedEntity.logo;
+    delete normalizedEntity.big_logo;
+  }
 
   return normalizedEntity;
 };

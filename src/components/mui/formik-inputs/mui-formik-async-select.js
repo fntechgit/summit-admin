@@ -19,7 +19,8 @@ const MuiFormikAsyncAutocomplete = ({
   formatSelectedValue = null,
   queryParams = [],
   isMulti = false,
-  defaultOptions
+  defaultOptions,
+  ...rest
 }) => {
   const [field, meta, helpers] = useField(name);
   const [options, setOptions] = useState([]);
@@ -27,6 +28,15 @@ const MuiFormikAsyncAutocomplete = ({
   const [searchTerm, setSearchTerm] = useState("");
 
   const value = field.value || (multiple ? [] : null);
+
+  // Sync a plain stored value back to the full option object
+  useEffect(() => {
+    if (!field.value || typeof field.value === "object" || options.length === 0)
+      return;
+    const match = options.find((o) => o.value === String(field.value));
+    if (match) helpers.setValue(match);
+  }, [options]);
+
   const error = meta.touched && meta.error;
 
   const fetchOptions = async (input = "") => {
@@ -131,6 +141,7 @@ const MuiFormikAsyncAutocomplete = ({
           {option.label}
         </li>
       )}
+      {...rest}
     />
   );
 };
