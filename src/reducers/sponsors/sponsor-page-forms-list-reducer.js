@@ -164,7 +164,8 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
           allowed_add_ons: a.allowed_add_ons,
           is_archived: a.is_archived,
           opens_at: opensAt,
-          expires_at: expiresAt
+          expires_at: expiresAt,
+          original_show_form_id: a.original_show_form_id
         };
       });
 
