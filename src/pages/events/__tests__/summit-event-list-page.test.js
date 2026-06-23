@@ -5,7 +5,7 @@ import { renderWithRedux } from "../../../utils/test-utils";
 const mockEditableTableSpy = jest.fn(() => null);
 
 jest.mock(
-  "../../../components/tables/BulkEditTable",
+  "openstack-uicore-foundation/lib/components/mui/bulk-edit-table",
   () =>
     function BulkEditTableMock(props) {
       mockEditableTableSpy(props);
