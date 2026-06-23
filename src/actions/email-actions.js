@@ -21,7 +21,6 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  showMessage,
   showSuccessMessage,
   authErrorHandler,
   fetchResponseHandler,
@@ -29,7 +28,7 @@ import {
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
-import debounce from "lodash/debounce"
+import debounce from "lodash/debounce";
 import history from "../history";
 import { checkOrFilter, getAccessTokenSafely } from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";
@@ -99,7 +98,7 @@ export const getEmailTemplates =
       createAction(RECEIVE_TEMPLATES),
       `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates`,
       authErrorHandler,
-      { order, orderDir, term }
+      { order, orderDir, term, page, perPage }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -137,40 +136,37 @@ export const saveEmailTemplate =
     const params = { access_token: accessToken, expand: "parent,versions" };
 
     if (entity.id) {
-      putRequest(
+      return putRequest(
         null,
         createAction(TEMPLATE_UPDATED),
         `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/${entity.id}`,
         normalizedEntity,
         customErrorHandler,
         entity
-      )(params)(dispatch).then(() => {
-        if (!noAlert)
-          dispatch(showSuccessMessage(T.translate("emails.template_saved")));
-        else dispatch(stopLoading());
-      });
-    } else {
-      const success_message = {
-        title: T.translate("general.done"),
-        html: T.translate("emails.template_created"),
-        type: "success"
-      };
-
-      postRequest(
-        null,
-        createAction(TEMPLATE_ADDED),
-        `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates`,
-        normalizedEntity,
-        customErrorHandler,
-        entity
-      )(params)(dispatch).then((payload) => {
-        dispatch(
-          showMessage(success_message, () => {
-            history.push(`/app/emails/templates/${payload.response.id}`);
-          })
-        );
-      });
+      )(params)(dispatch)
+        .then(() => {
+          if (!noAlert)
+            dispatch(showSuccessMessage(T.translate("emails.template_saved")));
+        })
+        .finally(() => {
+          dispatch(stopLoading());
+        });
     }
+    return postRequest(
+      null,
+      createAction(TEMPLATE_ADDED),
+      `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates`,
+      normalizedEntity,
+      customErrorHandler,
+      entity
+    )(params)(dispatch)
+      .then((payload) => {
+        dispatch(showSuccessMessage(T.translate("emails.template_created")));
+        history.push(`/app/emails/templates/${payload.response.id}`);
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 export const deleteEmailTemplate = (templateId) => async (dispatch) => {
