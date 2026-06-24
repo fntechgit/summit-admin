@@ -1925,7 +1925,7 @@
     "payment_profile": "Payment Profile",
     "add_payment_profile": "Add Payment Profile",
     "no_payment_profiles": "No Payment Profiles found for current search criteria.",
-    "remove_warning": "Are you sure you want to delete profile #{name}",
+    "remove_warning": "Are you sure you want to delete profile {name}",
     "placeholders": {
       "search_profiles": "Search payment profiles"
     }

@@ -1209,10 +1209,15 @@ export const getPaymentProfiles =
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
-      filter.push(`provider=@${escapedTerm},application_type=@${escapedTerm}`);
       const numericId = parseInt(escapedTerm, 10);
       if (!Number.isNaN(numericId)) {
-        filter.push(`id==${numericId}`);
+        filter.push(
+          `provider=@${escapedTerm},application_type=@${escapedTerm},id==${numericId}`
+        );
+      } else {
+        filter.push(
+          `provider=@${escapedTerm},application_type=@${escapedTerm}`
+        );
       }
     }
 
@@ -1293,6 +1298,8 @@ export const deletePaymentProfile =
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
 
+    dispatch(startLoading());
+
     const params = {
       access_token: accessToken
     };
@@ -1303,7 +1310,7 @@ export const deletePaymentProfile =
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${paymentProfileId}`,
       null,
       snackbarErrorHandler
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };

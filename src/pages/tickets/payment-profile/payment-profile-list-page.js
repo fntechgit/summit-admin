@@ -66,9 +66,9 @@ const PaymentProfileListPage = ({
   };
 
   const handleSave = (entity) =>
-    savePaymentProfile(entity).then(() => {
-      getPaymentProfiles(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
-    });
+    savePaymentProfile(entity).then(() =>
+      getPaymentProfiles(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+    );
 
   const handleDelete = (paymentProfileId) =>
     deletePaymentProfile(paymentProfileId).then(() =>
