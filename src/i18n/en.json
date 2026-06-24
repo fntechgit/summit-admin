@@ -1409,7 +1409,9 @@
     "group_created": "Activity Category Group created successfully.",
     "unlink_track_warning": "if you remove a category from the category group, any activities linked to that category will automatically be removed from the selection plan. Do you want to continue?",
     "placeholders": {
-      "select_class": "Select Class"
+      "select_class": "Select Class",
+      "search_categories": "Search and add categories",
+      "search_groups": "Search and add allowed groups"
     }
   },
   "location_list": {
