@@ -132,6 +132,8 @@ export const ERROR_CODE_404 = 404;
 
 export const ERROR_CODE_500 = 500;
 
+export const ERROR_CODE_503 = 503;
+
 export const HEX_RADIX = 16;
 
 export const DEBOUNCE_WAIT = 500;
