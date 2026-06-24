@@ -58,7 +58,8 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSOR_MANAGED_FORMS: {
-      const { order, orderDir, page, term, summitTZ, showArchived } = payload;
+      const { order, orderDir, page, perPage, term, summitTZ, showArchived } =
+        payload;
 
       return {
         ...state,
@@ -67,7 +68,8 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
           order,
           orderDir,
           forms: [],
-          currentPage: page
+          currentPage: page,
+          perPage
         },
         term,
         summitTZ,
@@ -75,7 +77,8 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case REQUEST_SPONSOR_CUSTOMIZED_FORMS: {
-      const { order, orderDir, page, term, summitTZ, showArchived } = payload;
+      const { order, orderDir, page, perPage, term, summitTZ, showArchived } =
+        payload;
 
       return {
         ...state,
@@ -84,7 +87,8 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
           order,
           orderDir,
           forms: [],
-          currentPage: page
+          currentPage: page,
+          perPage
         },
         term,
         summitTZ,
@@ -160,7 +164,8 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
           allowed_add_ons: a.allowed_add_ons,
           is_archived: a.is_archived,
           opens_at: opensAt,
-          expires_at: expiresAt
+          expires_at: expiresAt,
+          original_show_form_id: a.original_show_form_id
         };
       });
 

@@ -18,8 +18,8 @@ import MuiFormikDatepicker from "openstack-uicore-foundation/lib/components/mui/
 import {
   addIssAfterDateFieldValidator,
   formMetafieldsValidation,
-  opensAtValidation,
-  requiredStringValidation
+  requiredStringValidation,
+  requiredHTMLValidation
 } from "../../../../../../../utils/yup";
 import MuiFormikTextField from "../../../../../../../components/mui/formik-inputs/mui-formik-textfield";
 import useScrollToError from "../../../../../../../hooks/useScrollToError";
@@ -54,34 +54,50 @@ const CustomizedForm = ({
   isSaving = false,
   onSubmit
 }) => {
-  const sponsorships = sponsor.sponsorships_collection.sponsorships.map(
-    (e) => e.id
-  );
+  const sponsorshipIds = sponsor.sponsorships?.map((e) => e.id) || [];
 
   const formik = useFormik(
     {
       initialValues: buildInitialValues(initialValues, summitTZ),
-      validationSchema: yup.object().shape({
-        name: requiredStringValidation(),
-        code: requiredStringValidation(),
-        instructions: requiredStringValidation(),
-        opens_at: opensAtValidation(),
-        expires_at: yup
-          .date(T.translate("validation.date"))
-          .required(T.translate("validation.required"))
-          .isAfterDateField(
-            yup.ref("opens_at"),
-            T.translate("validation.after", {
-              field1: T.translate(
-                "edit_sponsor.forms_tab.customized_form.expires_at"
-              ),
-              field2: T.translate(
-                "edit_sponsor.forms_tab.customized_form.opens_at"
-              )
-            })
-          ),
-        meta_fields: formMetafieldsValidation()
-      }),
+      validationSchema: yup.object().shape(
+        {
+          name: requiredStringValidation(),
+          code: requiredStringValidation(),
+          instructions: requiredHTMLValidation(),
+          opens_at: yup
+            .date(T.translate("validation.date"))
+            .nullable()
+            .when("expires_at", {
+              is: (val) => !!val,
+              then: (schema) =>
+                schema.required(T.translate("validation.required")),
+              otherwise: (schema) => schema.nullable()
+            }),
+          expires_at: yup
+            .date(T.translate("validation.date"))
+            .nullable()
+            .when("opens_at", {
+              is: (val) => !!val,
+              then: (schema) =>
+                schema
+                  .required(T.translate("validation.required"))
+                  .isAfterDateField(
+                    yup.ref("opens_at"),
+                    T.translate("validation.after", {
+                      field1: T.translate(
+                        "edit_sponsor.forms_tab.customized_form.expires_at"
+                      ),
+                      field2: T.translate(
+                        "edit_sponsor.forms_tab.customized_form.opens_at"
+                      )
+                    })
+                  ),
+              otherwise: (schema) => schema.nullable()
+            }),
+          meta_fields: formMetafieldsValidation()
+        },
+        [["opens_at", "expires_at"]]
+      ),
       onSubmit,
       enableReinitialize: true
     },
@@ -126,7 +142,7 @@ const CustomizedForm = ({
                 name="allowed_add_ons"
                 queryFunction={querySponsorAddons}
                 // params for function, except input
-                queryParams={[summitId, sponsor.id, sponsorships]}
+                queryParams={[summitId, sponsor.id, sponsorshipIds]}
                 showSelectAll
                 getGroupId={(addon) => addon.sponsorship.type.id}
                 getGroupLabel={(addon) => addon.sponsorship.type.type.name}
@@ -141,7 +157,6 @@ const CustomizedForm = ({
                 label={T.translate(
                   "edit_sponsor.forms_tab.customized_form.opens_at"
                 )}
-                required
               />
             </Grid2>
             <Grid2 size={4}>
@@ -150,7 +165,6 @@ const CustomizedForm = ({
                 label={T.translate(
                   "edit_sponsor.forms_tab.customized_form.expires_at"
                 )}
-                required
               />
             </Grid2>
             <Grid2 size={12}>

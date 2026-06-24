@@ -17,7 +17,6 @@ import T from "i18n-react/dist/i18n-react";
 import { Box, Card, CardContent, Grid2, Typography } from "@mui/material";
 import { ListCard } from "openstack-uicore-foundation/lib/components/mui/cards";
 import SponsorOrderGrid from "openstack-uicore-foundation/lib/components/mui/sponsor-order-grid";
-import InfoNote from "openstack-uicore-foundation/lib/components/mui/info-note";
 import {
   cancelSponsorForm,
   getSponsorOrder,
@@ -27,7 +26,11 @@ import {
   updateClientAddress,
   updateClientInfo
 } from "../../../../../actions/sponsor-purchases-actions";
-import { ACCESS_ROUTES, DATE_FORMAT } from "../../../../../utils/constants";
+import {
+  ACCESS_ROUTES,
+  DATE_FORMAT,
+  PURCHASE_TYPES
+} from "../../../../../utils/constants";
 import Restrict from "../../../../../routes/restrict";
 import { formatDate } from "../../../../../utils/methods";
 import RefundForm from "../../../../../components/mui/RefundForm";
@@ -118,7 +121,7 @@ const SponsorOrderDetails = ({
   };
 
   const handleCancelForm = (item) => {
-    cancelSponsorForm(currentOrder.id, item.id);
+    cancelSponsorForm(currentOrder.id, item.id, item.name);
   };
 
   const handleUndoCancelForm = (item) => {
@@ -166,20 +169,10 @@ const SponsorOrderDetails = ({
             variant="outlined"
           >
             <CardContent>
-              <InfoNote
-                message={T.translate(
-                  "edit_sponsor.purchase_tab.order_details.info_note"
-                )}
-                sx={{ mt: 2, mb: 3 }}
-              />
               <SponsorOrderGrid
-                lines={currentOrder?.forms || []}
-                notes={currentOrder?.notes || []}
-                payments={currentOrder?.payments || []}
-                refunds={currentOrder?.refunds || []}
-                fees={currentOrder?.fees || []}
-                amountDue={currentOrder?.amount_due}
-                withDescription
+                order={currentOrder}
+                withReconciliation
+                withCancelledItemsHeader
                 onCancelForm={handleCancelForm}
                 onUndoCancelForm={handleUndoCancelForm}
               />
@@ -197,7 +190,10 @@ const SponsorOrderDetails = ({
                   "edit_sponsor.purchase_tab.order_details.issue_refund"
                 )}
               </Typography>
-              <RefundForm onSubmit={handleOrderRefund} />
+              <RefundForm
+                onSubmit={handleOrderRefund}
+                disabled={currentOrder.type === PURCHASE_TYPES.OFFLINE}
+              />
             </CardContent>
           </Card>
         </Grid2>

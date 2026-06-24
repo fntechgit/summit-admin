@@ -12,7 +12,7 @@
  * */
 
 import T from "i18n-react/dist/i18n-react";
-import debounce from "lodash/debounce"
+import debounce from "lodash/debounce";
 import {
   getRequest,
   putRequest,
@@ -905,6 +905,50 @@ export const saveEvent = (entity, publish) => async (dispatch, getState) => {
           );
         })
       );
+  });
+};
+
+export const saveEventAsDraft = (entity) => async (dispatch, getState) => {
+  if (!entity.id) {
+    console.error("saveEventAsDraft: entity.id is required");
+    return;
+  }
+
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const { type_id } = entity;
+  const type = currentSummit.event_types.find((e) => e.id === type_id);
+
+  dispatch(startLoading());
+
+  const normalizedEntity = normalizeEvent(entity, type, currentSummit);
+
+  const params = {
+    access_token: accessToken,
+    expand:
+      "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,selection_plan.extra_questions,selection_plan.extra_questions.values,created_by,track_chair_scores_avg.ranking_type,actions,allowed_ticket_types",
+    fields: "allowed_ticket_types.id,allowed_ticket_types.name"
+  };
+
+  return putRequest(
+    createAction(UPDATE_EVENT),
+    createAction(EVENT_UPDATED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}/draft`,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )(params)(dispatch).then(() => {
+    const success_message = {
+      title: T.translate("general.done"),
+      html: T.translate("edit_event.event_saved_as_draft"),
+      type: "success"
+    };
+    dispatch(
+      showMessage(success_message, () => {
+        location.reload();
+      })
+    );
   });
 };
 

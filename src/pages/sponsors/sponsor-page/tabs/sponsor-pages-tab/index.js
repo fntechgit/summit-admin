@@ -381,9 +381,7 @@ const SponsorPagesTab = ({
     )
   ];
 
-  const sponsorshipIds = sponsor.sponsorships_collection.sponsorships.map(
-    (e) => e.id
-  );
+  const sponsorshipIds = sponsor.sponsorships?.map((e) => e.id) || [];
 
   return (
     <Box sx={{ mt: 2 }}>

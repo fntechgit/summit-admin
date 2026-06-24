@@ -12,3 +12,7 @@ package-lock.json
 .vscode/settings.json
 *.log
 .vscode/launch.json
+.claude
+.codegraph
+.worktrees
+docs/

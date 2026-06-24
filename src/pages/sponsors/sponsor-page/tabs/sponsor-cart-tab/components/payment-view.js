@@ -59,11 +59,11 @@ const PaymentView = ({
   )
     return null;
 
-  const redirectUrl = `/app/summits/${currentSummit.id}/sponsors/${sponsor.id}/cart`;
+  const redirectUrl = `/app/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases`;
 
   const handlePaymentSuccess = () =>
-    confirmPayment().then(() => {
-      history.push(redirectUrl);
+    confirmPayment().then((purchase) => {
+      history.push(`${redirectUrl}/${purchase.purchase_id}`);
     });
 
   const handlePaymentError = (error) => {
@@ -75,13 +75,7 @@ const PaymentView = ({
       <Box sx={{ width: "100%" }}>
         <Card sx={{ borderRadius: "10px", height: "100%" }} variant="outlined">
           <CardContent>
-            <SponsorOrderGrid
-              lines={cart.forms || []}
-              notes={cart?.notes || []}
-              fees={cart?.fees || []}
-              total={cart?.total}
-              withDescription
-            />
+            <SponsorOrderGrid order={cart} />
           </CardContent>
         </Card>
       </Box>

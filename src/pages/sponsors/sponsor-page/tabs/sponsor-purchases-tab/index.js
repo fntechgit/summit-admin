@@ -85,9 +85,10 @@ const SponsorPurchasesTab = ({
   };
 
   const handleStatusChange = (purchaseId, newStatus) => {
-    if (newStatus === PURCHASE_STATUS.PAID) approveSponsorPurchase(purchaseId);
+    if (newStatus === PURCHASE_STATUS.PAID)
+      approveSponsorPurchase(sponsor.id, purchaseId);
     if (newStatus === PURCHASE_STATUS.CANCELLED)
-      rejectSponsorPurchase(purchaseId);
+      rejectSponsorPurchase(sponsor.id, purchaseId);
   };
 
   const tableColumns = [
@@ -149,7 +150,7 @@ const SponsorPurchasesTab = ({
       render: (row) => (
         <Button
           variant="text"
-          color="inherit"
+          sx={{ color: "primary.main" }}
           size="small"
           onClick={() => handleDetails(row)}
         >
@@ -163,7 +164,11 @@ const SponsorPurchasesTab = ({
       width: 100,
       align: "center",
       render: (row) => (
-        <IconButton size="large" onClick={() => handleMenu(row)}>
+        <IconButton
+          size="large"
+          sx={{ color: "primary.main" }}
+          onClick={() => handleMenu(row)}
+        >
           <MenuIcon fontSize="large" />
         </IconButton>
       )

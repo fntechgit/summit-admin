@@ -26,7 +26,8 @@ const DEFAULT_ENTITY = {
   opens_at: "",
   expires_at: "",
   instructions: "",
-  meta_fields: []
+  meta_fields: [],
+  items: []
 };
 
 const DEFAULT_STATE = {
@@ -43,10 +44,22 @@ const sponsorCustomizedFormReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case RECEIVE_SPONSOR_CUSTOMIZED_FORM: {
-      return {
-        ...state,
-        entity: payload.response
+      // this actions is dispatched by getSponsorManagedForm and getSponsorCustomizedForm
+      // getSponsorManagedForm expands items.images, getSponsorCustomizedForm not,
+      // so items is absent here for the customized path.
+      // Add expand=items,items.images to that action if item display is ever needed in
+      // the customized-form popup.
+      const entity = {
+        ...payload.response,
+        items: (payload.response.items || []).map((it) => ({
+          ...it,
+          images: (it.images || []).map((img) => ({
+            ...img,
+            file_path: img.file_url
+          }))
+        }))
       };
+      return { ...state, entity };
     }
     default:
       return state;

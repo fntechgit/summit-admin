@@ -99,8 +99,12 @@ const SponsorListPage = ({
   const canDeleteSponsors = memberObj.canDeleteSponsors();
 
   const columns = [
-    { columnKey: "id", header: T.translate("sponsor_list.id") },
-    { columnKey: "company_name", header: T.translate("sponsor_list.company") },
+    { columnKey: "id", header: T.translate("sponsor_list.id"), sortable: true },
+    {
+      columnKey: "company_name",
+      header: T.translate("sponsor_list.company"),
+      sortable: true
+    },
     {
       columnKey: "sponsorships",
       header: T.translate("sponsor_list.sponsorships"),
@@ -159,7 +163,7 @@ const SponsorListPage = ({
       columnKey: "documents",
       header: T.translate("sponsor_list.documents"),
       render: (row) =>
-        `${row.documents?.length || 0} ${T.translate(
+        `${row?.sponsorservices_statistics?.documents_qty || 0} ${T.translate(
           "sponsor_list.documents"
         ).toLowerCase()}`
     },
@@ -167,7 +171,7 @@ const SponsorListPage = ({
       columnKey: "forms",
       header: T.translate("sponsor_list.forms"),
       render: (row) =>
-        `${row.forms?.length || 0} ${T.translate(
+        `${row?.sponsorservices_statistics?.forms_qty || 0} ${T.translate(
           "sponsor_list.forms"
         ).toLowerCase()}`
     },
@@ -175,7 +179,7 @@ const SponsorListPage = ({
       columnKey: "purchases",
       header: T.translate("sponsor_list.purchases"),
       render: (row) =>
-        `${row.purchases?.length || 0} ${T.translate(
+        `${row?.sponsorservices_statistics?.purchases_qty || 0} ${T.translate(
           "sponsor_list.purchases"
         ).toLowerCase()}`
     },
@@ -183,18 +187,13 @@ const SponsorListPage = ({
       columnKey: "pages",
       header: T.translate("sponsor_list.pages"),
       render: (row) =>
-        `${row.pages?.length || 0} ${T.translate(
+        `${row?.sponsorservices_statistics?.pages_qty || 0} ${T.translate(
           "sponsor_list.pages"
         ).toLowerCase()}`
     }
   ];
 
   if (!currentSummit.id) return <div />;
-
-  const sortedSponsors = [...sponsors];
-  sortedSponsors.sort((a, b) =>
-    a.order > b.order ? 1 : a.order < b.order ? -1 : 0
-  );
 
   return (
     <div className="container">
@@ -255,8 +254,9 @@ const SponsorListPage = ({
       {sponsors.length > 0 && (
         <div>
           <MuiTable
-            data={sortedSponsors}
+            data={sponsors}
             columns={columns}
+            options={{ sortCol: order, sortDir: orderDir }}
             totalRows={totalSponsors}
             perPage={perPage}
             currentPage={currentPage}

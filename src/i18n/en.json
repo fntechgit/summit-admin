@@ -35,6 +35,7 @@
     "member": "Member",
     "members": "Members",
     "event": "Activity",
+    "activities": "Activities",
     "group": "Group",
     "yes": "Yes",
     "no": "No",
@@ -90,6 +91,7 @@
     "to": "To",
     "from": "From",
     "placeholders": {
+      "search": "Search...",
       "search_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id",
       "select_acceptance_criteria": "Select acceptance criteria",
       "select_invitation_status": "Select status"
@@ -186,6 +188,7 @@
     "sponsor_list": "Sponsor List",
     "sponsor_forms": "Forms",
     "sponsor_pages": "Pages",
+    "sponsor_purchases": "Purchases",
     "sponsorship_list": "Tiers",
     "sponsor_users": "Users",
     "sponsors_promocodes": "Promo Codes",
@@ -351,6 +354,14 @@
     "refund_amount_emitted": "Amount Refund",
     "ticket_types": "Active Tickets per Ticket Types",
     "badge_types": "Active Tickets per Badge Types",
+    "general_dates": "General Dates",
+    "ordering": "Ordering",
+    "important_documents": "Important Documents",
+    "sponsor_levels": "Sponsor Levels",
+    "pages": "Pages",
+    "tab_badge_types": "Badge Types",
+    "media_uploads": "Media Uploads",
+    "booth_layout_types": "Booth Layout Types",
     "expand": "Expand section",
     "collapse": "Collapse section",
     "badge_features_tickets": "Active Tickets per Badge Features",
@@ -679,7 +690,14 @@
       "search_comment": "Search by Comment, Creator ID",
       "allowed_ticket_types": "Select ticket types",
       "select_submission_source": "Select a Submission Source"
-    }
+    },
+    "draft_state_label": "DRAFT STATE: NOT SUBMITTED BY SUBMITTER",
+    "draft_state_badge": "Pending Complete Details",
+    "draft_state_missing_fields": "Missing required fields:",
+    "draft_state_note": "This activity was saved as a draft by the submitter and contains missing required fields. To make partial changes (e.g., re-categorize or assign tags) without filling out missing fields, use the Save as Incomplete button below. This preserves the draft status.",
+    "save_as_incomplete": "Save as Incomplete",
+    "save_and_mark_complete": "Save & Mark Complete",
+    "event_saved_as_draft": "Activity saved as draft successfully."
   },
   "edit_event_material": {
     "material": "Material",
@@ -716,7 +734,8 @@
     "member_id": "Member Id",
     "registration_code": "Registration Code",
     "on_site_phone": "On Site Phone",
-    "delete_speaker_warning": "Are you sure you want to delete speaker"
+    "no_results": "No items found for this search criteria.",
+    "delete_speaker_warning": "Are you sure you want to delete speaker {name}"
   },
   "edit_speaker": {
     "registration_code": "Registration Code",
@@ -821,6 +840,8 @@
   },
   "tag_list": {
     "tag_list": "Tag List",
+    "item": "item",
+    "items": "items",
     "tags": "Tags",
     "add_tag": "Add Tag",
     "delete_tag_warning": "Are you sure you want to delete tag",
@@ -833,6 +854,7 @@
   "edit_tag": {
     "tag": "Tag",
     "name": "Name",
+    "name_required": "Name is required.",
     "tag_saved": "Tag saved successfully.",
     "tag_created": "Tag created successfully."
   },
@@ -1091,7 +1113,8 @@
     "send_emails_title": "You are about to send an EMAIL BLAST to selected speakers !",
     "should_send_copy_2_submitter": "Also send to submitter?",
     "allows_to_reassign": "Allow to reassign?",
-    "items_qty": "Selected {qty} Speakers",
+    "items_qty": "Selected {qty} Speakers | {activitiesQty} Activities",
+    "items_qty_no_activities": "Selected {qty} Speakers",
     "placeholders": {
       "search_speakers": "Search by Full Name, Email, Speaker Id, Member Id, Title Or Abstract",
       "test_recipient": "Optional Test Recipient"
@@ -1105,7 +1128,9 @@
     "send_emails_title": "You are about to send an EMAIL BLAST to selected submitters !",
     "resend_done": "Emails sent successfully.",
     "submitters": "Submitters",
-    "submitters_no_speakers": "Submitters (no speakers)"
+    "submitters_no_speakers": "Submitters (no speakers)",
+    "items_qty": "Selected {qty} Submitters | {activitiesQty} Activities",
+    "items_qty_no_activities": "Selected {qty} Submitters"
   },
   "speaker_attendance_list": {
     "speaker_attendance_list": "Speaker Attendance List",
@@ -2496,6 +2521,7 @@
       "unarchive": "Unarchive",
       "add_form_using_template": "Add Form Using Template",
       "add_selected_form_template": "Add Selected Form Template",
+      "customized": "CUSTOMIZED",
       "customized_form": {
         "new_form_title": "Create New Form",
         "edit_form_title": "Edit Form",
@@ -2652,10 +2678,10 @@
         "general_info": "General Info",
         "payment_info": "Payment Info",
         "issue_refund": "Issue a Refund",
-        "info_note": "Active order items can be canceled. Canceled items show an undo action to restore them. Refund and payment rows are display-only.",
         "address_updated": "Address updated successfully",
         "client_updated": "Client info updated successfully",
-        "order_refunded": "Refund issued successfully."
+        "order_refunded": "Refund issued successfully.",
+        "line_cancelled": "{lineName} was cancelled. This item has been voided and removed from the balance. Use the undo action to restore it."
       }
     },
     "mu_tab": {
@@ -2881,6 +2907,16 @@
       }
     }
   },
+  "sponsor_show_purchases": {
+    "order": "Order",
+    "purchased": "Purchased",
+    "sponsor": "Sponsor",
+    "payment_method": "Payment Method",
+    "status": "Status",
+    "amount": "Amount",
+    "details": "Details",
+    "purchases": "Purchases"
+  },
   "sponsor_users": {
     "users": "Users",
     "access_request": "access request",
@@ -2961,22 +2997,25 @@
     "sponsorship_types_list": "Tier List",
     "sponsorship_type": "Tier",
     "widget_title": "Widget Title",
-    "no_sponsorships": "No sponsorships found for current search criteria.",
-    "add_sponsorship": "Add Sponsorship",
+    "no_sponsorships": "No tiers found for current search criteria.",
+    "add_sponsorship": "Add Tier",
     "name": "Name",
     "label": "Label",
     "size": "Size",
     "order": "Order",
-    "remove_warning": "Are you sure you want to delete sponsorship "
+    "remove_warning": "Are you sure you want to delete tier {name}",
+    "placeholders": {
+      "search": "Search tier"
+    }
   },
   "edit_sponsorship": {
-    "sponsorship": "Sponsorship",
+    "sponsorship": "Tier",
     "name": "Name",
     "order": "Order",
     "label": "Label",
     "size": "Size",
-    "sponsorship_saved": "Sponsorship saved successfully",
-    "sponsorship_created": "Sponsorship created successfully",
+    "sponsorship_saved": "Tier saved successfully",
+    "sponsorship_created": "Tier created successfully",
     "placeholders": {
       "select_size": "Select a Size"
     }
@@ -3430,7 +3469,7 @@
     "description": "Description",
     "allowed_extensions_input": "Allowed Extensions (comma separated: PDF,DOC,etc)",
     "allowed_extensions": "Allowed Extensions",
-    "delete_warning": "Are you sure you want to delete media file type ",
+    "delete_warning": "Are you sure you want to delete media file type {name}?",
     "saved": "Media File Type saved successfully.",
     "created": "Media File Type created successfully.",
     "placeholders": {
@@ -4191,7 +4230,8 @@
     "reason": "Reason for Refund",
     "amount": "Amount",
     "queue_refund": "Queue refund",
-    "info": "If the original payment was made via Stripe, the refund will be automatically queued and processed."
+    "info": "If the original payment was made via Stripe, the refund will be automatically queued and processed.",
+    "only_online_payments": "Only online payments are eligible for refunds"
   },
   "client_card": {
     "title": "Client & Address Details",
@@ -4213,6 +4253,7 @@
     "cancel": "Cancel"
   },
   "preview_modal": {
+    "title": "Image Preview",
     "file_name": "File name",
     "uploaded": "Uploaded"
   }

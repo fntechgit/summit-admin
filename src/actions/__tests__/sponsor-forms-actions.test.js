@@ -83,7 +83,7 @@ describe("Sponsor Forms Actions", () => {
             showArchived: false,
             order: "id",
             orderDir: 1,
-            currentPage: 2,
+            page: 2,
             perPage: 50,
             term: ""
           }
@@ -198,6 +198,7 @@ describe("Sponsor Forms Actions", () => {
 
     beforeEach(() => {
       jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
+      getRequest.mockClear();
 
       putRequest.mockImplementation((...requestArgs) => {
         const [, receiveActionCreator] = requestArgs;
@@ -280,7 +281,7 @@ describe("Sponsor Forms Actions", () => {
           showArchived: false,
           order: "name",
           orderDir: -1,
-          currentPage: 3,
+          page: 3,
           perPage: 25,
           term: "expo"
         }

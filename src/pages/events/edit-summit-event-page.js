@@ -17,6 +17,7 @@ import T from "i18n-react/dist/i18n-react";
 import EventForm from "../../components/forms/event-form";
 import {
   saveEvent,
+  saveEventAsDraft,
   saveEventFieldWithoutRefresh,
   attachFile,
   getEvents,
@@ -225,6 +226,7 @@ function EditSummitEventPage(props) {
     loading,
     history,
     saveEvent,
+    saveEventAsDraft,
     saveEventFieldWithoutRefresh,
     attachFile,
     unPublishEvent,
@@ -289,6 +291,7 @@ function EditSummitEventPage(props) {
           entity={entity}
           errors={errors}
           onSubmit={saveEvent}
+          onSaveIncomplete={saveEventAsDraft}
           onUpdate={saveEventFieldWithoutRefresh}
           onEventUpgrade={upgradeEvent}
           onAttach={attachFile}
@@ -336,6 +339,7 @@ const mapStateToProps = ({
 
 export default connect(mapStateToProps, {
   saveEvent,
+  saveEventAsDraft,
   saveEventFieldWithoutRefresh,
   attachFile,
   unPublishEvent,

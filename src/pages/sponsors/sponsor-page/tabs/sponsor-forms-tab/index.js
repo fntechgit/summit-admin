@@ -18,6 +18,7 @@ import {
   Box,
   Button,
   Checkbox,
+  Chip,
   FormControlLabel,
   FormGroup,
   Grid2
@@ -261,7 +262,19 @@ const SponsorFormsTab = ({
       columnKey: "name",
       header: name,
       sortable: true,
-      width: 235
+      width: 235,
+      render: (row) =>
+        row.original_show_form_id > 0 ? (
+          <>
+            {row.name}&nbsp;
+            <Chip
+              size="small"
+              label={T.translate("edit_sponsor.forms_tab.customized")}
+            />
+          </>
+        ) : (
+          row.name
+        )
     },
     {
       columnKey: "code",

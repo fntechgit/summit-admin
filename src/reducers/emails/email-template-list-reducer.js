@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -9,15 +9,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ */
 
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_TEMPLATES,
   REQUEST_TEMPLATES,
   TEMPLATE_DELETED
 } from "../../actions/email-actions";
-
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
   templates: [],
@@ -30,38 +29,49 @@ const DEFAULT_STATE = {
   totalTemplates: 0
 };
 
-const emailTemplateListReducer = (state = DEFAULT_STATE, action) => {
+const emailTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
   const { type, payload } = action;
   switch (type) {
     case LOGOUT_USER: {
       return DEFAULT_STATE;
     }
     case REQUEST_TEMPLATES: {
-      let { order, orderDir, term } = payload;
-
-      return { ...state, order, orderDir, term };
+      const { order, orderDir, term, page, perPage } = payload;
+      return {
+        ...state,
+        order,
+        orderDir,
+        term,
+        currentPage: page,
+        perPage,
+        templates: []
+      };
     }
     case RECEIVE_TEMPLATES: {
-      let { total, last_page, current_page } = payload.response;
-      let templates = payload.response.data.map((s) => {
-        return {
-          id: s.id,
-          identifier: s.identifier,
-          subject: s.subject,
-          from_email: s.from_email
-        };
-      });
+      const {
+        total,
+        last_page: lastPage,
+        current_page: currentPage,
+        per_page: perPage
+      } = payload.response;
+      const templates = payload.response.data.map((s) => ({
+        id: s.id,
+        identifier: s.identifier,
+        subject: s.subject,
+        from_email: s.from_email
+      }));
 
       return {
         ...state,
-        templates: templates,
-        currentPage: current_page,
+        templates,
+        currentPage,
+        perPage,
         totalTemplates: total,
-        lastPage: last_page
+        lastPage
       };
     }
     case TEMPLATE_DELETED: {
-      let { templateId } = payload;
+      const { templateId } = payload;
       return {
         ...state,
         templates: state.templates.filter((s) => s.id !== templateId)

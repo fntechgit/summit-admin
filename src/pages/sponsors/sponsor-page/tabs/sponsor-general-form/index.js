@@ -23,8 +23,7 @@ import {
   deleteExtraQuestion,
   getSponsorExtraQuestion,
   getSponsorLeadReportSettingsMeta,
-  getSponsorshipAddons,
-  getSponsorTiers,
+  getSponsorSponsorships,
   removeAddonToSponsorship,
   removeTierFromSponsor,
   resetSponsorExtraQuestionForm,
@@ -40,10 +39,9 @@ const SponsorGeneralForm = ({
   sponsor,
   member,
   currentSummit,
-  getSponsorTiers,
+  getSponsorSponsorships,
   addTierToSponsor,
   removeTierFromSponsor,
-  getSponsorshipAddons,
   setSelectedSponsorship,
   saveAddonsToSponsorship,
   removeAddonToSponsorship,
@@ -57,7 +55,7 @@ const SponsorGeneralForm = ({
   updateExtraQuestionOrder
 }) => {
   const handleSponsorshipPaginate = (page, perPage, order, orderDir) => {
-    getSponsorTiers(sponsor.id, page, perPage, order, orderDir);
+    getSponsorSponsorships(sponsor.id, page, perPage, order, orderDir);
   };
 
   return (
@@ -70,7 +68,6 @@ const SponsorGeneralForm = ({
         onSponsorshipPaginate={handleSponsorshipPaginate}
         onSponsorshipAdd={addTierToSponsor}
         onSponsorshipDelete={removeTierFromSponsor}
-        getSponsorshipAddons={getSponsorshipAddons}
         onSponsorshipSelect={setSelectedSponsorship}
         onSponsorshipAddonSave={saveAddonsToSponsorship}
         onSponsorshipAddonRemove={removeAddonToSponsorship}
@@ -108,10 +105,9 @@ const mapStateToProps = ({
 
 export default connect(mapStateToProps, {
   getSponsorLeadReportSettingsMeta,
-  getSponsorTiers,
+  getSponsorSponsorships,
   addTierToSponsor,
   removeTierFromSponsor,
-  getSponsorshipAddons,
   saveAddonsToSponsorship,
   removeAddonToSponsorship,
   setSelectedSponsorship,

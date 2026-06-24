@@ -111,7 +111,7 @@ export const SPONSOR_FORM_ITEM_UNARCHIVED = "SPONSOR_FORM_ITEM_UNARCHIVED";
 export const getSponsorForms =
   (
     term = "",
-    currentPage = DEFAULT_CURRENT_PAGE,
+    page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
@@ -132,7 +132,7 @@ export const getSponsorForms =
     }
 
     const params = {
-      page: currentPage,
+      page,
       fields:
         "id,code,name,level,expire_date,is_archived,sponsorship_types,apply_to_all_types,opens_at,expires_at",
       relations: "items,sponsorship_types",
@@ -164,7 +164,7 @@ export const getSponsorForms =
       createAction(RECEIVE_SPONSOR_FORMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms`,
       authErrorHandler,
-      { order, orderDir, currentPage, perPage, term, showArchived }
+      { order, orderDir, page, perPage, term, showArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -552,7 +552,7 @@ export const getSponsorManagedForms =
       createAction(RECEIVE_SPONSOR_MANAGED_FORMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-forms`,
       authErrorHandler,
-      { order, orderDir, page, term, summitTZ, showArchived }
+      { order, orderDir, page, perPage, term, summitTZ, showArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -637,15 +637,18 @@ const normalizeSponsorManagedForm = (entity) => {
 };
 
 export const getSponsorManagedForm = (formId) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
+  const { currentSummitState, currentSponsorState } = getState();
   const { currentSummit } = currentSummitState;
+  const {
+    entity: { id: sponsorId }
+  } = currentSponsorState;
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
 
   const params = {
     fields:
-      "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons",
+      "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons,instructions",
     expand:
       "allowed_add_ons,meta_fields,meta_fields.values,items,items.meta_fields,items.meta_fields.values,items.images",
     access_token: accessToken
@@ -654,7 +657,7 @@ export const getSponsorManagedForm = (formId) => async (dispatch, getState) => {
   return getRequest(
     null,
     createAction(RECEIVE_SPONSOR_CUSTOMIZED_FORM),
-    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}`,
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-forms/${formId}`,
     snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
@@ -694,7 +697,7 @@ export const getSponsorCustomizedForms =
     const params = {
       page,
       fields:
-        "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons",
+        "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons,original_show_form_id",
       expands: "allowed_add_ons",
       per_page: perPage,
       access_token: accessToken
@@ -717,7 +720,7 @@ export const getSponsorCustomizedForms =
       createAction(RECEIVE_SPONSOR_CUSTOMIZED_FORMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms`,
       authErrorHandler,
-      { order, orderDir, page, term, summitTZ, showArchived }
+      { order, orderDir, page, perPage, term, summitTZ, showArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -909,8 +912,10 @@ export const normalizeSponsorCustomizedForm = (entity, summitTZ) => {
     ...normalizedEntity
   } = entity;
 
-  normalizedEntity.opens_at = moment.tz(opens_at, summitTZ).unix();
-  normalizedEntity.expires_at = moment.tz(expires_at, summitTZ).unix();
+  if (opens_at)
+    normalizedEntity.opens_at = moment.tz(opens_at, summitTZ).unix();
+  if (expires_at)
+    normalizedEntity.expires_at = moment.tz(expires_at, summitTZ).unix();
 
   Object.assign(
     normalizedEntity,
@@ -1056,8 +1061,8 @@ export const getSponsorFormItems =
     const params = {
       page,
       fields:
-        "id,code,name,early_bird_rate,standard_rate,onsite_rate,default_quantity,images,is_archived",
-      relations: "images",
+        "id,code,name,early_bird_rate,standard_rate,onsite_rate,default_quantity,images,images.file_url,images.created,is_archived",
+      expand: "images",
       per_page: perPage,
       access_token: accessToken
     };
@@ -1095,7 +1100,7 @@ export const getSponsorFormItem =
 
     const params = {
       access_token: accessToken,
-      expands: "meta_fields,meta_fields.values,images"
+      expand: "meta_fields,meta_fields.values,images"
     };
 
     return getRequest(

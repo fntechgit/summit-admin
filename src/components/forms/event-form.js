@@ -17,20 +17,20 @@ import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import Swal from "sweetalert2";
 import { Tooltip } from "react-tooltip";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import GroupedDropdown from "openstack-uicore-foundation/lib/components/inputs/grouped-dropdown"
-import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
-import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input"
-import SpeakerInput from "openstack-uicore-foundation/lib/components/inputs/speaker-input"
-import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input"
-import GroupInput from "openstack-uicore-foundation/lib/components/inputs/group-input"
-import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
-import Panel from "openstack-uicore-foundation/lib/components/sections/panel"
-import Table from "openstack-uicore-foundation/lib/components/table"
-import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import GroupedDropdown from "openstack-uicore-foundation/lib/components/inputs/grouped-dropdown";
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
+import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input";
+import SpeakerInput from "openstack-uicore-foundation/lib/components/inputs/speaker-input";
+import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input";
+import GroupInput from "openstack-uicore-foundation/lib/components/inputs/group-input";
+import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
+import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
+import Table from "openstack-uicore-foundation/lib/components/table";
+import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
+import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input";
 import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import { Pagination } from "react-bootstrap";
@@ -125,6 +125,7 @@ class EventForm extends React.Component {
     this.handleCloneEvent = this.handleCloneEvent.bind(this);
     this.handleEventTypeChange = this.handleEventTypeChange.bind(this);
     this.handleRSVPTypeChange = this.handleRSVPTypeChange.bind(this);
+    this.handleSaveIncomplete = this.handleSaveIncomplete.bind(this);
   }
 
   componentDidMount() {
@@ -721,6 +722,52 @@ class EventForm extends React.Component {
     );
   }
 
+  handleSaveIncomplete(ev) {
+    ev.preventDefault();
+    const { onSaveIncomplete } = this.props;
+    const { entity } = this.state;
+    onSaveIncomplete({ ...entity });
+  }
+
+  isPresentation() {
+    const { entity } = this.state;
+    return entity.class_name === "Presentation";
+  }
+
+  isNew() {
+    const { entity } = this.state;
+    return !entity.id;
+  }
+
+  isComplete() {
+    const { entity } = this.state;
+    return (
+      ["Accepted", "Received"].includes(entity?.status) &&
+      entity?.progress === "COMPLETE"
+    );
+  }
+
+  getMissingDraftFields() {
+    const { entity } = this.state;
+    const missing = [];
+
+    if (!entity.title) missing.push("Title");
+    if (!entity.type_id) missing.push("Activity Type");
+    if (!entity.track_id) missing.push("Activity Category");
+
+    if (!entity.type_id || this.shouldShowField("allows_publishing_dates")) {
+      if (!entity.start_date) missing.push("Start Date");
+      if (!entity.end_date) missing.push("End Date");
+      if (!entity.duration) missing.push("Duration");
+    }
+
+    if (!entity.type_id || this.isEventType(EVENT_TYPE_PRESENTATION)) {
+      if (!entity.disclaimer_accepted) missing.push("Disclaimer Accepted");
+    }
+
+    return missing;
+  }
+
   handleEventTypeChange(oldEntity, newEntity) {
     const isEventUpgrade =
       !this.isEventType(EVENT_TYPE_PRESENTATION, oldEntity) &&
@@ -1038,9 +1085,49 @@ class EventForm extends React.Component {
       { label: "Submission", value: "Submission" }
     ];
 
+    const missingDraftFields =
+      !this.isPresentation() || this.isNew() || this.isComplete()
+        ? []
+        : this.getMissingDraftFields();
+
     return (
       <div>
         <input type="hidden" id="id" value={entity.id} />
+        {this.isPresentation() && !this.isNew() && !this.isComplete() && (
+          <div className="alert alert-warning" role="alert">
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                marginBottom: 8
+              }}
+            >
+              <strong>{T.translate("edit_event.draft_state_label")}</strong>
+              <span
+                className="label label-warning"
+                style={{
+                  fontSize: "0.85em",
+                  padding: "3px 8px",
+                  borderRadius: 3
+                }}
+              >
+                {T.translate("edit_event.draft_state_badge")}
+              </span>
+            </div>
+            {missingDraftFields.length > 0 && (
+              <p style={{ marginBottom: 6 }}>
+                <strong>
+                  {T.translate("edit_event.draft_state_missing_fields")}
+                </strong>{" "}
+                {missingDraftFields.join(", ")}
+              </p>
+            )}
+            <p style={{ marginBottom: 0 }}>
+              {T.translate("edit_event.draft_state_note")}
+            </p>
+          </div>
+        )}
         <div className="row form-group">
           <div className="col-md-8">
             <label> {T.translate("edit_event.submitter")} </label> &nbsp;
@@ -2059,7 +2146,7 @@ class EventForm extends React.Component {
                   type="button"
                   onClick={(ev) => this.triggerFormSubmit(ev, false)}
                   className="btn btn-primary pull-right"
-                  value={T.translate("general.save")}
+                  value={T.translate("edit_event.save_and_mark_complete")}
                 />
                 <input
                   type="button"
@@ -2067,6 +2154,16 @@ class EventForm extends React.Component {
                   className="btn btn-success pull-right"
                   value={T.translate("general.save_and_publish")}
                 />
+                {this.isPresentation() &&
+                  !this.isNew() &&
+                  !this.isComplete() && (
+                    <input
+                      type="button"
+                      onClick={this.handleSaveIncomplete}
+                      className="btn btn-warning pull-right"
+                      value={T.translate("edit_event.save_as_incomplete")}
+                    />
+                  )}
               </div>
             )}
 

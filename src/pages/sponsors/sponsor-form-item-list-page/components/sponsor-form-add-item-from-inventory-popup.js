@@ -16,11 +16,10 @@ import {
   Typography
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import Tooltip from "@mui/material/Tooltip";
-import ImageIcon from "@mui/icons-material/Image";
 import Box from "@mui/material/Box";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import { ImagePreviewCell } from "../../../../components/image-preview-cell";
 import { formatRateFromCents } from "../../../../utils/rate-helpers";
 import { addInventoryItems } from "../../../../actions/sponsor-forms-actions";
 import { getInventoryItems } from "../../../../actions/inventory-item-actions";
@@ -146,23 +145,18 @@ const SponsorFormAddItemFromInventoryPopup = ({
       header: "",
       width: 40,
       align: "center",
-      render: (row) =>
-        row.images?.length > 0 ? (
-          <Tooltip title={row.images[0].file_url} placement="top" arrow>
-            <IconButton size="large">
-              <ImageIcon
-                fontSize="large"
-                onClick={() =>
-                  window.open(
-                    row.images[0].file_url,
-                    "_blank",
-                    "noopener,noreferrer"
-                  )
-                }
-              />
-            </IconButton>
-          </Tooltip>
-        ) : null
+      render: (row) => {
+        const img = row.images?.[0];
+        const url = img?.file_url ?? img?.file_path;
+        if (!url) return null;
+        return (
+          <ImagePreviewCell
+            imageUrl={url}
+            itemName={row.name}
+            uploadDate={img?.created}
+          />
+        );
+      }
     }
   ];
 

@@ -51,7 +51,11 @@ const emailLogListReducer = (state = DEFAULT_STATE, action) => {
           ...m,
           template: m.template?.identifier || "N/A",
           sent_date,
-          last_error: m.last_error ? m.last_error : "N/A"
+          last_error: m.last_error ? m.last_error : "N/A",
+          payload:
+            m.payload !== null && typeof m.payload === "object"
+              ? JSON.stringify(m.payload)
+              : m.payload ?? ""
         };
       });
       return {
