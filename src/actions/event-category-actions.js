@@ -27,10 +27,7 @@ import {
 import T from "i18n-react/dist/i18n-react";
 import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
-import {
-  DEFAULT_PER_PAGE,
-  DEFAULT_CURRENT_PAGE
-} from "../utils/constants";
+import { DEFAULT_PER_PAGE, DEFAULT_CURRENT_PAGE } from "../utils/constants";
 
 export const REQUEST_EVENT_CATEGORIES = "REQUEST_EVENT_CATEGORIES";
 export const RECEIVE_EVENT_CATEGORIES = "RECEIVE_EVENT_CATEGORIES";
@@ -492,7 +489,7 @@ export const saveEventCategoryGroup =
     const params = { access_token: accessToken };
 
     if (entity.id) {
-      putRequest(
+      return putRequest(
         createAction(UPDATE_EVENT_CATEGORY_GROUP),
         createAction(EVENT_CATEGORY_GROUP_UPDATED),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-groups/${entity.id}`,
@@ -506,30 +503,22 @@ export const saveEventCategoryGroup =
           )
         );
       });
-    } else {
-      const successMessage = {
-        title: T.translate("general.done"),
-        html: T.translate("edit_event_category_group.group_created"),
-        type: "success"
-      };
-
-      postRequest(
+    } 
+      return postRequest(
         createAction(UPDATE_EVENT_CATEGORY_GROUP),
         createAction(EVENT_CATEGORY_GROUP_ADDED),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-groups`,
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(
-          showMessage(successMessage, () => {
-            history.replace(
-              `/app/summits/${currentSummit.id}/event-category-groups/${payload.response.id}`
-            );
-          })
+          showSuccessMessage(
+            T.translate("edit_event_category_group.group_created")
+          )
         );
       });
-    }
+    
   };
 
 export const deleteEventCategoryGroup =
