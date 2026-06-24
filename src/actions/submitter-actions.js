@@ -46,6 +46,10 @@ export const REQUEST_SUBMITTERS_ACTIVITIES_COUNT =
   "REQUEST_SUBMITTERS_ACTIVITIES_COUNT";
 export const RECEIVE_SUBMITTERS_ACTIVITIES_COUNT =
   "RECEIVE_SUBMITTERS_ACTIVITIES_COUNT";
+export const REQUEST_SELECTED_SUBMITTERS_ACTIVITY_COUNT =
+  "REQUEST_SELECTED_SUBMITTERS_ACTIVITY_COUNT";
+export const RECEIVE_SELECTED_SUBMITTERS_ACTIVITY_COUNT =
+  "RECEIVE_SELECTED_SUBMITTERS_ACTIVITY_COUNT";
 
 export const initSubmittersList = () => async (dispatch) => {
   dispatch(createAction(INIT_SUBMITTERS_LIST_PARAMS)());
@@ -59,6 +63,72 @@ const getSubmittersActivitiesCount =
       createAction(REQUEST_SUBMITTERS_ACTIVITIES_COUNT),
       createAction(RECEIVE_SUBMITTERS_ACTIVITIES_COUNT),
       `${window.API_BASE_URL}/api/v1/summits/${summitId}/submitters/all/events/count`,
+      authErrorHandler
+    )(params)(dispatch);
+  };
+
+export const getSelectedSubmittersActivityCount =
+  () => async (dispatch, getState) => {
+    const { currentSummitState, currentSummitSubmittersListState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const {
+      totalActivities,
+      term,
+      selectedCount,
+      selectedItems,
+      excludedItems,
+      selectedAll,
+      selectionPlanFilter,
+      trackFilter,
+      trackGroupFilter,
+      activityTypeFilter,
+      selectionStatusFilter,
+      mediaUploadTypeFilter
+    } = currentSummitSubmittersListState;
+    const filters = {
+      selectionPlanFilter,
+      trackFilter,
+      trackGroupFilter,
+      activityTypeFilter,
+      selectionStatusFilter,
+      mediaUploadTypeFilter
+    };
+    const filter = parseFilters(filters);
+    const params = { access_token: accessToken };
+
+    // if no submitters selected we escape setting count to 0
+    // if all submitters selected we escape setting count to totalActivities
+    if (selectedCount === 0 || (selectedAll && excludedItems.length === 0)) {
+      const activityCount = selectedCount === 0 ? 0 : totalActivities;
+      dispatch(
+        createAction(RECEIVE_SELECTED_SUBMITTERS_ACTIVITY_COUNT)({
+          response: { count: activityCount }
+        })
+      );
+      return;
+    }
+
+    if (term) {
+      const filterTerm = buildTermFilter(term);
+      filter.push(filterTerm.join(","));
+    }
+
+    // build id filter
+    if (selectedAll) {
+      if (excludedItems.length > 0) {
+        filter.push(`not_id==${excludedItems.join("||")}`);
+      }
+    } else if (selectedItems.length > 0) {
+      filter.push(`id==${selectedItems.join("||")}`);
+    }
+
+    if (filter.length > 0) params["filter[]"] = filter;
+
+    return getRequest(
+      createAction(REQUEST_SELECTED_SUBMITTERS_ACTIVITY_COUNT),
+      createAction(RECEIVE_SELECTED_SUBMITTERS_ACTIVITY_COUNT),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/submitters/all/events/count`,
       authErrorHandler
     )(params)(dispatch);
   };
