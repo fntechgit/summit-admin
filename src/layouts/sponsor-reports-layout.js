@@ -15,6 +15,8 @@ import React from "react";
 import { Route, Switch, withRouter } from "react-router-dom";
 import Restrict from "../routes/restrict";
 import PurchaseDetailsReportPage from "../pages/sponsors/sponsor-reports/purchase-details-report-page";
+import SponsorAssetDrilldownPage from "../pages/sponsors/sponsor-reports/sponsor-asset-drilldown-page";
+import SponsorAssetReportPage from "../pages/sponsors/sponsor-reports/sponsor-asset-report-page";
 
 const SponsorReportsLayout = ({ match }) => (
   <div>
@@ -23,6 +25,19 @@ const SponsorReportsLayout = ({ match }) => (
         exact
         path={`${match.url}/purchase-details`}
         component={PurchaseDetailsReportPage}
+      />
+      {/* Drill-down (more specific) FIRST so the base /sponsor-assets route
+          cannot shadow it even with exact on both. Belt-and-suspenders ordering
+          per React Router v4 Switch semantics (first match wins). */}
+      <Route
+        exact
+        path={`${match.url}/sponsor-assets/sponsors/:sponsorId`}
+        component={SponsorAssetDrilldownPage}
+      />
+      <Route
+        exact
+        path={`${match.url}/sponsor-assets`}
+        component={SponsorAssetReportPage}
       />
       <Route
         exact
