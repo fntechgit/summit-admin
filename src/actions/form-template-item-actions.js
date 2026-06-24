@@ -91,7 +91,7 @@ export const getFormTemplateItems =
 
     const params = {
       page,
-      fields: "id,code,name,is_archived,images,images.file_url",
+      fields: "id,code,name,is_archived,images,images.file_url,images.created",
       expand: "images",
       per_page: perPage,
       access_token: accessToken

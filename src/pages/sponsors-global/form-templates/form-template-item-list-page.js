@@ -24,13 +24,10 @@ import {
   Grid2
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
-import ImageIcon from "@mui/icons-material/Image";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import { ImagePreviewCell } from "../../../components/image-preview-cell";
 import {
   cloneFromInventoryItem,
-  deleteFormTemplateItem,
   getFormTemplateItem,
   getFormTemplateItems,
   saveFormTemplateItem,
@@ -208,23 +205,18 @@ const FormTemplateItemListPage = ({
       header: "",
       width: 40,
       align: "center",
-      render: (row) =>
-        row.images?.length > 0 ? (
-          <Tooltip title={row.images[0].file_url} placement="top" arrow>
-            <IconButton size="small">
-              <ImageIcon
-                fontSize="small"
-                onClick={() =>
-                  window.open(
-                    row.images[0].file_url,
-                    "_blank",
-                    "noopener,noreferrer"
-                  )
-                }
-              />
-            </IconButton>
-          </Tooltip>
-        ) : null
+      render: (row) => {
+        const img = row.images?.[0];
+        const url = img?.file_url ?? img?.file_path;
+        if (!url) return null;
+        return (
+          <ImagePreviewCell
+            imageUrl={url}
+            itemName={row.name}
+            uploadDate={img?.created}
+          />
+        );
+      }
     }
   ];
 
@@ -349,7 +341,6 @@ const mapStateToProps = ({
 
 export default connect(mapStateToProps, {
   cloneFromInventoryItem,
-  deleteFormTemplateItem,
   getFormTemplateItems,
   getFormTemplate,
   getInventoryItems,
