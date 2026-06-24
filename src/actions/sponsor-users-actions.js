@@ -541,7 +541,6 @@ export const sendSponsorUserInvite =
           })
         );
       })
-      .catch(console.log) // need to catch promise reject
       .finally(() => {
         dispatch(stopLoading());
       });
@@ -654,7 +653,6 @@ export const importSponsorUsers =
           })
         );
       })
-      .catch(console.log) // need to catch promise reject
       .finally(() => {
         dispatch(stopLoading());
       });
