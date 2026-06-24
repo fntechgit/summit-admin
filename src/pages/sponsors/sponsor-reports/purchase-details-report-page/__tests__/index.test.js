@@ -27,6 +27,7 @@ jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
 }));
 
 // Access the jest.fn() references from the mock (standard jest pattern).
+const { getCSV } = require("openstack-uicore-foundation/lib/utils/actions");
 const {
   getPurchaseDetailsReport,
   getPurchaseDetailsFilters
@@ -42,6 +43,7 @@ jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
   getCSV: jest.fn(() => ({ type: "GET_CSV_MOCK" }))
 }));
+
 
 // Mock getAccessTokenSafely so ExportCsvButton clicks don't fail in tests.
 jest.mock("../../../../../utils/methods", () => ({
@@ -66,7 +68,7 @@ const SAMPLE_ROW = {
 const PAGE_ROUTE = "/app/summits/:summit_id/sponsors/reports/purchase-details";
 const PAGE_URL = "/app/summits/42/sponsors/reports/purchase-details";
 
-function buildState(summaryOverrides = {}) {
+function buildState(summaryOverrides = {}, { total = 1 } = {}) {
   return {
     sponsorReportsPurchaseDetailsState: {
       data: [SAMPLE_ROW],
@@ -79,7 +81,7 @@ function buildState(summaryOverrides = {}) {
         ...summaryOverrides
       },
       filterOptions: { sponsors: [], statuses: [], forms: [] },
-      total: 1,
+      total,
       loading: false,
       readError: null,
       validationError: null,
@@ -91,7 +93,7 @@ function buildState(summaryOverrides = {}) {
   };
 }
 
-function renderPage(summaryOverrides = {}) {
+function renderPage(summaryOverrides = {}, stateOptions = {}) {
   const history = createMemoryHistory({ initialEntries: [PAGE_URL] });
   return {
     history,
@@ -99,7 +101,7 @@ function renderPage(summaryOverrides = {}) {
       <Router history={history}>
         <Route path={PAGE_ROUTE} component={PurchaseDetailsReportPage} />
       </Router>,
-      { initialState: buildState(summaryOverrides) }
+      { initialState: buildState(summaryOverrides, stateOptions) }
     )
   };
 }
@@ -242,5 +244,62 @@ describe("PurchaseDetailsReportPage", () => {
       expect.arrayContaining([expect.stringContaining("order_date>=")])
     );
     expect(calledQuery).toMatchObject({ page: 1 });
+  });
+
+  it("CSV export button dispatches getCSV with the summit-scoped URL, filtered query+access_token, and filename", async () => {
+    renderPage();
+    await act(async () => {});
+
+    // ExportCsvButton renders text from T.translate("sponsor_reports_page.export_csv")
+    const exportBtn = screen.getByText("sponsor_reports_page.export_csv");
+    await act(async () => {
+      fireEvent.click(exportBtn);
+    });
+
+    // getCSV is dispatched with (url, { ...csvQuery, access_token }, filename).
+    // csvQuery drops page/per_page; with no filters it is empty → only access_token.
+    expect(getCSV).toHaveBeenCalledTimes(1);
+    expect(getCSV).toHaveBeenCalledWith(
+      "http://test-api/api/v1/summits/42/reports/purchase-details/csv",
+      { access_token: "test-token" },
+      "purchase-details-summit-42.csv"
+    );
+  });
+
+  it("re-dispatches getPurchaseDetailsReport with the new page when MuiTable pagination changes (1-based)", async () => {
+    // total > perPage so the TablePagination "next page" button is enabled.
+    renderPage({}, { total: 25 });
+    await act(async () => {});
+    getPurchaseDetailsReport.mockClear();
+
+    // MUI TablePagination renders a next-page button. MuiTable converts the
+    // 0-based MUI page to a 1-based page before calling the page's onPageChange,
+    // so page 2 (not 1, not 0) must reach the query.
+    const nextBtn = screen.getByRole("button", { name: /next page/i });
+    await act(async () => {
+      fireEvent.click(nextBtn);
+    });
+
+    expect(getPurchaseDetailsReport).toHaveBeenCalled();
+    const [[calledQuery]] = getPurchaseDetailsReport.mock.calls;
+    expect(calledQuery).toMatchObject({ page: 2, per_page: 10 });
+  });
+
+  it("re-dispatches getPurchaseDetailsReport with the backend order param when a sortable column header is clicked", async () => {
+    renderPage();
+    await act(async () => {});
+    getPurchaseDetailsReport.mockClear();
+
+    // Clicking the "Order #" sort label toggles direction. Initial sortDir is 1 (asc),
+    // so MuiTable calls onSort("number", -1) → order param "-number".
+    const orderHeader = screen.getByText("Order #");
+    await act(async () => {
+      fireEvent.click(orderHeader);
+    });
+
+    expect(getPurchaseDetailsReport).toHaveBeenCalled();
+    const [[calledQuery]] = getPurchaseDetailsReport.mock.calls;
+    // Sort change snaps back to page 1; order is the backend key with desc prefix.
+    expect(calledQuery).toMatchObject({ page: 1, order: "-number" });
   });
 });

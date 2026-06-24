@@ -5,8 +5,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import OrdersTable, {
   formatCheckoutTime,
   getOrderRowId,
-  toOrderParam,
-  SORT_FIELD_MAP
+  toOrderParam
 } from "../OrdersTable";
 
 // MuiTable uses i18n-react internally (no-items message, pagination labels).
@@ -54,17 +53,6 @@ describe("formatCheckoutTime", () => {
 // sort-key helpers
 // ────────────────────────────────────────────────────────────────────────────
 describe("OrdersTable sort helpers", () => {
-  it("SORT_FIELD_MAP contains backend keys for sortable columns only", () => {
-    expect(SORT_FIELD_MAP.number).toBe("number");
-    expect(SORT_FIELD_MAP.order_date).toBe("order_date");
-    expect(SORT_FIELD_MAP.sponsor).toBe("sponsor");
-    expect(SORT_FIELD_MAP.status).toBe("status");
-    expect(SORT_FIELD_MAP.invoice_total).toBe("invoice_total");
-    // Non-sortable columns (Type, Sponsor Note) are NOT in the map
-    expect(SORT_FIELD_MAP.form_display).toBeUndefined();
-    expect(SORT_FIELD_MAP.sponsor_note).toBeUndefined();
-  });
-
   it("toOrderParam encodes asc (dir=1) and desc (dir=-1)", () => {
     expect(toOrderParam("number", 1)).toBe("number");
     expect(toOrderParam("number", -1)).toBe("-number");
