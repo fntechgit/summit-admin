@@ -24,6 +24,7 @@ import SpeakerPromoCodeSpecForm from "../../components/forms/speakers-promo-code
 import {
   initSpeakersList,
   getSpeakersBySummit,
+  getSpeakersActivitiesCount,
   exportSummitSpeakers,
   selectSummitSpeaker,
   unselectSummitSpeaker,
@@ -35,6 +36,7 @@ import {
 import {
   initSubmittersList,
   getSubmittersBySummit,
+  getSubmittersActivitiesCount,
   exportSummitSubmitters,
   selectSummitSubmitter,
   unselectSummitSubmitter,
@@ -146,13 +148,28 @@ class SummitSpeakersListPage extends React.Component {
       : this.props.submittersProps;
   }
 
-  getBySummit(term, page, perPage, order, orderDir, filters) {
+  getBySummit(
+    term,
+    page,
+    perPage,
+    order,
+    orderDir,
+    filters,
+    refreshCount = true
+  ) {
     const { source } = this.state;
     const callable =
       source === sources.speakers
         ? this.props.getSpeakersBySummit
         : this.props.getSubmittersBySummit;
     callable(term, page, perPage, order, orderDir, filters, source);
+    if (refreshCount) {
+      const countCallable =
+        source === sources.speakers
+          ? this.props.getSpeakersActivitiesCount
+          : this.props.getSubmittersActivitiesCount;
+      countCallable(filters);
+    }
   }
 
   export(term, order, orderDir, filters) {
@@ -220,15 +237,23 @@ class SummitSpeakersListPage extends React.Component {
     const {
       speakerFilters: { orAndFilter }
     } = this.state;
-    this.getBySummit(term, page, perPage, order, orderDir, {
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      orAndFilter,
-      mediaUploadTypeFilter
-    });
+    this.getBySummit(
+      term,
+      page,
+      perPage,
+      order,
+      orderDir,
+      {
+        selectionPlanFilter,
+        trackFilter,
+        trackGroupFilter,
+        activityTypeFilter,
+        selectionStatusFilter,
+        orAndFilter,
+        mediaUploadTypeFilter
+      },
+      false
+    );
   }
 
   handleSort(index, key, dir) {
@@ -246,15 +271,23 @@ class SummitSpeakersListPage extends React.Component {
     const {
       speakerFilters: { orAndFilter }
     } = this.state;
-    this.getBySummit(term, page, perPage, key, dir, {
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      orAndFilter,
-      mediaUploadTypeFilter
-    });
+    this.getBySummit(
+      term,
+      page,
+      perPage,
+      key,
+      dir,
+      {
+        selectionPlanFilter,
+        trackFilter,
+        trackGroupFilter,
+        activityTypeFilter,
+        selectionStatusFilter,
+        orAndFilter,
+        mediaUploadTypeFilter
+      },
+      false
+    );
   }
 
   handleSearch(term) {
@@ -273,15 +306,23 @@ class SummitSpeakersListPage extends React.Component {
     const {
       speakerFilters: { orAndFilter }
     } = this.state;
-    this.getBySummit(term, page, perPage, order, orderDir, {
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      orAndFilter,
-      mediaUploadTypeFilter
-    });
+    this.getBySummit(
+      term,
+      page,
+      perPage,
+      order,
+      orderDir,
+      {
+        selectionPlanFilter,
+        trackFilter,
+        trackGroupFilter,
+        activityTypeFilter,
+        selectionStatusFilter,
+        orAndFilter,
+        mediaUploadTypeFilter
+      },
+      false
+    );
   }
 
   handleChangeSelectionPlanFilter(ev) {
@@ -1222,6 +1263,7 @@ const mapStateToProps = ({
 export default connect(mapStateToProps, {
   initSpeakersList,
   getSpeakersBySummit,
+  getSpeakersActivitiesCount,
   exportSummitSpeakers,
   selectSummitSpeaker,
   unselectSummitSpeaker,
@@ -1231,6 +1273,7 @@ export default connect(mapStateToProps, {
   sendSpeakerEmails,
   initSubmittersList,
   getSubmittersBySummit,
+  getSubmittersActivitiesCount,
   exportSummitSubmitters,
   selectSummitSubmitter,
   unselectSummitSubmitter,
