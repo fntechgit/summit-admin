@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
@@ -22,7 +22,6 @@ import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import EventTypeForm from "../../../components/forms/event-type-form";
-import { saveEventType as saveEventTypeAction } from "../../../actions/event-type-actions";
 import {
   linkToPresentationType as linkToPresentationTypeAction,
   unlinkFromPresentationType as unlinkFromPresentationTypeAction,
@@ -33,13 +32,12 @@ const EventTypeDialog = ({
   currentSummit,
   entity,
   errors,
-  loading,
   onClose,
-  saveEventType,
+  onSave,
   linkToPresentationType,
   unlinkFromPresentationType
 }) => {
-  const isSaving = Boolean(loading);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleClose = () => {
     if (isSaving) return;
@@ -48,11 +46,13 @@ const EventTypeDialog = ({
 
   const handleOnSave = (eventTypeEntity) => {
     if (isSaving) return;
-    saveEventType(eventTypeEntity)
+    setIsSaving(true);
+    Promise.resolve(onSave(eventTypeEntity))
       .then(() => onClose())
       .catch(() => {
         // keep dialog open on save error to preserve user input
-      });
+      })
+      .finally(() => setIsSaving(false));
   };
 
   const getMediaUploads = (input, callback) => {
@@ -106,30 +106,22 @@ EventTypeDialog.propTypes = {
   currentSummit: PropTypes.shape({ id: PropTypes.number }).isRequired,
   entity: PropTypes.shape({ id: PropTypes.number }).isRequired,
   errors: PropTypes.shape({}),
-  loading: PropTypes.number,
   onClose: PropTypes.func.isRequired,
-  saveEventType: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
   linkToPresentationType: PropTypes.func.isRequired,
   unlinkFromPresentationType: PropTypes.func.isRequired
 };
 
 EventTypeDialog.defaultProps = {
-  errors: {},
-  loading: 0
+  errors: {}
 };
 
-const mapStateToProps = ({
-  baseState,
-  currentSummitState,
-  currentEventTypeState
-}) => ({
+const mapStateToProps = ({ currentSummitState, currentEventTypeState }) => ({
   currentSummit: currentSummitState.currentSummit,
-  loading: baseState.loading,
   ...currentEventTypeState
 });
 
 export default connect(mapStateToProps, {
-  saveEventType: saveEventTypeAction,
   linkToPresentationType: linkToPresentationTypeAction,
   unlinkFromPresentationType: unlinkFromPresentationTypeAction
 })(EventTypeDialog);

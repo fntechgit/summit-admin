@@ -134,27 +134,26 @@ export const saveEventType = (entity) => async (dispatch, getState) => {
       dispatch(
         showSuccessMessage(T.translate("edit_event_type.event_type_saved"))
       );
-      return dispatch(getEventTypes());
+      dispatch(stopLoading());
     });
-  } 
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_event_type.event_type_created"),
-      type: "success"
-    };
+  }
+  const success_message = {
+    title: T.translate("general.done"),
+    html: T.translate("edit_event_type.event_type_created"),
+    type: "success"
+  };
 
-    return postRequest(
-      createAction(UPDATE_EVENT_TYPE),
-      createAction(EVENT_TYPE_ADDED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/event-types`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then(() => {
-      dispatch(showMessage(success_message, () => {}));
-      return dispatch(getEventTypes());
-    });
-  
+  return postRequest(
+    createAction(UPDATE_EVENT_TYPE),
+    createAction(EVENT_TYPE_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/event-types`,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )(params)(dispatch).then(() => {
+    dispatch(showMessage(success_message, () => {}));
+    dispatch(stopLoading());
+  });
 };
 
 export const deleteEventType = (eventTypeId) => async (dispatch, getState) => {

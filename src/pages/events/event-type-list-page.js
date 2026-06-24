@@ -26,7 +26,8 @@ import {
   getEventType as getEventTypeAction,
   deleteEventType as deleteEventTypeAction,
   seedEventTypes as seedEventTypesAction,
-  resetEventTypeForm as resetEventTypeFormAction
+  resetEventTypeForm as resetEventTypeFormAction,
+  saveEventType as saveEventTypeAction
 } from "../../actions/event-type-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 import EventTypeDialog from "./components/event-type-dialog";
@@ -44,7 +45,8 @@ const EventTypeListPage = ({
   getEventType,
   deleteEventType,
   seedEventTypes,
-  resetEventTypeForm
+  resetEventTypeForm,
+  saveEventType
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -60,6 +62,11 @@ const EventTypeListPage = ({
     resetEventTypeForm();
     setOpenPopup("eventTypeForm");
   };
+
+  const handleSave = (eventTypeEntity) =>
+    saveEventType(eventTypeEntity).then(() =>
+      getEventTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+    );
 
   const handleDelete = (eventTypeId) => {
     deleteEventType(eventTypeId).then(() =>
@@ -184,7 +191,10 @@ const EventTypeListPage = ({
       )}
 
       {openPopup === "eventTypeForm" && (
-        <EventTypeDialog onClose={() => setOpenPopup(null)} />
+        <EventTypeDialog
+          onClose={() => setOpenPopup(null)}
+          onSave={handleSave}
+        />
       )}
     </div>
   );
@@ -210,7 +220,8 @@ EventTypeListPage.propTypes = {
   getEventType: PropTypes.func.isRequired,
   deleteEventType: PropTypes.func.isRequired,
   seedEventTypes: PropTypes.func.isRequired,
-  resetEventTypeForm: PropTypes.func.isRequired
+  resetEventTypeForm: PropTypes.func.isRequired,
+  saveEventType: PropTypes.func.isRequired
 };
 
 EventTypeListPage.defaultProps = {
@@ -235,5 +246,6 @@ export default connect(mapStateToProps, {
   getEventType: getEventTypeAction,
   deleteEventType: deleteEventTypeAction,
   seedEventTypes: seedEventTypesAction,
-  resetEventTypeForm: resetEventTypeFormAction
+  resetEventTypeForm: resetEventTypeFormAction,
+  saveEventType: saveEventTypeAction
 })(EventTypeListPage);
