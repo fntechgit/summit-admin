@@ -174,13 +174,21 @@ import sponsorPagePurchaseListReducer from "./reducers/sponsors/sponsor-page-pur
 import sponsorPagePagesListReducer from "./reducers/sponsors/sponsor-page-pages-list-reducer.js";
 import sponsorPageMUListReducer from "./reducers/sponsors/sponsor-page-mu-list-reducer.js";
 import dropboxSyncReducer from "./reducers/locations/dropbox-sync-reducer";
+import sponsorReportsPurchaseDetailsReducer from "./reducers/sponsors/sponsor-reports-purchase-details-reducer";
+import sponsorReportsSponsorAssetReducer from "./reducers/sponsors/sponsor-reports-sponsor-asset-reducer";
+import sponsorReportsDrilldownReducer from "./reducers/sponsors/sponsor-reports-drilldown-reducer";
 
 // default: localStorage if web, AsyncStorage if react-native
 
 const config = {
   key: "root",
   storage,
-  blacklist: ["dropboxSyncState"]
+  blacklist: [
+    "dropboxSyncState",
+    "sponsorReportsPurchaseDetailsState",
+    "sponsorReportsSponsorAssetState",
+    "sponsorReportsDrilldownState"
+  ]
 };
 
 const reducers = persistCombineReducers(config, {
@@ -343,7 +351,10 @@ const reducers = persistCombineReducers(config, {
   sponsorSettingsState: sponsorSettingsReducer,
   pageTemplateListState: pageTemplateListReducer,
   pageTemplateState: pageTemplateReducer,
-  dropboxSyncState: dropboxSyncReducer
+  dropboxSyncState: dropboxSyncReducer,
+  sponsorReportsPurchaseDetailsState: sponsorReportsPurchaseDetailsReducer,
+  sponsorReportsSponsorAssetState: sponsorReportsSponsorAssetReducer,
+  sponsorReportsDrilldownState: sponsorReportsDrilldownReducer
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
