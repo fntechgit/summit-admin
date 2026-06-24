@@ -35,6 +35,7 @@ const SponsorGlobalImportUsersPopup = ({
   const [userOptions, setUserOptions] = useState(null);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const formik = useFormik({
     initialValues: { sponsor: { id: "", name: "" } },
@@ -53,6 +54,7 @@ const SponsorGlobalImportUsersPopup = ({
 
   useEffect(() => {
     if (selectedSummit && sponsorId && companyId) {
+      let cancelled = false;
       setUserOptions(null);
       setSelectedUsers([]);
       fetchSponsorUsersBySummit(
@@ -61,25 +63,34 @@ const SponsorGlobalImportUsersPopup = ({
         companyId,
         DEFAULT_CURRENT_PAGE
       ).then((userData) => {
-        setUserOptions(userData);
-        setSelectedUsers([]);
+        if (!cancelled) {
+          setUserOptions(userData);
+          setSelectedUsers([]);
+        }
       });
+      return () => {
+        cancelled = true;
+      };
     }
   }, [selectedSummit, sponsorId, companyId]);
 
   const handleLoadMoreUsers = () => {
+    if (isLoadingMore) return;
     if (userOptions.current_page < userOptions.last_page) {
+      setIsLoadingMore(true);
       fetchSponsorUsersBySummit(
         currentSummit.id,
         selectedSummit,
         companyId,
         userOptions.current_page + 1
-      ).then((userData) => {
-        setUserOptions((value) => ({
-          ...userData,
-          data: [...value.data, ...userData.data]
-        }));
-      });
+      )
+        .then((userData) => {
+          setUserOptions((value) => ({
+            ...userData,
+            data: [...value.data, ...userData.data]
+          }));
+        })
+        .finally(() => setIsLoadingMore(false));
     }
   };
 
@@ -93,6 +104,7 @@ const SponsorGlobalImportUsersPopup = ({
     setIsSaving(true);
     importSponsorUsers(sponsorId, companyId, selectedSummit, selectedUsers)
       .then(() => onClose())
+      .catch(() => {})
       .finally(() => setIsSaving(false));
   };
 
