@@ -96,7 +96,7 @@ const TaxTypeListPage = ({
 
   const handleSave = (entity) =>
     saveTaxType(entity).then(() =>
-      getTaxTypes(term, currentPage, perPage, order, orderDir)
+      getTaxTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
     );
 
   const handleClosePopup = () => {

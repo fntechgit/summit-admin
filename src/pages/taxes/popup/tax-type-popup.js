@@ -30,6 +30,7 @@ const TaxTypePopup = ({
   };
 
   const handleSubmit = (values) => {
+    if (isSaving) return;
     setIsSaving(true);
     onSubmit(values)
       .then(() => onClose())

@@ -36,8 +36,11 @@ const validationSchema = yup.object({
   rate: yup
     .number()
     .typeError(T.translate("validation.number"))
-    .min(0, T.translate("validation.min", { min: 0 }))
-    .max(MAX_TAX_RATE, T.translate("validation.max", { max: MAX_TAX_RATE }))
+    .min(0, T.translate("validation.minimum", { minimum: 0 }))
+    .max(
+      MAX_TAX_RATE,
+      T.translate("validation.maximum", { maximum: MAX_TAX_RATE })
+    )
     .required(T.translate("validation.required")),
   tax_id: yup.string().nullable().optional()
 });
@@ -58,19 +61,18 @@ const TaxTypeForm = ({
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [ticketOptions, setTicketOptions] = useState([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
+  const [ticketTypes, setTicketTypes] = useState(entityProp.ticket_types ?? []);
 
   const initialValues = {
     id: entityProp.id,
     name: entityProp.name || "",
     rate: entityProp.rate ?? "",
-    tax_id: entityProp.tax_id || "",
-    ticket_types: entityProp.ticket_types ?? []
+    tax_id: entityProp.tax_id || ""
   };
 
   const formik = useFormik({
     initialValues,
     validationSchema,
-    enableReinitialize: true,
     onSubmit: (values) => {
       onSubmit({ ...entityProp, ...values });
     },
@@ -98,8 +100,8 @@ const TaxTypeForm = ({
   }, [formik.values.id]);
 
   const linkedIds = useMemo(
-    () => new Set(formik.values.ticket_types.map((t) => t.id)),
-    [formik.values.ticket_types]
+    () => new Set(ticketTypes.map((t) => t.id)),
+    [ticketTypes]
   );
 
   const filteredOptions = useMemo(
@@ -109,11 +111,13 @@ const TaxTypeForm = ({
 
   const handleTicketUnLink = (ticketId) => {
     onTicketUnLink(formik.values.id, ticketId);
+    setTicketTypes((prev) => prev.filter((t) => t.id !== ticketId));
   };
 
   const handleAdd = () => {
     if (!selectedTicket) return;
     onTicketLink(formik.values.id, selectedTicket);
+    setTicketTypes((prev) => [...prev, selectedTicket]);
     setSelectedTicket(null);
   };
 
@@ -196,12 +200,12 @@ const TaxTypeForm = ({
                 {T.translate("general.add")}
               </Button>
             </Box>
-            {formik.values.ticket_types.length > 0 && (
+            {ticketTypes.length > 0 && (
               <MuiTable
-                data={formik.values.ticket_types}
+                data={ticketTypes}
                 columns={ticketColumns}
-                totalRows={formik.values.ticket_types.length}
-                perPage={formik.values.ticket_types.length || DEFAULT_PER_PAGE}
+                totalRows={ticketTypes.length}
+                perPage={ticketTypes.length || DEFAULT_PER_PAGE}
                 currentPage={1}
                 getName={(item) => item.name}
                 onDelete={handleTicketUnLink}
