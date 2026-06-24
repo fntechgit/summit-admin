@@ -14,10 +14,16 @@
 import React from "react";
 import { Route, Switch, withRouter } from "react-router-dom";
 import Restrict from "../routes/restrict";
+import PurchaseDetailsReportPage from "../pages/sponsors/sponsor-reports/purchase-details-report-page";
 
 const SponsorReportsLayout = ({ match }) => (
   <div>
     <Switch>
+      <Route
+        exact
+        path={`${match.url}/purchase-details`}
+        component={PurchaseDetailsReportPage}
+      />
       <Route
         exact
         path={match.url}
