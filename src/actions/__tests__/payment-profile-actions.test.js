@@ -99,8 +99,7 @@ describe("getPaymentProfiles", () => {
     await flushPromises();
 
     expect(capturedParams["filter[]"]).toEqual([
-      "provider=@42,application_type=@42",
-      "id==42"
+      "provider=@42,application_type=@42,id==42"
     ]);
   });
 
