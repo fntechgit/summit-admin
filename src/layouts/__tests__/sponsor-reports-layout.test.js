@@ -40,6 +40,33 @@ jest.mock("../../access-routes.yml", () => ({
   ]
 }));
 
+// Mock reports-api so child pages can build URLs without a real API host.
+jest.mock("../../utils/reports-api", () => ({
+  getReportsApiBaseUrl: () => "http://test-api",
+  isPositiveIntId: (v) => /^[1-9]\d*$/.test(String(v))
+}));
+
+// Mock action creators used by the connected child pages.
+// Returns plain objects so the mock store can record them without real thunk logic.
+jest.mock("../../actions/sponsor-reports-actions", () => ({
+  getSponsorAssetSponsor: jest.fn(() => ({ type: "MOCK_GET_DRILLDOWN" })),
+  getSponsorAssetReport: jest.fn(() => ({ type: "MOCK_GET_SPONSOR_ASSET" })),
+  getSponsorAssetFilters: jest.fn(() => ({
+    type: "MOCK_GET_SPONSOR_ASSET_FILTERS"
+  })),
+  getPurchaseDetailsReport: jest.fn(() => ({
+    type: "MOCK_GET_PURCHASE_DETAILS"
+  })),
+  getPurchaseDetailsFilters: jest.fn(() => ({
+    type: "MOCK_GET_PURCHASE_DETAILS_FILTERS"
+  })),
+  SPONSOR_DRILLDOWN_READ_ERROR: "SPONSOR_DRILLDOWN_READ_ERROR",
+  SPONSOR_DRILLDOWN_EXPORT_DISABLED: "SPONSOR_DRILLDOWN_EXPORT_DISABLED",
+  PURCHASE_DETAILS_VALIDATION_CLEAR: "PURCHASE_DETAILS_VALIDATION_CLEAR",
+  REQUEST_SPONSOR_DRILLDOWN: "REQUEST_SPONSOR_DRILLDOWN",
+  RECEIVE_SPONSOR_DRILLDOWN: "RECEIVE_SPONSOR_DRILLDOWN"
+}));
+
 const REPORTS_ROUTE = "/app/summits/:summit_id/sponsors/reports";
 const REPORTS_URL = "/app/summits/1/sponsors/reports";
 
@@ -76,6 +103,47 @@ describe("SponsorReportsLayout", () => {
     expect(screen.getByText("Sorry...")).toBeInTheDocument();
     expect(
       screen.queryByTestId("report-card-purchase-details")
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders the drilldown page (not the landing) when navigating to the deep sponsor-assets/sponsors/:sponsorId path as admin", () => {
+    // Integration test: mounts the REAL Restrict-wrapped SponsorReportsLayout and
+    // navigates to the drilldown sub-route so the Switch routes to SponsorAssetDrilldownPage
+    // rather than the landing. Proves the route table resolves the deep path end-to-end
+    // through the admin gate, not just the list/landing.
+    const DRILLDOWN_URL =
+      "/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17";
+    const history = createMemoryHistory({ initialEntries: [DRILLDOWN_URL] });
+
+    renderWithRedux(
+      <Router history={history}>
+        <Route path={REPORTS_ROUTE} component={SponsorReportsLayout} />
+      </Router>,
+      {
+        initialState: {
+          loggedUserState: {
+            member: { groups: [{ code: "administrators" }] }
+          },
+          currentSummitState: { currentSummit: { id: 1 } },
+          sponsorReportsDrilldownState: {
+            detail: null,
+            loading: true,
+            readError: null,
+            exportDisabled: false
+          }
+        }
+      }
+    );
+
+    // The drilldown page renders its loading indicator — the landing cards are absent.
+    expect(
+      screen.getByText("sponsor_reports_page.loading")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("report-card-purchase-details")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("report-card-sponsor-assets")
     ).not.toBeInTheDocument();
   });
 });

@@ -4281,8 +4281,6 @@
     "uploaded": "Uploaded"
   },
   "sponsor_reports_page": {
-    "unauthorized_title": "Access restricted",
-    "unauthorized_body": "You don't have permission to view sponsor reports. Contact an administrator if you believe this is a mistake.",
     "search": "Search",
     "filter_sponsor": "Sponsor",
     "apply": "Apply",
@@ -4311,8 +4309,6 @@
     "sponsor_no_submissions": "This sponsor has no submissions yet.",
     "no_results": "No results.",
     "summit_not_found": "Summit not found.",
-    "summit_reports_title": "Summit Reports",
-    "summit": "Summit",
     "status_completed": "Completed",
     "status_in_progress": "In Progress",
     "status_pending": "Pending",
@@ -4324,9 +4320,6 @@
     "sponsors_count": "{count} sponsors",
     "unnamed_component": "(Unnamed)",
     "not_present_yet": "Not present yet",
-    "picker_title": "Reports",
-    "select_summit": "Select a summit to view its reports.",
-    "no_summits": "No summits with report data.",
     "report_filters": "Report Filters",
     "pending_upload": "Pending Upload",
     "pages_active": "{count} pages active",

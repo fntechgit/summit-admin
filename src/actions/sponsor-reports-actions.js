@@ -127,7 +127,12 @@ export const getSponsorAssetSponsor =
       createAction(RECEIVE_SPONSOR_DRILLDOWN),
       `${base(currentSummit.id)}/sponsor-assets/sponsors/${sponsorId}`,
       makeReadErrorHandler({
-        onReadError: createAction(SPONSOR_DRILLDOWN_READ_ERROR)
+        onReadError: createAction(SPONSOR_DRILLDOWN_READ_ERROR),
+        // A 412 or export-disabled 503 on a read endpoint must still clear
+        // loading; route both to the same READ_ERROR action so the page does
+        // not spin forever.
+        onValidationError: createAction(SPONSOR_DRILLDOWN_READ_ERROR),
+        onExportDisabled: createAction(SPONSOR_DRILLDOWN_READ_ERROR)
       })
     )({ access_token: accessToken })(dispatch)
       .catch(() => {})
