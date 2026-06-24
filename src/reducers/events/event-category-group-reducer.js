@@ -9,8 +9,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_EVENT_CATEGORY_GROUP,
   RESET_EVENT_CATEGORY_GROUP_FORM,
@@ -22,9 +25,6 @@ import {
   GROUP_ADDED_TO_GROUP,
   GROUP_REMOVED_FROM_GROUP
 } from "../../actions/event-category-actions";
-
-import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
@@ -49,99 +49,71 @@ const DEFAULT_STATE = {
   errors: {}
 };
 
+// eslint-disable-next-line default-param-last
 const eventCategoryGroupReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
     case LOGOUT_USER:
-      {
-        // we need this in case the token expired while editing the form
-        if (payload.hasOwnProperty("persistStore")) {
-          return state;
-        } else {
-          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-        }
+      if (Object.hasOwn(payload, "persistStore")) {
+        return state;
       }
-      break;
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
     case SET_CURRENT_SUMMIT:
     case RESET_EVENT_CATEGORY_GROUP_FORM:
-      {
-        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-      }
-      break;
-    case RECEIVE_EVENT_CATEGORY_GROUP_META:
-      {
-        let allClasses = [...payload.response];
-
-        return { ...state, allClasses: allClasses };
-      }
-      break;
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    case RECEIVE_EVENT_CATEGORY_GROUP_META: {
+      const allClasses = [...payload.response];
+      return { ...state, allClasses };
+    }
     case UPDATE_EVENT_CATEGORY_GROUP:
-      {
-        return { ...state, entity: { ...payload }, errors: {} };
-      }
-      break;
+      return { ...state, entity: { ...state.entity, ...payload }, errors: {} };
     case EVENT_CATEGORY_GROUP_ADDED:
-    case RECEIVE_EVENT_CATEGORY_GROUP:
-      {
-        let entity = { ...payload.response };
+    case RECEIVE_EVENT_CATEGORY_GROUP: {
+      const entity = { ...payload.response };
 
-        for (var key in entity) {
-          if (entity.hasOwnProperty(key)) {
-            entity[key] = entity[key] == null ? "" : entity[key];
-          }
+      for (const [key, value] of Object.entries(entity)) {
+        entity[key] = value == null ? "" : value;
+      }
+
+      return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+    }
+    case CATEGORY_ADDED_TO_GROUP: {
+      const category = { ...payload.category };
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          tracks: [...state.entity.tracks, category]
         }
-
-        return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
-      }
-      break;
-    case CATEGORY_ADDED_TO_GROUP:
-      {
-        let category = { ...payload.category };
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            tracks: [...state.entity.tracks, category]
-          }
-        };
-      }
-      break;
-    case CATEGORY_REMOVED_FROM_GROUP:
-      {
-        let { categoryId } = payload;
-        let tracks = state.entity.tracks.filter((t) => t.id !== categoryId);
-        return { ...state, entity: { ...state.entity, tracks: tracks } };
-      }
-      break;
-    case GROUP_ADDED_TO_GROUP:
-      {
-        let allowedGroup = { ...payload.allowedGroup };
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            allowed_groups: [...state.entity.allowed_groups, allowedGroup]
-          }
-        };
-      }
-      break;
-    case GROUP_REMOVED_FROM_GROUP:
-      {
-        let { allowedGroupId } = payload;
-        let allowed_groups = state.entity.allowed_groups.filter(
-          (g) => g.id !== allowedGroupId
-        );
-        return {
-          ...state,
-          entity: { ...state.entity, allowed_groups: allowed_groups }
-        };
-      }
-      break;
+      };
+    }
+    case CATEGORY_REMOVED_FROM_GROUP: {
+      const { categoryId } = payload;
+      const tracks = state.entity.tracks.filter((t) => t.id !== categoryId);
+      return { ...state, entity: { ...state.entity, tracks } };
+    }
+    case GROUP_ADDED_TO_GROUP: {
+      const allowedGroup = { ...payload.allowedGroup };
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          allowed_groups: [...state.entity.allowed_groups, allowedGroup]
+        }
+      };
+    }
+    case GROUP_REMOVED_FROM_GROUP: {
+      const { allowedGroupId } = payload;
+      const allowedGroups = state.entity.allowed_groups.filter(
+        (g) => g.id !== allowedGroupId
+      );
+      return {
+        ...state,
+        entity: { ...state.entity, allowed_groups: allowedGroups }
+      };
+    }
     case VALIDATE:
-      {
-        return { ...state, errors: payload.errors };
-      }
-      break;
+      return { ...state, errors: payload.errors };
     default:
       return state;
   }
