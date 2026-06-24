@@ -23,6 +23,13 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
   translate: (k) => k
 }));
 
+// react-breadcrumbs: render a stub so the landing page Breadcrumb doesn't error
+jest.mock("react-breadcrumbs", () => ({
+  Breadcrumb: ({ data }) => (
+    <div data-testid="breadcrumb" data-title={data.title} />
+  )
+}));
+
 // Provide real access-routes data so Restrict/Member gates correctly.
 // Without this the YAML transform stub returns "" and hasAccess() always returns true.
 jest.mock("../../access-routes.yml", () => ({
@@ -53,10 +60,13 @@ const renderLayout = (groups) => {
 };
 
 describe("SponsorReportsLayout", () => {
-  it("renders the reports placeholder for an administrator", () => {
+  it("renders the reports landing page (two cards) for an administrator", () => {
     renderLayout([{ code: "administrators" }]);
     expect(
-      screen.getByTestId("sponsor-reports-placeholder")
+      screen.getByTestId("report-card-purchase-details")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("report-card-sponsor-assets")
     ).toBeInTheDocument();
   });
 
@@ -65,7 +75,7 @@ describe("SponsorReportsLayout", () => {
     // UnAuthorizedPage renders: <h1>Sorry... </h1>
     expect(screen.getByText("Sorry...")).toBeInTheDocument();
     expect(
-      screen.queryByTestId("sponsor-reports-placeholder")
+      screen.queryByTestId("report-card-purchase-details")
     ).not.toBeInTheDocument();
   });
 });

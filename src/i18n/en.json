@@ -4331,6 +4331,7 @@
     "pending_upload": "Pending Upload",
     "pages_active": "{count} pages active",
     "purchase_details_desc": "Orders & revenue",
-    "sponsor_assets_desc": "Sponsor portal assets"
+    "sponsor_assets_desc": "Sponsor portal assets",
+    "landing_title": "Reports"
   }
 }
