@@ -17,6 +17,7 @@ import Restrict from "../routes/restrict";
 import PurchaseDetailsReportPage from "../pages/sponsors/sponsor-reports/purchase-details-report-page";
 import SponsorAssetDrilldownPage from "../pages/sponsors/sponsor-reports/sponsor-asset-drilldown-page";
 import SponsorAssetReportPage from "../pages/sponsors/sponsor-reports/sponsor-asset-report-page";
+import ReportsLandingPage from "../pages/sponsors/sponsor-reports/reports-landing-page";
 
 const SponsorReportsLayout = ({ match }) => (
   <div>
@@ -39,15 +40,7 @@ const SponsorReportsLayout = ({ match }) => (
         path={`${match.url}/sponsor-assets`}
         component={SponsorAssetReportPage}
       />
-      <Route
-        exact
-        path={match.url}
-        render={() => (
-          <div data-testid="sponsor-reports-placeholder">
-            <p>Sponsor Reports</p>
-          </div>
-        )}
-      />
+      <Route exact path={match.url} component={ReportsLandingPage} />
     </Switch>
   </div>
 );
