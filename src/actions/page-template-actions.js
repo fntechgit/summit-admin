@@ -211,35 +211,60 @@ export const savePageTemplate = (entity) => async (dispatch) => {
 
 /* **************************************  ARCHIVE  ************************************** */
 
-export const archivePageTemplate = (pageTemplateId) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
-  const params = { access_token: accessToken };
+export const archivePageTemplate =
+  (pageTemplateId) => async (dispatch, getState) => {
+    const accessToken = await getAccessTokenSafely();
+    const params = { access_token: accessToken };
 
-  return putRequest(
-    null,
-    createAction(PAGE_TEMPLATE_ARCHIVED),
-    `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${pageTemplateId}/archive`,
-    null,
-    snackbarErrorHandler
-  )(params)(dispatch);
-};
+    await putRequest(
+      null,
+      createAction(PAGE_TEMPLATE_ARCHIVED),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${pageTemplateId}/archive`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch);
+    const { term, currentPage, perPage, order, orderDir, showArchived } =
+      getState().pageTemplateListState;
+    dispatch(
+      getPageTemplates(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
+  };
 
-export const unarchivePageTemplate = (pageTemplateId) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
-  const params = { access_token: accessToken };
+export const unarchivePageTemplate =
+  (pageTemplateId) => async (dispatch, getState) => {
+    const accessToken = await getAccessTokenSafely();
+    const params = { access_token: accessToken };
 
-  dispatch(startLoading());
+    dispatch(startLoading());
 
-  return deleteRequest(
-    null,
-    createAction(PAGE_TEMPLATE_UNARCHIVED)({ pageTemplateId }),
-    `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${pageTemplateId}/archive`,
-    null,
-    snackbarErrorHandler
-  )(params)(dispatch).then(() => {
+    await deleteRequest(
+      null,
+      createAction(PAGE_TEMPLATE_UNARCHIVED)({ pageTemplateId }),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${pageTemplateId}/archive`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch);
     dispatch(stopLoading());
-  });
-};
+    const { term, currentPage, perPage, order, orderDir, showArchived } =
+      getState().pageTemplateListState;
+    dispatch(
+      getPageTemplates(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
+  };
 
 export const clonePageTemplate = (templateId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();

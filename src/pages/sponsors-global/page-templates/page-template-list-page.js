@@ -119,19 +119,9 @@ const PageTemplateListPage = ({
   };
 
   const handleArchive = (item) =>
-    (item.is_archived
+    item.is_archived
       ? unarchivePageTemplate(item.id)
-      : archivePageTemplate(item.id)
-    ).then(() => {
-      getPageTemplates(
-        term,
-        currentPage,
-        perPage,
-        order,
-        orderDir,
-        showArchived
-      );
-    });
+      : archivePageTemplate(item.id);
 
   const handleEdit = (row) => {
     getPageTemplate(row.id).then(() => setOpenPageDialog(true));

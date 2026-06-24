@@ -393,18 +393,46 @@ export const deleteItemImage = (
 
 /* **************************************  ARCHIVE  ************************************** */
 
-export const archiveFormTemplateItem = (formTemplateId, formTemplateItem) => {
-  const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItem.id}/archive`,
-    updatedActionName: FORM_TEMPLATE_ITEM_ARCHIVED
+export const archiveFormTemplateItem =
+  (formTemplateId, formTemplateItem) => async (dispatch, getState) => {
+    const settings = {
+      url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItem.id}/archive`,
+      updatedActionName: FORM_TEMPLATE_ITEM_ARCHIVED
+    };
+    await archiveItem(formTemplateItem, settings)(dispatch);
+    const { term, currentPage, perPage, order, orderDir, showArchived } =
+      getState().currentFormTemplateItemListState;
+    dispatch(
+      getFormTemplateItems(
+        formTemplateId,
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
   };
-  return archiveItem(formTemplateItem, settings);
-};
 
-export const unarchiveFormTemplateItem = (formTemplateId, formTemplateItem) => {
-  const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItem.id}/archive`,
-    deletedActionName: FORM_TEMPLATE_ITEM_UNARCHIVED
+export const unarchiveFormTemplateItem =
+  (formTemplateId, formTemplateItem) => async (dispatch, getState) => {
+    const settings = {
+      url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItem.id}/archive`,
+      deletedActionName: FORM_TEMPLATE_ITEM_UNARCHIVED
+    };
+    await unarchiveItem(formTemplateItem, settings)(dispatch);
+    const { term, currentPage, perPage, order, orderDir, showArchived } =
+      getState().currentFormTemplateItemListState;
+    dispatch(
+      getFormTemplateItems(
+        formTemplateId,
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
   };
-  return unarchiveItem(formTemplateItem, settings);
-};

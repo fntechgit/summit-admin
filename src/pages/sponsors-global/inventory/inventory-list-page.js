@@ -148,19 +148,9 @@ const InventoryListPage = ({
   };
 
   const handleArchiveItem = (item) =>
-    (item.is_archived
+    item.is_archived
       ? unarchiveInventoryItem(item)
-      : archiveInventoryItem(item)
-    ).then(() => {
-      getInventoryItems(
-        term,
-        currentPage,
-        perPage,
-        order,
-        orderDir,
-        showArchived
-      );
-    });
+      : archiveInventoryItem(item);
 
   const columns = [
     {

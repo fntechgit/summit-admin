@@ -101,12 +101,7 @@ const ShowPagesListPage = ({
   };
 
   const handleArchiveItem = (item) =>
-    (item.is_archived
-      ? unarchiveShowPage(item.id)
-      : archiveShowPage(item.id)
-    ).then(() => {
-      getShowPages(term, currentPage, perPage, order, orderDir, showArchived);
-    });
+    item.is_archived ? unarchiveShowPage(item.id) : archiveShowPage(item.id);
 
   const handleShowArchivedForms = (ev) => {
     getShowPages(

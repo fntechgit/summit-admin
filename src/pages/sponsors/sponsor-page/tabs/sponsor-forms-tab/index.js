@@ -147,20 +147,9 @@ const SponsorFormsTab = ({
   };
 
   const handleArchiveForm = (item) =>
-    (item.is_archived
+    item.is_archived
       ? unarchiveSponsorCustomizedForm(item.id)
-      : archiveSponsorCustomizedForm(item.id)
-    ).then(() => {
-      const { perPage, order, orderDir, currentPage } = customizedForms;
-      getSponsorCustomizedForms(
-        term,
-        currentPage,
-        perPage,
-        order,
-        orderDir,
-        showArchived
-      );
-    });
+      : archiveSponsorCustomizedForm(item.id);
 
   const handleCustomizedFormManageItems = (item) => {
     history.push(

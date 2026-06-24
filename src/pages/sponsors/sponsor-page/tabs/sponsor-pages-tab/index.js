@@ -180,20 +180,9 @@ const SponsorPagesTab = ({
   };
 
   const handleArchiveCustomizedPage = (item) =>
-    (item.is_archived
+    item.is_archived
       ? unarchiveCustomizedPage(item.id)
-      : archiveCustomizedPage(item.id)
-    ).then(() => {
-      const { perPage, order, orderDir, currentPage } = customizedPages;
-      return getSponsorCustomizedPages(
-        term,
-        currentPage,
-        perPage,
-        order,
-        orderDir,
-        showArchived
-      );
-    });
+      : archiveCustomizedPage(item.id);
 
   const handleManagedEdit = (item) => {
     getSponsorManagedPage(item.id).then(() => setOpenPopup("managedPagePopup"));

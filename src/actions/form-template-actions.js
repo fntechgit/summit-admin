@@ -325,18 +325,44 @@ export const deleteFormTemplateMaterial = (templateId, materialId) => {
 
 /* **************************************  ARCHIVE  ************************************** */
 
-export const archiveFormTemplate = (formTemplate) => {
-  const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplate.id}/archive`,
-    updatedActionName: FORM_TEMPLATE_ARCHIVED
+export const archiveFormTemplate =
+  (formTemplate) => async (dispatch, getState) => {
+    const settings = {
+      url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplate.id}/archive`,
+      updatedActionName: FORM_TEMPLATE_ARCHIVED
+    };
+    await archiveItem(formTemplate, settings)(dispatch);
+    const { term, currentPage, perPage, order, orderDir, showArchived } =
+      getState().currentFormTemplateListState;
+    dispatch(
+      getFormTemplates(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
   };
-  return archiveItem(formTemplate, settings);
-};
 
-export const unarchiveFormTemplate = (formTemplate) => {
-  const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplate.id}/archive`,
-    deletedActionName: FORM_TEMPLATE_UNARCHIVED
+export const unarchiveFormTemplate =
+  (formTemplate) => async (dispatch, getState) => {
+    const settings = {
+      url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplate.id}/archive`,
+      deletedActionName: FORM_TEMPLATE_UNARCHIVED
+    };
+    await unarchiveItem(formTemplate, settings)(dispatch);
+    const { term, currentPage, perPage, order, orderDir, showArchived } =
+      getState().currentFormTemplateListState;
+    dispatch(
+      getFormTemplates(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
   };
-  return unarchiveItem(formTemplate, settings);
-};

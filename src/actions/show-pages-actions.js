@@ -236,24 +236,25 @@ export const archiveShowPage = (pageId) => async (dispatch, getState) => {
 
   dispatch(startLoading());
 
-  return putRequest(
+  await putRequest(
     null,
     createAction(SHOW_PAGE_ARCHIVED)({ pageId }),
     `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages/${pageId}/archive`,
     null,
     snackbarErrorHandler
-  )(params)(dispatch)
-    .then(() => {
-      dispatch(
-        snackbarSuccessHandler({
-          title: T.translate("general.success"),
-          html: T.translate("show_pages.archived")
-        })
-      );
+  )(params)(dispatch);
+  dispatch(
+    snackbarSuccessHandler({
+      title: T.translate("general.success"),
+      html: T.translate("show_pages.archived")
     })
-    .finally(() => {
-      dispatch(stopLoading());
-    });
+  );
+  dispatch(stopLoading());
+  const { term, currentPage, perPage, order, orderDir, showArchived } =
+    getState().showPagesListState;
+  dispatch(
+    getShowPages(term, currentPage, perPage, order, orderDir, showArchived)
+  );
 };
 
 export const unarchiveShowPage = (pageId) => async (dispatch, getState) => {
@@ -264,22 +265,23 @@ export const unarchiveShowPage = (pageId) => async (dispatch, getState) => {
 
   dispatch(startLoading());
 
-  return deleteRequest(
+  await deleteRequest(
     null,
     createAction(SHOW_PAGE_UNARCHIVED)({ pageId }),
     `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages/${pageId}/archive`,
     null,
     snackbarErrorHandler
-  )(params)(dispatch)
-    .then(() => {
-      dispatch(
-        snackbarSuccessHandler({
-          title: T.translate("general.success"),
-          html: T.translate("show_pages.unarchived")
-        })
-      );
+  )(params)(dispatch);
+  dispatch(
+    snackbarSuccessHandler({
+      title: T.translate("general.success"),
+      html: T.translate("show_pages.unarchived")
     })
-    .finally(() => {
-      dispatch(stopLoading());
-    });
+  );
+  dispatch(stopLoading());
+  const { term, currentPage, perPage, order, orderDir, showArchived } =
+    getState().showPagesListState;
+  dispatch(
+    getShowPages(term, currentPage, perPage, order, orderDir, showArchived)
+  );
 };

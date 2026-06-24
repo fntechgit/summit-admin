@@ -370,18 +370,44 @@ export const deleteInventoryItemImage = (inventoryItemId, imageId) => {
 
 /* **************************************  ARCHIVE  ************************************** */
 
-export const archiveInventoryItem = (inventoryItem) => {
-  const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/archive`,
-    updatedActionName: INVENTORY_ITEM_ARCHIVED
+export const archiveInventoryItem =
+  (inventoryItem) => async (dispatch, getState) => {
+    const settings = {
+      url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/archive`,
+      updatedActionName: INVENTORY_ITEM_ARCHIVED
+    };
+    await archiveItem(inventoryItem, settings)(dispatch);
+    const { term, currentPage, perPage, order, orderDir, showArchived } =
+      getState().currentInventoryItemListState;
+    dispatch(
+      getInventoryItems(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
   };
-  return archiveItem(inventoryItem, settings);
-};
 
-export const unarchiveInventoryItem = (inventoryItem) => {
-  const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/archive`,
-    deletedActionName: INVENTORY_ITEM_UNARCHIVED
+export const unarchiveInventoryItem =
+  (inventoryItem) => async (dispatch, getState) => {
+    const settings = {
+      url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/archive`,
+      deletedActionName: INVENTORY_ITEM_UNARCHIVED
+    };
+    await unarchiveItem(inventoryItem, settings)(dispatch);
+    const { term, currentPage, perPage, order, orderDir, showArchived } =
+      getState().currentInventoryItemListState;
+    dispatch(
+      getInventoryItems(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
   };
-  return unarchiveItem(inventoryItem, settings);
-};

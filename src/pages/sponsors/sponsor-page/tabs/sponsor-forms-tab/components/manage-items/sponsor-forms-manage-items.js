@@ -151,20 +151,9 @@ const SponsorFormsManageItems = ({
   };
 
   const handleArchiveItem = (item) =>
-    (item.is_archived
+    item.is_archived
       ? unarchiveSponsorCustomizedFormItem(formId, item.id)
-      : archiveSponsorCustomizedFormItem(formId, item.id)
-    ).then(() => {
-      getSponsorCustomizedFormItems(
-        formId,
-        term,
-        currentPage,
-        perPage,
-        order,
-        orderDir,
-        showArchived
-      );
-    });
+      : archiveSponsorCustomizedFormItem(formId, item.id);
 
   const handleShowArchivedItems = (ev) => {
     getSponsorCustomizedFormItems(

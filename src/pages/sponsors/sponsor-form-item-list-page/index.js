@@ -108,19 +108,9 @@ const SponsorFormItemListPage = ({
   };
 
   const handleArchiveItem = (item) =>
-    (item.is_archived
+    item.is_archived
       ? unarchiveSponsorFormItem(formId, item.id)
-      : archiveSponsorFormItem(formId, item.id)
-    ).then(() => {
-      getSponsorFormItems(
-        formId,
-        currentPage,
-        perPage,
-        order,
-        orderDir,
-        showArchived
-      );
-    });
+      : archiveSponsorFormItem(formId, item.id);
 
   const handleRowDelete = (itemId) => {
     deleteSponsorFormItem(formId, itemId).then(() => {

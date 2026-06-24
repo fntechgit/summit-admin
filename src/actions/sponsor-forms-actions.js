@@ -202,13 +202,18 @@ export const archiveSponsorForm = (formId) => async (dispatch, getState) => {
   const { currentSummit } = currentSummitState;
   const params = { access_token: accessToken };
 
-  return putRequest(
+  await putRequest(
     null,
     createAction(SPONSOR_FORM_ARCHIVED),
     `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/archive`,
     null,
     snackbarErrorHandler
   )(params)(dispatch);
+  const { term, currentPage, perPage, order, orderDir, showArchived } =
+    getState().sponsorFormsListState;
+  dispatch(
+    getSponsorForms(term, currentPage, perPage, order, orderDir, showArchived)
+  );
 };
 
 export const unarchiveSponsorForm = (formId) => async (dispatch, getState) => {
@@ -219,15 +224,19 @@ export const unarchiveSponsorForm = (formId) => async (dispatch, getState) => {
 
   dispatch(startLoading());
 
-  return deleteRequest(
+  await deleteRequest(
     null,
     createAction(SPONSOR_FORM_UNARCHIVED)({ formId }),
     `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/archive`,
     null,
     snackbarErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+  )(params)(dispatch);
+  dispatch(stopLoading());
+  const { term, currentPage, perPage, order, orderDir, showArchived } =
+    getState().sponsorFormsListState;
+  dispatch(
+    getSponsorForms(term, currentPage, perPage, order, orderDir, showArchived)
+  );
 };
 
 export const deleteSponsorForm = (formId) => async (dispatch, getState) => {
@@ -945,7 +954,7 @@ export const archiveSponsorCustomizedForm =
 
     dispatch(startLoading());
 
-    return putRequest(
+    await putRequest(
       null,
       createAction(SPONSOR_CUSTOMIZED_FORM_ARCHIVED_CHANGED)({
         formId,
@@ -954,18 +963,27 @@ export const archiveSponsorCustomizedForm =
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/archive`,
       null,
       snackbarErrorHandler
-    )(params)(dispatch)
-      .then(() => {
-        dispatch(
-          snackbarSuccessHandler({
-            title: T.translate("general.success"),
-            html: T.translate("edit_sponsor.forms_tab.customized_form.archived")
-          })
-        );
+    )(params)(dispatch);
+    dispatch(
+      snackbarSuccessHandler({
+        title: T.translate("general.success"),
+        html: T.translate("edit_sponsor.forms_tab.customized_form.unarchived")
       })
-      .finally(() => {
-        dispatch(stopLoading());
-      });
+    );
+    dispatch(stopLoading());
+    const { term, showArchived, customizedForms } =
+      getState().sponsorPageFormsListState;
+    const { currentPage, perPage, order, orderDir } = customizedForms;
+    dispatch(
+      getSponsorCustomizedForms(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
   };
 
 export const unarchiveSponsorCustomizedForm =
@@ -980,7 +998,7 @@ export const unarchiveSponsorCustomizedForm =
 
     dispatch(startLoading());
 
-    return deleteRequest(
+    await deleteRequest(
       null,
       createAction(SPONSOR_CUSTOMIZED_FORM_ARCHIVED_CHANGED)({
         formId,
@@ -989,20 +1007,27 @@ export const unarchiveSponsorCustomizedForm =
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/archive`,
       null,
       snackbarErrorHandler
-    )(params)(dispatch)
-      .then(() => {
-        dispatch(
-          snackbarSuccessHandler({
-            title: T.translate("general.success"),
-            html: T.translate(
-              "edit_sponsor.forms_tab.customized_form.unarchived"
-            )
-          })
-        );
+    )(params)(dispatch);
+    dispatch(
+      snackbarSuccessHandler({
+        title: T.translate("general.success"),
+        html: T.translate("edit_sponsor.forms_tab.customized_form.unarchived")
       })
-      .finally(() => {
-        dispatch(stopLoading());
-      });
+    );
+    dispatch(stopLoading());
+    const { term, showArchived, customizedForms } =
+      getState().sponsorPageFormsListState;
+    const { currentPage, perPage, order, orderDir } = customizedForms;
+    dispatch(
+      getSponsorCustomizedForms(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
   };
 
 export const deleteSponsorCustomizedForm =
@@ -1278,13 +1303,25 @@ export const archiveSponsorFormItem =
     const { currentSummit } = currentSummitState;
     const params = { access_token: accessToken };
 
-    return putRequest(
+    await putRequest(
       null,
       createAction(SPONSOR_FORM_ITEM_ARCHIVED),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${itemId}/archive`,
       null,
       snackbarErrorHandler
     )(params)(dispatch);
+    const { currentPage, perPage, order, orderDir, showArchived } =
+      getState().sponsorFormItemsListState;
+    dispatch(
+      getSponsorFormItems(
+        formId,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
   };
 
 export const unarchiveSponsorFormItem =
@@ -1296,15 +1333,26 @@ export const unarchiveSponsorFormItem =
 
     dispatch(startLoading());
 
-    return deleteRequest(
+    await deleteRequest(
       null,
       createAction(SPONSOR_FORM_ITEM_UNARCHIVED)({ itemId }),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${itemId}/archive`,
       null,
       snackbarErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch);
+    dispatch(stopLoading());
+    const { currentPage, perPage, order, orderDir, showArchived } =
+      getState().sponsorFormItemsListState;
+    dispatch(
+      getSponsorFormItems(
+        formId,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
   };
 
 export const resetSponsorFormItem = () => (dispatch) => {
@@ -1566,15 +1614,27 @@ export const archiveSponsorCustomizedFormItem =
 
     dispatch(startLoading());
 
-    return putRequest(
+    await putRequest(
       null,
       createAction(SPONSOR_CUSTOMIZED_FORM_ITEM_ARCHIVED),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${itemId}/archive`,
       null,
       snackbarErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch);
+    dispatch(stopLoading());
+    const { term, currentPage, perPage, order, orderDir, showArchived } =
+      getState().sponsorCustomizedFormItemsListState;
+    dispatch(
+      getSponsorCustomizedFormItems(
+        formId,
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
   };
 
 export const unarchiveSponsorCustomizedFormItem =
@@ -1589,13 +1649,25 @@ export const unarchiveSponsorCustomizedFormItem =
 
     dispatch(startLoading());
 
-    return deleteRequest(
+    await deleteRequest(
       null,
       createAction(SPONSOR_CUSTOMIZED_FORM_ITEM_UNARCHIVED)({ itemId }),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${itemId}/archive`,
       null,
       snackbarErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch);
+    dispatch(stopLoading());
+    const { term, currentPage, perPage, order, orderDir, showArchived } =
+      getState().sponsorCustomizedFormItemsListState;
+    dispatch(
+      getSponsorCustomizedFormItems(
+        formId,
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
   };
