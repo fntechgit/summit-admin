@@ -24,7 +24,8 @@ import {
   deleteCompany,
   saveCompany,
   resetCompanyForm,
-  attachLogo
+  attachLogo,
+  removeLogo
 } from "../../actions/company-actions";
 import {
   getSponsoredProjects,
@@ -49,6 +50,7 @@ const CompanyListPage = ({
   saveCompany,
   resetCompanyForm,
   attachLogo,
+  removeLogo,
   getSponsoredProjects,
   saveSupportingCompany,
   deleteSupportingCompany,
@@ -201,6 +203,7 @@ const CompanyListPage = ({
           onClose={handleClose}
           onSave={handleSave}
           onAttach={attachLogo}
+          onRemove={removeLogo}
           onAddSponsorship={saveSupportingCompany}
           onDeleteSponsorship={deleteSupportingCompany}
           sponsoredProjects={sponsoredProjects}
@@ -229,5 +232,6 @@ export default connect(mapStateToProps, {
   getSponsoredProjects,
   saveSupportingCompany,
   deleteSupportingCompany,
-  attachLogo
+  attachLogo,
+  removeLogo
 })(CompanyListPage);

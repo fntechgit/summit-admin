@@ -85,6 +85,7 @@ const CompanyDialog = ({
   onSave,
   onClose,
   onAttach,
+  onRemove,
   onDeleteSponsorship,
   onAddSponsorship
 }) => {
@@ -126,11 +127,15 @@ const CompanyDialog = ({
       const valuesToSave = {
         ...values,
         color: colorRef.current,
-        country: values.country?.value
+        country:
+          typeof values.country === "object"
+            ? values.country?.value
+            : values.country
       };
       setIsSaving(true);
       onSave(valuesToSave)
         .then(() => onClose())
+        .catch(() => {})
         .finally(() => setIsSaving(false));
     }
   });
@@ -164,6 +169,10 @@ const CompanyDialog = ({
 
   const handleLogoRemove = (field) => () => {
     formik.setFieldValue(field, "");
+    if (initialEntity?.id) {
+      setIsSaving(true);
+      onRemove(initialEntity, field).finally(() => setIsSaving(false));
+    }
   };
 
   const handleSelectedSponsoredProject = (ev) => {
@@ -219,6 +228,11 @@ const CompanyDialog = ({
     colorRef.current = newValue;
   }, []);
 
+  const handleOnClose = () => {
+    if (isSaving) return;
+    onClose();
+  };
+
   const sponsored_project_columns = [
     {
       columnKey: "project_name",
@@ -238,7 +252,7 @@ const CompanyDialog = ({
   return (
     <Dialog
       open
-      onClose={onClose}
+      onClose={handleOnClose}
       maxWidth="md"
       fullWidth
       disableEscapeKeyDown={isSaving}
@@ -247,7 +261,7 @@ const CompanyDialog = ({
         <Typography fontSize="1.5rem">{title}</Typography>
         <IconButton
           size="small"
-          onClick={onClose}
+          onClick={handleOnClose}
           sx={{ mr: 1 }}
           aria-label="close"
           disabled={isSaving}
@@ -491,6 +505,8 @@ const CompanyDialog = ({
                   name="logo"
                   value={getLogoValue(formik.values.logo)}
                   onUploadComplete={handleLogoUploadComplete("logo")}
+                  onUploadStart={() => setIsSaving(true)}
+                  onError={() => setIsSaving(false)}
                   onRemove={handleLogoRemove("logo")}
                   postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
                   djsConfig={{ withCredentials: true }}
@@ -510,6 +526,8 @@ const CompanyDialog = ({
                   name="big_logo"
                   value={getLogoValue(formik.values.big_logo)}
                   onUploadComplete={handleLogoUploadComplete("big_logo")}
+                  onUploadStart={() => setIsSaving(true)}
+                  onError={() => setIsSaving(false)}
                   onRemove={handleLogoRemove("big_logo")}
                   postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
                   djsConfig={{ withCredentials: true }}
@@ -547,6 +565,7 @@ CompanyDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   onAttach: PropTypes.func.isRequired,
+  onRemove: PropTypes.func.isRequired,
   onDeleteSponsorship: PropTypes.func,
   onAddSponsorship: PropTypes.func
 };

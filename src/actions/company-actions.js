@@ -47,6 +47,8 @@ export const COMPANY_UPDATED = "COMPANY_UPDATED";
 export const COMPANY_ADDED = "COMPANY_ADDED";
 export const LOGO_ATTACHED = "LOGO_ATTACHED";
 export const BIG_LOGO_ATTACHED = "BIG_LOGO_ATTACHED";
+export const LOGO_REMOVED = "LOGO_REMOVED";
+export const BIG_LOGO_REMOVED = "BIG_LOGO_REMOVED";
 
 export const getCompanies =
   (
@@ -257,7 +259,8 @@ const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
   // remove # from color hexa
-  normalizedEntity.color = normalizedEntity.color.substr(1);
+  if (normalizedEntity.color.startsWith("#"))
+    normalizedEntity.color = normalizedEntity.color.substr(1);
 
   if (entity.id > 0) {
     delete normalizedEntity.logo;
@@ -265,6 +268,31 @@ const normalizeEntity = (entity) => {
   }
 
   return normalizedEntity;
+};
+
+export const removeLogo = (entity, picAttr) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  const endpoint =
+    picAttr === "logo"
+      ? `${window.API_BASE_URL}/api/v1/companies/${entity.id}/logo`
+      : `${window.API_BASE_URL}/api/v1/companies/${entity.id}/logo/big`;
+
+  const action = picAttr === "logo" ? LOGO_REMOVED : BIG_LOGO_REMOVED;
+
+  return deleteRequest(
+    null,
+    createAction(action),
+    endpoint,
+    {},
+    snackbarErrorHandler
+  )(params)(dispatch).finally(() => dispatch(stopLoading()));
 };
 
 export const queryCompanies = debounce(async (input, callback) => {
