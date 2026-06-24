@@ -16,17 +16,6 @@ import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import StatusPill from "./StatusPill";
 import { formatUsd } from "../../../utils/reports-money";
 
-// Backend `order=` key map. Keys are the MuiTable columnKey values (= backend
-// order keys) for sortable columns. Non-sortable columns (form_display,
-// sponsor_note) are intentionally absent — toOrderParam ignores them.
-export const SORT_FIELD_MAP = {
-  number: "number",
-  order_date: "order_date",
-  sponsor: "sponsor",
-  status: "status",
-  invoice_total: "invoice_total"
-};
-
 const ISO_DATE_LENGTH = 10; // "YYYY-MM-DD"
 const MS_PER_SECOND = 1000;
 const NOON = 12;
