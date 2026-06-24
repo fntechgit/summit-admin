@@ -67,7 +67,8 @@ const eventTypeListReducer = (state = DEFAULT_STATE, action) => {
       if (eventTypesAdded.length > 0) {
         return {
           ...state,
-          eventTypes: [...state.eventTypes, ...eventTypesAdded]
+          eventTypes: [...state.eventTypes, ...eventTypesAdded],
+          totalEventTypes: state.totalEventTypes + eventTypesAdded.length
         };
       }
       return state;
