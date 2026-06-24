@@ -53,7 +53,6 @@ const PurchaseDetailsReportPage = ({
   summary,
   filterOptions,
   total,
-  loading,
   readError,
   validationError,
   exportDisabled,
@@ -295,7 +294,6 @@ const PurchaseDetailsReportPage = ({
         <OrdersTable
           rows={data}
           totalRows={total}
-          loading={loading}
           currentPage={currentPage}
           perPage={perPage}
           order={order}

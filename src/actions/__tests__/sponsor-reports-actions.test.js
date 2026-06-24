@@ -6,7 +6,6 @@ import { doLogin } from "openstack-uicore-foundation/lib/security/methods";
 import * as methods from "../../utils/methods";
 import { makeReadErrorHandler } from "../../utils/report-errors";
 
-
 import {
   getPurchaseDetailsReport,
   getPurchaseDetailsFilters,
@@ -23,7 +22,8 @@ import {
   RECEIVE_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET_FILTERS,
   REQUEST_SPONSOR_DRILLDOWN,
-  RECEIVE_SPONSOR_DRILLDOWN
+  RECEIVE_SPONSOR_DRILLDOWN,
+  SPONSOR_DRILLDOWN_READ_ERROR
 } from "../sponsor-reports-actions";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
@@ -243,6 +243,54 @@ describe("sponsor-reports-actions", () => {
 
       expect(capturedUrl).toContain("/summits/42/");
       expect(capturedUrl).toContain("/sponsors/7");
+    });
+
+    it("412 on drilldown read dispatches SPONSOR_DRILLDOWN_READ_ERROR (clears loading)", async () => {
+      // Simulate getRequest invoking the error handler with a 412 response.
+      getRequest.mockImplementation(
+        (requestAC, _receiveAC, _url, errorHandler) => () => (dispatch) => {
+          if (requestAC) dispatch(requestAC({}));
+          errorHandler({ status: 412 }, {})(dispatch);
+          return Promise.resolve();
+        }
+      );
+
+      const store = mockStore(MOCK_STATE);
+      store.dispatch(getSponsorAssetSponsor(17));
+      await flushPromises();
+
+      const types = store.getActions().map((a) => a.type);
+      expect(types).toContain(REQUEST_SPONSOR_DRILLDOWN);
+      // 412 must dispatch a loading-clearing error action, not silently no-op.
+      expect(types).toContain(SPONSOR_DRILLDOWN_READ_ERROR);
+    });
+
+    it("503 export-disabled on drilldown read dispatches SPONSOR_DRILLDOWN_READ_ERROR (clears loading)", async () => {
+      // Simulate getRequest invoking the error handler with a 503 export-disabled response.
+      getRequest.mockImplementation(
+        (requestAC, _receiveAC, _url, errorHandler) => () => (dispatch) => {
+          if (requestAC) dispatch(requestAC({}));
+          errorHandler(
+            {
+              status: 503,
+              response: {
+                body: { message: "CSV export is not enabled for this summit" }
+              }
+            },
+            {}
+          )(dispatch);
+          return Promise.resolve();
+        }
+      );
+
+      const store = mockStore(MOCK_STATE);
+      store.dispatch(getSponsorAssetSponsor(17));
+      await flushPromises();
+
+      const types = store.getActions().map((a) => a.type);
+      expect(types).toContain(REQUEST_SPONSOR_DRILLDOWN);
+      // export-disabled 503 must also clear loading via an error action.
+      expect(types).toContain(SPONSOR_DRILLDOWN_READ_ERROR);
     });
   });
 
