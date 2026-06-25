@@ -8,10 +8,19 @@ import MuiFormikDatepicker from "openstack-uicore-foundation/lib/components/mui/
 import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
 import MuiFormikRadioGroup from "../../../../../components/mui/formik-inputs/mui-formik-radio-group";
 import MuiFormikFilesizeField from "../../../../../components/mui/formik-inputs/mui-formik-file-size-field";
-import { PAGE_MODULES_MEDIA_TYPES } from "../../../../../utils/constants";
+import {
+  COLUMN_6,
+  COLUMN_12,
+  PAGE_MODULES_MEDIA_TYPES
+} from "../../../../../utils/constants";
 import MuiFormikSelect from "../../../../../components/mui/formik-inputs/mui-formik-select";
 
-const MediaRequestModule = ({ baseName, index, mediaFileTypes }) => {
+const MediaRequestModule = ({
+  baseName,
+  index,
+  mediaFileTypes,
+  showUploadDeadline
+}) => {
   const { values } = useFormikContext();
   const buildFieldName = (field) => `${baseName}[${index}].${field}`;
 
@@ -47,7 +56,7 @@ const MediaRequestModule = ({ baseName, index, mediaFileTypes }) => {
       <Grid2 size={12}>
         <Divider sx={{ mx: -2 }} />
       </Grid2>
-      <Grid2 size={6}>
+      <Grid2 size={showUploadDeadline ? COLUMN_6 : COLUMN_12}>
         <InputLabel htmlFor={buildFieldName("name")}>
           {T.translate("page_template_list.page_crud.name")}
         </InputLabel>
@@ -57,15 +66,17 @@ const MediaRequestModule = ({ baseName, index, mediaFileTypes }) => {
           margin="none"
         />
       </Grid2>
-      <Grid2 size={6}>
-        <InputLabel htmlFor={buildFieldName("upload_deadline")}>
-          {T.translate("page_template_list.page_crud.upload_deadline")}
-        </InputLabel>
-        <MuiFormikDatepicker
-          name={buildFieldName("upload_deadline")}
-          margin="none"
-        />
-      </Grid2>
+      {showUploadDeadline && (
+        <Grid2 size={6}>
+          <InputLabel htmlFor={buildFieldName("upload_deadline")}>
+            {T.translate("page_template_list.page_crud.upload_deadline")}
+          </InputLabel>
+          <MuiFormikDatepicker
+            name={buildFieldName("upload_deadline")}
+            margin="none"
+          />
+        </Grid2>
+      )}
 
       {mediaType === PAGE_MODULES_MEDIA_TYPES.FILE && (
         <>
@@ -129,7 +140,9 @@ const MediaRequestModule = ({ baseName, index, mediaFileTypes }) => {
 
 MediaRequestModule.propTypes = {
   baseName: PropTypes.string.isRequired,
-  index: PropTypes.number.isRequired
+  index: PropTypes.number.isRequired,
+  mediaFileTypes: PropTypes.array.isRequired,
+  showUploadDeadline: PropTypes.bool
 };
 
 const mapStateToProps = ({ mediaUploadState }) => ({

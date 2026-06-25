@@ -93,6 +93,30 @@ describe("normalizePageTemplateModules", () => {
       const [result] = normalizePageTemplateModules([module]);
       expect(result.max_file_size).toBe(2048);
     });
+
+    it("should omit upload_deadline from payload when null (global template)", () => {
+      const module = {
+        kind: PAGES_MODULE_KINDS.MEDIA,
+        type: PAGE_MODULES_MEDIA_TYPES.FILE,
+        upload_deadline: null,
+        file_type_id: 3,
+        max_file_size: 1024
+      };
+      const [result] = normalizePageTemplateModules([module]);
+      expect(result).not.toHaveProperty("upload_deadline");
+    });
+
+    it("should omit upload_deadline from payload when undefined", () => {
+      const module = {
+        kind: PAGES_MODULE_KINDS.MEDIA,
+        type: PAGE_MODULES_MEDIA_TYPES.FILE,
+        upload_deadline: undefined,
+        file_type_id: 3,
+        max_file_size: 1024
+      };
+      const [result] = normalizePageTemplateModules([module]);
+      expect(result).not.toHaveProperty("upload_deadline");
+    });
   });
 
   describe("MEDIA kind — INPUT type", () => {
@@ -116,7 +140,17 @@ describe("normalizePageTemplateModules", () => {
         type: PAGE_MODULES_MEDIA_TYPES.INPUT
       };
       const [result] = normalizePageTemplateModules([module]);
-      expect(result.upload_deadline).toBeUndefined();
+      expect(result).not.toHaveProperty("upload_deadline");
+    });
+
+    it("should omit upload_deadline from payload when null (global template)", () => {
+      const module = {
+        kind: PAGES_MODULE_KINDS.MEDIA,
+        type: PAGE_MODULES_MEDIA_TYPES.INPUT,
+        upload_deadline: null
+      };
+      const [result] = normalizePageTemplateModules([module]);
+      expect(result).not.toHaveProperty("upload_deadline");
     });
   });
 
