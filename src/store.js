@@ -175,6 +175,7 @@ import sponsorPagePagesListReducer from "./reducers/sponsors/sponsor-page-pages-
 import sponsorPageMUListReducer from "./reducers/sponsors/sponsor-page-mu-list-reducer.js";
 import dropboxSyncReducer from "./reducers/locations/dropbox-sync-reducer";
 import sponsorReportsPurchaseDetailsReducer from "./reducers/sponsors/sponsor-reports-purchase-details-reducer";
+import sponsorReportsPurchaseDetailsLinesReducer from "./reducers/sponsors/sponsor-reports-purchase-details-lines-reducer";
 import sponsorReportsSponsorAssetReducer from "./reducers/sponsors/sponsor-reports-sponsor-asset-reducer";
 import sponsorReportsDrilldownReducer from "./reducers/sponsors/sponsor-reports-drilldown-reducer";
 
@@ -186,6 +187,7 @@ const config = {
   blacklist: [
     "dropboxSyncState",
     "sponsorReportsPurchaseDetailsState",
+    "sponsorReportsPurchaseDetailsLinesState",
     "sponsorReportsSponsorAssetState",
     "sponsorReportsDrilldownState"
   ]
@@ -353,6 +355,8 @@ const reducers = persistCombineReducers(config, {
   pageTemplateState: pageTemplateReducer,
   dropboxSyncState: dropboxSyncReducer,
   sponsorReportsPurchaseDetailsState: sponsorReportsPurchaseDetailsReducer,
+  sponsorReportsPurchaseDetailsLinesState:
+    sponsorReportsPurchaseDetailsLinesReducer,
   sponsorReportsSponsorAssetState: sponsorReportsSponsorAssetReducer,
   sponsorReportsDrilldownState: sponsorReportsDrilldownReducer
 });
