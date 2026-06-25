@@ -28,7 +28,6 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import {
-  Avatar,
   Box,
   Button,
   Card,
@@ -53,6 +52,7 @@ import usePrint from "../../../../hooks/usePrint";
 import ExportCsvButton from "../../../../components/sponsors/reports/ExportCsvButton";
 import TierBadge from "../../../../components/sponsors/reports/TierBadge";
 import StatusPill from "../../../../components/sponsors/reports/StatusPill";
+import SponsorAvatar from "../../../../components/sponsors/reports/SponsorAvatar";
 import { getSponsorAssetSponsor } from "../../../../actions/sponsor-reports-actions";
 
 // Gate the <img> on an image file extension; render every other file as a
@@ -242,7 +242,7 @@ const SponsorAssetDrilldownPage = ({
           }}
         >
           <Stack direction="row" spacing={2} alignItems="center">
-            <Avatar>{(sponsor.name || "?").charAt(0)}</Avatar>
+            <SponsorAvatar name={sponsor.name} logoUrl={sponsor.logo_url} />
             <Box>
               <Stack direction="row" spacing={1} alignItems="center">
                 <Typography variant="h6">{sponsor.name}</Typography>

@@ -14,7 +14,6 @@
 import React from "react";
 import { Link as RouterLink } from "react-router-dom";
 import {
-  Avatar,
   Card,
   CardActionArea,
   CardContent,
@@ -25,6 +24,7 @@ import {
 import T from "i18n-react/dist/i18n-react";
 import StatusRollupChips from "./StatusRollupChips";
 import TierBadge from "./TierBadge";
+import SponsorAvatar from "./SponsorAvatar";
 
 // Each sponsor card links to the summit-admin per-sponsor drill-down.
 // NOTE: the drill-down path is /app/summits/:summitId/sponsors/reports/sponsor-assets/sponsors/:id,
@@ -52,7 +52,7 @@ const GroupBySponsorView = ({ summitId, cards = [] }) => (
                 alignItems="center"
                 sx={{ mb: 1, flexWrap: "wrap" }}
               >
-                <Avatar src={s.logo_url || undefined} alt={s.name} />
+                <SponsorAvatar name={s.name} logoUrl={s.logo_url} />
                 <Typography variant="h6">{s.name}</Typography>
                 {showCompany && (
                   <Typography variant="body2" color="text.secondary">

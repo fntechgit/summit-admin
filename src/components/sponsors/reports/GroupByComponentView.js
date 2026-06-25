@@ -14,7 +14,6 @@
 import React from "react";
 import { Link as RouterLink } from "react-router-dom";
 import {
-  Avatar,
   Card,
   CardContent,
   Chip,
@@ -26,6 +25,7 @@ import {
 import T from "i18n-react/dist/i18n-react";
 import StatusRollupChips from "./StatusRollupChips";
 import StatusPill from "./StatusPill";
+import SponsorAvatar from "./SponsorAvatar";
 import { toPlainText } from "../../../utils/reports-text";
 
 const NOT_PRESENT_STATUSES = ["pending", "not_applicable"];
@@ -79,7 +79,7 @@ const GroupByComponentView = ({ summitId, cards = [] }) => (
                 alignItems="center"
                 sx={{ flexWrap: "wrap" }}
               >
-                <Avatar src={entry.logo_url || undefined} alt={entry.name} />
+                <SponsorAvatar name={entry.name} logoUrl={entry.logo_url} />
                 <MuiLink
                   component={RouterLink}
                   to={`/app/summits/${summitId}/sponsors/reports/sponsor-assets/sponsors/${entry.id}`}
@@ -87,11 +87,12 @@ const GroupByComponentView = ({ summitId, cards = [] }) => (
                   {entry.name}
                 </MuiLink>
                 <StatusPill status={entry.status} />
+                {/* Asset filename/summary: wrap (don't truncate) so the full
+                    name is readable; overflowWrap breaks long hashed filenames. */}
                 <Typography
                   variant="body2"
                   color="text.secondary"
-                  noWrap
-                  sx={{ maxWidth: 360 }}
+                  sx={{ flex: 1, minWidth: 0, overflowWrap: "anywhere" }}
                 >
                   {isNotPresent(entry)
                     ? T.translate("sponsor_reports_page.not_present_yet")
