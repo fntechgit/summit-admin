@@ -193,6 +193,19 @@ const PurchaseDetailsReportPage = ({
     return rest;
   }, [query]);
 
+  const linesCsvUrl = currentSummit
+    ? `${getReportsApiBaseUrl()}/api/v1/summits/${
+        currentSummit.id
+      }/reports/purchase-details/lines/csv`
+    : "";
+  const linesCsvQuery = useMemo(() => {
+    // Strip ONLY pagination — exports the full filtered set (backend caps at
+    // CSV_MAX_ROWS). Everything else buildReportQuery emitted is preserved,
+    // including the derived include_cancelled="true" when status is "Canceled".
+    const { page: _page, per_page: _perPage, ...rest } = linesQuery;
+    return rest;
+  }, [linesQuery]);
+
   // ── FilterBar handlers ──────────────────────────────────────────────────────
   // Applying/clearing a filter changes the result set → snap back to page 1.
   const handleApply = (next) => {
@@ -296,15 +309,19 @@ const PurchaseDetailsReportPage = ({
           <Button startIcon={<PrintIcon />} variant="outlined" onClick={print}>
             {T.translate("sponsor_reports_page.print")}
           </Button>
-          {view === "orders" && (
-            <ExportCsvButton
-              url={csvUrl}
-              query={csvQuery}
-              filename={`purchase-details-summit-${
-                currentSummit?.id ?? "unknown"
-              }.csv`}
-            />
-          )}
+          <ExportCsvButton
+            url={view === "orders" ? csvUrl : linesCsvUrl}
+            query={view === "orders" ? csvQuery : linesCsvQuery}
+            filename={
+              view === "orders"
+                ? `purchase-details-summit-${
+                    currentSummit?.id ?? "unknown"
+                  }.csv`
+                : `purchase-details-lines-summit-${
+                    currentSummit?.id ?? "unknown"
+                  }.csv`
+            }
+          />
         </>
       }
       filterBar={
