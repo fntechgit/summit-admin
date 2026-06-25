@@ -25,7 +25,11 @@ import DocumentDownloadModule from "./modules/page-template-document-download-mo
 import MediaRequestModule from "./modules/page-template-media-request-module";
 import { getAllMediaFileTypes } from "../../../../actions/media-file-type-actions";
 
-const PageModules = ({ name = "modules", getAllMediaFileTypes, isGlobal }) => {
+const PageModules = ({
+  name = "modules",
+  getAllMediaFileTypes,
+  isGlobal = false
+}) => {
   const { values, setFieldValue, errors, submitCount } = useFormikContext();
   const modules = getIn(values, name) || [];
   const moduleErrors = getIn(errors, name);
@@ -133,7 +137,7 @@ const PageModules = ({ name = "modules", getAllMediaFileTypes, isGlobal }) => {
           <MediaRequestModule
             baseName={name}
             index={index}
-            isGlobal={isGlobal}
+            showUploadDeadline={!isGlobal}
           />
         );
       default:
@@ -232,7 +236,8 @@ const PageModules = ({ name = "modules", getAllMediaFileTypes, isGlobal }) => {
 
 PageModules.propTypes = {
   name: PropTypes.string,
-  isGlobal: PropTypes.bool
+  isGlobal: PropTypes.bool,
+  getAllMediaFileTypes: PropTypes.func.isRequired
 };
 
 const mapStateToProps = () => ({});
