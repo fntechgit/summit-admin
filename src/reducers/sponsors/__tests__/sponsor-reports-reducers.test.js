@@ -5,7 +5,6 @@ import {
   RECEIVE_PURCHASE_DETAILS,
   PURCHASE_DETAILS_READ_ERROR,
   PURCHASE_DETAILS_VALIDATION_ERROR,
-  PURCHASE_DETAILS_EXPORT_DISABLED,
   REQUEST_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET_FILTERS,
@@ -121,16 +120,6 @@ describe("sponsorReportsPurchaseDetailsReducer", () => {
       expect(result.validationError).toStrictEqual(errPayload);
       // body must NOT be replaced
       expect(result.data).toStrictEqual(existingData);
-    });
-  });
-
-  describe("PURCHASE_DETAILS_EXPORT_DISABLED", () => {
-    it("sets exportDisabled=true", () => {
-      const result = purchaseDetailsReducer(PD_DEFAULT_STATE, {
-        type: PURCHASE_DETAILS_EXPORT_DISABLED,
-        payload: { message: "CSV export is not enabled" }
-      });
-      expect(result.exportDisabled).toBe(true);
     });
   });
 

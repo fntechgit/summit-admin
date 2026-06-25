@@ -130,7 +130,6 @@ const SponsorAssetDrilldownPage = ({
   detail,
   loading,
   readError,
-  exportDisabled,
   // From mapDispatchToProps
   getSponsorAssetSponsor: fetchSponsor,
   // From withRouter
@@ -139,7 +138,7 @@ const SponsorAssetDrilldownPage = ({
   const print = usePrint();
 
   // sponsorId from URL; summitId from Redux state (not URL params per summit-admin pattern).
-  const {sponsorId} = match.params;
+  const { sponsorId } = match.params;
   // Accept only strict positive integers so a malformed :sponsorId cannot be
   // interpolated into filter clauses or the CSV URL path.
   const validParams = isPositiveIntId(sponsorId);
@@ -278,7 +277,6 @@ const SponsorAssetDrilldownPage = ({
                   { sponsorId, pageId: section.page.id }
                 )}
                 filename={`sponsor-${sponsorId}-page-${section.page.id}.csv`}
-                disabled={exportDisabled}
                 label={T.translate("sponsor_reports_page.download_csv")}
               />
             </Box>

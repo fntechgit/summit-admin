@@ -17,8 +17,7 @@ import {
   REQUEST_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET_FILTERS,
-  SPONSOR_ASSET_READ_ERROR,
-  SPONSOR_ASSET_EXPORT_DISABLED
+  SPONSOR_ASSET_READ_ERROR
 } from "../../actions/sponsor-reports-actions";
 
 export const DEFAULT_STATE = {
@@ -30,9 +29,7 @@ export const DEFAULT_STATE = {
   lastPage: 0,
   summary: null, // { total, by_status, by_page }
   loading: false,
-  readError: null,
-  exportError: null,
-  exportDisabled: false
+  readError: null
 };
 
 const reducer = (state = DEFAULT_STATE, action) => {
@@ -55,8 +52,6 @@ const reducer = (state = DEFAULT_STATE, action) => {
         summary: env.summary,
         loading: false,
         readError: null
-        // NOTE: exportDisabled/exportError are intentionally NOT cleared — CSV-disabled
-        // is a service-wide backend flag, not invalidated by a successful read.
       };
     }
     case RECEIVE_SPONSOR_ASSET_FILTERS:
@@ -64,8 +59,6 @@ const reducer = (state = DEFAULT_STATE, action) => {
       return { ...state, filterOptions: payload.response, readError: null };
     case SPONSOR_ASSET_READ_ERROR:
       return { ...state, loading: false, readError: payload };
-    case SPONSOR_ASSET_EXPORT_DISABLED:
-      return { ...state, exportDisabled: true, exportError: payload };
     default:
       return state;
   }

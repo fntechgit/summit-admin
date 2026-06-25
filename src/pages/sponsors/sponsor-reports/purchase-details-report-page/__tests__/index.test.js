@@ -22,8 +22,7 @@ jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
     type: "REQUEST_PURCHASE_DETAILS_FILTERS"
   })),
   PURCHASE_DETAILS_VALIDATION_CLEAR: "PURCHASE_DETAILS_VALIDATION_CLEAR",
-  PURCHASE_DETAILS_READ_ERROR: "PURCHASE_DETAILS_READ_ERROR",
-  PURCHASE_DETAILS_EXPORT_DISABLED: "PURCHASE_DETAILS_EXPORT_DISABLED"
+  PURCHASE_DETAILS_READ_ERROR: "PURCHASE_DETAILS_READ_ERROR"
 }));
 
 // Access the jest.fn() references from the mock (standard jest pattern).
@@ -43,7 +42,6 @@ jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
   getCSV: jest.fn(() => ({ type: "GET_CSV_MOCK" }))
 }));
-
 
 // Mock getAccessTokenSafely so ExportCsvButton clicks don't fail in tests.
 jest.mock("../../../../../utils/methods", () => ({
@@ -84,8 +82,7 @@ function buildState(summaryOverrides = {}, { total = 1 } = {}) {
       total,
       loading: false,
       readError: null,
-      validationError: null,
-      exportDisabled: false
+      validationError: null
     },
     currentSummitState: {
       currentSummit: { id: 42 }

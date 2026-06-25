@@ -44,7 +44,6 @@ jest.mock("../../../../../utils/reports-api", () => ({
 
 jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
   getSponsorAssetSponsor: jest.fn(() => ({ type: "GET_DRILLDOWN" })),
-  SPONSOR_DRILLDOWN_EXPORT_DISABLED: "SPONSOR_DRILLDOWN_EXPORT_DISABLED",
   SPONSOR_DRILLDOWN_READ_ERROR: "SPONSOR_DRILLDOWN_READ_ERROR"
 }));
 
@@ -61,7 +60,6 @@ function buildState(drilldownOverrides = {}) {
       detail: null,
       loading: false,
       readError: null,
-      exportDisabled: false,
       ...drilldownOverrides
     },
     currentSummitState: {

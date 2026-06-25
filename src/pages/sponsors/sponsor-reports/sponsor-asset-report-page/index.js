@@ -61,7 +61,6 @@ const SponsorAssetReportPage = ({
   currentPage,
   loading,
   readError,
-  exportDisabled,
   // From mapDispatchToProps
   getSponsorAssetReport: fetchReport,
   getSponsorAssetFilters: fetchFilters
@@ -173,7 +172,6 @@ const SponsorAssetReportPage = ({
             url={csvUrl}
             query={csvQuery}
             filename={`sponsor-assets-summit-${currentSummit.id}.csv`}
-            disabled={exportDisabled}
           />
         </>
       }

@@ -61,7 +61,6 @@ jest.mock("../../actions/sponsor-reports-actions", () => ({
     type: "MOCK_GET_PURCHASE_DETAILS_FILTERS"
   })),
   SPONSOR_DRILLDOWN_READ_ERROR: "SPONSOR_DRILLDOWN_READ_ERROR",
-  SPONSOR_DRILLDOWN_EXPORT_DISABLED: "SPONSOR_DRILLDOWN_EXPORT_DISABLED",
   PURCHASE_DETAILS_VALIDATION_CLEAR: "PURCHASE_DETAILS_VALIDATION_CLEAR",
   REQUEST_SPONSOR_DRILLDOWN: "REQUEST_SPONSOR_DRILLDOWN",
   RECEIVE_SPONSOR_DRILLDOWN: "RECEIVE_SPONSOR_DRILLDOWN"
@@ -128,8 +127,7 @@ describe("SponsorReportsLayout", () => {
           sponsorReportsDrilldownState: {
             detail: null,
             loading: true,
-            readError: null,
-            exportDisabled: false
+            readError: null
           }
         }
       }

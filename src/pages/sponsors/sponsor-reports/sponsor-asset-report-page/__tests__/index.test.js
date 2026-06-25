@@ -31,7 +31,6 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
   getSponsorAssetFilters: jest.fn(() => ({ type: "GET_SA_FILTERS" })),
   getSponsorAssetReport: jest.fn(() => ({ type: "GET_SA_REPORT" })),
-  SPONSOR_ASSET_EXPORT_DISABLED: "SPONSOR_ASSET_EXPORT_DISABLED",
   SPONSOR_ASSET_READ_ERROR: "SPONSOR_ASSET_READ_ERROR"
 }));
 
@@ -103,7 +102,6 @@ function buildState(assetOverrides = {}) {
       },
       loading: false,
       readError: null,
-      exportDisabled: false,
       ...assetOverrides
     },
     currentSummitState: {
@@ -220,8 +218,7 @@ describe("SponsorAssetReportPage", () => {
             lastPage: 0,
             summary: null,
             loading: false,
-            readError: null,
-            exportDisabled: false
+            readError: null
           },
           currentSummitState: { currentSummit: null }
         }
@@ -237,12 +234,6 @@ describe("SponsorAssetReportPage", () => {
     renderPage();
     await act(async () => {});
     expect(screen.getByTestId("export-csv")).not.toBeDisabled();
-  });
-
-  it("disables the ExportCsvButton when exportDisabled is true", async () => {
-    renderPage({ exportDisabled: true });
-    await act(async () => {});
-    expect(screen.getByTestId("export-csv")).toBeDisabled();
   });
 
   it("hides the no-groups empty state until currentPage >= 1", async () => {
