@@ -144,4 +144,36 @@ describe("SponsorReportsLayout", () => {
       screen.queryByTestId("report-card-sponsor-assets")
     ).not.toBeInTheDocument();
   });
+
+  it("renders the Reports → Purchase Details breadcrumb trail on the sub-route", () => {
+    const PD_URL = "/app/summits/1/sponsors/reports/purchase-details";
+    const history = createMemoryHistory({ initialEntries: [PD_URL] });
+    renderWithRedux(
+      <Router history={history}>
+        <Route path={REPORTS_ROUTE} component={SponsorReportsLayout} />
+      </Router>,
+      {
+        initialState: {
+          loggedUserState: {
+            member: { groups: [{ code: "administrators" }] }
+          },
+          currentSummitState: { currentSummit: { id: 1 } },
+          sponsorReportsPurchaseDetailsState: {
+            data: [],
+            summary: null,
+            filterOptions: null,
+            total: 0,
+            readError: null,
+            validationError: null
+          }
+        }
+      }
+    );
+    // The persistent "Reports" crumb + the route's "Purchase Details" crumb both render.
+    const titles = screen
+      .getAllByTestId("breadcrumb")
+      .map((el) => el.getAttribute("data-title"));
+    expect(titles).toContain("sponsor_reports_page.landing_title");
+    expect(titles).toContain("sponsor_reports_page.purchase_details_title");
+  });
 });

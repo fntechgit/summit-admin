@@ -18,7 +18,11 @@ const SummaryPanel = ({ tiles = [] }) => {
           variant="outlined"
           sx={{ p: 2, flex: 1, minWidth: 140, borderRadius: 2 }}
         >
-          <Typography variant="overline" color="text.secondary">
+          <Typography
+            variant="subtitle1"
+            color="text.secondary"
+            sx={{ fontWeight: 500 }}
+          >
             {tile.label}
           </Typography>
           <Box>
