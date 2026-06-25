@@ -28,8 +28,6 @@ import {
   importAllowedMembersCSV,
   removeAllowedMemberFromSelectionPlan,
   removeTrackGroupFromSelectionPlan,
-  saveSelectionPlan,
-  saveSelectionPlanSettings,
   unassignProgressFlagFromSelectionPlan,
   updateProgressFlagOrder,
   updateRatingTypeOrder,
@@ -41,8 +39,7 @@ const EditSelectionPlanPage = ({
   entity,
   allowedMembers,
   errors,
-  onSaved,
-  onSavingChange,
+  onSave,
   history,
   extraQuestionsOrder,
   extraQuestionsOrderDir,
@@ -54,8 +51,6 @@ const EditSelectionPlanPage = ({
   updateProgressFlagOrder,
   addTrackGroupToSelectionPlan,
   removeTrackGroupFromSelectionPlan,
-  saveSelectionPlan,
-  saveSelectionPlanSettings,
   addAllowedMemberToSelectionPlan,
   addEventTypeSelectionPlan,
   assignExtraQuestion2SelectionPlan,
@@ -186,14 +181,11 @@ const EditSelectionPlanPage = ({
       allowedMembers={allowedMembers}
       currentSummit={currentSummit}
       errors={errors}
-      onSaved={onSaved}
-      onSavingChange={onSavingChange}
+      onSave={onSave}
       extraQuestionsOrder={extraQuestionsOrder}
       extraQuestionsOrderDir={extraQuestionsOrderDir}
       onTrackGroupLink={addTrackGroupToSelectionPlan}
       onTrackGroupUnLink={removeTrackGroupFromSelectionPlan}
-      onSubmit={saveSelectionPlan}
-      saveSelectionPlanSettings={saveSelectionPlanSettings}
       updateExtraQuestionOrder={onUpdateExtraQuestionOrder}
       onAddNewExtraQuestion={onAddNewExtraQuestion}
       onDeleteExtraQuestion={onDeleteExtraQuestion}
@@ -227,7 +219,6 @@ const mapStateToProps = ({
 });
 
 export default connect(mapStateToProps, {
-  saveSelectionPlan,
   addTrackGroupToSelectionPlan,
   removeTrackGroupFromSelectionPlan,
   addEventTypeSelectionPlan,
@@ -243,6 +234,5 @@ export default connect(mapStateToProps, {
   addAllowedMemberToSelectionPlan,
   removeAllowedMemberFromSelectionPlan,
   getAllowedMembers,
-  importAllowedMembersCSV,
-  saveSelectionPlanSettings
+  importAllowedMembersCSV
 })(EditSelectionPlanPage);

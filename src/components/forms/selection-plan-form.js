@@ -20,22 +20,24 @@ import {
   queryTrackGroups,
   queryEventTypes
 } from "openstack-uicore-foundation/lib/utils/query-actions";
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import SortableTable from "openstack-uicore-foundation/lib/components/mui/sortable-table";
 import Table from "openstack-uicore-foundation/lib/components/mui/table";
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import Autocomplete from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
+import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid2 from "@mui/material/Grid2";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 import MuiSwitch from "@mui/material/Switch";
 import Pagination from "@mui/material/Pagination";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
+import MuiFormikDropdownCheckbox from "../mui/formik-inputs/mui-formik-dropdown-checkbox";
 import MuiFormikDatetimepicker from "../mui/formik-inputs/mui-formik-datetimepicker";
 import { scrollToError, stripTags } from "../../utils/methods";
 import EmailTemplateInput from "../inputs/email-template-input";
@@ -88,10 +90,7 @@ const SelectionPlanForm = (props) => {
     actionTypesOrderDir,
     actionTypesOrder,
     allowedMembers,
-    onSaved,
-    onSavingChange,
-    onSubmit,
-    saveSelectionPlanSettings,
+    onSave,
     onTrackGroupLink,
     onTrackGroupUnLink,
     onAddEventType,
@@ -123,8 +122,6 @@ const SelectionPlanForm = (props) => {
   const [eventTypeSearchOptions, setEventTypeSearchOptions] = useState([]);
 
   const handleFormikSubmit = (values) => {
-    if (onSavingChange) onSavingChange(true);
-
     const normalized = { ...values };
     DATE_FIELDS.forEach((field) => {
       if (values[field]) {
@@ -136,36 +133,40 @@ const SelectionPlanForm = (props) => {
       }
     });
 
-    return onSubmit(normalized)
-      .then((e) => {
-        if (!e?.id) return null;
-        return saveSelectionPlanSettings(values.marketing_settings, e.id).then(
-          () => {
-            if (onSaved) onSaved(e);
-          }
-        );
-      })
-      .catch(() => {
-        // errors are surfaced via error handler
-      })
-      .finally(() => {
-        if (onSavingChange) onSavingChange(false);
-      });
+    return onSave(normalized);
   };
 
   const formik = useFormik({
     initialValues: buildInitialValues(propsEntity, currentSummit.time_zone_id),
     onSubmit: handleFormikSubmit,
-    enableReinitialize: true,
     validateOnChange: false
   });
 
   useEffect(() => {
     scrollToError(propsErrors);
-    if (propsErrors && Object.keys(propsErrors).length > 0) {
-      formik.setErrors(propsErrors);
-    }
+    formik.setErrors(
+      propsErrors && Object.keys(propsErrors).length > 0 ? propsErrors : {}
+    );
   }, [propsErrors]);
+
+  // Sync sub-resource arrays from Redux without resetting user-editable main tab fields
+  useEffect(() => {
+    formik.setValues((current) => ({
+      ...current,
+      track_groups: propsEntity.track_groups ?? [],
+      event_types: propsEntity.event_types ?? [],
+      extra_questions: propsEntity.extra_questions ?? [],
+      track_chair_rating_types: propsEntity.track_chair_rating_types ?? [],
+      allowed_presentation_action_types:
+        propsEntity.allowed_presentation_action_types ?? []
+    }));
+  }, [
+    propsEntity.track_groups,
+    propsEntity.event_types,
+    propsEntity.extra_questions,
+    propsEntity.track_chair_rating_types,
+    propsEntity.allowed_presentation_action_types
+  ]);
 
   // Reset tab if allowed_members becomes unavailable
   useEffect(() => {
@@ -406,10 +407,12 @@ const SelectionPlanForm = (props) => {
           <Grid2 container spacing={2} sx={{ mb: 2 }}>
             <Grid2 size={{ xs: 12, md: 4 }}>
               <label> {T.translate("edit_selection_plan.name")} *</label>
-              <Input
+              <TextField
                 id="name"
-                className="form-control"
-                error={hasErrors("name")}
+                fullWidth
+                size="small"
+                error={!!hasErrors("name")}
+                helperText={hasErrors("name") || undefined}
                 onChange={handleChange}
                 value={formik.values.name}
               />
@@ -494,14 +497,18 @@ const SelectionPlanForm = (props) => {
               <label>
                 {T.translate("edit_selection_plan.max_submissions")}
               </label>
-              <Input
-                className="form-control"
-                type="number"
-                error={hasErrors("max_submission_allowed_per_user")}
+              <TextField
                 id="max_submission_allowed_per_user"
+                type="number"
+                fullWidth
+                size="small"
+                error={!!hasErrors("max_submission_allowed_per_user")}
+                helperText={
+                  hasErrors("max_submission_allowed_per_user") || undefined
+                }
                 value={formik.values.max_submission_allowed_per_user}
                 onChange={handleChange}
-                min={0}
+                slotProps={{ htmlInput: { min: 0 } }}
               />
             </Grid2>
             <Grid2 size={{ xs: 12, md: 6 }}>
@@ -1054,15 +1061,13 @@ const SelectionPlanForm = (props) => {
                         "edit_selection_plan.allowed_presentation_questions"
                       )}
                     </label>
-                    <Dropdown
-                      id="allowed_presentation_questions"
-                      value={formik.values.allowed_presentation_questions}
+                    <MuiFormikDropdownCheckbox
+                      name="allowed_presentation_questions"
                       placeholder={T.translate(
                         "edit_selection_plan.placeholders.allowed_presentation_questions"
                       )}
-                      onChange={handleChange}
                       options={DEFAULT_ALLOWED_QUESTIONS}
-                      isMulti
+                      size="small"
                     />
                   </Grid2>
                   <Grid2 size={12}>
@@ -1072,17 +1077,13 @@ const SelectionPlanForm = (props) => {
                       )}{" "}
                       *
                     </label>
-                    <Dropdown
-                      id="allowed_presentation_editable_questions"
-                      value={
-                        formik.values.allowed_presentation_editable_questions
-                      }
+                    <MuiFormikDropdownCheckbox
+                      name="allowed_presentation_editable_questions"
                       placeholder={T.translate(
                         "edit_selection_plan.placeholders.allowed_presentation_editable_questions"
                       )}
-                      onChange={handleChange}
                       options={DEFAULT_ALLOWED_EDITABLE_QUESTIONS}
-                      isMulti
+                      size="small"
                     />
                   </Grid2>
                   <Grid2 size={12}>
@@ -1091,20 +1092,34 @@ const SelectionPlanForm = (props) => {
                         "edit_selection_plan.cfp_presentation_edition_default_tab"
                       )}
                     </label>
-                    <Dropdown
-                      id="cfp_presentation_edition_default_tab"
-                      value={
-                        formik.values.marketing_settings
-                          .cfp_presentation_edition_default_tab?.value || ""
-                      }
-                      placeholder={T.translate(
-                        "edit_selection_plan.placeholders.cfp_presentation_edition_default_tab"
-                      )}
-                      onChange={handleChange}
-                      options={DEFAULT_CFP_PRESENTATION_EDITION_TABS}
-                      isMulti={false}
-                      isClearable
-                    />
+                    <FormControl fullWidth size="small">
+                      <Select
+                        displayEmpty
+                        value={
+                          formik.values.marketing_settings
+                            .cfp_presentation_edition_default_tab?.value || ""
+                        }
+                        onChange={(ev) =>
+                          handleOnSwitchChange(
+                            "cfp_presentation_edition_default_tab",
+                            ev.target.value
+                          )
+                        }
+                      >
+                        <MenuItem value="">
+                          <em>
+                            {T.translate(
+                              "edit_selection_plan.placeholders.cfp_presentation_edition_default_tab"
+                            )}
+                          </em>
+                        </MenuItem>
+                        {DEFAULT_CFP_PRESENTATION_EDITION_TABS.map((opt) => (
+                          <MenuItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </Grid2>
                   <Grid2 size={{ xs: 12, md: 6 }}>
                     <label>
@@ -1120,10 +1135,14 @@ const SelectionPlanForm = (props) => {
                         )}
                       />
                     </label>
-                    <Input
+                    <TextField
                       id="cfp_landing_page_title"
-                      className="form-control"
-                      error={hasErrors("cfp_landing_page_title")}
+                      fullWidth
+                      size="small"
+                      error={!!hasErrors("cfp_landing_page_title")}
+                      helperText={
+                        hasErrors("cfp_landing_page_title") || undefined
+                      }
                       onChange={handleChange}
                       value={
                         formik.values.marketing_settings.cfp_landing_page_title
@@ -1145,10 +1164,14 @@ const SelectionPlanForm = (props) => {
                         )}
                       />
                     </label>
-                    <Input
+                    <TextField
                       id="cfp_track_question_label"
-                      className="form-control"
-                      error={hasErrors("cfp_track_question_label")}
+                      fullWidth
+                      size="small"
+                      error={!!hasErrors("cfp_track_question_label")}
+                      helperText={
+                        hasErrors("cfp_track_question_label") || undefined
+                      }
                       onChange={handleChange}
                       value={
                         formik.values.marketing_settings
@@ -1170,10 +1193,14 @@ const SelectionPlanForm = (props) => {
                         )}
                       />
                     </label>
-                    <Input
+                    <TextField
                       id="cfp_speakers_singular_label"
-                      className="form-control"
-                      error={hasErrors("cfp_speakers_singular_label")}
+                      fullWidth
+                      size="small"
+                      error={!!hasErrors("cfp_speakers_singular_label")}
+                      helperText={
+                        hasErrors("cfp_speakers_singular_label") || undefined
+                      }
                       onChange={handleChange}
                       value={
                         formik.values.marketing_settings
@@ -1195,10 +1222,14 @@ const SelectionPlanForm = (props) => {
                         )}
                       />
                     </label>
-                    <Input
+                    <TextField
                       id="cfp_speakers_plural_label"
-                      className="form-control"
-                      error={hasErrors("cfp_speakers_plural_label")}
+                      fullWidth
+                      size="small"
+                      error={!!hasErrors("cfp_speakers_plural_label")}
+                      helperText={
+                        hasErrors("cfp_speakers_plural_label") || undefined
+                      }
                       onChange={handleChange}
                       value={
                         formik.values.marketing_settings
@@ -1220,10 +1251,15 @@ const SelectionPlanForm = (props) => {
                         )}
                       />
                     </label>
-                    <Input
+                    <TextField
                       id="cfp_presentations_singular_label"
-                      className="form-control"
-                      error={hasErrors("cfp_presentations_singular_label")}
+                      fullWidth
+                      size="small"
+                      error={!!hasErrors("cfp_presentations_singular_label")}
+                      helperText={
+                        hasErrors("cfp_presentations_singular_label") ||
+                        undefined
+                      }
                       onChange={handleChange}
                       value={
                         formik.values.marketing_settings
@@ -1245,10 +1281,14 @@ const SelectionPlanForm = (props) => {
                         )}
                       />
                     </label>
-                    <Input
+                    <TextField
                       id="cfp_presentations_plural_label"
-                      className="form-control"
-                      error={hasErrors("cfp_presentations_plural_label")}
+                      fullWidth
+                      size="small"
+                      error={!!hasErrors("cfp_presentations_plural_label")}
+                      helperText={
+                        hasErrors("cfp_presentations_plural_label") || undefined
+                      }
                       onChange={handleChange}
                       value={
                         formik.values.marketing_settings
@@ -1270,10 +1310,17 @@ const SelectionPlanForm = (props) => {
                         )}
                       />
                     </label>
-                    <Input
+                    <TextField
                       id="cfp_presentation_summary_title_label"
-                      className="form-control"
-                      error={hasErrors("cfp_presentation_summary_title_label")}
+                      fullWidth
+                      size="small"
+                      error={
+                        !!hasErrors("cfp_presentation_summary_title_label")
+                      }
+                      helperText={
+                        hasErrors("cfp_presentation_summary_title_label") ||
+                        undefined
+                      }
                       onChange={handleChange}
                       value={
                         formik.values.marketing_settings
@@ -1295,12 +1342,17 @@ const SelectionPlanForm = (props) => {
                         )}
                       />
                     </label>
-                    <Input
+                    <TextField
                       id="cfp_presentation_summary_abstract_label"
-                      className="form-control"
-                      error={hasErrors(
-                        "cfp_presentation_summary_abstract_label"
-                      )}
+                      fullWidth
+                      size="small"
+                      error={
+                        !!hasErrors("cfp_presentation_summary_abstract_label")
+                      }
+                      helperText={
+                        hasErrors("cfp_presentation_summary_abstract_label") ||
+                        undefined
+                      }
                       onChange={handleChange}
                       value={
                         formik.values.marketing_settings
@@ -1322,12 +1374,20 @@ const SelectionPlanForm = (props) => {
                         )}
                       />
                     </label>
-                    <Input
+                    <TextField
                       id="cfp_presentation_summary_social_summary_label"
-                      className="form-control"
-                      error={hasErrors(
-                        "cfp_presentation_summary_social_summary_label"
-                      )}
+                      fullWidth
+                      size="small"
+                      error={
+                        !!hasErrors(
+                          "cfp_presentation_summary_social_summary_label"
+                        )
+                      }
+                      helperText={
+                        hasErrors(
+                          "cfp_presentation_summary_social_summary_label"
+                        ) || undefined
+                      }
                       onChange={handleChange}
                       value={
                         formik.values.marketing_settings
@@ -1350,10 +1410,17 @@ const SelectionPlanForm = (props) => {
                         )}
                       />
                     </label>
-                    <Input
+                    <TextField
                       id="cfp_presentation_summary_links_label"
-                      className="form-control"
-                      error={hasErrors("cfp_presentation_summary_links_label")}
+                      fullWidth
+                      size="small"
+                      error={
+                        !!hasErrors("cfp_presentation_summary_links_label")
+                      }
+                      helperText={
+                        hasErrors("cfp_presentation_summary_links_label") ||
+                        undefined
+                      }
                       onChange={handleChange}
                       value={
                         formik.values.marketing_settings

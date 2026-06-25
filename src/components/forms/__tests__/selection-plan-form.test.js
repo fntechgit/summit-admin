@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor
-} from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import SelectionPlanForm from "../selection-plan-form";
@@ -94,15 +88,13 @@ const defaultEntity = {
 const defaultProps = {
   entity: defaultEntity,
   errors: {},
-  currentSummit: { id: 1 },
+  currentSummit: { id: 1, time_zone_id: "UTC" },
   extraQuestionsOrder: "id",
   extraQuestionsOrderDir: 1,
   actionTypesOrder: "id",
   actionTypesOrderDir: 1,
   allowedMembers: { data: [], total: 0 },
-  onSaved: jest.fn(),
-  onSavingChange: jest.fn(),
-  saveSelectionPlanSettings: jest.fn(() => Promise.resolve()),
+  onSave: jest.fn(() => Promise.resolve()),
   onTrackGroupLink: jest.fn(),
   onTrackGroupUnLink: jest.fn(),
   onAddEventType: jest.fn(),
@@ -127,132 +119,49 @@ const defaultProps = {
   onEditProgressFlag: jest.fn()
 };
 
-// Mirrors the popup: form renders without a button; an external button submits
-// via the `form` attribute and tracks saving state via onSavingChange.
-const FormWithExternalButton = ({
-  onSavingChange: onSavingChangeProp,
-  ...rest
-}) => {
-  const [saving, setSaving] = React.useState(false);
-  const handleSavingChange = (s) => {
-    setSaving(s);
-    onSavingChangeProp(s);
-  };
-  return (
-    <>
-      <SelectionPlanForm {...rest} onSavingChange={handleSavingChange} />
-      <button type="submit" form="selection-plan-form" disabled={saving}>
-        general.save
-      </button>
-    </>
-  );
-};
+// Mirrors the popup: form has no internal submit button; an external button
+// submits via the `form` attribute. The popup owns isSaving — not the form.
+const FormWithExternalButton = (props) => (
+  <>
+    <SelectionPlanForm {...props} />
+    <button type="submit" form="selection-plan-form">
+      general.save
+    </button>
+  </>
+);
 
-describe("SelectionPlanForm — save guard", () => {
-  let onSubmit;
-  let onSavingChange;
-
+describe("SelectionPlanForm — save behaviour", () => {
   beforeEach(() => {
-    onSubmit = jest.fn();
-    onSavingChange = jest.fn();
     jest.clearAllMocks();
   });
 
   const renderForm = (props = {}) =>
-    render(
-      <FormWithExternalButton
-        {...defaultProps}
-        onSubmit={onSubmit}
-        onSavingChange={onSavingChange}
-        {...props}
-      />
-    );
+    render(<FormWithExternalButton {...defaultProps} {...props} />);
 
-  it("disables submit and calls onSavingChange(true) while save is pending", async () => {
-    let resolveSave;
-    onSubmit.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      })
-    );
-
-    renderForm();
-    await userEvent.click(screen.getByRole("button", { name: "general.save" }));
-
-    await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: "general.save" })
-      ).toBeDisabled();
-    });
-    expect(onSavingChange).toHaveBeenCalledWith(true);
-
-    await act(async () => {
-      resolveSave({ id: 1 });
-      await Promise.resolve();
-    });
-  });
-
-  it("does not re-trigger onSubmit while a save is in flight", async () => {
-    let resolveSave;
-    onSubmit.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      })
-    );
-
-    renderForm();
-    await userEvent.click(screen.getByRole("button", { name: "general.save" }));
-
-    await waitFor(() =>
-      expect(
-        screen.getByRole("button", { name: "general.save" })
-      ).toBeDisabled()
-    );
-
-    // Second click on disabled button — should not fire onSubmit again
-    fireEvent.click(screen.getByRole("button", { name: "general.save" }));
-    expect(onSubmit).toHaveBeenCalledTimes(1);
-
-    await act(async () => {
-      resolveSave({ id: 1 });
-      await Promise.resolve();
-    });
-  });
-
-  it("re-enables submit and calls onSavingChange(false) when onSubmit rejects", async () => {
-    onSubmit.mockImplementation(() => Promise.reject(new Error("API error")));
-
-    renderForm();
-    await userEvent.click(screen.getByRole("button", { name: "general.save" }));
-
-    await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: "general.save" })
-      ).not.toBeDisabled();
-    });
-    expect(onSavingChange).toHaveBeenCalledWith(false);
-  });
-
-  it("calls saveSelectionPlanSettings then onSaved on successful submit", async () => {
-    const savedEntity = { id: 42 };
-    const onSubmitMock = jest.fn().mockResolvedValue(savedEntity);
-    const onSavedMock = jest.fn();
-    const saveSettingsMock = jest.fn().mockResolvedValue();
-
-    renderForm({
-      onSubmit: onSubmitMock,
-      onSaved: onSavedMock,
-      saveSelectionPlanSettings: saveSettingsMock
-    });
+  it("calls onSave when the form is submitted", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    renderForm({ onSave });
 
     await userEvent.click(screen.getByRole("button", { name: "general.save" }));
 
     await waitFor(() => {
-      expect(saveSettingsMock).toHaveBeenCalledWith(
-        defaultEntity.marketing_settings,
-        savedEntity.id
-      );
-      expect(onSavedMock).toHaveBeenCalledWith(savedEntity);
+      expect(onSave).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it("passes normalized values to onSave", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    renderForm({ onSave });
+
+    await userEvent.click(screen.getByRole("button", { name: "general.save" }));
+
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+    const [calledWith] = onSave.mock.calls[0];
+    // Dates that were null become 0 (unix epoch sentinel) after normalization
+    expect(calledWith.submission_begin_date).toBe(0);
+    expect(calledWith.marketing_settings).toEqual(
+      defaultEntity.marketing_settings
+    );
   });
 });

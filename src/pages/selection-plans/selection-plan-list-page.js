@@ -23,7 +23,9 @@ import {
   deleteSelectionPlan,
   getSelectionPlan,
   getSelectionPlans,
-  resetSelectionPlanForm
+  resetSelectionPlanForm,
+  saveSelectionPlan,
+  saveSelectionPlanSettings
 } from "../../actions/selection-plan-actions";
 import { getMarketingSettingsBySelectionPlan } from "../../actions/marketing-actions";
 import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../utils/constants";
@@ -44,7 +46,9 @@ const SelectionPlanListPage = ({
   getSelectionPlans,
   resetSelectionPlanForm,
   getMarketingSettingsBySelectionPlan,
-  deleteSelectionPlan
+  deleteSelectionPlan,
+  saveSelectionPlan,
+  saveSelectionPlanSettings
 }) => {
   const [openSelectionPlanPopup, setOpenSelectionPlanPopup] = useState(false);
 
@@ -84,7 +88,7 @@ const SelectionPlanListPage = ({
     if (!id) return;
 
     deleteSelectionPlan(id)
-      .finally(() => refreshSelectionPlans())
+      .then(() => refreshSelectionPlans())
       .catch(() => {});
   };
 
@@ -98,10 +102,16 @@ const SelectionPlanListPage = ({
     setOpenSelectionPlanPopup(false);
   };
 
-  const handleSelectionPlanSaved = () => {
-    setOpenSelectionPlanPopup(false);
-    refreshSelectionPlans();
-  };
+  const handleSave = (entity) =>
+    saveSelectionPlan(entity)
+      .then((savedEntity) => {
+        if (!savedEntity?.id) return null;
+        return saveSelectionPlanSettings(
+          entity.marketing_settings ?? {},
+          savedEntity.id
+        );
+      })
+      .then(() => refreshSelectionPlans());
 
   const handleSort = (key, dir) => {
     getSelectionPlans(term, currentPage, perPage, key, dir);
@@ -214,6 +224,9 @@ const SelectionPlanListPage = ({
             onSort={handleSort}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            deleteDialogBody={(name) =>
+              `${T.translate("selection_plan_list.remove_warning")}${name}?`
+            }
             confirmButtonColor="error"
           />
         </div>
@@ -223,7 +236,7 @@ const SelectionPlanListPage = ({
         <SelectionPlanPopup
           isEditing={!!currentSelectionPlan?.id}
           onClose={handleClosePopup}
-          onSaved={handleSelectionPlanSaved}
+          onSave={handleSave}
           history={history}
         />
       )}
@@ -246,5 +259,7 @@ export default connect(mapStateToProps, {
   getSelectionPlan,
   resetSelectionPlanForm,
   getMarketingSettingsBySelectionPlan,
-  deleteSelectionPlan
+  deleteSelectionPlan,
+  saveSelectionPlan,
+  saveSelectionPlanSettings
 })(SelectionPlanListPage);

@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -23,18 +23,20 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import EditSelectionPlanPage from "./edit-selection-plan-page";
 
-const SelectionPlanPopup = ({ isEditing, onClose, onSaved, history }) => {
+const SelectionPlanPopup = ({ isEditing, onClose, onSave, history }) => {
   const [isSaving, setIsSaving] = useState(false);
-  const isSavingRef = useRef(false);
-
-  const handleSavingChange = (saving) => {
-    isSavingRef.current = saving;
-    setIsSaving(saving);
-  };
 
   const handleClose = () => {
-    if (isSavingRef.current) return;
+    if (isSaving) return;
     onClose();
+  };
+
+  const handleSave = (values) => {
+    setIsSaving(true);
+    return Promise.resolve(onSave(values))
+      .then(() => onClose())
+      .catch(() => {})
+      .finally(() => setIsSaving(false));
   };
 
   return (
@@ -52,17 +54,18 @@ const SelectionPlanPopup = ({ isEditing, onClose, onSaved, history }) => {
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         {isEditing ? T.translate("general.edit") : T.translate("general.add")}{" "}
         {T.translate("edit_selection_plan.selection_plan")}
-        <IconButton size="small" onClick={handleClose} disabled={isSaving}>
+        <IconButton
+          aria-label="Close"
+          size="small"
+          onClick={handleClose}
+          disabled={isSaving}
+        >
           <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
       <Divider />
       <DialogContent sx={{ overflowY: "auto" }}>
-        <EditSelectionPlanPage
-          onSaved={onSaved}
-          onSavingChange={handleSavingChange}
-          history={history}
-        />
+        <EditSelectionPlanPage onSave={handleSave} history={history} />
       </DialogContent>
       <Divider />
       <DialogActions>
