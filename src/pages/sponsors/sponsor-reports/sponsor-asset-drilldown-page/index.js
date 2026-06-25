@@ -93,13 +93,23 @@ const ContentCell = ({ row }) => {
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
+        sx={{ display: "flex", alignItems: "flex-start", gap: 0.5 }}
       >
-        <InsertDriveFileOutlinedIcon fontSize="small" />
-        <Typography variant="body2" noWrap title={filename}>
+        <InsertDriveFileOutlinedIcon
+          fontSize="small"
+          sx={{ flexShrink: 0, mt: 0.25 }}
+        />
+        {/* Long hashed filenames have no spaces; overflowWrap:anywhere breaks
+            the unbroken hash so the link wraps inside its card instead of
+            overflowing. minWidth:0 lets the text shrink within the flex row. */}
+        <Typography
+          variant="body2"
+          title={filename}
+          sx={{ flex: 1, minWidth: 0, overflowWrap: "anywhere" }}
+        >
           {filename || row.module.title}
         </Typography>
-        <DownloadIcon fontSize="small" />
+        <DownloadIcon fontSize="small" sx={{ flexShrink: 0, mt: 0.25 }} />
       </MuiLink>
     );
   }
