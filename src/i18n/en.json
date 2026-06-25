@@ -1389,7 +1389,7 @@
     "type": "Type",
     "categories": "Categories",
     "color": "Color",
-    "delete_warning": "Please verify you want to delete activity category group "
+    "delete_warning": "Please verify you want to delete activity category group"
   },
   "edit_event_category_group": {
     "event_category_group": "Activity Category Group",

@@ -39,8 +39,8 @@ const eventCategoryGroupListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_EVENT_CATEGORY_GROUPS: {
-      const { order, orderDir, term, perPage } = payload;
-      return { ...state, order, orderDir, term, perPage };
+      const { order, orderDir, term, perPage, currentPage } = payload;
+      return { ...state, order, orderDir, term, perPage, currentPage };
     }
     case RECEIVE_EVENT_CATEGORY_GROUPS: {
       const { total, last_page, current_page } = payload.response;
@@ -67,7 +67,8 @@ const eventCategoryGroupListReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         eventCategoryGroups: state.eventCategoryGroups.filter(
           (g) => g.id !== groupId
-        )
+        ),
+        totalEventCategoryGroups: state.totalEventCategoryGroups - 1
       };
     }
     default:

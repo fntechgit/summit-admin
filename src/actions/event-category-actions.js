@@ -27,10 +27,7 @@ import {
 import T from "i18n-react/dist/i18n-react";
 import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
-import {
-  DEFAULT_PER_PAGE,
-  DEFAULT_CURRENT_PAGE
-} from "../utils/constants";
+import { DEFAULT_PER_PAGE, DEFAULT_CURRENT_PAGE } from "../utils/constants";
 
 export const REQUEST_EVENT_CATEGORIES = "REQUEST_EVENT_CATEGORIES";
 export const RECEIVE_EVENT_CATEGORIES = "RECEIVE_EVENT_CATEGORIES";
@@ -428,7 +425,7 @@ export const getEventCategoryGroups =
       createAction(RECEIVE_EVENT_CATEGORY_GROUPS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-groups`,
       authErrorHandler,
-      { order, orderDir, term, perPage }
+      { order, orderDir, term, perPage, currentPage: page }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
