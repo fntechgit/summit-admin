@@ -32,7 +32,8 @@ const ReportShell = ({
                 alignItems: "center",
                 justifyContent: "center",
                 bgcolor: `${iconTone}.light`,
-                color: `${iconTone}.dark`
+                // White glyph to match the sponsor avatars on the same tint.
+                color: "common.white"
               }}
             >
               {icon}
