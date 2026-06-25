@@ -16,7 +16,12 @@ export const toPlainText = (html) => {
   if (html == null) return "";
   return String(html)
     .replace(/<[^>]*>/g, " ") // tags become whitespace so boundaries don't fuse words
-    .replace(/&[a-z]+;|&#\d+;/gi, (m) => (m in ENTITIES ? ENTITIES[m] : m))
+    .replace(/&[a-z]+;|&#\d+;/gi, (m) => {
+      // Match is case-insensitive (e.g. "&AMP;") but the map keys are lowercase;
+      // normalize for lookup, and return the original token on a miss.
+      const key = m.toLowerCase();
+      return key in ENTITIES ? ENTITIES[key] : m;
+    })
     .replace(/\s+/g, " ")
     .trim();
 };

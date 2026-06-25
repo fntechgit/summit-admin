@@ -29,9 +29,14 @@ export const buildReportQuery = (filters = {}) => {
   const filter = [];
 
   // Sponsor — the one multi-select dimension → comma-OR in a SINGLE bracket.
-  if (sponsorIds.length > 0) {
-    // Number() coercion prevents stray-comma strings from injecting extra OR terms.
-    filter.push(sponsorIds.map((id) => `sponsor_id==${Number(id)}`).join(","));
+  // Coerce to positive integers and drop everything else, so a stray entry can't
+  // emit `sponsor_id==NaN`/`==0` (rejected by the backend; can hit the bad-filter
+  // 500 path). Note Number(null) === 0, so the `> 0` check is load-bearing.
+  const sponsorFilterIds = sponsorIds
+    .map((id) => Number(id))
+    .filter((id) => Number.isInteger(id) && id > 0);
+  if (sponsorFilterIds.length > 0) {
+    filter.push(sponsorFilterIds.map((id) => `sponsor_id==${id}`).join(","));
   }
 
   // Single-value dimensions — each its own comma-free bracket (AND).
