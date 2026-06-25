@@ -165,6 +165,16 @@ describe("SponsorReportsLayout", () => {
             total: 0,
             readError: null,
             validationError: null
+          },
+          sponsorReportsPurchaseDetailsLinesState: {
+            data: [],
+            summary: null,
+            total: 0,
+            currentPage: 1,
+            lastPage: 1,
+            perPage: 50,
+            loading: false,
+            readError: null
           }
         }
       }
