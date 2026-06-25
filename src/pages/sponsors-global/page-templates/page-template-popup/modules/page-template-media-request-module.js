@@ -15,7 +15,12 @@ import {
 } from "../../../../../utils/constants";
 import MuiFormikSelect from "../../../../../components/mui/formik-inputs/mui-formik-select";
 
-const MediaRequestModule = ({ baseName, index, mediaFileTypes, isGlobal }) => {
+const MediaRequestModule = ({
+  baseName,
+  index,
+  mediaFileTypes,
+  showUploadDeadline
+}) => {
   const { values } = useFormikContext();
   const buildFieldName = (field) => `${baseName}[${index}].${field}`;
 
@@ -51,7 +56,7 @@ const MediaRequestModule = ({ baseName, index, mediaFileTypes, isGlobal }) => {
       <Grid2 size={12}>
         <Divider sx={{ mx: -2 }} />
       </Grid2>
-      <Grid2 size={isGlobal ? COLUMN_12 : COLUMN_6}>
+      <Grid2 size={showUploadDeadline ? COLUMN_6 : COLUMN_12}>
         <InputLabel htmlFor={buildFieldName("name")}>
           {T.translate("page_template_list.page_crud.name")}
         </InputLabel>
@@ -61,7 +66,7 @@ const MediaRequestModule = ({ baseName, index, mediaFileTypes, isGlobal }) => {
           margin="none"
         />
       </Grid2>
-      {!isGlobal && (
+      {showUploadDeadline && (
         <Grid2 size={6}>
           <InputLabel htmlFor={buildFieldName("upload_deadline")}>
             {T.translate("page_template_list.page_crud.upload_deadline")}
@@ -137,7 +142,7 @@ MediaRequestModule.propTypes = {
   baseName: PropTypes.string.isRequired,
   index: PropTypes.number.isRequired,
   mediaFileTypes: PropTypes.array.isRequired,
-  isGlobal: PropTypes.bool
+  showUploadDeadline: PropTypes.bool
 };
 
 const mapStateToProps = ({ mediaUploadState }) => ({

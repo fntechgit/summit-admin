@@ -83,7 +83,11 @@ const PageTemplatePopup = ({
     kind: yup.string().equals([PAGES_MODULE_KINDS.MEDIA]),
     name: yup.string().required(T.translate("validation.required")),
     type: yup.string().required(T.translate("validation.required")),
-    upload_deadline: yup.date().nullable(),
+    upload_deadline: yup.date().when("$isGlobal", {
+      is: true,
+      then: (s) => s.nullable(),
+      otherwise: (s) => s.required(T.translate("validation.required"))
+    }),
     description: yup.string().required(T.translate("validation.required")),
     max_file_size: yup.number().when("type", {
       is: PAGE_MODULES_MEDIA_TYPES.FILE,
@@ -120,6 +124,7 @@ const PageTemplatePopup = ({
 
   const formik = useFormik({
     initialValues: pageTemplate,
+    validationContext: { isGlobal },
     validationSchema: yup.object().shape({
       code: yup.string().required(T.translate("validation.required")),
       name: yup.string().required(T.translate("validation.required")),
