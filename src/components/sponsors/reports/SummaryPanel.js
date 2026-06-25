@@ -21,7 +21,8 @@ const SummaryPanel = ({ tiles = [] }) => {
           <Typography
             variant="subtitle1"
             color="text.secondary"
-            sx={{ fontWeight: 500 }}
+            // subtitle1 resolves to ~10px in this theme; pin a readable px.
+            sx={{ fontWeight: 500, fontSize: "14px" }}
           >
             {tile.label}
           </Typography>
