@@ -30,7 +30,7 @@ import GroupByToggle from "../../../../components/sponsors/reports/GroupByToggle
 import GroupBySponsorView from "../../../../components/sponsors/reports/GroupBySponsorView";
 import GroupByComponentView from "../../../../components/sponsors/reports/GroupByComponentView";
 import ExportCsvButton from "../../../../components/sponsors/reports/ExportCsvButton";
-import usePrint from "../../../../components/sponsors/reports/usePrint";
+import usePrint from "../../../../hooks/usePrint";
 import {
   getSponsorAssetFilters,
   getSponsorAssetReport

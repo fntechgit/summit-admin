@@ -40,11 +40,6 @@ export const formatCheckoutTime = (value) => {
   return `${date} ${hour12}:${mm} ${ampm}`;
 };
 
-// MuiTable keys rows on row.id; the API exposes purchase_id, not id.
-// The page must call rows.map(r => ({ ...r, id: r.purchase_id })) before
-// passing data, or use this helper for explicit mapping.
-export const getOrderRowId = (row) => row.purchase_id;
-
 // Converts MuiTable sort state to the `order` query param expected by the API.
 // MuiTable calls onSort(columnKey, dir) where dir = 1 (asc) | -1 (desc).
 // Since columnKey IS the backend key for sortable columns, no extra translation

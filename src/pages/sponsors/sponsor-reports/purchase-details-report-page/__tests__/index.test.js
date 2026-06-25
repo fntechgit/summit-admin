@@ -24,6 +24,9 @@ jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
   getPurchaseDetailsLinesReport: jest.fn(() => ({
     type: "REQUEST_PURCHASE_DETAILS_LINES"
   })),
+  clearPurchaseDetailsValidation: jest.fn(() => ({
+    type: "PURCHASE_DETAILS_VALIDATION_CLEAR"
+  })),
   PURCHASE_DETAILS_VALIDATION_CLEAR: "PURCHASE_DETAILS_VALIDATION_CLEAR",
   PURCHASE_DETAILS_READ_ERROR: "PURCHASE_DETAILS_READ_ERROR"
 }));

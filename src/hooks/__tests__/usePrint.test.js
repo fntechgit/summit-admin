@@ -1,4 +1,4 @@
-// src/components/sponsors/reports/__tests__/usePrint.test.js
+// src/hooks/__tests__/usePrint.test.js
 // @testing-library/react 12 (React 16) does not export renderHook; use a
 // lightweight component wrapper instead.
 import "@testing-library/jest-dom";

@@ -30,8 +30,8 @@ export const buildSectionCsvQuery = (
   const sid = Number(sponsorId);
   const pid = Number(pageId);
   // Defense-in-depth: callers pass route/backend integer ids (the drill-down page
-  // validates :sponsorId/:summitId before rendering). Never interpolate a
-  // non-integer value into a filter clause sent to the CSV endpoint.
+  // validates :sponsorId before rendering). Only interpolate sponsor_id/page_id
+  // into a filter clause when each coerces to an integer; non-integers are dropped.
   if (Number.isInteger(sid)) kept.push(`sponsor_id==${sid}`);
   if (Number.isInteger(pid)) kept.push(`page_id==${pid}`);
   return { ...rest, "filter[]": kept };

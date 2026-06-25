@@ -37,15 +37,15 @@ import OrdersTable, {
 import LinesManifestView from "../../../../components/sponsors/reports/LinesManifestView";
 import ReportViewToggle from "../../../../components/sponsors/reports/ReportViewToggle";
 import ExportCsvButton from "../../../../components/sponsors/reports/ExportCsvButton";
-import usePrint from "../../../../components/sponsors/reports/usePrint";
+import usePrint from "../../../../hooks/usePrint";
 import {
   getPurchaseDetailsReport,
   getPurchaseDetailsLinesReport,
   getPurchaseDetailsFilters,
-  PURCHASE_DETAILS_VALIDATION_CLEAR
+  clearPurchaseDetailsValidation
 } from "../../../../actions/sponsor-reports-actions";
+import { DEFAULT_PER_PAGE } from "../../../../utils/constants";
 
-const DEFAULT_PAGE_SIZE = 10;
 const LINES_DEFAULT_PAGE_SIZE = 50;
 const TOAST_AUTO_HIDE_MS = 6000;
 const ISO_DATE_LENGTH = 10; // "YYYY-MM-DD"
@@ -64,18 +64,18 @@ const PurchaseDetailsReportPage = ({
   linesSummary,
   linesTotal,
   linesReadError,
-  // From mapDispatchToProps (function form — includes raw dispatch)
-  dispatch,
+  // From mapDispatchToProps (object form — bound action creators)
   getPurchaseDetailsReport: fetchReport,
   getPurchaseDetailsLinesReport: fetchLinesReport,
-  getPurchaseDetailsFilters: fetchFilters
+  getPurchaseDetailsFilters: fetchFilters,
+  clearPurchaseDetailsValidation: clearValidation
 }) => {
   const print = usePrint();
 
   // Local pagination/sort state. MuiTable dir = 1 (asc) | -1 (desc).
   const [filters, setFilters] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(DEFAULT_PAGE_SIZE);
+  const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [order, setOrder] = useState(null);
   const [orderDir, setOrderDir] = useState(1);
   const [view, setView] = useState("orders");
@@ -324,7 +324,7 @@ const PurchaseDetailsReportPage = ({
       <Snackbar
         open={Boolean(validationError)}
         autoHideDuration={TOAST_AUTO_HIDE_MS}
-        onClose={() => dispatch({ type: PURCHASE_DETAILS_VALIDATION_CLEAR })}
+        onClose={() => clearValidation()}
       >
         <Alert severity="error" data-testid="reports-validation-error">
           {validationError?.message ||
@@ -375,17 +375,12 @@ const mapStateToProps = ({
   linesReadError: sponsorReportsPurchaseDetailsLinesState.readError
 });
 
-// Function form of mapDispatchToProps: injects raw dispatch (needed for the
-// PURCHASE_DETAILS_VALIDATION_CLEAR action in the Snackbar handler) alongside
-// the bound action creators.
-const mapDispatchToProps = (dispatch) => ({
-  dispatch,
-  getPurchaseDetailsReport: (query) =>
-    dispatch(getPurchaseDetailsReport(query)),
-  getPurchaseDetailsLinesReport: (query) =>
-    dispatch(getPurchaseDetailsLinesReport(query)),
-  getPurchaseDetailsFilters: () => dispatch(getPurchaseDetailsFilters())
-});
+const mapDispatchToProps = {
+  getPurchaseDetailsReport,
+  getPurchaseDetailsLinesReport,
+  getPurchaseDetailsFilters,
+  clearPurchaseDetailsValidation
+};
 
 export default withRouter(
   connect(mapStateToProps, mapDispatchToProps)(PurchaseDetailsReportPage)

@@ -49,7 +49,7 @@ import {
   isPositiveIntId
 } from "../../../../utils/reports-api";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
-import usePrint from "../../../../components/sponsors/reports/usePrint";
+import usePrint from "../../../../hooks/usePrint";
 import ExportCsvButton from "../../../../components/sponsors/reports/ExportCsvButton";
 import TierBadge from "../../../../components/sponsors/reports/TierBadge";
 import StatusPill from "../../../../components/sponsors/reports/StatusPill";
