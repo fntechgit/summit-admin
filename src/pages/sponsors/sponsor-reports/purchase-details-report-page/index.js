@@ -34,15 +34,19 @@ import FilterBar from "../../../../components/sponsors/reports/FilterBar";
 import OrdersTable, {
   toOrderParam
 } from "../../../../components/sponsors/reports/OrdersTable";
+import LinesManifestView from "../../../../components/sponsors/reports/LinesManifestView";
+import ReportViewToggle from "../../../../components/sponsors/reports/ReportViewToggle";
 import ExportCsvButton from "../../../../components/sponsors/reports/ExportCsvButton";
 import usePrint from "../../../../components/sponsors/reports/usePrint";
 import {
   getPurchaseDetailsReport,
+  getPurchaseDetailsLinesReport,
   getPurchaseDetailsFilters,
   PURCHASE_DETAILS_VALIDATION_CLEAR
 } from "../../../../actions/sponsor-reports-actions";
 
 const DEFAULT_PAGE_SIZE = 10;
+const LINES_DEFAULT_PAGE_SIZE = 50;
 const TOAST_AUTO_HIDE_MS = 6000;
 const ISO_DATE_LENGTH = 10; // "YYYY-MM-DD"
 
@@ -55,9 +59,15 @@ const PurchaseDetailsReportPage = ({
   total,
   readError,
   validationError,
+  // Lines slice (per-line manifest view)
+  linesData,
+  linesSummary,
+  linesTotal,
+  linesReadError,
   // From mapDispatchToProps (function form — includes raw dispatch)
   dispatch,
   getPurchaseDetailsReport: fetchReport,
+  getPurchaseDetailsLinesReport: fetchLinesReport,
   getPurchaseDetailsFilters: fetchFilters
 }) => {
   const print = usePrint();
@@ -68,6 +78,9 @@ const PurchaseDetailsReportPage = ({
   const [perPage, setPerPage] = useState(DEFAULT_PAGE_SIZE);
   const [order, setOrder] = useState(null);
   const [orderDir, setOrderDir] = useState(1);
+  const [view, setView] = useState("orders");
+  const [linesPage, setLinesPage] = useState(1);
+  const [linesPerPage, setLinesPerPage] = useState(LINES_DEFAULT_PAGE_SIZE);
 
   // Build the API query from all local state. Memoized so useEffect only re-runs
   // when the query actually changes (referential stability).
@@ -91,6 +104,25 @@ const PurchaseDetailsReportPage = ({
     });
   }, [filters, currentPage, perPage, order, orderDir]);
 
+  // Lines query: same filters as Orders, but NO order param. CustomOrderingFilter
+  // would replace the default sponsor-name ordering and scatter the sponsor groups,
+  // so the manifest relies on the backend default ordering.
+  const linesQuery = useMemo(() => {
+    const { dateFrom, dateTo, ...rest } = filters;
+    const nextDayStartIso = (ymd) => {
+      const d = new Date(`${ymd}T00:00:00Z`);
+      d.setUTCDate(d.getUTCDate() + 1);
+      return `${d.toISOString().slice(0, ISO_DATE_LENGTH)}T00:00:00Z`;
+    };
+    return buildReportQuery({
+      ...rest,
+      dateFrom: dateFrom ? `${dateFrom}T00:00:00Z` : undefined,
+      dateTo: dateTo ? nextDayStartIso(dateTo) : undefined,
+      page: linesPage,
+      perPage: linesPerPage
+    });
+  }, [filters, linesPage, linesPerPage]);
+
   // Fetch filters once on mount. Summit is read from store inside the action.
   // Empty deps is intentional: fetchFilters is stable from connect() and reads
   // summit from Redux store inside the thunk.
@@ -98,46 +130,51 @@ const PurchaseDetailsReportPage = ({
     fetchFilters();
   }, []); // mount-only
 
-  // Fetch report data whenever the derived query object changes.
-  // fetchReport reads summit from the store — only query changes drive re-fetches.
+  // Orders view: fetch the order-grain report when its query changes.
   useEffect(() => {
-    fetchReport(query);
-  }, [query]); // query is memoized; updates only when filters/pagination/sort change
+    if (view === "orders") fetchReport(query);
+  }, [view, query]);
+
+  // Line Items view: fetch the per-line feed when its query changes.
+  useEffect(() => {
+    if (view === "lines") fetchLinesReport(linesQuery);
+  }, [view, linesQuery]);
 
   // ── Summary tiles ───────────────────────────────────────────────────────────
-  // D9: Total Refunded tile renders ONLY when summary.total_refunded != null.
+  // D9: Total Refunded tile renders ONLY when activeSummary.total_refunded != null.
   // Backend main does not yet expose it (ships in PR #24); the presence check
   // keeps the tile hidden on current main and auto-appears after PR #24 deploys.
-  const tiles = summary
+  const activeSummary = view === "orders" ? summary : linesSummary;
+  const tiles = activeSummary
     ? [
         {
           key: "total_orders",
           label: T.translate("sponsor_reports_page.total_orders"),
-          value: summary.total_orders
+          value: activeSummary.total_orders
         },
         {
           key: "total_items",
           label: T.translate("sponsor_reports_page.total_items"),
-          value: summary.total_items
+          value: activeSummary.total_items
         },
         {
           key: "total_paid",
           label: T.translate("sponsor_reports_page.total_paid"),
-          value: formatUsd(summary.total_paid),
+          value: formatUsd(activeSummary.total_paid),
           tone: "success"
         },
         {
           key: "total_pending",
           label: T.translate("sponsor_reports_page.total_pending"),
-          value: formatUsd(summary.total_pending),
+          value: formatUsd(activeSummary.total_pending),
           tone: "warning"
         },
-        ...(summary.total_refunded != null
+        ...(activeSummary.total_refunded != null
           ? [
               {
                 key: "total_refunded",
                 label: T.translate("sponsor_reports_page.total_refunded"),
-                value: formatUsd(summary.total_refunded)
+                value: formatUsd(activeSummary.total_refunded)
               }
             ]
           : [])
@@ -161,10 +198,12 @@ const PurchaseDetailsReportPage = ({
   const handleApply = (next) => {
     setFilters(next);
     setCurrentPage(1);
+    setLinesPage(1);
   };
   const handleClear = () => {
     setFilters({});
     setCurrentPage(1);
+    setLinesPage(1);
   };
 
   // ── Sort/pagination handlers ─────────────────────────────────────────────────
@@ -179,6 +218,11 @@ const PurchaseDetailsReportPage = ({
   const handlePerPageChange = (newPerPage) => {
     setPerPage(newPerPage);
     setCurrentPage(1);
+  };
+  const handleLinesPageChange = (page) => setLinesPage(page);
+  const handleLinesPerPageChange = (newPerPage) => {
+    setLinesPerPage(newPerPage);
+    setLinesPage(1);
   };
 
   // ── Extra filter controls (status / type / date range) ──────────────────────
@@ -248,16 +292,19 @@ const PurchaseDetailsReportPage = ({
       subtitle={T.translate("sponsor_reports_page.purchase_details_subtitle")}
       actions={
         <>
+          <ReportViewToggle value={view} onChange={setView} />
           <Button startIcon={<PrintIcon />} variant="outlined" onClick={print}>
             {T.translate("sponsor_reports_page.print")}
           </Button>
-          <ExportCsvButton
-            url={csvUrl}
-            query={csvQuery}
-            filename={`purchase-details-summit-${
-              currentSummit?.id ?? "unknown"
-            }.csv`}
-          />
+          {view === "orders" && (
+            <ExportCsvButton
+              url={csvUrl}
+              query={csvQuery}
+              filename={`purchase-details-summit-${
+                currentSummit?.id ?? "unknown"
+              }.csv`}
+            />
+          )}
         </>
       }
       filterBar={
@@ -284,11 +331,12 @@ const PurchaseDetailsReportPage = ({
             T.translate("sponsor_reports_page.validation_error")}
         </Alert>
       </Snackbar>
-      {readError ? (
+      {(view === "orders" ? readError : linesReadError) ? (
         <Alert data-testid="reports-read-error" severity="warning">
-          {readError.message || T.translate("sponsor_reports_page.read_error")}
+          {(view === "orders" ? readError : linesReadError)?.message ||
+            T.translate("sponsor_reports_page.read_error")}
         </Alert>
-      ) : (
+      ) : view === "orders" ? (
         <OrdersTable
           rows={data}
           totalRows={total}
@@ -300,6 +348,15 @@ const PurchaseDetailsReportPage = ({
           onPerPageChange={handlePerPageChange}
           onSort={handleSort}
         />
+      ) : (
+        <LinesManifestView
+          rows={linesData}
+          total={linesTotal}
+          currentPage={linesPage}
+          perPage={linesPerPage}
+          onPageChange={handleLinesPageChange}
+          onPerPageChange={handleLinesPerPageChange}
+        />
       )}
     </ReportShell>
   );
@@ -307,10 +364,15 @@ const PurchaseDetailsReportPage = ({
 
 const mapStateToProps = ({
   sponsorReportsPurchaseDetailsState,
+  sponsorReportsPurchaseDetailsLinesState,
   currentSummitState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
-  ...sponsorReportsPurchaseDetailsState
+  ...sponsorReportsPurchaseDetailsState,
+  linesData: sponsorReportsPurchaseDetailsLinesState.data,
+  linesSummary: sponsorReportsPurchaseDetailsLinesState.summary,
+  linesTotal: sponsorReportsPurchaseDetailsLinesState.total,
+  linesReadError: sponsorReportsPurchaseDetailsLinesState.readError
 });
 
 // Function form of mapDispatchToProps: injects raw dispatch (needed for the
@@ -320,6 +382,8 @@ const mapDispatchToProps = (dispatch) => ({
   dispatch,
   getPurchaseDetailsReport: (query) =>
     dispatch(getPurchaseDetailsReport(query)),
+  getPurchaseDetailsLinesReport: (query) =>
+    dispatch(getPurchaseDetailsLinesReport(query)),
   getPurchaseDetailsFilters: () => dispatch(getPurchaseDetailsFilters())
 });
 
