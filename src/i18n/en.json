@@ -4329,6 +4329,22 @@
     "pages_active": "{count} pages active",
     "purchase_details_desc": "Orders & revenue",
     "sponsor_assets_desc": "Sponsor portal assets",
-    "landing_title": "Reports"
+    "landing_title": "Reports",
+    "view_toggle": "View",
+    "view_orders": "Orders",
+    "view_line_items": "Line Items",
+    "lines_count": "{count} lines",
+    "destination_booth_fallback": "Booth",
+    "col_order": "Order #",
+    "col_form_code": "Form Code",
+    "col_item_code": "Item Code",
+    "col_item_name": "Item Name",
+    "col_destination": "Destination",
+    "col_checkout_at": "Checked Out At",
+    "col_notes": "Notes",
+    "col_quantity": "Qty",
+    "col_used_rate": "Used Rate",
+    "col_status": "Status",
+    "col_line_total": "Line Total"
   }
 }
