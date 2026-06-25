@@ -21,6 +21,9 @@ jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
   getPurchaseDetailsFilters: jest.fn(() => ({
     type: "REQUEST_PURCHASE_DETAILS_FILTERS"
   })),
+  getPurchaseDetailsLinesReport: jest.fn(() => ({
+    type: "REQUEST_PURCHASE_DETAILS_LINES"
+  })),
   PURCHASE_DETAILS_VALIDATION_CLEAR: "PURCHASE_DETAILS_VALIDATION_CLEAR",
   PURCHASE_DETAILS_READ_ERROR: "PURCHASE_DETAILS_READ_ERROR"
 }));
@@ -29,7 +32,8 @@ jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
 const { getCSV } = require("openstack-uicore-foundation/lib/utils/actions");
 const {
   getPurchaseDetailsReport,
-  getPurchaseDetailsFilters
+  getPurchaseDetailsFilters,
+  getPurchaseDetailsLinesReport
 } = require("../../../../../actions/sponsor-reports-actions");
 
 // Mock the API base-url helper so the CSV URL can be constructed in tests.
@@ -63,6 +67,28 @@ const SAMPLE_ROW = {
   sponsor_note: ""
 };
 
+const SAMPLE_LINE = {
+  sponsor: { id: 17, name: "Acme Corp" },
+  purchase: {
+    id: 5001,
+    number: "OCP-1",
+    status: "Paid",
+    checkout_at: 1735000000
+  },
+  form: { code: "AV", name: "Audio Visual" },
+  item_code: "AV1",
+  description: "Audio mixer",
+  rate_name: "Early",
+  quantity: 2,
+  unit_price: "500.00",
+  line_total: "1000.00",
+  add_on_id: 3,
+  add_on_name: "Meeting Room T",
+  notes: "dock B",
+  is_canceled: false,
+  canceled_at: null
+};
+
 const PAGE_ROUTE = "/app/summits/:summit_id/sponsors/reports/purchase-details";
 const PAGE_URL = "/app/summits/42/sponsors/reports/purchase-details";
 
@@ -86,6 +112,22 @@ function buildState(summaryOverrides = {}, { total = 1 } = {}) {
     },
     currentSummitState: {
       currentSummit: { id: 42 }
+    },
+    sponsorReportsPurchaseDetailsLinesState: {
+      data: [SAMPLE_LINE],
+      summary: {
+        total_orders: 1,
+        total_items: 2,
+        total_paid: "1000.00",
+        total_pending: "0.00",
+        total_refunded: null
+      },
+      total: 1,
+      currentPage: 1,
+      lastPage: 1,
+      perPage: 50,
+      loading: false,
+      readError: null
     }
   };
 }
@@ -298,5 +340,41 @@ describe("PurchaseDetailsReportPage", () => {
     const [[calledQuery]] = getPurchaseDetailsReport.mock.calls;
     // Sort change snaps back to page 1; order is the backend key with desc prefix.
     expect(calledQuery).toMatchObject({ page: 1, order: "-number" });
+  });
+
+  it("renders the Orders/Line-Items view toggle", async () => {
+    renderPage();
+    await act(async () => {});
+    expect(
+      screen.getByText("sponsor_reports_page.view_line_items")
+    ).toBeInTheDocument();
+  });
+
+  it("dispatches getPurchaseDetailsLinesReport and renders the manifest when Line Items is selected", async () => {
+    renderPage();
+    await act(async () => {});
+    getPurchaseDetailsLinesReport.mockClear();
+
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.view_line_items"));
+    });
+
+    expect(getPurchaseDetailsLinesReport).toHaveBeenCalled();
+    const [[calledQuery]] = getPurchaseDetailsLinesReport.mock.calls;
+    expect(calledQuery).toMatchObject({ page: 1, per_page: 50 });
+    expect(calledQuery).not.toHaveProperty("order");
+    // Manifest renders the line's destination
+    expect(screen.getByText("Meeting Room T")).toBeInTheDocument();
+  });
+
+  it("hides the CSV export button in the Line Items view", async () => {
+    renderPage();
+    await act(async () => {});
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.view_line_items"));
+    });
+    expect(
+      screen.queryByText("sponsor_reports_page.export_csv")
+    ).not.toBeInTheDocument();
   });
 });
