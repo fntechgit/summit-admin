@@ -2,11 +2,7 @@
 import "@testing-library/jest-dom";
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import OrdersTable, {
-  formatCheckoutTime,
-  getOrderRowId,
-  toOrderParam
-} from "../OrdersTable";
+import OrdersTable, { formatCheckoutTime, toOrderParam } from "../OrdersTable";
 
 // MuiTable uses i18n-react internally (no-items message, pagination labels).
 jest.mock("i18n-react/dist/i18n-react", () => ({
@@ -64,10 +60,6 @@ describe("OrdersTable sort helpers", () => {
     expect(toOrderParam(null, 1)).toBeUndefined();
     expect(toOrderParam(undefined, 1)).toBeUndefined();
     expect(toOrderParam("", 1)).toBeUndefined();
-  });
-
-  it("getOrderRowId extracts purchase_id (MuiTable requires row.id)", () => {
-    expect(getOrderRowId({ purchase_id: 99, id: 1 })).toBe(99);
   });
 });
 
