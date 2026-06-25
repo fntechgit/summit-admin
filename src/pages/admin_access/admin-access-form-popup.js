@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { connect } from "react-redux";
-import T from "i18n-react/dist/i18n-react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -44,17 +43,7 @@ const AdminAccessFormPopup = ({
       maxWidth="md"
       fullWidth
     >
-      <DialogTitle
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between"
-        }}
-      >
-        <span>
-          {entity.id ? T.translate("general.edit") : T.translate("general.add")}{" "}
-          {T.translate("admin_access.admin_access")}
-        </span>
+      <DialogTitle sx={{ display: "flex", justifyContent: "flex-end", pb: 0 }}>
         <IconButton onClick={handleClose} disabled={isSaving} size="small">
           <CloseIcon />
         </IconButton>

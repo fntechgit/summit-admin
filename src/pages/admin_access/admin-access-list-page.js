@@ -64,10 +64,15 @@ const AdminAccessListPage = ({
     }
 
     if (accessId) {
+      let ignore = false;
       getAdminAccess(accessId)
-        .then(() => setOpen(true))
+        .then(() => {
+          if (!ignore) setOpen(true);
+        })
         .catch(() => history.push("/app/admin-access"));
-      return;
+      return () => {
+        ignore = true;
+      };
     }
 
     setOpen(false);

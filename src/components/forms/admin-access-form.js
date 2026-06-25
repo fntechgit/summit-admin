@@ -62,6 +62,10 @@ const AdminAccessForm = ({
 
   return (
     <FormikProvider value={formik}>
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        {entity.id ? T.translate("general.edit") : T.translate("general.add")}{" "}
+        {T.translate("admin_access.admin_access")}
+      </Typography>
       <Box
         component="form"
         onSubmit={formik.handleSubmit}
@@ -86,9 +90,9 @@ const AdminAccessForm = ({
               id="members"
               value={formik.values.members}
               getOptionLabel={(member) =>
-                "email" in member
-                  ? `${member.first_name} ${member.last_name} (${member.email})`
-                  : `${member.first_name} ${member.last_name} (${member.id})`
+                `${member.first_name} ${member.last_name} (${
+                  "email" in member ? member.email : member.id
+                })`
               }
               onChange={(ev) =>
                 formik.setFieldValue("members", ev.target.value)
