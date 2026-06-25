@@ -13,7 +13,12 @@ const GroupByToggle = ({ value, onChange }) => (
       if (next) onChange(next);
     }}
     aria-label={T.translate("sponsor_reports_page.group_by")}
-    sx={{ "& .MuiToggleButton-root": { px: 2.5, fontSize: "0.95rem" } }}
+    // Match the adjacent action buttons (Print / Export CSV) typography.
+    // px, not rem: html root font-size is 62.5% (10px) here, so "0.875rem" would
+    // render 8.75px; the MuiButton resolves to 14px.
+    sx={{
+      "& .MuiToggleButton-root": { px: 2.5, fontSize: "14px", fontWeight: 500 }
+    }}
   >
     <ToggleButton value="sponsor">
       {T.translate("sponsor_reports_page.group_by_sponsor")}
