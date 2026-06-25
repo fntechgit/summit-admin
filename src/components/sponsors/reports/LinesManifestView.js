@@ -103,50 +103,48 @@ const LinesManifestView = ({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {group.lines.map((line, idx) => 
+                  {group.lines.map((line, idx) => (
                     // No backend line id; purchase.id repeats per line, so a
                     // composite key (with the in-group index) is needed.
-                     (
-                      <TableRow
-                        // eslint-disable-next-line react/no-array-index-key
-                        key={`${line.purchase?.id}-${
-                          line.item_code ?? "na"
-                        }-${idx}`}
-                        data-canceled={line.is_canceled ? "true" : undefined}
-                        sx={
-                          line.is_canceled
-                            ? {
-                                opacity: 0.6,
-                                "& td": { textDecoration: "line-through" }
-                              }
-                            : undefined
-                        }
-                      >
-                        <TableCell>{line.purchase?.number}</TableCell>
-                        <TableCell>{line.form?.code}</TableCell>
-                        <TableCell>{line.item_code}</TableCell>
-                        <TableCell>{line.description}</TableCell>
-                        <TableCell>
-                          <Destination name={line.add_on_name} />
-                        </TableCell>
-                        <TableCell>
-                          {formatCheckoutTime(line.purchase?.checkout_at)}
-                        </TableCell>
-                        <TableCell>{line.notes}</TableCell>
-                        <TableCell align="right">{line.quantity}</TableCell>
-                        <TableCell>{line.rate_name}</TableCell>
-                        <TableCell>
-                          <StatusPill
-                            status={line.purchase?.status}
-                            label={line.purchase?.status}
-                          />
-                        </TableCell>
-                        <TableCell align="right">
-                          {formatUsd(line.line_total)}
-                        </TableCell>
-                      </TableRow>
-                    )
-                  )}
+                    <TableRow
+                      // eslint-disable-next-line react/no-array-index-key
+                      key={`${line.purchase?.id}-${
+                        line.item_code ?? "na"
+                      }-${idx}`}
+                      data-canceled={line.is_canceled ? "true" : undefined}
+                      sx={
+                        line.is_canceled
+                          ? {
+                              opacity: 0.6,
+                              "& td": { textDecoration: "line-through" }
+                            }
+                          : undefined
+                      }
+                    >
+                      <TableCell>{line.purchase?.number}</TableCell>
+                      <TableCell>{line.form?.code}</TableCell>
+                      <TableCell>{line.item_code}</TableCell>
+                      <TableCell>{line.description}</TableCell>
+                      <TableCell>
+                        <Destination name={line.add_on_name} />
+                      </TableCell>
+                      <TableCell>
+                        {formatCheckoutTime(line.purchase?.checkout_at)}
+                      </TableCell>
+                      <TableCell>{line.notes}</TableCell>
+                      <TableCell align="right">{line.quantity}</TableCell>
+                      <TableCell>{line.rate_name}</TableCell>
+                      <TableCell>
+                        <StatusPill
+                          status={line.purchase?.status}
+                          label={line.purchase?.status}
+                        />
+                      </TableCell>
+                      <TableCell align="right">
+                        {formatUsd(line.line_total)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>
