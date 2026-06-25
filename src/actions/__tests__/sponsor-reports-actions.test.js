@@ -360,6 +360,47 @@ describe("sponsor-reports-actions", () => {
     });
   });
 
+  // ─── getPurchaseDetailsLinesReport ──────────────────────────────────────────
+
+  describe("getPurchaseDetailsLinesReport", () => {
+    beforeEach(() => {
+      jest
+        .spyOn(methods, "getAccessTokenSafely")
+        .mockResolvedValue("test-token");
+    });
+
+    it("GETs the /purchase-details/lines endpoint with query + access_token and NO order", async () => {
+      makeHappyGetRequest();
+      const store = mockStore(MOCK_STATE);
+      const {
+        getPurchaseDetailsLinesReport
+      } = require("../sponsor-reports-actions");
+      await store.dispatch(
+        getPurchaseDetailsLinesReport({
+          page: 1,
+          per_page: 50,
+          "filter[]": ["sponsor_id==17"]
+        })
+      );
+      await flushPromises();
+
+      expect(capturedUrl).toMatch(
+        /\/api\/v1\/summits\/42\/reports\/purchase-details\/lines$/
+      );
+      expect(capturedParams).toMatchObject({
+        access_token: "test-token",
+        page: 1,
+        per_page: 50,
+        "filter[]": ["sponsor_id==17"]
+      });
+      expect(capturedParams).not.toHaveProperty("order");
+
+      const types = store.getActions().map((a) => a.type);
+      expect(types).toContain("REQUEST_PURCHASE_DETAILS_LINES");
+      expect(types).toContain("RECEIVE_PURCHASE_DETAILS_LINES");
+    });
+  });
+
   // ─── makeReadErrorHandler (direct unit tests) ────────────────────────────────
 
   describe("makeReadErrorHandler", () => {
