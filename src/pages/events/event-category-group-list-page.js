@@ -40,10 +40,10 @@ const EventCategoryGroupListPage = ({
   history
 }) => {
   useEffect(() => {
-    if (currentSummit) {
+    if (currentSummit?.id) {
       getEventCategoryGroups();
     }
-  }, []);
+  }, [currentSummit?.id]);
 
   const handleEdit = (row) => {
     history.push(
