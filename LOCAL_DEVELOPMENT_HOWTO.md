@@ -209,13 +209,14 @@ Open `http://localhost:8080` and click **Login**.
 
 ### IP banned by openstackid (404 "page is invalid" on login)
 
-Repeated failed introspection attempts trigger openstackid's blacklist. The banned IP is the Docker bridge gateway, which varies by machine. Clear the ban:
+Repeated failed introspection attempts trigger openstackid's blacklist. Clear all bans:
 
 ```bash
-HOST_IP=$(docker network inspect bridge --format '{{range .IPAM.Config}}{{.Gateway}}{{end}}')
-docker exec openstackid-redis-1 redis-cli -a 1qaz2wsx! DEL "$HOST_IP" 2>/dev/null
-docker exec idp-db-local mysql -u idp_user --password='1qaz2wsx!' idp_local -e "DELETE FROM banned_ips WHERE ip = '$HOST_IP';"
+docker exec openstackid-redis-1 redis-cli -a 1qaz2wsx! FLUSHDB 2>/dev/null
+docker exec idp-db-local mysql -u idp_user --password='1qaz2wsx!' idp_local -e "DELETE FROM banned_ips;"
 ```
+
+> Note: `FLUSHDB` clears all keys in Redis DB 0, which in this setup contains only the IP blacklist. If you have added other data to that DB, use `DEL "<your-ip>"` instead.
 
 ### Permission denied on summit-api storage
 
