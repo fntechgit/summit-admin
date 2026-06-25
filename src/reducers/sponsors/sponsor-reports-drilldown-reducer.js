@@ -16,17 +16,14 @@ import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
   REQUEST_SPONSOR_DRILLDOWN,
   RECEIVE_SPONSOR_DRILLDOWN,
-  SPONSOR_DRILLDOWN_READ_ERROR,
-  SPONSOR_DRILLDOWN_EXPORT_DISABLED
+  SPONSOR_DRILLDOWN_READ_ERROR
 } from "../../actions/sponsor-reports-actions";
 
 export const DEFAULT_STATE = {
   // The whole retrieve response: { sponsor: {id,name,tier,pages_active}, pages: [...] }.
   detail: null,
   loading: false,
-  readError: null, // includes { kind: "not-found" } for unknown sponsor (404)
-  exportDisabled: false,
-  exportError: null
+  readError: null // includes { kind: "not-found" } for unknown sponsor (404)
 };
 
 const reducer = (state = DEFAULT_STATE, action) => {
@@ -46,8 +43,6 @@ const reducer = (state = DEFAULT_STATE, action) => {
       };
     case SPONSOR_DRILLDOWN_READ_ERROR:
       return { ...state, loading: false, readError: payload };
-    case SPONSOR_DRILLDOWN_EXPORT_DISABLED:
-      return { ...state, exportDisabled: true, exportError: payload };
     default:
       return state;
   }

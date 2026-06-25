@@ -17,10 +17,10 @@ import {
   RECEIVE_PURCHASE_DETAILS_FILTERS,
   PURCHASE_DETAILS_READ_ERROR,
   PURCHASE_DETAILS_VALIDATION_ERROR,
-  PURCHASE_DETAILS_EXPORT_DISABLED,
   REQUEST_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET_FILTERS,
+  SPONSOR_ASSET_READ_ERROR,
   REQUEST_SPONSOR_DRILLDOWN,
   RECEIVE_SPONSOR_DRILLDOWN,
   SPONSOR_DRILLDOWN_READ_ERROR
@@ -133,6 +133,34 @@ describe("sponsor-reports-actions", () => {
       expect(capturedParams.page).toBe(2);
       expect(capturedParams.per_page).toBe(25);
     });
+
+    it("503 export-disabled on read dispatches PURCHASE_DETAILS_READ_ERROR (clears loading)", async () => {
+      // Simulate getRequest invoking the error handler with a 503 export-disabled response.
+      getRequest.mockImplementation(
+        (requestAC, _receiveAC, _url, errorHandler) => () => (dispatch) => {
+          if (requestAC) dispatch(requestAC({}));
+          errorHandler(
+            {
+              status: 503,
+              response: {
+                body: { message: "CSV export is not enabled for this summit" }
+              }
+            },
+            {}
+          )(dispatch);
+          return Promise.resolve();
+        }
+      );
+
+      const store = mockStore(MOCK_STATE);
+      store.dispatch(getPurchaseDetailsReport({ page: 1 }));
+      await flushPromises();
+
+      const types = store.getActions().map((a) => a.type);
+      expect(types).toContain(REQUEST_PURCHASE_DETAILS);
+      // export-disabled must dispatch the loading-clearing READ_ERROR action.
+      expect(types).toContain(PURCHASE_DETAILS_READ_ERROR);
+    });
   });
 
   // ─── getPurchaseDetailsFilters ───────────────────────────────────────────────
@@ -192,6 +220,34 @@ describe("sponsor-reports-actions", () => {
       await flushPromises();
 
       expect(capturedUrl).toContain("/summits/42/");
+    });
+
+    it("503 export-disabled on read dispatches SPONSOR_ASSET_READ_ERROR (clears loading)", async () => {
+      // Simulate getRequest invoking the error handler with a 503 export-disabled response.
+      getRequest.mockImplementation(
+        (requestAC, _receiveAC, _url, errorHandler) => () => (dispatch) => {
+          if (requestAC) dispatch(requestAC({}));
+          errorHandler(
+            {
+              status: 503,
+              response: {
+                body: { message: "CSV export is not enabled for this summit" }
+              }
+            },
+            {}
+          )(dispatch);
+          return Promise.resolve();
+        }
+      );
+
+      const store = mockStore(MOCK_STATE);
+      store.dispatch(getSponsorAssetReport({ group_by: "sponsor" }));
+      await flushPromises();
+
+      const types = store.getActions().map((a) => a.type);
+      expect(types).toContain(REQUEST_SPONSOR_ASSET);
+      // export-disabled must dispatch the loading-clearing READ_ERROR action.
+      expect(types).toContain(SPONSOR_ASSET_READ_ERROR);
     });
   });
 
@@ -348,13 +404,16 @@ describe("sponsor-reports-actions", () => {
       );
     });
 
-    it("503 with 'CSV export is not enabled' dispatches onExportDisabled", () => {
+    it("503 with 'CSV export is not enabled' calls onExportDisabled (thunks wire this to READ_ERROR)", () => {
+      // makeReadErrorHandler routes export-disabled to onExportDisabled regardless of what
+      // the caller wires it to. Thunks now wire onExportDisabled → READ_ERROR; this test
+      // verifies the routing layer with a local stub action type.
       const onReadError = jest.fn((p) => ({
         type: PURCHASE_DETAILS_READ_ERROR,
         payload: p
       }));
       const onExportDisabled = jest.fn((p) => ({
-        type: PURCHASE_DETAILS_EXPORT_DISABLED,
+        type: PURCHASE_DETAILS_READ_ERROR,
         payload: p
       }));
       const handler = makeReadErrorHandler({ onReadError, onExportDisabled });
@@ -371,7 +430,7 @@ describe("sponsor-reports-actions", () => {
       expect(onExportDisabled).toHaveBeenCalled();
       expect(onReadError).not.toHaveBeenCalled();
       expect(mockDispatch).toHaveBeenCalledWith(
-        expect.objectContaining({ type: PURCHASE_DETAILS_EXPORT_DISABLED })
+        expect.objectContaining({ type: PURCHASE_DETAILS_READ_ERROR })
       );
     });
   });

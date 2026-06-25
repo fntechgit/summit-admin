@@ -55,7 +55,6 @@ const PurchaseDetailsReportPage = ({
   total,
   readError,
   validationError,
-  exportDisabled,
   // From mapDispatchToProps (function form — includes raw dispatch)
   dispatch,
   getPurchaseDetailsReport: fetchReport,
@@ -258,7 +257,6 @@ const PurchaseDetailsReportPage = ({
             filename={`purchase-details-summit-${
               currentSummit?.id ?? "unknown"
             }.csv`}
-            disabled={exportDisabled}
           />
         </>
       }

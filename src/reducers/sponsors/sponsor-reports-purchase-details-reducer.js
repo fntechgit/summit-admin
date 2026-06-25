@@ -20,8 +20,7 @@ import {
   RECEIVE_PURCHASE_DETAILS_FILTERS,
   PURCHASE_DETAILS_READ_ERROR,
   PURCHASE_DETAILS_VALIDATION_ERROR,
-  PURCHASE_DETAILS_VALIDATION_CLEAR,
-  PURCHASE_DETAILS_EXPORT_DISABLED
+  PURCHASE_DETAILS_VALIDATION_CLEAR
 } from "../../actions/sponsor-reports-actions";
 
 export const DEFAULT_STATE = {
@@ -35,9 +34,7 @@ export const DEFAULT_STATE = {
   query: {},
   loading: false,
   readError: null, // replaces the body (read-disabled / not-found / unauthorized / unknown)
-  validationError: null, // 412 — inline/toast, body stays
-  exportError: null,
-  exportDisabled: false
+  validationError: null // 412 — inline/toast, body stays
 };
 
 const reducer = (state = DEFAULT_STATE, action) => {
@@ -79,8 +76,6 @@ const reducer = (state = DEFAULT_STATE, action) => {
       return { ...state, loading: false, validationError: payload };
     case PURCHASE_DETAILS_VALIDATION_CLEAR:
       return { ...state, validationError: null };
-    case PURCHASE_DETAILS_EXPORT_DISABLED:
-      return { ...state, exportDisabled: true, exportError: payload };
     default:
       return state;
   }

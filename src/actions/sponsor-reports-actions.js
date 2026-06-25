@@ -17,20 +17,15 @@ export const PURCHASE_DETAILS_VALIDATION_ERROR =
   "PURCHASE_DETAILS_VALIDATION_ERROR";
 export const PURCHASE_DETAILS_VALIDATION_CLEAR =
   "PURCHASE_DETAILS_VALIDATION_CLEAR";
-export const PURCHASE_DETAILS_EXPORT_DISABLED =
-  "PURCHASE_DETAILS_EXPORT_DISABLED";
 
 export const REQUEST_SPONSOR_ASSET = "REQUEST_SPONSOR_ASSET";
 export const RECEIVE_SPONSOR_ASSET = "RECEIVE_SPONSOR_ASSET";
 export const RECEIVE_SPONSOR_ASSET_FILTERS = "RECEIVE_SPONSOR_ASSET_FILTERS";
 export const SPONSOR_ASSET_READ_ERROR = "SPONSOR_ASSET_READ_ERROR";
-export const SPONSOR_ASSET_EXPORT_DISABLED = "SPONSOR_ASSET_EXPORT_DISABLED";
 
 export const REQUEST_SPONSOR_DRILLDOWN = "REQUEST_SPONSOR_DRILLDOWN";
 export const RECEIVE_SPONSOR_DRILLDOWN = "RECEIVE_SPONSOR_DRILLDOWN";
 export const SPONSOR_DRILLDOWN_READ_ERROR = "SPONSOR_DRILLDOWN_READ_ERROR";
-export const SPONSOR_DRILLDOWN_EXPORT_DISABLED =
-  "SPONSOR_DRILLDOWN_EXPORT_DISABLED";
 
 // Base URL helper — scoped to a specific summit's reports endpoint.
 const base = (summitId) =>
@@ -51,7 +46,7 @@ export const getPurchaseDetailsReport =
       makeReadErrorHandler({
         onReadError: createAction(PURCHASE_DETAILS_READ_ERROR),
         onValidationError: createAction(PURCHASE_DETAILS_VALIDATION_ERROR),
-        onExportDisabled: createAction(PURCHASE_DETAILS_EXPORT_DISABLED)
+        onExportDisabled: createAction(PURCHASE_DETAILS_READ_ERROR)
       })
     )(params)(dispatch)
       .catch(() => {})
@@ -92,7 +87,7 @@ export const getSponsorAssetReport =
         // FE never sends an invalid group_by/order, but a 412 must not be swallowed:
         // route it to the read-error body rather than a silent no-op.
         onValidationError: createAction(SPONSOR_ASSET_READ_ERROR),
-        onExportDisabled: createAction(SPONSOR_ASSET_EXPORT_DISABLED)
+        onExportDisabled: createAction(SPONSOR_ASSET_READ_ERROR)
       })
     )(params)(dispatch)
       .catch(() => {})
