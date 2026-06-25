@@ -156,10 +156,20 @@ describe("sponsor-reports-actions", () => {
       store.dispatch(getPurchaseDetailsReport({ page: 1 }));
       await flushPromises();
 
-      const types = store.getActions().map((a) => a.type);
+      const actions = store.getActions();
+      const types = actions.map((a) => a.type);
       expect(types).toContain(REQUEST_PURCHASE_DETAILS);
       // export-disabled must dispatch the loading-clearing READ_ERROR action.
       expect(types).toContain(PURCHASE_DETAILS_READ_ERROR);
+      // payload carries the full { kind, status, message } shape (consistent
+      // with the other error branches).
+      const readErr = actions.find(
+        (a) => a.type === PURCHASE_DETAILS_READ_ERROR
+      );
+      expect(readErr.payload).toMatchObject({
+        kind: "export-disabled",
+        status: 503
+      });
     });
   });
 

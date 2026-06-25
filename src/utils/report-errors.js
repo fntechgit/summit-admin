@@ -64,7 +64,9 @@ export const makeReadErrorHandler =
     );
     switch (kind) {
       case "export-disabled":
-        if (onExportDisabled) dispatch(onExportDisabled({ message }));
+        // Same payload shape as onReadError so consumers can switch on `kind`.
+        if (onExportDisabled)
+          dispatch(onExportDisabled({ kind, status, message }));
         return;
       case "validation":
         if (onValidationError) dispatch(onValidationError({ status, message }));
