@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Autocomplete,
   Box,
@@ -26,6 +26,12 @@ const FilterBar = ({
   showSearch = false
 }) => {
   const [draft, setDraft] = useState(value);
+  // Re-sync the draft when the committed `value` prop changes externally
+  // (e.g. a parent-driven reset). Typing only mutates `draft`, so this fires
+  // on Apply/Clear/external changes, not on every keystroke.
+  useEffect(() => {
+    setDraft(value);
+  }, [value]);
   const update = (patch) => setDraft((d) => ({ ...d, ...patch }));
 
   return (

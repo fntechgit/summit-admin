@@ -5,6 +5,7 @@ import {
   RECEIVE_PURCHASE_DETAILS,
   PURCHASE_DETAILS_READ_ERROR,
   PURCHASE_DETAILS_VALIDATION_ERROR,
+  PURCHASE_DETAILS_VALIDATION_CLEAR,
   REQUEST_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET_FILTERS,
@@ -118,6 +119,23 @@ describe("sponsorReportsPurchaseDetailsReducer", () => {
       });
       expect(result.loading).toBe(false);
       expect(result.validationError).toStrictEqual(errPayload);
+      // body must NOT be replaced
+      expect(result.data).toStrictEqual(existingData);
+    });
+  });
+
+  describe("PURCHASE_DETAILS_VALIDATION_CLEAR", () => {
+    it("clears validationError without replacing the body", () => {
+      const existingData = [{ id: 1 }, { id: 2 }];
+      const state = {
+        ...PD_DEFAULT_STATE,
+        data: existingData,
+        validationError: { status: 412, message: "invalid filter" }
+      };
+      const result = purchaseDetailsReducer(state, {
+        type: PURCHASE_DETAILS_VALIDATION_CLEAR
+      });
+      expect(result.validationError).toBeNull();
       // body must NOT be replaced
       expect(result.data).toStrictEqual(existingData);
     });
