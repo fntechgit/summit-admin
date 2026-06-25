@@ -184,13 +184,15 @@ const SponsorAssetReportPage = ({
       >
         <GroupByToggle value={groupBy} onChange={onGroupBy} />
       </Stack>
-      <FilterBar
-        sponsors={filterOptions?.sponsors || []}
-        value={filters}
-        onApply={onApply}
-        onClear={onClear}
-        showSearch
-      />
+      <Box sx={{ mb: 2 }}>
+        <FilterBar
+          sponsors={filterOptions?.sponsors || []}
+          value={filters}
+          onApply={onApply}
+          onClear={onClear}
+          showSearch
+        />
+      </Box>
       {summary && <SummaryPanel tiles={tiles} />}
 
       {loading && (

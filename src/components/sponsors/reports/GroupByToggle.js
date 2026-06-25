@@ -7,12 +7,13 @@ import T from "i18n-react/dist/i18n-react";
 const GroupByToggle = ({ value, onChange }) => (
   <ToggleButtonGroup
     exclusive
-    size="small"
+    size="medium"
     value={value}
     onChange={(_e, next) => {
       if (next) onChange(next);
     }}
     aria-label={T.translate("sponsor_reports_page.group_by")}
+    sx={{ "& .MuiToggleButton-root": { px: 2.5, fontSize: "0.95rem" } }}
   >
     <ToggleButton value="sponsor">
       {T.translate("sponsor_reports_page.group_by_sponsor")}

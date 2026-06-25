@@ -19,13 +19,6 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
   translate: (k) => k
 }));
 
-// react-breadcrumbs: render a simple stub so we can assert the breadcrumb title
-jest.mock("react-breadcrumbs", () => ({
-  Breadcrumb: ({ data }) => (
-    <div data-testid="breadcrumb" data-title={data.title} />
-  )
-}));
-
 const BASE = "/app/summits/1/sponsors/reports";
 const PAGE_ROUTE = "/app/summits/:summit_id/sponsors/reports";
 
@@ -69,15 +62,6 @@ describe("ReportsLandingPage", () => {
       .closest("a");
     expect(link).not.toBeNull();
     expect(link.getAttribute("href")).toBe(`${BASE}/sponsor-assets`);
-  });
-
-  it("renders a breadcrumb with the landing_title i18n key", () => {
-    renderLanding();
-    const bc = screen.getByTestId("breadcrumb");
-    expect(bc).toBeInTheDocument();
-    expect(bc.getAttribute("data-title")).toBe(
-      "sponsor_reports_page.landing_title"
-    );
   });
 
   it("renders exactly two report cards", () => {

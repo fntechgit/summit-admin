@@ -14,7 +14,6 @@
 import React from "react";
 import { Link, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from "react-breadcrumbs";
 import {
   Card,
   CardActionArea,
@@ -38,12 +37,6 @@ const CARDS = [
 
 const ReportsLandingPage = ({ match }) => (
   <div className="container">
-    <Breadcrumb
-      data={{
-        title: T.translate("sponsor_reports_page.landing_title"),
-        pathname: match.url
-      }}
-    />
     <h3>{T.translate("sponsor_reports_page.landing_title")}</h3>
     <Grid2 container spacing={2}>
       {CARDS.map((card) => (
