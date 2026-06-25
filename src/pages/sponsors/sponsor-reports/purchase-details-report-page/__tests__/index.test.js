@@ -370,14 +370,76 @@ describe("PurchaseDetailsReportPage", () => {
     expect(screen.getByText("Meeting Room T")).toBeInTheDocument();
   });
 
-  it("hides the CSV export button in the Line Items view", async () => {
+  it("renders the CSV export button in the Line Items view", async () => {
     renderPage();
     await act(async () => {});
     await act(async () => {
       fireEvent.click(screen.getByText("sponsor_reports_page.view_line_items"));
     });
     expect(
-      screen.queryByText("sponsor_reports_page.export_csv")
-    ).not.toBeInTheDocument();
+      screen.getByText("sponsor_reports_page.export_csv")
+    ).toBeInTheDocument();
+  });
+
+  it("CSV export in the Line Items view dispatches getCSV with the lines URL, pagination-stripped query, and lines filename", async () => {
+    renderPage();
+    await act(async () => {});
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.view_line_items"));
+    });
+
+    // Guard: switching to the lines view must not trigger an export on its own.
+    // (beforeEach jest.clearAllMocks() leaves getCSV at zero calls here.)
+    expect(getCSV).not.toHaveBeenCalled();
+    const exportBtn = screen.getByText("sponsor_reports_page.export_csv");
+    await act(async () => {
+      fireEvent.click(exportBtn);
+    });
+
+    // getCSV is dispatched with (url, { ...linesCsvQuery, access_token }, filename).
+    // With no filters, linesCsvQuery drops page/per_page → empty → only access_token.
+    expect(getCSV).toHaveBeenCalledTimes(1);
+    expect(getCSV).toHaveBeenCalledWith(
+      "http://test-api/api/v1/summits/42/reports/purchase-details/lines/csv",
+      { access_token: "test-token" },
+      "purchase-details-lines-summit-42.csv"
+    );
+  });
+
+  it("Line Items CSV export preserves applied filters and strips only pagination", async () => {
+    renderPage();
+    await act(async () => {});
+
+    // Apply a date filter (same mechanism as the orders filter test).
+    const dateInputs = document.querySelectorAll("input[type=\"date\"]");
+    await act(async () => {
+      fireEvent.change(dateInputs[0], { target: { value: "2026-01-01" } });
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.apply"));
+    });
+
+    // Switch to Line Items and export.
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.view_line_items"));
+    });
+    // Guard: neither Apply nor the view switch should have exported anything yet.
+    expect(getCSV).not.toHaveBeenCalled();
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.export_csv"));
+    });
+
+    expect(getCSV).toHaveBeenCalledTimes(1);
+    const [[exportedUrl, exportedQuery]] = getCSV.mock.calls;
+    expect(exportedUrl).toBe(
+      "http://test-api/api/v1/summits/42/reports/purchase-details/lines/csv"
+    );
+    // Applied date filter survives; only pagination is stripped.
+    expect(exportedQuery["filter[]"]).toEqual(
+      expect.arrayContaining([expect.stringContaining("order_date>=")])
+    );
+    expect(exportedQuery).not.toHaveProperty("page");
+    expect(exportedQuery).not.toHaveProperty("per_page");
+    expect(exportedQuery.access_token).toBe("test-token");
   });
 });
