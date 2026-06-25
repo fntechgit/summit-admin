@@ -36,6 +36,9 @@ export const getPurchaseDetailsReport =
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
+    // No summit in context → skip. Otherwise base(currentSummit.id) throws
+    // synchronously after startLoading() and the spinner is never cleared.
+    if (!currentSummit?.id) return undefined;
     const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
     const params = { access_token: accessToken, ...query };
@@ -56,6 +59,7 @@ export const getPurchaseDetailsReport =
 export const getPurchaseDetailsFilters = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const { currentSummit } = currentSummitState;
+  if (!currentSummit?.id) return undefined;
   const accessToken = await getAccessTokenSafely();
   dispatch(startLoading());
   return getRequest(
@@ -75,6 +79,9 @@ export const getSponsorAssetReport =
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
+    // No summit in context → skip. Otherwise base(currentSummit.id) throws
+    // synchronously after startLoading() and the spinner is never cleared.
+    if (!currentSummit?.id) return undefined;
     const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
     const params = { access_token: accessToken, ...query };
@@ -97,6 +104,7 @@ export const getSponsorAssetReport =
 export const getSponsorAssetFilters = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const { currentSummit } = currentSummitState;
+  if (!currentSummit?.id) return undefined;
   const accessToken = await getAccessTokenSafely();
   dispatch(startLoading());
   return getRequest(
@@ -115,6 +123,9 @@ export const getSponsorAssetSponsor =
   (sponsorId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
+    // No summit in context → skip. Otherwise base(currentSummit.id) throws
+    // synchronously after startLoading() and the spinner is never cleared.
+    if (!currentSummit?.id) return undefined;
     const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
     return getRequest(
