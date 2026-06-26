@@ -671,3 +671,8 @@ export const htmlToPlainText = (html) => {
     .documentElement.textContent;
   return decoded.replace(/\s+/g, " ").trim();
 };
+
+export const formatDuration = (duration) => {
+  const d = moment.duration(duration, "seconds");
+  return d.format("mm:ss") !== "00" ? d.format("mm:ss") : "TBD";
+};
