@@ -10,7 +10,8 @@ jest.mock(
     function BulkEditTableMock(props) {
       mockEditableTableSpy(props);
       return null;
-    }
+    },
+  { virtual: true }
 );
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
@@ -38,11 +39,37 @@ jest.mock("react-bootstrap", () => {
   };
 });
 
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/snackbar-notification",
+  () => ({
+    ...jest.requireActual(
+      "openstack-uicore-foundation/lib/components/mui/snackbar-notification"
+    ),
+    useSnackbarMessage: () => ({
+      errorMessage: jest.fn(),
+      successMessage: jest.fn()
+    })
+  })
+);
+
 jest.mock("../../../components/filters/save-filter-criteria", () => () => null);
 jest.mock(
   "../../../components/filters/select-filter-criteria",
   () => () => null
 );
+
+jest.mock("openstack-uicore-foundation/lib/components/mui/grid-filter", () => ({
+  ...jest.requireActual(
+    "openstack-uicore-foundation/lib/components/mui/grid-filter"
+  ),
+  GridFilter: () => null,
+  useGridFilter: () => ({
+    parsedFilter: [],
+    resetFilters: jest.fn(),
+    filterValues: [],
+    setFilters: jest.fn()
+  })
+}));
 
 describe("SummitEventListPage", () => {
   let windowOpenSpy;
@@ -135,7 +162,8 @@ describe("SummitEventListPage", () => {
 
     expect(windowOpenSpy).toHaveBeenCalledWith(
       "/app/summits/12/events/101/materials/999",
-      "_blank"
+      "_blank",
+      "noopener,noreferrer"
     );
   });
 
@@ -212,7 +240,8 @@ describe("SummitEventListPage", () => {
 
     expect(windowOpenSpy).toHaveBeenCalledWith(
       "/app/summits/12/events/101/materials/999",
-      "_blank"
+      "_blank",
+      "noopener,noreferrer"
     );
   });
 
