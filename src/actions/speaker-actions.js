@@ -90,11 +90,14 @@ export const UNSELECT_ALL_SUMMIT_SPEAKERS = "UNSELECT_ALL_SUMMIT_SPEAKERS";
 export const SEND_SPEAKERS_EMAILS = "SEND_SPEAKERS_EMAILS";
 export const SET_SPEAKERS_CURRENT_FLOW_EVENT =
   "SET_SPEAKERS_CURRENT_FLOW_EVENT";
-
 export const REQUEST_SPEAKERS_ACTIVITIES_COUNT =
   "REQUEST_SPEAKERS_ACTIVITIES_COUNT";
 export const RECEIVE_SPEAKERS_ACTIVITIES_COUNT =
   "RECEIVE_SPEAKERS_ACTIVITIES_COUNT";
+export const REQUEST_SELECTED_SPEAKERS_ACTIVITY_COUNT =
+  "REQUEST_SELECTED_SPEAKERS_ACTIVITY_COUNT";
+export const RECEIVE_SELECTED_SPEAKERS_ACTIVITY_COUNT =
+  "RECEIVE_SELECTED_SPEAKERS_ACTIVITY_COUNT";
 
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
@@ -895,6 +898,73 @@ const getSpeakersActivitiesCount =
       createAction(REQUEST_SPEAKERS_ACTIVITIES_COUNT),
       createAction(RECEIVE_SPEAKERS_ACTIVITIES_COUNT),
       `${window.API_BASE_URL}/api/v1/summits/${summitId}/speakers/all/events/count`,
+      authErrorHandler
+    )(params)(dispatch);
+  };
+
+export const getSelectedSpeakersActivityCount =
+  () => async (dispatch, getState) => {
+    const { currentSummitState, currentSummitSpeakersListState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const {
+      totalActivities,
+      term,
+      selectedCount,
+      selectedItems,
+      excludedItems,
+      selectedAll,
+      selectionPlanFilter,
+      trackFilter,
+      trackGroupFilter,
+      activityTypeFilter,
+      selectionStatusFilter,
+      mediaUploadTypeFilter
+    } = currentSummitSpeakersListState;
+    const filters = {
+      selectionPlanFilter,
+      trackFilter,
+      trackGroupFilter,
+      activityTypeFilter,
+      selectionStatusFilter,
+      mediaUploadTypeFilter
+    };
+    const filter = parseFilters(filters);
+    const params = { access_token: accessToken };
+
+    // if no speakers selected we escape setting count to 0
+    // if all speakers selected we escape setting count to totalActivities
+    if (selectedCount === 0 || (selectedAll && excludedItems.length === 0)) {
+      const activityCount = selectedCount === 0 ? 0 : totalActivities;
+      dispatch(
+        createAction(RECEIVE_SELECTED_SPEAKERS_ACTIVITY_COUNT)({
+          response: { count: activityCount },
+          override: true
+        })
+      );
+      return;
+    }
+
+    if (term) {
+      const filterTerm = buildTermFilter(term);
+      filter.push(filterTerm.join(","));
+    }
+
+    // build id filter
+    if (selectedAll) {
+      if (excludedItems.length > 0) {
+        filter.push(`not_id==${excludedItems.join("||")}`);
+      }
+    } else if (selectedItems.length > 0) {
+      filter.push(`id==${selectedItems.join("||")}`);
+    }
+
+    if (filter.length > 0) params["filter[]"] = filter;
+
+    return getRequest(
+      createAction(REQUEST_SELECTED_SPEAKERS_ACTIVITY_COUNT),
+      createAction(RECEIVE_SELECTED_SPEAKERS_ACTIVITY_COUNT),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/speakers/all/events/count`,
       authErrorHandler
     )(params)(dispatch);
   };

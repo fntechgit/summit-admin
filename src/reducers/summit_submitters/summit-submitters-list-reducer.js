@@ -21,7 +21,9 @@ import {
   UNSELECT_ALL_SUMMIT_SUBMITTERS,
   SEND_SUBMITTERS_EMAILS,
   SET_SUBMITTERS_CURRENT_FLOW_EVENT,
-  RECEIVE_SUBMITTERS_ACTIVITIES_COUNT
+  RECEIVE_SUBMITTERS_ACTIVITIES_COUNT,
+  REQUEST_SELECTED_SUBMITTERS_ACTIVITY_COUNT,
+  RECEIVE_SELECTED_SUBMITTERS_ACTIVITY_COUNT
 } from "../../actions/submitter-actions";
 
 import {
@@ -29,6 +31,8 @@ import {
   SET_CURRENT_SUMMIT
 } from "../../actions/summit-actions";
 import { buildSpeakersSubmittersList } from "../utils/methods";
+
+
 
 const DEFAULT_STATE = {
   items: [],
@@ -41,6 +45,8 @@ const DEFAULT_STATE = {
   totalItems: 0,
   totalActivities: 0,
   selectedCount: 0,
+  selectedActivityCount: 0,
+  gettingSelectedActivityCount: false,
   selectedItems: [],
   excludedItems: [],
   selectedAll: false,
@@ -197,6 +203,17 @@ const summitSubmittersListReducer = (state = DEFAULT_STATE, action) => {
     }
     case RECEIVE_SUBMITTERS_ACTIVITIES_COUNT: {
       return { ...state, totalActivities: payload.response.count };
+    }
+    case REQUEST_SELECTED_SUBMITTERS_ACTIVITY_COUNT: {
+      return { ...state, gettingSelectedActivityCount: true };
+    }
+    case RECEIVE_SELECTED_SUBMITTERS_ACTIVITY_COUNT: {
+      const { count } = payload.response;
+      return {
+        ...state,
+        selectedActivityCount: count,
+        gettingSelectedActivityCount: false
+      };
     }
     default:
       return state;

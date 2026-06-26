@@ -21,7 +21,9 @@ import {
   UNSELECT_ALL_SUMMIT_SPEAKERS,
   SEND_SPEAKERS_EMAILS,
   SET_SPEAKERS_CURRENT_FLOW_EVENT,
-  RECEIVE_SPEAKERS_ACTIVITIES_COUNT
+  RECEIVE_SPEAKERS_ACTIVITIES_COUNT,
+  REQUEST_SELECTED_SPEAKERS_ACTIVITY_COUNT,
+  RECEIVE_SELECTED_SPEAKERS_ACTIVITY_COUNT
 } from "../../actions/speaker-actions";
 
 import {
@@ -41,6 +43,8 @@ const DEFAULT_STATE = {
   totalItems: 0,
   totalActivities: 0,
   selectedCount: 0,
+  selectedActivityCount: 0,
+  gettingSelectedActivityCount: false,
   selectedItems: [],
   excludedItems: [],
   selectedAll: false,
@@ -209,6 +213,19 @@ const summitSpeakersListReducer = (state = DEFAULT_STATE, action = {}) => {
     }
     case RECEIVE_SPEAKERS_ACTIVITIES_COUNT: {
       return { ...state, totalActivities: payload.response.count };
+    }
+    case REQUEST_SELECTED_SPEAKERS_ACTIVITY_COUNT: {
+      return { ...state, gettingSelectedActivityCount: true };
+    }
+    case RECEIVE_SELECTED_SPEAKERS_ACTIVITY_COUNT: {
+      if (!state.gettingSelectedActivityCount && !payload.override)
+        return state;
+      const { count } = payload.response;
+      return {
+        ...state,
+        selectedActivityCount: count,
+        gettingSelectedActivityCount: false
+      };
     }
     default:
       return state;

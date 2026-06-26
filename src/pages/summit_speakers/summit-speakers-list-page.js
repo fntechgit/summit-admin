@@ -30,7 +30,8 @@ import {
   selectAllSummitSpeakers,
   unselectAllSummitSpeakers,
   setCurrentFlowEvent,
-  sendSpeakerEmails
+  sendSpeakerEmails,
+  getSelectedSpeakersActivityCount
 } from "../../actions/speaker-actions";
 import {
   initSubmittersList,
@@ -41,7 +42,8 @@ import {
   selectAllSummitSubmitters,
   unselectAllSummitSubmitters,
   setCurrentSubmitterFlowEvent,
-  sendSubmitterEmails
+  sendSubmitterEmails,
+  getSelectedSubmittersActivityCount
 } from "../../actions/submitter-actions";
 import {
   validateSpecs,
@@ -65,6 +67,7 @@ class SummitSpeakersListPage extends React.Component {
     super(props);
 
     this.getSubjectProps = this.getSubjectProps.bind(this);
+    this.getSelectedActivityCount = this.getSelectedActivityCount.bind(this);
     this.export = this.export.bind(this);
     this.getBySummit = this.getBySummit.bind(this);
     this.handleSpeakerSubmitterSourceChange =
@@ -139,11 +142,32 @@ class SummitSpeakersListPage extends React.Component {
     }
   }
 
+  componentDidUpdate(prevProps) {
+    const { source } = this.state;
+    const subjectPropKey =
+      source === sources.speakers ? "speakersProps" : "submittersProps";
+    const { selectedCount: currentCount } = this.props[subjectPropKey];
+    const { selectedCount: prevCount } = prevProps[subjectPropKey];
+
+    if (currentCount !== prevCount) {
+      this.getSelectedActivityCount();
+    }
+  }
+
   getSubjectProps() {
     const { source } = this.state;
     return source === sources.speakers
       ? this.props.speakersProps
       : this.props.submittersProps;
+  }
+
+  getSelectedActivityCount() {
+    const { source } = this.state;
+    if (source === sources.speakers) {
+      this.props.getSelectedSpeakersActivityCount();
+    } else {
+      this.props.getSelectedSubmittersActivityCount();
+    }
   }
 
   getBySummit(term, page, perPage, order, orderDir, filters) {
@@ -703,6 +727,8 @@ class SummitSpeakersListPage extends React.Component {
       orderDir,
       totalItems,
       selectedCount,
+      selectedActivityCount,
+      gettingSelectedActivityCount,
       selectedAll,
       selectionPlanFilter,
       trackFilter,
@@ -711,11 +737,8 @@ class SummitSpeakersListPage extends React.Component {
       selectionStatusFilter,
       mediaUploadTypeFilter,
       currentFlowEvent,
-      totalActivities,
-      excludedItems
+      totalActivities
     } = this.getSubjectProps();
-
-    const activitiesCountAccurate = selectedAll && excludedItems.length === 0;
 
     const columns = [
       {
@@ -1052,19 +1075,17 @@ class SummitSpeakersListPage extends React.Component {
           <div>
             <span>
               <b>
-                {activitiesCountAccurate
-                  ? T.translate(
-                      this.state.source === sources.speakers
-                        ? "summit_speakers_list.items_qty"
-                        : "summit_submitters_list.items_qty",
-                      { qty: selectedCount, activitiesQty: totalActivities }
-                    )
-                  : T.translate(
-                      this.state.source === sources.speakers
-                        ? "summit_speakers_list.items_qty_no_activities"
-                        : "summit_submitters_list.items_qty_no_activities",
-                      { qty: selectedCount }
-                    )}
+                {T.translate(
+                  this.state.source === sources.speakers
+                    ? "summit_speakers_list.items_qty"
+                    : "summit_submitters_list.items_qty",
+                  {
+                    qty: selectedCount,
+                    activitiesQty: gettingSelectedActivityCount
+                      ? "..."
+                      : selectedActivityCount
+                  }
+                )}
               </b>
             </span>
             <SelectableTable
@@ -1222,6 +1243,7 @@ const mapStateToProps = ({
 export default connect(mapStateToProps, {
   initSpeakersList,
   getSpeakersBySummit,
+  getSelectedSpeakersActivityCount,
   exportSummitSpeakers,
   selectSummitSpeaker,
   unselectSummitSpeaker,
@@ -1231,6 +1253,7 @@ export default connect(mapStateToProps, {
   sendSpeakerEmails,
   initSubmittersList,
   getSubmittersBySummit,
+  getSelectedSubmittersActivityCount,
   exportSummitSubmitters,
   selectSummitSubmitter,
   unselectSummitSubmitter,
