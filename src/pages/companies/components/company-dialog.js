@@ -191,11 +191,10 @@ const CompanyDialog = ({
     if (!selectedSponsoredProject || !selectedSponsorShipType || isSaving)
       return;
     setIsSaving(true);
-    onAddSponsorship(
-      formik.values.id,
-      selectedSponsoredProject,
-      selectedSponsorShipType
-    ).finally(() => setIsSaving(false));
+    onAddSponsorship(selectedSponsoredProject, selectedSponsorShipType, {
+      id: 0,
+      company: { id: formik.values.id }
+    }).finally(() => setIsSaving(false));
   };
 
   const handleDeleteSponsorship = async (sponsorshipId) => {

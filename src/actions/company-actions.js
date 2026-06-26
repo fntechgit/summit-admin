@@ -206,19 +206,19 @@ export const attachLogo = (entity, file, picAttr) => async (dispatch) => {
   const uploadFile = picAttr === "logo" ? uploadLogo : uploadBigLogo;
 
   if (entity.id) {
-    dispatch(uploadFile(entity, file));
-  } else {
-    return postRequest(
-      createAction(UPDATE_COMPANY),
-      createAction(COMPANY_ADDED),
-      `${window.API_BASE_URL}/api/v1/companies`,
-      normalizedEntity,
-      snackbarErrorHandler,
-      entity
-    )(params)(dispatch).then((payload) => {
-      dispatch(uploadFile(payload.response, file));
-    });
+    return dispatch(uploadFile(entity, file));
   }
+
+  return postRequest(
+    createAction(UPDATE_COMPANY),
+    createAction(COMPANY_ADDED),
+    `${window.API_BASE_URL}/api/v1/companies`,
+    normalizedEntity,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch).then((payload) => {
+    dispatch(uploadFile(payload.response, file));
+  });
 };
 
 const uploadLogo = (entity, file) => async (dispatch) => {
