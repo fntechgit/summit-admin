@@ -36,7 +36,7 @@ const DEFAULT_STATE = {
   perPage: 10,
   totalEvents: 0,
   summitTZ: "",
-  filters: {},
+  filters: [],
   extraColumns: [],
   selectionPlans: []
 };

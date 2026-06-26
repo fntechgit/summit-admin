@@ -22,7 +22,7 @@ const ImportModal = ({ show, onClose, onImport }) => {
   };
 
   return (
-    <Modal show={show} onHide={onClose}>
+    <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
         <Modal.Title>{T.translate("event_list.import_events")}</Modal.Title>
       </Modal.Header>
