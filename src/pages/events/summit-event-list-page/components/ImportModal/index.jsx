@@ -29,23 +29,25 @@ const ImportModal = ({ show, onClose, onImport }) => {
       <Modal.Body>
         <div className="row">
           <div className="col-md-12">
-            Format must be the following:
+            {T.translate("event_list.import_events_format_header")}
             <br />
-            (Minimal data required)
+            {T.translate("event_list.import_events_format_minimal")}
             <br />
-            * title ( text )<br />
-            * description (text )<br />
-            * type_id (int) or type (string type name)
+            {T.translate("event_list.import_events_format_title")}
             <br />
-            * track_id (int) or track ( string track name)
+            {T.translate("event_list.import_events_format_description")}
             <br />
-            * speaker_emails ( list of email | delimited) [optional]
+            {T.translate("event_list.import_events_format_type_id")}
             <br />
-            * speaker_fullnames ( list of full names | delimited) [optional]
+            {T.translate("event_list.import_events_format_track_id")}
             <br />
-            * speaker_companies ( list of companies | delimited) [optional]
+            {T.translate("event_list.import_events_format_speaker_emails")}
             <br />
-            * speaker_titles ( list of titles | delimited) [optional]
+            {T.translate("event_list.import_events_format_speaker_fullnames")}
+            <br />
+            {T.translate("event_list.import_events_format_speaker_companies")}
+            <br />
+            {T.translate("event_list.import_events_format_speaker_titles")}
             <br />
             <br />
           </div>
