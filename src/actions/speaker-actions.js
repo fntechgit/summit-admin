@@ -938,7 +938,8 @@ export const getSelectedSpeakersActivityCount =
       const activityCount = selectedCount === 0 ? 0 : totalActivities;
       dispatch(
         createAction(RECEIVE_SELECTED_SPEAKERS_ACTIVITY_COUNT)({
-          response: { count: activityCount }
+          response: { count: activityCount },
+          override: true
         })
       );
       return;

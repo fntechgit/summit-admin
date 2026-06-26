@@ -218,6 +218,8 @@ const summitSpeakersListReducer = (state = DEFAULT_STATE, action = {}) => {
       return { ...state, gettingSelectedActivityCount: true };
     }
     case RECEIVE_SELECTED_SPEAKERS_ACTIVITY_COUNT: {
+      if (!state.gettingSelectedActivityCount && !payload.override)
+        return state;
       const { count } = payload.response;
       return {
         ...state,
