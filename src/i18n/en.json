@@ -1114,7 +1114,6 @@
     "should_send_copy_2_submitter": "Also send to submitter?",
     "allows_to_reassign": "Allow to reassign?",
     "items_qty": "Selected {qty} Speakers | {activitiesQty} Activities",
-    "items_qty_no_activities": "Selected {qty} Speakers",
     "placeholders": {
       "search_speakers": "Search by Full Name, Email, Speaker Id, Member Id, Title Or Abstract",
       "test_recipient": "Optional Test Recipient"
@@ -1129,8 +1128,7 @@
     "resend_done": "Emails sent successfully.",
     "submitters": "Submitters",
     "submitters_no_speakers": "Submitters (no speakers)",
-    "items_qty": "Selected {qty} Submitters | {activitiesQty} Activities",
-    "items_qty_no_activities": "Selected {qty} Submitters"
+    "items_qty": "Selected {qty} Submitters | {activitiesQty} Activities"
   },
   "speaker_attendance_list": {
     "speaker_attendance_list": "Speaker Attendance List",
