@@ -928,7 +928,6 @@ export const deleteEvent = (eventId) => async (dispatch, getState) => {
 export const exportEvents =
   (term = null, order = "id", orderDir = DEFAULT_ORDER_DIR, filters = []) =>
   async (dispatch, getState) => {
-    dispatch(startLoading());
     const { currentSummitState, currentEventListState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;

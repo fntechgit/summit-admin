@@ -84,7 +84,7 @@ const SummitEventListPage = ({
 }) => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showImportFromMUXModal, setShowImportFromMUXModal] = useState(false);
-  const [selectedColumns, setSelectedColumns] = useState([]);
+  const [selectedColumns, setSelectedColumns] = useState(extraColumns ?? []);
   const [selectedFilterCriteria, setSelectedFilterCriteria] = useState(null);
   const { parsedFilter, resetFilters, filterValues, setFilters } =
     useGridFilter(FILTER_ID);
@@ -469,7 +469,7 @@ const mapStateToProps = ({
   mediaUploadListState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
-  mediaUploadTypes: mediaUploadListState.media_uploads,
+  mediaUploadTypes: mediaUploadListState?.media_uploads ?? [],
   ...currentEventListState
 });
 

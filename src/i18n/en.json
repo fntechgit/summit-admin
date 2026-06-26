@@ -1220,6 +1220,8 @@
     "mux_email_to": "Email to",
     "mux_email_to_info": "Recipient to send process excerpt.",
     "mux_import_done": "MUX MP4 Import Process Requested Successfuly.",
+    "missing_token_error": "Missing Mux Token ID or Mux Token Secret",
+    "mux_import_error": "Error while importing Mux MP4: {error}",
     "allows_attendee_vote_filter": "Allows attendee vote",
     "allows_location_filter": "Allows location",
     "allows_publishing_dates_filter": "Allows publishing dates",

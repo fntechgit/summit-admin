@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { Modal } from "react-bootstrap";
 import T from "i18n-react";
 import { Input } from "@mui/material";
+import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
 
 const ImportMUXModal = ({ show, onClose, onImport }) => {
+  const { errorMessage } = useSnackbarMessage();
   const [tokenId, setTokenId] = useState("");
   const [tokenSecret, setTokenSecret] = useState("");
   const [emailTo, setEmailTo] = useState("");
@@ -17,9 +19,21 @@ const ImportMUXModal = ({ show, onClose, onImport }) => {
 
   const handleImport = (ev) => {
     ev.preventDefault();
-    onImport(tokenId, tokenSecret, emailTo).then(() => {
-      handleClose();
-    });
+    if (!tokenId || !tokenSecret) {
+      errorMessage(T.translate("event_list.missing_token_error"));
+      return;
+    }
+    onImport(tokenId, tokenSecret, emailTo)
+      .then(() => {
+        handleClose();
+      })
+      .catch((error) => {
+        errorMessage(
+          T.translate("event_list.mux_import_error", {
+            error: error.message || error
+          })
+        );
+      });
   };
 
   return (
