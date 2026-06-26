@@ -194,12 +194,19 @@ export const normalizeBulkEvents = (entity) => {
     const normalizedEvent = {
       id: e.id,
       title: e.title,
-      selection_plan_id: e.selection_plan?.id || e.selection_plan_id,
-      location_id: e.location?.id || e.location_id,
+      selection_plan_id:
+        e.selection_plan?.id ||
+        (typeof e.selection_plan === "number"
+          ? e.selection_plan
+          : e.selection_plan_id),
+      location_id:
+        e.location?.id ||
+        (typeof e.location === "number" ? e.location : e.location_id),
       start_date: e.start_date,
       end_date: e.end_date,
-      type_id: e.type?.id || e.type_id,
-      track_id: e.track?.id || e.track_id,
+      type_id: e.type?.id || (typeof e.type === "number" ? e.type : e.type_id),
+      track_id:
+        e.track?.id || (typeof e.track === "number" ? e.track : e.track_id),
       duration: e.duration,
       streaming_url: e.streaming_url,
       streaming_type: e.streaming_type,
@@ -354,7 +361,7 @@ export const bulkUpdateEvents = (events) => async (dispatch, getState) => {
       );
     })
     .catch(() => {
-      console.log("ERROR");
+      dispatch(stopLoading());
     });
 };
 

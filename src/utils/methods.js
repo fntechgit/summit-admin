@@ -674,5 +674,6 @@ export const htmlToPlainText = (html) => {
 
 export const formatDuration = (duration) => {
   const d = moment.duration(duration, "seconds");
-  return d.format("mm:ss") !== "00" ? d.format("mm:ss") : "TBD";
+  const formatted = d.format("mm:ss", { trim: false });
+  return formatted !== "00:00" ? formatted : "TBD";
 };
