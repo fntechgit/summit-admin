@@ -135,7 +135,7 @@ const SummitEventListPage = ({
   }, [selectedFilterCriteria]);
 
   useEffect(() => {
-    setSelectedColumns(extraColumns);
+    setSelectedColumns(extraColumns ?? []);
   }, [extraColumns]);
 
   const handleMUXImport = (ev) => {
@@ -149,7 +149,7 @@ const SummitEventListPage = ({
 
   const handleExport = (ev) => {
     ev.preventDefault();
-    exportEvents(term, order, orderDir, parsedFilter, selectedColumns);
+    exportEvents(term, order, orderDir, parsedFilter);
   };
 
   const handlePageChange = (page) => {

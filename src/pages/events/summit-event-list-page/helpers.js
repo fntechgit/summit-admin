@@ -398,7 +398,8 @@ export const getOptionalColumns = (
                   if (!row?.id || !currentSummitId) return false;
                   window.open(
                     `/app/summits/${currentSummitId}/events/${row.id}/materials/${m.id}`,
-                    "_blank"
+                    "_blank",
+                    "noopener,noreferrer"
                   );
                   return false;
                 }}
