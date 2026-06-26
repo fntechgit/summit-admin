@@ -4,26 +4,14 @@ import { renderWithRedux } from "../../../utils/test-utils";
 
 const mockEditableTableSpy = jest.fn(() => null);
 
-jest.mock("openstack-uicore-foundation/lib/components", () => ({
-  CompanyInput: () => null,
-  DateTimePicker: () => null,
-  Dropdown: () => null,
-  FreeTextSearch: () => null,
-  Input: () => null,
-  MemberInput: () => null,
-  OperatorInput: () => null,
-  SpeakerInput: () => null,
-  TagInput: () => null,
-  UploadInput: () => null
-}));
-
 jest.mock(
-  "../../../components/tables/editable-table/EditableTable",
+  "openstack-uicore-foundation/lib/components/mui/bulk-edit-table",
   () =>
-    function EditableTableMock(props) {
+    function BulkEditTableMock(props) {
       mockEditableTableSpy(props);
       return null;
-    }
+    },
+  { virtual: true }
 );
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
@@ -51,13 +39,37 @@ jest.mock("react-bootstrap", () => {
   };
 });
 
-jest.mock("../../../components/filters/media-type-filter", () => () => null);
-jest.mock("../../../components/filters/or-and-filter", () => () => null);
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/snackbar-notification",
+  () => ({
+    ...jest.requireActual(
+      "openstack-uicore-foundation/lib/components/mui/snackbar-notification"
+    ),
+    useSnackbarMessage: () => ({
+      errorMessage: jest.fn(),
+      successMessage: jest.fn()
+    })
+  })
+);
+
 jest.mock("../../../components/filters/save-filter-criteria", () => () => null);
 jest.mock(
   "../../../components/filters/select-filter-criteria",
   () => () => null
 );
+
+jest.mock("openstack-uicore-foundation/lib/components/mui/grid-filter", () => ({
+  ...jest.requireActual(
+    "openstack-uicore-foundation/lib/components/mui/grid-filter"
+  ),
+  GridFilter: () => null,
+  useGridFilter: () => ({
+    parsedFilter: [],
+    resetFilters: jest.fn(),
+    filterValues: [],
+    setFilters: jest.fn()
+  })
+}));
 
 describe("SummitEventListPage", () => {
   let windowOpenSpy;
@@ -69,54 +81,6 @@ describe("SummitEventListPage", () => {
 
   afterEach(() => {
     windowOpenSpy.mockRestore();
-  });
-
-  test("does not pass afterUpdate prop to EditableTable in bulk mode", () => {
-    renderWithRedux(<SummitEventListPage />, {
-      initialState: {
-        currentSummitState: {
-          currentSummit: {
-            id: 12,
-            time_zone: { name: "UTC" },
-            time_zone_id: "UTC",
-            selection_plans: [],
-            tracks: [],
-            event_types: [],
-            locations: [],
-            presentation_action_types: []
-          }
-        },
-        currentEventListState: {
-          events: [
-            {
-              id: 101,
-              type: { id: 1, name: "Presentation", use_speakers: true },
-              title: "Sample event",
-              selection_status: "pending",
-              media_uploads: []
-            }
-          ],
-          lastPage: 1,
-          currentPage: 1,
-          order: "id",
-          orderDir: 1,
-          totalEvents: 1,
-          term: "",
-          filters: {},
-          extraColumns: ["media_uploads"],
-          perPage: 10,
-          enabledFilters: []
-        }
-      }
-    });
-
-    expect(mockEditableTableSpy).toHaveBeenCalled();
-
-    const editableTableProps =
-      mockEditableTableSpy.mock.calls[
-        mockEditableTableSpy.mock.calls.length - 1
-      ][0];
-    expect(editableTableProps.afterUpdate).toBeUndefined();
   });
 
   test("opens media upload material link using row event id", async () => {
@@ -133,6 +97,9 @@ describe("SummitEventListPage", () => {
             locations: [],
             presentation_action_types: []
           }
+        },
+        mediaUploadListState: {
+          media_uploads: []
         },
         currentEventListState: {
           events: [
@@ -161,8 +128,7 @@ describe("SummitEventListPage", () => {
           term: "",
           filters: {},
           extraColumns: ["media_uploads"],
-          perPage: 10,
-          enabledFilters: []
+          perPage: 10
         }
       }
     });
@@ -196,7 +162,8 @@ describe("SummitEventListPage", () => {
 
     expect(windowOpenSpy).toHaveBeenCalledWith(
       "/app/summits/12/events/101/materials/999",
-      "_blank"
+      "_blank",
+      "noopener,noreferrer"
     );
   });
 
@@ -214,6 +181,9 @@ describe("SummitEventListPage", () => {
             locations: [],
             presentation_action_types: []
           }
+        },
+        mediaUploadListState: {
+          media_uploads: []
         },
         currentEventListState: {
           events: [
@@ -239,8 +209,7 @@ describe("SummitEventListPage", () => {
           term: "",
           filters: {},
           extraColumns: ["media_uploads"],
-          perPage: 10,
-          enabledFilters: []
+          perPage: 10
         }
       }
     });
@@ -271,7 +240,8 @@ describe("SummitEventListPage", () => {
 
     expect(windowOpenSpy).toHaveBeenCalledWith(
       "/app/summits/12/events/101/materials/999",
-      "_blank"
+      "_blank",
+      "noopener,noreferrer"
     );
   });
 
@@ -289,6 +259,9 @@ describe("SummitEventListPage", () => {
             locations: [],
             presentation_action_types: []
           }
+        },
+        mediaUploadListState: {
+          media_uploads: []
         },
         currentEventListState: {
           events: [
@@ -315,8 +288,7 @@ describe("SummitEventListPage", () => {
           term: "",
           filters: {},
           extraColumns: ["media_uploads"],
-          perPage: 10,
-          enabledFilters: []
+          perPage: 10
         }
       }
     });
