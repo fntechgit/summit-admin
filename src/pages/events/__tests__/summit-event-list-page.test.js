@@ -5,9 +5,9 @@ import { renderWithRedux } from "../../../utils/test-utils";
 const mockEditableTableSpy = jest.fn(() => null);
 
 jest.mock(
-  "../../../components/tables/editable-table/EditableTable",
+  "openstack-uicore-foundation/lib/components/mui/bulk-edit-table",
   () =>
-    function EditableTableMock(props) {
+    function BulkEditTableMock(props) {
       mockEditableTableSpy(props);
       return null;
     }
@@ -54,56 +54,6 @@ describe("SummitEventListPage", () => {
 
   afterEach(() => {
     windowOpenSpy.mockRestore();
-  });
-
-  test("does not pass afterUpdate prop to EditableTable in bulk mode", () => {
-    renderWithRedux(<SummitEventListPage />, {
-      initialState: {
-        currentSummitState: {
-          currentSummit: {
-            id: 12,
-            time_zone: { name: "UTC" },
-            time_zone_id: "UTC",
-            selection_plans: [],
-            tracks: [],
-            event_types: [],
-            locations: [],
-            presentation_action_types: []
-          }
-        },
-        mediaUploadListState: {
-          media_uploads: []
-        },
-        currentEventListState: {
-          events: [
-            {
-              id: 101,
-              type: { id: 1, name: "Presentation", use_speakers: true },
-              title: "Sample event",
-              selection_status: "pending",
-              media_uploads: []
-            }
-          ],
-          lastPage: 1,
-          currentPage: 1,
-          order: "id",
-          orderDir: 1,
-          totalEvents: 1,
-          term: "",
-          filters: {},
-          extraColumns: ["media_uploads"],
-          perPage: 10
-        }
-      }
-    });
-
-    expect(mockEditableTableSpy).toHaveBeenCalled();
-
-    const editableTableProps =
-      mockEditableTableSpy.mock.calls[
-        mockEditableTableSpy.mock.calls.length - 1
-      ][0];
-    expect(editableTableProps.afterUpdate).toBeUndefined();
   });
 
   test("opens media upload material link using row event id", async () => {

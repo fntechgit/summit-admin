@@ -27,7 +27,7 @@ import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 momentDurationFormatSetup(moment);
 
 const DEFAULT_STATE = {
-  events: {},
+  events: [],
   term: null,
   order: "id",
   orderDir: 1,

@@ -644,3 +644,8 @@ export const getFileUploadAllowedExtensions = () => {
 
 export const isImageUrl = (url) =>
   /\.(jpe?g|png|gif|webp|svg|bmp)(\?|$)/i.test(url);
+
+export const formatDuration = (duration) => {
+  const d = moment.duration(duration, "seconds");
+  return d.format("mm:ss") !== "00" ? d.format("mm:ss") : "TBD";
+};
