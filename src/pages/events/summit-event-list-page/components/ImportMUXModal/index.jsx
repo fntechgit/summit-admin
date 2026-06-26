@@ -23,7 +23,7 @@ const ImportMUXModal = ({ show, onClose, onImport }) => {
   };
 
   return (
-    <Modal show={show} onHide={onClose}>
+    <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
         <Modal.Title>{T.translate("event_list.mux_import")}</Modal.Title>
       </Modal.Header>
@@ -60,6 +60,7 @@ const ImportMUXModal = ({ show, onClose, onImport }) => {
             />
             <Input
               id="mux_token_secret"
+              type="password"
               value={tokenSecret}
               onChange={(ev) => setTokenSecret(ev.target.value)}
               className="form-control"

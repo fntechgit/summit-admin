@@ -236,7 +236,7 @@ export const getEvents =
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const summitTZ = currentSummit.time_zone.name;
-    const filter = [...filters];
+    const filter = Array.isArray(filters) ? [...filters] : [];
 
     dispatch(startLoading());
 
@@ -938,7 +938,7 @@ export const exportEvents =
     const totalPages = Math.ceil(totalEvents / EXPORT_PAGE_SIZE_200);
     const endpoint = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/csv`;
 
-    const filter = [...filters];
+    const filter = Array.isArray(filters) ? [...filters] : [];
 
     dispatch(startLoading());
 

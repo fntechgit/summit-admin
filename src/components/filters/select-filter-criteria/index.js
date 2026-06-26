@@ -1,4 +1,4 @@
-/* *
+/**
  * Copyright 2019 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,6 @@ const SelectFilterCriteria = ({
           isClearable
           defaultOptions={defaultOptions}
           onMenuOpen={handleMenuOpen}
-          isLoading
           {...rest}
         />
       </div>
