@@ -26,7 +26,7 @@ import T from "i18n-react/dist/i18n-react";
 import StatusRollupChips from "./StatusRollupChips";
 import StatusPill from "./StatusPill";
 import SponsorAvatar from "./SponsorAvatar";
-import { toPlainText } from "../../../utils/reports-text";
+import { htmlToPlainText } from "../../../utils/methods";
 
 const NOT_PRESENT_STATUSES = ["pending", "not_applicable"];
 
@@ -96,7 +96,7 @@ const GroupByComponentView = ({ summitId, cards = [] }) => (
                 >
                   {isNotPresent(entry)
                     ? T.translate("sponsor_reports_page.not_present_yet")
-                    : toPlainText(
+                    : htmlToPlainText(
                         entry.content?.summary ||
                           entry.content?.value ||
                           entry.content?.filename ||
