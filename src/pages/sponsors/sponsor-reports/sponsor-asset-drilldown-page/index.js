@@ -42,7 +42,7 @@ import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 import DownloadIcon from "@mui/icons-material/Download";
 import { buildSectionCsvQuery } from "../../../../utils/section-csv-query";
-import { toPlainText } from "../../../../utils/reports-text";
+import { htmlToPlainText } from "../../../../utils/methods";
 import {
   getReportsApiBaseUrl,
   isPositiveIntId
@@ -66,7 +66,7 @@ const ContentCell = ({ row }) => {
     row.content?.preview_url || row.actions?.single_download_url || null;
   const filename = row.content?.filename || "";
   // value/summary may carry HTML markup — flatten to plain text (don't render markup).
-  const text = toPlainText(
+  const text = htmlToPlainText(
     row.content?.value || row.content?.summary || filename
   );
   const isImage = !!url && IMAGE_EXT.test(filename || url);
