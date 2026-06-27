@@ -31,7 +31,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import T from "i18n-react/dist/i18n-react";
 import StatusPill from "./StatusPill";
 import { formatCheckoutTime } from "./OrdersTable";
-import { formatUsd } from "../../../utils/reports-money";
+import { formatUsd } from "../../../pages/sponsors/sponsor-reports/reports-money";
 import { bucketLinesBySponsor } from "../../../utils/manifest-grouping";
 
 // eslint-disable-next-line no-magic-numbers
