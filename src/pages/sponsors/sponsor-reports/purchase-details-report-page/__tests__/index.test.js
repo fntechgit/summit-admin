@@ -14,6 +14,8 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 
 // Action creators: jest.fn() inside the factory to avoid hoisting issues.
 // Import the mocked functions below to assert on .mock.calls.
+// Export thunks return a plain object so redux-mock-store does not reject the
+// dispatched value (a bare jest.fn() returns undefined which the store rejects).
 jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
   getPurchaseDetailsReport: jest.fn(() => ({
     type: "REQUEST_PURCHASE_DETAILS"
@@ -27,33 +29,22 @@ jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
   clearPurchaseDetailsValidation: jest.fn(() => ({
     type: "PURCHASE_DETAILS_VALIDATION_CLEAR"
   })),
+  exportPurchaseDetailsCsv: jest.fn(() => ({ type: "EXPORT_PD_CSV" })),
+  exportPurchaseDetailsLinesCsv: jest.fn(() => ({
+    type: "EXPORT_PD_LINES_CSV"
+  })),
   PURCHASE_DETAILS_VALIDATION_CLEAR: "PURCHASE_DETAILS_VALIDATION_CLEAR",
   PURCHASE_DETAILS_READ_ERROR: "PURCHASE_DETAILS_READ_ERROR"
 }));
 
 // Access the jest.fn() references from the mock (standard jest pattern).
-const { getCSV } = require("openstack-uicore-foundation/lib/utils/actions");
 const {
   getPurchaseDetailsReport,
   getPurchaseDetailsFilters,
-  getPurchaseDetailsLinesReport
+  getPurchaseDetailsLinesReport,
+  exportPurchaseDetailsCsv,
+  exportPurchaseDetailsLinesCsv
 } = require("../../../../../actions/sponsor-reports-actions");
-
-// Mock the API base-url helper so the CSV URL can be constructed in tests.
-jest.mock("../../../../../utils/reports-api", () => ({
-  getReportsApiBaseUrl: () => "http://test-api"
-}));
-
-// Mock getCSV used by ExportCsvButton (via connect dispatch).
-jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
-  ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
-  getCSV: jest.fn(() => ({ type: "GET_CSV_MOCK" }))
-}));
-
-// Mock getAccessTokenSafely so ExportCsvButton clicks don't fail in tests.
-jest.mock("../../../../../utils/methods", () => ({
-  getAccessTokenSafely: jest.fn(() => Promise.resolve("test-token"))
-}));
 
 // ────────────────────────────────────────────────────────────────────────────
 // Test fixtures
@@ -288,24 +279,18 @@ describe("PurchaseDetailsReportPage", () => {
     expect(calledQuery).toMatchObject({ page: 1 });
   });
 
-  it("CSV export button dispatches getCSV with the summit-scoped URL, filtered query+access_token, and filename", async () => {
+  it("CSV export button calls exportPurchaseDetailsCsv with current filters and sort", async () => {
     renderPage();
     await act(async () => {});
 
-    // ExportCsvButton renders text from T.translate("sponsor_reports_page.export_csv")
     const exportBtn = screen.getByText("sponsor_reports_page.export_csv");
     await act(async () => {
       fireEvent.click(exportBtn);
     });
 
-    // getCSV is dispatched with (url, { ...csvQuery, access_token }, filename).
-    // csvQuery drops page/per_page; with no filters it is empty → only access_token.
-    expect(getCSV).toHaveBeenCalledTimes(1);
-    expect(getCSV).toHaveBeenCalledWith(
-      "http://test-api/api/v1/summits/42/reports/purchase-details/csv",
-      { access_token: "test-token" },
-      "purchase-details-summit-42.csv"
-    );
+    // URL/params/filename correctness lives in the action tests.
+    // Here we assert the page dispatches the right thunk with the right args.
+    expect(exportPurchaseDetailsCsv).toHaveBeenCalledWith({}, null, 1);
   });
 
   it("re-dispatches getPurchaseDetailsReport with the new page when MuiTable pagination changes (1-based)", async () => {
@@ -381,7 +366,7 @@ describe("PurchaseDetailsReportPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("CSV export in the Line Items view dispatches getCSV with the lines URL, pagination-stripped query, and lines filename", async () => {
+  it("CSV export in the Line Items view calls exportPurchaseDetailsLinesCsv with filters", async () => {
     renderPage();
     await act(async () => {});
     await act(async () => {
@@ -389,24 +374,18 @@ describe("PurchaseDetailsReportPage", () => {
     });
 
     // Guard: switching to the lines view must not trigger an export on its own.
-    // (beforeEach jest.clearAllMocks() leaves getCSV at zero calls here.)
-    expect(getCSV).not.toHaveBeenCalled();
+    expect(exportPurchaseDetailsCsv).not.toHaveBeenCalled();
+    expect(exportPurchaseDetailsLinesCsv).not.toHaveBeenCalled();
+
     const exportBtn = screen.getByText("sponsor_reports_page.export_csv");
     await act(async () => {
       fireEvent.click(exportBtn);
     });
 
-    // getCSV is dispatched with (url, { ...linesCsvQuery, access_token }, filename).
-    // With no filters, linesCsvQuery drops page/per_page → empty → only access_token.
-    expect(getCSV).toHaveBeenCalledTimes(1);
-    expect(getCSV).toHaveBeenCalledWith(
-      "http://test-api/api/v1/summits/42/reports/purchase-details/lines/csv",
-      { access_token: "test-token" },
-      "purchase-details-lines-summit-42.csv"
-    );
+    expect(exportPurchaseDetailsLinesCsv).toHaveBeenCalledWith({});
   });
 
-  it("Line Items CSV export preserves applied filters and strips only pagination", async () => {
+  it("Line Items CSV export passes applied filters to exportPurchaseDetailsLinesCsv", async () => {
     renderPage();
     await act(async () => {});
 
@@ -424,22 +403,15 @@ describe("PurchaseDetailsReportPage", () => {
       fireEvent.click(screen.getByText("sponsor_reports_page.view_line_items"));
     });
     // Guard: neither Apply nor the view switch should have exported anything yet.
-    expect(getCSV).not.toHaveBeenCalled();
+    expect(exportPurchaseDetailsLinesCsv).not.toHaveBeenCalled();
     await act(async () => {
       fireEvent.click(screen.getByText("sponsor_reports_page.export_csv"));
     });
 
-    expect(getCSV).toHaveBeenCalledTimes(1);
-    const [[exportedUrl, exportedQuery]] = getCSV.mock.calls;
-    expect(exportedUrl).toBe(
-      "http://test-api/api/v1/summits/42/reports/purchase-details/lines/csv"
-    );
-    // Applied date filter survives; only pagination is stripped.
-    expect(exportedQuery["filter[]"]).toEqual(
-      expect.arrayContaining([expect.stringContaining("order_date>=")])
-    );
-    expect(exportedQuery).not.toHaveProperty("page");
-    expect(exportedQuery).not.toHaveProperty("per_page");
-    expect(exportedQuery.access_token).toBe("test-token");
+    // The thunk receives the live filters object; URL/params correctness lives in
+    // the action tests (expandDates, filter[] assembly, etc.).
+    expect(exportPurchaseDetailsLinesCsv).toHaveBeenCalledWith({
+      dateFrom: "2026-01-01"
+    });
   });
 });

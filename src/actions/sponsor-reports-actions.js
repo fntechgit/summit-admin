@@ -1,12 +1,16 @@
 import {
   createAction,
   getRequest,
+  getCSV,
   startLoading,
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
-import { getReportsApiBaseUrl } from "../utils/reports-api";
 import { makeReadErrorHandler } from "../utils/report-errors";
+import {
+  buildPurchaseQuery,
+  buildPurchaseLinesQuery
+} from "../pages/sponsors/sponsor-reports/report-query";
 
 export const REQUEST_PURCHASE_DETAILS = "REQUEST_PURCHASE_DETAILS";
 export const RECEIVE_PURCHASE_DETAILS = "RECEIVE_PURCHASE_DETAILS";
@@ -34,7 +38,7 @@ export const PURCHASE_DETAILS_LINES_READ_ERROR =
 
 // Base URL helper — scoped to a specific summit's reports endpoint.
 const base = (summitId) =>
-  `${getReportsApiBaseUrl()}/api/v1/summits/${summitId}/reports`;
+  `${window.SPONSOR_REPORTS_API_URL}/api/v1/summits/${summitId}/reports`;
 
 export const getPurchaseDetailsReport =
   (query = {}) =>
@@ -155,6 +159,50 @@ export const getSponsorAssetFilters = () => async (dispatch, getState) => {
     .catch(() => {})
     .finally(() => dispatch(stopLoading()));
 };
+
+// Orders CSV export — owns URL + params + filename (cf. exportEventRsvpsCSV).
+// Keeps the on-screen sort so the exported rows match what the user sees.
+// No page/perPage → buildPurchaseQuery emits neither; backend exports the full
+// filtered set.
+export const exportPurchaseDetailsCsv =
+  (filters = {}, order, orderDir) =>
+  async (dispatch, getState) => {
+    const { currentSummit } = getState().currentSummitState;
+    if (!currentSummit?.id) return undefined;
+    const accessToken = await getAccessTokenSafely();
+    const params = {
+      access_token: accessToken,
+      ...buildPurchaseQuery(filters, { order, orderDir })
+    };
+    return dispatch(
+      getCSV(
+        `${base(currentSummit.id)}/purchase-details/csv`,
+        params,
+        `purchase-details-summit-${currentSummit.id}.csv`
+      )
+    );
+  };
+
+// Per-line CSV export — no order param (backend default ordering keeps sponsor
+// groups intact; see lines query comment in the page).
+export const exportPurchaseDetailsLinesCsv =
+  (filters = {}) =>
+  async (dispatch, getState) => {
+    const { currentSummit } = getState().currentSummitState;
+    if (!currentSummit?.id) return undefined;
+    const accessToken = await getAccessTokenSafely();
+    const params = {
+      access_token: accessToken,
+      ...buildPurchaseLinesQuery(filters, {})
+    };
+    return dispatch(
+      getCSV(
+        `${base(currentSummit.id)}/purchase-details/lines/csv`,
+        params,
+        `purchase-details-lines-summit-${currentSummit.id}.csv`
+      )
+    );
+  };
 
 export const getSponsorAssetSponsor =
   (sponsorId) => async (dispatch, getState) => {
