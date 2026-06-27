@@ -64,7 +64,8 @@ class SelectionPlanForm extends React.Component {
       showSection: "main",
       newMemberEmail: "",
       showImportModal: false,
-      importFile: null
+      importFile: null,
+      selectedTimezone: props.currentSummit.time_zone_id
     };
 
     this.handleTrackGroupLink = this.handleTrackGroupLink.bind(this);
@@ -144,6 +145,7 @@ class SelectionPlanForm extends React.Component {
     if (!shallowEqual(prevProps.entity, this.props.entity)) {
       state.entity = { ...this.props.entity };
       state.errors = {};
+      state.selectedTimezone = this.props.currentSummit.time_zone_id;
     }
 
     if (!shallowEqual(prevProps.errors, this.props.errors)) {
@@ -314,15 +316,19 @@ class SelectionPlanForm extends React.Component {
   }
 
   render() {
-    const { entity, showSection, newMemberEmail, showImportModal } = this.state;
+    const { entity, showSection, newMemberEmail, showImportModal, selectedTimezone } =
+      this.state;
     const {
       currentSummit,
+      timezones,
       extraQuestionsOrderDir,
       extraQuestionsOrder,
       actionTypesOrderDir,
       actionTypesOrder,
       allowedMembers
     } = this.props;
+
+    const timezoneDdl = (timezones || []).map((tz) => ({ label: tz, value: tz }));
 
     const trackGroupsColumns = [
       { columnKey: "name", value: T.translate("edit_selection_plan.name") },
@@ -428,8 +434,6 @@ class SelectionPlanForm extends React.Component {
       }
     };
 
-    console.log("CHECK...", entity, currentSummit);
-
     return (
       <form className="selection-plan-form">
         <input type="hidden" id="id" value={entity.id} />
@@ -509,6 +513,22 @@ class SelectionPlanForm extends React.Component {
         </div>
 
         <div className="row form-group">
+          <div className="col-md-12">
+            <label>
+              {T.translate("edit_selection_plan.time_zone_for_dates")}
+            </label>
+            <Dropdown
+              id="selectedTimezone"
+              value={selectedTimezone}
+              onChange={(ev) =>
+                this.setState({ selectedTimezone: ev.target.value })
+              }
+              options={timezoneDdl}
+            />
+          </div>
+        </div>
+
+        <div className="row form-group">
           <div className="col-md-6">
             <label>
               {" "}
@@ -518,10 +538,10 @@ class SelectionPlanForm extends React.Component {
               id="submission_begin_date"
               onChange={this.handleChange}
               format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-              timezone={currentSummit.time_zone_id}
+              timezone={selectedTimezone}
               value={epochToMomentTimeZone(
                 entity.submission_begin_date,
-                currentSummit.time_zone_id
+                selectedTimezone
               )}
             />
           </div>
@@ -534,10 +554,10 @@ class SelectionPlanForm extends React.Component {
               id="submission_end_date"
               onChange={this.handleChange}
               format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-              timezone={currentSummit.time_zone_id}
+              timezone={selectedTimezone}
               value={epochToMomentTimeZone(
                 entity.submission_end_date,
-                currentSummit.time_zone_id
+                selectedTimezone
               )}
             />
           </div>
@@ -573,10 +593,10 @@ class SelectionPlanForm extends React.Component {
               id="submission_lock_down_presentation_status_date"
               onChange={this.handleChange}
               format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-              timezone={currentSummit.time_zone_id}
+              timezone={selectedTimezone}
               value={epochToMomentTimeZone(
                 entity.submission_lock_down_presentation_status_date,
-                currentSummit.time_zone_id
+                selectedTimezone
               )}
             />
           </div>
@@ -591,10 +611,10 @@ class SelectionPlanForm extends React.Component {
               id="voting_begin_date"
               onChange={this.handleChange}
               format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-              timezone={currentSummit.time_zone_id}
+              timezone={selectedTimezone}
               value={epochToMomentTimeZone(
                 entity.voting_begin_date,
-                currentSummit.time_zone_id
+                selectedTimezone
               )}
             />
           </div>
@@ -607,10 +627,10 @@ class SelectionPlanForm extends React.Component {
               id="voting_end_date"
               onChange={this.handleChange}
               format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-              timezone={currentSummit.time_zone_id}
+              timezone={selectedTimezone}
               value={epochToMomentTimeZone(
                 entity.voting_end_date,
-                currentSummit.time_zone_id
+                selectedTimezone
               )}
             />
           </div>
@@ -625,10 +645,10 @@ class SelectionPlanForm extends React.Component {
               id="selection_begin_date"
               onChange={this.handleChange}
               format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-              timezone={currentSummit.time_zone_id}
+              timezone={selectedTimezone}
               value={epochToMomentTimeZone(
                 entity.selection_begin_date,
-                currentSummit.time_zone_id
+                selectedTimezone
               )}
             />
           </div>
@@ -641,10 +661,10 @@ class SelectionPlanForm extends React.Component {
               id="selection_end_date"
               onChange={this.handleChange}
               format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-              timezone={currentSummit.time_zone_id}
+              timezone={selectedTimezone}
               value={epochToMomentTimeZone(
                 entity.selection_end_date,
-                currentSummit.time_zone_id
+                selectedTimezone
               )}
             />
           </div>
