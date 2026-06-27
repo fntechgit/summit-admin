@@ -24,23 +24,24 @@ import {
   TextField
 } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
+import DownloadIcon from "@mui/icons-material/Download";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { formatUsd } from "../../../../utils/reports-money";
 import { buildPurchaseQuery, buildPurchaseLinesQuery } from "../report-query";
-import { getReportsApiBaseUrl } from "../../../../utils/reports-api";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
 import FilterBar from "../../../../components/sponsors/reports/FilterBar";
 import OrdersTable from "../../../../components/sponsors/reports/OrdersTable";
 import LinesManifestView from "../../../../components/sponsors/reports/LinesManifestView";
 import ReportViewToggle from "../../../../components/sponsors/reports/ReportViewToggle";
-import ExportCsvButton from "../../../../components/sponsors/reports/ExportCsvButton";
 import usePrint from "../../../../hooks/usePrint";
 import {
   getPurchaseDetailsReport,
   getPurchaseDetailsLinesReport,
   getPurchaseDetailsFilters,
-  clearPurchaseDetailsValidation
+  clearPurchaseDetailsValidation,
+  exportPurchaseDetailsCsv,
+  exportPurchaseDetailsLinesCsv
 } from "../../../../actions/sponsor-reports-actions";
 import { DEFAULT_PER_PAGE } from "../../../../utils/constants";
 
@@ -49,7 +50,6 @@ const TOAST_AUTO_HIDE_MS = 6000;
 
 const PurchaseDetailsReportPage = ({
   // From mapStateToProps
-  currentSummit,
   data,
   summary,
   filterOptions,
@@ -65,7 +65,9 @@ const PurchaseDetailsReportPage = ({
   getPurchaseDetailsReport: fetchReport,
   getPurchaseDetailsLinesReport: fetchLinesReport,
   getPurchaseDetailsFilters: fetchFilters,
-  clearPurchaseDetailsValidation: clearValidation
+  clearPurchaseDetailsValidation: clearValidation,
+  exportPurchaseDetailsCsv: exportOrdersCsv,
+  exportPurchaseDetailsLinesCsv: exportLinesCsv
 }) => {
   const print = usePrint();
 
@@ -161,31 +163,6 @@ const PurchaseDetailsReportPage = ({
           : [])
       ]
     : [];
-
-  // ── CSV export ──────────────────────────────────────────────────────────────
-  const csvUrl = currentSummit
-    ? `${getReportsApiBaseUrl()}/api/v1/summits/${
-        currentSummit.id
-      }/reports/purchase-details/csv`
-    : "";
-  const csvQuery = useMemo(() => {
-    // Drop pagination params from the CSV query — exports the full filtered set.
-    const { page: _page, per_page: _perPage, ...rest } = query;
-    return rest;
-  }, [query]);
-
-  const linesCsvUrl = currentSummit
-    ? `${getReportsApiBaseUrl()}/api/v1/summits/${
-        currentSummit.id
-      }/reports/purchase-details/lines/csv`
-    : "";
-  const linesCsvQuery = useMemo(() => {
-    // Strip ONLY pagination — exports the full filtered set (backend caps at
-    // CSV_MAX_ROWS). Everything else buildReportQuery emitted is preserved,
-    // including the derived include_cancelled="true" when status is "Canceled".
-    const { page: _page, per_page: _perPage, ...rest } = linesQuery;
-    return rest;
-  }, [linesQuery]);
 
   // ── FilterBar handlers ──────────────────────────────────────────────────────
   // Applying/clearing a filter changes the result set → snap back to page 1.
@@ -290,19 +267,17 @@ const PurchaseDetailsReportPage = ({
           <Button startIcon={<PrintIcon />} variant="outlined" onClick={print}>
             {T.translate("sponsor_reports_page.print")}
           </Button>
-          <ExportCsvButton
-            url={view === "orders" ? csvUrl : linesCsvUrl}
-            query={view === "orders" ? csvQuery : linesCsvQuery}
-            filename={
+          <Button
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            onClick={() =>
               view === "orders"
-                ? `purchase-details-summit-${
-                    currentSummit?.id ?? "unknown"
-                  }.csv`
-                : `purchase-details-lines-summit-${
-                    currentSummit?.id ?? "unknown"
-                  }.csv`
+                ? exportOrdersCsv(filters, order, orderDir)
+                : exportLinesCsv(filters)
             }
-          />
+          >
+            {T.translate("sponsor_reports_page.export_csv")}
+          </Button>
         </>
       }
       filterBar={
@@ -362,10 +337,8 @@ const PurchaseDetailsReportPage = ({
 
 const mapStateToProps = ({
   sponsorReportsPurchaseDetailsState,
-  sponsorReportsPurchaseDetailsLinesState,
-  currentSummitState
+  sponsorReportsPurchaseDetailsLinesState
 }) => ({
-  currentSummit: currentSummitState.currentSummit,
   ...sponsorReportsPurchaseDetailsState,
   linesData: sponsorReportsPurchaseDetailsLinesState.data,
   linesSummary: sponsorReportsPurchaseDetailsLinesState.summary,
@@ -377,7 +350,9 @@ const mapDispatchToProps = {
   getPurchaseDetailsReport,
   getPurchaseDetailsLinesReport,
   getPurchaseDetailsFilters,
-  clearPurchaseDetailsValidation
+  clearPurchaseDetailsValidation,
+  exportPurchaseDetailsCsv,
+  exportPurchaseDetailsLinesCsv
 };
 
 export default withRouter(

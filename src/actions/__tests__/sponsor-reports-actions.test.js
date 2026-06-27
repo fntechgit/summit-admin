@@ -1,7 +1,10 @@
 import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
-import { getRequest } from "openstack-uicore-foundation/lib/utils/actions";
+import {
+  getRequest,
+  getCSV
+} from "openstack-uicore-foundation/lib/utils/actions";
 import { doLogin } from "openstack-uicore-foundation/lib/security/methods";
 import * as methods from "../../utils/methods";
 import { makeReadErrorHandler } from "../../utils/report-errors";
@@ -12,6 +15,8 @@ import {
   getSponsorAssetReport,
   getSponsorAssetFilters,
   getSponsorAssetSponsor,
+  exportPurchaseDetailsCsv,
+  exportPurchaseDetailsLinesCsv,
   REQUEST_PURCHASE_DETAILS,
   RECEIVE_PURCHASE_DETAILS,
   RECEIVE_PURCHASE_DETAILS_FILTERS,
@@ -29,7 +34,8 @@ import {
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   __esModule: true,
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
-  getRequest: jest.fn()
+  getRequest: jest.fn(),
+  getCSV: jest.fn(() => ({ type: "GET_CSV_MOCK" }))
 }));
 
 jest.mock("openstack-uicore-foundation/lib/security/methods", () => ({
@@ -91,6 +97,7 @@ describe("sponsor-reports-actions", () => {
   beforeEach(() => {
     jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
     getRequest.mockClear();
+    getCSV.mockClear();
     doLogin.mockClear();
     capturedUrl = null;
     capturedParams = null;
@@ -398,6 +405,66 @@ describe("sponsor-reports-actions", () => {
       const types = store.getActions().map((a) => a.type);
       expect(types).toContain("REQUEST_PURCHASE_DETAILS_LINES");
       expect(types).toContain("RECEIVE_PURCHASE_DETAILS_LINES");
+    });
+  });
+
+  // ─── exportPurchaseDetailsCsv / exportPurchaseDetailsLinesCsv ───────────────
+
+  describe("exportPurchaseDetailsCsv / exportPurchaseDetailsLinesCsv", () => {
+    let dispatch;
+    let getState;
+
+    beforeEach(() => {
+      jest
+        .spyOn(methods, "getAccessTokenSafely")
+        .mockResolvedValue("test-token");
+      getCSV.mockClear();
+      dispatch = jest.fn();
+      getState = () => ({ currentSummitState: { currentSummit: { id: 42 } } });
+      window.SPONSOR_REPORTS_API_URL = "http://test-api";
+    });
+
+    it("exportPurchaseDetailsCsv → getCSV with orders URL, sort, expanded dates, no pagination", async () => {
+      await exportPurchaseDetailsCsv(
+        { dateFrom: "2026-01-01", dateTo: "2026-01-31" },
+        "order_date",
+        -1
+      )(dispatch, getState);
+      const [url, params, filename] = getCSV.mock.calls[0];
+      expect(url).toBe(
+        "http://test-api/api/v1/summits/42/reports/purchase-details/csv"
+      );
+      expect(params).toMatchObject({
+        access_token: "test-token",
+        order: "-order_date"
+      });
+      expect(params["filter[]"]).toEqual(
+        expect.arrayContaining([
+          "order_date>=2026-01-01T00:00:00Z",
+          "order_date<2026-02-01T00:00:00Z"
+        ])
+      );
+      expect(params).not.toHaveProperty("page");
+      expect(params).not.toHaveProperty("per_page");
+      expect(filename).toBe("purchase-details-summit-42.csv");
+    });
+
+    it("exportPurchaseDetailsCsv encodes ascending sort too", async () => {
+      await exportPurchaseDetailsCsv({}, "number", 1)(dispatch, getState);
+      expect(getCSV.mock.calls[0][1].order).toBe("number");
+    });
+
+    it("exportPurchaseDetailsLinesCsv → lines URL, no order, lines filename", async () => {
+      await exportPurchaseDetailsLinesCsv({ status: "Paid" })(
+        dispatch,
+        getState
+      );
+      const [url, params, filename] = getCSV.mock.calls[0];
+      expect(url).toBe(
+        "http://test-api/api/v1/summits/42/reports/purchase-details/lines/csv"
+      );
+      expect(params).not.toHaveProperty("order");
+      expect(filename).toBe("purchase-details-lines-summit-42.csv");
     });
   });
 
