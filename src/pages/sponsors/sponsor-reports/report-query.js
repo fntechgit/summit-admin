@@ -1,4 +1,4 @@
-// src/utils/report-query.js
+// src/pages/sponsors/sponsor-reports/report-query.js
 //
 // Translates report UI filter state into a base-api-utils query object.
 //
@@ -8,6 +8,8 @@
 // dimension. v1 designates SPONSOR as that dimension; all others are single-value.
 // Every emitted value uses valid `field==value` / `field>=value` operator syntax
 // (a no-operator value triggers a server IndexError → 500).
+
+import { toOrderParam } from "../../../components/sponsors/reports/OrdersTable";
 
 export const buildReportQuery = (filters = {}) => {
   const {
@@ -70,3 +72,40 @@ export const buildReportQuery = (filters = {}) => {
 
   return query;
 };
+
+const ISO_DATE_LENGTH = 10;
+
+// dateTo → start of the NEXT day (exclusive <) so same-day fractional-second rows
+// are included rather than dropped by a <= end-of-day bound.
+const nextDayStartIso = (ymd) => {
+  const d = new Date(`${ymd}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + 1);
+  return `${d.toISOString().slice(0, ISO_DATE_LENGTH)}T00:00:00Z`;
+};
+
+const expandDates = (filters = {}) => {
+  const { dateFrom, dateTo, ...rest } = filters;
+  return {
+    ...rest,
+    dateFrom: dateFrom ? `${dateFrom}T00:00:00Z` : undefined,
+    dateTo: dateTo ? nextDayStartIso(dateTo) : undefined
+  };
+};
+
+// Orders grain: date expansion + pagination + formatted sort. Used by the on-screen
+// fetch AND exportPurchaseDetailsCsv (export passes no page/perPage → none emitted).
+export const buildPurchaseQuery = (
+  filters = {},
+  { page, perPage, order, orderDir } = {}
+) =>
+  buildReportQuery({
+    ...expandDates(filters),
+    page,
+    perPage,
+    order: toOrderParam(order, orderDir)
+  });
+
+// Lines grain: same date expansion, NO order (manifest relies on backend default
+// ordering). Used by the on-screen lines fetch AND exportPurchaseDetailsLinesCsv.
+export const buildPurchaseLinesQuery = (filters = {}, { page, perPage } = {}) =>
+  buildReportQuery({ ...expandDates(filters), page, perPage });

@@ -26,14 +26,12 @@ import {
 import PrintIcon from "@mui/icons-material/Print";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { formatUsd } from "../../../../utils/reports-money";
-import { buildReportQuery } from "../../../../utils/report-query";
+import { buildPurchaseQuery, buildPurchaseLinesQuery } from "../report-query";
 import { getReportsApiBaseUrl } from "../../../../utils/reports-api";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
 import FilterBar from "../../../../components/sponsors/reports/FilterBar";
-import OrdersTable, {
-  toOrderParam
-} from "../../../../components/sponsors/reports/OrdersTable";
+import OrdersTable from "../../../../components/sponsors/reports/OrdersTable";
 import LinesManifestView from "../../../../components/sponsors/reports/LinesManifestView";
 import ReportViewToggle from "../../../../components/sponsors/reports/ReportViewToggle";
 import ExportCsvButton from "../../../../components/sponsors/reports/ExportCsvButton";
@@ -48,7 +46,6 @@ import { DEFAULT_PER_PAGE } from "../../../../utils/constants";
 
 const LINES_DEFAULT_PAGE_SIZE = 50;
 const TOAST_AUTO_HIDE_MS = 6000;
-const ISO_DATE_LENGTH = 10; // "YYYY-MM-DD"
 
 const PurchaseDetailsReportPage = ({
   // From mapStateToProps
@@ -84,44 +81,28 @@ const PurchaseDetailsReportPage = ({
 
   // Build the API query from all local state. Memoized so useEffect only re-runs
   // when the query actually changes (referential stability).
-  const query = useMemo(() => {
-    const { dateFrom, dateTo, ...rest } = filters;
-    // Expand YYYY-MM-DD dates to ISO datetimes for the IsoDateTimeFilter backend field.
-    // dateTo → start of the NEXT day (exclusive <) so same-day fractional-second rows
-    // are included rather than dropped by a <= end-of-day bound.
-    const nextDayStartIso = (ymd) => {
-      const d = new Date(`${ymd}T00:00:00Z`);
-      d.setUTCDate(d.getUTCDate() + 1);
-      return `${d.toISOString().slice(0, ISO_DATE_LENGTH)}T00:00:00Z`;
-    };
-    return buildReportQuery({
-      ...rest,
-      dateFrom: dateFrom ? `${dateFrom}T00:00:00Z` : undefined,
-      dateTo: dateTo ? nextDayStartIso(dateTo) : undefined,
-      page: currentPage,
-      perPage,
-      order: toOrderParam(order, orderDir)
-    });
-  }, [filters, currentPage, perPage, order, orderDir]);
+  const query = useMemo(
+    () =>
+      buildPurchaseQuery(filters, {
+        page: currentPage,
+        perPage,
+        order,
+        orderDir
+      }),
+    [filters, currentPage, perPage, order, orderDir]
+  );
 
   // Lines query: same filters as Orders, but NO order param. CustomOrderingFilter
   // would replace the default sponsor-name ordering and scatter the sponsor groups,
   // so the manifest relies on the backend default ordering.
-  const linesQuery = useMemo(() => {
-    const { dateFrom, dateTo, ...rest } = filters;
-    const nextDayStartIso = (ymd) => {
-      const d = new Date(`${ymd}T00:00:00Z`);
-      d.setUTCDate(d.getUTCDate() + 1);
-      return `${d.toISOString().slice(0, ISO_DATE_LENGTH)}T00:00:00Z`;
-    };
-    return buildReportQuery({
-      ...rest,
-      dateFrom: dateFrom ? `${dateFrom}T00:00:00Z` : undefined,
-      dateTo: dateTo ? nextDayStartIso(dateTo) : undefined,
-      page: linesPage,
-      perPage: linesPerPage
-    });
-  }, [filters, linesPage, linesPerPage]);
+  const linesQuery = useMemo(
+    () =>
+      buildPurchaseLinesQuery(filters, {
+        page: linesPage,
+        perPage: linesPerPage
+      }),
+    [filters, linesPage, linesPerPage]
+  );
 
   // Fetch filters once on mount. Summit is read from store inside the action.
   // Empty deps is intentional: fetchFilters is stable from connect() and reads
