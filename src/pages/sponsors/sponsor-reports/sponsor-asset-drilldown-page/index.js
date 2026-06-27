@@ -41,19 +41,17 @@ import PrintIcon from "@mui/icons-material/Print";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 import DownloadIcon from "@mui/icons-material/Download";
-import { buildSectionCsvQuery } from "../../../../utils/section-csv-query";
 import { htmlToPlainText } from "../../../../utils/methods";
-import {
-  getReportsApiBaseUrl,
-  isPositiveIntId
-} from "../../../../utils/reports-api";
+import { isPositiveIntId } from "../../../../utils/reports-api";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import usePrint from "../../../../hooks/usePrint";
-import ExportCsvButton from "../../../../components/sponsors/reports/ExportCsvButton";
 import TierBadge from "../../../../components/sponsors/reports/TierBadge";
 import StatusPill from "../../../../components/sponsors/reports/StatusPill";
 import SponsorAvatar from "../../../../components/sponsors/reports/SponsorAvatar";
-import { getSponsorAssetSponsor } from "../../../../actions/sponsor-reports-actions";
+import {
+  exportSponsorAssetSectionCsv,
+  getSponsorAssetSponsor
+} from "../../../../actions/sponsor-reports-actions";
 
 // Gate the <img> on an image file extension; render every other file as a
 // download link (a PDF url in an <img> would show a broken image).
@@ -136,12 +134,12 @@ const ContentCell = ({ row }) => {
 
 const SponsorAssetDrilldownPage = ({
   // From mapStateToProps
-  currentSummit,
   detail,
   loading,
   readError,
   // From mapDispatchToProps
   getSponsorAssetSponsor: fetchSponsor,
+  exportSponsorAssetSectionCsv,
   // From withRouter
   match
 }) => {
@@ -158,12 +156,6 @@ const SponsorAssetDrilldownPage = ({
   useEffect(() => {
     if (validParams) fetchSponsor(sponsorId);
   }, [sponsorId, validParams]); // fetchSponsor is stable from connect — no dep needed
-
-  const csvBase = currentSummit
-    ? `${getReportsApiBaseUrl()}/api/v1/summits/${
-        currentSummit.id
-      }/reports/sponsor-assets/csv`
-    : "";
 
   if (!validParams || readError?.kind === "not-found") {
     return (
@@ -280,15 +272,15 @@ const SponsorAssetDrilldownPage = ({
               <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                 {section.page.title}
               </Typography>
-              <ExportCsvButton
-                url={csvBase}
-                query={buildSectionCsvQuery(
-                  {},
-                  { sponsorId, pageId: section.page.id }
-                )}
-                filename={`sponsor-${sponsorId}-page-${section.page.id}.csv`}
-                label={T.translate("sponsor_reports_page.download_csv")}
-              />
+              <Button
+                startIcon={<DownloadIcon />}
+                variant="outlined"
+                onClick={() =>
+                  exportSponsorAssetSectionCsv(sponsorId, section.page.id)
+                }
+              >
+                {T.translate("sponsor_reports_page.download_csv")}
+              </Button>
             </Box>
             <Grid container spacing={2}>
               {section.modules?.map((row) => (
@@ -332,17 +324,15 @@ const SponsorAssetDrilldownPage = ({
   );
 };
 
-const mapStateToProps = ({
-  sponsorReportsDrilldownState,
-  currentSummitState
-}) => ({
-  currentSummit: currentSummitState.currentSummit,
+const mapStateToProps = ({ sponsorReportsDrilldownState }) => ({
   ...sponsorReportsDrilldownState
 });
 
 const mapDispatchToProps = (dispatch) => ({
   getSponsorAssetSponsor: (sponsorId) =>
-    dispatch(getSponsorAssetSponsor(sponsorId))
+    dispatch(getSponsorAssetSponsor(sponsorId)),
+  exportSponsorAssetSectionCsv: (sponsorId, pageId) =>
+    dispatch(exportSponsorAssetSectionCsv(sponsorId, pageId))
 });
 
 export default withRouter(
