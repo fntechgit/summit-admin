@@ -7,7 +7,7 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { doLogin } from "openstack-uicore-foundation/lib/security/methods";
 import * as methods from "../../utils/methods";
-import { makeReadErrorHandler } from "../../utils/report-errors";
+import { makeReadErrorHandler } from "../../pages/sponsors/sponsor-reports/report-errors";
 
 import {
   getPurchaseDetailsReport,

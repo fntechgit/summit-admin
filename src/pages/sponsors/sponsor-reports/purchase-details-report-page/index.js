@@ -26,7 +26,7 @@ import {
 import PrintIcon from "@mui/icons-material/Print";
 import DownloadIcon from "@mui/icons-material/Download";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
-import { formatUsd } from "../../../../utils/reports-money";
+import { formatUsd } from "../reports-money";
 import { buildPurchaseQuery, buildPurchaseLinesQuery } from "../report-query";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
