@@ -18,7 +18,7 @@ import T from "i18n-react/dist/i18n-react";
 import { Box, Button, Pagination, Stack, Typography } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import CollectionsOutlinedIcon from "@mui/icons-material/CollectionsOutlined";
-import { buildReportQuery } from "../../../../utils/report-query";
+import { buildReportQuery } from "../report-query";
 import {
   getReportsApiBaseUrl,
   isPositiveIntId

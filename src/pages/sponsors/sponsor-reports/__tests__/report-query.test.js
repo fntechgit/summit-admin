@@ -1,4 +1,4 @@
-import { buildReportQuery } from "../report-query";
+import { buildReportQuery , buildPurchaseQuery, buildPurchaseLinesQuery } from "../report-query";
 
 describe("buildReportQuery", () => {
   it("returns an empty object for no filters", () => {
@@ -60,5 +60,41 @@ describe("buildReportQuery", () => {
       per_page: 25,
       group_by: "sponsor"
     });
+  });
+});
+
+describe("buildPurchaseQuery (orders)", () => {
+  it("expands dates and includes a formatted order param", () => {
+    const q = buildPurchaseQuery(
+      { dateFrom: "2026-01-01", dateTo: "2026-01-31" },
+      { page: 1, perPage: 10, order: "order_date", orderDir: -1 }
+    );
+    expect(q["filter[]"]).toEqual(
+      expect.arrayContaining([
+        "order_date>=2026-01-01T00:00:00Z",
+        "order_date<2026-02-01T00:00:00Z"
+      ])
+    );
+    expect(q.order).toBe("-order_date");
+    expect(q).toMatchObject({ page: 1, per_page: 10 });
+  });
+  it("omits page/per_page/order when not provided (export shape)", () => {
+    const q = buildPurchaseQuery({ status: "Paid" }, {});
+    expect(q).not.toHaveProperty("page");
+    expect(q).not.toHaveProperty("per_page");
+    expect(q).not.toHaveProperty("order");
+    expect(q["filter[]"]).toEqual(["status==Paid"]);
+  });
+});
+
+describe("buildPurchaseLinesQuery", () => {
+  it("expands dates, carries pagination, and never sets order", () => {
+    const q = buildPurchaseLinesQuery(
+      { dateFrom: "2026-01-01" },
+      { page: 2, perPage: 50 }
+    );
+    expect(q["filter[]"]).toEqual(["order_date>=2026-01-01T00:00:00Z"]);
+    expect(q).toMatchObject({ page: 2, per_page: 50 });
+    expect(q).not.toHaveProperty("order");
   });
 });
