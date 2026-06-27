@@ -17,6 +17,8 @@ import {
   getSponsorAssetSponsor,
   exportPurchaseDetailsCsv,
   exportPurchaseDetailsLinesCsv,
+  exportSponsorAssetCsv,
+  exportSponsorAssetSectionCsv,
   REQUEST_PURCHASE_DETAILS,
   RECEIVE_PURCHASE_DETAILS,
   RECEIVE_PURCHASE_DETAILS_FILTERS,
@@ -465,6 +467,58 @@ describe("sponsor-reports-actions", () => {
       );
       expect(params).not.toHaveProperty("order");
       expect(filename).toBe("purchase-details-lines-summit-42.csv");
+    });
+  });
+
+  // ─── exportSponsorAssetCsv / exportSponsorAssetSectionCsv ───────────────────
+
+  describe("exportSponsorAssetCsv / exportSponsorAssetSectionCsv", () => {
+    let dispatch;
+    let getState;
+
+    beforeEach(() => {
+      jest
+        .spyOn(methods, "getAccessTokenSafely")
+        .mockResolvedValue("test-token");
+      getCSV.mockClear();
+      dispatch = jest.fn();
+      getState = () => ({
+        currentSummitState: { currentSummit: { id: 42 } }
+      });
+      window.SPONSOR_REPORTS_API_URL = "http://test-api";
+    });
+
+    it("exportSponsorAssetCsv → assets URL, keeps filters, strips group_by/order/pagination", async () => {
+      // Pass an input that buildReportQuery WOULD emit grouping/pagination/order for,
+      // to actually exercise the strip (the page only ever passes flat filters, but the
+      // thunk's contract is a flat export regardless).
+      await exportSponsorAssetCsv({
+        sponsorIds: [17],
+        groupBy: "component",
+        page: 2,
+        perPage: 25,
+        order: "status"
+      })(dispatch, getState);
+      const [url, params, filename] = getCSV.mock.calls[0];
+      expect(url).toBe(
+        "http://test-api/api/v1/summits/42/reports/sponsor-assets/csv"
+      );
+      expect(params["filter[]"]).toEqual(["sponsor_id==17"]); // filter survives
+      expect(params).not.toHaveProperty("group_by");
+      expect(params).not.toHaveProperty("order");
+      expect(params).not.toHaveProperty("page");
+      expect(params).not.toHaveProperty("per_page");
+      expect(filename).toBe("sponsor-assets-summit-42.csv");
+    });
+
+    it("exportSponsorAssetSectionCsv → only sponsor_id/page_id filters + filename", async () => {
+      await exportSponsorAssetSectionCsv("17", "3")(dispatch, getState);
+      const [url, params, filename] = getCSV.mock.calls[0];
+      expect(url).toBe(
+        "http://test-api/api/v1/summits/42/reports/sponsor-assets/csv"
+      );
+      expect(params["filter[]"]).toEqual(["sponsor_id==17", "page_id==3"]);
+      expect(filename).toBe("sponsor-17-page-3.csv");
     });
   });
 

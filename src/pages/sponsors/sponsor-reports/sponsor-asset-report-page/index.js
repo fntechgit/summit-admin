@@ -17,21 +17,19 @@ import { withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import { Box, Button, Pagination, Stack, Typography } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
+import DownloadIcon from "@mui/icons-material/Download";
 import CollectionsOutlinedIcon from "@mui/icons-material/CollectionsOutlined";
 import { buildReportQuery } from "../report-query";
-import {
-  getReportsApiBaseUrl,
-  isPositiveIntId
-} from "../../../../utils/reports-api";
+import { isPositiveIntId } from "../../../../utils/reports-api";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
 import FilterBar from "../../../../components/sponsors/reports/FilterBar";
 import GroupByToggle from "../../../../components/sponsors/reports/GroupByToggle";
 import GroupBySponsorView from "../../../../components/sponsors/reports/GroupBySponsorView";
 import GroupByComponentView from "../../../../components/sponsors/reports/GroupByComponentView";
-import ExportCsvButton from "../../../../components/sponsors/reports/ExportCsvButton";
 import usePrint from "../../../../hooks/usePrint";
 import {
+  exportSponsorAssetCsv,
   getSponsorAssetFilters,
   getSponsorAssetReport
 } from "../../../../actions/sponsor-reports-actions";
@@ -63,7 +61,8 @@ const SponsorAssetReportPage = ({
   readError,
   // From mapDispatchToProps
   getSponsorAssetReport: fetchReport,
-  getSponsorAssetFilters: fetchFilters
+  getSponsorAssetFilters: fetchFilters,
+  exportSponsorAssetCsv
 }) => {
   const print = usePrint();
 
@@ -100,25 +99,6 @@ const SponsorAssetReportPage = ({
   useEffect(() => {
     if (validSummit) fetchReport(query);
   }, [query]); // query is memoized; re-fetches only on real changes
-
-  // CSV export uses the flat row export path: strip group_by/page/per_page/order
-  // so the export matches the active filters but ignores grouping & pagination.
-  const csvQuery = useMemo(() => {
-    const {
-      group_by: _groupBy,
-      page: _page,
-      per_page: _perPage,
-      order: _order,
-      ...rest
-    } = query;
-    return rest;
-  }, [query]);
-
-  const csvUrl = currentSummit
-    ? `${getReportsApiBaseUrl()}/api/v1/summits/${
-        currentSummit.id
-      }/reports/sponsor-assets/csv`
-    : "";
 
   const onApply = (next) => {
     setPage(FIRST_PAGE);
@@ -168,11 +148,13 @@ const SponsorAssetReportPage = ({
           <Button startIcon={<PrintIcon />} variant="outlined" onClick={print}>
             {T.translate("sponsor_reports_page.print")}
           </Button>
-          <ExportCsvButton
-            url={csvUrl}
-            query={csvQuery}
-            filename={`sponsor-assets-summit-${currentSummit.id}.csv`}
-          />
+          <Button
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            onClick={() => exportSponsorAssetCsv(filters)}
+          >
+            {T.translate("sponsor_reports_page.export_csv")}
+          </Button>
         </>
       }
     >
@@ -257,7 +239,8 @@ const mapStateToProps = ({
 
 const mapDispatchToProps = (dispatch) => ({
   getSponsorAssetReport: (query) => dispatch(getSponsorAssetReport(query)),
-  getSponsorAssetFilters: () => dispatch(getSponsorAssetFilters())
+  getSponsorAssetFilters: () => dispatch(getSponsorAssetFilters()),
+  exportSponsorAssetCsv: (filters) => dispatch(exportSponsorAssetCsv(filters))
 });
 
 export default withRouter(

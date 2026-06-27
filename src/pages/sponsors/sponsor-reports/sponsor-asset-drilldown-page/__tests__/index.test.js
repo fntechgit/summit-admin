@@ -15,7 +15,7 @@
 
 import "@testing-library/jest-dom";
 import React from "react";
-import { act, screen } from "@testing-library/react";
+import { act, screen, fireEvent } from "@testing-library/react";
 import { Router, Route } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import { renderWithRedux } from "utils/test-utils";
@@ -26,29 +26,22 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
   translate: (k) => k
 }));
 
-// Stub ExportCsvButton to avoid real CSV logic in tests.
-jest.mock("../../../../../components/sponsors/reports/ExportCsvButton", () => ({
-  __esModule: true,
-  default: ({ label, disabled }) => (
-    <button type="button" data-testid="export-csv" disabled={disabled}>
-      {label || "export"}
-    </button>
-  )
-}));
-
 jest.mock("../../../../../utils/reports-api", () => ({
-  getReportsApiBaseUrl: () => "http://test-api",
   isPositiveIntId: jest.requireActual("../../../../../utils/reports-api")
     .isPositiveIntId
 }));
 
 jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
   getSponsorAssetSponsor: jest.fn(() => ({ type: "GET_DRILLDOWN" })),
+  exportSponsorAssetSectionCsv: jest.fn(() => ({
+    type: "EXPORT_SA_SECTION_CSV"
+  })),
   SPONSOR_DRILLDOWN_READ_ERROR: "SPONSOR_DRILLDOWN_READ_ERROR"
 }));
 
 const {
-  getSponsorAssetSponsor
+  getSponsorAssetSponsor,
+  exportSponsorAssetSectionCsv
 } = require("../../../../../actions/sponsor-reports-actions");
 
 const PAGE_ROUTE =
@@ -133,6 +126,32 @@ describe("SponsorAssetDrilldownPage", () => {
     expect(screen.getAllByText("Acme").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Booth")).toBeInTheDocument();
     expect(screen.getByText("Logo")).toBeInTheDocument();
+  });
+
+  it("renders the section download button and dispatches exportSponsorAssetSectionCsv on click", async () => {
+    renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
+      detail: {
+        sponsor: { id: 17, name: "Acme", tier: "Gold", pages_active: 1 },
+        pages: [
+          {
+            page: { id: 9, title: "Booth", type: "page" },
+            modules: []
+          }
+        ]
+      }
+    });
+    await act(async () => {});
+    exportSponsorAssetSectionCsv.mockClear();
+
+    const downloadBtn = screen.getByRole("button", {
+      name: /sponsor_reports_page\.download_csv/
+    });
+    expect(downloadBtn).not.toBeDisabled();
+    fireEvent.click(downloadBtn);
+    await act(async () => {});
+
+    // sponsorId from URL ("17"), pageId from section.page.id (9)
+    expect(exportSponsorAssetSectionCsv).toHaveBeenCalledWith("17", 9);
   });
 
   it("renders the navy header with tier badge", async () => {

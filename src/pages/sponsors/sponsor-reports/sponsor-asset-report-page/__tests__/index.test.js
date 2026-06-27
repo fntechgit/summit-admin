@@ -31,27 +31,11 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
   getSponsorAssetFilters: jest.fn(() => ({ type: "GET_SA_FILTERS" })),
   getSponsorAssetReport: jest.fn(() => ({ type: "GET_SA_REPORT" })),
+  exportSponsorAssetCsv: jest.fn(() => ({ type: "EXPORT_SA_CSV" })),
   SPONSOR_ASSET_READ_ERROR: "SPONSOR_ASSET_READ_ERROR"
 }));
 
-// Stub ExportCsvButton so tests can inspect the `query` prop without triggering
-// a real CSV fetch.
-jest.mock("../../../../../components/sponsors/reports/ExportCsvButton", () => ({
-  __esModule: true,
-  default: ({ query, disabled, label }) => (
-    <button
-      type="button"
-      data-testid="export-csv"
-      data-query={JSON.stringify(query)}
-      disabled={disabled}
-    >
-      {label || "export"}
-    </button>
-  )
-}));
-
 jest.mock("../../../../../utils/reports-api", () => ({
-  getReportsApiBaseUrl: () => "http://test-api",
   isPositiveIntId: jest.requireActual("../../../../../utils/reports-api")
     .isPositiveIntId
 }));
@@ -59,7 +43,8 @@ jest.mock("../../../../../utils/reports-api", () => ({
 // Require after mocks so the jest.fn() references are the mocked ones.
 const {
   getSponsorAssetFilters,
-  getSponsorAssetReport
+  getSponsorAssetReport,
+  exportSponsorAssetCsv
 } = require("../../../../../actions/sponsor-reports-actions");
 
 const PAGE_ROUTE = "/app/summits/:summit_id/sponsors/reports/sponsor-assets";
@@ -230,10 +215,30 @@ describe("SponsorAssetReportPage", () => {
     expect(getSponsorAssetReport).not.toHaveBeenCalled();
   });
 
-  it("renders the ExportCsvButton (enabled by default)", async () => {
+  it("renders the export button (enabled by default)", async () => {
     renderPage();
     await act(async () => {});
-    expect(screen.getByTestId("export-csv")).not.toBeDisabled();
+    expect(
+      screen.getByRole("button", {
+        name: /sponsor_reports_page\.export_csv/
+      })
+    ).not.toBeDisabled();
+  });
+
+  it("dispatches exportSponsorAssetCsv with current filters on export button click", async () => {
+    renderPage();
+    await act(async () => {});
+    exportSponsorAssetCsv.mockClear();
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /sponsor_reports_page\.export_csv/
+      })
+    );
+    await act(async () => {});
+
+    // Initial filters state is {} — the thunk is called with those filters.
+    expect(exportSponsorAssetCsv).toHaveBeenCalledWith({});
   });
 
   it("hides the no-groups empty state until currentPage >= 1", async () => {

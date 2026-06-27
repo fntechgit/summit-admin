@@ -8,6 +8,7 @@ import {
 import { getAccessTokenSafely } from "../utils/methods";
 import { makeReadErrorHandler } from "../utils/report-errors";
 import {
+  buildReportQuery,
   buildPurchaseQuery,
   buildPurchaseLinesQuery
 } from "../pages/sponsors/sponsor-reports/report-query";
@@ -228,4 +229,50 @@ export const getSponsorAssetSponsor =
     )({ access_token: accessToken })(dispatch)
       .catch(() => {})
       .finally(() => dispatch(stopLoading()));
+  };
+
+// Sponsor-asset CSV — flat export: drop grouping/order/pagination so the export
+// matches the active filters but not the grouped/paged view.
+export const exportSponsorAssetCsv =
+  (filters = {}) =>
+  async (dispatch, getState) => {
+    const { currentSummit } = getState().currentSummitState;
+    if (!currentSummit?.id) return undefined;
+    const accessToken = await getAccessTokenSafely();
+    const {
+      group_by: _g,
+      order: _o,
+      page: _p,
+      per_page: _pp,
+      ...rest
+    } = buildReportQuery(filters);
+    return dispatch(
+      getCSV(
+        `${base(currentSummit.id)}/sponsor-assets/csv`,
+        { access_token: accessToken, ...rest },
+        `sponsor-assets-summit-${currentSummit.id}.csv`
+      )
+    );
+  };
+
+// Single sponsor+page section export. Integer-guard both ids (defense-in-depth;
+// the drilldown route validates :sponsorId before render). No base query — the
+// drilldown always exported a section with no other active filters.
+export const exportSponsorAssetSectionCsv =
+  (sponsorId, pageId) => async (dispatch, getState) => {
+    const { currentSummit } = getState().currentSummitState;
+    if (!currentSummit?.id) return undefined;
+    const accessToken = await getAccessTokenSafely();
+    const filter = [];
+    const sid = Number(sponsorId);
+    const pid = Number(pageId);
+    if (Number.isInteger(sid)) filter.push(`sponsor_id==${sid}`);
+    if (Number.isInteger(pid)) filter.push(`page_id==${pid}`);
+    return dispatch(
+      getCSV(
+        `${base(currentSummit.id)}/sponsor-assets/csv`,
+        { access_token: accessToken, "filter[]": filter },
+        `sponsor-${sponsorId}-page-${pageId}.csv`
+      )
+    );
   };
