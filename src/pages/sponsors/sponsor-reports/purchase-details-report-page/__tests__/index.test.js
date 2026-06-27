@@ -234,10 +234,10 @@ describe("PurchaseDetailsReportPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the ExportCsvButton", async () => {
+  it("renders the export button", async () => {
     renderPage();
     await act(async () => {});
-    // ExportCsvButton renders text from T.translate("sponsor_reports_page.export_csv")
+    // The export button renders text from T.translate("sponsor_reports_page.export_csv")
     // With the echo mock this becomes the key string
     expect(
       screen.getByText("sponsor_reports_page.export_csv")

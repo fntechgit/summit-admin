@@ -20,7 +20,7 @@ import PrintIcon from "@mui/icons-material/Print";
 import DownloadIcon from "@mui/icons-material/Download";
 import CollectionsOutlinedIcon from "@mui/icons-material/CollectionsOutlined";
 import { buildReportQuery } from "../report-query";
-import { isPositiveIntId } from "../../../../utils/reports-api";
+import { isPositiveIntId } from "../../../../utils/methods";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
 import FilterBar from "../../../../components/sponsors/reports/FilterBar";

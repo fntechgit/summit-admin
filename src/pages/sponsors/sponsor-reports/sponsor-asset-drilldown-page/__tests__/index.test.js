@@ -26,11 +26,6 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
   translate: (k) => k
 }));
 
-jest.mock("../../../../../utils/reports-api", () => ({
-  isPositiveIntId: jest.requireActual("../../../../../utils/reports-api")
-    .isPositiveIntId
-}));
-
 jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
   getSponsorAssetSponsor: jest.fn(() => ({ type: "GET_DRILLDOWN" })),
   exportSponsorAssetSectionCsv: jest.fn(() => ({

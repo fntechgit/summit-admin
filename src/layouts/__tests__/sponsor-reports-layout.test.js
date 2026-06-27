@@ -40,12 +40,6 @@ jest.mock("../../access-routes.yml", () => ({
   ]
 }));
 
-// Mock reports-api so child pages can build URLs without a real API host.
-jest.mock("../../utils/reports-api", () => ({
-  getReportsApiBaseUrl: () => "http://test-api",
-  isPositiveIntId: (v) => /^[1-9]\d*$/.test(String(v))
-}));
-
 // Mock action creators used by the connected child pages.
 // Returns plain objects so the mock store can record them without real thunk logic.
 jest.mock("../../actions/sponsor-reports-actions", () => ({

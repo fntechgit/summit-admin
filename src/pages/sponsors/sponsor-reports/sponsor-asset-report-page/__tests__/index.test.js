@@ -35,11 +35,6 @@ jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
   SPONSOR_ASSET_READ_ERROR: "SPONSOR_ASSET_READ_ERROR"
 }));
 
-jest.mock("../../../../../utils/reports-api", () => ({
-  isPositiveIntId: jest.requireActual("../../../../../utils/reports-api")
-    .isPositiveIntId
-}));
-
 // Require after mocks so the jest.fn() references are the mocked ones.
 const {
   getSponsorAssetFilters,
