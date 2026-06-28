@@ -29,9 +29,9 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import T from "i18n-react/dist/i18n-react";
+import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import StatusPill from "./StatusPill";
 import { formatCheckoutTime } from "./OrdersTable";
-import { formatUsd } from "../../../pages/sponsors/sponsor-reports/reports-money";
 import { bucketLinesBySponsor } from "../../../utils/manifest-grouping";
 
 // eslint-disable-next-line no-magic-numbers
@@ -141,7 +141,9 @@ const LinesManifestView = ({
                         />
                       </TableCell>
                       <TableCell align="right">
-                        {formatUsd(line.line_total)}
+                        {line.line_total == null
+                          ? "—"
+                          : currencyAmountFromCents(line.line_total)}
                       </TableCell>
                     </TableRow>
                   ))}

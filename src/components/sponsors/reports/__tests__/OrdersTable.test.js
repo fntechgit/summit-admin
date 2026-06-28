@@ -74,7 +74,7 @@ const sampleRow = {
   checkout_at: "2026-06-05T15:41:13Z",
   form: { display: "Booth" },
   status: "Paid",
-  invoice_total: "250.00",
+  invoice_total: 25000,
   sponsor_note: "VIP note"
 };
 
@@ -129,8 +129,9 @@ describe("OrdersTable rendering", () => {
     expect(screen.getByText("Paid")).toBeInTheDocument();
   });
 
-  it("renders formatUsd(invoice_total) in the Invoice Total column", () => {
+  it("renders currencyAmountFromCents(invoice_total) in the Invoice Total column", () => {
     renderTable();
+    // 25000 cents → "$250.00" (no thousands separator — platform-wide uicore behavior)
     expect(screen.getByText("$250.00")).toBeInTheDocument();
   });
 

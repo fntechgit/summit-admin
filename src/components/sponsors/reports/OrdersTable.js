@@ -13,8 +13,8 @@
 
 import React from "react";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import StatusPill from "./StatusPill";
-import { formatUsd } from "../../../pages/sponsors/sponsor-reports/reports-money";
 
 const ISO_DATE_LENGTH = 10; // "YYYY-MM-DD"
 const MS_PER_SECOND = 1000;
@@ -91,7 +91,10 @@ const columns = [
     header: "Invoice Total",
     sortable: true,
     align: "right",
-    render: (row) => formatUsd(row.invoice_total)
+    render: (row) =>
+      row.invoice_total == null
+        ? "—"
+        : currencyAmountFromCents(row.invoice_total)
   },
   {
     columnKey: "sponsor_note",

@@ -21,8 +21,8 @@ const line = (over = {}) => ({
   description: "Audio mixer",
   rate_name: "Early",
   quantity: 2,
-  unit_price: "500.00",
-  line_total: "1000.00",
+  unit_price: 50000,
+  line_total: 100000,
   add_on_id: 3,
   add_on_name: "Meeting Room T",
   notes: "dock B",
@@ -69,7 +69,8 @@ describe("LinesManifestView", () => {
     renderView();
     expect(screen.getByText("Paid")).toBeInTheDocument();
     expect(screen.getByText("AV1")).toBeInTheDocument();
-    expect(screen.getByText("$1,000.00")).toBeInTheDocument();
+    // 100000 cents → "$1000.00" (no thousands separator — platform-wide uicore behavior)
+    expect(screen.getByText("$1000.00")).toBeInTheDocument();
   });
 
   it("KEEPS a canceled line in the rendered set (visual treatment, not filtered)", () => {

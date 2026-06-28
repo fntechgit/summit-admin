@@ -26,7 +26,7 @@ import {
 import PrintIcon from "@mui/icons-material/Print";
 import DownloadIcon from "@mui/icons-material/Download";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
-import { formatUsd } from "../reports-money";
+import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { buildPurchaseQuery, buildPurchaseLinesQuery } from "../report-query";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
@@ -128,6 +128,9 @@ const PurchaseDetailsReportPage = ({
   // Backend main does not yet expose it (ships in PR #24); the presence check
   // keeps the tile hidden on current main and auto-appears after PR #24 deploys.
   const activeSummary = view === "orders" ? summary : linesSummary;
+  // money: format integer CENTS via uicore; guard unexpected nulls with em dash.
+  const money = (cents) =>
+    cents == null ? "—" : currencyAmountFromCents(cents);
   const tiles = activeSummary
     ? [
         {
@@ -143,13 +146,13 @@ const PurchaseDetailsReportPage = ({
         {
           key: "total_paid",
           label: T.translate("sponsor_reports_page.total_paid"),
-          value: formatUsd(activeSummary.total_paid),
+          value: money(activeSummary.total_paid),
           tone: "success"
         },
         {
           key: "total_pending",
           label: T.translate("sponsor_reports_page.total_pending"),
-          value: formatUsd(activeSummary.total_pending),
+          value: money(activeSummary.total_pending),
           tone: "warning"
         },
         ...(activeSummary.total_refunded != null
@@ -157,7 +160,7 @@ const PurchaseDetailsReportPage = ({
               {
                 key: "total_refunded",
                 label: T.translate("sponsor_reports_page.total_refunded"),
-                value: formatUsd(activeSummary.total_refunded)
+                value: money(activeSummary.total_refunded)
               }
             ]
           : [])
