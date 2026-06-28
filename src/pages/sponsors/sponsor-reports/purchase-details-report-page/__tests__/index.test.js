@@ -57,7 +57,7 @@ const SAMPLE_ROW = {
   checkout_at: "2026-06-05T15:41:13Z",
   form: { display: "Booth" },
   status: "Paid",
-  invoice_total: "100.00",
+  invoice_total: 10000,
   sponsor_note: ""
 };
 
@@ -74,8 +74,8 @@ const SAMPLE_LINE = {
   description: "Audio mixer",
   rate_name: "Early",
   quantity: 2,
-  unit_price: "500.00",
-  line_total: "1000.00",
+  unit_price: 50000,
+  line_total: 100000,
   add_on_id: 3,
   add_on_name: "Meeting Room T",
   notes: "dock B",
@@ -93,8 +93,8 @@ function buildState(summaryOverrides = {}, { total = 1 } = {}) {
       summary: {
         total_orders: 1,
         total_items: 1,
-        total_paid: "100.00",
-        total_pending: "0.00",
+        total_paid: 10000,
+        total_pending: 0,
         total_refunded: null,
         ...summaryOverrides
       },
@@ -112,8 +112,8 @@ function buildState(summaryOverrides = {}, { total = 1 } = {}) {
       summary: {
         total_orders: 1,
         total_items: 2,
-        total_paid: "1000.00",
-        total_pending: "0.00",
+        total_paid: 100000,
+        total_pending: 0,
         total_refunded: null
       },
       total: 1,
@@ -210,7 +210,7 @@ describe("PurchaseDetailsReportPage", () => {
     });
 
     it("shows the Total Refunded tile when summary.total_refunded is a non-null value", async () => {
-      renderPage({ total_refunded: "50.00" });
+      renderPage({ total_refunded: 5000 });
       await act(async () => {});
       expect(
         screen.getByText("sponsor_reports_page.total_refunded")
