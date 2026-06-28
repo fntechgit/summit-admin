@@ -63,7 +63,7 @@ describe("sponsorReportsPurchaseDetailsReducer", () => {
         current_page: 2,
         last_page: 5,
         per_page: 10,
-        summary: { total_paid: "100.00" }
+        summary: { total_paid: 10000 }
       }
     };
 
@@ -79,13 +79,13 @@ describe("sponsorReportsPurchaseDetailsReducer", () => {
       expect(result.currentPage).toBe(2);
       expect(result.lastPage).toBe(5);
       expect(result.perPage).toBe(10);
-      expect(result.summary).toStrictEqual({ total_paid: "100.00" });
+      expect(result.summary).toStrictEqual({ total_paid: 10000 });
       expect(result.readError).toBeNull();
       expect(result.validationError).toBeNull();
     });
 
     it("preserves existing summary when response summary is null", () => {
-      const prevSummary = { total_paid: "200.00" };
+      const prevSummary = { total_paid: 20000 };
       const state = { ...PD_DEFAULT_STATE, summary: prevSummary };
       const result = purchaseDetailsReducer(state, {
         type: RECEIVE_PURCHASE_DETAILS,
