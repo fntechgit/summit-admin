@@ -19,7 +19,7 @@ import { Box, Button, Pagination, Stack, Typography } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import DownloadIcon from "@mui/icons-material/Download";
 import CollectionsOutlinedIcon from "@mui/icons-material/CollectionsOutlined";
-import { buildReportQuery } from "../report-query";
+import { buildReportQuery } from "../../../../actions/sponsor-reports-query";
 import { isPositiveIntId } from "../../../../utils/methods";
 import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";

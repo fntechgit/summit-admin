@@ -1,4 +1,4 @@
-// src/pages/sponsors/sponsor-reports/report-query.js
+// src/actions/sponsor-reports-query.js
 //
 // Translates report UI filter state into a base-api-utils query object.
 //
@@ -10,7 +10,13 @@
 // (a no-operator value triggers a server IndexError → 500).
 
 import moment from "moment-timezone";
-import { toOrderParam } from "../../../components/sponsors/reports/OrdersTable";
+
+// Converts MuiTable sort state to the `order` query param expected by the API.
+// MuiTable calls onSort(columnKey, dir) where dir = 1 (asc) | -1 (desc).
+export const toOrderParam = (columnKey, dir) => {
+  if (!columnKey) return undefined;
+  return dir === -1 ? `-${columnKey}` : columnKey;
+};
 
 export const buildReportQuery = (filters = {}) => {
   const {

@@ -42,15 +42,6 @@ export const formatCheckoutTime = (value) => {
   return m.format("YYYY-MM-DD h:mm A");
 };
 
-// Converts MuiTable sort state to the `order` query param expected by the API.
-// MuiTable calls onSort(columnKey, dir) where dir = 1 (asc) | -1 (desc).
-// Since columnKey IS the backend key for sortable columns, no extra translation
-// is needed — the page passes (key, dir) directly to buildReportQuery's `order`.
-export const toOrderParam = (columnKey, dir) => {
-  if (!columnKey) return undefined;
-  return dir === -1 ? `-${columnKey}` : columnKey;
-};
-
 // MuiTable column definitions.
 // columnKey for sortable columns equals the backend `order=` parameter so
 // onSort(columnKey, dir) → toOrderParam(columnKey, dir) yields the correct string

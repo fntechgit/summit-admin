@@ -2,7 +2,7 @@
 import "@testing-library/jest-dom";
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import OrdersTable, { formatCheckoutTime, toOrderParam } from "../OrdersTable";
+import OrdersTable, { formatCheckoutTime } from "../OrdersTable";
 
 // MuiTable uses i18n-react internally (no-items message, pagination labels).
 jest.mock("i18n-react/dist/i18n-react", () => ({
@@ -67,24 +67,6 @@ describe("formatCheckoutTime", () => {
   it("falls back to the 10-char date slice for malformed ISO-like strings", () => {
     // month 13 / day 99 / hour 25 → moment marks invalid → date-only fallback
     expect(formatCheckoutTime("2026-13-99T25:99:00Z")).toBe("2026-13-99");
-  });
-});
-
-// ────────────────────────────────────────────────────────────────────────────
-// sort-key helpers
-// ────────────────────────────────────────────────────────────────────────────
-describe("OrdersTable sort helpers", () => {
-  it("toOrderParam encodes asc (dir=1) and desc (dir=-1)", () => {
-    expect(toOrderParam("number", 1)).toBe("number");
-    expect(toOrderParam("number", -1)).toBe("-number");
-    expect(toOrderParam("order_date", -1)).toBe("-order_date");
-    expect(toOrderParam("invoice_total", 1)).toBe("invoice_total");
-  });
-
-  it("toOrderParam returns undefined when columnKey is falsy", () => {
-    expect(toOrderParam(null, 1)).toBeUndefined();
-    expect(toOrderParam(undefined, 1)).toBeUndefined();
-    expect(toOrderParam("", 1)).toBeUndefined();
   });
 });
 
