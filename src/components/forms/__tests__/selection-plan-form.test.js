@@ -66,11 +66,6 @@ jest.mock("../../mui/formik-inputs/mui-formik-datetimepicker", () => ({
   default: ({ name }) => <div data-testid={name} />
 }));
 
-jest.mock("../../mui/formik-inputs/mui-formik-dropdown-checkbox", () => ({
-  __esModule: true,
-  default: ({ name }) => <div data-testid={name} />
-}));
-
 jest.mock("../../inputs/email-template-input", () => ({
   __esModule: true,
   default: ({ id }) => <input data-testid={id} />
@@ -584,21 +579,25 @@ describe("SelectionPlanForm - allowed_members tab", () => {
 // ---------------------------------------------------------------------------
 
 describe("SelectionPlanForm - cfp_settings tab", () => {
-  it("renders the allowed_presentation_questions dropdown", async () => {
+  it("renders the allowed_presentation_questions autocomplete", async () => {
     renderExistingForm();
     await clickTab("edit_selection_plan.cfp_settings");
     const panel = document.getElementById("tabpanel-cfp_settings");
     expect(
-      within(panel).getByTestId("allowed_presentation_questions")
+      within(panel).getByPlaceholderText(
+        "edit_selection_plan.placeholders.allowed_presentation_questions"
+      )
     ).toBeInTheDocument();
   });
 
-  it("renders the allowed_presentation_editable_questions dropdown", async () => {
+  it("renders the allowed_presentation_editable_questions autocomplete", async () => {
     renderExistingForm();
     await clickTab("edit_selection_plan.cfp_settings");
     const panel = document.getElementById("tabpanel-cfp_settings");
     expect(
-      within(panel).getByTestId("allowed_presentation_editable_questions")
+      within(panel).getByPlaceholderText(
+        "edit_selection_plan.placeholders.allowed_presentation_editable_questions"
+      )
     ).toBeInTheDocument();
   });
 });

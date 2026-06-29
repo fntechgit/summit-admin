@@ -16,19 +16,41 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { useFormikContext } from "formik";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
+import Autocomplete from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
-import FormControl from "@mui/material/FormControl";
+import Chip from "@mui/material/Chip";
 import Grid2 from "@mui/material/Grid2";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
 import MuiSwitch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
-import MuiFormikDropdownCheckbox from "../../mui/formik-inputs/mui-formik-dropdown-checkbox";
 import {
   DEFAULT_ALLOWED_EDITABLE_QUESTIONS,
   DEFAULT_ALLOWED_QUESTIONS,
   DEFAULT_CFP_PRESENTATION_EDITION_TABS
 } from "../../../reducers/selection_plans/selection-plan-reducer";
+
+function renderAllowedQuestionsInput(params) {
+  const placeholder = T.translate(
+    "edit_selection_plan.placeholders.allowed_presentation_questions"
+  );
+  // eslint-disable-next-line react/jsx-props-no-spreading
+  return <TextField {...params} size="small" placeholder={placeholder} />;
+}
+
+function renderAllowedEditableQuestionsInput(params) {
+  const placeholder = T.translate(
+    "edit_selection_plan.placeholders.allowed_presentation_editable_questions"
+  );
+  // eslint-disable-next-line react/jsx-props-no-spreading
+  return <TextField {...params} size="small" placeholder={placeholder} />;
+}
+
+function renderDefaultTabInput(params) {
+  const placeholder = T.translate(
+    "edit_selection_plan.placeholders.cfp_presentation_edition_default_tab"
+  );
+  // eslint-disable-next-line react/jsx-props-no-spreading
+  return <TextField {...params} size="small" placeholder={placeholder} />;
+}
 
 const CfpSettingsTab = ({ hidden, currentSummit }) => {
   const { values, errors, setFieldValue } = useFormikContext();
@@ -86,13 +108,38 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
                 "edit_selection_plan.allowed_presentation_questions"
               )}
             </label>
-            <MuiFormikDropdownCheckbox
-              name="allowed_presentation_questions"
-              placeholder={T.translate(
-                "edit_selection_plan.placeholders.allowed_presentation_questions"
-              )}
-              options={DEFAULT_ALLOWED_QUESTIONS}
+            <Autocomplete
+              multiple
               size="small"
+              options={DEFAULT_ALLOWED_QUESTIONS}
+              getOptionLabel={(opt) => opt.label}
+              isOptionEqualToValue={(opt, val) => opt.value === val.value}
+              value={DEFAULT_ALLOWED_QUESTIONS.filter((opt) =>
+                (values.allowed_presentation_questions || []).includes(
+                  opt.value
+                )
+              )}
+              onChange={(_, selected) =>
+                setFieldValue(
+                  "allowed_presentation_questions",
+                  selected.map((opt) => opt.value)
+                )
+              }
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => {
+                  const { key, ...tagProps } = getTagProps({ index });
+                  // eslint-disable-next-line react/jsx-props-no-spreading
+                  return (
+                    <Chip
+                      variant="outlined"
+                      label={option.label}
+                      key={key}
+                      {...tagProps}
+                    />
+                  );
+                })
+              }
+              renderInput={renderAllowedQuestionsInput}
             />
           </Grid2>
           <Grid2 size={12}>
@@ -103,13 +150,38 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
               )}{" "}
               *
             </label>
-            <MuiFormikDropdownCheckbox
-              name="allowed_presentation_editable_questions"
-              placeholder={T.translate(
-                "edit_selection_plan.placeholders.allowed_presentation_editable_questions"
-              )}
-              options={DEFAULT_ALLOWED_EDITABLE_QUESTIONS}
+            <Autocomplete
+              multiple
               size="small"
+              options={DEFAULT_ALLOWED_EDITABLE_QUESTIONS}
+              getOptionLabel={(opt) => opt.label}
+              isOptionEqualToValue={(opt, val) => opt.value === val.value}
+              value={DEFAULT_ALLOWED_EDITABLE_QUESTIONS.filter((opt) =>
+                (values.allowed_presentation_editable_questions || []).includes(
+                  opt.value
+                )
+              )}
+              onChange={(_, selected) =>
+                setFieldValue(
+                  "allowed_presentation_editable_questions",
+                  selected.map((opt) => opt.value)
+                )
+              }
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => {
+                  const { key, ...tagProps } = getTagProps({ index });
+                  // eslint-disable-next-line react/jsx-props-no-spreading
+                  return (
+                    <Chip
+                      variant="outlined"
+                      label={option.label}
+                      key={key}
+                      {...tagProps}
+                    />
+                  );
+                })
+              }
+              renderInput={renderAllowedEditableQuestionsInput}
             />
           </Grid2>
           <Grid2 size={12}>
@@ -119,31 +191,25 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
                 "edit_selection_plan.cfp_presentation_edition_default_tab"
               )}
             </label>
-            <FormControl fullWidth size="small">
-              <Select
-                displayEmpty
-                value={ms.cfp_presentation_edition_default_tab?.value || ""}
-                onChange={(ev) =>
-                  handleSwitchChange(
-                    "cfp_presentation_edition_default_tab",
-                    ev.target.value
-                  )
-                }
-              >
-                <MenuItem value="">
-                  <em>
-                    {T.translate(
-                      "edit_selection_plan.placeholders.cfp_presentation_edition_default_tab"
-                    )}
-                  </em>
-                </MenuItem>
-                {DEFAULT_CFP_PRESENTATION_EDITION_TABS.map((opt) => (
-                  <MenuItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              size="small"
+              options={DEFAULT_CFP_PRESENTATION_EDITION_TABS}
+              getOptionLabel={(opt) => opt.label}
+              isOptionEqualToValue={(opt, val) => opt.value === val.value}
+              value={
+                DEFAULT_CFP_PRESENTATION_EDITION_TABS.find(
+                  (opt) =>
+                    opt.value === ms.cfp_presentation_edition_default_tab?.value
+                ) || null
+              }
+              onChange={(_, selected) =>
+                handleSwitchChange(
+                  "cfp_presentation_edition_default_tab",
+                  selected ? selected.value : ""
+                )
+              }
+              renderInput={renderDefaultTabInput}
+            />
           </Grid2>
 
           {[
