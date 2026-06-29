@@ -33,10 +33,14 @@ jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => {
     data = [],
     onEdit,
     onDelete,
+    onPageChange,
     onPerPageChange,
     onSort
   }) => (
     <div data-testid="mui-table">
+      <button type="button" onClick={() => onPageChange(2)}>
+        page-2
+      </button>
       <button type="button" onClick={() => onPerPageChange(25)}>
         per-page-25
       </button>
@@ -164,6 +168,14 @@ describe("AdminAccessListPage", () => {
         expect(screen.getByTestId("admin-access-form")).toBeInTheDocument()
       );
       expect(mockGetAdminAccess).toHaveBeenCalledWith(1);
+    });
+
+    it("requests data for the selected page", async () => {
+      renderPage();
+      fireEvent.click(screen.getByRole("button", { name: "page-2" }));
+      await waitFor(() => {
+        expect(mockGetAdminAccesses).toHaveBeenCalledWith("", 2, 10, "id", 1);
+      });
     });
 
     it("requests data with selected rows per page", async () => {

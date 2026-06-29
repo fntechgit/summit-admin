@@ -50,6 +50,22 @@ describe("saveAdminAccess", () => {
   });
 
   describe("create path (entity has no id)", () => {
+    it("includes expand=members,summits in request params", async () => {
+      let capturedParams;
+      postRequest.mockImplementation((req, res) => (params) => (dispatch) => {
+        capturedParams = params;
+        return requestMock(req, res)(params)(dispatch);
+      });
+
+      const store = mockStore({});
+      await store.dispatch(
+        saveAdminAccess({ title: "Group A", members: [], summits: [] })
+      );
+      await flushPromises();
+
+      expect(capturedParams).toMatchObject({ expand: "members,summits" });
+    });
+
     it("returns a Promise", async () => {
       const store = mockStore({});
       const result = store.dispatch(
@@ -90,6 +106,22 @@ describe("saveAdminAccess", () => {
   });
 
   describe("update path (entity has id)", () => {
+    it("includes expand=members,summits in request params", async () => {
+      let capturedParams;
+      putRequest.mockImplementation((req, res) => (params) => (dispatch) => {
+        capturedParams = params;
+        return requestMock(req, res)(params)(dispatch);
+      });
+
+      const store = mockStore({});
+      await store.dispatch(
+        saveAdminAccess({ id: 1, title: "Group A", members: [], summits: [] })
+      );
+      await flushPromises();
+
+      expect(capturedParams).toMatchObject({ expand: "members,summits" });
+    });
+
     it("returns a Promise", async () => {
       const store = mockStore({});
       const result = store.dispatch(

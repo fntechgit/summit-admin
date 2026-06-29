@@ -7,20 +7,12 @@ import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import AdminAccessForm from "../../components/forms/admin-access-form";
-import { resetAdminAccessForm } from "../../actions/admin-access-actions";
 
-const AdminAccessFormPopup = ({
-  entity,
-  errors,
-  onClose,
-  onSave,
-  resetAdminAccessForm
-}) => {
+const AdminAccessFormPopup = ({ entity, errors, onClose, onSave }) => {
   const [isSaving, setIsSaving] = useState(false);
 
   const handleClose = () => {
     if (isSaving) return;
-    resetAdminAccessForm();
     onClose();
   };
 
@@ -66,6 +58,4 @@ const mapStateToProps = ({ adminAccessState }) => ({
   errors: adminAccessState.errors
 });
 
-export default connect(mapStateToProps, {
-  resetAdminAccessForm
-})(AdminAccessFormPopup);
+export default connect(mapStateToProps)(AdminAccessFormPopup);
