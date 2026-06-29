@@ -34,6 +34,7 @@ import StatusPill from "./StatusPill";
 import { formatCheckoutTime } from "./OrdersTable";
 import { bucketLinesBySponsor } from "./manifest-grouping";
 import {
+  DEFAULT_CURRENT_PAGE,
   DEFAULT_PER_PAGE,
   FIFTY_PER_PAGE,
   MAX_PER_PAGE,
@@ -76,7 +77,7 @@ const HEADERS = [
 const LinesManifestView = ({
   rows = [],
   total = 0,
-  currentPage = 1,
+  currentPage = DEFAULT_CURRENT_PAGE,
   perPage = FIFTY_PER_PAGE,
   onPageChange,
   onPerPageChange

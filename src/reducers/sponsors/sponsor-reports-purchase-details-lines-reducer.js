@@ -12,7 +12,7 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { DEFAULT_PER_PAGE } from "../../utils/constants";
+import { DEFAULT_CURRENT_PAGE, DEFAULT_PER_PAGE } from "../../utils/constants";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
   REQUEST_PURCHASE_DETAILS_LINES,
@@ -24,8 +24,8 @@ export const DEFAULT_STATE = {
   data: [],
   summary: null,
   total: 0,
-  currentPage: 1,
-  lastPage: 1,
+  currentPage: DEFAULT_CURRENT_PAGE,
+  lastPage: DEFAULT_CURRENT_PAGE,
   perPage: DEFAULT_PER_PAGE,
   loading: false,
   readError: null
