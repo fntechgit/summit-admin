@@ -6,7 +6,7 @@ import {
   ERROR_CODE_404,
   ERROR_CODE_412,
   ERROR_CODE_503
-} from "../../../utils/constants";
+} from "../utils/constants";
 
 export const extractErrorMessage = (err = {}, res = {}) => {
   const candidates = [
