@@ -33,11 +33,19 @@ import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/m
 import StatusPill from "./StatusPill";
 import { formatCheckoutTime } from "./OrdersTable";
 import { bucketLinesBySponsor } from "../../../utils/manifest-grouping";
+import {
+  DEFAULT_PER_PAGE,
+  FIFTY_PER_PAGE,
+  MAX_PER_PAGE,
+  TWENTY_PER_PAGE
+} from "../../../utils/constants";
 
-// eslint-disable-next-line no-magic-numbers
-const PER_PAGE_OPTIONS = [10, 25, 50, 100];
-// eslint-disable-next-line no-magic-numbers
-const DEFAULT_PER_PAGE = 50;
+const PER_PAGE_OPTIONS = [
+  DEFAULT_PER_PAGE,
+  TWENTY_PER_PAGE,
+  FIFTY_PER_PAGE,
+  MAX_PER_PAGE
+];
 
 // Destination = the line's add-on (e.g. "Meeting Room T"); when absent, the
 // logistics convention is the sponsor's booth. The booth NUMBER ships with
@@ -69,7 +77,7 @@ const LinesManifestView = ({
   rows = [],
   total = 0,
   currentPage = 1,
-  perPage = DEFAULT_PER_PAGE,
+  perPage = FIFTY_PER_PAGE,
   onPageChange,
   onPerPageChange
 }) => {
