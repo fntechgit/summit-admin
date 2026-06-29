@@ -25,7 +25,6 @@ import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
 import FilterBar from "../../../../components/sponsors/reports/FilterBar";
 import GroupByToggle from "../../../../components/sponsors/reports/GroupByToggle";
-import ContentTypeToggle from "../../../../components/sponsors/reports/ContentTypeToggle";
 import GroupBySponsorView from "../../../../components/sponsors/reports/GroupBySponsorView";
 import GroupByComponentView from "../../../../components/sponsors/reports/GroupByComponentView";
 import usePrint from "../../../../hooks/usePrint";
@@ -71,7 +70,6 @@ const SponsorAssetReportPage = ({
   const validSummit = !!(currentSummit && isPositiveIntId(currentSummit.id));
 
   const [groupBy, setGroupBy] = useState("sponsor");
-  const [contentType, setContentType] = useState("collected");
   const [filters, setFilters] = useState({});
   const [page, setPage] = useState(DEFAULT_CURRENT_PAGE);
 
@@ -88,13 +86,10 @@ const SponsorAssetReportPage = ({
   useEffect(() => {
     if (validSummit)
       fetchReport(
-        {
-          ...filters,
-          moduleType: contentType === "collected" ? "Media" : undefined
-        },
+        { ...filters, moduleType: "Media" },
         { groupBy, page, perPage: GROUP_PER_PAGE }
       );
-  }, [filters, groupBy, page, contentType]); // validSummit omitted intentionally — stable once summit loads
+  }, [filters, groupBy, page]); // validSummit omitted intentionally — stable once summit loads
 
   const onApply = (next) => {
     setPage(DEFAULT_CURRENT_PAGE);
@@ -107,10 +102,6 @@ const SponsorAssetReportPage = ({
   const onGroupBy = (next) => {
     setPage(DEFAULT_CURRENT_PAGE);
     setGroupBy(next);
-  };
-  const onContentType = (next) => {
-    setPage(DEFAULT_CURRENT_PAGE);
-    setContentType(next);
   };
 
   const tiles = STATUS_TILE_KEYS.map((key) => ({
@@ -152,10 +143,7 @@ const SponsorAssetReportPage = ({
             startIcon={<DownloadIcon />}
             variant="outlined"
             onClick={() =>
-              exportSponsorAssetCsv({
-                ...filters,
-                moduleType: contentType === "collected" ? "Media" : undefined
-              })
+              exportSponsorAssetCsv({ ...filters, moduleType: "Media" })
             }
           >
             {T.translate("sponsor_reports_page.export_csv")}
@@ -170,7 +158,6 @@ const SponsorAssetReportPage = ({
         sx={{ mb: 2, flexWrap: "wrap" }}
       >
         <GroupByToggle value={groupBy} onChange={onGroupBy} />
-        <ContentTypeToggle value={contentType} onChange={onContentType} />
       </Stack>
       <Box sx={{ mb: 2 }}>
         <FilterBar
