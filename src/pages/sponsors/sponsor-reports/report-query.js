@@ -9,6 +9,7 @@
 // Every emitted value uses valid `field==value` / `field>=value` operator syntax
 // (a no-operator value triggers a server IndexError → 500).
 
+import moment from "moment-timezone";
 import { toOrderParam } from "../../../components/sponsors/reports/OrdersTable";
 
 export const buildReportQuery = (filters = {}) => {
@@ -73,14 +74,11 @@ export const buildReportQuery = (filters = {}) => {
   return query;
 };
 
-const ISO_DATE_LENGTH = 10;
-
 // dateTo → start of the NEXT day (exclusive <) so same-day fractional-second rows
 // are included rather than dropped by a <= end-of-day bound.
 const nextDayStartIso = (ymd) => {
-  const d = new Date(`${ymd}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + 1);
-  return `${d.toISOString().slice(0, ISO_DATE_LENGTH)}T00:00:00Z`;
+  const m = moment.utc(ymd, "YYYY-MM-DD", true).add(1, "day");
+  return m.isValid() ? m.format("YYYY-MM-DDT00:00:00[Z]") : ymd;
 };
 
 const expandDates = (filters = {}) => {
