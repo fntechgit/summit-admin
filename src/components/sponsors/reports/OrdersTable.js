@@ -16,7 +16,10 @@ import moment from "moment-timezone";
 import T from "i18n-react/dist/i18n-react";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
-import { DEFAULT_PER_PAGE } from "../../../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_PER_PAGE
+} from "../../../utils/constants";
 import StatusPill from "./StatusPill";
 
 const ISO_DATE_LENGTH = 10; // "YYYY-MM-DD"
@@ -108,7 +111,7 @@ const columns = [
 const OrdersTable = ({
   rows = [],
   totalRows = 0,
-  currentPage = 1,
+  currentPage = DEFAULT_CURRENT_PAGE,
   perPage = DEFAULT_PER_PAGE,
   order = null,
   orderDir = 1,
