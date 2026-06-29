@@ -12,35 +12,30 @@
  * */
 
 import React from "react";
+import moment from "moment-timezone";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
-import {
-  DEFAULT_PER_PAGE,
-  MILLISECONDS_IN_SECOND
-} from "../../../utils/constants";
+import { DEFAULT_PER_PAGE } from "../../../utils/constants";
 import StatusPill from "./StatusPill";
 
 const ISO_DATE_LENGTH = 10; // "YYYY-MM-DD"
-const NOON = 12;
 
 // Port of OrdersGrid.js formatCheckoutTime — handles BOTH the current ISO
 // checkout_at (DRF DateTimeField on backend main) AND a future epoch int
-// (pending ClickUp 86bagnfmn).  Parses date/time directly off the ISO string
-// parts so the displayed time always matches the stored UTC value and tests
-// stay timezone-stable regardless of the machine's local TZ offset.
+// (pending ClickUp 86bagnfmn).  Parses in UTC so the displayed time always
+// matches the stored UTC value and tests stay timezone-stable.
 export const formatCheckoutTime = (value) => {
   if (value == null || value === "") return "";
-  const iso =
-    typeof value === "number" || /^\d+$/.test(value)
-      ? new Date(Number(value) * MILLISECONDS_IN_SECOND).toISOString()
-      : String(value);
-  const m = iso.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})/);
-  if (!m) return iso.slice(0, ISO_DATE_LENGTH);
-  const [, date, hh, mm] = m;
-  const hour24 = Number(hh);
-  const ampm = hour24 >= NOON ? "PM" : "AM";
-  const hour12 = hour24 % NOON || NOON;
-  return `${date} ${hour12}:${mm} ${ampm}`;
+  let m;
+  if (typeof value === "number" || /^\d+$/.test(value)) {
+    m = moment.unix(Number(value)).utc();
+  } else {
+    const s = String(value);
+    if (!s.includes("T")) return s.slice(0, ISO_DATE_LENGTH);
+    m = moment.utc(s);
+  }
+  if (!m.isValid()) return String(value).slice(0, ISO_DATE_LENGTH);
+  return m.format("YYYY-MM-DD h:mm A");
 };
 
 // Converts MuiTable sort state to the `order` query param expected by the API.
