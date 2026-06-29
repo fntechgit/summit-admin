@@ -166,8 +166,7 @@ export const getSponsorAssetFilters = () => async (dispatch, getState) => {
 // No page/perPage → buildPurchaseQuery emits neither; backend exports the full
 // filtered set.
 export const exportPurchaseDetailsCsv =
-  (filters = {}, order, orderDir) =>
-  async (dispatch, getState) => {
+  (filters, order, orderDir) => async (dispatch, getState) => {
     const { currentSummit } = getState().currentSummitState;
     if (!currentSummit?.id) return Promise.resolve();
     const accessToken = await getAccessTokenSafely();
