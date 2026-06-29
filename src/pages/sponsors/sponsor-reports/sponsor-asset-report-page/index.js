@@ -21,6 +21,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import CollectionsOutlinedIcon from "@mui/icons-material/CollectionsOutlined";
 import { buildReportQuery } from "../report-query";
 import { isPositiveIntId } from "../../../../utils/methods";
+import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
 import FilterBar from "../../../../components/sponsors/reports/FilterBar";
@@ -47,7 +48,6 @@ const TILE_TONE = {
   not_applicable: "neutral"
 };
 const GROUP_PER_PAGE = 25;
-const FIRST_PAGE = 1;
 
 const SponsorAssetReportPage = ({
   // From mapStateToProps
@@ -72,7 +72,7 @@ const SponsorAssetReportPage = ({
 
   const [groupBy, setGroupBy] = useState("sponsor");
   const [filters, setFilters] = useState({});
-  const [page, setPage] = useState(FIRST_PAGE);
+  const [page, setPage] = useState(DEFAULT_CURRENT_PAGE);
 
   // Fetch sponsor filter options once on mount; summit is read from store inside
   // the action. Guard on validSummit so no network call fires when currentSummit
@@ -101,15 +101,15 @@ const SponsorAssetReportPage = ({
   }, [query]); // query is memoized; re-fetches only on real changes
 
   const onApply = (next) => {
-    setPage(FIRST_PAGE);
+    setPage(DEFAULT_CURRENT_PAGE);
     setFilters(next);
   };
   const onClear = () => {
-    setPage(FIRST_PAGE);
+    setPage(DEFAULT_CURRENT_PAGE);
     setFilters({});
   };
   const onGroupBy = (next) => {
-    setPage(FIRST_PAGE);
+    setPage(DEFAULT_CURRENT_PAGE);
     setGroupBy(next);
   };
 
@@ -195,7 +195,7 @@ const SponsorAssetReportPage = ({
           fetch resolves, and no flicker if /filters lands before the report (Task 3 decouple). */}
       {!loading &&
         !readError &&
-        currentPage >= FIRST_PAGE &&
+        currentPage >= DEFAULT_CURRENT_PAGE &&
         data.length === 0 && (
           <Box
             data-testid="reports-no-groups"
@@ -216,11 +216,11 @@ const SponsorAssetReportPage = ({
         <GroupByComponentView summitId={currentSummit.id} cards={data} />
       )}
 
-      {!loading && !readError && lastPage > FIRST_PAGE && (
+      {!loading && !readError && lastPage > DEFAULT_CURRENT_PAGE && (
         <Stack alignItems="center" sx={{ mt: 2 }}>
           <Pagination
             count={lastPage}
-            page={currentPage || FIRST_PAGE}
+            page={currentPage || DEFAULT_CURRENT_PAGE}
             onChange={(_e, p) => setPage(p)}
           />
         </Stack>

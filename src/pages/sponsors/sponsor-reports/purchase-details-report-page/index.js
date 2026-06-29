@@ -37,7 +37,11 @@ import {
   exportPurchaseDetailsCsv,
   exportPurchaseDetailsLinesCsv
 } from "../../../../actions/sponsor-reports-actions";
-import { DEFAULT_PER_PAGE, FIFTY_PER_PAGE } from "../../../../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_PER_PAGE,
+  FIFTY_PER_PAGE
+} from "../../../../utils/constants";
 
 const PurchaseDetailsReportPage = ({
   // From mapStateToProps
@@ -77,12 +81,12 @@ const PurchaseDetailsReportPage = ({
 
   // Local pagination/sort state. MuiTable dir = 1 (asc) | -1 (desc).
   const [filters, setFilters] = useState({});
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(DEFAULT_CURRENT_PAGE);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [order, setOrder] = useState(null);
   const [orderDir, setOrderDir] = useState(1);
   const [view, setView] = useState("orders");
-  const [linesPage, setLinesPage] = useState(1);
+  const [linesPage, setLinesPage] = useState(DEFAULT_CURRENT_PAGE);
   const [linesPerPage, setLinesPerPage] = useState(FIFTY_PER_PAGE);
 
   // Build the API query from all local state. Memoized so useEffect only re-runs
@@ -175,32 +179,32 @@ const PurchaseDetailsReportPage = ({
   // Applying/clearing a filter changes the result set → snap back to page 1.
   const handleApply = (next) => {
     setFilters(next);
-    setCurrentPage(1);
-    setLinesPage(1);
+    setCurrentPage(DEFAULT_CURRENT_PAGE);
+    setLinesPage(DEFAULT_CURRENT_PAGE);
   };
   const handleClear = () => {
     setFilters({});
-    setCurrentPage(1);
-    setLinesPage(1);
+    setCurrentPage(DEFAULT_CURRENT_PAGE);
+    setLinesPage(DEFAULT_CURRENT_PAGE);
   };
 
   // ── Sort/pagination handlers ─────────────────────────────────────────────────
   const handleSort = (columnKey, dir) => {
     setOrder(columnKey);
     setOrderDir(dir);
-    setCurrentPage(1);
+    setCurrentPage(DEFAULT_CURRENT_PAGE);
   };
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
   const handlePerPageChange = (newPerPage) => {
     setPerPage(newPerPage);
-    setCurrentPage(1);
+    setCurrentPage(DEFAULT_CURRENT_PAGE);
   };
   const handleLinesPageChange = (page) => setLinesPage(page);
   const handleLinesPerPageChange = (newPerPage) => {
     setLinesPerPage(newPerPage);
-    setLinesPage(1);
+    setLinesPage(DEFAULT_CURRENT_PAGE);
   };
 
   // ── Extra filter controls (status / type / date range) ──────────────────────
