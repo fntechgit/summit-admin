@@ -9,124 +9,144 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import React from "react";
+import React, { useEffect } from "react";
+import { FormikProvider, useFormik } from "formik";
+import * as yup from "yup";
 import T from "i18n-react/dist/i18n-react";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
-import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Grid2 from "@mui/material/Grid2";
+import Typography from "@mui/material/Typography";
+import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input";
 import SummitInput from "openstack-uicore-foundation/lib/components/inputs/summit-input";
-import {
-  scrollToError,
-  hasErrors,
-  shallowEqual,
-  isEmpty
-} from "../../utils/methods";
+import MuiFormikTextField from "../mui/formik-inputs/mui-formik-textfield";
+import { requiredStringValidation } from "../../utils/yup";
 
-class AdminAccessForm extends React.Component {
-  constructor(props) {
-    super(props);
+const validationSchema = yup.object().shape({
+  title: requiredStringValidation(),
+  members: yup.array().min(1, T.translate("validation.required")),
+  summits: yup.array().min(1, T.translate("validation.required"))
+});
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors
-    };
+const AdminAccessForm = ({
+  entity,
+  errors: serverErrors,
+  onSubmit,
+  isSaving = false
+}) => {
+  const formik = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      id: entity.id || 0,
+      title: entity.title || "",
+      members: entity.members || [],
+      summits: entity.summits || []
+    },
+    validationSchema,
+    onSubmit: (values) => onSubmit(values)
+  });
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const state = {};
-    scrollToError(this.props.errors);
-
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
+  useEffect(() => {
+    if (!serverErrors || Object.keys(serverErrors).length === 0) {
+      formik.setErrors({});
+      formik.setTouched({});
+      return;
     }
+    formik.setErrors(serverErrors);
+    formik.setTouched(
+      Object.fromEntries(Object.keys(serverErrors).map((k) => [k, true]))
+    );
+  }, [serverErrors]);
 
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
-    }
-
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
-    }
-  }
-
-  handleChange(ev) {
-    const entity = { ...this.state.entity };
-    const errors = { ...this.state.errors };
-    const { value, id } = ev.target;
-
-    errors[id] = "";
-    entity[id] = value;
-
-    this.setState({ entity: entity, errors: errors });
-  }
-
-  handleSubmit(ev) {
-    const { entity } = this.state;
-    ev.preventDefault();
-
-    this.props.onSubmit(entity);
-  }
-
-  render() {
-    const { entity, errors } = this.state;
-
-    return (
-      <form className="admin-access-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("admin_access.title")} *</label>
-            <Input
-              id="title"
-              value={entity.title}
-              onChange={this.handleChange}
-              className="form-control"
-              error={hasErrors("title", errors)}
+  return (
+    <FormikProvider value={formik}>
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        {entity.id ? T.translate("general.edit") : T.translate("general.add")}{" "}
+        {T.translate("admin_access.admin_access")}
+      </Typography>
+      <Box
+        component="form"
+        onSubmit={formik.handleSubmit}
+        sx={{ width: "100%" }}
+      >
+        <input type="hidden" name="id" value={formik.values.id} />
+        <Grid2 container spacing={2}>
+          <Grid2 size={12}>
+            <MuiFormikTextField
+              name="title"
+              label={T.translate("admin_access.title")}
+              required
+              fullWidth
             />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("admin_access.members")} *</label>
+          </Grid2>
+
+          <Grid2 size={{ xs: 12, md: 6 }}>
+            <Typography component="label" sx={{ display: "block", mb: 0.5 }}>
+              {T.translate("admin_access.members")} *
+            </Typography>
             <MemberInput
               id="members"
-              value={entity.members}
+              value={formik.values.members}
               getOptionLabel={(member) => {
-                return member.hasOwnProperty("email")
-                  ? `${member.first_name} ${member.last_name} (${member.email})`
-                  : `${member.first_name} ${member.last_name} (${member.id})`;
+                if (typeof member !== "object" || member === null)
+                  return String(member ?? "");
+                return `${member.first_name} ${member.last_name} (${
+                  "email" in member ? member.email : member.id
+                })`;
               }}
-              onChange={this.handleChange}
-              multi={true}
+              onChange={(ev) =>
+                formik.setFieldValue("members", ev.target.value)
+              }
+              onBlur={() => formik.setFieldTouched("members", true)}
+              menuPortalTarget={document.body}
+              menuPosition="fixed"
+              styles={{ menuPortal: (base) => ({ ...base, zIndex: 1400 }) }}
+              multi
             />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("admin_access.summits")} *</label>
+            {formik.touched.members && formik.errors.members && (
+              <Typography color="error" sx={{ fontSize: "1.2rem", mt: 0.5 }}>
+                {formik.errors.members}
+              </Typography>
+            )}
+          </Grid2>
+
+          <Grid2 size={{ xs: 12, md: 6 }}>
+            <Typography component="label" sx={{ display: "block", mb: 0.5 }}>
+              {T.translate("admin_access.summits")} *
+            </Typography>
             <SummitInput
               id="summits"
-              value={entity.summits}
-              onChange={this.handleChange}
-              multi={true}
+              value={formik.values.summits}
+              onChange={(ev) =>
+                formik.setFieldValue("summits", ev.target.value)
+              }
+              onBlur={() => formik.setFieldTouched("summits", true)}
+              menuPortalTarget={document.body}
+              menuPosition="fixed"
+              styles={{ menuPortal: (base) => ({ ...base, zIndex: 1400 }) }}
+              multi
             />
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
-        </div>
-      </form>
-    );
-  }
-}
+            {formik.touched.summits && formik.errors.summits && (
+              <Typography color="error" sx={{ fontSize: "1.2rem", mt: 0.5 }}>
+                {formik.errors.summits}
+              </Typography>
+            )}
+          </Grid2>
+
+          <Grid2
+            size={12}
+            sx={{ display: "flex", justifyContent: "flex-end", pt: 1 }}
+          >
+            <Button type="submit" variant="contained" disabled={isSaving}>
+              {T.translate("general.save")}
+            </Button>
+          </Grid2>
+        </Grid2>
+      </Box>
+    </FormikProvider>
+  );
+};
 
 export default AdminAccessForm;
