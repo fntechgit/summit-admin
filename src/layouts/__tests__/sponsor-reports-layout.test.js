@@ -30,6 +30,14 @@ jest.mock("react-breadcrumbs", () => ({
   )
 }));
 
+// The connected Purchase Details page calls useSnackbarMessage(); the global
+// provider isn't in this layout render, so mock the hook (mirrors the page's
+// own test) — otherwise it destructures undefined and throws on render.
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/snackbar-notification",
+  () => ({ useSnackbarMessage: () => ({ errorMessage: jest.fn() }) })
+);
+
 // Provide real access-routes data so Restrict/Member gates correctly.
 // Without this the YAML transform stub returns "" and hasAccess() always returns true.
 jest.mock("../../access-routes.yml", () => ({
