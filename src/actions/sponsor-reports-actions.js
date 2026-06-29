@@ -6,7 +6,7 @@ import {
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
-import { makeReadErrorHandler } from "../pages/sponsors/sponsor-reports/report-errors";
+import { makeReadErrorHandler } from "./sponsor-reports-errors";
 import {
   buildReportQuery,
   buildPurchaseQuery,
