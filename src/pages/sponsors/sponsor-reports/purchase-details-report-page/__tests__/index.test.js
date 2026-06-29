@@ -178,11 +178,12 @@ describe("PurchaseDetailsReportPage", () => {
     expect(getPurchaseDetailsFilters).toHaveBeenCalled();
   });
 
-  it("dispatches getPurchaseDetailsReport with page=1 and per_page=10 on initial load", async () => {
+  it("dispatches getPurchaseDetailsReport with page=1 and perPage=10 on initial load", async () => {
     renderPage();
     await act(async () => {});
     expect(getPurchaseDetailsReport).toHaveBeenCalledWith(
-      expect.objectContaining({ page: 1, per_page: 10 })
+      {},
+      expect.objectContaining({ page: 1, perPage: 10 })
     );
   });
 
@@ -292,14 +293,13 @@ describe("PurchaseDetailsReportPage", () => {
       fireEvent.click(applyBtn);
     });
 
-    // Filter change → query memo invalidated → useEffect re-fires → re-fetch
+    // Filter change → useEffect re-fires → re-fetch with new primitives
     expect(getPurchaseDetailsReport).toHaveBeenCalled();
-    const [[calledQuery]] = getPurchaseDetailsReport.mock.calls;
-    // Date filter is expanded to ISO and placed in filter[]
-    expect(calledQuery["filter[]"]).toEqual(
-      expect.arrayContaining([expect.stringContaining("order_date>=")])
-    );
-    expect(calledQuery).toMatchObject({ page: 1 });
+    const [[calledFilters, calledPagination]] =
+      getPurchaseDetailsReport.mock.calls;
+    // The page passes the raw filter object; date expansion happens inside the thunk.
+    expect(calledFilters).toMatchObject({ dateFrom: "2026-01-01" });
+    expect(calledPagination).toMatchObject({ page: 1 });
   });
 
   it("CSV export button calls exportPurchaseDetailsCsv with current filters and sort", async () => {
@@ -331,8 +331,8 @@ describe("PurchaseDetailsReportPage", () => {
     });
 
     expect(getPurchaseDetailsReport).toHaveBeenCalled();
-    const [[calledQuery]] = getPurchaseDetailsReport.mock.calls;
-    expect(calledQuery).toMatchObject({ page: 2, per_page: 10 });
+    const [[, calledPagination]] = getPurchaseDetailsReport.mock.calls;
+    expect(calledPagination).toMatchObject({ page: 2, perPage: 10 });
   });
 
   it("re-dispatches getPurchaseDetailsReport with the backend order param when a sortable column header is clicked", async () => {
@@ -348,9 +348,14 @@ describe("PurchaseDetailsReportPage", () => {
     });
 
     expect(getPurchaseDetailsReport).toHaveBeenCalled();
-    const [[calledQuery]] = getPurchaseDetailsReport.mock.calls;
-    // Sort change snaps back to page 1; order is the backend key with desc prefix.
-    expect(calledQuery).toMatchObject({ page: 1, order: "-number" });
+    const [[, calledPagination]] = getPurchaseDetailsReport.mock.calls;
+    // Sort change snaps back to page 1; raw primitives — thunk converts order/orderDir
+    // to the backend "-number" format internally via toOrderParam.
+    expect(calledPagination).toMatchObject({
+      page: 1,
+      order: "number",
+      orderDir: -1
+    });
   });
 
   it("renders the Orders/Line-Items view toggle", async () => {
@@ -371,9 +376,9 @@ describe("PurchaseDetailsReportPage", () => {
     });
 
     expect(getPurchaseDetailsLinesReport).toHaveBeenCalled();
-    const [[calledQuery]] = getPurchaseDetailsLinesReport.mock.calls;
-    expect(calledQuery).toMatchObject({ page: 1, per_page: 50 });
-    expect(calledQuery).not.toHaveProperty("order");
+    const [[, calledPagination]] = getPurchaseDetailsLinesReport.mock.calls;
+    expect(calledPagination).toMatchObject({ page: 1, perPage: 50 });
+    expect(calledPagination).not.toHaveProperty("order");
     // Manifest renders the line's destination
     expect(screen.getByText("Meeting Room T")).toBeInTheDocument();
   });

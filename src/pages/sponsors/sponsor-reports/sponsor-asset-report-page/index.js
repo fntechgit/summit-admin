@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
@@ -19,7 +19,6 @@ import { Box, Button, Pagination, Stack, Typography } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import DownloadIcon from "@mui/icons-material/Download";
 import CollectionsOutlinedIcon from "@mui/icons-material/CollectionsOutlined";
-import { buildReportQuery } from "../../../../actions/sponsor-reports-query";
 import { isPositiveIntId } from "../../../../utils/methods";
 import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
@@ -81,24 +80,13 @@ const SponsorAssetReportPage = ({
     if (validSummit) fetchFilters();
   }, []); // mount-only — validSummit is stable once the summit context is set
 
-  // Build the API query from all local state. Memoized so useEffect only re-runs
-  // when the query actually changes (referential stability).
-  const query = useMemo(
-    () =>
-      buildReportQuery({
-        ...filters,
-        groupBy,
-        page,
-        perPage: GROUP_PER_PAGE
-      }),
-    [filters, groupBy, page]
-  );
-
-  // Fetch the grouped report whenever the derived query changes; skips if
+  // Fetch the grouped report when any primitive input changes; skips if
   // currentSummit is not yet available (rare — summit always loads before nav).
+  // The thunk builds the API query (group_by, per_page, filter[]) internally.
   useEffect(() => {
-    if (validSummit) fetchReport(query);
-  }, [query]); // query is memoized; re-fetches only on real changes
+    if (validSummit)
+      fetchReport(filters, { groupBy, page, perPage: GROUP_PER_PAGE });
+  }, [filters, groupBy, page]); // validSummit omitted intentionally — stable once summit loads
 
   const onApply = (next) => {
     setPage(DEFAULT_CURRENT_PAGE);

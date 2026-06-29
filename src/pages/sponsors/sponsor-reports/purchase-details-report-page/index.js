@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
@@ -21,10 +21,6 @@ import DownloadIcon from "@mui/icons-material/Download";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
-import {
-  buildPurchaseQuery,
-  buildPurchaseLinesQuery
-} from "../../../../actions/sponsor-reports-query";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
 import FilterBar from "../../../../components/sponsors/reports/FilterBar";
@@ -92,31 +88,6 @@ const PurchaseDetailsReportPage = ({
   const [linesPage, setLinesPage] = useState(DEFAULT_CURRENT_PAGE);
   const [linesPerPage, setLinesPerPage] = useState(FIFTY_PER_PAGE);
 
-  // Build the API query from all local state. Memoized so useEffect only re-runs
-  // when the query actually changes (referential stability).
-  const query = useMemo(
-    () =>
-      buildPurchaseQuery(filters, {
-        page: currentPage,
-        perPage,
-        order,
-        orderDir
-      }),
-    [filters, currentPage, perPage, order, orderDir]
-  );
-
-  // Lines query: same filters as Orders, but NO order param. CustomOrderingFilter
-  // would replace the default sponsor-name ordering and scatter the sponsor groups,
-  // so the manifest relies on the backend default ordering.
-  const linesQuery = useMemo(
-    () =>
-      buildPurchaseLinesQuery(filters, {
-        page: linesPage,
-        perPage: linesPerPage
-      }),
-    [filters, linesPage, linesPerPage]
-  );
-
   // Fetch filters once on mount. Summit is read from store inside the action.
   // Empty deps is intentional: fetchFilters is stable from connect() and reads
   // summit from Redux store inside the thunk.
@@ -124,15 +95,20 @@ const PurchaseDetailsReportPage = ({
     fetchFilters();
   }, []); // mount-only
 
-  // Orders view: fetch the order-grain report when its query changes.
+  // Orders view: fetch the order-grain report when any primitive input changes.
+  // The thunk builds the API query (date expansion, filter[] assembly, sort) internally.
   useEffect(() => {
-    if (view === "orders") fetchReport(query);
-  }, [view, query]);
+    if (view === "orders")
+      fetchReport(filters, { page: currentPage, perPage, order, orderDir });
+  }, [view, filters, currentPage, perPage, order, orderDir]);
 
-  // Line Items view: fetch the per-line feed when its query changes.
+  // Line Items view: fetch the per-line feed when its inputs change. NO order param —
+  // CustomOrderingFilter would replace the default sponsor-name ordering and scatter
+  // the sponsor groups, so the manifest relies on the backend default ordering.
   useEffect(() => {
-    if (view === "lines") fetchLinesReport(linesQuery);
-  }, [view, linesQuery]);
+    if (view === "lines")
+      fetchLinesReport(filters, { page: linesPage, perPage: linesPerPage });
+  }, [view, filters, linesPage, linesPerPage]);
 
   // ── Summary tiles ───────────────────────────────────────────────────────────
   // D9: Total Refunded tile renders ONLY when activeSummary.total_refunded != null.

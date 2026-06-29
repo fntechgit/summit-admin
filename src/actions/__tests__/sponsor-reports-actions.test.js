@@ -117,7 +117,7 @@ describe("sponsor-reports-actions", () => {
   describe("getPurchaseDetailsReport", () => {
     it("dispatches REQUEST_PURCHASE_DETAILS then RECEIVE_PURCHASE_DETAILS", async () => {
       const store = mockStore(MOCK_STATE);
-      store.dispatch(getPurchaseDetailsReport({ page: 1 }));
+      store.dispatch(getPurchaseDetailsReport({}, { page: 1 }));
       await flushPromises();
 
       const types = store.getActions().map((a) => a.type);
@@ -133,9 +133,9 @@ describe("sponsor-reports-actions", () => {
       expect(capturedUrl).toContain("/summits/42/");
     });
 
-    it("passes access_token and spread query in params", async () => {
+    it("passes access_token and built query params (page, per_page) in outgoing request", async () => {
       const store = mockStore(MOCK_STATE);
-      store.dispatch(getPurchaseDetailsReport({ page: 2, per_page: 25 }));
+      store.dispatch(getPurchaseDetailsReport({}, { page: 2, perPage: 25 }));
       await flushPromises();
 
       expect(capturedParams.access_token).toBe("TOKEN");
@@ -162,7 +162,7 @@ describe("sponsor-reports-actions", () => {
       );
 
       const store = mockStore(MOCK_STATE);
-      store.dispatch(getPurchaseDetailsReport({ page: 1 }));
+      store.dispatch(getPurchaseDetailsReport({}, { page: 1 }));
       await flushPromises();
 
       const actions = store.getActions();
@@ -216,7 +216,7 @@ describe("sponsor-reports-actions", () => {
   describe("getSponsorAssetReport", () => {
     it("dispatches REQUEST_SPONSOR_ASSET then RECEIVE_SPONSOR_ASSET", async () => {
       const store = mockStore(MOCK_STATE);
-      store.dispatch(getSponsorAssetReport({ group_by: "sponsor" }));
+      store.dispatch(getSponsorAssetReport({}, { groupBy: "sponsor" }));
       await flushPromises();
 
       const types = store.getActions().map((a) => a.type);
@@ -224,9 +224,9 @@ describe("sponsor-reports-actions", () => {
       expect(types).toContain(RECEIVE_SPONSOR_ASSET);
     });
 
-    it("passes access_token and query params", async () => {
+    it("passes access_token and built group_by param in outgoing request", async () => {
       const store = mockStore(MOCK_STATE);
-      store.dispatch(getSponsorAssetReport({ group_by: "sponsor" }));
+      store.dispatch(getSponsorAssetReport({}, { groupBy: "sponsor" }));
       await flushPromises();
 
       expect(capturedParams.access_token).toBe("TOKEN");
@@ -260,7 +260,7 @@ describe("sponsor-reports-actions", () => {
       );
 
       const store = mockStore(MOCK_STATE);
-      store.dispatch(getSponsorAssetReport({ group_by: "sponsor" }));
+      store.dispatch(getSponsorAssetReport({}, { groupBy: "sponsor" }));
       await flushPromises();
 
       const types = store.getActions().map((a) => a.type);
@@ -378,24 +378,26 @@ describe("sponsor-reports-actions", () => {
         .mockResolvedValue("test-token");
     });
 
-    it("GETs the /purchase-details/lines endpoint with query + access_token and NO order", async () => {
+    it("GETs the /purchase-details/lines endpoint with built query + access_token and NO order", async () => {
       makeHappyGetRequest();
       const store = mockStore(MOCK_STATE);
       const {
         getPurchaseDetailsLinesReport
       } = require("../sponsor-reports-actions");
+      // Pass primitives (filters + pagination); thunk calls buildPurchaseLinesQuery internally.
       await store.dispatch(
-        getPurchaseDetailsLinesReport({
-          page: 1,
-          per_page: 50,
-          "filter[]": ["sponsor_id==17"]
-        })
+        getPurchaseDetailsLinesReport(
+          { sponsorIds: [17] },
+          { page: 1, perPage: 50 }
+        )
       );
       await flushPromises();
 
       expect(capturedUrl).toMatch(
         /\/api\/v1\/summits\/42\/reports\/purchase-details\/lines$/
       );
+      // buildPurchaseLinesQuery({ sponsorIds: [17] }, { page: 1, perPage: 50 }) →
+      // { "filter[]": ["sponsor_id==17"], page: 1, per_page: 50 } — no order emitted.
       expect(capturedParams).toMatchObject({
         access_token: "test-token",
         page: 1,

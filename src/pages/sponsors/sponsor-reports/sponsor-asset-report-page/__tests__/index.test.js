@@ -113,7 +113,8 @@ describe("SponsorAssetReportPage", () => {
     await act(async () => {});
     expect(getSponsorAssetFilters).toHaveBeenCalledWith();
     expect(getSponsorAssetReport).toHaveBeenCalledWith(
-      expect.objectContaining({ group_by: "sponsor" })
+      {},
+      expect.objectContaining({ groupBy: "sponsor" })
     );
   });
 
@@ -134,8 +135,9 @@ describe("SponsorAssetReportPage", () => {
       getSponsorAssetReport.mock.calls[
         getSponsorAssetReport.mock.calls.length - 1
       ];
-    expect(lastCall[0]).toEqual(
-      expect.objectContaining({ group_by: "component" })
+    // Second arg is the options object — thunk converts groupBy → group_by internally.
+    expect(lastCall[1]).toEqual(
+      expect.objectContaining({ groupBy: "component" })
     );
   });
 
@@ -176,11 +178,12 @@ describe("SponsorAssetReportPage", () => {
     await act(async () => {});
 
     expect(getSponsorAssetReport).toHaveBeenCalled();
-    const query =
+    const calledOptions =
       getSponsorAssetReport.mock.calls[
         getSponsorAssetReport.mock.calls.length - 1
-      ][0];
-    expect(query).toMatchObject({ page: 2 });
+      ][1];
+    // Second arg is the options object containing page, groupBy, perPage.
+    expect(calledOptions).toMatchObject({ page: 2 });
   });
 
   it("renders the summit-not-found guard when currentSummit is null", async () => {
