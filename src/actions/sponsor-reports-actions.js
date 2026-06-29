@@ -48,7 +48,7 @@ export const getPurchaseDetailsReport =
     const { currentSummit } = currentSummitState;
     // No summit in context → skip. Otherwise base(currentSummit.id) throws
     // synchronously after startLoading() and the spinner is never cleared.
-    if (!currentSummit?.id) return undefined;
+    if (!currentSummit?.id) return Promise.resolve();
     const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
     const params = { access_token: accessToken, ...query };
@@ -78,7 +78,7 @@ export const getPurchaseDetailsLinesReport =
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
-    if (!currentSummit?.id) return undefined;
+    if (!currentSummit?.id) return Promise.resolve();
     const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
     const params = { access_token: accessToken, ...query };
@@ -101,7 +101,7 @@ export const getPurchaseDetailsLinesReport =
 export const getPurchaseDetailsFilters = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const { currentSummit } = currentSummitState;
-  if (!currentSummit?.id) return undefined;
+  if (!currentSummit?.id) return Promise.resolve();
   const accessToken = await getAccessTokenSafely();
   dispatch(startLoading());
   return getRequest(
@@ -123,7 +123,7 @@ export const getSponsorAssetReport =
     const { currentSummit } = currentSummitState;
     // No summit in context → skip. Otherwise base(currentSummit.id) throws
     // synchronously after startLoading() and the spinner is never cleared.
-    if (!currentSummit?.id) return undefined;
+    if (!currentSummit?.id) return Promise.resolve();
     const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
     const params = { access_token: accessToken, ...query };
@@ -146,7 +146,7 @@ export const getSponsorAssetReport =
 export const getSponsorAssetFilters = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const { currentSummit } = currentSummitState;
-  if (!currentSummit?.id) return undefined;
+  if (!currentSummit?.id) return Promise.resolve();
   const accessToken = await getAccessTokenSafely();
   dispatch(startLoading());
   return getRequest(
@@ -169,7 +169,7 @@ export const exportPurchaseDetailsCsv =
   (filters = {}, order, orderDir) =>
   async (dispatch, getState) => {
     const { currentSummit } = getState().currentSummitState;
-    if (!currentSummit?.id) return undefined;
+    if (!currentSummit?.id) return Promise.resolve();
     const accessToken = await getAccessTokenSafely();
     const params = {
       access_token: accessToken,
@@ -190,7 +190,7 @@ export const exportPurchaseDetailsLinesCsv =
   (filters = {}) =>
   async (dispatch, getState) => {
     const { currentSummit } = getState().currentSummitState;
-    if (!currentSummit?.id) return undefined;
+    if (!currentSummit?.id) return Promise.resolve();
     const accessToken = await getAccessTokenSafely();
     const params = {
       access_token: accessToken,
@@ -211,7 +211,7 @@ export const getSponsorAssetSponsor =
     const { currentSummit } = currentSummitState;
     // No summit in context → skip. Otherwise base(currentSummit.id) throws
     // synchronously after startLoading() and the spinner is never cleared.
-    if (!currentSummit?.id) return undefined;
+    if (!currentSummit?.id) return Promise.resolve();
     const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
     return getRequest(
@@ -237,7 +237,7 @@ export const exportSponsorAssetCsv =
   (filters = {}) =>
   async (dispatch, getState) => {
     const { currentSummit } = getState().currentSummitState;
-    if (!currentSummit?.id) return undefined;
+    if (!currentSummit?.id) return Promise.resolve();
     const accessToken = await getAccessTokenSafely();
     const {
       group_by: _g,
@@ -261,7 +261,7 @@ export const exportSponsorAssetCsv =
 export const exportSponsorAssetSectionCsv =
   (sponsorId, pageId) => async (dispatch, getState) => {
     const { currentSummit } = getState().currentSummitState;
-    if (!currentSummit?.id) return undefined;
+    if (!currentSummit?.id) return Promise.resolve();
     const accessToken = await getAccessTokenSafely();
     const filter = [];
     const sid = Number(sponsorId);
