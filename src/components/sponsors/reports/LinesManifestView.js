@@ -32,7 +32,7 @@ import T from "i18n-react/dist/i18n-react";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import StatusPill from "./StatusPill";
 import { formatCheckoutTime } from "./OrdersTable";
-import { bucketLinesBySponsor } from "../../../utils/manifest-grouping";
+import { bucketLinesBySponsor } from "./manifest-grouping";
 import {
   DEFAULT_PER_PAGE,
   FIFTY_PER_PAGE,
