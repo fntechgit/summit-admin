@@ -230,7 +230,9 @@ describe("SponsorAssetDrilldownPage", () => {
 
   it("ContentCell: flattens HTML in a Media text/input value to plain text", async () => {
     // A Media row whose media_request_type is Input carries entered text in
-    // content.value, which may contain HTML — ContentCell flattens it (no markup).
+    // content.value, which may contain HTML — ContentCell uses htmlToPlainText.
+    // Input exercises the behavior that distinguishes htmlToPlainText from a bare
+    // stripTags: tags → space, entities decoded (&nbsp;/&amp;), whitespace collapsed.
     renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
       detail: {
         sponsor: { id: 17, name: "Acme", tier: "Gold", pages_active: 1 },
@@ -241,7 +243,7 @@ describe("SponsorAssetDrilldownPage", () => {
               {
                 module: { id: 1, title: "Tagline", type: "Media" },
                 status: "completed",
-                content: { value: "<p>cespinTEST3</p>" }
+                content: { value: "<p>Booth&nbsp;A</p><p>B &amp; C</p>" }
               }
             ]
           }
@@ -249,8 +251,9 @@ describe("SponsorAssetDrilldownPage", () => {
       }
     });
     await act(async () => {});
-    expect(screen.getByText("cespinTEST3")).toBeInTheDocument();
-    expect(screen.queryByText("<p>cespinTEST3</p>")).not.toBeInTheDocument();
+    expect(screen.getByText("Booth A B & C")).toBeInTheDocument();
+    // Entities must be decoded — a bare stripTags would leave "&amp;"/"&nbsp;".
+    expect(screen.queryByText(/&amp;|&nbsp;/)).not.toBeInTheDocument();
   });
 
   it("ContentCell: shows pending_upload placeholder when there is no url or text", async () => {
