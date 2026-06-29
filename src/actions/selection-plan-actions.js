@@ -23,6 +23,7 @@ import {
   startLoading,
   showMessage,
   authErrorHandler,
+  snackbarErrorHandler,
   postFile
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
@@ -132,7 +133,7 @@ export const getSelectionPlan =
       null,
       createAction(RECEIVE_SELECTION_PLAN),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}`,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(async () => {
       await dispatch(getAllowedMembers(selectionPlanId));
       await dispatch(
@@ -161,7 +162,7 @@ export const saveSelectionPlan = (entity) => async (dispatch, getState) => {
       createAction(SELECTION_PLAN_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${entity.id}?access_token=${accessToken}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )({})(dispatch)
       .then((payload) => {
@@ -182,7 +183,7 @@ export const saveSelectionPlan = (entity) => async (dispatch, getState) => {
     createAction(SELECTION_PLAN_ADDED),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans?access_token=${accessToken}`,
     normalizedEntity,
-    authErrorHandler,
+    snackbarErrorHandler,
     entity
   )({})(dispatch)
     .then((payload) => {
@@ -214,7 +215,7 @@ export const deleteSelectionPlan =
       createAction(SELECTION_PLAN_DELETED)({ selectionPlanId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -260,7 +261,7 @@ export const removeTrackGroupFromSelectionPlan =
       createAction(TRACK_GROUP_REMOVED)({ trackGroupId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/track-groups/${trackGroupId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -424,7 +425,7 @@ export const saveSelectionPlanExtraQuestion =
         createAction(SELECTION_PLAN_EXTRA_QUESTION_UPDATED),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/extra-questions/${entity.id}`,
         normalizedEntity,
-        authErrorHandler,
+        snackbarErrorHandler,
         entity
       )(params)(dispatch).then((payload) => {
         dispatch(stopLoading());
@@ -460,7 +461,7 @@ export const saveSelectionPlanExtraQuestion =
       createAction(SELECTION_PLAN_EXTRA_QUESTION_ADDED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/extra-questions`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch).then((payload) => {
       dispatch(stopLoading());
@@ -489,7 +490,7 @@ export const deleteSelectionPlanExtraQuestion =
       createAction(SELECTION_PLAN_EXTRA_QUESTION_DELETED)({ questionId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/extra-questions/${questionId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -511,7 +512,7 @@ export const updateSelectionPlanExtraQuestionOrder =
       createAction(SELECTION_PLAN_EXTRA_QUESTION_ORDER_UPDATED)(questions),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/extra-questions/${questionId}`,
       { order: newOrder },
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -535,7 +536,7 @@ export const saveSelectionPlanExtraQuestionValue =
         createAction(SELECTION_PLAN_EXTRA_QUESTION_VALUE_UPDATED),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/extra-questions/${questionId}/values/${entity.id}`,
         entity,
-        authErrorHandler,
+        snackbarErrorHandler,
         entity
       )(params)(dispatch).then(() => {
         dispatch(stopLoading());
@@ -547,7 +548,7 @@ export const saveSelectionPlanExtraQuestionValue =
       createAction(SELECTION_PLAN_EXTRA_QUESTION_VALUE_ADDED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/extra-questions/${questionId}/values`,
       entity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -579,7 +580,7 @@ export const updateSelectionPlanExtraQuestionValueOrder =
       createAction(SELECTION_PLAN_EXTRA_QUESTION_VALUE_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${summit_id}/selection-plans/${selection_plan_id}/extra-questions/${id}/values/${valueId}`,
       { order: newOrder },
-      authErrorHandler,
+      snackbarErrorHandler,
       { order: newOrder, id: valueId }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -601,7 +602,7 @@ export const deleteSelectionPlanExtraQuestionValue =
       createAction(SELECTION_PLAN_EXTRA_QUESTION_VALUE_DELETED)({ valueId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/extra-questions/${questionId}/values/${valueId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -631,7 +632,7 @@ export const addEventTypeSelectionPlan =
       createAction(SELECTION_PLAN_EVENT_TYPE_ADDED)({ eventType }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/event-types/${eventType.id}`,
       {},
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -653,7 +654,7 @@ export const deleteEventTypeSelectionPlan =
       createAction(SELECTION_PLAN_EVENT_TYPE_REMOVED)({ eventTypeId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/event-types/${eventTypeId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -691,7 +692,7 @@ export const updateRatingTypeOrder =
       createAction(SELECTION_PLAN_RATING_TYPE_ORDER_UPDATED)(ratingTypes),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/track-chair-rating-types/${ratingTypeId}`,
       ratingType,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -712,7 +713,7 @@ export const deleteRatingType =
       createAction(SELECTION_PLAN_RATING_TYPE_REMOVED)({ ratingTypeId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/track-chair-rating-types/${ratingTypeId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -744,12 +745,12 @@ export const assignExtraQuestion2SelectionPlan =
   (summitId, selectionPlanId, questionId) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
-    postRequest(
+    return postRequest(
       null,
       createAction(SELECTION_PLAN_ASSIGNED_EXTRA_QUESTION),
       `${window.API_BASE_URL}/api/v1/summits/${summitId}/selection-plans/${selectionPlanId}/extra-questions/${questionId}?access_token=${accessToken}`,
       {},
-      authErrorHandler
+      snackbarErrorHandler
     )({})(dispatch).then(() => {
       dispatch(stopLoading());
       dispatch(
@@ -784,7 +785,7 @@ export const getAllowedMembers =
       createAction(REQUEST_ALLOWED_MEMBERS),
       createAction(RECEIVE_ALLOWED_MEMBERS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/allowed-members`,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -807,7 +808,7 @@ export const addAllowedMemberToSelectionPlan =
       createAction(ALLOWED_MEMBER_ADDED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/allowed-members`,
       { email },
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -830,7 +831,7 @@ export const removeAllowedMemberFromSelectionPlan =
       createAction(ALLOWED_MEMBER_REMOVED)({ emailId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/allowed-members/${emailId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -848,13 +849,13 @@ export const importAllowedMembersCSV =
 
     dispatch(startLoading());
 
-    postFile(
+    return postFile(
       null,
       createAction(ALLOWED_MEMBERS_IMPORTED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/allowed-members/csv`,
       file,
       {},
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
       dispatch(
@@ -887,7 +888,7 @@ export const getSelectionPlanProgressFlags =
       null,
       createAction(RECEIVE_SELECTION_PLAN_PROGRESS_FLAGS),
       `${window.API_BASE_URL}/api/v1/summits/${summitId}/selection-plans/${selectionPlanId}/allowed-presentation-action-types`,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -897,12 +898,12 @@ export const assignProgressFlag2SelectionPlan =
   (summitId, selectionPlanId, progressFlagId) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
-    postRequest(
+    return postRequest(
       null,
       createAction(SELECTION_PLAN_ASSIGNED_PROGRESS_FLAG),
       `${window.API_BASE_URL}/api/v1/summits/${summitId}/selection-plans/${selectionPlanId}/allowed-presentation-action-types/${progressFlagId}?access_token=${accessToken}`,
       {},
-      authErrorHandler
+      snackbarErrorHandler
     )({})(dispatch).then(() => {
       dispatch(stopLoading());
       dispatch(
@@ -936,7 +937,7 @@ export const updateProgressFlagOrder =
       createAction(SELECTION_PLAN_PROGRESS_FLAG_ORDER_UPDATED)(progressFlags),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/allowed-presentation-action-types/${progressFlagId}`,
       progressFlag,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -957,7 +958,7 @@ export const unassignProgressFlagFromSelectionPlan =
       createAction(SELECTION_PLAN_PROGRESS_FLAG_REMOVED)({ progressFlagId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/allowed-presentation-action-types/${progressFlagId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
