@@ -43,9 +43,8 @@ export const formatCheckoutTime = (value) => {
 };
 
 // MuiTable column definitions.
-// columnKey for sortable columns equals the backend `order=` parameter so
-// onSort(columnKey, dir) → toOrderParam(columnKey, dir) yields the correct string
-// without any additional translation in the page handler.
+// columnKey for sortable columns equals the backend `order=` field, so the
+// query thunk formats the sort direction from (columnKey, dir) directly.
 // Non-sortable columns (Type, Sponsor Note) use arbitrary unique keys.
 const columns = [
   {
