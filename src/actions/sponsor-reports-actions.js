@@ -11,7 +11,7 @@ import {
   buildReportQuery,
   buildPurchaseQuery,
   buildPurchaseLinesQuery
-} from "../pages/sponsors/sponsor-reports/report-query";
+} from "./sponsor-reports-query";
 
 export const REQUEST_PURCHASE_DETAILS = "REQUEST_PURCHASE_DETAILS";
 export const RECEIVE_PURCHASE_DETAILS = "RECEIVE_PURCHASE_DETAILS";

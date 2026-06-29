@@ -21,7 +21,10 @@ import DownloadIcon from "@mui/icons-material/Download";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
-import { buildPurchaseQuery, buildPurchaseLinesQuery } from "../report-query";
+import {
+  buildPurchaseQuery,
+  buildPurchaseLinesQuery
+} from "../../../../actions/sponsor-reports-query";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
 import FilterBar from "../../../../components/sponsors/reports/FilterBar";

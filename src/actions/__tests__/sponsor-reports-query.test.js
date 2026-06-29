@@ -1,4 +1,9 @@
-import { buildReportQuery , buildPurchaseQuery, buildPurchaseLinesQuery } from "../report-query";
+import {
+  buildReportQuery,
+  buildPurchaseQuery,
+  buildPurchaseLinesQuery,
+  toOrderParam
+} from "../sponsor-reports-query";
 
 describe("buildReportQuery", () => {
   it("returns an empty object for no filters", () => {
@@ -96,5 +101,23 @@ describe("buildPurchaseLinesQuery", () => {
     expect(q["filter[]"]).toEqual(["order_date>=2026-01-01T00:00:00Z"]);
     expect(q).toMatchObject({ page: 2, per_page: 50 });
     expect(q).not.toHaveProperty("order");
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────
+// toOrderParam — moved here from OrdersTable since it is query-layer logic
+// ────────────────────────────────────────────────────────────────────────────
+describe("toOrderParam", () => {
+  it("encodes asc (dir=1) and desc (dir=-1)", () => {
+    expect(toOrderParam("number", 1)).toBe("number");
+    expect(toOrderParam("number", -1)).toBe("-number");
+    expect(toOrderParam("order_date", -1)).toBe("-order_date");
+    expect(toOrderParam("invoice_total", 1)).toBe("invoice_total");
+  });
+
+  it("returns undefined when columnKey is falsy", () => {
+    expect(toOrderParam(null, 1)).toBeUndefined();
+    expect(toOrderParam(undefined, 1)).toBeUndefined();
+    expect(toOrderParam("", 1)).toBeUndefined();
   });
 });
