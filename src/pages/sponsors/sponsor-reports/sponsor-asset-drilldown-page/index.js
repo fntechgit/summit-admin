@@ -41,7 +41,11 @@ import PrintIcon from "@mui/icons-material/Print";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 import DownloadIcon from "@mui/icons-material/Download";
-import { htmlToPlainText, isPositiveIntId } from "../../../../utils/methods";
+import {
+  htmlToPlainText,
+  isImageUrl,
+  isPositiveIntId
+} from "../../../../utils/methods";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import usePrint from "../../../../hooks/usePrint";
 import TierBadge from "../../../../components/sponsors/reports/TierBadge";
@@ -51,10 +55,6 @@ import {
   exportSponsorAssetSectionCsv,
   getSponsorAssetSponsor
 } from "../../../../actions/sponsor-reports-actions";
-
-// Gate the <img> on an image file extension; render every other file as a
-// download link (a PDF url in an <img> would show a broken image).
-const IMAGE_EXT = /\.(png|jpe?g|gif|webp|svg|bmp)$/i;
 
 // ContentCell uses T.translate directly (no `t` prop) — this component is
 // co-located with the page and uses the same i18n module as everything else.
@@ -66,7 +66,7 @@ const ContentCell = ({ row }) => {
   const text = htmlToPlainText(
     row.content?.value || row.content?.summary || filename
   );
-  const isImage = !!url && IMAGE_EXT.test(filename || url);
+  const isImage = !!url && isImageUrl(filename || url);
 
   if (url && isImage) {
     return (
