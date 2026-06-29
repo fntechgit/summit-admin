@@ -258,8 +258,9 @@ export const exportSponsorAssetCsv =
   };
 
 // Single sponsor+page section export. Integer-guard both ids (defense-in-depth;
-// the drilldown route validates :sponsorId before render). No base query — the
-// drilldown always exported a section with no other active filters.
+// the drilldown route validates :sponsorId before render). Scoped to collected
+// (module_type==Media) so the per-page CSV matches the collected-only view —
+// downloads/info are excluded from the report and from this export.
 export const exportSponsorAssetSectionCsv =
   (sponsorId, pageId) => async (dispatch, getState) => {
     const { currentSummit } = getState().currentSummitState;
@@ -270,6 +271,7 @@ export const exportSponsorAssetSectionCsv =
     const pid = Number(pageId);
     if (Number.isInteger(sid)) filter.push(`sponsor_id==${sid}`);
     if (Number.isInteger(pid)) filter.push(`page_id==${pid}`);
+    filter.push("module_type==Media");
     return dispatch(
       getCSV(
         `${base(currentSummit.id)}/sponsor-assets/csv`,
