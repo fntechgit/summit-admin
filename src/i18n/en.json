@@ -4331,6 +4331,8 @@
     "view_line_items": "Line Items",
     "lines_count": "{count} lines",
     "destination_booth_fallback": "Booth",
+    "col_checkout_time": "Checkout Time",
+    "col_invoice_total": "Invoice Total",
     "col_order": "Order #",
     "col_form_code": "Form Code",
     "col_item_code": "Item Code",
@@ -4339,6 +4341,9 @@
     "col_checkout_at": "Checked Out At",
     "col_notes": "Notes",
     "col_quantity": "Qty",
+    "col_sponsor": "Sponsor",
+    "col_sponsor_note": "Sponsor Note",
+    "col_type": "Type",
     "col_used_rate": "Used Rate",
     "col_status": "Status",
     "col_line_total": "Line Total"

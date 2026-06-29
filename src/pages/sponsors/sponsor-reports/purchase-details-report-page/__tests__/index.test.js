@@ -342,7 +342,7 @@ describe("PurchaseDetailsReportPage", () => {
 
     // Clicking the "Order #" sort label toggles direction. Initial sortDir is 1 (asc),
     // so MuiTable calls onSort("number", -1) → order param "-number".
-    const orderHeader = screen.getByText("Order #");
+    const orderHeader = screen.getByText("sponsor_reports_page.col_order");
     await act(async () => {
       fireEvent.click(orderHeader);
     });
