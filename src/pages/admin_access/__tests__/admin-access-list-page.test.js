@@ -1,6 +1,6 @@
 import React from "react";
 import { Provider } from "react-redux";
-import { MemoryRouter, Route } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
 import {
   act,
   render,
@@ -56,7 +56,6 @@ jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => {
       ))}
     </div>
   );
-
   return MockMuiTable;
 });
 
@@ -82,7 +81,6 @@ jest.mock("../../../components/forms/admin-access-form", () => {
       </button>
     </div>
   );
-
   return MockAdminAccessForm;
 });
 
@@ -112,24 +110,28 @@ const baseFormState = {
   errors: {}
 };
 
-const renderPage = (path = "/app/admin-access", formState = baseFormState) => {
+const renderPage = (listState = baseListState, formState = baseFormState) => {
   const store = mockStore({
-    adminAccessListState: baseListState,
+    adminAccessListState: listState,
     adminAccessState: formState
   });
 
   render(
     <Provider store={store}>
-      <MemoryRouter initialEntries={[path]}>
-        <Route
-          path="/app/admin-access/:access_id?"
-          component={AdminAccessListPage}
-        />
+      <MemoryRouter>
+        <AdminAccessListPage />
       </MemoryRouter>
     </Provider>
   );
 
   return store;
+};
+
+const openNewPopup = async () => {
+  fireEvent.click(screen.getByRole("button", { name: "admin_access.add" }));
+  await waitFor(() =>
+    expect(screen.getByTestId("admin-access-form")).toBeInTheDocument()
+  );
 };
 
 describe("AdminAccessListPage", () => {
@@ -143,47 +145,38 @@ describe("AdminAccessListPage", () => {
   });
 
   describe("rendering and navigation", () => {
-    it("renders grid and opens popup for new item", async () => {
-      renderPage("/app/admin-access");
-
+    it("renders the table and no popup on initial load", () => {
+      renderPage();
       expect(screen.getByTestId("mui-table")).toBeInTheDocument();
       expect(screen.queryByTestId("admin-access-form")).not.toBeInTheDocument();
-
-      fireEvent.click(screen.getByRole("button", { name: /create|add/i }));
-
-      await waitFor(() => {
-        expect(screen.getByTestId("admin-access-form")).toBeInTheDocument();
-      });
     });
 
-    it("opens popup when route has an access id", async () => {
-      const formState = {
-        entity: { id: 1, title: "Group A", members: [], summits: [] },
-        errors: {}
-      };
+    it("opens popup and resets form when Add is clicked", async () => {
+      renderPage();
+      await openNewPopup();
+      expect(mockResetAdminAccessForm).toHaveBeenCalled();
+    });
 
-      renderPage("/app/admin-access/1", formState);
-
-      await waitFor(() => {
-        expect(screen.getByTestId("admin-access-form")).toBeInTheDocument();
-      });
+    it("fetches the item and opens popup when edit row is clicked", async () => {
+      renderPage();
+      fireEvent.click(screen.getByRole("button", { name: "edit" }));
+      await waitFor(() =>
+        expect(screen.getByTestId("admin-access-form")).toBeInTheDocument()
+      );
+      expect(mockGetAdminAccess).toHaveBeenCalledWith(1);
     });
 
     it("requests data with selected rows per page", async () => {
-      renderPage("/app/admin-access");
-
+      renderPage();
       fireEvent.click(screen.getByRole("button", { name: "per-page-25" }));
-
       await waitFor(() => {
         expect(mockGetAdminAccesses).toHaveBeenCalledWith("", 1, 25, "id", 1);
       });
     });
 
     it("requests data with new sort column and direction", async () => {
-      renderPage("/app/admin-access");
-
+      renderPage();
       fireEvent.click(screen.getByRole("button", { name: "sort-col" }));
-
       await waitFor(() => {
         expect(mockGetAdminAccesses).toHaveBeenCalledWith(
           "",
@@ -196,12 +189,10 @@ describe("AdminAccessListPage", () => {
     });
 
     it("requests data with search term and resets to page 1", async () => {
-      renderPage("/app/admin-access");
-
+      renderPage();
       fireEvent.change(screen.getByPlaceholderText("search"), {
         target: { value: "admins" }
       });
-
       await waitFor(() => {
         expect(mockGetAdminAccesses).toHaveBeenCalledWith(
           "admins",
@@ -214,14 +205,43 @@ describe("AdminAccessListPage", () => {
     });
   });
 
+  describe("popup open/close", () => {
+    it("closes popup and resets form when close button is clicked", async () => {
+      renderPage();
+      await openNewPopup();
+
+      fireEvent.click(screen.getByTestId("CloseIcon").closest("button"));
+
+      await waitFor(() =>
+        expect(
+          screen.queryByTestId("admin-access-form")
+        ).not.toBeInTheDocument()
+      );
+      expect(mockResetAdminAccessForm).toHaveBeenCalled();
+    });
+
+    it("does not open popup when getAdminAccess rejects", async () => {
+      mockGetAdminAccess.mockReturnValue(() =>
+        Promise.reject(new Error("not found"))
+      );
+
+      renderPage();
+      fireEvent.click(screen.getByRole("button", { name: "edit" }));
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(screen.queryByTestId("admin-access-form")).not.toBeInTheDocument();
+    });
+  });
+
   describe("save guard", () => {
     it("disables the X button and submit while save is in flight", async () => {
       mockSaveAdminAccess.mockReturnValue(() => new Promise(() => {}));
 
-      renderPage("/app/admin-access/new");
-      await waitFor(() =>
-        expect(screen.getByTestId("admin-access-form")).toBeInTheDocument()
-      );
+      renderPage();
+      await openNewPopup();
 
       fireEvent.click(screen.getByRole("button", { name: "submit-form" }));
 
@@ -240,10 +260,8 @@ describe("AdminAccessListPage", () => {
         Promise.reject(new Error("save failed"))
       );
 
-      renderPage("/app/admin-access/new");
-      await waitFor(() =>
-        expect(screen.getByTestId("admin-access-form")).toBeInTheDocument()
-      );
+      renderPage();
+      await openNewPopup();
 
       const callsBefore = mockGetAdminAccesses.mock.calls.length;
 
@@ -263,74 +281,10 @@ describe("AdminAccessListPage", () => {
     });
   });
 
-  describe("route-driven open/close", () => {
-    it("does not open dialog and navigates back when getAdminAccess rejects", async () => {
-      mockGetAdminAccess.mockReturnValue(() =>
-        Promise.reject(new Error("not found"))
-      );
-
-      renderPage("/app/admin-access/1");
-
-      await act(async () => {
-        await flushPromises();
-      });
-
-      expect(screen.queryByTestId("admin-access-form")).not.toBeInTheDocument();
-    });
-
-    it("closes the dialog when the URL changes from a detail route to the list route", async () => {
-      const store = mockStore({
-        adminAccessListState: baseListState,
-        adminAccessState: {
-          entity: { id: 1, title: "Group A", members: [], summits: [] },
-          errors: {}
-        }
-      });
-
-      let capturedHistory;
-
-      render(
-        <Provider store={store}>
-          <MemoryRouter initialEntries={["/app/admin-access/1"]}>
-            <>
-              <Route
-                path="/app/admin-access/:access_id?"
-                component={AdminAccessListPage}
-              />
-              <Route
-                render={({ history }) => {
-                  capturedHistory = history;
-                  return null;
-                }}
-              />
-            </>
-          </MemoryRouter>
-        </Provider>
-      );
-
-      await waitFor(() =>
-        expect(screen.getByTestId("admin-access-form")).toBeInTheDocument()
-      );
-
-      await act(async () => {
-        capturedHistory.push("/app/admin-access");
-        await flushPromises();
-      });
-
-      await waitFor(() =>
-        expect(
-          screen.queryByTestId("admin-access-form")
-        ).not.toBeInTheDocument()
-      );
-    });
-  });
-
   describe("list management", () => {
     it("reloads the list after a successful save", async () => {
-      renderPage("/app/admin-access/new");
-      await waitFor(() =>
-        expect(screen.getByTestId("admin-access-form")).toBeInTheDocument()
-      );
+      renderPage();
+      await openNewPopup();
 
       const callsBefore = mockGetAdminAccesses.mock.calls.length;
 
@@ -345,7 +299,7 @@ describe("AdminAccessListPage", () => {
     });
 
     it("reloads the list after a successful delete", async () => {
-      renderPage("/app/admin-access");
+      renderPage();
 
       const callsBefore = mockGetAdminAccesses.mock.calls.length;
 
@@ -359,46 +313,8 @@ describe("AdminAccessListPage", () => {
       );
     });
 
-    it("re-syncs the list after a failed delete", async () => {
-      mockDeleteAdminAccess.mockReturnValue(() =>
-        Promise.reject(new Error("delete failed"))
-      );
-
-      renderPage("/app/admin-access");
-
-      const callsBefore = mockGetAdminAccesses.mock.calls.length;
-
-      await act(async () => {
-        fireEvent.click(screen.getByRole("button", { name: "delete" }));
-        await flushPromises();
-      });
-
-      // .finally() fires even on rejection
-      expect(mockGetAdminAccesses.mock.calls.length).toBeGreaterThan(
-        callsBefore
-      );
-    });
-
-    it("decrements page when deleting the last item on a page > 1", async () => {
-      const store = mockStore({
-        adminAccessListState: {
-          ...baseListState,
-          currentPage: 2,
-          admin_accesses: [{ id: 1, title: "Group A" }]
-        },
-        adminAccessState: baseFormState
-      });
-
-      render(
-        <Provider store={store}>
-          <MemoryRouter initialEntries={["/app/admin-access"]}>
-            <Route
-              path="/app/admin-access/:access_id?"
-              component={AdminAccessListPage}
-            />
-          </MemoryRouter>
-        </Provider>
-      );
+    it("reloads from page 1 after a successful delete", async () => {
+      renderPage({ ...baseListState, currentPage: 3 });
 
       await act(async () => {
         fireEvent.click(screen.getByRole("button", { name: "delete" }));

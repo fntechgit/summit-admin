@@ -131,7 +131,7 @@ export const saveAdminAccess = (entity) => async (dispatch) => {
   dispatch(startLoading());
 
   const normalizedEntity = normalizeEntity(entity);
-  const params = { access_token: accessToken };
+  const params = { access_token: accessToken, expand: "members,summits" };
 
   if (entity.id) {
     return putRequest(

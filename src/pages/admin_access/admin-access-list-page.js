@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Box from "@mui/material/Box";
@@ -30,6 +30,17 @@ import {
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 import AdminAccessFormPopup from "./admin-access-form-popup";
 
+const columns = [
+  { columnKey: "id", header: T.translate("general.id"), sortable: true },
+  {
+    columnKey: "title",
+    header: T.translate("admin_access.title"),
+    sortable: true
+  },
+  { columnKey: "summits", header: T.translate("admin_access.summits") },
+  { columnKey: "members", header: T.translate("admin_access.members") }
+];
+
 const AdminAccessListPage = ({
   admin_accesses,
   totalAdminAccesses,
@@ -38,45 +49,17 @@ const AdminAccessListPage = ({
   term,
   order,
   orderDir,
-  match,
-  history,
   getAdminAccesses,
   deleteAdminAccess,
   getAdminAccess,
   resetAdminAccessForm,
   saveAdminAccess
 }) => {
-  const [searchTerm, setSearchTerm] = useState(term || "");
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     getAdminAccesses(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
   }, [getAdminAccesses]);
-
-  useEffect(() => {
-    const { access_id: accessId } = match.params;
-    const isNew = /\/new$/.test(history.location.pathname);
-
-    if (isNew) {
-      resetAdminAccessForm();
-      setOpen(true);
-      return;
-    }
-
-    if (accessId) {
-      let ignore = false;
-      getAdminAccess(accessId)
-        .then(() => {
-          if (!ignore) setOpen(true);
-        })
-        .catch(() => history.push("/app/admin-access"));
-      return () => {
-        ignore = true;
-      };
-    }
-
-    setOpen(false);
-  }, [match.params.access_id, history.location.pathname]);
 
   const handlePageChange = (page) => {
     getAdminAccesses(term, page, perPage, order, orderDir);
@@ -91,33 +74,24 @@ const AdminAccessListPage = ({
   };
 
   const handleSearch = (value) => {
-    setSearchTerm(value);
     getAdminAccesses(value, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
   };
 
   const handleNewAdminAccess = () => {
-    history.push("/app/admin-access/new");
+    resetAdminAccessForm();
+    setOpen(true);
   };
 
   const handleEdit = (row) => {
-    history.push(`/app/admin-access/${row.id}`);
+    getAdminAccess(row.id)
+      .then(() => setOpen(true))
+      .catch(() => {});
   };
 
-  const handleDeleteAdminAccess = (rowOrId) => {
-    const accessId = typeof rowOrId === "object" ? rowOrId?.id : rowOrId;
-
-    if (!accessId) return;
-
-    const nextPage =
-      admin_accesses.length === 1 && currentPage > 1
-        ? currentPage - 1
-        : currentPage;
-
-    deleteAdminAccess(accessId)
-      .finally(() => {
-        getAdminAccesses(term, nextPage, perPage, order, orderDir);
-      })
-      .catch(() => {});
+  const handleDelete = (accessId) => {
+    deleteAdminAccess(accessId).then(() =>
+      getAdminAccesses(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+    );
   };
 
   const handleSave = (entity) =>
@@ -125,31 +99,12 @@ const AdminAccessListPage = ({
       getAdminAccesses(term, currentPage, perPage, order, orderDir)
     );
 
-  const closeDialog = () => {
+  const handleClose = () => {
+    resetAdminAccessForm();
     setOpen(false);
-    history.push("/app/admin-access");
   };
 
-  const columns = useMemo(
-    () => [
-      { columnKey: "id", header: T.translate("general.id"), sortable: true },
-      {
-        columnKey: "title",
-        header: T.translate("admin_access.title"),
-        sortable: true
-      },
-      { columnKey: "summits", header: T.translate("admin_access.summits") },
-      { columnKey: "members", header: T.translate("admin_access.members") }
-    ],
-    []
-  );
-
-  const tableOptions = {
-    sortCol: order,
-    sortDir: orderDir
-  };
-
-  const totalItems = totalAdminAccesses;
+  const tableOptions = { sortCol: order, sortDir: orderDir };
 
   return (
     <Box className="container">
@@ -157,15 +112,11 @@ const AdminAccessListPage = ({
       <Grid2
         container
         spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
+        sx={{ justifyContent: "center", alignItems: "center", mb: 2 }}
       >
         <Grid2 size={2}>
           <Box component="span">
-            {totalItems} {T.translate("general.items")}
+            {totalAdminAccesses} {T.translate("general.items")}
           </Box>
         </Grid2>
         <Grid2
@@ -173,14 +124,11 @@ const AdminAccessListPage = ({
           size={10}
           spacing={1}
           gap={1}
-          sx={{
-            justifyContent: "flex-end",
-            alignItems: "center"
-          }}
+          sx={{ justifyContent: "flex-end", alignItems: "center" }}
         >
           <Grid2 size={3}>
             <MuiSearchInput
-              term={searchTerm}
+              term={term}
               onSearch={handleSearch}
               placeholder={T.translate("admin_access.placeholders.search")}
             />
@@ -213,7 +161,7 @@ const AdminAccessListPage = ({
           options={tableOptions}
           perPage={perPage}
           currentPage={currentPage}
-          totalRows={totalItems}
+          totalRows={totalAdminAccesses}
           getName={(adminAccess) => adminAccess?.title ?? adminAccess?.id}
           deleteDialogBody={(groupName) =>
             `${T.translate("admin_access.delete_warning")} "${groupName}"`
@@ -223,12 +171,12 @@ const AdminAccessListPage = ({
           onPerPageChange={handlePerPageChange}
           onSort={handleSort}
           onEdit={handleEdit}
-          onDelete={handleDeleteAdminAccess}
+          onDelete={handleDelete}
         />
       )}
 
       {open && (
-        <AdminAccessFormPopup onSave={handleSave} onClose={closeDialog} />
+        <AdminAccessFormPopup onSave={handleSave} onClose={handleClose} />
       )}
     </Box>
   );

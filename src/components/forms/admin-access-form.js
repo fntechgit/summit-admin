@@ -89,11 +89,13 @@ const AdminAccessForm = ({
             <MemberInput
               id="members"
               value={formik.values.members}
-              getOptionLabel={(member) =>
-                `${member.first_name} ${member.last_name} (${
+              getOptionLabel={(member) => {
+                if (typeof member !== "object" || member === null)
+                  return String(member ?? "");
+                return `${member.first_name} ${member.last_name} (${
                   "email" in member ? member.email : member.id
-                })`
-              }
+                })`;
+              }}
               onChange={(ev) =>
                 formik.setFieldValue("members", ev.target.value)
               }
