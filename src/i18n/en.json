@@ -3370,11 +3370,11 @@
     "title": "Title",
     "members": "Members",
     "summits": "Events",
-    "delete_warning": "Are you sure you want to delete group ",
+    "delete_warning": "Please verify you want to delete group ",
     "saved": "Admin Access Group saved successfully.",
     "created": "Admin Access Group created successfully.",
     "placeholders": {
-      "search": "Search groups by name",
+      "search": "Search groups by title",
       "select_summits": "Select Events",
       "select_members": "Select Members"
     }
