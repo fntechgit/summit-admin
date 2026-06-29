@@ -180,28 +180,46 @@ describe("OrdersTable rendering", () => {
     const sortLabelTexts = sortLabels.map((el) => el.textContent.trim());
 
     // Sortable columns are wrapped in sort labels
-    expect(sortLabelTexts.some((t) => t.includes("Order #"))).toBe(true);
-    expect(sortLabelTexts.some((t) => t.includes("Sponsor"))).toBe(true);
-    expect(sortLabelTexts.some((t) => t.includes("Checkout Time"))).toBe(true);
-    expect(sortLabelTexts.some((t) => t.includes("Invoice Total"))).toBe(true);
+    expect(
+      sortLabelTexts.some((t) => t.includes("sponsor_reports_page.col_order"))
+    ).toBe(true);
+    expect(
+      sortLabelTexts.some((t) => t.includes("sponsor_reports_page.col_sponsor"))
+    ).toBe(true);
+    expect(
+      sortLabelTexts.some((t) =>
+        t.includes("sponsor_reports_page.col_checkout_time")
+      )
+    ).toBe(true);
+    expect(
+      sortLabelTexts.some((t) =>
+        t.includes("sponsor_reports_page.col_invoice_total")
+      )
+    ).toBe(true);
     // Non-sortable columns are NOT in sort labels
-    expect(sortLabelTexts.some((t) => t.includes("Type"))).toBe(false);
-    expect(sortLabelTexts.some((t) => t.includes("Sponsor Note"))).toBe(false);
+    expect(
+      sortLabelTexts.some((t) => t.includes("sponsor_reports_page.col_type"))
+    ).toBe(false);
+    expect(
+      sortLabelTexts.some((t) =>
+        t.includes("sponsor_reports_page.col_sponsor_note")
+      )
+    ).toBe(false);
   });
 
   it("clicking a sortable column header calls onSort with (columnKey, dir)", () => {
     const handleSort = jest.fn();
     renderTable([sampleRow], { onSort: handleSort });
     // TableSortLabel for "Order #" has onClick → calls onSort("number", dir)
-    fireEvent.click(screen.getByText("Order #"));
+    fireEvent.click(screen.getByText("sponsor_reports_page.col_order"));
     expect(handleSort).toHaveBeenCalledWith("number", expect.any(Number));
   });
 
   it("clicking non-sortable Type or Sponsor Note header does NOT call onSort", () => {
     const handleSort = jest.fn();
     renderTable([sampleRow], { onSort: handleSort });
-    fireEvent.click(screen.getByText("Type"));
-    fireEvent.click(screen.getByText("Sponsor Note"));
+    fireEvent.click(screen.getByText("sponsor_reports_page.col_type"));
+    fireEvent.click(screen.getByText("sponsor_reports_page.col_sponsor_note"));
     expect(handleSort).not.toHaveBeenCalled();
   });
 });

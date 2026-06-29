@@ -13,6 +13,7 @@
 
 import React from "react";
 import moment from "moment-timezone";
+import T from "i18n-react/dist/i18n-react";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { DEFAULT_PER_PAGE } from "../../../utils/constants";
@@ -55,38 +56,38 @@ export const toOrderParam = (columnKey, dir) => {
 const columns = [
   {
     columnKey: "number",
-    header: "Order #",
+    header: T.translate("sponsor_reports_page.col_order"),
     sortable: true,
     render: (row) => row.purchase_number
   },
   {
     columnKey: "sponsor",
-    header: "Sponsor",
+    header: T.translate("sponsor_reports_page.col_sponsor"),
     sortable: true,
     render: (row) => row.sponsor?.name ?? ""
   },
   {
     columnKey: "order_date",
-    header: "Checkout Time",
+    header: T.translate("sponsor_reports_page.col_checkout_time"),
     sortable: true,
     // render reads checkout_at (ISO or epoch) via the shared helper.
     render: (row) => formatCheckoutTime(row.checkout_at)
   },
   {
     columnKey: "form_display",
-    header: "Type",
+    header: T.translate("sponsor_reports_page.col_type"),
     sortable: false, // not a backend ordering field
     render: (row) => row.form?.display ?? ""
   },
   {
     columnKey: "status",
-    header: "Status",
+    header: T.translate("sponsor_reports_page.col_status"),
     sortable: true,
     render: (row) => <StatusPill status={row.status} label={row.status} />
   },
   {
     columnKey: "invoice_total",
-    header: "Invoice Total",
+    header: T.translate("sponsor_reports_page.col_invoice_total"),
     sortable: true,
     align: "right",
     render: (row) =>
@@ -96,7 +97,7 @@ const columns = [
   },
   {
     columnKey: "sponsor_note",
-    header: "Sponsor Note",
+    header: T.translate("sponsor_reports_page.col_sponsor_note"),
     sortable: false // not a backend ordering field
     // No render — MuiTable fallback reads row["sponsor_note"] directly.
   }
