@@ -43,6 +43,31 @@ describe("formatCheckoutTime", () => {
     expect(formatCheckoutTime(undefined)).toBe("");
     expect(formatCheckoutTime("")).toBe("");
   });
+
+  // ── Offset & malformed contract pins ────────────────────────────────────────
+  // The backend always emits UTC `Z` datetimes (sponsor-reports-api TIME_ZONE=
+  // "UTC", USE_TZ=True, DRF emits Z), so the offset path is inert in production.
+  // These assertions lock the moment.utc() contract so future refactors can't
+  // silently change the behavior on non-Z inputs or malformed strings.
+  it("converts ISO strings with explicit UTC offsets to UTC before formatting", () => {
+    // -05:00 → adds 5 h → 2026-06-30T04:59:59Z
+    expect(formatCheckoutTime("2026-06-29T23:59:59-05:00")).toBe(
+      "2026-06-30 4:59 AM"
+    );
+    // +05:00 → subtracts 5 h → 2026-06-29T18:59:59Z
+    expect(formatCheckoutTime("2026-06-29T23:59:59+05:00")).toBe(
+      "2026-06-29 6:59 PM"
+    );
+    // Z suffix (the real-data path) — baseline assertion alongside offset cases
+    expect(formatCheckoutTime("2026-06-29T23:59:59Z")).toBe(
+      "2026-06-29 11:59 PM"
+    );
+  });
+
+  it("falls back to the 10-char date slice for malformed ISO-like strings", () => {
+    // month 13 / day 99 / hour 25 → moment marks invalid → date-only fallback
+    expect(formatCheckoutTime("2026-13-99T25:99:00Z")).toBe("2026-13-99");
+  });
 });
 
 // ────────────────────────────────────────────────────────────────────────────
