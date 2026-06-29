@@ -12,6 +12,15 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
   translate: (k) => k
 }));
 
+// ── Snackbar hook ─────────────────────────────────────────────────────────────
+const mockErrorMessage = jest.fn();
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/snackbar-notification",
+  () => ({
+    useSnackbarMessage: () => ({ errorMessage: mockErrorMessage })
+  })
+);
+
 // Action creators: jest.fn() inside the factory to avoid hoisting issues.
 // Import the mocked functions below to assert on .mock.calls.
 // Export thunks return a plain object so redux-mock-store does not reject the
@@ -42,6 +51,7 @@ const {
   getPurchaseDetailsReport,
   getPurchaseDetailsFilters,
   getPurchaseDetailsLinesReport,
+  clearPurchaseDetailsValidation,
   exportPurchaseDetailsCsv,
   exportPurchaseDetailsLinesCsv
 } = require("../../../../../actions/sponsor-reports-actions");
@@ -137,6 +147,19 @@ function renderPage(summaryOverrides = {}, stateOptions = {}) {
       { initialState: buildState(summaryOverrides, stateOptions) }
     )
   };
+}
+
+/** Render with an explicit validationError in the purchase-details slice. */
+function renderPageWithValidationError(validationError) {
+  const state = buildState();
+  state.sponsorReportsPurchaseDetailsState.validationError = validationError;
+  const history = createMemoryHistory({ initialEntries: [PAGE_URL] });
+  return renderWithRedux(
+    <Router history={history}>
+      <Route path={PAGE_ROUTE} component={PurchaseDetailsReportPage} />
+    </Router>,
+    { initialState: state }
+  );
 }
 
 beforeEach(() => {
@@ -412,6 +435,34 @@ describe("PurchaseDetailsReportPage", () => {
     // the action tests (expandDates, filter[] assembly, etc.).
     expect(exportPurchaseDetailsLinesCsv).toHaveBeenCalledWith({
       dateFrom: "2026-01-01"
+    });
+  });
+
+  describe("validation error — snackbar hook", () => {
+    it("calls errorMessage with the validationError message when validationError is set", async () => {
+      renderPageWithValidationError({ message: "Too many filters" });
+      await act(async () => {});
+      expect(mockErrorMessage).toHaveBeenCalledWith("Too many filters");
+    });
+
+    it("calls errorMessage with the i18n fallback key when validationError has no message", async () => {
+      renderPageWithValidationError({});
+      await act(async () => {});
+      expect(mockErrorMessage).toHaveBeenCalledWith(
+        "sponsor_reports_page.validation_error"
+      );
+    });
+
+    it("dispatches clearPurchaseDetailsValidation after showing the error message", async () => {
+      renderPageWithValidationError({ message: "Bad request" });
+      await act(async () => {});
+      expect(clearPurchaseDetailsValidation).toHaveBeenCalled();
+    });
+
+    it("does not call errorMessage when validationError is null", async () => {
+      renderPage(); // default state has validationError: null
+      await act(async () => {});
+      expect(mockErrorMessage).not.toHaveBeenCalled();
     });
   });
 });

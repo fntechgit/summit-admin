@@ -15,18 +15,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Alert,
-  Box,
-  Button,
-  MenuItem,
-  Snackbar,
-  TextField
-} from "@mui/material";
+import { Alert, Box, Button, MenuItem, TextField } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import DownloadIcon from "@mui/icons-material/Download";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
+import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
 import { buildPurchaseQuery, buildPurchaseLinesQuery } from "../report-query";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
@@ -46,7 +40,6 @@ import {
 import { DEFAULT_PER_PAGE } from "../../../../utils/constants";
 
 const LINES_DEFAULT_PAGE_SIZE = 50;
-const TOAST_AUTO_HIDE_MS = 6000;
 
 const PurchaseDetailsReportPage = ({
   // From mapStateToProps
@@ -70,6 +63,19 @@ const PurchaseDetailsReportPage = ({
   exportPurchaseDetailsLinesCsv: exportLinesCsv
 }) => {
   const print = usePrint();
+  const { errorMessage } = useSnackbarMessage();
+
+  // Show a global snackbar toast when the backend returns a 412 validation error,
+  // then clear the redux slice so the toast fires only once per error.
+  useEffect(() => {
+    if (validationError) {
+      errorMessage(
+        validationError.message ||
+          T.translate("sponsor_reports_page.validation_error")
+      );
+      clearValidation();
+    }
+  }, [validationError]);
 
   // Local pagination/sort state. MuiTable dir = 1 (asc) | -1 (desc).
   const [filters, setFilters] = useState({});
@@ -296,17 +302,6 @@ const PurchaseDetailsReportPage = ({
       }
     >
       <SummaryPanel tiles={tiles} />
-      {/* 412 → inline toast; body preserved (rows stay visible) */}
-      <Snackbar
-        open={Boolean(validationError)}
-        autoHideDuration={TOAST_AUTO_HIDE_MS}
-        onClose={() => clearValidation()}
-      >
-        <Alert severity="error" data-testid="reports-validation-error">
-          {validationError?.message ||
-            T.translate("sponsor_reports_page.validation_error")}
-        </Alert>
-      </Snackbar>
       {(view === "orders" ? readError : linesReadError) ? (
         <Alert data-testid="reports-read-error" severity="warning">
           {(view === "orders" ? readError : linesReadError)?.message ||
