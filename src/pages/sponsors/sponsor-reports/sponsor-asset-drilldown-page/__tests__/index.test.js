@@ -228,6 +228,31 @@ describe("SponsorAssetDrilldownPage", () => {
     );
   });
 
+  it("ContentCell: flattens HTML in a Media text/input value to plain text", async () => {
+    // A Media row whose media_request_type is Input carries entered text in
+    // content.value, which may contain HTML — ContentCell flattens it (no markup).
+    renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
+      detail: {
+        sponsor: { id: 17, name: "Acme", tier: "Gold", pages_active: 1 },
+        pages: [
+          {
+            page: { id: 9, title: "Booth", type: "page" },
+            modules: [
+              {
+                module: { id: 1, title: "Tagline", type: "Media" },
+                status: "completed",
+                content: { value: "<p>cespinTEST3</p>" }
+              }
+            ]
+          }
+        ]
+      }
+    });
+    await act(async () => {});
+    expect(screen.getByText("cespinTEST3")).toBeInTheDocument();
+    expect(screen.queryByText("<p>cespinTEST3</p>")).not.toBeInTheDocument();
+  });
+
   it("ContentCell: shows pending_upload placeholder when there is no url or text", async () => {
     renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
       detail: {

@@ -513,13 +513,18 @@ describe("sponsor-reports-actions", () => {
       expect(filename).toBe("sponsor-assets-summit-42.csv");
     });
 
-    it("exportSponsorAssetSectionCsv → only sponsor_id/page_id filters + filename", async () => {
+    it("exportSponsorAssetSectionCsv → sponsor_id/page_id + collected (Media) filter + filename", async () => {
       await exportSponsorAssetSectionCsv("17", "3")(dispatch, getState);
       const [url, params, filename] = getCSV.mock.calls[0];
       expect(url).toBe(
         "http://test-api/api/v1/summits/42/reports/sponsor-assets/csv"
       );
-      expect(params["filter[]"]).toEqual(["sponsor_id==17", "page_id==3"]);
+      // Collected-only: the per-page CSV is scoped to Media, matching the view.
+      expect(params["filter[]"]).toEqual([
+        "sponsor_id==17",
+        "page_id==3",
+        "module_type==Media"
+      ]);
       expect(filename).toBe("sponsor-17-page-3.csv");
     });
   });
