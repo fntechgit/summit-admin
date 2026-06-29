@@ -20,7 +20,10 @@ import PrintIcon from "@mui/icons-material/Print";
 import DownloadIcon from "@mui/icons-material/Download";
 import CollectionsOutlinedIcon from "@mui/icons-material/CollectionsOutlined";
 import { isPositiveIntId } from "../../../../utils/methods";
-import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  TWENTY_PER_PAGE
+} from "../../../../utils/constants";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
 import FilterBar from "../../../../components/sponsors/reports/FilterBar";
@@ -46,7 +49,6 @@ const TILE_TONE = {
   pending: "warning",
   not_applicable: "neutral"
 };
-const GROUP_PER_PAGE = 25;
 
 const SponsorAssetReportPage = ({
   // From mapStateToProps
@@ -87,7 +89,7 @@ const SponsorAssetReportPage = ({
     if (validSummit)
       fetchReport(
         { ...filters, moduleType: "Media" },
-        { groupBy, page, perPage: GROUP_PER_PAGE }
+        { groupBy, page, perPage: TWENTY_PER_PAGE }
       );
   }, [filters, groupBy, page]); // validSummit omitted intentionally — stable once summit loads
 

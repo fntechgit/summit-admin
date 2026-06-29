@@ -5,7 +5,7 @@ import {
   startLoading,
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { getAccessTokenSafely } from "../utils/methods";
+import { getAccessTokenSafely, isPositiveIntId } from "../utils/methods";
 import { makeReadErrorHandler } from "./sponsor-reports-errors";
 import {
   buildReportQuery,
@@ -257,21 +257,23 @@ export const exportSponsorAssetCsv =
     );
   };
 
-// Single sponsor+page section export. Integer-guard both ids (defense-in-depth;
-// the drilldown route validates :sponsorId before render). Scoped to collected
-// (module_type==Media) so the per-page CSV matches the collected-only view —
-// downloads/info are excluded from the report and from this export.
+// Single sponsor+page section export. Both ids must be positive ints (shared
+// isPositiveIntId; the drilldown route validates :sponsorId before render) — bail
+// rather than emit a broadened CSV, since dropping one id would widen the export
+// to the whole sponsor/report. Scoped to collected (module_type==Media) so the
+// per-page CSV matches the collected-only view — downloads/info are excluded.
 export const exportSponsorAssetSectionCsv =
   (sponsorId, pageId) => async (dispatch, getState) => {
     const { currentSummit } = getState().currentSummitState;
     if (!currentSummit?.id) return Promise.resolve();
+    if (!isPositiveIntId(sponsorId) || !isPositiveIntId(pageId))
+      return Promise.resolve();
     const accessToken = await getAccessTokenSafely();
-    const filter = [];
-    const sid = Number(sponsorId);
-    const pid = Number(pageId);
-    if (Number.isInteger(sid)) filter.push(`sponsor_id==${sid}`);
-    if (Number.isInteger(pid)) filter.push(`page_id==${pid}`);
-    filter.push("module_type==Media");
+    const filter = [
+      `sponsor_id==${sponsorId}`,
+      `page_id==${pageId}`,
+      "module_type==Media"
+    ];
     return dispatch(
       getCSV(
         `${base(currentSummit.id)}/sponsor-assets/csv`,

@@ -10,6 +10,7 @@
 // (a no-operator value triggers a server IndexError → 500).
 
 import moment from "moment-timezone";
+import { isPositiveIntId } from "../utils/methods";
 
 // Converts MuiTable sort state to the `order` query param expected by the API.
 // MuiTable calls onSort(columnKey, dir) where dir = 1 (asc) | -1 (desc).
@@ -38,12 +39,10 @@ export const buildReportQuery = (filters = {}) => {
   const filter = [];
 
   // Sponsor — the one multi-select dimension → comma-OR in a SINGLE bracket.
-  // Coerce to positive integers and drop everything else, so a stray entry can't
-  // emit `sponsor_id==NaN`/`==0` (rejected by the backend; can hit the bad-filter
-  // 500 path). Note Number(null) === 0, so the `> 0` check is load-bearing.
-  const sponsorFilterIds = sponsorIds
-    .map((id) => Number(id))
-    .filter((id) => Number.isInteger(id) && id > 0);
+  // Keep only positive-integer ids (shared isPositiveIntId — string-aware), so a
+  // stray entry can't emit `sponsor_id==NaN`/`==0`/negative (rejected by the
+  // backend; can hit the bad-filter 500 path).
+  const sponsorFilterIds = sponsorIds.filter(isPositiveIntId).map(Number);
   if (sponsorFilterIds.length > 0) {
     filter.push(sponsorFilterIds.map((id) => `sponsor_id==${id}`).join(","));
   }

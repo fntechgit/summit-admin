@@ -39,9 +39,8 @@ const hasContent = (content) =>
 const isNotPresent = (entry) =>
   NOT_PRESENT_STATUSES.includes(entry.status) && !hasContent(entry.content);
 
-// Each sponsor link inside a component card goes to the summit-admin drill-down.
-// NOTE: path is /app/summits/:summitId/sponsors/reports/sponsor-assets/sponsors/:id,
-// NOT the old /app/reports/summits/:summitId/... path from the sponsor-services source.
+// Each sponsor link inside a component card goes to the drill-down route:
+// /app/summits/:summitId/sponsors/reports/sponsor-assets/sponsors/:id.
 const GroupByComponentView = ({ summitId, cards = [] }) => (
   <Stack spacing={2}>
     {cards.map((card, idx) => (
