@@ -193,14 +193,20 @@ const SponsorAssetDrilldownPage = ({
   const sponsor = detail?.sponsor;
   const pages = detail?.pages || [];
 
-  const visiblePages = pages
-    .map((section) => ({
-      ...section,
-      modules: (section.modules || []).filter(
-        (row) => contentType === "all" || row.module.type === "Media"
-      )
-    }))
-    .filter((section) => section.modules.length > 0);
+  // "All" shows every section as-is, including a page the sponsor never
+  // submitted to (an empty section still renders). "Collected" hides non-Media
+  // rows and drops a section only once the filter has emptied it.
+  const visiblePages =
+    contentType === "all"
+      ? pages
+      : pages
+          .map((section) => ({
+            ...section,
+            modules: (section.modules || []).filter(
+              (row) => row.module.type === "Media"
+            )
+          }))
+          .filter((section) => section.modules.length > 0);
 
   return (
     <ReportShell

@@ -427,4 +427,37 @@ describe("SponsorAssetDrilldownPage", () => {
     expect(screen.getByText("Deck")).toBeInTheDocument();
     expect(screen.getByText("Blurb")).toBeInTheDocument();
   });
+
+  it("S1b: an empty page section (no modules) is hidden under Collected but still shown under All", async () => {
+    renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
+      detail: {
+        sponsor: { id: 17, name: "Acme", tier: "Gold", pages_active: 1 },
+        pages: [
+          {
+            page: { id: 9, title: "Booth", type: "page" },
+            modules: [
+              {
+                module: { id: 1, title: "Logo", type: "Media" },
+                status: "completed"
+              }
+            ]
+          },
+          {
+            page: { id: 11, title: "Empty Page", type: "page" },
+            modules: []
+          }
+        ]
+      }
+    });
+    await act(async () => {});
+
+    // Default Collected: a section with no collected Media is dropped.
+    expect(screen.getByText("Booth")).toBeInTheDocument();
+    expect(screen.queryByText("Empty Page")).not.toBeInTheDocument();
+
+    // "All" shows every section as-is — the empty page section still renders.
+    fireEvent.click(screen.getByText("sponsor_reports_page.content_all"));
+    await act(async () => {});
+    expect(screen.getByText("Empty Page")).toBeInTheDocument();
+  });
 });
