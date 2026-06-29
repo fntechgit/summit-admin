@@ -112,7 +112,7 @@ describe("SponsorAssetReportPage", () => {
     renderPage();
     await act(async () => {});
     expect(getSponsorAssetFilters).toHaveBeenCalledWith();
-    // Default contentType is "collected" → moduleType: "Media" injected into first arg.
+    // moduleType: "Media" is hard-wired (collected only).
     expect(getSponsorAssetReport).toHaveBeenCalledWith(
       expect.objectContaining({ moduleType: "Media" }),
       expect.objectContaining({ groupBy: "sponsor" })
@@ -236,13 +236,13 @@ describe("SponsorAssetReportPage", () => {
     );
     await act(async () => {});
 
-    // Default contentType is "collected" → moduleType: "Media" injected into first arg.
+    // moduleType: "Media" is hard-wired (collected only).
     expect(exportSponsorAssetCsv).toHaveBeenCalledWith(
       expect.objectContaining({ moduleType: "Media" })
     );
   });
 
-  it("fetches with moduleType=Media by default (Collected mode)", async () => {
+  it("fetches with moduleType=Media (hard-wired collected mode)", async () => {
     renderPage();
     await act(async () => {});
     const firstArg =
@@ -250,57 +250,6 @@ describe("SponsorAssetReportPage", () => {
         getSponsorAssetReport.mock.calls.length - 1
       ][0];
     expect(firstArg).toEqual(expect.objectContaining({ moduleType: "Media" }));
-  });
-
-  it("fetches with moduleType undefined after toggling to All", async () => {
-    renderPage({ data: [], currentPage: 1, lastPage: 1 });
-    await act(async () => {});
-    getSponsorAssetReport.mockClear();
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "sponsor_reports_page.content_all"
-      })
-    );
-    await act(async () => {});
-
-    expect(getSponsorAssetReport).toHaveBeenCalled();
-    const firstArg =
-      getSponsorAssetReport.mock.calls[
-        getSponsorAssetReport.mock.calls.length - 1
-      ][0];
-    // "All" → no moduleType filter (omit entirely / undefined)
-    expect(firstArg).not.toHaveProperty("moduleType", "Media");
-    expect(firstArg.moduleType).toBeUndefined();
-  });
-
-  it("resets page to DEFAULT_CURRENT_PAGE when content type is toggled", async () => {
-    renderPage({ data: [], lastPage: 3, currentPage: 1 });
-    await act(async () => {});
-
-    // Navigate to page 2 first
-    const nav = screen.getByRole("navigation");
-    const page2 = Array.from(nav.querySelectorAll("button")).find((b) =>
-      b.textContent.includes("2")
-    );
-    fireEvent.click(page2);
-    await act(async () => {});
-    getSponsorAssetReport.mockClear();
-
-    // Toggle content type → page must reset to 1
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "sponsor_reports_page.content_all"
-      })
-    );
-    await act(async () => {});
-
-    expect(getSponsorAssetReport).toHaveBeenCalled();
-    const options =
-      getSponsorAssetReport.mock.calls[
-        getSponsorAssetReport.mock.calls.length - 1
-      ][1];
-    expect(options).toMatchObject({ page: 1 });
   });
 
   it("hides the no-groups empty state until currentPage >= 1", async () => {

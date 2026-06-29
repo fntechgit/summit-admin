@@ -23,7 +23,7 @@
 // value; the ContentCell component gates on filename extension (not MIME type)
 // because the backend returns the same minted URL for both (sponsor_asset_serializers.py:72,76).
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
@@ -47,7 +47,6 @@ import {
   isPositiveIntId
 } from "../../../../utils/methods";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
-import ContentTypeToggle from "../../../../components/sponsors/reports/ContentTypeToggle";
 import usePrint from "../../../../hooks/usePrint";
 import TierBadge from "../../../../components/sponsors/reports/TierBadge";
 import StatusPill from "../../../../components/sponsors/reports/StatusPill";
@@ -144,7 +143,6 @@ const SponsorAssetDrilldownPage = ({
   match
 }) => {
   const print = usePrint();
-  const [contentType, setContentType] = useState("collected");
 
   // sponsorId from URL; summitId from Redux state (not URL params per summit-admin pattern).
   const { sponsorId } = match.params;
@@ -193,20 +191,16 @@ const SponsorAssetDrilldownPage = ({
   const sponsor = detail?.sponsor;
   const pages = detail?.pages || [];
 
-  // "All" shows every section as-is, including a page the sponsor never
-  // submitted to (an empty section still renders). "Collected" hides non-Media
-  // rows and drops a section only once the filter has emptied it.
-  const visiblePages =
-    contentType === "all"
-      ? pages
-      : pages
-          .map((section) => ({
-            ...section,
-            modules: (section.modules || []).filter(
-              (row) => row.module.type === "Media"
-            )
-          }))
-          .filter((section) => section.modules.length > 0);
+  // Hard-wired to collected (Media) only — filter out non-Media rows and drop
+  // sections that become empty after filtering.
+  const visiblePages = pages
+    .map((section) => ({
+      ...section,
+      modules: (section.modules || []).filter(
+        (row) => row.module.type === "Media"
+      )
+    }))
+    .filter((section) => section.modules.length > 0);
 
   return (
     <ReportShell
@@ -215,12 +209,9 @@ const SponsorAssetDrilldownPage = ({
         T.translate("sponsor_reports_page.sponsor_assets_title")
       }
       actions={
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Button startIcon={<PrintIcon />} variant="outlined" onClick={print}>
-            {T.translate("sponsor_reports_page.print")}
-          </Button>
-          <ContentTypeToggle value={contentType} onChange={setContentType} />
-        </Stack>
+        <Button startIcon={<PrintIcon />} variant="outlined" onClick={print}>
+          {T.translate("sponsor_reports_page.print")}
+        </Button>
       }
     >
       {loading && (
@@ -329,9 +320,7 @@ const SponsorAssetDrilldownPage = ({
                       >
                         {row.module.title}
                       </Typography>
-                      {row.module.type !== "Document" && (
-                        <StatusPill status={row.status} label={row.status} />
-                      )}
+                      <StatusPill status={row.status} label={row.status} />
                     </Stack>
                     <ContentCell row={row} />
                   </Box>
