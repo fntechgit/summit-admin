@@ -42,7 +42,7 @@ const base = (summitId) =>
   `${window.SPONSOR_REPORTS_API_URL}/api/v1/summits/${summitId}/reports`;
 
 export const getPurchaseDetailsReport =
-  (query = {}) =>
+  (filters = {}, pagination = {}) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
@@ -51,6 +51,7 @@ export const getPurchaseDetailsReport =
     if (!currentSummit?.id) return Promise.resolve();
     const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
+    const query = buildPurchaseQuery(filters, pagination);
     const params = { access_token: accessToken, ...query };
     return getRequest(
       createAction(REQUEST_PURCHASE_DETAILS),
@@ -74,13 +75,14 @@ export const clearPurchaseDetailsValidation = () => ({
 });
 
 export const getPurchaseDetailsLinesReport =
-  (query = {}) =>
+  (filters = {}, pagination = {}) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
     if (!currentSummit?.id) return Promise.resolve();
     const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
+    const query = buildPurchaseLinesQuery(filters, pagination);
     const params = { access_token: accessToken, ...query };
     return getRequest(
       createAction(REQUEST_PURCHASE_DETAILS_LINES),
@@ -117,7 +119,7 @@ export const getPurchaseDetailsFilters = () => async (dispatch, getState) => {
 };
 
 export const getSponsorAssetReport =
-  (query = {}) =>
+  (filters = {}, options = {}) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
@@ -126,6 +128,7 @@ export const getSponsorAssetReport =
     if (!currentSummit?.id) return Promise.resolve();
     const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
+    const query = buildReportQuery({ ...filters, ...options });
     const params = { access_token: accessToken, ...query };
     return getRequest(
       createAction(REQUEST_SPONSOR_ASSET),
