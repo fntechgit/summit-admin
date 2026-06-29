@@ -111,9 +111,8 @@ const PurchaseDetailsReportPage = ({
   }, [view, filters, linesPage, linesPerPage]);
 
   // ── Summary tiles ───────────────────────────────────────────────────────────
-  // D9: Total Refunded tile renders ONLY when activeSummary.total_refunded != null.
-  // Backend main does not yet expose it (ships in PR #24); the presence check
-  // keeps the tile hidden on current main and auto-appears after PR #24 deploys.
+  // D9: Total Refunded tile renders ONLY when total_refunded != null — a defensive
+  // presence check (the field is optional in the summary payload).
   const activeSummary = view === "orders" ? summary : linesSummary;
   // money: format integer CENTS via uicore; guard unexpected nulls with em dash.
   const money = (cents) =>

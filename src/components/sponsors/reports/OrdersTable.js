@@ -24,10 +24,10 @@ import StatusPill from "./StatusPill";
 
 const ISO_DATE_LENGTH = 10; // "YYYY-MM-DD"
 
-// Port of OrdersGrid.js formatCheckoutTime — handles BOTH the current ISO
-// checkout_at (DRF DateTimeField on backend main) AND a future epoch int
-// (pending ClickUp 86bagnfmn).  Parses in UTC so the displayed time always
-// matches the stored UTC value and tests stay timezone-stable.
+// Formats the checkout timestamp — handles BOTH the current ISO checkout_at
+// (DRF DateTimeField on the backend) AND a future epoch int (pending ClickUp
+// 86bagnfmn). Parses in UTC so the displayed time always matches the stored UTC
+// value and tests stay timezone-stable.
 export const formatCheckoutTime = (value) => {
   if (value == null || value === "") return "";
   let m;

@@ -527,6 +527,13 @@ describe("sponsor-reports-actions", () => {
       ]);
       expect(filename).toBe("sponsor-17-page-3.csv");
     });
+
+    it("exportSponsorAssetSectionCsv → bails (no CSV) on a non-positive-int id rather than broadening the export", async () => {
+      // A missing/invalid page_id must NOT widen the CSV to the whole sponsor.
+      await exportSponsorAssetSectionCsv("17", "0")(dispatch, getState);
+      await exportSponsorAssetSectionCsv("abc", "3")(dispatch, getState);
+      expect(getCSV).not.toHaveBeenCalled();
+    });
   });
 
   // ─── makeReadErrorHandler (direct unit tests) ────────────────────────────────
