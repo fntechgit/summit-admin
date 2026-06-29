@@ -21,7 +21,9 @@ import {
   COMPANY_UPDATED,
   COMPANY_ADDED,
   LOGO_ATTACHED,
-  BIG_LOGO_ATTACHED
+  BIG_LOGO_ATTACHED,
+  LOGO_REMOVED,
+  BIG_LOGO_REMOVED
 } from "../../actions/company-actions";
 import {
   SPONSORED_PROJECT_SPONSORSHIP_TYPE_SUPPORTING_COMPANY_DELETED,
@@ -60,11 +62,11 @@ const DEFAULT_STATE = {
 };
 
 const companyReducer = (state = DEFAULT_STATE, action) => {
-  const { type, payload } = action;
+  const { type, payload = {} } = action;
   switch (type) {
     case LOGOUT_USER:
       // we need this in ce the token expired while editing the form
-      if (payload.hasOwnProperty("persistStore")) {
+      if (Object.prototype.hasOwnProperty.call(payload, "persistStore")) {
         return state;
       }
       return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
@@ -95,6 +97,10 @@ const companyReducer = (state = DEFAULT_STATE, action) => {
       const logo = `${state.entity.big_logo}?${new Date().getTime()}`;
       return { ...state, entity: { ...state.entity, big_logo: logo } };
     }
+    case LOGO_REMOVED:
+      return { ...state, entity: { ...state.entity, logo: "" } };
+    case BIG_LOGO_REMOVED:
+      return { ...state, entity: { ...state.entity, big_logo: "" } };
     case COMPANY_UPDATED:
       return state;
     case VALIDATE:
@@ -107,6 +113,7 @@ const companyReducer = (state = DEFAULT_STATE, action) => {
         );
         return e;
       });
+      if (!f) return state;
       project_sponsorships = project_sponsorships.filter((e) => e.id != f.id);
       return {
         ...state,

@@ -171,7 +171,10 @@ const CompanyDialog = ({
     formik.setFieldValue(field, "");
     if (initialEntity?.id) {
       setIsSaving(true);
-      onRemove(initialEntity, field).finally(() => setIsSaving(false));
+      const prevValue = formik.values[field];
+      onRemove(initialEntity, field)
+        .catch(() => formik.setFieldValue(field, prevValue))
+        .finally(() => setIsSaving(false));
     }
   };
 
