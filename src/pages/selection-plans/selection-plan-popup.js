@@ -12,6 +12,7 @@
  * */
 
 import React, { useState } from "react";
+import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -32,6 +33,7 @@ const SelectionPlanPopup = ({ isEditing, onClose, onSave, history }) => {
   };
 
   const handleSave = (values) => {
+    if (isSaving) return Promise.resolve();
     setIsSaving(true);
     return Promise.resolve(onSave(values))
       .then(() => onClose())
@@ -80,6 +82,17 @@ const SelectionPlanPopup = ({ isEditing, onClose, onSave, history }) => {
       </DialogActions>
     </Dialog>
   );
+};
+
+SelectionPlanPopup.propTypes = {
+  isEditing: PropTypes.bool,
+  onClose: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+  history: PropTypes.shape({ push: PropTypes.func }).isRequired
+};
+
+SelectionPlanPopup.defaultProps = {
+  isEditing: false
 };
 
 export default SelectionPlanPopup;
