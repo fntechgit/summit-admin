@@ -327,12 +327,10 @@ const mapStateToProps = ({ sponsorReportsDrilldownState }) => ({
   ...sponsorReportsDrilldownState
 });
 
-const mapDispatchToProps = (dispatch) => ({
-  getSponsorAssetSponsor: (sponsorId) =>
-    dispatch(getSponsorAssetSponsor(sponsorId)),
-  exportSponsorAssetSectionCsv: (sponsorId, pageId) =>
-    dispatch(exportSponsorAssetSectionCsv(sponsorId, pageId))
-});
+const mapDispatchToProps = {
+  getSponsorAssetSponsor,
+  exportSponsorAssetSectionCsv
+};
 
 export default withRouter(
   connect(mapStateToProps, mapDispatchToProps)(SponsorAssetDrilldownPage)
