@@ -37,9 +37,7 @@ import {
   exportPurchaseDetailsCsv,
   exportPurchaseDetailsLinesCsv
 } from "../../../../actions/sponsor-reports-actions";
-import { DEFAULT_PER_PAGE } from "../../../../utils/constants";
-
-const LINES_DEFAULT_PAGE_SIZE = 50;
+import { DEFAULT_PER_PAGE, FIFTY_PER_PAGE } from "../../../../utils/constants";
 
 const PurchaseDetailsReportPage = ({
   // From mapStateToProps
@@ -85,7 +83,7 @@ const PurchaseDetailsReportPage = ({
   const [orderDir, setOrderDir] = useState(1);
   const [view, setView] = useState("orders");
   const [linesPage, setLinesPage] = useState(1);
-  const [linesPerPage, setLinesPerPage] = useState(LINES_DEFAULT_PAGE_SIZE);
+  const [linesPerPage, setLinesPerPage] = useState(FIFTY_PER_PAGE);
 
   // Build the API query from all local state. Memoized so useEffect only re-runs
   // when the query actually changes (referential stability).
