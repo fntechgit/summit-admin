@@ -14,10 +14,13 @@
 import React from "react";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
+import {
+  DEFAULT_PER_PAGE,
+  MILLISECONDS_IN_SECOND
+} from "../../../utils/constants";
 import StatusPill from "./StatusPill";
 
 const ISO_DATE_LENGTH = 10; // "YYYY-MM-DD"
-const MS_PER_SECOND = 1000;
 const NOON = 12;
 
 // Port of OrdersGrid.js formatCheckoutTime — handles BOTH the current ISO
@@ -29,7 +32,7 @@ export const formatCheckoutTime = (value) => {
   if (value == null || value === "") return "";
   const iso =
     typeof value === "number" || /^\d+$/.test(value)
-      ? new Date(Number(value) * MS_PER_SECOND).toISOString()
+      ? new Date(Number(value) * MILLISECONDS_IN_SECOND).toISOString()
       : String(value);
   const m = iso.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})/);
   if (!m) return iso.slice(0, ISO_DATE_LENGTH);
@@ -103,9 +106,6 @@ const columns = [
     // No render — MuiTable fallback reads row["sponsor_note"] directly.
   }
 ];
-
-// eslint-disable-next-line no-magic-numbers
-const DEFAULT_PER_PAGE = 10;
 
 // Props mirror the MuiTable contract used by show-purchase-list-page.
 // rows must be raw API rows (purchase_id present); id mapping is done here.
