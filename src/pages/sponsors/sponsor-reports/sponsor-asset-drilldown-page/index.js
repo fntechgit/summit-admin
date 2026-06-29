@@ -23,7 +23,7 @@
 // value; the ContentCell component gates on filename extension (not MIME type)
 // because the backend returns the same minted URL for both (sponsor_asset_serializers.py:72,76).
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
@@ -47,6 +47,7 @@ import {
   isPositiveIntId
 } from "../../../../utils/methods";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
+import ContentTypeToggle from "../../../../components/sponsors/reports/ContentTypeToggle";
 import usePrint from "../../../../hooks/usePrint";
 import TierBadge from "../../../../components/sponsors/reports/TierBadge";
 import StatusPill from "../../../../components/sponsors/reports/StatusPill";
@@ -143,6 +144,7 @@ const SponsorAssetDrilldownPage = ({
   match
 }) => {
   const print = usePrint();
+  const [contentType, setContentType] = useState("collected");
 
   // sponsorId from URL; summitId from Redux state (not URL params per summit-admin pattern).
   const { sponsorId } = match.params;
@@ -191,6 +193,15 @@ const SponsorAssetDrilldownPage = ({
   const sponsor = detail?.sponsor;
   const pages = detail?.pages || [];
 
+  const visiblePages = pages
+    .map((section) => ({
+      ...section,
+      modules: (section.modules || []).filter(
+        (row) => contentType === "all" || row.module.type === "Media"
+      )
+    }))
+    .filter((section) => section.modules.length > 0);
+
   return (
     <ReportShell
       title={
@@ -198,9 +209,12 @@ const SponsorAssetDrilldownPage = ({
         T.translate("sponsor_reports_page.sponsor_assets_title")
       }
       actions={
-        <Button startIcon={<PrintIcon />} variant="outlined" onClick={print}>
-          {T.translate("sponsor_reports_page.print")}
-        </Button>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Button startIcon={<PrintIcon />} variant="outlined" onClick={print}>
+            {T.translate("sponsor_reports_page.print")}
+          </Button>
+          <ContentTypeToggle value={contentType} onChange={setContentType} />
+        </Stack>
       }
     >
       {loading && (
@@ -251,7 +265,7 @@ const SponsorAssetDrilldownPage = ({
         </Box>
       )}
 
-      {pages.map((section) => (
+      {visiblePages.map((section) => (
         <Card
           key={section.page.id}
           variant="outlined"
@@ -309,7 +323,9 @@ const SponsorAssetDrilldownPage = ({
                       >
                         {row.module.title}
                       </Typography>
-                      <StatusPill status={row.status} label={row.status} />
+                      {row.module.type !== "Document" && (
+                        <StatusPill status={row.status} label={row.status} />
+                      )}
                     </Stack>
                     <ContentCell row={row} />
                   </Box>

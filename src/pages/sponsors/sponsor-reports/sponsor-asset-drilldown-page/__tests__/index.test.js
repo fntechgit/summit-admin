@@ -130,7 +130,13 @@ describe("SponsorAssetDrilldownPage", () => {
         pages: [
           {
             page: { id: 9, title: "Booth", type: "page" },
-            modules: []
+            // At least one Media module so the section is not filtered out in collected mode.
+            modules: [
+              {
+                module: { id: 1, title: "Logo", type: "Media" },
+                status: "completed"
+              }
+            ]
           }
         ]
       }
@@ -245,6 +251,9 @@ describe("SponsorAssetDrilldownPage", () => {
       }
     });
     await act(async () => {});
+    // Toggle to "all" so the Document module card is visible.
+    fireEvent.click(screen.getByText("sponsor_reports_page.content_all"));
+    await act(async () => {});
     const pdfLink = screen.getByRole("link", { name: /deck\.pdf/i });
     expect(pdfLink).toHaveAttribute("href", "https://x/deck.pdf");
     expect(pdfLink).toHaveAttribute("rel", "noopener noreferrer");
@@ -295,7 +304,127 @@ describe("SponsorAssetDrilldownPage", () => {
       }
     });
     await act(async () => {});
+    // Toggle to "all" so the Info module card is visible.
+    fireEvent.click(screen.getByText("sponsor_reports_page.content_all"));
+    await act(async () => {});
     expect(screen.getByText("cespinTEST3")).toBeInTheDocument();
     expect(screen.queryByText("<p>cespinTEST3</p>")).not.toBeInTheDocument();
+  });
+
+  it("S1a: Document row title is shown but StatusPill is suppressed; Media row StatusPill is present", async () => {
+    renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
+      detail: {
+        sponsor: { id: 17, name: "Acme", tier: "Gold", pages_active: 1 },
+        pages: [
+          {
+            page: { id: 9, title: "Booth", type: "page" },
+            modules: [
+              {
+                module: { id: 1, title: "Logo", type: "Media" },
+                status: "submitted"
+              },
+              {
+                module: { id: 2, title: "Deck", type: "Document" },
+                status: "completed"
+              }
+            ]
+          }
+        ]
+      }
+    });
+    await act(async () => {});
+
+    // Toggle to "all" so the Document row is visible alongside the Media row.
+    fireEvent.click(screen.getByText("sponsor_reports_page.content_all"));
+    await act(async () => {});
+
+    // Document row title is rendered.
+    expect(screen.getByText("Deck")).toBeInTheDocument();
+    // Document StatusPill is suppressed — the status label "completed" must not appear.
+    expect(screen.queryByText("completed")).not.toBeInTheDocument();
+    // Media row StatusPill is present — the status label "submitted" appears.
+    expect(screen.getByText("submitted")).toBeInTheDocument();
+  });
+
+  it("S1b default collected: only Media module cards render; a section with only non-Media rows is absent", async () => {
+    renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
+      detail: {
+        sponsor: { id: 17, name: "Acme", tier: "Gold", pages_active: 2 },
+        pages: [
+          {
+            page: { id: 9, title: "Booth", type: "page" },
+            modules: [
+              {
+                module: { id: 1, title: "Logo", type: "Media" },
+                status: "completed"
+              },
+              {
+                module: { id: 2, title: "Deck", type: "Document" },
+                status: "pending"
+              },
+              {
+                module: { id: 3, title: "Blurb", type: "Info" },
+                status: "pending"
+              }
+            ]
+          },
+          {
+            page: { id: 10, title: "Branding", type: "page" },
+            modules: [
+              {
+                module: { id: 4, title: "PDF Only", type: "Document" },
+                status: "pending"
+              }
+            ]
+          }
+        ]
+      }
+    });
+    await act(async () => {});
+
+    // Media card is visible in default "collected" mode.
+    expect(screen.getByText("Logo")).toBeInTheDocument();
+    // Document and Info module cards are not rendered.
+    expect(screen.queryByText("Deck")).not.toBeInTheDocument();
+    expect(screen.queryByText("Blurb")).not.toBeInTheDocument();
+    // A section whose only modules are non-Media is not rendered.
+    expect(screen.queryByText("Branding")).not.toBeInTheDocument();
+  });
+
+  it("S1b toggle to all: Document and Info module cards become visible", async () => {
+    renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
+      detail: {
+        sponsor: { id: 17, name: "Acme", tier: "Gold", pages_active: 1 },
+        pages: [
+          {
+            page: { id: 9, title: "Booth", type: "page" },
+            modules: [
+              {
+                module: { id: 1, title: "Logo", type: "Media" },
+                status: "completed"
+              },
+              {
+                module: { id: 2, title: "Deck", type: "Document" },
+                status: "pending"
+              },
+              {
+                module: { id: 3, title: "Blurb", type: "Info" },
+                status: "pending"
+              }
+            ]
+          }
+        ]
+      }
+    });
+    await act(async () => {});
+
+    // Toggle to "all".
+    fireEvent.click(screen.getByText("sponsor_reports_page.content_all"));
+    await act(async () => {});
+
+    // All module cards are now visible.
+    expect(screen.getByText("Logo")).toBeInTheDocument();
+    expect(screen.getByText("Deck")).toBeInTheDocument();
+    expect(screen.getByText("Blurb")).toBeInTheDocument();
   });
 });
