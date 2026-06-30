@@ -34,7 +34,8 @@ const TaxTypePopup = ({
     setIsSaving(true);
     onSave(values)
       .then(() => onClose())
-      .catch(() => setIsSaving(false));
+      .catch(() => {})
+      .finally(() => setIsSaving(false));
   };
 
   return (

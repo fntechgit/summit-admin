@@ -161,6 +161,22 @@ describe("TaxTypeListPage", () => {
     expect(resetTaxTypeForm).toHaveBeenCalled();
   });
 
+  it("fetches the entity and opens the popup when clicking edit", async () => {
+    renderWithRedux(<TaxTypeListPage match={{ url: "/taxes" }} />, {
+      initialState
+    });
+
+    expect(screen.queryByTestId("tax-type-popup")).not.toBeInTheDocument();
+
+    await act(async () => {
+      await userEvent.click(screen.getByRole("button", { name: "edit-row" }));
+      await flushPromises();
+    });
+
+    expect(getTaxType).toHaveBeenCalledWith(1);
+    expect(screen.getByTestId("tax-type-popup")).toBeInTheDocument();
+  });
+
   it("re-syncs the list after a failed delete", async () => {
     deleteTaxType.mockReturnValue(() =>
       Promise.reject(new Error("delete failed"))
