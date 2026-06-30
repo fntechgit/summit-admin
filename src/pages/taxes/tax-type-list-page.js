@@ -66,13 +66,13 @@ const TaxTypeListPage = ({
   const handleDelete = (taxTypeId) => {
     deleteTaxType(taxTypeId)
       .finally(() => {
-        getTaxTypes(term, currentPage, perPage, order, orderDir);
+        getTaxTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
       })
       .catch(() => {});
   };
 
   const handleSort = (key, dir) => {
-    getTaxTypes(term, currentPage, perPage, key, dir);
+    getTaxTypes(term, DEFAULT_CURRENT_PAGE, perPage, key, dir);
   };
 
   const handleSearch = (searchTerm) => {
