@@ -21,6 +21,14 @@ describe("AXES", () => {
     expect(AXES.component.isUnknown(noComp)).toBe(true);
     expect(AXES.component.labelOf(noComp)).toBe("(Unnamed)");
   });
+  it("trims whitespace from component labels so key and label stay in sync", () => {
+    const padded = { module: { component_name: " Logo " } };
+    const exact = { module: { component_name: "logo" } };
+    // Both collapse to the same bucket key.
+    expect(AXES.component.keyOf(padded)).toBe(AXES.component.keyOf(exact));
+    // Label is trimmed but preserves original casing.
+    expect(AXES.component.labelOf(padded)).toBe("Logo");
+  });
   it("uses page title as the page label", () => {
     expect(AXES.page.keyOf(row)).toBe(99);
     expect(AXES.page.labelOf(row)).toBe("Booth Staff");

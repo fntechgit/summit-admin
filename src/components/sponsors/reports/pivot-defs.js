@@ -28,8 +28,11 @@ export const AXES = {
       blank(r.module?.component_name)
         ? null
         : r.module.component_name.trim().toLowerCase(),
+    // Trim to keep label/key in sync: " Logo " keys as "logo" and should display as "Logo".
     labelOf: (r) =>
-      blank(r.module?.component_name) ? "(Unnamed)" : r.module.component_name,
+      blank(r.module?.component_name)
+        ? "(Unnamed)"
+        : r.module.component_name.trim(),
     isUnknown: (r) => blank(r.module?.component_name)
   }
 };
