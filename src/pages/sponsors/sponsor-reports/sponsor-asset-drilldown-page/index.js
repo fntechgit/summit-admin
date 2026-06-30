@@ -33,103 +33,22 @@ import {
   Card,
   CardContent,
   Grid2,
-  Link as MuiLink,
   Stack,
   Typography
 } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
-import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
-import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 import DownloadIcon from "@mui/icons-material/Download";
-import {
-  htmlToPlainText,
-  isImageUrl,
-  isPositiveIntId
-} from "../../../../utils/methods";
+import { isPositiveIntId } from "../../../../utils/methods";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import usePrint from "../../../../hooks/usePrint";
 import TierBadge from "../../../../components/sponsors/reports/TierBadge";
 import StatusPill from "../../../../components/sponsors/reports/StatusPill";
 import SponsorAvatar from "../../../../components/sponsors/reports/SponsorAvatar";
+import ContentCell from "../../../../components/sponsors/reports/ContentCell";
 import {
   exportSponsorAssetSectionCsv,
   getSponsorAssetSponsor
 } from "../../../../actions/sponsor-reports-actions";
-
-// ContentCell uses T.translate directly (no `t` prop) — this component is
-// co-located with the page and uses the same i18n module as everything else.
-const ContentCell = ({ row }) => {
-  const url =
-    row.content?.preview_url || row.actions?.single_download_url || null;
-  const filename = row.content?.filename || "";
-  // value/summary may carry HTML markup — flatten to plain text (don't render markup).
-  const text = htmlToPlainText(
-    row.content?.value || row.content?.summary || filename
-  );
-  const isImage = !!url && isImageUrl(filename || url);
-
-  if (url && isImage) {
-    return (
-      <Box
-        component="img"
-        src={url}
-        alt={row.module.title}
-        sx={{
-          width: "100%",
-          height: 120,
-          objectFit: "contain",
-          borderRadius: 1,
-          bgcolor: "grey.50"
-        }}
-      />
-    );
-  }
-  if (url) {
-    return (
-      <MuiLink
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        sx={{ display: "flex", alignItems: "flex-start", gap: 0.5 }}
-      >
-        <InsertDriveFileOutlinedIcon
-          fontSize="small"
-          sx={{ flexShrink: 0, mt: 0.25 }}
-        />
-        {/* Long hashed filenames have no spaces; overflowWrap:anywhere breaks
-            the unbroken hash so the link wraps inside its card instead of
-            overflowing. minWidth:0 lets the text shrink within the flex row. */}
-        <Typography
-          variant="body2"
-          title={filename}
-          sx={{ flex: 1, minWidth: 0, overflowWrap: "anywhere" }}
-        >
-          {filename || row.module.title}
-        </Typography>
-        <DownloadIcon fontSize="small" sx={{ flexShrink: 0, mt: 0.25 }} />
-      </MuiLink>
-    );
-  }
-  if (text) {
-    return (
-      <Typography variant="body2" noWrap title={text}>
-        {text}
-      </Typography>
-    );
-  }
-  return (
-    <Stack
-      alignItems="center"
-      spacing={0.5}
-      sx={{ color: "text.disabled", py: 2 }}
-    >
-      <ImageOutlinedIcon />
-      <Typography variant="caption">
-        {T.translate("sponsor_reports_page.pending_upload")}
-      </Typography>
-    </Stack>
-  );
-};
 
 const SponsorAssetDrilldownPage = ({
   // From mapStateToProps
