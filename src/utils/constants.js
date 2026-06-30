@@ -152,6 +152,8 @@ export const TEN = 10;
 
 export const ONE_HUNDRED = 100;
 
+export const TEN_THOUSAND = 10000;
+
 export const COLUMN_4 = 4;
 
 export const COLUMN_8 = 8;
@@ -161,6 +163,8 @@ export const DEFAULT_Z_INDEX = 1;
 export const HIGH_Z_INDEX = 9999;
 
 export const DELTA_SECS = 300;
+
+export const MAX_CENTS = 99;
 
 export const EVENT_TYPE_PRESENTATION = "PresentationType";
 
