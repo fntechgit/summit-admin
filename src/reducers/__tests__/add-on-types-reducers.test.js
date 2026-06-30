@@ -14,17 +14,13 @@ import {
 // ─── addOnTypeReducer ─────────────────────────────────────────────────────────
 
 describe("addOnTypeReducer", () => {
-  it("RESET_ADD_ON_TYPE_FORM resets entity and clears errors", () => {
-    const dirty = {
-      entity: { id: 3, name: "Foo" },
-      errors: { name: "required" }
-    };
+  it("RESET_ADD_ON_TYPE_FORM resets entity to DEFAULT_ENTITY", () => {
+    const dirty = { entity: { id: 3, name: "Foo" } };
     const state = addOnTypeReducer(dirty, {
       type: RESET_ADD_ON_TYPE_FORM,
       payload: {}
     });
     expect(state.entity).toEqual(DEFAULT_ENTITY);
-    expect(state.errors).toEqual({});
   });
 
   it("RECEIVE_ADD_ON_TYPE merges response into entity", () => {
@@ -37,18 +33,14 @@ describe("addOnTypeReducer", () => {
     expect(state.entity.name).toBe("VIP Pass");
   });
 
-  it("LOGOUT_USER without persistStore resets entity and errors", () => {
-    const dirty = {
-      entity: { id: 3, name: "Foo" },
-      errors: { name: "required" }
-    };
+  it("LOGOUT_USER without persistStore resets entity", () => {
+    const dirty = { entity: { id: 3, name: "Foo" } };
     const state = addOnTypeReducer(dirty, { type: LOGOUT_USER, payload: {} });
     expect(state.entity).toEqual(DEFAULT_ENTITY);
-    expect(state.errors).toEqual({});
   });
 
   it("LOGOUT_USER with persistStore preserves current state", () => {
-    const dirty = { entity: { id: 3, name: "Foo" }, errors: {} };
+    const dirty = { entity: { id: 3, name: "Foo" } };
     const state = addOnTypeReducer(dirty, {
       type: LOGOUT_USER,
       payload: { persistStore: true }
@@ -81,41 +73,19 @@ describe("addOnTypesListReducer", () => {
     expect(state.totalAddOnTypes).toBe(0);
   });
 
-  describe("REQUEST_ADD_ON_TYPES", () => {
-    it("clears addOnTypes when not a page/sort change (e.g. new search)", () => {
-      const stateWithData = { ...emptyState, addOnTypes: [{ id: 1 }] };
-      const state = addOnTypesListReducer(stateWithData, {
-        type: REQUEST_ADD_ON_TYPES,
-        payload: {
-          order: "name",
-          orderDir: 1,
-          page: 1,
-          perPage: 10,
-          term: "vip"
-        }
-      });
-      expect(state.addOnTypes).toEqual([]);
+  it("REQUEST_ADD_ON_TYPES updates pagination and term without touching the list", () => {
+    const stateWithData = {
+      ...emptyState,
+      addOnTypes: [{ id: 1 }],
+      currentPage: 2
+    };
+    const state = addOnTypesListReducer(stateWithData, {
+      type: REQUEST_ADD_ON_TYPES,
+      payload: { order: "name", orderDir: 1, page: 1, perPage: 10, term: "vip" }
     });
-
-    it("preserves addOnTypes when only the page changes", () => {
-      const stateWithData = {
-        ...emptyState,
-        addOnTypes: [{ id: 1 }],
-        currentPage: 1
-      };
-      const state = addOnTypesListReducer(stateWithData, {
-        type: REQUEST_ADD_ON_TYPES,
-        payload: {
-          order: "name",
-          orderDir: 1,
-          page: 2,
-          perPage: 10,
-          term: null
-        }
-      });
-      expect(state.addOnTypes).toEqual([{ id: 1 }]);
-      expect(state.currentPage).toBe(2);
-    });
+    expect(state.currentPage).toBe(1);
+    expect(state.order).toBe("name");
+    expect(state.term).toBe("vip");
   });
 
   describe("RECEIVE_ADD_ON_TYPES", () => {

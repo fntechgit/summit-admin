@@ -32,7 +32,6 @@ import AddOnTypesDialog from "./add-on-types-dialog";
 const AddOnTypesListPage = ({
   addOnTypes,
   currentAddOnType,
-  currentAddOnTypeErrors,
   currentPage,
   perPage,
   term,
@@ -195,7 +194,6 @@ const AddOnTypesListPage = ({
       {open && (
         <AddOnTypesDialog
           entity={currentAddOnType}
-          errors={currentAddOnTypeErrors}
           onSave={handleAddOnTypeSave}
           onClose={handleClose}
         />
@@ -209,8 +207,7 @@ const mapStateToProps = ({
   currentAddOnTypeState
 }) => ({
   ...currentAddonTypesListState,
-  currentAddOnType: currentAddOnTypeState.entity,
-  currentAddOnTypeErrors: currentAddOnTypeState.errors
+  currentAddOnType: currentAddOnTypeState.entity
 });
 
 export default connect(mapStateToProps, {

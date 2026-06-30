@@ -25,8 +25,7 @@ export const DEFAULT_ENTITY = {
 };
 
 const DEFAULT_STATE = {
-  entity: DEFAULT_ENTITY,
-  errors: {}
+  entity: DEFAULT_ENTITY
 };
 
 const addOnTypeReducer = (state = DEFAULT_STATE, action) => {
@@ -37,10 +36,10 @@ const addOnTypeReducer = (state = DEFAULT_STATE, action) => {
       if (Object.prototype.hasOwnProperty.call(payload, "persistStore")) {
         return state;
       }
-      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+      return { ...state, entity: { ...DEFAULT_ENTITY } };
     }
     case RESET_ADD_ON_TYPE_FORM: {
-      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+      return { ...state, entity: { ...DEFAULT_ENTITY } };
     }
     case RECEIVE_ADD_ON_TYPE: {
       const entity = { ...payload.response };

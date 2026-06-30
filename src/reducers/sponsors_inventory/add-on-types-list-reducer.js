@@ -36,33 +36,8 @@ const addOnTypesListReducer = (state = DEFAULT_STATE, action = {}) => {
       return DEFAULT_STATE;
     }
     case REQUEST_ADD_ON_TYPES: {
-      const { order, orderDir, page, perPage, ...rest } = payload;
-
-      if (
-        order !== state.order ||
-        orderDir !== state.orderDir ||
-        page !== state.currentPage
-      ) {
-        // if the change was in page or order, keep selection
-        return {
-          ...state,
-          order,
-          orderDir,
-          currentPage: page,
-          perPage,
-          ...rest
-        };
-      }
-
-      return {
-        ...state,
-        order,
-        orderDir,
-        addOnTypes: [],
-        currentPage: page,
-        perPage,
-        ...rest
-      };
+      const { order, orderDir, term, page, perPage } = payload;
+      return { ...state, order, orderDir, term, currentPage: page, perPage };
     }
     case RECEIVE_ADD_ON_TYPES: {
       const { current_page, total, last_page, data } = payload.response;
