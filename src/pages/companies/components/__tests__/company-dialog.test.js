@@ -18,7 +18,23 @@ jest.mock("openstack-uicore-foundation/lib/utils/query-actions", () => ({
 }));
 
 jest.mock("openstack-uicore-foundation/lib/components", () => ({
-  UploadInputV3: () => <div data-testid="upload-input" />
+  UploadInputV3: ({ id, onUploadComplete, onUploadStart, value }) => (
+    <div
+      data-testid={`upload-input-${id}`}
+      data-logo={value?.[0]?.file_path ?? ""}
+    >
+      <button
+        type="button"
+        data-testid={`trigger-upload-${id}`}
+        onClick={() => {
+          onUploadStart?.();
+          onUploadComplete({ path: "/uploads/", name: `${id}.png` });
+        }}
+      >
+        Upload
+      </button>
+    </div>
+  )
 }));
 
 jest.mock(
@@ -189,5 +205,56 @@ describe("CompanyDialog", () => {
     });
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  describe("logo upload", () => {
+    it("reverts logo preview and re-enables save when onAttach fails", async () => {
+      const user = userEvent.setup();
+      let rejectAttach;
+      const onAttach = jest.fn(
+        () =>
+          new Promise((_, rej) => {
+            rejectAttach = rej;
+          })
+      );
+      const onRemove = jest.fn(() => Promise.resolve());
+
+      render(
+        <CompanyDialog
+          entity={{
+            ...BASE_ENTITY,
+            id: 1,
+            name: "Acme Corp",
+            logo: "old-logo.png"
+          }}
+          onSave={onSave}
+          onClose={onClose}
+          onAttach={onAttach}
+          onRemove={onRemove}
+        />
+      );
+
+      const saveButton = screen.getByText("general.save").closest("button");
+
+      // trigger the upload completion (CDN upload already happened)
+      await act(async () => {
+        await user.click(screen.getByTestId("trigger-upload-logo"));
+      });
+
+      // save should be blocked while onAttach is in flight
+      expect(saveButton).toBeDisabled();
+
+      // API call fails
+      await act(async () => {
+        rejectAttach(new Error("network error"));
+      });
+
+      // save re-enables and logo preview reverts to the previous value
+      await waitFor(() => expect(saveButton).not.toBeDisabled());
+      expect(screen.getByTestId("upload-input-logo")).toHaveAttribute(
+        "data-logo",
+        "old-logo.png"
+      );
+    });
   });
 });

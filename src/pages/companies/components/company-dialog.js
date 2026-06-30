@@ -158,12 +158,13 @@ const CompanyDialog = ({
     };
     delete uploadLogo.path;
     delete uploadLogo.name;
+    const prevValue = formik.values[field];
     formik.setFieldValue(field, uploadLogo);
     if (initialEntity?.id) {
       setIsSaving(true);
-      onAttach(initialEntity, uploadLogo, field).finally(() =>
-        setIsSaving(false)
-      );
+      onAttach(initialEntity, uploadLogo, field)
+        .catch(() => formik.setFieldValue(field, prevValue))
+        .finally(() => setIsSaving(false));
     }
   };
 
