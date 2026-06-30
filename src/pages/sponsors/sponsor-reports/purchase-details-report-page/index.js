@@ -191,6 +191,7 @@ const PurchaseDetailsReportPage = ({
   const formOptions = (filterOptions?.forms || []).filter((f) =>
     f.name?.trim()
   );
+  const paymentMethodOptions = filterOptions?.payment_methods || [];
 
   const extraControls = (draft, update) => (
     <>
@@ -221,6 +222,21 @@ const PurchaseDetailsReportPage = ({
         {formOptions.map((f) => (
           <MenuItem key={f.code} value={f.code}>
             {f.name}
+          </MenuItem>
+        ))}
+      </TextField>
+      <TextField
+        select
+        size="small"
+        sx={{ minWidth: 160 }}
+        label={T.translate("sponsor_reports_page.filter_payment_method")}
+        value={draft.paymentMethod || ""}
+        onChange={(e) => update({ paymentMethod: e.target.value || undefined })}
+      >
+        <MenuItem value="">{T.translate("sponsor_reports_page.any")}</MenuItem>
+        {paymentMethodOptions.map((pm) => (
+          <MenuItem key={pm} value={pm}>
+            {pm}
           </MenuItem>
         ))}
       </TextField>

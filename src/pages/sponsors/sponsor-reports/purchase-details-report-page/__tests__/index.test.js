@@ -2,6 +2,7 @@
 import "@testing-library/jest-dom";
 import React from "react";
 import { act, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Router, Route } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import { renderWithRedux } from "utils/test-utils";
@@ -108,7 +109,12 @@ function buildState(summaryOverrides = {}, { total = 1 } = {}) {
         total_refunded: null,
         ...summaryOverrides
       },
-      filterOptions: { sponsors: [], statuses: [], forms: [] },
+      filterOptions: {
+        sponsors: [],
+        statuses: [],
+        forms: [],
+        payment_methods: ["Card", "Invoice"]
+      },
       total,
       loading: false,
       readError: null,
@@ -441,6 +447,21 @@ describe("PurchaseDetailsReportPage", () => {
     expect(exportPurchaseDetailsLinesCsv).toHaveBeenCalledWith({
       dateFrom: "2026-01-01"
     });
+  });
+
+  it("renders a Payment Method filter whose options come from filterOptions.payment_methods", async () => {
+    renderPage();
+    // MUI v6 Select: role="combobox" named by its InputLabel; menu items are role="option".
+    await act(async () => {
+      await userEvent.click(
+        screen.getByRole("combobox", {
+          name: "sponsor_reports_page.filter_payment_method"
+        })
+      );
+    });
+    // The fixture's payment_methods: ["Card", "Invoice"] must render as options.
+    expect(screen.getByRole("option", { name: "Card" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Invoice" })).toBeInTheDocument();
   });
 
   describe("validation error — snackbar hook", () => {
