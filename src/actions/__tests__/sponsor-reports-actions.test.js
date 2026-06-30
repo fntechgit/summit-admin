@@ -25,7 +25,9 @@ import {
   PURCHASE_DETAILS_READ_ERROR,
   PURCHASE_DETAILS_VALIDATION_ERROR,
   RECEIVE_SPONSOR_ASSET_FILTERS,
+  REQUEST_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET_ROWS,
+  SPONSOR_ASSET_READ_ERROR,
   REQUEST_SPONSOR_DRILLDOWN,
   RECEIVE_SPONSOR_DRILLDOWN,
   SPONSOR_DRILLDOWN_READ_ERROR
@@ -330,6 +332,148 @@ describe("sponsor-reports-actions", () => {
         .filter((a) => a.type === RECEIVE_SPONSOR_ASSET_ROWS);
       expect(rowsActions).toHaveLength(1);
       expect(rowsActions[0].payload.response.data).toEqual([{ id: "fresh" }]);
+    });
+
+    it("suppresses REQUEST_SPONSOR_ASSET from a stale call (prevents stuck-loading after concurrent supersede)", async () => {
+      // Hole 1: REQUEST_SPONSOR_ASSET is dispatched after `await getAccessTokenSafely()`.
+      // Without the guardedDispatch fix, call A's late REQUEST (after B already committed
+      // RECEIVE_SPONSOR_ASSET_ROWS) would flip loading:true with no terminal to clear it.
+      //
+      // Mechanism: defer call A's token so it resumes AFTER call B has fully committed.
+      // mySeq_A is captured synchronously before the await, so sponsorAssetRowsSeq has
+      // already been incremented to 2 (by B) before A's token resolves.
+      let resolveTokenA;
+      jest
+        .spyOn(methods, "getAccessTokenSafely")
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              resolveTokenA = () => resolve("TOKEN");
+            })
+        )
+        .mockResolvedValue("TOKEN"); // B and any subsequent calls resolve immediately
+
+      getRequest.mockImplementation(
+        (_requestAC, receiveActionCreator) => () => (guardedOrDispatch) => {
+          const response = {
+            data: [{ id: "fresh" }],
+            last_page: 1,
+            summary: null
+          };
+          if (typeof receiveActionCreator === "function") {
+            guardedOrDispatch(receiveActionCreator({ response }));
+          }
+          return Promise.resolve({ response });
+        }
+      );
+
+      const store = mockStore(MOCK_STATE);
+
+      // Start stale call A — blocks waiting for its token (mySeq_A=1, seq=1).
+      const stalePromise = store.dispatch(getSponsorAssetRows({}));
+      // Start fresh call B — token resolves immediately; bumps seq to 2 before A resumes.
+      await store.dispatch(getSponsorAssetRows({}));
+      await flushPromises();
+
+      // Unblock A: A's token resolves. At this point mySeq_A=1 but sponsorAssetRowsSeq=2.
+      // guardedDispatch suppresses A's REQUEST_SPONSOR_ASSET (and every subsequent dispatch).
+      resolveTokenA();
+      await stalePromise;
+      await flushPromises();
+
+      const actions = store.getActions();
+      // Only B's REQUEST dispatched — A's was suppressed (would have flipped loading:true).
+      const requestActions = actions.filter(
+        (a) => a.type === REQUEST_SPONSOR_ASSET
+      );
+      expect(requestActions).toHaveLength(1);
+      // Only B's RECEIVE dispatched — A's is also suppressed.
+      const receiveActions = actions.filter(
+        (a) => a.type === RECEIVE_SPONSOR_ASSET_ROWS
+      );
+      expect(receiveActions).toHaveLength(1);
+      // The last loading-relevant action is B's RECEIVE → loading ends false (not stuck true).
+      const loadingRelevant = actions.filter(
+        (a) =>
+          a.type === REQUEST_SPONSOR_ASSET ||
+          a.type === RECEIVE_SPONSOR_ASSET_ROWS ||
+          a.type === SPONSOR_ASSET_READ_ERROR
+      );
+      expect(loadingRelevant[loadingRelevant.length - 1].type).toBe(
+        RECEIVE_SPONSOR_ASSET_ROWS
+      );
+    });
+
+    it("suppresses SPONSOR_ASSET_READ_ERROR from a stale call's error handler (stale HTTP error cannot clobber fresh success)", async () => {
+      // Hole 2: fetchPage passed raw dispatch to getRequest, so a stale request's HTTP error
+      // fired SPONSOR_ASSET_READ_ERROR unguarded — persisting readError over fresh success.
+      //
+      // Mechanism: defer A's token so B commits success first. Then switch the getRequest mock
+      // to invoke the error handler (simulating HTTP 403) before resolving A's token so that
+      // when A calls fetchPage it triggers the error path through its own guardedDispatch.
+      // Note: makeReadErrorHandler for the default/403 branch calls onReadError which dispatches
+      // SPONSOR_ASSET_READ_ERROR. With the fix, this dispatch goes through guardedDispatch
+      // (mySeq_A=1 ≠ seq=2) and is suppressed.
+      // Fidelity caveat: this test simulates the error handler being invoked by the getRequest
+      // mock directly rather than by the real uicore HTTP layer. It honestly exercises that
+      // guardedDispatch (passed as the dispatch arg) blocks the handler's dispatch when stale.
+      let resolveTokenA;
+      jest
+        .spyOn(methods, "getAccessTokenSafely")
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              resolveTokenA = () => resolve("TOKEN");
+            })
+        )
+        .mockResolvedValue("TOKEN");
+
+      // Initial mock: B calls this and succeeds.
+      getRequest.mockImplementation(
+        (_requestAC, receiveActionCreator) => () => (guardedOrDispatch) => {
+          const response = {
+            data: [{ id: "fresh" }],
+            last_page: 1,
+            summary: null
+          };
+          if (typeof receiveActionCreator === "function") {
+            guardedOrDispatch(receiveActionCreator({ response }));
+          }
+          return Promise.resolve({ response });
+        }
+      );
+
+      const store = mockStore(MOCK_STATE);
+
+      // Start stale call A — deferred token; start fresh call B — resolves and commits.
+      const stalePromise = store.dispatch(getSponsorAssetRows({}));
+      await store.dispatch(getSponsorAssetRows({}));
+      await flushPromises();
+
+      // Switch mock to error path BEFORE unblocking A. When A's fetchPage runs it will
+      // invoke the errorHandler through A's guardedDispatch (mySeq_A=1 ≠ seq=2 → suppressed).
+      // The mock returns Promise.resolve() (no {response}) which causes a TypeError in the
+      // thunk's try block; the catch also dispatches via guardedDispatch — also suppressed.
+      getRequest.mockImplementation(
+        (_requestAC, _receiveAC, _url, errorHandler) =>
+          () =>
+          (guardedOrDispatch) => {
+            // Simulate getRequest invoking the error handler for a 403 (dispatches onReadError).
+            errorHandler({ status: 403 }, {})(guardedOrDispatch);
+            return Promise.resolve(); // no {response} → TypeError in thunk → catch also guarded
+          }
+      );
+
+      resolveTokenA();
+      await stalePromise;
+      await flushPromises();
+
+      const types = store.getActions().map((a) => a.type);
+      // B's success committed and must stand.
+      expect(types).toContain(RECEIVE_SPONSOR_ASSET_ROWS);
+      // A's stale error must NOT appear — guardedDispatch swallows both the error handler's
+      // dispatch and the catch's dispatch.
+      expect(types).not.toContain(SPONSOR_ASSET_READ_ERROR);
     });
   });
 

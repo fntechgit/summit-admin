@@ -160,11 +160,21 @@ export const getSponsorAssetRows =
     // one will bump the counter and render this invocation "stale" before we finish.
     sponsorAssetRowsSeq += 1;
     const mySeq = sponsorAssetRowsSeq;
+    // Single guard wrapper: every state mutation in this thunk goes through guardedDispatch
+    // so a superseded invocation cannot mutate state at all. Covers:
+    //   • REQUEST_SPONSOR_ASSET after the token await (stuck-loading hole)
+    //   • per-page error dispatches inside getRequest's error handler (stale-error hole)
+    //   • both terminal dispatches (RECEIVE and SPONSOR_ASSET_READ_ERROR in catch)
+    // The only un-gated path is doLogin on a stale 401 — acceptable.
+    const guardedDispatch = (action) => {
+      if (mySeq === sponsorAssetRowsSeq) dispatch(action);
+    };
     const accessToken = await getAccessTokenSafely();
-    dispatch(createAction(REQUEST_SPONSOR_ASSET)({})); // loading:true, readError:null
+    guardedDispatch(createAction(REQUEST_SPONSOR_ASSET)({})); // loading:true, readError:null
     const baseQuery = buildReportQuery({ ...filters, moduleType: "Media" });
     const url = `${base(currentSummit.id)}/sponsor-assets`;
     // null request action (loading already set); throwaway receive — we read {response}.
+    // guardedDispatch is passed so getRequest's internal error handler is also seq-guarded.
     const fetchPage = (page) =>
       getRequest(
         null,
@@ -180,7 +190,7 @@ export const getSponsorAssetRows =
         ...baseQuery,
         per_page: ALL_ROWS_PER_PAGE,
         page
-      })(dispatch);
+      })(guardedDispatch);
     try {
       const { response } = await fetchPage(1);
       let allRows = response.data;
@@ -189,28 +199,18 @@ export const getSponsorAssetRows =
         const next = await fetchPage(p);
         allRows = allRows.concat(next.response.data);
       }
-      // Only commit if we are still the latest call. A superseded (stale) invocation
-      // that finishes after a newer one would otherwise overwrite the newer call's rows.
-      // Per-page makeReadErrorHandler error dispatches inside the loop are not seq-guarded
-      // (they live inside getRequest and target the dominant case of a stale SUCCESS).
-      if (mySeq === sponsorAssetRowsSeq) {
-        dispatch(
-          createAction(RECEIVE_SPONSOR_ASSET_ROWS)({
-            response: { ...response, data: allRows }
-          })
-        );
-      }
+      guardedDispatch(
+        createAction(RECEIVE_SPONSOR_ASSET_ROWS)({
+          response: { ...response, data: allRows }
+        })
+      );
     } catch (e) {
       // For HTTP failures, makeReadErrorHandler already dispatched SPONSOR_ASSET_READ_ERROR
-      // (which clears the local `loading` flag — reducer sets `loading:false`). But global
-      // stopLoading does NOT clear this reducer's local `loading`, and a NON-HTTP exception
-      // after REQUEST_SPONSOR_ASSET would otherwise leave the page stuck loading. So dispatch
-      // a local terminal SPONSOR_ASSET_READ_ERROR here too (idempotent if both fire).
-      if (mySeq === sponsorAssetRowsSeq) {
-        dispatch(
-          createAction(SPONSOR_ASSET_READ_ERROR)({ message: e?.message })
-        );
-      }
+      // through guardedDispatch (clearing local loading if this is still the live call).
+      // Also guards non-HTTP exceptions so a stale catch cannot flip readError.
+      guardedDispatch(
+        createAction(SPONSOR_ASSET_READ_ERROR)({ message: e?.message })
+      );
     }
     return Promise.resolve();
   };
