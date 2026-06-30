@@ -283,6 +283,54 @@ describe("sponsor-reports-actions", () => {
       // 4. The carried summary is page 1's summary (embedded in the first response).
       expect(rowsActions[0].payload.response.summary).toEqual(page1Summary);
     });
+
+    it("drops a stale RECEIVE_SPONSOR_ASSET_ROWS when a newer call supersedes it (request token)", async () => {
+      // Two back-to-back thunk invocations.  The FIRST call's page-1 fetch is
+      // deferred so it resolves AFTER the SECOND call has fully completed.
+      // Assert: only one RECEIVE_SPONSOR_ASSET_ROWS is dispatched, carrying the
+      // second call's data — the stale first call must not overwrite it.
+      let resolveFirstPage;
+      let getRequestCallNum = 0;
+
+      getRequest.mockImplementation(
+        (_requestAC, receiveActionCreator) => () => (dispatch) => {
+          getRequestCallNum += 1;
+          const callNum = getRequestCallNum;
+          const data = callNum === 1 ? [{ id: "stale" }] : [{ id: "fresh" }];
+          const response = { data, last_page: 1, summary: null };
+          if (typeof receiveActionCreator === "function") {
+            dispatch(receiveActionCreator({ response }));
+          }
+          if (callNum === 1) {
+            // First thunk's page-1 fetch: hold until explicitly released.
+            return new Promise((resolve) => {
+              resolveFirstPage = () => resolve({ response });
+            });
+          }
+          return Promise.resolve({ response });
+        }
+      );
+
+      const store = mockStore(MOCK_STATE);
+
+      // Launch stale call — will block at fetchPage(1).
+      const stalePromise = store.dispatch(getSponsorAssetRows({}));
+
+      // Launch fresh call — resolves immediately, commits its rows.
+      await store.dispatch(getSponsorAssetRows({}));
+      await flushPromises();
+
+      // Now unblock the stale call; its RECEIVE_SPONSOR_ASSET_ROWS should be suppressed.
+      resolveFirstPage();
+      await stalePromise;
+      await flushPromises();
+
+      const rowsActions = store
+        .getActions()
+        .filter((a) => a.type === RECEIVE_SPONSOR_ASSET_ROWS);
+      expect(rowsActions).toHaveLength(1);
+      expect(rowsActions[0].payload.response.data).toEqual([{ id: "fresh" }]);
+    });
   });
 
   // ─── getSponsorAssetSponsor ──────────────────────────────────────────────────

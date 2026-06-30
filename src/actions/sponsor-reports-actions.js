@@ -39,6 +39,12 @@ export const RECEIVE_PURCHASE_DETAILS_LINES = "RECEIVE_PURCHASE_DETAILS_LINES";
 export const PURCHASE_DETAILS_LINES_READ_ERROR =
   "PURCHASE_DETAILS_LINES_READ_ERROR";
 
+// Monotonically-increasing counter used to detect stale getSponsorAssetRows completions.
+// Each invocation captures the counter value at entry; only the invocation whose captured
+// value still matches the current counter (i.e. no newer call was started) is allowed to
+// commit its RECEIVE_SPONSOR_ASSET_ROWS dispatch.
+let sponsorAssetRowsSeq = 0;
+
 // Base URL helper — scoped to a specific summit's reports endpoint.
 const base = (summitId) =>
   `${window.SPONSOR_REPORTS_API_URL}/api/v1/summits/${summitId}/reports`;
@@ -150,6 +156,10 @@ export const getSponsorAssetRows =
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
     if (!currentSummit?.id) return Promise.resolve();
+    // Capture the sequence token immediately so any concurrent call that starts after this
+    // one will bump the counter and render this invocation "stale" before we finish.
+    sponsorAssetRowsSeq += 1;
+    const mySeq = sponsorAssetRowsSeq;
     const accessToken = await getAccessTokenSafely();
     dispatch(createAction(REQUEST_SPONSOR_ASSET)({})); // loading:true, readError:null
     const baseQuery = buildReportQuery({ ...filters, moduleType: "Media" });
@@ -179,18 +189,28 @@ export const getSponsorAssetRows =
         const next = await fetchPage(p);
         allRows = allRows.concat(next.response.data);
       }
-      dispatch(
-        createAction(RECEIVE_SPONSOR_ASSET_ROWS)({
-          response: { ...response, data: allRows }
-        })
-      );
+      // Only commit if we are still the latest call. A superseded (stale) invocation
+      // that finishes after a newer one would otherwise overwrite the newer call's rows.
+      // Per-page makeReadErrorHandler error dispatches inside the loop are not seq-guarded
+      // (they live inside getRequest and target the dominant case of a stale SUCCESS).
+      if (mySeq === sponsorAssetRowsSeq) {
+        dispatch(
+          createAction(RECEIVE_SPONSOR_ASSET_ROWS)({
+            response: { ...response, data: allRows }
+          })
+        );
+      }
     } catch (e) {
       // For HTTP failures, makeReadErrorHandler already dispatched SPONSOR_ASSET_READ_ERROR
       // (which clears the local `loading` flag — reducer sets `loading:false`). But global
       // stopLoading does NOT clear this reducer's local `loading`, and a NON-HTTP exception
       // after REQUEST_SPONSOR_ASSET would otherwise leave the page stuck loading. So dispatch
       // a local terminal SPONSOR_ASSET_READ_ERROR here too (idempotent if both fire).
-      dispatch(createAction(SPONSOR_ASSET_READ_ERROR)({ message: e?.message }));
+      if (mySeq === sponsorAssetRowsSeq) {
+        dispatch(
+          createAction(SPONSOR_ASSET_READ_ERROR)({ message: e?.message })
+        );
+      }
     }
     return Promise.resolve();
   };
