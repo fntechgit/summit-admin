@@ -145,7 +145,7 @@ describe("TaxTypeForm", () => {
   });
 
   it("removes a linked ticket from the list and calls onTicketUnLink", async () => {
-    const onTicketUnLink = jest.fn();
+    const onTicketUnLink = jest.fn().mockReturnValue(Promise.resolve());
     const linked = { id: 5, name: "VIP Ticket" };
     renderForm(
       { id: 1, name: "VAT", rate: 20, ticket_types: [linked] },
@@ -160,5 +160,26 @@ describe("TaxTypeForm", () => {
       expect(screen.queryByText(linked.name)).not.toBeInTheDocument()
     );
     expect(onTicketUnLink).toHaveBeenCalledWith(1, linked.id);
+  });
+
+  it("rolls back ticket unlink when onTicketUnLink fails", async () => {
+    const onTicketUnLink = jest
+      .fn()
+      .mockReturnValue(Promise.reject(new Error("unlink failed")));
+    const linked = { id: 5, name: "VIP Ticket" };
+    renderForm(
+      { id: 1, name: "VAT", rate: 20, ticket_types: [linked] },
+      { onTicketUnLink }
+    );
+
+    expect(screen.getByText(linked.name)).toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: `remove-ticket-${linked.id}` })
+    );
+
+    await waitFor(() =>
+      expect(screen.getByText(linked.name)).toBeInTheDocument()
+    );
   });
 });

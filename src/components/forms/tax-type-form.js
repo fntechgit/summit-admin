@@ -116,8 +116,11 @@ const TaxTypeForm = ({
   );
 
   const handleTicketUnLink = (ticketId) => {
-    onTicketUnLink(formik.values.id, ticketId);
+    const ticket = ticketTypes.find((t) => t.id === ticketId);
     setTicketTypes((prev) => prev.filter((t) => t.id !== ticketId));
+    onTicketUnLink(formik.values.id, ticketId).catch(() => {
+      setTicketTypes((prev) => [...prev, ticket]);
+    });
   };
 
   const handleAdd = () => {
