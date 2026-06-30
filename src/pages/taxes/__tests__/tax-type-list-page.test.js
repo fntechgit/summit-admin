@@ -61,13 +61,16 @@ jest.mock(
 
 jest.mock("../popup/tax-type-popup", () => ({
   __esModule: true,
-  default: ({ onSubmit }) => (
+  default: ({ onSave, onClose }) => (
     <div data-testid="tax-type-popup">
       <button
         type="button"
-        onClick={() => onSubmit({ name: "New Tax", rate: 10, tax_id: "NT1" })}
+        onClick={() => onSave({ name: "New Tax", rate: 10, tax_id: "NT1" })}
       >
         popup-save
+      </button>
+      <button type="button" onClick={onClose}>
+        popup-close
       </button>
     </div>
   )
@@ -140,6 +143,22 @@ describe("TaxTypeListPage", () => {
 
     // Call 1: useEffect on mount; call 2: handleDelete .finally()
     expect(getTaxTypes).toHaveBeenCalledTimes(2);
+  });
+
+  it("closes popup and resets form when popup calls onClose", async () => {
+    renderWithRedux(<TaxTypeListPage match={{ url: "/taxes" }} />, {
+      initialState
+    });
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "tax_type_list.add_tax_type" })
+    );
+    expect(screen.getByTestId("tax-type-popup")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "popup-close" }));
+
+    expect(screen.queryByTestId("tax-type-popup")).not.toBeInTheDocument();
+    expect(resetTaxTypeForm).toHaveBeenCalled();
   });
 
   it("re-syncs the list after a failed delete", async () => {

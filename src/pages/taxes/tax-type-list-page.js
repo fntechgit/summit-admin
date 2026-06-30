@@ -12,6 +12,8 @@
  * */
 
 import React, { useEffect, useState } from "react";
+// eslint-disable-next-line camelcase
+import { unstable_batchedUpdates as batchUpdates } from "react-dom";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
@@ -95,13 +97,17 @@ const TaxTypeListPage = ({
   };
 
   const handleSave = (entity) =>
-    saveTaxType(entity).then(() =>
-      getTaxTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
-    );
+    saveTaxType(entity).then(() => {
+      getTaxTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir).catch(
+        () => {}
+      );
+    });
 
   const handleClosePopup = () => {
-    setShowTaxTypeModal(false);
-    resetTaxTypeForm();
+    batchUpdates(() => {
+      resetTaxTypeForm();
+      setShowTaxTypeModal(false);
+    });
   };
 
   const columns = [
@@ -215,7 +221,7 @@ const TaxTypeListPage = ({
             onClose={handleClosePopup}
             entity={currentTaxType}
             currentSummit={currentSummit}
-            onSubmit={handleSave}
+            onSave={handleSave}
             onTicketLink={addTicketToTaxType}
             onTicketUnLink={removeTicketFromTaxType}
           />

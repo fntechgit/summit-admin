@@ -14,7 +14,7 @@ const TaxTypePopup = ({
   onClose,
   entity,
   currentSummit,
-  onSubmit,
+  onSave,
   onTicketLink,
   onTicketUnLink
 }) => {
@@ -32,10 +32,9 @@ const TaxTypePopup = ({
   const handleSubmit = (values) => {
     if (isSaving) return;
     setIsSaving(true);
-    onSubmit(values)
+    onSave(values)
       .then(() => onClose())
-      .catch(() => {})
-      .finally(() => setIsSaving(false));
+      .catch(() => setIsSaving(false));
   };
 
   return (
@@ -71,9 +70,9 @@ const TaxTypePopup = ({
 
 TaxTypePopup.propTypes = {
   onClose: PropTypes.func.isRequired,
-  entity: PropTypes.object.isRequired,
-  currentSummit: PropTypes.object.isRequired,
-  onSubmit: PropTypes.func.isRequired,
+  entity: PropTypes.shape({ id: PropTypes.number }).isRequired,
+  currentSummit: PropTypes.shape({}).isRequired,
+  onSave: PropTypes.func.isRequired,
   onTicketLink: PropTypes.func.isRequired,
   onTicketUnLink: PropTypes.func.isRequired
 };

@@ -32,11 +32,11 @@ const defaultProps = {
 
 describe("TaxTypePopup", () => {
   let onClose;
-  let onSubmit;
+  let onSave;
 
   beforeEach(() => {
     onClose = jest.fn();
-    onSubmit = jest.fn();
+    onSave = jest.fn();
   });
 
   const renderPopup = (props = {}) =>
@@ -44,14 +44,14 @@ describe("TaxTypePopup", () => {
       <TaxTypePopup
         {...defaultProps}
         onClose={onClose}
-        onSubmit={onSubmit}
+        onSave={onSave}
         {...props}
       />
     );
 
-  it("disables the submit button and X while onSubmit is pending", async () => {
+  it("disables the submit button and X while onSave is pending", async () => {
     let resolveSave;
-    onSubmit.mockReturnValue(
+    onSave.mockReturnValue(
       new Promise((resolve) => {
         resolveSave = resolve;
       })
@@ -71,11 +71,13 @@ describe("TaxTypePopup", () => {
       resolveSave();
       await Promise.resolve();
     });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("does not re-trigger onSubmit while a save is in flight", async () => {
+  it("does not re-trigger onSave while a save is in flight", async () => {
     let resolveSave;
-    onSubmit.mockReturnValue(
+    onSave.mockReturnValue(
       new Promise((resolve) => {
         resolveSave = resolve;
       })
@@ -89,16 +91,25 @@ describe("TaxTypePopup", () => {
     );
 
     await userEvent.click(screen.getByRole("button", { name: "submit-form" }));
-    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSave).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       resolveSave();
       await Promise.resolve();
     });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("re-enables submit and does not call onClose when onSubmit rejects", async () => {
-    onSubmit.mockImplementation(() => Promise.reject(new Error("API error")));
+  it("calls onClose after successful save", async () => {
+    onSave.mockReturnValue(Promise.resolve());
+    renderPopup();
+    await userEvent.click(screen.getByRole("button", { name: "submit-form" }));
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  });
+
+  it("re-enables submit and does not call onClose when onSave rejects", async () => {
+    onSave.mockImplementation(() => Promise.reject(new Error("API error")));
 
     renderPopup();
     await userEvent.click(screen.getByRole("button", { name: "submit-form" }));
