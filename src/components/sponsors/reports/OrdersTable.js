@@ -42,6 +42,14 @@ export const formatCheckoutTime = (value) => {
   return m.format("YYYY-MM-DD h:mm A");
 };
 
+// Invoice due date is a UTC DateTimeField on the backend, emitted as an epoch int
+// (to_epoch). Reuse formatCheckoutTime's UTC-stable epoch parsing, then keep only the
+// date part — a due date has no meaningful time-of-day to display.
+export const formatDueDate = (value) => {
+  if (value == null || value === "") return "";
+  return formatCheckoutTime(value).slice(0, ISO_DATE_LENGTH);
+};
+
 // MuiTable column definitions.
 // columnKey for sortable columns equals the backend `order=` field, so the
 // query thunk formats the sort direction from (columnKey, dir) directly.
@@ -87,6 +95,31 @@ const columns = [
       row.invoice_total == null
         ? "—"
         : currencyAmountFromCents(row.invoice_total)
+  },
+  {
+    columnKey: "payment_method",
+    header: T.translate("sponsor_reports_page.col_payment_method"),
+    sortable: false, // not a backend ordering field
+    render: (row) => row.payment_method ?? "—"
+  },
+  {
+    columnKey: "invoice_reference",
+    header: T.translate("sponsor_reports_page.col_invoice_reference"),
+    sortable: false, // not a backend ordering field
+    render: (row) => row.invoice_reference ?? "—"
+  },
+  {
+    columnKey: "invoice_sub_status",
+    header: T.translate("sponsor_reports_page.col_invoice_sub_status"),
+    sortable: false, // not a backend ordering field
+    render: (row) => row.invoice_sub_status ?? "—"
+  },
+  {
+    columnKey: "invoice_due_date",
+    header: T.translate("sponsor_reports_page.col_invoice_due_date"),
+    sortable: false, // not a backend ordering field
+    render: (row) =>
+      row.invoice_due_date == null ? "—" : formatDueDate(row.invoice_due_date)
   },
   {
     columnKey: "sponsor_note",
