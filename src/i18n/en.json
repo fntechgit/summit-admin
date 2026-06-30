@@ -1956,7 +1956,8 @@
     "payment_type_fee_method": "Method",
     "payment_type_fee_value": "Value",
     "payment_type_fee_max_cents": "Max Amount",
-    "payment_type_fee_min_cents": "Min Amount"
+    "payment_type_fee_min_cents": "Min Amount",
+    "fee_type_remove_warning": "Are you sure you want to delete fee type {id}?"
   },
   "edit_payment_fee_type": {
     "payment_fee_type": "Payment Fee Type",

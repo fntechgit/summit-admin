@@ -42,6 +42,10 @@ const InfoTooltip = ({ title }) => (
   </Tooltip>
 );
 
+InfoTooltip.propTypes = {
+  title: PropTypes.string.isRequired
+};
+
 const APPLICATION_TYPE_OPTIONS = [
   { label: "Registration", value: "Registration" },
   { label: "Bookable Rooms", value: "BookableRooms" },
@@ -189,12 +193,12 @@ const PaymentProfileDialog = ({
         "payment_profiles.payment_profile"
       )}`;
 
-  const fee_types_options = {
+  const feeTypesOptions = {
     sortCol: paymentFeeTypes.order,
     sortDir: paymentFeeTypes.orderDir
   };
 
-  const fee_types_columns = [
+  const feeTypesColumns = [
     {
       columnKey: "name",
       header: T.translate("edit_payment_profile.payment_type_fee_name")
@@ -247,6 +251,7 @@ const PaymentProfileDialog = ({
   };
 
   const handleCancelFeeType = () => {
+    if (isSaving) return;
     feeTypeFormik.resetForm();
     setShowFeeTypeForm(false);
   };
@@ -646,6 +651,7 @@ const PaymentProfileDialog = ({
                           <Button
                             variant="contained"
                             onClick={feeTypeFormik.handleSubmit}
+                            disabled={isSaving}
                             sx={{
                               height: "36px",
                               fontSize: "1.4rem",
@@ -660,12 +666,18 @@ const PaymentProfileDialog = ({
                     )}
                   </FormikProvider>
                   <MuiTable
-                    columns={fee_types_columns}
+                    columns={feeTypesColumns}
                     data={paymentFeeTypes.paymentFeeTypes}
-                    options={fee_types_options}
+                    options={feeTypesOptions}
                     totalRows={paymentFeeTypes.totalPaymentFeeTypes}
                     onDelete={handleFeeTypeDelete}
                     onEdit={handleFeeTypeEdit}
+                    deleteDialogBody={(id) =>
+                      T.translate(
+                        "edit_payment_profile.fee_type_remove_warning",
+                        { id }
+                      )
+                    }
                   />
                 </Box>
               </>
@@ -689,14 +701,37 @@ const PaymentProfileDialog = ({
 PaymentProfileDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
-  entity: PropTypes.object,
-  paymentFeeTypes: PropTypes.array,
+  entity: PropTypes.shape({
+    id: PropTypes.number,
+    application_type: PropTypes.string,
+    provider: PropTypes.string,
+    is_active: PropTypes.bool,
+    test_mode_enabled: PropTypes.bool,
+    send_email_receipt: PropTypes.bool,
+    merchant_account_id: PropTypes.string,
+    live_secret_key: PropTypes.string,
+    live_publishable_key: PropTypes.string,
+    test_secret_key: PropTypes.string,
+    test_publishable_key: PropTypes.string
+  }),
+  paymentFeeTypes: PropTypes.shape({
+    paymentFeeTypes: PropTypes.arrayOf(PropTypes.shape({})),
+    totalPaymentFeeTypes: PropTypes.number,
+    order: PropTypes.string,
+    orderDir: PropTypes.number
+  }),
   onSaveFeeType: PropTypes.func.isRequired,
   onDeleteFeeType: PropTypes.func.isRequired
 };
 
 PaymentProfileDialog.defaultProps = {
-  entity: {}
+  entity: {},
+  paymentFeeTypes: {
+    paymentFeeTypes: [],
+    totalPaymentFeeTypes: 0,
+    order: "id",
+    orderDir: 1
+  }
 };
 
 export default PaymentProfileDialog;
