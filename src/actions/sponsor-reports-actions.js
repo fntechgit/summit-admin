@@ -6,6 +6,7 @@ import {
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely, isPositiveIntId } from "../utils/methods";
+import { ALL_ROWS_PER_PAGE } from "../utils/constants";
 import { makeReadErrorHandler } from "./sponsor-reports-errors";
 import {
   buildReportQuery,
@@ -27,6 +28,8 @@ export const REQUEST_SPONSOR_ASSET = "REQUEST_SPONSOR_ASSET";
 export const RECEIVE_SPONSOR_ASSET = "RECEIVE_SPONSOR_ASSET";
 export const RECEIVE_SPONSOR_ASSET_FILTERS = "RECEIVE_SPONSOR_ASSET_FILTERS";
 export const SPONSOR_ASSET_READ_ERROR = "SPONSOR_ASSET_READ_ERROR";
+export const RECEIVE_SPONSOR_ASSET_ROWS = "RECEIVE_SPONSOR_ASSET_ROWS";
+export const RECEIVE_SPONSOR_ASSET_PAGE = "RECEIVE_SPONSOR_ASSET_PAGE"; // throwaway per-page action
 
 export const REQUEST_SPONSOR_DRILLDOWN = "REQUEST_SPONSOR_DRILLDOWN";
 export const RECEIVE_SPONSOR_DRILLDOWN = "RECEIVE_SPONSOR_DRILLDOWN";
@@ -163,6 +166,63 @@ export const getSponsorAssetFilters = () => async (dispatch, getState) => {
     .catch(() => {})
     .finally(() => dispatch(stopLoading()));
 };
+
+// Fetch the WHOLE filtered collected-asset set for the current summit so the FE can pivot
+// client-side. The server applies filters + module_type==Media and computes the embedded
+// summary on the unpaginated set. One request at the raised cap covers normal summits; if
+// last_page > 1 we page the remainder (correctness safety net — no cap is a completeness
+// guarantee). Loading is atomic: REQUEST_SPONSOR_ASSET → (accumulate all pages) → ONE
+// RECEIVE_SPONSOR_ASSET_ROWS, so the tree never renders a partial set.
+export const getSponsorAssetRows =
+  (filters = {}) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+    if (!currentSummit?.id) return Promise.resolve();
+    const accessToken = await getAccessTokenSafely();
+    dispatch(createAction(REQUEST_SPONSOR_ASSET)({})); // loading:true, readError:null
+    const baseQuery = buildReportQuery({ ...filters, moduleType: "Media" });
+    const url = `${base(currentSummit.id)}/sponsor-assets`;
+    // null request action (loading already set); throwaway receive — we read {response}.
+    const fetchPage = (page) =>
+      getRequest(
+        null,
+        createAction(RECEIVE_SPONSOR_ASSET_PAGE),
+        url,
+        makeReadErrorHandler({
+          onReadError: createAction(SPONSOR_ASSET_READ_ERROR),
+          onValidationError: createAction(SPONSOR_ASSET_READ_ERROR),
+          onExportDisabled: createAction(SPONSOR_ASSET_READ_ERROR)
+        })
+      )({
+        access_token: accessToken,
+        ...baseQuery,
+        per_page: ALL_ROWS_PER_PAGE,
+        page
+      })(dispatch);
+    try {
+      const { response } = await fetchPage(1);
+      let allRows = response.data;
+      for (let p = 2; p <= (response.last_page || 1); p += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        const next = await fetchPage(p);
+        allRows = allRows.concat(next.response.data);
+      }
+      dispatch(
+        createAction(RECEIVE_SPONSOR_ASSET_ROWS)({
+          response: { ...response, data: allRows }
+        })
+      );
+    } catch (e) {
+      // For HTTP failures, makeReadErrorHandler already dispatched SPONSOR_ASSET_READ_ERROR
+      // (which clears the local `loading` flag — reducer sets `loading:false`). But global
+      // stopLoading does NOT clear this reducer's local `loading`, and a NON-HTTP exception
+      // after REQUEST_SPONSOR_ASSET would otherwise leave the page stuck loading. So dispatch
+      // a local terminal SPONSOR_ASSET_READ_ERROR here too (idempotent if both fire).
+      dispatch(createAction(SPONSOR_ASSET_READ_ERROR)({ message: e?.message }));
+    }
+    return Promise.resolve();
+  };
 
 // Orders CSV export — owns URL + params + filename (cf. exportEventRsvpsCSV).
 // Keeps the on-screen sort so the exported rows match what the user sees.

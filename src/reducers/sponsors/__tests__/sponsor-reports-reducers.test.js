@@ -9,6 +9,7 @@ import {
   REQUEST_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET_FILTERS,
+  RECEIVE_SPONSOR_ASSET_ROWS,
   SPONSOR_ASSET_READ_ERROR,
   REQUEST_SPONSOR_DRILLDOWN,
   RECEIVE_SPONSOR_DRILLDOWN,
@@ -344,5 +345,32 @@ describe("sponsorReportsDrilldownReducer", () => {
       const result = drilldownReducer(dirty, { type: LOGOUT_USER });
       expect(result).toStrictEqual(DD_DEFAULT_STATE);
     });
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// sponsor-asset reducer — flat rows (Task 4)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+describe("sponsor-asset reducer flat rows", () => {
+  it("REQUEST_SPONSOR_ASSET sets loading true", () => {
+    const s = sponsorAssetReducer(SA_DEFAULT_STATE, {
+      type: REQUEST_SPONSOR_ASSET
+    });
+    expect(s.loading).toBe(true);
+  });
+
+  it("RECEIVE_SPONSOR_ASSET_ROWS stores the full rows + summary and clears loading", () => {
+    const env = {
+      data: [{ sponsor: { id: 1 } }, { sponsor: { id: 2 } }],
+      summary: { total: 2, by_status: { completed: 2 } }
+    };
+    const s = sponsorAssetReducer(
+      { ...SA_DEFAULT_STATE, loading: true },
+      { type: RECEIVE_SPONSOR_ASSET_ROWS, payload: { response: env } }
+    );
+    expect(s.rows.map((r) => r.sponsor.id)).toEqual([1, 2]);
+    expect(s.summary.total).toBe(2);
+    expect(s.loading).toBe(false);
   });
 });

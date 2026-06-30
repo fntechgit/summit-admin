@@ -17,12 +17,14 @@ import {
   REQUEST_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET_FILTERS,
+  RECEIVE_SPONSOR_ASSET_ROWS,
   SPONSOR_ASSET_READ_ERROR
 } from "../../actions/sponsor-reports-actions";
 
 export const DEFAULT_STATE = {
   filterOptions: null, // { sponsors, pages, tiers, components }
   data: [], // grouped cards (sponsor or component) for the current page
+  rows: [], // flat collected-asset rows for client-side pivot (Task 4+)
   total: 0, // number of GROUPS (not rows)
   perPage: 0,
   currentPage: 0, // 0 until the first report load — used to gate the empty state
@@ -57,6 +59,16 @@ const reducer = (state = DEFAULT_STATE, action) => {
     case RECEIVE_SPONSOR_ASSET_FILTERS:
       // loading is report-owned now (filters use a null request action), so leave it alone.
       return { ...state, filterOptions: payload.response, readError: null };
+    case RECEIVE_SPONSOR_ASSET_ROWS: {
+      const env = payload.response;
+      return {
+        ...state,
+        rows: env.data,
+        summary: env.summary,
+        loading: false,
+        readError: null
+      };
+    }
     case SPONSOR_ASSET_READ_ERROR:
       return { ...state, loading: false, readError: payload };
     default:
