@@ -52,6 +52,10 @@ export const getGlobalItems = () => [
       {
         name: "page_templates",
         linkUrl: "page-templates"
+      },
+      {
+        name: "add_on_types",
+        linkUrl: "add-on-types"
       }
     ]
   },

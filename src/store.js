@@ -174,6 +174,8 @@ import sponsorPagePurchaseListReducer from "./reducers/sponsors/sponsor-page-pur
 import sponsorPagePagesListReducer from "./reducers/sponsors/sponsor-page-pages-list-reducer.js";
 import sponsorPageMUListReducer from "./reducers/sponsors/sponsor-page-mu-list-reducer.js";
 import dropboxSyncReducer from "./reducers/locations/dropbox-sync-reducer";
+import addOnTypeReducer from "./reducers/sponsors_inventory/add-on-type-reducer.js";
+import addOnTypesListReducer from "./reducers/sponsors_inventory/add-on-types-list-reducer.js";
 
 // default: localStorage if web, AsyncStorage if react-native
 
@@ -343,6 +345,8 @@ const reducers = persistCombineReducers(config, {
   sponsorSettingsState: sponsorSettingsReducer,
   pageTemplateListState: pageTemplateListReducer,
   pageTemplateState: pageTemplateReducer,
+  currentAddonTypesListState: addOnTypesListReducer,
+  currentAddOnTypeState: addOnTypeReducer,
   dropboxSyncState: dropboxSyncReducer
 });
 
