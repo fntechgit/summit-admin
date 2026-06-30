@@ -15,26 +15,23 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Pagination, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import DownloadIcon from "@mui/icons-material/Download";
 import CollectionsOutlinedIcon from "@mui/icons-material/CollectionsOutlined";
 import { isPositiveIntId } from "../../../../utils/methods";
-import {
-  DEFAULT_CURRENT_PAGE,
-  TWENTY_PER_PAGE
-} from "../../../../utils/constants";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
 import FilterBar from "../../../../components/sponsors/reports/FilterBar";
-import GroupByToggle from "../../../../components/sponsors/reports/GroupByToggle";
-import GroupBySponsorView from "../../../../components/sponsors/reports/GroupBySponsorView";
-import GroupByComponentView from "../../../../components/sponsors/reports/GroupByComponentView";
+import PivotSelector from "../../../../components/sponsors/reports/PivotSelector";
+import PivotTree from "../../../../components/sponsors/reports/PivotTree";
+import { PIVOTS } from "../../../../components/sponsors/reports/pivot-defs";
+import { usePivot } from "../../../../components/sponsors/reports/usePivot";
 import usePrint from "../../../../hooks/usePrint";
 import {
   exportSponsorAssetCsv,
   getSponsorAssetFilters,
-  getSponsorAssetReport
+  getSponsorAssetRows
 } from "../../../../actions/sponsor-reports-actions";
 
 const STATUS_TILE_KEYS = [
@@ -54,14 +51,12 @@ const SponsorAssetReportPage = ({
   // From mapStateToProps
   currentSummit,
   filterOptions,
-  data,
+  rows,
   summary,
-  lastPage,
-  currentPage,
   loading,
   readError,
   // From mapDispatchToProps
-  getSponsorAssetReport: fetchReport,
+  getSponsorAssetRows: fetchRows,
   getSponsorAssetFilters: fetchFilters,
   exportSponsorAssetCsv
 }) => {
@@ -71,9 +66,8 @@ const SponsorAssetReportPage = ({
   // route context and always has a valid currentSummit when rendered normally.
   const validSummit = !!(currentSummit && isPositiveIntId(currentSummit.id));
 
-  const [groupBy, setGroupBy] = useState("sponsor");
+  const [pivotKey, setPivotKey] = useState(PIVOTS[0].key);
   const [filters, setFilters] = useState({});
-  const [page, setPage] = useState(DEFAULT_CURRENT_PAGE);
 
   // Fetch sponsor filter options once on mount; summit is read from store inside
   // the action. Guard on validSummit so no network call fires when currentSummit
@@ -82,29 +76,19 @@ const SponsorAssetReportPage = ({
     if (validSummit) fetchFilters();
   }, []); // mount-only — validSummit is stable once the summit context is set
 
-  // Fetch the grouped report when any primitive input changes; skips if
-  // currentSummit is not yet available (rare — summit always loads before nav).
-  // The thunk builds the API query (group_by, per_page, filter[]) internally.
+  // Fetch the full flat row set when filters change; server applies
+  // module_type==Media. Pivot is purely client-side — no refetch on pivot change.
   useEffect(() => {
-    if (validSummit)
-      fetchReport(
-        { ...filters, moduleType: "Media" },
-        { groupBy, page, perPage: TWENTY_PER_PAGE }
-      );
-  }, [filters, groupBy, page]); // validSummit omitted intentionally — stable once summit loads
+    if (validSummit) fetchRows(filters);
+  }, [filters]); // validSummit omitted intentionally — stable once summit loads
 
-  const onApply = (next) => {
-    setPage(DEFAULT_CURRENT_PAGE);
-    setFilters(next);
-  };
-  const onClear = () => {
-    setPage(DEFAULT_CURRENT_PAGE);
-    setFilters({});
-  };
-  const onGroupBy = (next) => {
-    setPage(DEFAULT_CURRENT_PAGE);
-    setGroupBy(next);
-  };
+  const activePivot = PIVOTS.find((p) => p.key === pivotKey) || PIVOTS[0];
+  // CRITICAL: pass activePivot.axes directly (stable reference into PIVOTS).
+  // Do NOT spread/rebuild — a fresh array each render busts the useMemo.
+  const tree = usePivot(rows, activePivot.axes);
+
+  const onApply = (next) => setFilters(next);
+  const onClear = () => setFilters({});
 
   const tiles = STATUS_TILE_KEYS.map((key) => ({
     key,
@@ -159,7 +143,7 @@ const SponsorAssetReportPage = ({
         alignItems="center"
         sx={{ mb: 2, flexWrap: "wrap" }}
       >
-        <GroupByToggle value={groupBy} onChange={onGroupBy} />
+        <PivotSelector value={pivotKey} onChange={setPivotKey} />
       </Stack>
       <Box sx={{ mb: 2 }}>
         <FilterBar
@@ -186,39 +170,19 @@ const SponsorAssetReportPage = ({
           </Typography>
         </Box>
       )}
-      {/* currentPage is 0 until the first report load → no empty-state flash before the
-          fetch resolves, and no flicker if /filters lands before the report (Task 3 decouple). */}
-      {!loading &&
-        !readError &&
-        currentPage >= DEFAULT_CURRENT_PAGE &&
-        data.length === 0 && (
-          <Box
-            data-testid="reports-no-groups"
-            sx={{ p: 4, textAlign: "center" }}
-          >
-            <Typography variant="h6">
-              {T.translate("sponsor_reports_page.no_results")}
-            </Typography>
-          </Box>
-        )}
-      {/* Render the view that matches the data we actually hold, not the live toggle —
-          a stale/out-of-order grouped response could otherwise feed the wrong view component
-          a mismatched card shape and crash (sponsor card has .sponsor, component card .component). */}
-      {!loading && !readError && data.length > 0 && !!data[0].sponsor && (
-        <GroupBySponsorView summitId={currentSummit.id} cards={data} />
+      {!loading && !readError && rows.length === 0 && (
+        <Box data-testid="reports-no-groups" sx={{ p: 4, textAlign: "center" }}>
+          <Typography variant="h6">
+            {T.translate("sponsor_reports_page.no_results")}
+          </Typography>
+        </Box>
       )}
-      {!loading && !readError && data.length > 0 && !!data[0].component && (
-        <GroupByComponentView summitId={currentSummit.id} cards={data} />
-      )}
-
-      {!loading && !readError && lastPage > DEFAULT_CURRENT_PAGE && (
-        <Stack alignItems="center" sx={{ mt: 2 }}>
-          <Pagination
-            count={lastPage}
-            page={currentPage || DEFAULT_CURRENT_PAGE}
-            onChange={(_e, p) => setPage(p)}
-          />
-        </Stack>
+      {!loading && !readError && rows.length > 0 && (
+        <PivotTree
+          nodes={tree}
+          summitId={currentSummit.id}
+          maxDepth={activePivot.axes.length}
+        />
       )}
     </ReportShell>
   );
@@ -233,7 +197,7 @@ const mapStateToProps = ({
 });
 
 const mapDispatchToProps = {
-  getSponsorAssetReport,
+  getSponsorAssetRows,
   getSponsorAssetFilters,
   exportSponsorAssetCsv
 };

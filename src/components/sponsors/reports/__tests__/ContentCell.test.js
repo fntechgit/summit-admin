@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import ContentCell from "../ContentCell";
 
 // Sibling report-component tests mock i18n so T.translate returns the key (e.g.
-// GroupByToggle.test.js, StatusRollupChips.test.js) — needed for the pending-upload assertion.
+// StatusRollupChips.test.js) — needed for the pending-upload assertion.
 jest.mock("i18n-react/dist/i18n-react", () => ({ translate: (k) => k }));
 
 describe("ContentCell", () => {
