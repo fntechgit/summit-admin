@@ -32,8 +32,7 @@ export const buildReportQuery = (filters = {}) => {
     search,
     order,
     page,
-    perPage,
-    groupBy
+    perPage
   } = filters;
 
   const filter = [];
@@ -71,10 +70,6 @@ export const buildReportQuery = (filters = {}) => {
   if (perPage != null) query.per_page = perPage;
   // Canceled is excluded server-side by default.
   if (status === "Canceled") query.include_cancelled = "true";
-
-  // Grouped mode: filters/search above still apply (server groups the filtered set).
-  // Only `sponsor`/`component` are valid; an empty/falsy value stays flat (omit).
-  if (groupBy) query.group_by = groupBy;
 
   return query;
 };

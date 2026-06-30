@@ -34,9 +34,6 @@ export const AXES = {
   }
 };
 
-export const axisKeyOf = (axisId, row) => AXES[axisId].keyOf(row);
-export const axisLabelOf = (axisId, row) => AXES[axisId].labelOf(row);
-
 export const PIVOTS = [
   {
     key: "sponsor_page_component",

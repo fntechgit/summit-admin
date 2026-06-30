@@ -52,7 +52,6 @@ jest.mock("../../access-routes.yml", () => ({
 // Returns plain objects so the mock store can record them without real thunk logic.
 jest.mock("../../actions/sponsor-reports-actions", () => ({
   getSponsorAssetSponsor: jest.fn(() => ({ type: "MOCK_GET_DRILLDOWN" })),
-  getSponsorAssetReport: jest.fn(() => ({ type: "MOCK_GET_SPONSOR_ASSET" })),
   getSponsorAssetFilters: jest.fn(() => ({
     type: "MOCK_GET_SPONSOR_ASSET_FILTERS"
   })),

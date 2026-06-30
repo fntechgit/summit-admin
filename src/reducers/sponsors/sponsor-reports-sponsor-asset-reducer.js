@@ -15,7 +15,6 @@ import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
   REQUEST_SPONSOR_ASSET,
-  RECEIVE_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET_FILTERS,
   RECEIVE_SPONSOR_ASSET_ROWS,
   SPONSOR_ASSET_READ_ERROR
@@ -23,14 +22,9 @@ import {
 
 export const DEFAULT_STATE = {
   filterOptions: null, // { sponsors, pages, tiers, components }
-  data: [], // grouped cards (sponsor or component) for the current page
-  rows: [], // flat collected-asset rows for client-side pivot (Task 4+)
-  total: 0, // number of GROUPS (not rows)
-  perPage: 0,
-  currentPage: 0, // 0 until the first report load — used to gate the empty state
-  lastPage: 0,
+  rows: [], // flat collected-asset rows for client-side pivot
   summary: null, // { total, by_status, by_page }
-  loading: false,
+  loading: true, // true by default — the page always fetches on mount; avoids a no-results flash before first fetch
   readError: null
 };
 
@@ -42,20 +36,6 @@ const reducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     case REQUEST_SPONSOR_ASSET:
       return { ...state, loading: true, readError: null };
-    case RECEIVE_SPONSOR_ASSET: {
-      const env = payload.response;
-      return {
-        ...state,
-        data: env.data,
-        total: env.total,
-        perPage: env.per_page,
-        currentPage: env.current_page,
-        lastPage: env.last_page,
-        summary: env.summary,
-        loading: false,
-        readError: null
-      };
-    }
     case RECEIVE_SPONSOR_ASSET_FILTERS:
       // loading is report-owned now (filters use a null request action), so leave it alone.
       return { ...state, filterOptions: payload.response, readError: null };

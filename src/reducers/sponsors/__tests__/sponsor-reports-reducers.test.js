@@ -7,7 +7,6 @@ import {
   PURCHASE_DETAILS_VALIDATION_ERROR,
   PURCHASE_DETAILS_VALIDATION_CLEAR,
   REQUEST_SPONSOR_ASSET,
-  RECEIVE_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET_FILTERS,
   RECEIVE_SPONSOR_ASSET_ROWS,
   SPONSOR_ASSET_READ_ERROR,
@@ -189,35 +188,6 @@ describe("sponsorReportsSponsorAssetReducer", () => {
         payload: {}
       });
       expect(result.loading).toBe(true);
-      expect(result.readError).toBeNull();
-    });
-  });
-
-  describe("RECEIVE_SPONSOR_ASSET", () => {
-    const payload = {
-      response: {
-        data: [{ id: 10 }],
-        total: 5,
-        per_page: 20,
-        current_page: 1,
-        last_page: 1,
-        summary: { total: 100 }
-      }
-    };
-
-    it("maps env fields to state", () => {
-      const state = { ...SA_DEFAULT_STATE, loading: true };
-      const result = sponsorAssetReducer(state, {
-        type: RECEIVE_SPONSOR_ASSET,
-        payload
-      });
-      expect(result.loading).toBe(false);
-      expect(result.data).toStrictEqual([{ id: 10 }]);
-      expect(result.total).toBe(5);
-      expect(result.perPage).toBe(20);
-      expect(result.currentPage).toBe(1);
-      expect(result.lastPage).toBe(1);
-      expect(result.summary).toStrictEqual({ total: 100 });
       expect(result.readError).toBeNull();
     });
   });

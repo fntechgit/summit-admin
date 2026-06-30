@@ -49,21 +49,19 @@ describe("buildReportQuery", () => {
     });
   });
 
-  it("passes through search/order/pagination/group_by", () => {
+  it("passes through search/order/pagination", () => {
     expect(
       buildReportQuery({
         search: "acme",
         order: "-number",
         page: 2,
-        perPage: 25,
-        groupBy: "sponsor"
+        perPage: 25
       })
     ).toStrictEqual({
       search: "acme",
       order: "-number",
       page: 2,
-      per_page: 25,
-      group_by: "sponsor"
+      per_page: 25
     });
   });
 });
