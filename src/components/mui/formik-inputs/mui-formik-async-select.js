@@ -18,14 +18,27 @@ const MuiFormikAsyncAutocomplete = ({
   formatOption = (item) => ({ value: item.id.toString(), label: item.name }),
   formatSelectedValue = null,
   queryParams = [],
-  isMulti = false
+  isMulti = false,
+  defaultOptions,
+  ...rest
 }) => {
   const [field, meta, helpers] = useField(name);
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const value = field.value || (multiple ? [] : null);
+  const isMultiSelect = isMulti || multiple;
+
+  const value = field.value || (isMultiSelect ? [] : null);
+
+  // Sync a plain stored value back to the full option object
+  useEffect(() => {
+    if (!field.value || typeof field.value === "object" || options.length === 0)
+      return;
+    const match = options.find((o) => o.value === String(field.value));
+    if (match) helpers.setValue(match);
+  }, [options]);
+
   const error = meta.touched && meta.error;
 
   const fetchOptions = async (input = "") => {
@@ -45,7 +58,7 @@ const MuiFormikAsyncAutocomplete = ({
   };
 
   useEffect(() => {
-    if (searchTerm) {
+    if (!defaultOptions && searchTerm) {
       const delayDebounce = setTimeout(() => {
         fetchOptions(searchTerm);
       }, DEBOUNCE_WAIT_250);
@@ -59,7 +72,7 @@ const MuiFormikAsyncAutocomplete = ({
   }, []);
 
   const handleChange = (event, selected) => {
-    if (!multiple) {
+    if (!isMultiSelect) {
       const selectedValue = plainValue ? selected?.value || "" : selected;
       helpers.setValue(selectedValue);
       return;
@@ -82,11 +95,21 @@ const MuiFormikAsyncAutocomplete = ({
       value={value}
       onChange={handleChange}
       loading={loading}
-      multiple={isMulti}
+      multiple={isMultiSelect}
       fullWidth
       getOptionLabel={(option) => option.label || ""}
       isOptionEqualToValue={(option, value) => option.value === value.value}
-      onInputChange={(e, newInput) => setSearchTerm(newInput)}
+      onInputChange={
+        !defaultOptions ? (e, newInput) => setSearchTerm(newInput) : undefined
+      }
+      filterOptions={
+        defaultOptions
+          ? (options, { inputValue }) =>
+              options.filter((opt) =>
+                opt.label.toLowerCase().includes(inputValue.toLowerCase())
+              )
+          : undefined // no client-side filter — let the API handle it via searchTerm
+      }
       renderInput={(params) => (
         <TextField
           {...params}
@@ -116,10 +139,11 @@ const MuiFormikAsyncAutocomplete = ({
       )}
       renderOption={(props, option, { selected }) => (
         <li {...props}>
-          {multiple && <Checkbox checked={selected} sx={{ mr: 1 }} />}
+          {isMultiSelect && <Checkbox checked={selected} sx={{ mr: 1 }} />}
           {option.label}
         </li>
       )}
+      {...rest}
     />
   );
 };
