@@ -127,7 +127,7 @@ export const getTrackChairs =
       createAction(RECEIVE_TRACK_CHAIRS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-chairs`,
       snackbarErrorHandler,
-      { trackId, term, order, orderDir, perPage }
+      { trackId, term, order, orderDir, page, perPage }
     )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
@@ -152,7 +152,7 @@ export const addTrackChair =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-chairs`,
       { member_id: member.id, categories: trackIds },
       snackbarErrorHandler
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };

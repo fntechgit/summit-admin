@@ -3,6 +3,7 @@ import { act, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithRedux } from "utils/test-utils";
 import {
+  getTrackChairs,
   saveTrackChair,
   addTrackChair,
   deleteTrackChair
@@ -144,7 +145,6 @@ describe("TrackChairListPage", () => {
       expect(capturedDialogProps.entity).toEqual({
         id: mockTrackChair.id,
         member: mockTrackChair.member,
-        originalMemberId: mockTrackChair.member.id,
         trackIds: [1] // mapped from categories
       });
     });
@@ -182,16 +182,17 @@ describe("TrackChairListPage", () => {
 
       expect(addTrackChair).toHaveBeenCalledWith({ id: 99 }, [1]);
       expect(saveTrackChair).not.toHaveBeenCalled();
+      // adding resets back to the first page
+      expect(getTrackChairs).toHaveBeenLastCalledWith(null, "", 1, 10, "id", 1);
     });
 
-    it("calls saveTrackChair when only tracks change on an existing chair", async () => {
-      renderPage({ trackChairs: [mockTrackChair] });
+    it("calls saveTrackChair when editing an existing chair, keeping the current page", async () => {
+      renderPage({ trackChairs: [mockTrackChair], currentPage: 3 });
 
       await act(async () => {
         await userEvent.click(screen.getByTestId(`edit-${mockTrackChair.id}`));
       });
 
-      // Same member (value: 42 === originalMemberId: 42), different tracks
       await act(async () => {
         await capturedDialogProps.onSave({
           id: mockTrackChair.id,
@@ -202,6 +203,32 @@ describe("TrackChairListPage", () => {
 
       expect(saveTrackChair).toHaveBeenCalledWith(mockTrackChair.id, [1, 2]);
       expect(addTrackChair).not.toHaveBeenCalled();
+      // editing stays on the current page instead of resetting to the first one
+      expect(getTrackChairs).toHaveBeenLastCalledWith(null, "", 3, 10, "id", 1);
+    });
+
+    it("resolves (and lets the dialog close) even if the post-save reload fails", async () => {
+      renderPage();
+
+      await act(async () => {
+        await userEvent.click(screen.getByRole("button", { name: /add/i }));
+      });
+
+      // only the reload triggered by save should reject, not the initial mount load
+      getTrackChairs.mockImplementationOnce(
+        () => () => Promise.reject(new Error("network blip"))
+      );
+
+      let saveResult;
+      await act(async () => {
+        saveResult = capturedDialogProps.onSave({
+          id: 0,
+          member: { value: 99, label: "New Member" },
+          trackIds: [1]
+        });
+      });
+
+      await expect(saveResult).resolves.toBeUndefined();
     });
   });
 });

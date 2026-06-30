@@ -132,7 +132,6 @@ describe("TrackChairDialog", () => {
           last_name: "Doe",
           email: "jane@example.com"
         },
-        originalMemberId: 10,
         trackIds: [2]
       };
       renderDialog({ entity });

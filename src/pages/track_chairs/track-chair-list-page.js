@@ -38,6 +38,14 @@ import {
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 import TrackChairDialog from "./components/track-chair-dialog";
 
+const buttonSx = {
+  height: "36px",
+  padding: "6px 16px",
+  fontSize: "1.4rem",
+  lineHeight: "2.4rem",
+  letterSpacing: "0.4px"
+};
+
 const TrackChairListPage = ({
   currentSummit,
   trackChairs,
@@ -54,13 +62,14 @@ const TrackChairListPage = ({
   addTrackChair,
   exportTrackChairs
 }) => {
-  const [dialogEntity, setDialogEntity] = useState(null);
+  const [memberEdit, setMemberEdit] = useState(null);
 
   useEffect(() => {
     if (currentSummit?.id) getTrackChairs();
   }, [currentSummit?.id]);
 
-  const chairTracks = currentSummit.tracks.filter((t) => t.chair_visible);
+  const chairTracks =
+    currentSummit?.tracks?.filter((t) => t.chair_visible) ?? [];
 
   const handleSearch = (searchTerm) => {
     getTrackChairs(
@@ -85,7 +94,7 @@ const TrackChairListPage = ({
   };
 
   const handleSort = (key, dir) => {
-    getTrackChairs(trackId, term, currentPage, perPage, key, dir);
+    getTrackChairs(trackId, term, DEFAULT_CURRENT_PAGE, perPage, key, dir);
   };
 
   const handlePageChange = (page) => {
@@ -104,14 +113,13 @@ const TrackChairListPage = ({
   };
 
   const handleNewTrackChair = () => {
-    setDialogEntity({});
+    setMemberEdit({});
   };
 
   const handleEdit = (trackChair) => {
-    setDialogEntity({
+    setMemberEdit({
       id: trackChair.id,
       member: trackChair.member,
-      originalMemberId: trackChair.member.id,
       trackIds: trackChair.categories.map((c) => c.id)
     });
   };
@@ -121,25 +129,23 @@ const TrackChairListPage = ({
   };
 
   const handleSave = ({ id, member, trackIds }) => {
-    const newMember = dialogEntity?.originalMemberId !== member?.value;
-    const action =
-      !id || newMember
-        ? addTrackChair({ id: member.value }, trackIds)
-        : saveTrackChair(id, trackIds);
-    return action.then(() =>
+    const action = !id
+      ? addTrackChair({ id: member.value }, trackIds)
+      : saveTrackChair(id, trackIds);
+    return action.then(() => {
       getTrackChairs(
         trackId,
         term,
-        DEFAULT_CURRENT_PAGE,
+        !id ? DEFAULT_CURRENT_PAGE : currentPage,
         perPage,
         order,
         orderDir
-      )
-    );
+      ).catch(() => {});
+    });
   };
 
   const handleClose = () => {
-    setDialogEntity(null);
+    setMemberEdit(null);
   };
 
   const columns = [
@@ -154,14 +160,6 @@ const TrackChairListPage = ({
   const table_options = { sortCol: order, sortDir: orderDir };
 
   const tracks_ddl = chairTracks.map((t) => ({ label: t.name, value: t.id }));
-
-  const buttonSx = {
-    height: "36px",
-    padding: "6px 16px",
-    fontSize: "1.4rem",
-    lineHeight: "2.4rem",
-    letterSpacing: "0.4px"
-  };
 
   if (!currentSummit?.id) return <div />;
 
@@ -289,9 +287,9 @@ const TrackChairListPage = ({
         />
       )}
 
-      {dialogEntity !== null && (
+      {memberEdit !== null && (
         <TrackChairDialog
-          entity={dialogEntity}
+          entity={memberEdit}
           tracks={chairTracks}
           onSave={handleSave}
           onClose={handleClose}

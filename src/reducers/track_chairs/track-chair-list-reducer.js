@@ -42,9 +42,17 @@ const trackChairListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_TRACK_CHAIRS: {
-      const { order, orderDir, term, trackId, perPage } = payload;
+      const { order, orderDir, term, trackId, page, perPage } = payload;
 
-      return { ...state, order, orderDir, term, trackId, perPage };
+      return {
+        ...state,
+        order,
+        orderDir,
+        term,
+        trackId,
+        currentPage: page,
+        perPage
+      };
     }
     case RECEIVE_TRACK_CHAIRS: {
       const { total, last_page, current_page, data } = payload.response;
