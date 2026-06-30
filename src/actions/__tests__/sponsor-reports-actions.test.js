@@ -12,7 +12,6 @@ import { makeReadErrorHandler } from "../sponsor-reports-errors";
 import {
   getPurchaseDetailsReport,
   getPurchaseDetailsFilters,
-  getSponsorAssetReport,
   getSponsorAssetFilters,
   getSponsorAssetRows,
   getSponsorAssetSponsor,
@@ -25,11 +24,8 @@ import {
   RECEIVE_PURCHASE_DETAILS_FILTERS,
   PURCHASE_DETAILS_READ_ERROR,
   PURCHASE_DETAILS_VALIDATION_ERROR,
-  REQUEST_SPONSOR_ASSET,
-  RECEIVE_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET_FILTERS,
   RECEIVE_SPONSOR_ASSET_ROWS,
-  SPONSOR_ASSET_READ_ERROR,
   REQUEST_SPONSOR_DRILLDOWN,
   RECEIVE_SPONSOR_DRILLDOWN,
   SPONSOR_DRILLDOWN_READ_ERROR
@@ -210,65 +206,6 @@ describe("sponsor-reports-actions", () => {
       const types = store.getActions().map((a) => a.type);
       expect(types).toContain(RECEIVE_PURCHASE_DETAILS_FILTERS);
       expect(capturedParams.access_token).toBe("TOKEN");
-    });
-  });
-
-  // ─── getSponsorAssetReport ───────────────────────────────────────────────────
-
-  describe("getSponsorAssetReport", () => {
-    it("dispatches REQUEST_SPONSOR_ASSET then RECEIVE_SPONSOR_ASSET", async () => {
-      const store = mockStore(MOCK_STATE);
-      store.dispatch(getSponsorAssetReport({}, { groupBy: "sponsor" }));
-      await flushPromises();
-
-      const types = store.getActions().map((a) => a.type);
-      expect(types).toContain(REQUEST_SPONSOR_ASSET);
-      expect(types).toContain(RECEIVE_SPONSOR_ASSET);
-    });
-
-    it("passes access_token and built group_by param in outgoing request", async () => {
-      const store = mockStore(MOCK_STATE);
-      store.dispatch(getSponsorAssetReport({}, { groupBy: "sponsor" }));
-      await flushPromises();
-
-      expect(capturedParams.access_token).toBe("TOKEN");
-      expect(capturedParams.group_by).toBe("sponsor");
-    });
-
-    it("uses summit id from state in URL", async () => {
-      const store = mockStore(MOCK_STATE);
-      store.dispatch(getSponsorAssetReport());
-      await flushPromises();
-
-      expect(capturedUrl).toContain("/summits/42/");
-    });
-
-    it("503 export-disabled on read dispatches SPONSOR_ASSET_READ_ERROR (clears loading)", async () => {
-      // Simulate getRequest invoking the error handler with a 503 export-disabled response.
-      getRequest.mockImplementation(
-        (requestAC, _receiveAC, _url, errorHandler) => () => (dispatch) => {
-          if (requestAC) dispatch(requestAC({}));
-          errorHandler(
-            {
-              status: 503,
-              response: {
-                body: { message: "CSV export is not enabled for this summit" }
-              }
-            },
-            {}
-          )(dispatch);
-          return Promise.resolve();
-        }
-      );
-
-      const store = mockStore(MOCK_STATE);
-      store.dispatch(getSponsorAssetReport({}, { groupBy: "sponsor" }));
-      await flushPromises();
-
-      const types = store.getActions().map((a) => a.type);
-      expect(types).toContain(REQUEST_SPONSOR_ASSET);
-      // export-disabled must dispatch the loading-clearing READ_ERROR action.
-      expect(types).toContain(SPONSOR_ASSET_READ_ERROR);
     });
   });
 
@@ -540,13 +477,12 @@ describe("sponsor-reports-actions", () => {
       window.SPONSOR_REPORTS_API_URL = "http://test-api";
     });
 
-    it("exportSponsorAssetCsv → assets URL, keeps filters, strips group_by/order/pagination", async () => {
-      // Pass an input that buildReportQuery WOULD emit grouping/pagination/order for,
+    it("exportSponsorAssetCsv → assets URL, keeps filters, strips order/pagination", async () => {
+      // Pass an input that buildReportQuery WOULD emit pagination/order for,
       // to actually exercise the strip (the page only ever passes flat filters, but the
       // thunk's contract is a flat export regardless).
       await exportSponsorAssetCsv({
         sponsorIds: [17],
-        groupBy: "component",
         page: 2,
         perPage: 25,
         order: "status"
@@ -556,7 +492,6 @@ describe("sponsor-reports-actions", () => {
         "http://test-api/api/v1/summits/42/reports/sponsor-assets/csv"
       );
       expect(params["filter[]"]).toEqual(["sponsor_id==17"]); // filter survives
-      expect(params).not.toHaveProperty("group_by");
       expect(params).not.toHaveProperty("order");
       expect(params).not.toHaveProperty("page");
       expect(params).not.toHaveProperty("per_page");

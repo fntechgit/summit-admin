@@ -25,7 +25,6 @@ export const PURCHASE_DETAILS_VALIDATION_CLEAR =
   "PURCHASE_DETAILS_VALIDATION_CLEAR";
 
 export const REQUEST_SPONSOR_ASSET = "REQUEST_SPONSOR_ASSET";
-export const RECEIVE_SPONSOR_ASSET = "RECEIVE_SPONSOR_ASSET";
 export const RECEIVE_SPONSOR_ASSET_FILTERS = "RECEIVE_SPONSOR_ASSET_FILTERS";
 export const SPONSOR_ASSET_READ_ERROR = "SPONSOR_ASSET_READ_ERROR";
 export const RECEIVE_SPONSOR_ASSET_ROWS = "RECEIVE_SPONSOR_ASSET_ROWS";
@@ -121,34 +120,6 @@ export const getPurchaseDetailsFilters = () => async (dispatch, getState) => {
     .finally(() => dispatch(stopLoading()));
 };
 
-export const getSponsorAssetReport =
-  (filters = {}, options = {}) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const { currentSummit } = currentSummitState;
-    // No summit in context → skip. Otherwise base(currentSummit.id) throws
-    // synchronously after startLoading() and the spinner is never cleared.
-    if (!currentSummit?.id) return Promise.resolve();
-    const accessToken = await getAccessTokenSafely();
-    dispatch(startLoading());
-    const query = buildReportQuery({ ...filters, ...options });
-    const params = { access_token: accessToken, ...query };
-    return getRequest(
-      createAction(REQUEST_SPONSOR_ASSET),
-      createAction(RECEIVE_SPONSOR_ASSET),
-      `${base(currentSummit.id)}/sponsor-assets`,
-      makeReadErrorHandler({
-        onReadError: createAction(SPONSOR_ASSET_READ_ERROR),
-        // FE never sends an invalid group_by/order, but a 412 must not be swallowed:
-        // route it to the read-error body rather than a silent no-op.
-        onValidationError: createAction(SPONSOR_ASSET_READ_ERROR),
-        onExportDisabled: createAction(SPONSOR_ASSET_READ_ERROR)
-      })
-    )(params)(dispatch)
-      .catch(() => {})
-      .finally(() => dispatch(stopLoading()));
-  };
-
 export const getSponsorAssetFilters = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const { currentSummit } = currentSummitState;
@@ -156,7 +127,7 @@ export const getSponsorAssetFilters = () => async (dispatch, getState) => {
   const accessToken = await getAccessTokenSafely();
   dispatch(startLoading());
   return getRequest(
-    null, // loading is owned by getSponsorAssetReport; filters must not toggle it
+    null, // loading is owned by getSponsorAssetRows; filters must not toggle it
     createAction(RECEIVE_SPONSOR_ASSET_FILTERS),
     `${base(currentSummit.id)}/sponsor-assets/filters`,
     makeReadErrorHandler({
@@ -302,7 +273,6 @@ export const exportSponsorAssetCsv =
     if (!currentSummit?.id) return Promise.resolve();
     const accessToken = await getAccessTokenSafely();
     const {
-      group_by: _g,
       order: _o,
       page: _p,
       per_page: _pp,
