@@ -24,6 +24,7 @@ export const buildReportQuery = (filters = {}) => {
     sponsorIds = [],
     status,
     formCode,
+    paymentMethod,
     pageId,
     moduleType,
     mediaRequestType,
@@ -49,6 +50,7 @@ export const buildReportQuery = (filters = {}) => {
   // Single-value dimensions — each its own comma-free bracket (AND).
   if (status) filter.push(`status==${status}`);
   if (formCode) filter.push(`form_code==${formCode}`);
+  if (paymentMethod) filter.push(`payment_method==${paymentMethod}`);
   if (pageId) filter.push(`page_id==${pageId}`);
   if (moduleType) filter.push(`module_type==${moduleType}`);
   if (mediaRequestType) filter.push(`media_request_type==${mediaRequestType}`);
