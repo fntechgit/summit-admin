@@ -12,6 +12,7 @@
  * */
 
 import React, { useEffect, useMemo, useState } from "react";
+import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { useFormik, FormikProvider } from "formik";
 import * as yup from "yup";
@@ -40,6 +41,11 @@ const validationSchema = yup.object({
     .max(
       MAX_TAX_RATE,
       T.translate("validation.maximum", { maximum: MAX_TAX_RATE })
+    )
+    .test(
+      "max-3-decimals",
+      T.translate("validation.max_decimals", { count: 3 }),
+      (v) => v == null || /^\d+(\.\d{1,3})?$/.test(String(v))
     )
     .required(T.translate("validation.required")),
   tax_id: yup.string().nullable().optional()
@@ -146,6 +152,7 @@ const TaxTypeForm = ({
               name="rate"
               label={T.translate("edit_tax_type.rate")}
               type="number"
+              inputProps={{ step: "0.001" }}
               fullWidth
             />
           </Grid2>
@@ -175,7 +182,7 @@ const TaxTypeForm = ({
                 onChange={(_, val) => setSelectedTicket(val)}
                 renderInput={(params) => (
                   <TextField
-                    {...params}
+                    {...params} // eslint-disable-line react/jsx-props-no-spreading
                     size="small"
                     placeholder={T.translate("edit_tax_type.ticket_types")}
                     slotProps={{
@@ -225,6 +232,25 @@ const TaxTypeForm = ({
       </Box>
     </FormikProvider>
   );
+};
+
+TaxTypeForm.propTypes = {
+  entity: PropTypes.shape({
+    id: PropTypes.number,
+    name: PropTypes.string,
+    rate: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    tax_id: PropTypes.string,
+    ticket_types: PropTypes.arrayOf(PropTypes.shape({}))
+  }).isRequired,
+  currentSummit: PropTypes.shape({ id: PropTypes.number }).isRequired,
+  onTicketLink: PropTypes.func.isRequired,
+  onTicketUnLink: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  isSaving: PropTypes.bool
+};
+
+TaxTypeForm.defaultProps = {
+  isSaving: false
 };
 
 export default TaxTypeForm;

@@ -107,6 +107,7 @@
     "positive": "Must be a positive number.",
     "one_option_required": "Must have one option",
     "two_decimals": "Max 2 decimal places",
+    "max_decimals": "Max {count} decimal places",
     "email": "Wrong email format.",
     "url": "Wrong URL format",
     "date": "Wrong date format.",
