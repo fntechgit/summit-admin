@@ -12,8 +12,6 @@
  * */
 
 import React, { useEffect, useState } from "react";
-// eslint-disable-next-line camelcase
-import { unstable_batchedUpdates as batchUpdates } from "react-dom";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
@@ -104,10 +102,8 @@ const TaxTypeListPage = ({
     });
 
   const handleClosePopup = () => {
-    batchUpdates(() => {
-      resetTaxTypeForm();
-      setShowTaxTypeModal(false);
-    });
+    resetTaxTypeForm();
+    setShowTaxTypeModal(false);
   };
 
   const columns = [
