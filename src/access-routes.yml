@@ -160,6 +160,12 @@ tickets:
   - summit-front-end-administrators
   - summit-registration-administrators
 
+taxes:
+  - super-admins
+  - administrators
+  - summit-front-end-administrators
+  - summit-registration-administrators
+
 registration-invitations:
   - super-admins
   - administrators

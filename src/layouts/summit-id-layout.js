@@ -48,7 +48,9 @@ const LocationLayout = React.lazy(() => import("./location-layout"));
 const SignagePage = React.lazy(() => import("../pages/signage"));
 const RsvpTemplateLayout = React.lazy(() => import("./rsvp-template-layout"));
 const TicketTypeLayout = React.lazy(() => import("./ticket-type-layout"));
-const TaxTypeLayout = React.lazy(() => import("./tax-type-layout"));
+const TaxTypeListPage = React.lazy(() =>
+  import("../pages/taxes/tax-type-list-page")
+);
 const RefundPolicyListPage = React.lazy(() =>
   import("../pages/tickets/refund-policy-list-page")
 );
@@ -205,7 +207,12 @@ const SummitIdLayout = ({ currentSummit, loading, match, ...props }) => {
             path={`${match.url}/ticket-types`}
             component={TicketTypeLayout}
           />
-          <Route path={`${match.url}/tax-types`} component={TaxTypeLayout} />
+          <Route
+            strict
+            exact
+            path={`${match.url}/tax-types`}
+            component={TaxTypeListPage}
+          />
           <Route
             path={`${match.url}/refund-policies`}
             component={RefundPolicyListPage}

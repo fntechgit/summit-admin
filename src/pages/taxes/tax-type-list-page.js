@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -9,133 +9,243 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
+import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import Table from "openstack-uicore-foundation/lib/components/table";
-import { getSummitById } from "../../actions/summit-actions";
-import { getTaxTypes, deleteTaxType } from "../../actions/tax-actions";
+import Button from "@mui/material/Button";
+import Grid2 from "@mui/material/Grid2";
+import Typography from "@mui/material/Typography";
+import AddIcon from "@mui/icons-material/Add";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import Restrict from "../../routes/restrict";
+import {
+  getTaxTypes,
+  deleteTaxType,
+  getTaxType,
+  resetTaxTypeForm,
+  saveTaxType,
+  addTicketToTaxType,
+  removeTicketFromTaxType
+} from "../../actions/tax-actions";
+import TaxTypePopup from "./popup/tax-type-popup";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
-class TaxTypeListPage extends React.Component {
-  constructor(props) {
-    super(props);
+const TaxTypeListPage = ({
+  currentSummit,
+  taxTypes,
+  term,
+  order,
+  orderDir,
+  perPage,
+  currentPage,
+  totalTaxTypes,
+  currentTaxType,
+  getTaxTypes,
+  deleteTaxType,
+  getTaxType,
+  resetTaxTypeForm,
+  saveTaxType,
+  addTicketToTaxType,
+  removeTicketFromTaxType,
+  match
+}) => {
+  const [showTaxTypeModal, setShowTaxTypeModal] = useState(false);
 
-    this.handleEdit = this.handleEdit.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
-    this.handleSort = this.handleSort.bind(this);
-    this.handleNewTaxType = this.handleNewTaxType.bind(this);
-
-    this.state = {};
-  }
-
-  componentDidMount() {
-    const { currentSummit } = this.props;
-    if (currentSummit) {
-      this.props.getTaxTypes();
+  useEffect(() => {
+    if (currentSummit?.id) {
+      getTaxTypes(term, currentPage, perPage, order, orderDir);
     }
-  }
+  }, [currentSummit]);
 
-  handleEdit(tax_type_id) {
-    const { currentSummit, history } = this.props;
-    history.push(`/app/summits/${currentSummit.id}/tax-types/${tax_type_id}`);
-  }
+  const handleDelete = (taxTypeId) => {
+    deleteTaxType(taxTypeId)
+      .finally(() => {
+        getTaxTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+      })
+      .catch(() => {});
+  };
 
-  handleDelete(taxTypeId) {
-    const { deleteTaxType, taxTypes } = this.props;
-    let taxType = taxTypes.find((t) => t.id === taxTypeId);
+  const handleSort = (key, dir) => {
+    getTaxTypes(term, DEFAULT_CURRENT_PAGE, perPage, key, dir);
+  };
 
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: T.translate("tax_type_list.remove_warning") + " " + taxType.name,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
-      if (result.value) {
-        deleteTaxType(taxTypeId);
-      }
+  const handleSearch = (searchTerm) => {
+    getTaxTypes(searchTerm, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+  };
+
+  const handlePageChange = (page) => {
+    getTaxTypes(term, page, perPage, order, orderDir);
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    getTaxTypes(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
+  };
+
+  const handleOpenNewTaxType = () => {
+    resetTaxTypeForm();
+    setShowTaxTypeModal(true);
+  };
+
+  const handleEdit = (row) => {
+    getTaxType(row.id).then(() => setShowTaxTypeModal(true));
+  };
+
+  const handleSave = (entity) =>
+    saveTaxType(entity).then(() => {
+      getTaxTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir).catch(
+        () => {}
+      );
     });
-  }
 
-  handleSort(index, key, dir, func) {
-    this.props.getTaxTypes(key, dir);
-  }
+  const handleClosePopup = () => {
+    resetTaxTypeForm();
+    setShowTaxTypeModal(false);
+  };
 
-  handleNewTaxType(ev) {
-    const { currentSummit, history } = this.props;
-    history.push(`/app/summits/${currentSummit.id}/tax-types/new`);
-  }
+  const columns = [
+    {
+      columnKey: "name",
+      header: T.translate("tax_type_list.name"),
+      sortable: true
+    },
+    {
+      columnKey: "rate",
+      header: T.translate("tax_type_list.rate"),
+      sortable: true
+    },
+    {
+      columnKey: "tax_id",
+      header: T.translate("tax_type_list.tax_id")
+    }
+  ];
 
-  render() {
-    const { currentSummit, taxTypes, order, orderDir, totalTaxTypes } =
-      this.props;
+  const tableOptions = {
+    sortCol: order,
+    sortDir: orderDir
+  };
 
-    const columns = [
-      {
-        columnKey: "name",
-        value: T.translate("tax_type_list.name"),
-        sortable: true
-      },
-      { columnKey: "rate", value: T.translate("tax_type_list.rate") },
-      { columnKey: "tax_id", value: T.translate("tax_type_list.tax_id") }
-    ];
+  if (!currentSummit?.id) return <div />;
 
-    const table_options = {
-      sortCol: order,
-      sortDir: orderDir,
-      actions: {
-        edit: { onClick: this.handleEdit },
-        delete: { onClick: this.handleDelete }
-      }
-    };
-
-    if (!currentSummit.id) return <div />;
-
-    return (
+  return (
+    <>
+      <Breadcrumb
+        data={{
+          title: T.translate("tax_type_list.tax_types"),
+          pathname: match.url
+        }}
+      />
       <div className="container">
-        <h3>
-          {" "}
-          {T.translate("tax_type_list.tax_type_list")} ({totalTaxTypes})
-        </h3>
-        <div className={"row"}>
-          <div className="col-md-6 text-right col-md-offset-6">
-            <button
-              className="btn btn-primary right-space"
-              onClick={this.handleNewTaxType}
-            >
-              {T.translate("tax_type_list.add_tax_type")}
-            </button>
-          </div>
-        </div>
+        <h3>{T.translate("tax_type_list.tax_type_list")}</h3>
+
+        <Grid2
+          container
+          spacing={2}
+          sx={{
+            justifyContent: "center",
+            alignItems: "center",
+            mb: 2
+          }}
+        >
+          <Grid2 size={6}>
+            <Typography>
+              {totalTaxTypes} {T.translate("general.items")}
+            </Typography>
+          </Grid2>
+          <Grid2
+            container
+            size={6}
+            spacing={1}
+            sx={{
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
+            <Grid2 size={2} />
+            <Grid2 size={6}>
+              <SearchInput
+                onSearch={handleSearch}
+                term={term}
+                placeholder={T.translate("tax_type_list.name")}
+                debounced
+              />
+            </Grid2>
+            <Grid2 size={4}>
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={handleOpenNewTaxType}
+                startIcon={<AddIcon />}
+                sx={{ height: "36px" }}
+              >
+                {T.translate("tax_type_list.add_tax_type")}
+              </Button>
+            </Grid2>
+          </Grid2>
+        </Grid2>
 
         {taxTypes.length === 0 && (
           <div>{T.translate("tax_type_list.no_tax_types")}</div>
         )}
 
         {taxTypes.length > 0 && (
-          <Table
-            options={table_options}
+          <MuiTable
+            options={tableOptions}
             data={taxTypes}
             columns={columns}
-            onSort={this.handleSort}
+            totalRows={totalTaxTypes}
+            perPage={perPage}
+            currentPage={currentPage}
+            getName={(item) => item.name}
+            onSort={handleSort}
+            onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            deleteDialogBody={(name) =>
+              T.translate("tax_type_list.remove_warning", { taxType: name })
+            }
+            confirmButtonColor="error"
+          />
+        )}
+
+        {showTaxTypeModal && (
+          <TaxTypePopup
+            onClose={handleClosePopup}
+            entity={currentTaxType}
+            currentSummit={currentSummit}
+            onSave={handleSave}
+            onTicketLink={addTicketToTaxType}
+            onTicketUnLink={removeTicketFromTaxType}
           />
         )}
       </div>
-    );
-  }
-}
+    </>
+  );
+};
 
-const mapStateToProps = ({ currentSummitState, currentTaxTypeListState }) => ({
+const mapStateToProps = ({
+  currentSummitState,
+  currentTaxTypeListState,
+  currentTaxTypeState
+}) => ({
   currentSummit: currentSummitState.currentSummit,
-  ...currentTaxTypeListState
+  ...currentTaxTypeListState,
+  currentTaxType: currentTaxTypeState.entity
 });
 
-export default connect(mapStateToProps, {
-  getSummitById,
-  getTaxTypes,
-  deleteTaxType
-})(TaxTypeListPage);
+export default Restrict(
+  connect(mapStateToProps, {
+    getTaxTypes,
+    deleteTaxType,
+    getTaxType,
+    resetTaxTypeForm,
+    saveTaxType,
+    addTicketToTaxType,
+    removeTicketFromTaxType
+  })(TaxTypeListPage),
+  "taxes"
+);
