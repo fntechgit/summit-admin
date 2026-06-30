@@ -48,6 +48,7 @@ import {
   EXPORT_PAGE_SIZE_100,
   TEN
 } from "../utils/constants";
+import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
 export const REQUEST_TICKETS = "REQUEST_TICKETS";
 export const RECEIVE_TICKETS = "RECEIVE_TICKETS";
@@ -1200,6 +1201,7 @@ export const deleteRefundPolicy =
 
 export const getPaymentProfiles =
   (
+    term = "",
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
@@ -1209,6 +1211,7 @@ export const getPaymentProfiles =
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
+    const filter = [];
 
     dispatch(startLoading());
 
@@ -1218,10 +1221,28 @@ export const getPaymentProfiles =
       access_token: accessToken
     };
 
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      const numericId = parseInt(escapedTerm, 10);
+      if (!Number.isNaN(numericId)) {
+        filter.push(
+          `provider=@${escapedTerm},application_type=@${escapedTerm},id==${numericId}`
+        );
+      } else {
+        filter.push(
+          `provider=@${escapedTerm},application_type=@${escapedTerm}`
+        );
+      }
+    }
+
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
       params.order = `${orderDirSign}${order}`;
+    }
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
     }
 
     return getRequest(
@@ -1229,8 +1250,8 @@ export const getPaymentProfiles =
       createAction(RECEIVE_PAYMENT_PROFILES),
 
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles`,
-      authErrorHandler,
-      { page, perPage, order, orderDir }
+      snackbarErrorHandler,
+      { term, page, perPage, order, orderDir }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -1241,49 +1262,48 @@ export const savePaymentProfile = (entity) => async (dispatch, getState) => {
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
 
+  dispatch(startLoading());
+
   const params = {
     access_token: accessToken
   };
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_PAYMENT_PROFILE),
       createAction(PAYMENT_PROFILE_UPDATED),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${entity.id}`,
       entity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(
-        showSuccessMessage(
-          T.translate("edit_payment_profile.payment_profile_saved")
-        )
-      );
-    });
-    return;
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_payment_profile.payment_profile_saved")
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
   }
 
-  const success_message = {
-    title: T.translate("general.done"),
-    html: T.translate("edit_payment_profile.payment_profile_created"),
-    type: "success"
-  };
-
-  postRequest(
+  return postRequest(
     createAction(UPDATE_PAYMENT_PROFILE),
     createAction(PAYMENT_PROFILE_ADDED),
     `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles`,
     entity,
-    authErrorHandler
-  )(params)(dispatch).then((payload) => {
-    dispatch(
-      showMessage(success_message, () => {
-        history.push(
-          `/app/summits/${currentSummit.id}/payment-profiles/${payload.response.id}`
-        );
-      })
-    );
-  });
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_payment_profile.payment_profile_created")
+        })
+      );
+    })
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const deletePaymentProfile =
@@ -1291,6 +1311,8 @@ export const deletePaymentProfile =
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
+
+    dispatch(startLoading());
 
     const params = {
       access_token: accessToken
@@ -1301,8 +1323,8 @@ export const deletePaymentProfile =
       createAction(PAYMENT_PROFILE_DELETED)({ paymentProfileId }),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${paymentProfileId}`,
       null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
+      snackbarErrorHandler
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -1323,7 +1345,7 @@ export const getPaymentProfile =
       null,
       createAction(RECEIVE_PAYMENT_PROFILE),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${paymentProfileId}`,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -1361,7 +1383,7 @@ export const getPaymentFeeTypes =
       createAction(RECEIVE_PAYMENT_FEE_TYPES),
 
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${paymentProfileId}/fee-types`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { page, perPage, order, orderDir }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -1380,45 +1402,44 @@ export const savePaymentFeeType = (entity) => async (dispatch, getState) => {
     access_token: accessToken
   };
 
+  dispatch(startLoading());
+
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_PAYMENT_FEE_TYPE),
       createAction(PAYMENT_FEE_TYPE_UPDATED),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${paymentProfileId}/fee-types/${entity.id}`,
       entity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(
-        showSuccessMessage(
-          T.translate("edit_payment_fee_type.payment_fee_type_saved")
-        )
-      );
-    });
-    return;
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_payment_fee_type.payment_fee_type_saved")
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
   }
 
-  const success_message = {
-    title: T.translate("general.done"),
-    html: T.translate("edit_payment_fee_type.payment_fee_type_created"),
-    type: "success"
-  };
-
-  postRequest(
+  return postRequest(
     createAction(UPDATE_PAYMENT_FEE_TYPE),
     createAction(PAYMENT_FEE_TYPE_ADDED),
     `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${paymentProfileId}/fee-types`,
     entity,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(
-      showMessage(success_message, () => {
-        history.push(
-          `/app/summits/${currentSummit.id}/payment-profiles/${paymentProfileId}`
-        );
-      })
-    );
-  });
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_payment_fee_type.payment_fee_type_created")
+        })
+      );
+    })
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const deletePaymentFeeType =
@@ -1439,7 +1460,7 @@ export const deletePaymentFeeType =
       createAction(PAYMENT_FEE_TYPE_DELETED)({ paymentFeeTypeId }),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${paymentProfileId}/fee-types/${paymentFeeTypeId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -1464,7 +1485,7 @@ export const getPaymentFeeType =
       null,
       createAction(RECEIVE_PAYMENT_FEE_TYPE),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${paymentProfileId}/fee-types/${paymentFeeTypeId}`,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
