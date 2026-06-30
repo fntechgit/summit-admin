@@ -11,11 +11,13 @@ import {
   Typography
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import T from "i18n-react/dist/i18n-react";
 import ContentCell from "./ContentCell";
 import StatusPill from "./StatusPill";
 import StatusRollupChips from "./StatusRollupChips";
 import TierBadge from "./TierBadge";
 import SponsorAvatar from "./SponsorAvatar";
+import { UNKNOWN_LABEL_KEYS } from "./pivot-defs";
 
 const Leaf = ({ rows }) => (
   <Stack spacing={1}>
@@ -28,7 +30,9 @@ const Leaf = ({ rows }) => (
         sx={{ flexWrap: "wrap" }}
       >
         <Typography variant="body2" sx={{ minWidth: 160 }}>
-          {row.module?.component_name || row.module?.title || "(Unnamed)"}
+          {row.module?.component_name ||
+            row.module?.title ||
+            T.translate("sponsor_reports_page.pivot_unnamed_component")}
         </Typography>
         <StatusPill status={row.status} label={row.status} />
         <Box sx={{ flex: 1, minWidth: 200 }}>
@@ -71,10 +75,16 @@ const PivotTree = ({ nodes, summitId, depth = 0, maxDepth }) => (
                   to={sponsorLink}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {node.label}
+                  {node.isUnknown
+                    ? T.translate(UNKNOWN_LABEL_KEYS[node.axisId])
+                    : node.label}
                 </MuiLink>
               ) : (
-                <Typography>{node.label}</Typography>
+                <Typography>
+                  {node.isUnknown
+                    ? T.translate(UNKNOWN_LABEL_KEYS[node.axisId])
+                    : node.label}
+                </Typography>
               )}
               {node.axisId === "sponsor" && (
                 <TierBadge tier={node.sample.sponsor?.tier} />
