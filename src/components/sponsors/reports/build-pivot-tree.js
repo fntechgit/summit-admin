@@ -1,12 +1,12 @@
 import { AXES } from "./pivot-defs";
 
-const STATUS_KEYS = ["completed", "in_progress", "pending", "not_applicable"];
+const STATUS_KEYS = ["completed", "in_progress", "pending"];
 // Symbol sentinel for the "key is null" (unknown) bucket — collision-free with any
 // real id/string key, and (unlike a string literal) impossible to clash with data.
 const UNKNOWN = Symbol("unknown");
 
 const rollupOf = (rows) => {
-  const r = { completed: 0, in_progress: 0, pending: 0, not_applicable: 0 };
+  const r = { completed: 0, in_progress: 0, pending: 0 };
   rows.forEach((row) => {
     if (STATUS_KEYS.includes(row.status)) r[row.status] += 1;
   });

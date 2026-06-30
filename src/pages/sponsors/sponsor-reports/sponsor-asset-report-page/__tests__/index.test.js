@@ -127,9 +127,10 @@ describe("SponsorAssetReportPage", () => {
     expect(
       screen.getByText("sponsor_reports_page.status_pending")
     ).toBeInTheDocument();
+    // N/A tile dropped — report is scoped to Media, which never yields N/A.
     expect(
-      screen.getByText("sponsor_reports_page.status_not_applicable")
-    ).toBeInTheDocument();
+      screen.queryByText("sponsor_reports_page.status_not_applicable")
+    ).not.toBeInTheDocument();
   });
 
   it("renders the summit-not-found guard when currentSummit is null", async () => {

@@ -34,17 +34,13 @@ import {
   getSponsorAssetRows
 } from "../../../../actions/sponsor-reports-actions";
 
-const STATUS_TILE_KEYS = [
-  "completed",
-  "in_progress",
-  "pending",
-  "not_applicable"
-];
+// not_applicable is omitted — the report is scoped to Media assets (server applies
+// module_type==Media), which never yield an N/A status, so the tile was always zero.
+const STATUS_TILE_KEYS = ["completed", "in_progress", "pending"];
 const TILE_TONE = {
   completed: "success",
   in_progress: "info",
-  pending: "warning",
-  not_applicable: "neutral"
+  pending: "warning"
 };
 
 const SponsorAssetReportPage = ({

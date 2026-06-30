@@ -8,7 +8,7 @@ import StatusRollupChips from "../StatusRollupChips";
 jest.mock("i18n-react/dist/i18n-react", () => ({ translate: (k) => k }));
 
 describe("StatusRollupChips", () => {
-  it("renders all four status keys with their counts in a stable order", () => {
+  it("renders the three displayed status keys with their counts in a stable order", () => {
     renderWithRedux(
       <StatusRollupChips
         rollup={{ completed: 8, in_progress: 2, pending: 4, not_applicable: 0 }}
@@ -23,13 +23,12 @@ describe("StatusRollupChips", () => {
     expect(
       screen.getByText("sponsor_reports_page.status_pending: 4")
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("sponsor_reports_page.status_not_applicable: 0")
-    ).toBeInTheDocument();
+    // N/A is not a sponsor-asset state (report is scoped to Media); never displayed.
+    expect(screen.queryByText(/status_not_applicable/)).not.toBeInTheDocument();
   });
 
   it("treats a missing rollup as all-zero (no crash)", () => {
     renderWithRedux(<StatusRollupChips rollup={null} />);
-    expect(screen.getAllByText(/: 0$/)).toHaveLength(4);
+    expect(screen.getAllByText(/: 0$/)).toHaveLength(3);
   });
 });
