@@ -1,6 +1,19 @@
 import React from "react";
-import { Box, Paper, Stack, Typography } from "@mui/material";
-import "./report-print.css";
+import { Box, GlobalStyles, Paper, Stack, Typography } from "@mui/material";
+
+// Whole-page print isolation: hide everything, then reveal only the report body.
+// MUI GlobalStyles replaces a standalone .css file (legacy in summit-admin).
+const printStyles = (
+  <GlobalStyles
+    styles={{
+      "@media print": {
+        "body *": { visibility: "hidden" },
+        ".report-body, .report-body *": { visibility: "visible" },
+        ".report-body": { position: "absolute", left: 0, top: 0, width: "100%" }
+      }
+    }}
+  />
+);
 
 // Header card (tinted icon square + title/subtitle + action slot) / filter slot / body slot.
 const ReportShell = ({
@@ -13,6 +26,7 @@ const ReportShell = ({
   children
 }) => (
   <Box sx={{ p: 3 }}>
+    {printStyles}
     <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2 }}>
       <Stack
         direction="row"
