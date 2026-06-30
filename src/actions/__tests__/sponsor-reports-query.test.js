@@ -64,6 +64,35 @@ describe("buildReportQuery", () => {
       per_page: 25
     });
   });
+
+  it("adds payment_method as its own single-value AND bracket", () => {
+    expect(buildReportQuery({ paymentMethod: "Invoice" })).toStrictEqual({
+      "filter[]": ["payment_method==Invoice"]
+    });
+  });
+
+  it("composes payment_method with sponsor/status/form brackets (AND)", () => {
+    expect(
+      buildReportQuery({
+        sponsorIds: [1],
+        status: "Paid",
+        formCode: "AS",
+        paymentMethod: "Card"
+      })
+    ).toStrictEqual({
+      "filter[]": [
+        "sponsor_id==1",
+        "status==Paid",
+        "form_code==AS",
+        "payment_method==Card"
+      ]
+    });
+  });
+
+  it("omits payment_method when absent or empty", () => {
+    expect(buildReportQuery({ paymentMethod: "" })).toStrictEqual({});
+    expect(buildReportQuery({})).toStrictEqual({});
+  });
 });
 
 describe("buildPurchaseQuery (orders)", () => {
