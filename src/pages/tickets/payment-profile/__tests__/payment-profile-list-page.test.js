@@ -151,4 +151,28 @@ describe("PaymentProfileListPage popup behavior", () => {
       baseState.currentPaymentProfileState.entity.id
     );
   });
+
+  test("onSave rejects when list refresh fails after successful save, keeping dialog open", async () => {
+    // savePaymentProfile succeeds but the subsequent getPaymentProfiles call fails.
+    // The returned promise from handleSave (onSave prop) must reject so the dialog
+    // stays open - preventing a silent duplicate creation if the user retries.
+    savePaymentProfile.mockReturnValue(() => Promise.resolve());
+    getPaymentProfiles
+      .mockReturnValueOnce(() => Promise.resolve()) // initial load on mount
+      .mockReturnValueOnce(() => Promise.reject(new Error("refresh failed"))); // after save
+
+    renderWithRedux(<PaymentProfileListPage />, { initialState: baseState });
+    await openPopup();
+
+    let saveError;
+    await act(async () => {
+      saveError = await capturedDialogProps
+        .onSave({ id: 0, application_type: "Registration", provider: "Stripe" })
+        .catch((e) => e);
+      await flushPromises();
+    });
+
+    expect(saveError).toBeInstanceOf(Error);
+    expect(screen.getByTestId("payment-profile-dialog")).toBeInTheDocument();
+  });
 });
