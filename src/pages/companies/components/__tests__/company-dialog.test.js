@@ -158,6 +158,28 @@ describe("CompanyDialog", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps dialog open and re-enables save when onSave rejects", async () => {
+    onSave = jest.fn(() => Promise.reject(new Error("server error")));
+    const user = userEvent.setup();
+
+    render(
+      <CompanyDialog
+        entity={{ ...BASE_ENTITY, id: 1, name: "Acme Corp" }}
+        onSave={onSave}
+        onClose={onClose}
+      />
+    );
+
+    const saveButton = screen.getByText("general.save").closest("button");
+
+    await act(async () => {
+      await user.click(saveButton);
+    });
+
+    await waitFor(() => expect(saveButton).not.toBeDisabled());
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
   it("disables the save button while saving and re-enables after resolve", async () => {
     let resolve;
     onSave = jest.fn(

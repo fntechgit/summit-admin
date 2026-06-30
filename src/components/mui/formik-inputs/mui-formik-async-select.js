@@ -108,7 +108,7 @@ const MuiFormikAsyncAutocomplete = ({
               options.filter((opt) =>
                 opt.label.toLowerCase().includes(inputValue.toLowerCase())
               )
-          : undefined // MUI usa su default que no filtra (deja que la API filtre)
+          : undefined // no client-side filter — let the API handle it via searchTerm
       }
       renderInput={(params) => (
         <TextField
