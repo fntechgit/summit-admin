@@ -165,6 +165,8 @@ const CompanyDialog = ({
       onAttach(initialEntity, uploadLogo, field)
         .catch(() => formik.setFieldValue(field, prevValue))
         .finally(() => setIsSaving(false));
+    } else {
+      setIsSaving(false);
     }
   };
 

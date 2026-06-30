@@ -230,6 +230,31 @@ describe("CompanyDialog", () => {
   });
 
   describe("logo upload", () => {
+    it("re-enables save after CDN upload completes for a new company", async () => {
+      const user = userEvent.setup();
+      const onAttach = jest.fn(() => Promise.resolve());
+      const onRemove = jest.fn(() => Promise.resolve());
+
+      render(
+        <CompanyDialog
+          entity={BASE_ENTITY}
+          onSave={onSave}
+          onClose={onClose}
+          onAttach={onAttach}
+          onRemove={onRemove}
+        />
+      );
+
+      const saveButton = screen.getByText("general.save").closest("button");
+
+      await act(async () => {
+        await user.click(screen.getByTestId("trigger-upload-big_logo"));
+      });
+
+      await waitFor(() => expect(saveButton).not.toBeDisabled());
+      expect(onAttach).not.toHaveBeenCalled();
+    });
+
     it("reverts logo preview and re-enables save when onAttach fails", async () => {
       const user = userEvent.setup();
       let rejectAttach;
