@@ -122,9 +122,12 @@ const TaxTypeForm = ({
 
   const handleAdd = () => {
     if (!selectedTicket) return;
-    onTicketLink(formik.values.id, selectedTicket);
-    setTicketTypes((prev) => [...prev, selectedTicket]);
+    const ticket = selectedTicket;
     setSelectedTicket(null);
+    setTicketTypes((prev) => [...prev, ticket]);
+    onTicketLink(formik.values.id, ticket).catch(() => {
+      setTicketTypes((prev) => prev.filter((t) => t.id !== ticket.id));
+    });
   };
 
   return (
