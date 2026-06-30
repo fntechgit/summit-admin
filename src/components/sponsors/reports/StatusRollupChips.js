@@ -3,9 +3,10 @@ import { Chip, Stack } from "@mui/material";
 import T from "i18n-react/dist/i18n-react";
 import { statusTone } from "./StatusPill";
 
-// The backend status_rollup always carries all four lowercase keys; render them
-// in a fixed order so cards line up. A missing rollup degrades to all-zero.
-const STATUS_KEYS = ["completed", "in_progress", "pending", "not_applicable"];
+// Render the displayed status keys in a fixed order so cards line up. A missing
+// rollup degrades to all-zero. not_applicable is intentionally omitted — the report
+// is scoped to Media assets, which never produce that status.
+const STATUS_KEYS = ["completed", "in_progress", "pending"];
 
 const StatusRollupChips = ({ rollup }) => {
   const r = rollup || {};

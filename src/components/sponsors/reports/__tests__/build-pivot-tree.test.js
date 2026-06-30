@@ -40,8 +40,7 @@ describe("buildPivotTree", () => {
     expect(tree[0].statusRollup).toEqual({
       completed: 2,
       in_progress: 0,
-      pending: 1,
-      not_applicable: 0
+      pending: 1
     });
   });
 });
