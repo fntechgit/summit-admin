@@ -480,33 +480,35 @@ export const archiveCustomizedPage = (pageId) => async (dispatch, getState) => {
 
   dispatch(startLoading());
 
-  await putRequest(
+  return putRequest(
     null,
     createAction(SPONSOR_CUSTOMIZED_PAGE_ARCHIVED)({ pageId }),
     `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-pages/${pageId}/archive`,
     null,
     snackbarErrorHandler
-  )(params)(dispatch);
-  dispatch(
-    snackbarSuccessHandler({
-      title: T.translate("general.success"),
-      html: T.translate("edit_sponsor.pages_tab.customized_page_archived")
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_sponsor.pages_tab.customized_page_archived")
+        })
+      );
+      const { term, showArchived, customizedPages } =
+        getState().sponsorPagePagesListState;
+      const { currentPage, perPage, order, orderDir } = customizedPages;
+      return dispatch(
+        getSponsorCustomizedPages(
+          term,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        )
+      );
     })
-  );
-  dispatch(stopLoading());
-  const { term, showArchived, customizedPages } =
-    getState().sponsorPagePagesListState;
-  const { currentPage, perPage, order, orderDir } = customizedPages;
-  dispatch(
-    getSponsorCustomizedPages(
-      term,
-      currentPage,
-      perPage,
-      order,
-      orderDir,
-      showArchived
-    )
-  );
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const unarchiveCustomizedPage =
@@ -521,33 +523,37 @@ export const unarchiveCustomizedPage =
 
     dispatch(startLoading());
 
-    await deleteRequest(
+    return deleteRequest(
       null,
       createAction(SPONSOR_CUSTOMIZED_PAGE_UNARCHIVED)({ pageId }),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-pages/${pageId}/archive`,
       null,
       snackbarErrorHandler
-    )(params)(dispatch);
-    dispatch(
-      snackbarSuccessHandler({
-        title: T.translate("general.success"),
-        html: T.translate("edit_sponsor.pages_tab.customized_page_unarchived")
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate(
+              "edit_sponsor.pages_tab.customized_page_unarchived"
+            )
+          })
+        );
+        const { term, showArchived, customizedPages } =
+          getState().sponsorPagePagesListState;
+        const { currentPage, perPage, order, orderDir } = customizedPages;
+        return dispatch(
+          getSponsorCustomizedPages(
+            term,
+            currentPage,
+            perPage,
+            order,
+            orderDir,
+            showArchived
+          )
+        );
       })
-    );
-    dispatch(stopLoading());
-    const { term, showArchived, customizedPages } =
-      getState().sponsorPagePagesListState;
-    const { currentPage, perPage, order, orderDir } = customizedPages;
-    dispatch(
-      getSponsorCustomizedPages(
-        term,
-        currentPage,
-        perPage,
-        order,
-        orderDir,
-        showArchived
-      )
-    );
+      .finally(() => dispatch(stopLoading()));
   };
 
 export const deleteSponsorCustomizedPage =

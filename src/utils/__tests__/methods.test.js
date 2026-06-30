@@ -173,6 +173,10 @@ describe("getSafePageAfterRemove", () => {
     expect(getSafePageAfterRemove(21, 10, 3)).toBe(2);
   });
 
+  it("should stay on a non-last page even if the global page count would decrease", () => {
+    expect(getSafePageAfterRemove(21, 10, 2)).toBe(2);
+  });
+
   it("should never return a page lower than 1", () => {
     expect(getSafePageAfterRemove(1, 10, 1)).toBe(1);
   });

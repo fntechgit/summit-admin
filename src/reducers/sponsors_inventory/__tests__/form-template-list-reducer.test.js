@@ -4,9 +4,8 @@ import {
   FORM_TEMPLATE_ARCHIVED
 } from "../../../actions/form-template-actions";
 
-// This test currently FAILS, proving the stale-closure bug.
-// The fix: move page correction into the action thunk via getState() instead of the reducer.
-it("stays on the corrected page after the .then() refetch that follows an archive", () => {
+// Verifies the reducer decrements currentPage when archiving the only item on the last page.
+it("decrements currentPage when archiving the only item on the last page", () => {
   // 21 items across 3 pages; page 3 has exactly 1 item
   const onPage3 = formTemplateListReducer(undefined, {
     type: RECEIVE_FORM_TEMPLATES,

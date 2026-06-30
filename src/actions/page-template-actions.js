@@ -216,25 +216,30 @@ export const archivePageTemplate =
     const accessToken = await getAccessTokenSafely();
     const params = { access_token: accessToken };
 
-    await putRequest(
+    dispatch(startLoading());
+
+    return putRequest(
       null,
       createAction(PAGE_TEMPLATE_ARCHIVED),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${pageTemplateId}/archive`,
       null,
       snackbarErrorHandler
-    )(params)(dispatch);
-    const { term, currentPage, perPage, order, orderDir, showArchived } =
-      getState().pageTemplateListState;
-    dispatch(
-      getPageTemplates(
-        term,
-        currentPage,
-        perPage,
-        order,
-        orderDir,
-        showArchived
-      )
-    );
+    )(params)(dispatch)
+      .then(() => {
+        const { term, currentPage, perPage, order, orderDir, showArchived } =
+          getState().pageTemplateListState;
+        return dispatch(
+          getPageTemplates(
+            term,
+            currentPage,
+            perPage,
+            order,
+            orderDir,
+            showArchived
+          )
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
   };
 
 export const unarchivePageTemplate =
@@ -244,26 +249,28 @@ export const unarchivePageTemplate =
 
     dispatch(startLoading());
 
-    await deleteRequest(
+    return deleteRequest(
       null,
       createAction(PAGE_TEMPLATE_UNARCHIVED)({ pageTemplateId }),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${pageTemplateId}/archive`,
       null,
       snackbarErrorHandler
-    )(params)(dispatch);
-    dispatch(stopLoading());
-    const { term, currentPage, perPage, order, orderDir, showArchived } =
-      getState().pageTemplateListState;
-    dispatch(
-      getPageTemplates(
-        term,
-        currentPage,
-        perPage,
-        order,
-        orderDir,
-        showArchived
-      )
-    );
+    )(params)(dispatch)
+      .then(() => {
+        const { term, currentPage, perPage, order, orderDir, showArchived } =
+          getState().pageTemplateListState;
+        return dispatch(
+          getPageTemplates(
+            term,
+            currentPage,
+            perPage,
+            order,
+            orderDir,
+            showArchived
+          )
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
   };
 
 export const clonePageTemplate = (templateId) => async (dispatch) => {
