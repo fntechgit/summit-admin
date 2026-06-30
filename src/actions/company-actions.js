@@ -20,16 +20,13 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  showMessage,
-  showSuccessMessage,
-  authErrorHandler,
   escapeFilterValue,
   fetchResponseHandler,
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import debounce from "lodash/debounce"
+import debounce from "lodash/debounce";
 import URI from "urijs";
-import history from "../history";
+import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
   DEBOUNCE_WAIT,
@@ -50,6 +47,8 @@ export const COMPANY_UPDATED = "COMPANY_UPDATED";
 export const COMPANY_ADDED = "COMPANY_ADDED";
 export const LOGO_ATTACHED = "LOGO_ATTACHED";
 export const BIG_LOGO_ATTACHED = "BIG_LOGO_ATTACHED";
+export const LOGO_REMOVED = "LOGO_REMOVED";
+export const BIG_LOGO_REMOVED = "BIG_LOGO_REMOVED";
 
 export const getCompanies =
   (
@@ -92,9 +91,9 @@ export const getCompanies =
       createAction(REQUEST_COMPANIES),
       createAction(RECEIVE_COMPANIES),
       `${window.API_BASE_URL}/api/v1/companies`,
-      authErrorHandler,
-      { order, orderDir, page, term }
-    )(params)(dispatch).then(() => {
+      snackbarErrorHandler,
+      { order, orderDir, page, perPage, term }
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -114,8 +113,8 @@ export const getCompany = (companyId) => async (dispatch) => {
     null,
     createAction(RECEIVE_COMPANY),
     `${window.API_BASE_URL}/api/v1/companies/${companyId}`,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
+    snackbarErrorHandler
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
@@ -134,8 +133,8 @@ export const deleteCompany = (companyId) => async (dispatch) => {
     createAction(COMPANY_DELETED)({ companyId }),
     `${window.API_BASE_URL}/api/v1/companies/${companyId}`,
     null,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
+    snackbarErrorHandler
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
@@ -155,38 +154,42 @@ export const saveCompany = (entity) => async (dispatch) => {
   const normalizedEntity = normalizeEntity(entity);
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_COMPANY),
       createAction(COMPANY_UPDATED),
       `${window.API_BASE_URL}/api/v1/companies/${entity.id}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(showSuccessMessage(T.translate("edit_company.company_saved")));
-    });
-  } else {
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_company.company_created"),
-      type: "success"
-    };
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_company.company_saved")
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
+  }
 
-    postRequest(
-      createAction(UPDATE_COMPANY),
-      createAction(COMPANY_ADDED),
-      `${window.API_BASE_URL}/api/v1/companies`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then(() => {
+  return postRequest(
+    createAction(UPDATE_COMPANY),
+    createAction(COMPANY_ADDED),
+    `${window.API_BASE_URL}/api/v1/companies`,
+    normalizedEntity,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch)
+    .then(() => {
       dispatch(
-        showMessage(success_message, () => {
-          history.push("/app/companies");
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_company.company_created")
         })
       );
-    });
-  }
+    })
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const attachLogo = (entity, file, picAttr) => async (dispatch) => {
@@ -203,19 +206,19 @@ export const attachLogo = (entity, file, picAttr) => async (dispatch) => {
   const uploadFile = picAttr === "logo" ? uploadLogo : uploadBigLogo;
 
   if (entity.id) {
-    dispatch(uploadFile(entity, file));
-  } else {
-    return postRequest(
-      createAction(UPDATE_COMPANY),
-      createAction(COMPANY_ADDED),
-      `${window.API_BASE_URL}/api/v1/companies`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then((payload) => {
-      dispatch(uploadFile(payload.response, file));
-    });
+    return dispatch(uploadFile(entity, file));
   }
+
+  return postRequest(
+    createAction(UPDATE_COMPANY),
+    createAction(COMPANY_ADDED),
+    `${window.API_BASE_URL}/api/v1/companies`,
+    normalizedEntity,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch).then((payload) => {
+    dispatch(uploadFile(payload.response, file));
+  });
 };
 
 const uploadLogo = (entity, file) => async (dispatch) => {
@@ -225,17 +228,14 @@ const uploadLogo = (entity, file) => async (dispatch) => {
     access_token: accessToken
   };
 
-  postRequest(
+  return postRequest(
     null,
     createAction(LOGO_ATTACHED),
     `${window.API_BASE_URL}/api/v1/companies/${entity.id}/logo`,
     file,
-    authErrorHandler,
+    snackbarErrorHandler,
     { pic: entity.pic }
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-    history.push(`/app/companies/${entity.id}`);
-  });
+  )(params)(dispatch).finally(() => dispatch(stopLoading()));
 };
 
 const uploadBigLogo = (entity, file) => async (dispatch) => {
@@ -245,29 +245,54 @@ const uploadBigLogo = (entity, file) => async (dispatch) => {
     access_token: accessToken
   };
 
-  postRequest(
+  return postRequest(
     null,
     createAction(BIG_LOGO_ATTACHED),
     `${window.API_BASE_URL}/api/v1/companies/${entity.id}/logo/big`,
     file,
-    authErrorHandler,
+    snackbarErrorHandler,
     { pic: entity.pic }
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-    history.push(`/app/companies/${entity.id}`);
-  });
+  )(params)(dispatch).finally(() => dispatch(stopLoading()));
 };
 
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
   // remove # from color hexa
-  normalizedEntity.color = normalizedEntity.color.substr(1);
+  if (normalizedEntity.color.startsWith("#"))
+    normalizedEntity.color = normalizedEntity.color.substr(1);
 
-  delete normalizedEntity.logo;
-  delete normalizedEntity.big_logo;
+  if (entity.id > 0) {
+    delete normalizedEntity.logo;
+    delete normalizedEntity.big_logo;
+  }
 
   return normalizedEntity;
+};
+
+export const removeLogo = (entity, picAttr) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  const endpoint =
+    picAttr === "logo"
+      ? `${window.API_BASE_URL}/api/v1/companies/${entity.id}/logo`
+      : `${window.API_BASE_URL}/api/v1/companies/${entity.id}/logo/big`;
+
+  const action = picAttr === "logo" ? LOGO_REMOVED : BIG_LOGO_REMOVED;
+
+  return deleteRequest(
+    null,
+    createAction(action),
+    endpoint,
+    {},
+    snackbarErrorHandler
+  )(params)(dispatch).finally(() => dispatch(stopLoading()));
 };
 
 export const queryCompanies = debounce(async (input, callback) => {
