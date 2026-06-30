@@ -247,8 +247,8 @@ describe("OrdersTable finance columns", () => {
     };
     renderTable([nullRow]);
     // invoice_total (25000) still renders $250.00; the four finance cells render —.
-    // At least four em-dash cells appear (one per null finance column).
-    expect(screen.getAllByText("—").length).toBeGreaterThanOrEqual(4);
+    // Exactly four em-dash cells appear (one per null finance column).
+    expect(screen.getAllByText("—")).toHaveLength(4);
   });
 
   it("finance columns are NOT sortable (no backend ordering field)", () => {
@@ -256,15 +256,13 @@ describe("OrdersTable finance columns", () => {
     const sortLabelTexts = Array.from(
       document.querySelectorAll(".MuiTableSortLabel-root")
     ).map((el) => el.textContent.trim());
-    expect(
-      sortLabelTexts.some((t) =>
-        t.includes("sponsor_reports_page.col_payment_method")
-      )
-    ).toBe(false);
-    expect(
-      sortLabelTexts.some((t) =>
-        t.includes("sponsor_reports_page.col_invoice_due_date")
-      )
-    ).toBe(false);
+    [
+      "sponsor_reports_page.col_payment_method",
+      "sponsor_reports_page.col_invoice_reference",
+      "sponsor_reports_page.col_invoice_sub_status",
+      "sponsor_reports_page.col_invoice_due_date"
+    ].forEach((key) => {
+      expect(sortLabelTexts.some((t) => t.includes(key))).toBe(false);
+    });
   });
 });
