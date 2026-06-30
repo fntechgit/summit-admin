@@ -11,180 +11,252 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import {
-  Input,
-  SimpleLinkList
-} from "openstack-uicore-foundation/lib/components";
+import { useFormik, FormikProvider } from "formik";
+import * as yup from "yup";
+import Autocomplete from "@mui/material/Autocomplete";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Grid2 from "@mui/material/Grid2";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import { queryTicketTypes } from "openstack-uicore-foundation/lib/utils/query-actions";
-import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
-import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
+import { DEFAULT_PER_PAGE } from "../../utils/constants";
+import useScrollToError from "../../hooks/useScrollToError";
 
-class TaxTypeForm extends React.Component {
-  constructor(props) {
-    super(props);
+const MAX_TAX_RATE = 100;
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors
-    };
+const validationSchema = yup.object({
+  name: yup.string().required(T.translate("validation.required")),
+  rate: yup
+    .number()
+    .typeError(T.translate("validation.number"))
+    .min(0, T.translate("validation.minimum", { minimum: 0 }))
+    .max(
+      MAX_TAX_RATE,
+      T.translate("validation.maximum", { maximum: MAX_TAX_RATE })
+    )
+    .test(
+      "max-3-decimals",
+      T.translate("validation.max_decimals", { count: 3 }),
+      (v) => v == null || /^\d+(\.\d{1,3})?$/.test(String(v))
+    )
+    .required(T.translate("validation.required")),
+  tax_id: yup.string().nullable().optional()
+});
 
-    this.handleTicketLink = this.handleTicketLink.bind(this);
-    this.handleTicketUnLink = this.handleTicketUnLink.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+const ticketColumns = [
+  { columnKey: "name", header: T.translate("edit_tax_type.name") },
+  { columnKey: "description", header: T.translate("edit_tax_type.description") }
+];
 
-  componentDidUpdate(prevProps) {
-    const state = {};
-    scrollToError(this.props.errors);
+const TaxTypeForm = ({
+  entity: entityProp,
+  currentSummit,
+  onTicketLink,
+  onTicketUnLink,
+  onSubmit,
+  isSaving = false
+}) => {
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [ticketOptions, setTicketOptions] = useState([]);
+  const [loadingTickets, setLoadingTickets] = useState(false);
+  const [ticketTypes, setTicketTypes] = useState(entityProp.ticket_types ?? []);
 
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
-    }
+  const initialValues = {
+    id: entityProp.id,
+    name: entityProp.name || "",
+    rate: entityProp.rate ?? "",
+    tax_id: entityProp.tax_id || ""
+  };
 
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
-    }
+  const formik = useFormik({
+    initialValues,
+    validationSchema,
+    onSubmit: (values) => {
+      onSubmit({ ...entityProp, ...values });
+    },
+    validateOnChange: false
+  });
 
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
-    }
-  }
+  useScrollToError(formik);
 
-  handleChange(ev) {
-    const newEntity = { ...this.state.entity };
-    const newErrors = { ...this.state.errors };
-    let { value, id } = ev.target;
-
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
-
-    if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_TO_SECONDS;
-    }
-
-    newErrors[id] = "";
-    newEntity[id] = value;
-    this.setState({ entity: newEntity, errors: newErrors });
-  }
-
-  handleSubmit(ev) {
-    const entity = { ...this.state.entity };
-    ev.preventDefault();
-
-    this.props.onSubmit(entity);
-  }
-
-  hasErrors(field) {
-    const { errors } = this.state;
-    if (field in errors) {
-      return errors[field];
-    }
-
-    return "";
-  }
-
-  handleTicketLink(value) {
-    const { entity } = this.state;
-    this.props.onTicketLink(entity.id, value);
-  }
-
-  handleTicketUnLink(valueId) {
-    const { entity } = this.state;
-    this.props.onTicketUnLink(entity.id, valueId);
-  }
-
-  render() {
-    const { entity } = this.state;
-    const { currentSummit } = this.props;
-
-    const ticketColumns = [
-      { columnKey: "name", value: T.translate("edit_tax_type.name") },
-      {
-        columnKey: "description",
-        value: T.translate("edit_tax_type.description")
-      }
-    ];
-
-    const ticketOptions = {
-      title: T.translate("edit_tax_type.ticket_types"),
-      valueKey: "name",
-      labelKey: "name",
-      defaultOptions: true,
-      actions: {
-        search: (ev, callback) =>
-          queryTicketTypes(currentSummit.id, { name: ev }, callback, "v2"),
-        delete: { onClick: this.handleTicketUnLink },
-        add: { onClick: this.handleTicketLink }
-      }
-    };
-
-    return (
-      <form className="tax-type-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("edit_tax_type.name")} *</label>
-            <Input
-              id="name"
-              className="form-control"
-              error={this.hasErrors("name")}
-              onChange={this.handleChange}
-              value={entity.name}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("edit_tax_type.rate")}</label>
-            <Input
-              className="form-control"
-              type="number"
-              error={this.hasErrors("rate")}
-              id="rate"
-              value={entity.rate}
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_tax_type.tax_id")}</label>
-            <Input
-              className="form-control"
-              error={this.hasErrors("tax_id")}
-              id="tax_id"
-              value={entity.tax_id}
-              onChange={this.handleChange}
-            />
-          </div>
-        </div>
-
-        <hr />
-        {entity.id !== 0 && (
-          <SimpleLinkList
-            values={entity.ticket_types}
-            columns={ticketColumns}
-            options={ticketOptions}
-          />
-        )}
-
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
-        </div>
-      </form>
+  // queryTicketTypes is already debounced at 500ms internally
+  const fetchTickets = (term) => {
+    setLoadingTickets(true);
+    queryTicketTypes(
+      currentSummit.id,
+      { name: term },
+      (results) => {
+        setTicketOptions(results);
+        setLoadingTickets(false);
+      },
+      "v2"
     );
-  }
-}
+  };
+
+  useEffect(() => {
+    if (formik.values.id) fetchTickets("");
+  }, [formik.values.id]);
+
+  const linkedIds = useMemo(
+    () => new Set(ticketTypes.map((t) => t.id)),
+    [ticketTypes]
+  );
+
+  const filteredOptions = useMemo(
+    () => ticketOptions.filter((t) => !linkedIds.has(t.id)),
+    [ticketOptions, linkedIds]
+  );
+
+  const handleTicketUnLink = (ticketId) => {
+    const ticket = ticketTypes.find((t) => t.id === ticketId);
+    setTicketTypes((prev) => prev.filter((t) => t.id !== ticketId));
+    onTicketUnLink(formik.values.id, ticketId).catch(() => {
+      setTicketTypes((prev) => [...prev, ticket]);
+    });
+  };
+
+  const handleAdd = () => {
+    if (!selectedTicket) return;
+    const ticket = selectedTicket;
+    setSelectedTicket(null);
+    setTicketTypes((prev) => [...prev, ticket]);
+    onTicketLink(formik.values.id, ticket).catch(() => {
+      setTicketTypes((prev) => prev.filter((t) => t.id !== ticket.id));
+    });
+  };
+
+  return (
+    <FormikProvider value={formik}>
+      <Box
+        component="form"
+        onSubmit={formik.handleSubmit}
+        noValidate
+        autoComplete="off"
+      >
+        <input type="hidden" name="id" value={formik.values.id} />
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <MuiFormikTextField
+              name="name"
+              label={T.translate("edit_tax_type.name")}
+              required
+              fullWidth
+            />
+          </Grid2>
+        </Grid2>
+        <Grid2 container spacing={2} sx={{ mb: 3 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <MuiFormikTextField
+              name="rate"
+              label={T.translate("edit_tax_type.rate")}
+              type="number"
+              inputProps={{ step: "0.001" }}
+              fullWidth
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <MuiFormikTextField
+              name="tax_id"
+              label={T.translate("edit_tax_type.tax_id")}
+              fullWidth
+            />
+          </Grid2>
+        </Grid2>
+        {formik.values.id !== 0 && (
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              {T.translate("edit_tax_type.ticket_types")}
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+              <Autocomplete
+                sx={{ flex: 1 }}
+                options={filteredOptions}
+                value={selectedTicket}
+                loading={loadingTickets}
+                filterOptions={(x) => x}
+                getOptionLabel={(opt) => opt.name || ""}
+                isOptionEqualToValue={(opt, val) => opt.id === val.id}
+                onInputChange={(_, input) => fetchTickets(input)}
+                onChange={(_, val) => setSelectedTicket(val)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params} // eslint-disable-line react/jsx-props-no-spreading
+                    size="small"
+                    placeholder={T.translate("edit_tax_type.ticket_types")}
+                    slotProps={{
+                      input: {
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {loadingTickets && <CircularProgress size={20} />}
+                            {params.InputProps?.endAdornment}
+                          </>
+                        )
+                      }
+                    }}
+                  />
+                )}
+              />
+              <Button
+                variant="contained"
+                onClick={handleAdd}
+                disabled={!selectedTicket}
+              >
+                {T.translate("general.add")}
+              </Button>
+            </Box>
+            {ticketTypes.length > 0 && (
+              <MuiTable
+                data={ticketTypes}
+                columns={ticketColumns}
+                totalRows={ticketTypes.length}
+                perPage={ticketTypes.length || DEFAULT_PER_PAGE}
+                currentPage={1}
+                getName={(item) => item.name}
+                onDelete={handleTicketUnLink}
+                deleteDialogBody={(name) =>
+                  T.translate("edit_tax_type.remove_ticket_warning", { name })
+                }
+                confirmButtonColor="error"
+              />
+            )}
+          </Box>
+        )}
+        <Stack direction="row" justifyContent="flex-end">
+          <Button variant="contained" type="submit" disabled={isSaving}>
+            {T.translate("general.save")}
+          </Button>
+        </Stack>
+      </Box>
+    </FormikProvider>
+  );
+};
+
+TaxTypeForm.propTypes = {
+  entity: PropTypes.shape({
+    id: PropTypes.number,
+    name: PropTypes.string,
+    rate: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    tax_id: PropTypes.string,
+    ticket_types: PropTypes.arrayOf(PropTypes.shape({}))
+  }).isRequired,
+  currentSummit: PropTypes.shape({ id: PropTypes.number }).isRequired,
+  onTicketLink: PropTypes.func.isRequired,
+  onTicketUnLink: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  isSaving: PropTypes.bool
+};
+
+TaxTypeForm.defaultProps = {
+  isSaving: false
+};
 
 export default TaxTypeForm;

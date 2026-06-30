@@ -107,6 +107,7 @@
     "positive": "Must be a positive number.",
     "one_option_required": "Must have one option",
     "two_decimals": "Max 2 decimal places",
+    "max_decimals": "Max {count} decimal places",
     "email": "Wrong email format.",
     "url": "Wrong URL format",
     "date": "Wrong date format.",
@@ -1964,7 +1965,7 @@
     "name": "Name",
     "tax_id": "Tax Id",
     "rate": "Rate",
-    "remove_warning": "Are you sure you want to delete tax type "
+    "remove_warning": "Please verify you want to delete tax type {taxType}"
   },
   "edit_tax_type": {
     "tax_type": "Tax Type",
@@ -1974,7 +1975,8 @@
     "description": "Description",
     "ticket_types": "Ticket Types",
     "tax_type_saved": "Tax Type saved successfully",
-    "tax_type_created": "Tax Type created successfully"
+    "tax_type_created": "Tax Type created successfully",
+    "remove_ticket_warning": "Please verify you want to remove ticket type {name}"
   },
   "refund_policy_list": {
     "refund_policy_list": "Automatic Refund Policy List",
