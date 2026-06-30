@@ -2,7 +2,7 @@
 import "@testing-library/jest-dom";
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import OrdersTable, { formatCheckoutTime } from "../OrdersTable";
+import OrdersTable, { formatCheckoutTime, formatDueDate } from "../OrdersTable";
 
 // MuiTable uses i18n-react internally (no-items message, pagination labels).
 jest.mock("i18n-react/dist/i18n-react", () => ({
@@ -82,6 +82,10 @@ const sampleRow = {
   form: { display: "Booth" },
   status: "Paid",
   invoice_total: 25000,
+  payment_method: "Invoice",
+  invoice_reference: "INV-2026-007",
+  invoice_sub_status: "Sent",
+  invoice_due_date: 1780674073, // 2026-06-05T15:41:13Z → date part "2026-06-05"
   sponsor_note: "VIP note"
 };
 
@@ -203,5 +207,64 @@ describe("OrdersTable rendering", () => {
     fireEvent.click(screen.getByText("sponsor_reports_page.col_type"));
     fireEvent.click(screen.getByText("sponsor_reports_page.col_sponsor_note"));
     expect(handleSort).not.toHaveBeenCalled();
+  });
+});
+
+describe("formatDueDate", () => {
+  it("formats an epoch as a UTC date (date-only, timezone-stable)", () => {
+    // 2026-06-05T15:41:13Z = 1780674073 s → date part only
+    expect(formatDueDate(1780674073)).toBe("2026-06-05");
+    expect(formatDueDate("1780674073")).toBe("2026-06-05");
+  });
+
+  it("returns an empty string for null/empty/undefined", () => {
+    expect(formatDueDate(null)).toBe("");
+    expect(formatDueDate(undefined)).toBe("");
+    expect(formatDueDate("")).toBe("");
+  });
+});
+
+describe("OrdersTable finance columns", () => {
+  it("renders payment_method, invoice_reference, and invoice_sub_status", () => {
+    renderTable();
+    expect(screen.getByText("Invoice")).toBeInTheDocument();
+    expect(screen.getByText("INV-2026-007")).toBeInTheDocument();
+    expect(screen.getByText("Sent")).toBeInTheDocument();
+  });
+
+  it("renders invoice_due_date as a UTC date via formatDueDate", () => {
+    renderTable();
+    expect(screen.getByText("2026-06-05")).toBeInTheDocument();
+  });
+
+  it("renders an em dash for null finance fields", () => {
+    const nullRow = {
+      ...sampleRow,
+      payment_method: null,
+      invoice_reference: null,
+      invoice_sub_status: null,
+      invoice_due_date: null
+    };
+    renderTable([nullRow]);
+    // invoice_total (25000) still renders $250.00; the four finance cells render —.
+    // At least four em-dash cells appear (one per null finance column).
+    expect(screen.getAllByText("—").length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("finance columns are NOT sortable (no backend ordering field)", () => {
+    renderTable();
+    const sortLabelTexts = Array.from(
+      document.querySelectorAll(".MuiTableSortLabel-root")
+    ).map((el) => el.textContent.trim());
+    expect(
+      sortLabelTexts.some((t) =>
+        t.includes("sponsor_reports_page.col_payment_method")
+      )
+    ).toBe(false);
+    expect(
+      sortLabelTexts.some((t) =>
+        t.includes("sponsor_reports_page.col_invoice_due_date")
+      )
+    ).toBe(false);
   });
 });
