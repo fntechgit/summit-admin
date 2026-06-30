@@ -14,6 +14,7 @@ import {
   getPurchaseDetailsFilters,
   getSponsorAssetReport,
   getSponsorAssetFilters,
+  getSponsorAssetRows,
   getSponsorAssetSponsor,
   exportPurchaseDetailsCsv,
   exportPurchaseDetailsLinesCsv,
@@ -27,6 +28,7 @@ import {
   REQUEST_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET_FILTERS,
+  RECEIVE_SPONSOR_ASSET_ROWS,
   SPONSOR_ASSET_READ_ERROR,
   REQUEST_SPONSOR_DRILLDOWN,
   RECEIVE_SPONSOR_DRILLDOWN,
@@ -295,6 +297,54 @@ describe("sponsor-reports-actions", () => {
       const types = store.getActions().map((a) => a.type);
       expect(types).toContain(RECEIVE_SPONSOR_ASSET_FILTERS);
       expect(capturedParams.access_token).toBe("TOKEN");
+    });
+  });
+
+  // ─── getSponsorAssetRows ─────────────────────────────────────────────────────
+
+  describe("getSponsorAssetRows", () => {
+    const rowA = { id: 1, name: "Asset A" };
+    const rowB = { id: 2, name: "Asset B" };
+    const page1Summary = { total_collected: 5 };
+
+    it("accumulates all pages and dispatches a single atomic RECEIVE_SPONSOR_ASSET_ROWS", async () => {
+      // Override the default happy mock with a 2-page sequence distinguished by call order.
+      const capturedPages = [];
+      getRequest.mockImplementation(
+        (_requestAC, receiveActionCreator) => (params) => (dispatch) => {
+          capturedPages.push(params.page);
+          const response =
+            capturedPages.length === 1
+              ? { data: [rowA], last_page: 2, summary: page1Summary }
+              : { data: [rowB], last_page: 2 };
+          if (typeof receiveActionCreator === "function") {
+            dispatch(receiveActionCreator({ response }));
+          }
+          return Promise.resolve({ response });
+        }
+      );
+
+      const store = mockStore(MOCK_STATE);
+      await store.dispatch(getSponsorAssetRows({}));
+      await flushPromises();
+
+      const actions = store.getActions();
+
+      // 1. getRequest was called for page 1, then page 2 (two total fetches).
+      expect(getRequest).toHaveBeenCalledTimes(2);
+      expect(capturedPages).toEqual([1, 2]);
+
+      // 2. Exactly one RECEIVE_SPONSOR_ASSET_ROWS was dispatched.
+      const rowsActions = actions.filter(
+        (a) => a.type === RECEIVE_SPONSOR_ASSET_ROWS
+      );
+      expect(rowsActions).toHaveLength(1);
+
+      // 3. That action's payload carries the concatenated rows in order.
+      expect(rowsActions[0].payload.response.data).toEqual([rowA, rowB]);
+
+      // 4. The carried summary is page 1's summary (embedded in the first response).
+      expect(rowsActions[0].payload.response.summary).toEqual(page1Summary);
     });
   });
 
