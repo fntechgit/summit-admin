@@ -4346,6 +4346,15 @@
     "col_type": "Type",
     "col_used_rate": "Used Rate",
     "col_status": "Status",
-    "col_line_total": "Line Total"
+    "col_line_total": "Line Total",
+    "pivot_sponsor_page_component": "Sponsor → Page → Component",
+    "pivot_page_component_sponsor": "Page → Component → Sponsor",
+    "pivot_page_sponsor_component": "Page → Sponsor → Component",
+    "pivot_component_sponsor": "Component → Sponsor",
+    "pivot_tier_sponsor_page_component": "Tier → Sponsor → Page → Component",
+    "pivot_unknown_sponsor": "(Unknown sponsor)",
+    "pivot_no_tier": "(No tier)",
+    "pivot_no_page": "(No page)",
+    "pivot_unnamed_component": "(Unnamed)"
   }
 }

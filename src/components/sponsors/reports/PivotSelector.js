@@ -16,7 +16,7 @@ const PivotSelector = ({ value, onChange }) => (
     >
       {PIVOTS.map((p) => (
         <MenuItem key={p.key} value={p.key}>
-          {p.label}
+          {T.translate(p.labelKey)}
         </MenuItem>
       ))}
     </Select>

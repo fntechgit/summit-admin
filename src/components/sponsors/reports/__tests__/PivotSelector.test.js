@@ -20,7 +20,9 @@ it("renders all pivots and emits the selected key", async () => {
   });
   await act(async () => {
     await userEvent.click(
-      screen.getByRole("option", { name: "Page → Sponsor → Component" })
+      screen.getByRole("option", {
+        name: "sponsor_reports_page.pivot_page_sponsor_component"
+      })
     );
   });
   expect(onChange).toHaveBeenCalledWith("page_sponsor_component");

@@ -34,30 +34,40 @@ export const AXES = {
   }
 };
 
+// i18n keys for unknown-bucket labels used by PivotTree to translate "(Unknown sponsor)" etc.
+// The data layer (AXES.*.labelOf) returns English fallbacks so sorting stays string-based;
+// the renderer overrides display for unknown nodes using these keys.
+export const UNKNOWN_LABEL_KEYS = {
+  sponsor: "sponsor_reports_page.pivot_unknown_sponsor",
+  tier: "sponsor_reports_page.pivot_no_tier",
+  page: "sponsor_reports_page.pivot_no_page",
+  component: "sponsor_reports_page.pivot_unnamed_component"
+};
+
 export const PIVOTS = [
   {
     key: "sponsor_page_component",
-    label: "Sponsor → Page → Component",
+    labelKey: "sponsor_reports_page.pivot_sponsor_page_component",
     axes: ["sponsor", "page", "component"]
   },
   {
     key: "page_component_sponsor",
-    label: "Page → Component → Sponsor",
+    labelKey: "sponsor_reports_page.pivot_page_component_sponsor",
     axes: ["page", "component", "sponsor"]
   },
   {
     key: "page_sponsor_component",
-    label: "Page → Sponsor → Component",
+    labelKey: "sponsor_reports_page.pivot_page_sponsor_component",
     axes: ["page", "sponsor", "component"]
   },
   {
     key: "component_sponsor",
-    label: "Component → Sponsor",
+    labelKey: "sponsor_reports_page.pivot_component_sponsor",
     axes: ["component", "sponsor"]
   },
   {
     key: "tier_sponsor_page_component",
-    label: "Tier → Sponsor → Page → Component",
+    labelKey: "sponsor_reports_page.pivot_tier_sponsor_page_component",
     axes: ["tier", "sponsor", "page", "component"]
   }
 ];
