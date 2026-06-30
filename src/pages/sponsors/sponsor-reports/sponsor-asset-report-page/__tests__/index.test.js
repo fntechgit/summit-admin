@@ -16,6 +16,7 @@
 import "@testing-library/jest-dom";
 import React from "react";
 import { act, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Router, Route } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import { renderWithRedux } from "utils/test-utils";
@@ -113,6 +114,51 @@ describe("SponsorAssetReportPage", () => {
     await act(async () => {});
     // Default pivot is sponsor→page→component; first node label is the sponsor name.
     expect(screen.getByText("Acme")).toBeInTheDocument();
+  });
+
+  it("renders a Status single-select (Completed/In Progress/Pending) and applies status== on Apply", async () => {
+    renderPage();
+    await act(async () => {});
+    // MUI Select renders role="combobox" named by its InputLabel (i18n mock echoes the key).
+    await act(async () => {
+      await userEvent.click(
+        screen.getByRole("combobox", {
+          name: "sponsor_reports_page.filter_asset_status"
+        })
+      );
+    });
+    // Options are the three displayable statuses; labels echo the i18n keys.
+    expect(
+      screen.getByRole("option", {
+        name: "sponsor_reports_page.status_completed"
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("option", {
+        name: "sponsor_reports_page.status_in_progress"
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("option", {
+        name: "sponsor_reports_page.status_pending"
+      })
+    ).toBeInTheDocument();
+    // Pick Completed, then Apply → server refetch carries status=="completed".
+    await act(async () => {
+      await userEvent.click(
+        screen.getByRole("option", {
+          name: "sponsor_reports_page.status_completed"
+        })
+      );
+    });
+    await act(async () => {
+      await userEvent.click(
+        screen.getByRole("button", { name: "sponsor_reports_page.apply" })
+      );
+    });
+    expect(getSponsorAssetRows).toHaveBeenLastCalledWith({
+      status: "completed"
+    });
   });
 
   it("renders the by_status summary tiles from the summary object", async () => {

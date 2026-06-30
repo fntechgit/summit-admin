@@ -15,7 +15,14 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  MenuItem,
+  Stack,
+  TextField,
+  Typography
+} from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import DownloadIcon from "@mui/icons-material/Download";
 import CollectionsOutlinedIcon from "@mui/icons-material/CollectionsOutlined";
@@ -148,6 +155,25 @@ const SponsorAssetReportPage = ({
           onApply={onApply}
           onClear={onClear}
           showSearch
+          extraControls={(draft, update) => (
+            <TextField
+              select
+              size="small"
+              sx={{ minWidth: 160 }}
+              label={T.translate("sponsor_reports_page.filter_asset_status")}
+              value={draft.status || ""}
+              onChange={(e) => update({ status: e.target.value || undefined })}
+            >
+              <MenuItem value="">
+                {T.translate("sponsor_reports_page.any")}
+              </MenuItem>
+              {STATUS_TILE_KEYS.map((key) => (
+                <MenuItem key={key} value={key}>
+                  {T.translate(`sponsor_reports_page.status_${key}`)}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
         />
       </Box>
       {summary && <SummaryPanel tiles={tiles} />}

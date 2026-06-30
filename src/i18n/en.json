@@ -4312,6 +4312,7 @@
     "status_completed": "Completed",
     "status_in_progress": "In Progress",
     "status_pending": "Pending",
+    "filter_asset_status": "Status",
     "group_by": "Group by",
     "group_by_sponsor": "Sponsor",
     "group_by_component": "Component",
