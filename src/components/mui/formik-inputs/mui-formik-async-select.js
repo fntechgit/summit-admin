@@ -91,6 +91,7 @@ const MuiFormikAsyncAutocomplete = ({
 
   return (
     <Autocomplete
+      {...rest}
       options={options}
       value={value}
       onChange={handleChange}
@@ -143,7 +144,6 @@ const MuiFormikAsyncAutocomplete = ({
           {option.label}
         </li>
       )}
-      {...rest}
     />
   );
 };
