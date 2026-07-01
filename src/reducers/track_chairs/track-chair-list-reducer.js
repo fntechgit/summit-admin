@@ -76,7 +76,7 @@ const trackChairListReducer = (state = DEFAULT_STATE, action) => {
       newTrackChair.trackNames = newTrackChair.categories
         .map((c) => c.name)
         .join(", ");
-      newTrackChair.name = `${newTrackChair.member.first_name} ${newTrackChair.member.last_name}`;
+      newTrackChair.name = `${newTrackChair.member.first_name} ${newTrackChair.member.last_name} (${newTrackChair.member.email})`;
 
       return { ...state, trackChairs: [...state.trackChairs, newTrackChair] };
     }
