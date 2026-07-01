@@ -399,7 +399,11 @@ export const archiveFormTemplateItem =
       url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItem.id}/archive`,
       updatedActionName: FORM_TEMPLATE_ITEM_ARCHIVED
     };
-    await archiveItem(formTemplateItem, settings)(dispatch);
+    try {
+      await archiveItem(formTemplateItem, settings)(dispatch);
+    } catch (e) {
+      return;
+    }
     const { term, currentPage, perPage, order, orderDir, showArchived } =
       getState().currentFormTemplateItemListState;
     dispatch(
@@ -421,7 +425,11 @@ export const unarchiveFormTemplateItem =
       url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItem.id}/archive`,
       deletedActionName: FORM_TEMPLATE_ITEM_UNARCHIVED
     };
-    await unarchiveItem(formTemplateItem, settings)(dispatch);
+    try {
+      await unarchiveItem(formTemplateItem, settings)(dispatch);
+    } catch (e) {
+      return;
+    }
     const { term, currentPage, perPage, order, orderDir, showArchived } =
       getState().currentFormTemplateItemListState;
     dispatch(

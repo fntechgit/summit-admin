@@ -225,6 +225,7 @@ export const archiveSponsorForm = (formId) => async (dispatch, getState) => {
         )
       );
     })
+    .catch(() => {})
     .finally(() => dispatch(stopLoading()));
 };
 
@@ -257,6 +258,7 @@ export const unarchiveSponsorForm = (formId) => async (dispatch, getState) => {
         )
       );
     })
+    .catch(() => {})
     .finally(() => dispatch(stopLoading()));
 };
 
@@ -1006,6 +1008,7 @@ export const archiveSponsorCustomizedForm =
           )
         );
       })
+      .catch(() => {})
       .finally(() => dispatch(stopLoading()));
   };
 
@@ -1054,6 +1057,7 @@ export const unarchiveSponsorCustomizedForm =
           )
         );
       })
+      .catch(() => {})
       .finally(() => dispatch(stopLoading()));
   };
 
@@ -1353,6 +1357,7 @@ export const archiveSponsorFormItem =
           )
         );
       })
+      .catch(() => {})
       .finally(() => dispatch(stopLoading()));
   };
 
@@ -1386,6 +1391,7 @@ export const unarchiveSponsorFormItem =
           )
         );
       })
+      .catch(() => {})
       .finally(() => dispatch(stopLoading()));
   };
 
@@ -1670,6 +1676,7 @@ export const archiveSponsorCustomizedFormItem =
           )
         );
       })
+      .catch(() => {})
       .finally(() => dispatch(stopLoading()));
   };
 
@@ -1707,5 +1714,6 @@ export const unarchiveSponsorCustomizedFormItem =
           )
         );
       })
+      .catch(() => {})
       .finally(() => dispatch(stopLoading()));
   };

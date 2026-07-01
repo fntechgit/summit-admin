@@ -239,6 +239,7 @@ export const archivePageTemplate =
           )
         );
       })
+      .catch(() => {})
       .finally(() => dispatch(stopLoading()));
   };
 
@@ -270,6 +271,7 @@ export const unarchivePageTemplate =
           )
         );
       })
+      .catch(() => {})
       .finally(() => dispatch(stopLoading()));
   };
 

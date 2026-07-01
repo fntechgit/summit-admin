@@ -256,6 +256,7 @@ export const archiveShowPage = (pageId) => async (dispatch, getState) => {
         getShowPages(term, currentPage, perPage, order, orderDir, showArchived)
       );
     })
+    .catch(() => {})
     .finally(() => dispatch(stopLoading()));
 };
 
@@ -287,5 +288,6 @@ export const unarchiveShowPage = (pageId) => async (dispatch, getState) => {
         getShowPages(term, currentPage, perPage, order, orderDir, showArchived)
       );
     })
+    .catch(() => {})
     .finally(() => dispatch(stopLoading()));
 };

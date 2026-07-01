@@ -508,6 +508,7 @@ export const archiveCustomizedPage = (pageId) => async (dispatch, getState) => {
         )
       );
     })
+    .catch(() => {})
     .finally(() => dispatch(stopLoading()));
 };
 
@@ -553,6 +554,7 @@ export const unarchiveCustomizedPage =
           )
         );
       })
+      .catch(() => {})
       .finally(() => dispatch(stopLoading()));
   };
 

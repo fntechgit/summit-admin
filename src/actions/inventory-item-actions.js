@@ -376,7 +376,11 @@ export const archiveInventoryItem =
       url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/archive`,
       updatedActionName: INVENTORY_ITEM_ARCHIVED
     };
-    await archiveItem(inventoryItem, settings)(dispatch);
+    try {
+      await archiveItem(inventoryItem, settings)(dispatch);
+    } catch (e) {
+      return;
+    }
     const { term, currentPage, perPage, order, orderDir, showArchived } =
       getState().currentInventoryItemListState;
     dispatch(
@@ -397,7 +401,11 @@ export const unarchiveInventoryItem =
       url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/archive`,
       deletedActionName: INVENTORY_ITEM_UNARCHIVED
     };
-    await unarchiveItem(inventoryItem, settings)(dispatch);
+    try {
+      await unarchiveItem(inventoryItem, settings)(dispatch);
+    } catch (e) {
+      return;
+    }
     const { term, currentPage, perPage, order, orderDir, showArchived } =
       getState().currentInventoryItemListState;
     dispatch(
