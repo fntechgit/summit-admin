@@ -334,11 +334,11 @@ export const archiveFormTemplate =
     try {
       await archiveItem(formTemplate, settings)(dispatch);
     } catch (e) {
-      return;
+      return undefined;
     }
     const { term, currentPage, perPage, order, orderDir, showArchived } =
       getState().currentFormTemplateListState;
-    dispatch(
+    return dispatch(
       getFormTemplates(
         term,
         currentPage,
@@ -359,11 +359,11 @@ export const unarchiveFormTemplate =
     try {
       await unarchiveItem(formTemplate, settings)(dispatch);
     } catch (e) {
-      return;
+      return undefined;
     }
     const { term, currentPage, perPage, order, orderDir, showArchived } =
       getState().currentFormTemplateListState;
-    dispatch(
+    return dispatch(
       getFormTemplates(
         term,
         currentPage,

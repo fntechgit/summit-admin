@@ -379,11 +379,11 @@ export const archiveInventoryItem =
     try {
       await archiveItem(inventoryItem, settings)(dispatch);
     } catch (e) {
-      return;
+      return undefined;
     }
     const { term, currentPage, perPage, order, orderDir, showArchived } =
       getState().currentInventoryItemListState;
-    dispatch(
+    return dispatch(
       getInventoryItems(
         term,
         currentPage,
@@ -404,11 +404,11 @@ export const unarchiveInventoryItem =
     try {
       await unarchiveItem(inventoryItem, settings)(dispatch);
     } catch (e) {
-      return;
+      return undefined;
     }
     const { term, currentPage, perPage, order, orderDir, showArchived } =
       getState().currentInventoryItemListState;
-    dispatch(
+    return dispatch(
       getInventoryItems(
         term,
         currentPage,
