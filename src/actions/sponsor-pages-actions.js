@@ -494,10 +494,22 @@ export const archiveCustomizedPage = (pageId) => async (dispatch, getState) => {
           html: T.translate("edit_sponsor.pages_tab.customized_page_archived")
         })
       );
+      const { term, showArchived, customizedPages } =
+        getState().sponsorPagePagesListState;
+      const { currentPage, perPage, order, orderDir } = customizedPages;
+      return dispatch(
+        getSponsorCustomizedPages(
+          term,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        )
+      );
     })
-    .finally(() => {
-      dispatch(stopLoading());
-    });
+    .catch(() => {})
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const unarchiveCustomizedPage =
@@ -528,10 +540,22 @@ export const unarchiveCustomizedPage =
             )
           })
         );
+        const { term, showArchived, customizedPages } =
+          getState().sponsorPagePagesListState;
+        const { currentPage, perPage, order, orderDir } = customizedPages;
+        return dispatch(
+          getSponsorCustomizedPages(
+            term,
+            currentPage,
+            perPage,
+            order,
+            orderDir,
+            showArchived
+          )
+        );
       })
-      .finally(() => {
-        dispatch(stopLoading());
-      });
+      .catch(() => {})
+      .finally(() => dispatch(stopLoading()));
   };
 
 export const deleteSponsorCustomizedPage =

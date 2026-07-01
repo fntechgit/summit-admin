@@ -169,7 +169,12 @@ const SponsorFormAddItemFromInventoryPopup = ({
         <Typography variant="h5">
           {T.translate("sponsor_form_item_list.add_from_inventory.title")}
         </Typography>
-        <IconButton size="large" sx={{ p: 0 }} onClick={handleClose}>
+        <IconButton
+          size="large"
+          sx={{ p: 0 }}
+          onClick={handleClose}
+          data-testid="close-dialog"
+        >
           <CloseIcon fontSize="large" />
         </IconButton>
       </DialogTitle>
