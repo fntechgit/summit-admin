@@ -200,6 +200,10 @@ const SponsorFormsManageItems = ({
     );
   };
 
+  const handleImageRemove = (imageId) => {
+    console.log("CHECK IMAGE ", imageId);
+  };
+
   const sponsorItemColumns = [
     {
       columnKey: "code",
@@ -382,6 +386,7 @@ const SponsorFormsManageItems = ({
           entity={currentInventoryItem}
           onSave={handleItemSave}
           onClose={handleClose}
+          onImageDeleted={handleImageRemove}
         />
       )}
 
