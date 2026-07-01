@@ -23,7 +23,7 @@ import {
   MenuItem,
   Select
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
+import DownloadIcon from "@mui/icons-material/Download";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import history from "../../../history";
@@ -186,7 +186,7 @@ const ShowPurchaseListPage = ({
           sx={{ color: "primary.main" }}
           onClick={() => handleMenu(row)}
         >
-          <MenuIcon fontSize="large" />
+          <DownloadIcon fontSize="large" />
         </IconButton>
       )
     }
