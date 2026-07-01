@@ -43,6 +43,7 @@ const SponsorItemDialog = ({
   onSave,
   onMetaFieldTypeDeleted,
   onMetaFieldTypeValueDeleted,
+  onImageDeleted,
   entity: initialEntity
 }) => {
   const [isSaving, setIsSaving] = useState(false);
@@ -91,6 +92,10 @@ const SponsorItemDialog = ({
     if (isSaving) return;
     formik.resetForm();
     onClose();
+  };
+
+  const handleIDeleteImage = (id) => {
+    if (id) onImageDeleted(id);
   };
 
   return (
@@ -236,6 +241,7 @@ const SponsorItemDialog = ({
                   id="image-upload"
                   name="images"
                   maxFiles={mediaType.max_uploads_qty}
+                  onDelete={handleIDeleteImage}
                   allowedExtensions={getFileUploadAllowedExtensions()}
                 />
               </Grid2>
@@ -263,6 +269,7 @@ SponsorItemDialog.propTypes = {
   onSave: PropTypes.func.isRequired,
   onMetaFieldTypeDeleted: PropTypes.func,
   onMetaFieldTypeValueDeleted: PropTypes.func,
+  onImageDeleted: PropTypes.func,
   entity: PropTypes.object
 };
 
