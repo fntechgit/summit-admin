@@ -3,11 +3,10 @@ import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
 import {
   getRequest,
-  getCSV
+  getCSV,
+  authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { doLogin } from "openstack-uicore-foundation/lib/security/methods";
 import * as methods from "../../utils/methods";
-import { makeReadErrorHandler } from "../sponsor-reports-errors";
 
 import {
   getPurchaseDetailsReport,
@@ -37,16 +36,10 @@ jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   __esModule: true,
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
   getRequest: jest.fn(),
-  getCSV: jest.fn(() => ({ type: "GET_CSV_MOCK" }))
-}));
-
-jest.mock("openstack-uicore-foundation/lib/security/methods", () => ({
-  doLogin: jest.fn()
-}));
-
-jest.mock("openstack-uicore-foundation/lib/utils/methods", () => ({
-  ...jest.requireActual("openstack-uicore-foundation/lib/utils/methods"),
-  getBackURL: jest.fn(() => "/back")
+  getCSV: jest.fn(() => ({ type: "GET_CSV_MOCK" })),
+  // 401s delegate here for the guarded (session-clearing) re-login. Stub it to a
+  // no-op thunk so we can assert delegation without triggering a real redirect.
+  authErrorHandler: jest.fn(() => () => {})
 }));
 
 const MOCK_STATE = {
@@ -100,7 +93,7 @@ describe("sponsor-reports-actions", () => {
     jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
     getRequest.mockClear();
     getCSV.mockClear();
-    doLogin.mockClear();
+    authErrorHandler.mockClear();
     capturedUrl = null;
     capturedParams = null;
     makeHappyGetRequest();
@@ -143,8 +136,9 @@ describe("sponsor-reports-actions", () => {
       expect(capturedParams.per_page).toBe(25);
     });
 
-    it("503 export-disabled on read dispatches PURCHASE_DETAILS_READ_ERROR (clears loading)", async () => {
-      // Simulate getRequest invoking the error handler with a 503 export-disabled response.
+    it("503 on read dispatches PURCHASE_DETAILS_READ_ERROR (clears loading, inline body)", async () => {
+      // Simulate getRequest invoking the error handler with a 503 (feature-off /
+      // export-disabled) response — a generic read error replaces the body.
       getRequest.mockImplementation(
         (requestAC, _receiveAC, _url, errorHandler) => () => (dispatch) => {
           if (requestAC) dispatch(requestAC({}));
@@ -152,7 +146,7 @@ describe("sponsor-reports-actions", () => {
             {
               status: 503,
               response: {
-                body: { message: "CSV export is not enabled for this summit" }
+                body: { message: "Reports are not enabled for this summit" }
               }
             },
             {}
@@ -168,17 +162,18 @@ describe("sponsor-reports-actions", () => {
       const actions = store.getActions();
       const types = actions.map((a) => a.type);
       expect(types).toContain(REQUEST_PURCHASE_DETAILS);
-      // export-disabled must dispatch the loading-clearing READ_ERROR action.
+      // A 503 must dispatch the loading-clearing READ_ERROR action.
       expect(types).toContain(PURCHASE_DETAILS_READ_ERROR);
-      // payload carries the full { kind, status, message } shape (consistent
-      // with the other error branches).
+      // Payload carries the status + server message for the inline body (no
+      // synthetic "kind" — only 404 is tagged, for the drilldown not-found panel).
       const readErr = actions.find(
         (a) => a.type === PURCHASE_DETAILS_READ_ERROR
       );
       expect(readErr.payload).toMatchObject({
-        kind: "export-disabled",
-        status: 503
+        status: 503,
+        message: "Reports are not enabled for this summit"
       });
+      expect(readErr.payload.kind).toBeUndefined();
     });
   });
 
@@ -315,10 +310,15 @@ describe("sponsor-reports-actions", () => {
 
       const store = mockStore(MOCK_STATE);
 
-      // Launch stale call — will block at fetchPage(1).
+      // Launch stale call A and let it advance — while still the current call
+      // (seq=1) — to its held page-1 fetch. It takes getRequest call #1 (deferred)
+      // and parks there. This way A is superseded DURING its fetch, exercising the
+      // guardedDispatch RECEIVE-drop rather than the earlier token-stage staleness
+      // bail (which the sibling test covers).
       const stalePromise = store.dispatch(getSponsorAssetRows({}));
+      await flushPromises();
 
-      // Launch fresh call — resolves immediately, commits its rows.
+      // Launch fresh call B — bumps seq to 2, resolves immediately, commits its rows.
       await store.dispatch(getSponsorAssetRows({}));
       await flushPromises();
 
@@ -411,7 +411,7 @@ describe("sponsor-reports-actions", () => {
       // Mechanism: defer A's token so B commits success first. Then switch the getRequest mock
       // to invoke the error handler (simulating HTTP 403) before resolving A's token so that
       // when A calls fetchPage it triggers the error path through its own guardedDispatch.
-      // Note: makeReadErrorHandler for the default/403 branch calls onReadError which dispatches
+      // Note: reportReadErrorHandler for the default/403 branch calls onReadError which dispatches
       // SPONSOR_ASSET_READ_ERROR. With the fix, this dispatch goes through guardedDispatch
       // (mySeq_A=1 ≠ seq=2) and is suppressed.
       // Fidelity caveat: this test simulates the error handler being invoked by the getRequest
@@ -475,6 +475,56 @@ describe("sponsor-reports-actions", () => {
       // dispatch and the catch's dispatch.
       expect(types).not.toContain(SPONSOR_ASSET_READ_ERROR);
     });
+
+    it("live 401 delegates to authErrorHandler and dispatches no inline read error", async () => {
+      // uicore invokes the error handler, then REJECTS with a plain {err,res} object.
+      getRequest.mockImplementation(
+        (_requestAC, _receiveAC, _url, errorHandler) => () => (dispatch) => {
+          errorHandler({ status: 401 }, {})(dispatch);
+          // Non-Error reject models uicore's HTTP-failure shape (the case under test).
+          // eslint-disable-next-line prefer-promise-reject-errors
+          return Promise.reject({ err: { status: 401 }, res: {} });
+        }
+      );
+
+      const store = mockStore(MOCK_STATE);
+      await store.dispatch(getSponsorAssetRows({}));
+      await flushPromises();
+
+      // 401 delegates to guarded reauth; the catch must NOT flash a read error over it.
+      expect(authErrorHandler).toHaveBeenCalledWith({ status: 401 }, {});
+      const types = store.getActions().map((a) => a.type);
+      expect(types).not.toContain(SPONSOR_ASSET_READ_ERROR);
+    });
+
+    it("live 403 surfaces the server message once (catch does not clobber it)", async () => {
+      getRequest.mockImplementation(
+        (_requestAC, _receiveAC, _url, errorHandler) => () => (dispatch) => {
+          errorHandler(
+            { status: 403, response: { body: { message: "Forbidden here" } } },
+            {}
+          )(dispatch);
+          // Non-Error reject models uicore's HTTP-failure shape (the case under test).
+          // eslint-disable-next-line prefer-promise-reject-errors
+          return Promise.reject({ err: { status: 403 }, res: {} });
+        }
+      );
+
+      const store = mockStore(MOCK_STATE);
+      await store.dispatch(getSponsorAssetRows({}));
+      await flushPromises();
+
+      // Exactly one READ_ERROR (from the handler) with the server message intact —
+      // the catch's non-HTTP net must not fire a second, message-less dispatch.
+      const readErrs = store
+        .getActions()
+        .filter((a) => a.type === SPONSOR_ASSET_READ_ERROR);
+      expect(readErrs).toHaveLength(1);
+      expect(readErrs[0].payload).toMatchObject({
+        status: 403,
+        message: "Forbidden here"
+      });
+    });
   });
 
   // ─── getSponsorAssetSponsor ──────────────────────────────────────────────────
@@ -519,8 +569,8 @@ describe("sponsor-reports-actions", () => {
       expect(types).toContain(SPONSOR_DRILLDOWN_READ_ERROR);
     });
 
-    it("503 export-disabled on drilldown read dispatches SPONSOR_DRILLDOWN_READ_ERROR (clears loading)", async () => {
-      // Simulate getRequest invoking the error handler with a 503 export-disabled response.
+    it("503 on drilldown read dispatches SPONSOR_DRILLDOWN_READ_ERROR (clears loading)", async () => {
+      // Simulate getRequest invoking the error handler with a 503 response.
       getRequest.mockImplementation(
         (requestAC, _receiveAC, _url, errorHandler) => () => (dispatch) => {
           if (requestAC) dispatch(requestAC({}));
@@ -543,7 +593,7 @@ describe("sponsor-reports-actions", () => {
 
       const types = store.getActions().map((a) => a.type);
       expect(types).toContain(REQUEST_SPONSOR_DRILLDOWN);
-      // export-disabled 503 must also clear loading via an error action.
+      // a 503 must also clear loading via an error action.
       expect(types).toContain(SPONSOR_DRILLDOWN_READ_ERROR);
     });
   });
@@ -713,88 +763,86 @@ describe("sponsor-reports-actions", () => {
     });
   });
 
-  // ─── makeReadErrorHandler (direct unit tests) ────────────────────────────────
+  // ─── reportReadErrorHandler (exercised through the thunks) ────────────────────
+  // The handler is module-private (folded into the actions file, matching the
+  // rest of src/actions), so it is covered via the thunks that wire it — the
+  // same integration style as every other error assertion above.
 
-  describe("makeReadErrorHandler", () => {
-    let mockDispatch;
-
-    beforeEach(() => {
-      mockDispatch = jest.fn();
-    });
-
-    it("401 calls doLogin and does not dispatch", () => {
-      const onReadError = jest.fn((p) => ({
-        type: PURCHASE_DETAILS_READ_ERROR,
-        payload: p
-      }));
-      const handler = makeReadErrorHandler({ onReadError });
-      handler({ status: 401 }, {})(mockDispatch);
-
-      expect(doLogin).toHaveBeenCalled();
-      expect(mockDispatch).not.toHaveBeenCalled();
-    });
-
-    it("403 dispatches onReadError", () => {
-      const onReadError = jest.fn((p) => ({
-        type: PURCHASE_DETAILS_READ_ERROR,
-        payload: p
-      }));
-      const handler = makeReadErrorHandler({ onReadError });
-      handler({ status: 403 }, {})(mockDispatch);
-
-      expect(onReadError).toHaveBeenCalled();
-      expect(mockDispatch).toHaveBeenCalledWith(
-        expect.objectContaining({ type: PURCHASE_DETAILS_READ_ERROR })
+  describe("reportReadErrorHandler", () => {
+    // Drive a chosen status through a thunk's error handler.
+    const mockErrorStatus = (err) =>
+      getRequest.mockImplementation(
+        (requestAC, _receiveAC, _url, errorHandler) => () => (dispatch) => {
+          if (requestAC) dispatch(requestAC({}));
+          errorHandler(err, {})(dispatch);
+          return Promise.resolve();
+        }
       );
+
+    it("401 delegates to uicore authErrorHandler and dispatches no read error", async () => {
+      mockErrorStatus({ status: 401 });
+
+      const store = mockStore(MOCK_STATE);
+      store.dispatch(getPurchaseDetailsReport({}, { page: 1 }));
+      await flushPromises();
+
+      // Guarded re-login is the platform handler's job (dedupes concurrent 401s).
+      expect(authErrorHandler).toHaveBeenCalledWith({ status: 401 }, {});
+      const types = store.getActions().map((a) => a.type);
+      expect(types).not.toContain(PURCHASE_DETAILS_READ_ERROR);
+      expect(types).not.toContain(PURCHASE_DETAILS_VALIDATION_ERROR);
     });
 
-    it("412 dispatches onValidationError and leaves body intact", () => {
-      const onReadError = jest.fn((p) => ({
-        type: PURCHASE_DETAILS_READ_ERROR,
-        payload: p
-      }));
-      const onValidationError = jest.fn((p) => ({
-        type: PURCHASE_DETAILS_VALIDATION_ERROR,
-        payload: p
-      }));
-      const handler = makeReadErrorHandler({ onReadError, onValidationError });
-      handler({ status: 412 }, {})(mockDispatch);
+    it("403 replaces the body via READ_ERROR (no synthetic kind)", async () => {
+      mockErrorStatus({ status: 403 });
 
-      expect(onValidationError).toHaveBeenCalled();
-      expect(onReadError).not.toHaveBeenCalled();
-      expect(mockDispatch).toHaveBeenCalledWith(
-        expect.objectContaining({ type: PURCHASE_DETAILS_VALIDATION_ERROR })
-      );
+      const store = mockStore(MOCK_STATE);
+      store.dispatch(getPurchaseDetailsReport({}, { page: 1 }));
+      await flushPromises();
+
+      const readErr = store
+        .getActions()
+        .find((a) => a.type === PURCHASE_DETAILS_READ_ERROR);
+      expect(readErr).toBeDefined();
+      expect(readErr.payload).toMatchObject({ status: 403 });
+      expect(readErr.payload.kind).toBeUndefined();
+      expect(authErrorHandler).not.toHaveBeenCalled();
     });
 
-    it("503 with 'CSV export is not enabled' calls onExportDisabled (thunks wire this to READ_ERROR)", () => {
-      // makeReadErrorHandler routes export-disabled to onExportDisabled regardless of what
-      // the caller wires it to. Thunks now wire onExportDisabled → READ_ERROR; this test
-      // verifies the routing layer with a local stub action type.
-      const onReadError = jest.fn((p) => ({
-        type: PURCHASE_DETAILS_READ_ERROR,
-        payload: p
-      }));
-      const onExportDisabled = jest.fn((p) => ({
-        type: PURCHASE_DETAILS_READ_ERROR,
-        payload: p
-      }));
-      const handler = makeReadErrorHandler({ onReadError, onExportDisabled });
-      handler(
-        {
-          status: 503,
-          response: {
-            body: { message: "CSV export is not enabled for this summit" }
-          }
-        },
-        {}
-      )(mockDispatch);
+    it("412 routes to VALIDATION_ERROR and leaves the body intact", async () => {
+      mockErrorStatus({
+        status: 412,
+        response: { body: { message: "Bad date range" } }
+      });
 
-      expect(onExportDisabled).toHaveBeenCalled();
-      expect(onReadError).not.toHaveBeenCalled();
-      expect(mockDispatch).toHaveBeenCalledWith(
-        expect.objectContaining({ type: PURCHASE_DETAILS_READ_ERROR })
-      );
+      const store = mockStore(MOCK_STATE);
+      store.dispatch(getPurchaseDetailsReport({}, { page: 1 }));
+      await flushPromises();
+
+      const types = store.getActions().map((a) => a.type);
+      expect(types).toContain(PURCHASE_DETAILS_VALIDATION_ERROR);
+      expect(types).not.toContain(PURCHASE_DETAILS_READ_ERROR);
+      const vErr = store
+        .getActions()
+        .find((a) => a.type === PURCHASE_DETAILS_VALIDATION_ERROR);
+      expect(vErr.payload).toMatchObject({
+        status: 412,
+        message: "Bad date range"
+      });
+    });
+
+    it("404 on the drilldown tags the body kind:'not-found'", async () => {
+      mockErrorStatus({ status: 404 });
+
+      const store = mockStore(MOCK_STATE);
+      store.dispatch(getSponsorAssetSponsor(17));
+      await flushPromises();
+
+      const readErr = store
+        .getActions()
+        .find((a) => a.type === SPONSOR_DRILLDOWN_READ_ERROR);
+      expect(readErr).toBeDefined();
+      expect(readErr.payload).toMatchObject({ status: 404, kind: "not-found" });
     });
   });
 });

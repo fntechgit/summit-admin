@@ -22,7 +22,7 @@ const ContentCell = ({ row }) => {
       <Box
         component="img"
         src={url}
-        alt={row.module.title}
+        alt={row.module?.title}
         sx={{
           width: "100%",
           height: 120,
@@ -50,7 +50,7 @@ const ContentCell = ({ row }) => {
           title={filename}
           sx={{ flex: 1, minWidth: 0, overflowWrap: "anywhere" }}
         >
-          {filename || row.module.title}
+          {filename || row.module?.title}
         </Typography>
         <DownloadIcon fontSize="small" sx={{ flexShrink: 0, mt: 0.25 }} />
       </MuiLink>

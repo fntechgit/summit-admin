@@ -200,6 +200,34 @@ describe("SponsorAssetDrilldownPage", () => {
     expect(screen.getByTestId("sponsor-no-submissions")).toBeInTheDocument();
   });
 
+  it("shows the sponsor-no-submissions state when pages contain only non-Media modules (visiblePages empty)", async () => {
+    renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
+      detail: {
+        sponsor: { id: 17, name: "Acme", tier: "Gold", pages_active: 2 },
+        pages: [
+          {
+            page: { id: 9, title: "Booth", type: "page" },
+            modules: [
+              {
+                module: { id: 2, title: "Deck", type: "Document" },
+                status: "pending"
+              },
+              {
+                module: { id: 3, title: "Blurb", type: "Info" },
+                status: "pending"
+              }
+            ]
+          }
+        ]
+      }
+    });
+    await act(async () => {});
+    // pages.length > 0 but every section filters out to empty in collected mode,
+    // so the no-submissions panel (not an empty body) must render.
+    expect(screen.getByTestId("sponsor-no-submissions")).toBeInTheDocument();
+    expect(screen.queryByText("Booth")).not.toBeInTheDocument();
+  });
+
   it("ContentCell: image row renders <img> with preview_url", async () => {
     renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
       detail: {

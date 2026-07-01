@@ -33,7 +33,7 @@ import FilterBar from "../../../../components/sponsors/reports/FilterBar";
 import PivotSelector from "../../../../components/sponsors/reports/PivotSelector";
 import PivotTree from "../../../../components/sponsors/reports/PivotTree";
 import { PIVOTS } from "../../../../components/sponsors/reports/pivot-defs";
-import { usePivot } from "../../../../components/sponsors/reports/usePivot";
+import { usePivot } from "../../../../hooks/usePivot";
 import usePrint from "../../../../hooks/usePrint";
 import {
   exportSponsorAssetCsv,

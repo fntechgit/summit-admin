@@ -1,9 +1,11 @@
+// Query builders live in sponsor-reports-actions.js (folded in — they are used
+// only by that action file); this suite exercises them directly.
 import {
   buildReportQuery,
   buildPurchaseQuery,
   buildPurchaseLinesQuery,
   toOrderParam
-} from "../sponsor-reports-query";
+} from "../sponsor-reports-actions";
 
 describe("buildReportQuery", () => {
   it("returns an empty object for no filters", () => {
