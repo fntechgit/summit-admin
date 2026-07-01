@@ -41,7 +41,7 @@ const parseValue = (item, timeZone) => {
     }
     case "CheckBoxList": {
       const defaultVal = item.values.find((v) => v.is_default)?.id;
-      return item.current_value || (defaultVal ? [defaultVal] : []);
+      return item.current_value || (defaultVal ? [String(defaultVal)] : []);
     }
     case "Text":
     case "TextArea":
