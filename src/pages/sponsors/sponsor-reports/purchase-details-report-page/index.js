@@ -225,21 +225,30 @@ const PurchaseDetailsReportPage = ({
           </MenuItem>
         ))}
       </TextField>
-      <TextField
-        select
-        size="small"
-        sx={{ minWidth: 160 }}
-        label={T.translate("sponsor_reports_page.filter_payment_method")}
-        value={draft.paymentMethod || ""}
-        onChange={(e) => update({ paymentMethod: e.target.value || undefined })}
-      >
-        <MenuItem value="">{T.translate("sponsor_reports_page.any")}</MenuItem>
-        {paymentMethodOptions.map((pm) => (
-          <MenuItem key={pm} value={pm}>
-            {pm}
+      {/* Payment Method is an order-level attribute; only the orders endpoint
+          filters on it (the lines filter set omits payment_method), so surface
+          it in the orders view only — mirrors search being view-specific. */}
+      {view === "orders" && (
+        <TextField
+          select
+          size="small"
+          sx={{ minWidth: 160 }}
+          label={T.translate("sponsor_reports_page.filter_payment_method")}
+          value={draft.paymentMethod || ""}
+          onChange={(e) =>
+            update({ paymentMethod: e.target.value || undefined })
+          }
+        >
+          <MenuItem value="">
+            {T.translate("sponsor_reports_page.any")}
           </MenuItem>
-        ))}
-      </TextField>
+          {paymentMethodOptions.map((pm) => (
+            <MenuItem key={pm} value={pm}>
+              {pm}
+            </MenuItem>
+          ))}
+        </TextField>
+      )}
       {/* Date inputs emit ISO YYYY-MM-DD — expanded to ISO datetimes in buildQuery */}
       <TextField
         type="date"

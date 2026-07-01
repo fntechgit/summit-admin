@@ -131,6 +131,15 @@ describe("buildPurchaseLinesQuery", () => {
     expect(q).toMatchObject({ page: 2, per_page: 50 });
     expect(q).not.toHaveProperty("order");
   });
+
+  it("drops payment_method — the lines filter set does not support it", () => {
+    const q = buildPurchaseLinesQuery(
+      { status: "Paid", paymentMethod: "Invoice" },
+      { page: 1, perPage: 10 }
+    );
+    expect(q["filter[]"]).toEqual(["status==Paid"]);
+    expect(q["filter[]"]).not.toContain("payment_method==Invoice");
+  });
 });
 
 // ────────────────────────────────────────────────────────────────────────────

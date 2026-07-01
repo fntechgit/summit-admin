@@ -20,6 +20,7 @@ import PurchaseDetailsReportPage from "../pages/sponsors/sponsor-reports/purchas
 import SponsorAssetDrilldownPage from "../pages/sponsors/sponsor-reports/sponsor-asset-drilldown-page";
 import SponsorAssetReportPage from "../pages/sponsors/sponsor-reports/sponsor-asset-report-page";
 import ReportsLandingPage from "../pages/sponsors/sponsor-reports/reports-landing-page";
+import NoMatchPage from "../pages/no-match-page";
 
 // Each sub-route adds its own crumb under the persistent "Reports" crumb, so the
 // trail reads .../Sponsors/Reports/<page> (mirrors sponsor-layout's convention).
@@ -75,6 +76,9 @@ const SponsorReportsLayout = ({ match }) => (
         )}
       />
       <Route exact path={match.url} component={ReportsLandingPage} />
+      {/* Catch-all for unknown /reports/... paths, mirroring sponsor/event
+          layouts (otherwise only the breadcrumb shell renders). */}
+      <Route component={NoMatchPage} />
     </Switch>
   </div>
 );

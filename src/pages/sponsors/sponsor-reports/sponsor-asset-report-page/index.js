@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
@@ -33,7 +33,7 @@ import FilterBar from "../../../../components/sponsors/reports/FilterBar";
 import PivotSelector from "../../../../components/sponsors/reports/PivotSelector";
 import PivotTree from "../../../../components/sponsors/reports/PivotTree";
 import { PIVOTS } from "../../../../components/sponsors/reports/pivot-defs";
-import { usePivot } from "../../../../hooks/usePivot";
+import { buildPivotTree } from "../../../../components/sponsors/reports/build-pivot-tree";
 import usePrint from "../../../../hooks/usePrint";
 import {
   exportSponsorAssetCsv,
@@ -86,9 +86,14 @@ const SponsorAssetReportPage = ({
   }, [filters]); // validSummit omitted intentionally — stable once summit loads
 
   const activePivot = PIVOTS.find((p) => p.key === pivotKey) || PIVOTS[0];
+  // Memoized pivot tree — only rebuilds when rows/axes change, so switching the
+  // pivot selector or re-rendering doesn't re-group on every render.
   // CRITICAL: pass activePivot.axes directly (stable reference into PIVOTS).
   // Do NOT spread/rebuild — a fresh array each render busts the useMemo.
-  const tree = usePivot(rows, activePivot.axes);
+  const tree = useMemo(
+    () => buildPivotTree(rows, activePivot.axes),
+    [rows, activePivot.axes]
+  );
 
   const onApply = (next) => setFilters(next);
   const onClear = () => setFilters({});
