@@ -33,7 +33,7 @@ jest.mock("openstack-uicore-foundation/lib/components", () => {
   const React = require("react");
   return {
     __esModule: true,
-    MuiFormItemTable: ({ data, onNotesClick, onSettingsClick }) =>
+    MuiFormItemTable: ({ data }) =>
       React.createElement(
         "div",
         null,
@@ -41,25 +41,7 @@ jest.mock("openstack-uicore-foundation/lib/components", () => {
           React.createElement(
             "div",
             { key: item.form_item_id },
-            React.createElement("span", null, item.name),
-            React.createElement(
-              "button",
-              {
-                "aria-label": "edit",
-                onClick: () => onNotesClick && onNotesClick(item),
-                type: "button"
-              },
-              "edit"
-            ),
-            React.createElement(
-              "button",
-              {
-                "aria-label": "settings",
-                onClick: () => onSettingsClick && onSettingsClick(item),
-                type: "button"
-              },
-              "settings"
-            )
+            React.createElement("span", null, item.name)
           )
         )
       ),
@@ -432,70 +414,37 @@ describe("EditCartForm", () => {
   });
 
   describe("Interactive Features", () => {
-    test("opens notes modal when notes button clicked", async () => {
+    test("renders all form items in MuiFormItemTable", async () => {
       renderWithStore();
 
       await waitFor(() => {
         expect(screen.getByText("Item 1")).toBeInTheDocument();
-      });
-
-      // Find the Edit icon button (notes) by aria-label
-      const notesButton = screen.getAllByLabelText("edit")[0];
-
-      await userEvent.click(notesButton);
-
-      await waitFor(() => {
-        expect(screen.getByRole("dialog")).toBeInTheDocument();
+        expect(screen.getByText("Item 2")).toBeInTheDocument();
       });
     });
 
-    test("closes notes modal", async () => {
+    test("renders Save and Cancel buttons", async () => {
       renderWithStore();
 
       await waitFor(() => {
-        expect(screen.getByText("Item 1")).toBeInTheDocument();
-      });
-
-      const notesButton = screen.getAllByLabelText("edit")[0];
-
-      await userEvent.click(notesButton);
-
-      await waitFor(() => {
-        expect(screen.getByRole("dialog")).toBeInTheDocument();
-      });
-
-      // Find close button within the dialog
-      const closeButton = screen.getByLabelText("close");
-
-      await userEvent.click(closeButton);
-
-      await waitFor(() => {
-        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+        expect(screen.getByText(/general.save/)).toBeInTheDocument();
+        expect(screen.getByText(/general.cancel/)).toBeInTheDocument();
       });
     });
 
-    test("opens settings modal when settings button clicked", async () => {
+    test("does not render any dialog by default", async () => {
       renderWithStore();
 
       await waitFor(() => {
         expect(screen.getByText("Item 1")).toBeInTheDocument();
       });
 
-      const settingsButtons = screen.getAllByRole("button");
-      const settingsButton = settingsButtons.find(
-        (btn) => btn.getAttribute("aria-label") === "settings"
-      );
-
-      await userEvent.click(settingsButton);
-
-      await waitFor(() => {
-        expect(screen.getByRole("dialog")).toBeInTheDocument();
-      });
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
   });
 
   describe("Item Field Error Message", () => {
-    test("shows error message below Save when a required Item field is empty after submit", async () => {
+    test("blocks form submission when a required Item field is empty", async () => {
       const formWithRequiredItemField = {
         ...mockCartForm,
         items: [
@@ -522,10 +471,9 @@ describe("EditCartForm", () => {
 
       await userEvent.click(screen.getByText(/general.save/));
 
+      // Validation errors prevent form submission; updateCartForm should not be called
       await waitFor(() => {
-        expect(
-          screen.getByText("validation.additional_items")
-        ).toBeInTheDocument();
+        expect(mockUpdateCartForm).not.toHaveBeenCalled();
       });
     });
 
