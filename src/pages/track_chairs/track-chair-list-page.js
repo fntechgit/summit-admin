@@ -125,7 +125,16 @@ const TrackChairListPage = ({
   };
 
   const handleDelete = (trackChairId) => {
-    deleteTrackChair(trackChairId);
+    deleteTrackChair(trackChairId).then(() =>
+      getTrackChairs(
+        trackId,
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir
+      )
+    );
   };
 
   const handleSave = ({ id, member, trackIds }) => {

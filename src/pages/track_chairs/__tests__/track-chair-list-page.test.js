@@ -162,6 +162,31 @@ describe("TrackChairListPage", () => {
 
       expect(deleteTrackChair).toHaveBeenCalledWith(mockTrackChair.id);
     });
+
+    it("reloads the list on the first page after a successful delete", async () => {
+      renderPage({
+        trackChairs: [mockTrackChair],
+        currentPage: 3,
+        term: "abc",
+        order: "trackName",
+        orderDir: -1
+      });
+
+      await act(async () => {
+        await userEvent.click(
+          screen.getByTestId(`delete-${mockTrackChair.id}`)
+        );
+      });
+
+      expect(getTrackChairs).toHaveBeenLastCalledWith(
+        null,
+        "abc",
+        1,
+        10,
+        "trackName",
+        -1
+      );
+    });
   });
 
   describe("handleSave", () => {
