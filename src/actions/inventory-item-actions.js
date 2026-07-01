@@ -370,18 +370,52 @@ export const deleteInventoryItemImage = (inventoryItemId, imageId) => {
 
 /* **************************************  ARCHIVE  ************************************** */
 
-export const archiveInventoryItem = (inventoryItem) => {
-  const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/archive`,
-    updatedActionName: INVENTORY_ITEM_ARCHIVED
+export const archiveInventoryItem =
+  (inventoryItem) => async (dispatch, getState) => {
+    const settings = {
+      url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/archive`,
+      updatedActionName: INVENTORY_ITEM_ARCHIVED
+    };
+    try {
+      await archiveItem(inventoryItem, settings)(dispatch);
+    } catch (e) {
+      return undefined;
+    }
+    const { term, currentPage, perPage, order, orderDir, showArchived } =
+      getState().currentInventoryItemListState;
+    return dispatch(
+      getInventoryItems(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
   };
-  return archiveItem(inventoryItem, settings);
-};
 
-export const unarchiveInventoryItem = (inventoryItem) => {
-  const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/archive`,
-    deletedActionName: INVENTORY_ITEM_UNARCHIVED
+export const unarchiveInventoryItem =
+  (inventoryItem) => async (dispatch, getState) => {
+    const settings = {
+      url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/archive`,
+      deletedActionName: INVENTORY_ITEM_UNARCHIVED
+    };
+    try {
+      await unarchiveItem(inventoryItem, settings)(dispatch);
+    } catch (e) {
+      return undefined;
+    }
+    const { term, currentPage, perPage, order, orderDir, showArchived } =
+      getState().currentInventoryItemListState;
+    return dispatch(
+      getInventoryItems(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
   };
-  return unarchiveItem(inventoryItem, settings);
-};

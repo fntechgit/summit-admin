@@ -250,10 +250,14 @@ export const archiveShowPage = (pageId) => async (dispatch, getState) => {
           html: T.translate("show_pages.archived")
         })
       );
+      const { term, currentPage, perPage, order, orderDir, showArchived } =
+        getState().showPagesListState;
+      return dispatch(
+        getShowPages(term, currentPage, perPage, order, orderDir, showArchived)
+      );
     })
-    .finally(() => {
-      dispatch(stopLoading());
-    });
+    .catch(() => {})
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const unarchiveShowPage = (pageId) => async (dispatch, getState) => {
@@ -278,8 +282,12 @@ export const unarchiveShowPage = (pageId) => async (dispatch, getState) => {
           html: T.translate("show_pages.unarchived")
         })
       );
+      const { term, currentPage, perPage, order, orderDir, showArchived } =
+        getState().showPagesListState;
+      return dispatch(
+        getShowPages(term, currentPage, perPage, order, orderDir, showArchived)
+      );
     })
-    .finally(() => {
-      dispatch(stopLoading());
-    });
+    .catch(() => {})
+    .finally(() => dispatch(stopLoading()));
 };

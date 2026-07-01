@@ -644,3 +644,13 @@ export const getFileUploadAllowedExtensions = () => {
 
 export const isImageUrl = (url) =>
   /\.(jpe?g|png|gif|webp|svg|bmp)(\?|$)/i.test(url);
+
+export const getSafePageAfterRemove = (totalCount, perPage, currentPage) => {
+  const lastPage = Math.ceil(totalCount / perPage);
+  const isOnLastPage = currentPage === lastPage;
+  // last page had exactly one item, so removing it shrinks the page count
+  const pageCountDecreases = Number.isInteger((totalCount - 1) / perPage);
+  return isOnLastPage && pageCountDecreases && currentPage > 1
+    ? currentPage - 1
+    : currentPage;
+};
