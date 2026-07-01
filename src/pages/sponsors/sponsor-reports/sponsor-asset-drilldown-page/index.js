@@ -116,7 +116,7 @@ const SponsorAssetDrilldownPage = ({
     .map((section) => ({
       ...section,
       modules: (section.modules || []).filter(
-        (row) => row.module.type === "Media"
+        (row) => row.module?.type === "Media"
       )
     }))
     .filter((section) => section.modules.length > 0);
@@ -136,8 +136,10 @@ const SponsorAssetDrilldownPage = ({
       {loading && (
         <Typography>{T.translate("sponsor_reports_page.loading")}</Typography>
       )}
-      {/* A valid sponsor with no submissions returns pages: [] (NOT a 404). */}
-      {!loading && detail && pages.length === 0 && (
+      {/* No collected (Media) submissions to show: either a valid sponsor with
+          pages: [] (NOT a 404), or a sponsor whose pages hold only non-Media
+          modules, which visiblePages filters out. Mirrors the visiblePages render below. */}
+      {!loading && detail && visiblePages.length === 0 && (
         <Box
           data-testid="sponsor-no-submissions"
           sx={{ p: 4, textAlign: "center" }}
@@ -213,7 +215,7 @@ const SponsorAssetDrilldownPage = ({
             </Box>
             <Grid2 container spacing={2}>
               {section.modules?.map((row) => (
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={row.module.id}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={row.module?.id}>
                   <Box
                     sx={{
                       border: 1,
@@ -235,9 +237,9 @@ const SponsorAssetDrilldownPage = ({
                         variant="body2"
                         sx={{ fontWeight: 600 }}
                         noWrap
-                        title={row.module.title}
+                        title={row.module?.title}
                       >
-                        {row.module.title}
+                        {row.module?.title}
                       </Typography>
                       <StatusPill status={row.status} label={row.status} />
                     </Stack>
