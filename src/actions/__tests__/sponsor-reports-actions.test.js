@@ -873,9 +873,9 @@ describe("sponsor-reports-actions", () => {
       (_label, currentSummit) => {
         it.each(FETCHES)(
           "%s dispatches nothing and issues no request",
-          async (_name, thunk) => {
+          async (_name, fetchThunk) => {
             const store = mockStore({ currentSummitState: { currentSummit } });
-            await store.dispatch(thunk());
+            await store.dispatch(fetchThunk());
             await flushPromises();
             expect(store.getActions()).toEqual([]);
             expect(getRequest).not.toHaveBeenCalled();
