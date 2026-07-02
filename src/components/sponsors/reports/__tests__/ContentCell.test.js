@@ -8,18 +8,6 @@ import ContentCell from "../ContentCell";
 jest.mock("i18n-react/dist/i18n-react", () => ({ translate: (k) => k }));
 
 describe("ContentCell", () => {
-  it("renders an <img> for an image preview_url", () => {
-    const row = {
-      module: { title: "Logo" },
-      content: { preview_url: "https://x/logo.png", filename: "logo.png" }
-    };
-    render(<ContentCell row={row} />);
-    expect(screen.getByRole("img")).toHaveAttribute(
-      "src",
-      "https://x/logo.png"
-    );
-  });
-
   it("always gives the image a string alt (empty when module/title is missing, never a missing attribute)", () => {
     const url = "https://x/logo.png";
     const { container, rerender } = render(

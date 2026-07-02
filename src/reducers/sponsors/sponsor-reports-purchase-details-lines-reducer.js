@@ -24,10 +24,12 @@ export const DEFAULT_STATE = {
   data: [],
   summary: null,
   total: 0,
+  // Pagination/filter live here (recorded on REQUEST) so they survive SPA
+  // navigation; the global overlay owns loading (state.baseState.loading).
   currentPage: DEFAULT_CURRENT_PAGE,
   lastPage: DEFAULT_CURRENT_PAGE,
   perPage: DEFAULT_PER_PAGE,
-  loading: false,
+  filters: {},
   readError: null
 };
 
@@ -37,8 +39,10 @@ const reducer = (state = DEFAULT_STATE, action) => {
     case LOGOUT_USER:
     case SET_CURRENT_SUMMIT:
       return DEFAULT_STATE;
-    case REQUEST_PURCHASE_DETAILS_LINES:
-      return { ...state, loading: true, readError: null };
+    case REQUEST_PURCHASE_DETAILS_LINES: {
+      const { currentPage, perPage, filters } = payload;
+      return { ...state, currentPage, perPage, filters, readError: null };
+    }
     case RECEIVE_PURCHASE_DETAILS_LINES: {
       const {
         data,
@@ -56,12 +60,11 @@ const reducer = (state = DEFAULT_STATE, action) => {
         perPage,
         currentPage,
         summary: summary ?? state.summary,
-        loading: false,
         readError: null
       };
     }
     case PURCHASE_DETAILS_LINES_READ_ERROR:
-      return { ...state, loading: false, readError: payload };
+      return { ...state, readError: payload };
     default:
       return state;
   }

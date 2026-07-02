@@ -3,14 +3,13 @@ import {
   Autocomplete,
   Box,
   Button,
-  InputAdornment,
   Paper,
   Stack,
   TextField,
   Typography
 } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import SearchIcon from "@mui/icons-material/Search";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import T from "i18n-react/dist/i18n-react";
 
 // Sponsor is the ONLY multi-select (base-api-utils limitation). All other
@@ -49,19 +48,23 @@ const FilterBar = ({
         sx={{ flexWrap: "wrap", rowGap: 2 }}
       >
         {showSearch && (
-          <TextField
-            size="small"
-            label={T.translate("sponsor_reports_page.search")}
-            value={draft.search || ""}
-            onChange={(e) => update({ search: e.target.value })}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              )
-            }}
-          />
+          <Box sx={{ minWidth: 240 }}>
+            {/* SearchInput only propagates via a debounced onSearch (no
+                per-keystroke onChange), so it can't reliably feed the Apply-gated
+                draft — a fast type+Apply would miss the last chars. Instead treat
+                search as a live, debounced filter: commit + apply it on onSearch
+                (this is how the peer list pages use SearchInput). */}
+            <SearchInput
+              term={draft.search || ""}
+              onSearch={(term) => {
+                const next = { ...draft, search: term || undefined };
+                setDraft(next);
+                onApply(next);
+              }}
+              placeholder={T.translate("sponsor_reports_page.search")}
+              debounced
+            />
+          </Box>
         )}
         <Autocomplete
           multiple

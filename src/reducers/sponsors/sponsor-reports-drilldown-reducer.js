@@ -21,8 +21,9 @@ import {
 
 export const DEFAULT_STATE = {
   // The whole retrieve response: { sponsor: {id,name,tier,pages_active}, pages: [...] }.
+  // Single-sponsor fetch by id — no pagination/sort/filter state to relocate; the
+  // global overlay owns loading (state.baseState.loading).
   detail: null,
-  loading: false,
   readError: null // includes { kind: "not-found" } for unknown sponsor (404)
 };
 
@@ -33,16 +34,15 @@ const reducer = (state = DEFAULT_STATE, action) => {
     case SET_CURRENT_SUMMIT:
       return DEFAULT_STATE;
     case REQUEST_SPONSOR_DRILLDOWN:
-      return { ...state, loading: true, readError: null, detail: null };
+      return { ...state, readError: null, detail: null };
     case RECEIVE_SPONSOR_DRILLDOWN:
       return {
         ...state,
         detail: payload.response,
-        loading: false,
         readError: null
       };
     case SPONSOR_DRILLDOWN_READ_ERROR:
-      return { ...state, loading: false, readError: payload };
+      return { ...state, readError: payload };
     default:
       return state;
   }

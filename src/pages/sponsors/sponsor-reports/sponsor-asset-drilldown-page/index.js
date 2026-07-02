@@ -53,7 +53,6 @@ import {
 const SponsorAssetDrilldownPage = ({
   // From mapStateToProps
   detail,
-  loading,
   readError,
   // From mapDispatchToProps
   getSponsorAssetSponsor: fetchSponsor,
@@ -133,13 +132,10 @@ const SponsorAssetDrilldownPage = ({
         </Button>
       }
     >
-      {loading && (
-        <Typography>{T.translate("sponsor_reports_page.loading")}</Typography>
-      )}
       {/* No collected (Media) submissions to show: either a valid sponsor with
           pages: [] (NOT a 404), or a sponsor whose pages hold only non-Media
           modules, which visiblePages filters out. Mirrors the visiblePages render below. */}
-      {!loading && detail && visiblePages.length === 0 && (
+      {detail && visiblePages.length === 0 && (
         <Box
           data-testid="sponsor-no-submissions"
           sx={{ p: 4, textAlign: "center" }}

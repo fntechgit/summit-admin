@@ -91,7 +91,6 @@ export const FIVE_PER_PAGE = 5;
 export const HUNDRED_PER_PAGE = 100;
 export const DEFAULT_EXTRA_QUESTIONS_PER_PAGE = 100;
 export const DEFAULT_ORDER_DIR = 1;
-export const ALL_ROWS_PER_PAGE = 5000;
 
 export const DATE_FORMAT = "MM/DD/YYYY";
 export const DATETIME_FORMAT = "MM/DD/YYYY hh:mm a";

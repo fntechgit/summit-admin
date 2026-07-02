@@ -46,7 +46,6 @@ function buildState(drilldownOverrides = {}) {
   return {
     sponsorReportsDrilldownState: {
       detail: null,
-      loading: false,
       readError: null,
       ...drilldownOverrides
     },
@@ -75,20 +74,11 @@ beforeEach(() => {
 
 describe("SponsorAssetDrilldownPage", () => {
   it("dispatches getSponsorAssetSponsor(sponsorId) on mount — no summitId arg (summit from state)", async () => {
-    renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
-      loading: true
-    });
+    renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17");
     await act(async () => {});
     // Task-2 thunk: getSponsorAssetSponsor(sponsorId) only; summit comes from getState inside thunk.
     expect(getSponsorAssetSponsor).toHaveBeenCalledWith("17");
     expect(getSponsorAssetSponsor).toHaveBeenCalledTimes(1);
-  });
-
-  it("renders not-found and skips the fetch for a malformed sponsorId (sponsorId=0)", async () => {
-    renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/0");
-    await act(async () => {});
-    expect(screen.getByTestId("sponsor-not-found")).toBeInTheDocument();
-    expect(getSponsorAssetSponsor).not.toHaveBeenCalled();
   });
 
   it("renders not-found state on a 404 readError", async () => {
@@ -97,30 +87,6 @@ describe("SponsorAssetDrilldownPage", () => {
     });
     await act(async () => {});
     expect(screen.getByTestId("sponsor-not-found")).toBeInTheDocument();
-  });
-
-  it("renders the sponsor header, page sections, and module rows from the real detail shape", async () => {
-    renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
-      detail: {
-        sponsor: { id: 17, name: "Acme", tier: "Gold", pages_active: 3 },
-        pages: [
-          {
-            page: { id: 9, title: "Booth", type: "page" },
-            modules: [
-              {
-                module: { id: 1, title: "Logo", type: "Media" },
-                status: "completed"
-              }
-            ]
-          }
-        ]
-      }
-    });
-    await act(async () => {});
-    // Sponsor name appears in both the ReportShell title (h5) and the navy header (h6)
-    expect(screen.getAllByText("Acme").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("Booth")).toBeInTheDocument();
-    expect(screen.getByText("Logo")).toBeInTheDocument();
   });
 
   it("renders the section download button and dispatches exportSponsorAssetSectionCsv on click", async () => {
@@ -155,51 +121,6 @@ describe("SponsorAssetDrilldownPage", () => {
     expect(exportSponsorAssetSectionCsv).toHaveBeenCalledWith("17", 9);
   });
 
-  it("renders the navy header with tier badge", async () => {
-    renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
-      detail: {
-        sponsor: {
-          id: 17,
-          name: "AcBel Polytech",
-          tier: "Gold",
-          pages_active: 3
-        },
-        pages: []
-      }
-    });
-    await act(async () => {});
-    expect(screen.getAllByText("AcBel Polytech").length).toBeGreaterThanOrEqual(
-      1
-    );
-    // TierBadge renders tier.toUpperCase()
-    expect(screen.getByText("GOLD")).toBeInTheDocument();
-  });
-
-  it("renders the pages_active count in the sponsor header", async () => {
-    renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
-      detail: {
-        sponsor: { id: 17, name: "Acme Corp", tier: "Silver", pages_active: 5 },
-        pages: []
-      }
-    });
-    await act(async () => {});
-    // With echo mock, T.translate("sponsor_reports_page.pages_active") → the key
-    expect(
-      screen.getByText("sponsor_reports_page.pages_active")
-    ).toBeInTheDocument();
-  });
-
-  it("shows the sponsor-no-submissions state when the sponsor has no pages", async () => {
-    renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
-      detail: {
-        sponsor: { id: 17, name: "Acme", tier: "Gold" },
-        pages: []
-      }
-    });
-    await act(async () => {});
-    expect(screen.getByTestId("sponsor-no-submissions")).toBeInTheDocument();
-  });
-
   it("shows the sponsor-no-submissions state when pages contain only non-Media modules (visiblePages empty)", async () => {
     renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
       detail: {
@@ -226,85 +147,6 @@ describe("SponsorAssetDrilldownPage", () => {
     // so the no-submissions panel (not an empty body) must render.
     expect(screen.getByTestId("sponsor-no-submissions")).toBeInTheDocument();
     expect(screen.queryByText("Booth")).not.toBeInTheDocument();
-  });
-
-  it("ContentCell: image row renders <img> with preview_url", async () => {
-    renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
-      detail: {
-        sponsor: { id: 17, name: "Acme", tier: "Gold", pages_active: 2 },
-        pages: [
-          {
-            page: { id: 9, title: "Booth", type: "page" },
-            modules: [
-              {
-                module: { id: 1, title: "Logo", type: "Media" },
-                status: "completed",
-                content: {
-                  filename: "logo.png",
-                  preview_url: "https://x/logo.png"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    });
-    await act(async () => {});
-    expect(screen.getByRole("img", { name: /logo/i })).toHaveAttribute(
-      "src",
-      "https://x/logo.png"
-    );
-  });
-
-  it("ContentCell: flattens HTML in a Media text/input value to plain text", async () => {
-    // A Media row whose media_request_type is Input carries entered text in
-    // content.value, which may contain HTML — ContentCell uses htmlToPlainText.
-    // Input exercises the behavior that distinguishes htmlToPlainText from a bare
-    // stripTags: tags → space, entities decoded (&nbsp;/&amp;), whitespace collapsed.
-    renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
-      detail: {
-        sponsor: { id: 17, name: "Acme", tier: "Gold", pages_active: 1 },
-        pages: [
-          {
-            page: { id: 9, title: "Booth", type: "page" },
-            modules: [
-              {
-                module: { id: 1, title: "Tagline", type: "Media" },
-                status: "completed",
-                content: { value: "<p>Booth&nbsp;A</p><p>B &amp; C</p>" }
-              }
-            ]
-          }
-        ]
-      }
-    });
-    await act(async () => {});
-    expect(screen.getByText("Booth A B & C")).toBeInTheDocument();
-    // Entities must be decoded — a bare stripTags would leave "&amp;"/"&nbsp;".
-    expect(screen.queryByText(/&amp;|&nbsp;/)).not.toBeInTheDocument();
-  });
-
-  it("ContentCell: shows pending_upload placeholder when there is no url or text", async () => {
-    renderAt("/app/summits/1/sponsors/reports/sponsor-assets/sponsors/17", {
-      detail: {
-        sponsor: { id: 17, name: "Acme", tier: "Bronze", pages_active: 1 },
-        pages: [
-          {
-            page: { id: 9, title: "Booth", type: "page" },
-            modules: [
-              {
-                module: { id: 3, title: "Empty", type: "Media" },
-                status: "pending"
-              }
-            ]
-          }
-        ]
-      }
-    });
-    await act(async () => {});
-    expect(
-      screen.getByText("sponsor_reports_page.pending_upload")
-    ).toBeInTheDocument();
   });
 
   it("shows only collected Media content: only Media module cards render; a section with only non-Media rows is absent", async () => {

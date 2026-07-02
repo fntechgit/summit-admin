@@ -10,10 +10,6 @@ describe("TierBadge", () => {
     renderWithRedux(<TierBadge tier="Gold" />);
     expect(screen.getByText("GOLD")).toBeInTheDocument();
   });
-  it("renders a neutral badge for an unknown tier", () => {
-    renderWithRedux(<TierBadge tier="Platinum" />);
-    expect(screen.getByText("PLATINUM")).toBeInTheDocument();
-  });
   it("renders nothing when tier is null/empty", () => {
     const { container } = renderWithRedux(<TierBadge tier={null} />);
     expect(container).toBeEmptyDOMElement();

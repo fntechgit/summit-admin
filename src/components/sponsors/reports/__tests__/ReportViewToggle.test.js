@@ -6,26 +6,14 @@ import ReportViewToggle from "../ReportViewToggle";
 jest.mock("i18n-react/dist/i18n-react", () => ({ translate: (k) => k }));
 
 describe("ReportViewToggle", () => {
-  it("renders both view options", () => {
-    render(<ReportViewToggle value="orders" onChange={jest.fn()} />);
-    expect(
-      screen.getByText("sponsor_reports_page.view_orders")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("sponsor_reports_page.view_line_items")
-    ).toBeInTheDocument();
-  });
-
-  it("calls onChange with the clicked view", () => {
+  it("emits the clicked view but ignores a re-click of the active button (MUI passes null)", () => {
     const onChange = jest.fn();
     render(<ReportViewToggle value="orders" onChange={onChange} />);
+    // Clicking the inactive view emits its key.
     fireEvent.click(screen.getByText("sponsor_reports_page.view_line_items"));
     expect(onChange).toHaveBeenCalledWith("lines");
-  });
-
-  it("ignores a re-click of the active button (MUI passes null)", () => {
-    const onChange = jest.fn();
-    render(<ReportViewToggle value="orders" onChange={onChange} />);
+    onChange.mockClear();
+    // Re-clicking the active view → MUI passes null → we swallow it.
     fireEvent.click(screen.getByText("sponsor_reports_page.view_orders"));
     expect(onChange).not.toHaveBeenCalled();
   });

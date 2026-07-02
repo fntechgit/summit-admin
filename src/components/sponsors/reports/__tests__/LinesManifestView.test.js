@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom";
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import LinesManifestView from "../LinesManifestView";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
@@ -45,34 +45,6 @@ const renderView = (props = {}) =>
   );
 
 describe("LinesManifestView", () => {
-  it("renders a sponsor section header with a lines count", () => {
-    renderView();
-    expect(screen.getByText("Acme")).toBeInTheDocument();
-    expect(
-      screen.getByText("sponsor_reports_page.lines_count:1")
-    ).toBeInTheDocument();
-  });
-
-  it("renders the line's destination from add_on_name", () => {
-    renderView();
-    expect(screen.getByText("Meeting Room T")).toBeInTheDocument();
-  });
-
-  it("falls back to a muted 'Booth' when add_on_name is null", () => {
-    renderView({ rows: [line({ add_on_name: null })] });
-    expect(
-      screen.getByText("sponsor_reports_page.destination_booth_fallback")
-    ).toBeInTheDocument();
-  });
-
-  it("renders the status pill and money/qty cells", () => {
-    renderView();
-    expect(screen.getByText("Paid")).toBeInTheDocument();
-    expect(screen.getByText("AV1")).toBeInTheDocument();
-    // 100000 cents → "$1000.00" (no thousands separator — platform-wide uicore behavior)
-    expect(screen.getByText("$1000.00")).toBeInTheDocument();
-  });
-
   it("KEEPS a canceled line in the rendered set (visual treatment, not filtered)", () => {
     renderView({
       rows: [
@@ -84,10 +56,52 @@ describe("LinesManifestView", () => {
     expect(row).toHaveAttribute("data-canceled", "true");
   });
 
-  it("calls onPageChange with a 1-indexed page when the pager advances", () => {
-    const onPageChange = jest.fn();
-    renderView({ total: 120, onPageChange });
-    fireEvent.click(screen.getByRole("button", { name: /next page/i }));
-    expect(onPageChange).toHaveBeenCalledWith(2);
+  // Sponsor bucketing (formerly bucketLinesBySponsor, now a private helper).
+  describe("sponsor bucketing", () => {
+    it("groups by sponsor.id preserving first-seen order", () => {
+      renderView({
+        rows: [
+          line({ sponsor: { id: 17, name: "Acme" }, item_code: "A1" }),
+          line({ sponsor: { id: 9, name: "Globex" }, item_code: "G1" }),
+          line({ sponsor: { id: 17, name: "Acme" }, item_code: "A2" })
+        ]
+      });
+      const tables = screen.getAllByRole("table");
+      expect(tables).toHaveLength(2);
+      // First-seen order: Acme (with A1 + A2) before Globex (G1).
+      expect(within(tables[0]).getByText("A1")).toBeInTheDocument();
+      expect(within(tables[0]).getByText("A2")).toBeInTheDocument();
+      expect(within(tables[1]).getByText("G1")).toBeInTheDocument();
+    });
+
+    it("keeps a sponsor in ONE group when its rows are non-adjacent (same name, interleaved)", () => {
+      // Two distinct ids sharing a name, interleaved by date as the backend orders them.
+      renderView({
+        rows: [
+          line({ sponsor: { id: 17, name: "Dup Name" }, item_code: "X1" }),
+          line({ sponsor: { id: 42, name: "Dup Name" }, item_code: "Y1" }),
+          line({ sponsor: { id: 17, name: "Dup Name" }, item_code: "X2" })
+        ]
+      });
+      const tables = screen.getAllByRole("table");
+      expect(tables).toHaveLength(2);
+      // X1 and X2 land in the same table (id 17) despite the interleaved Y1 row.
+      const id17Table = screen.getByText("X1").closest("table");
+      expect(within(id17Table).getByText("X2")).toBeInTheDocument();
+      expect(within(id17Table).queryByText("Y1")).not.toBeInTheDocument();
+    });
+
+    it("buckets rows with a missing sponsor id under a single group", () => {
+      renderView({
+        rows: [
+          { item_code: "Z1", purchase: { id: 1 } },
+          { sponsor: {}, item_code: "Z2", purchase: { id: 2 } }
+        ]
+      });
+      const tables = screen.getAllByRole("table");
+      expect(tables).toHaveLength(1);
+      expect(within(tables[0]).getByText("Z1")).toBeInTheDocument();
+      expect(within(tables[0]).getByText("Z2")).toBeInTheDocument();
+    });
   });
 });

@@ -24,7 +24,11 @@ export const DEFAULT_STATE = {
   filterOptions: null, // { sponsors, pages, tiers, components }
   rows: [], // flat collected-asset rows for client-side pivot
   summary: null, // { total, by_status, by_page }
-  loading: true, // true by default — the page always fetches on mount; avoids a no-results flash before first fetch
+  // Active filters live here (recorded on REQUEST) so they survive SPA
+  // navigation; the global overlay owns loading (state.baseState.loading).
+  // This flow fetches ALL rows client-side, so there is no server
+  // currentPage/perPage to relocate.
+  filters: {},
   readError: null
 };
 
@@ -35,9 +39,8 @@ const reducer = (state = DEFAULT_STATE, action) => {
     case SET_CURRENT_SUMMIT:
       return DEFAULT_STATE;
     case REQUEST_SPONSOR_ASSET:
-      return { ...state, loading: true, readError: null };
+      return { ...state, filters: payload?.filters, readError: null };
     case RECEIVE_SPONSOR_ASSET_FILTERS:
-      // loading is report-owned now (filters use a null request action), so leave it alone.
       return { ...state, filterOptions: payload.response, readError: null };
     case RECEIVE_SPONSOR_ASSET_ROWS: {
       const env = payload.response;
@@ -45,12 +48,11 @@ const reducer = (state = DEFAULT_STATE, action) => {
         ...state,
         rows: env.data,
         summary: env.summary,
-        loading: false,
         readError: null
       };
     }
     case SPONSOR_ASSET_READ_ERROR:
-      return { ...state, loading: false, readError: payload };
+      return { ...state, readError: payload };
     default:
       return state;
   }

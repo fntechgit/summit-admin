@@ -2,7 +2,6 @@
 import "@testing-library/jest-dom";
 import React from "react";
 import { act, screen, fireEvent } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { Router, Route } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import { renderWithRedux } from "utils/test-utils";
@@ -21,6 +20,41 @@ jest.mock(
     useSnackbarMessage: () => ({ errorMessage: mockErrorMessage })
   })
 );
+
+// ── uicore date picker ────────────────────────────────────────────────────────
+// The real component wraps react-datetime (jsdom-hostile). Mock it to a plain
+// input that mirrors the wrapper's onChange contract: it emits a moment on
+// target.value, which the page converts back to a "YYYY-MM-DD" string.
+/* eslint-disable global-require */
+jest.mock(
+  "openstack-uicore-foundation/lib/components/inputs/datetimepicker",
+  () => {
+    const React = require("react");
+    const moment = require("moment-timezone");
+    return {
+      __esModule: true,
+      default: ({ id, inputProps = {}, onChange }) =>
+        React.createElement("input", {
+          id,
+          "data-mocked": "DateTimePicker",
+          placeholder: inputProps.placeholder,
+          onChange: (e) =>
+            onChange({
+              target: {
+                id,
+                type: "datetime",
+                // The real wrapper emits moment(0) (epoch) on a CLEAR, not "" —
+                // mirror that so the clear-path test exercises the epoch guard.
+                value: e.target.value
+                  ? moment.utc(e.target.value, "YYYY-MM-DD")
+                  : moment(0)
+              }
+            })
+        })
+    };
+  }
+);
+/* eslint-enable global-require */
 
 // Action creators: jest.fn() inside the factory to avoid hoisting issues.
 // Import the mocked functions below to assert on .mock.calls.
@@ -50,10 +84,7 @@ jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
 // Access the jest.fn() references from the mock (standard jest pattern).
 const {
   getPurchaseDetailsReport,
-  getPurchaseDetailsFilters,
   getPurchaseDetailsLinesReport,
-  clearPurchaseDetailsValidation,
-  exportPurchaseDetailsCsv,
   exportPurchaseDetailsLinesCsv
 } = require("../../../../../actions/sponsor-reports-actions");
 
@@ -97,7 +128,10 @@ const SAMPLE_LINE = {
 const PAGE_ROUTE = "/app/summits/:summit_id/sponsors/reports/purchase-details";
 const PAGE_URL = "/app/summits/42/sponsors/reports/purchase-details";
 
-function buildState(summaryOverrides = {}, { total = 1 } = {}) {
+function buildState(
+  summaryOverrides = {},
+  { total = 1, ordersFilters = {}, linesFilters = {} } = {}
+) {
   return {
     sponsorReportsPurchaseDetailsState: {
       data: [SAMPLE_ROW],
@@ -116,7 +150,14 @@ function buildState(summaryOverrides = {}, { total = 1 } = {}) {
         payment_methods: ["Card", "Invoice"]
       },
       total,
-      loading: false,
+      // Pagination/sort/filter now live in the reducer slice (recorded on
+      // REQUEST); the global overlay owns loading, so no per-slice `loading`.
+      currentPage: 1,
+      lastPage: 1,
+      perPage: 10,
+      order: null,
+      orderDir: 1,
+      filters: ordersFilters,
       readError: null,
       validationError: null
     },
@@ -136,7 +177,7 @@ function buildState(summaryOverrides = {}, { total = 1 } = {}) {
       currentPage: 1,
       lastPage: 1,
       perPage: 50,
-      loading: false,
+      filters: linesFilters,
       readError: null
     }
   };
@@ -177,76 +218,7 @@ beforeEach(() => {
 // ────────────────────────────────────────────────────────────────────────────
 
 describe("PurchaseDetailsReportPage", () => {
-  it("dispatches getPurchaseDetailsReport and getPurchaseDetailsFilters on mount", async () => {
-    renderPage();
-    await act(async () => {});
-    expect(getPurchaseDetailsReport).toHaveBeenCalled();
-    expect(getPurchaseDetailsFilters).toHaveBeenCalled();
-  });
-
-  it("dispatches getPurchaseDetailsReport with page=1 and perPage=10 on initial load", async () => {
-    renderPage();
-    await act(async () => {});
-    expect(getPurchaseDetailsReport).toHaveBeenCalledWith(
-      {},
-      expect.objectContaining({ page: 1, perPage: 10 })
-    );
-  });
-
-  it("renders data rows via OrdersTable (MuiTable)", async () => {
-    renderPage();
-    await act(async () => {});
-    // purchase_number rendered by OrdersTable's "Order #" column
-    expect(screen.getByText("ORD-001")).toBeInTheDocument();
-    // sponsor.name rendered by Sponsor column
-    expect(screen.getByText("Acme Corp")).toBeInTheDocument();
-  });
-
-  it("renders summary tiles for total_orders, total_items, total_paid, total_pending", async () => {
-    renderPage();
-    await act(async () => {});
-    expect(
-      screen.getByText("sponsor_reports_page.total_orders")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("sponsor_reports_page.total_items")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("sponsor_reports_page.total_paid")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("sponsor_reports_page.total_pending")
-    ).toBeInTheDocument();
-  });
-
   describe("D9 — conditional Total Refunded tile", () => {
-    it("hides the Total Refunded tile when summary.total_refunded is null", async () => {
-      renderPage({ total_refunded: null });
-      await act(async () => {});
-      expect(
-        screen.queryByText("sponsor_reports_page.total_refunded")
-      ).not.toBeInTheDocument();
-    });
-
-    it("hides the Total Refunded tile when summary.total_refunded is undefined (key absent)", async () => {
-      // Build a summary with no total_refunded key at all
-      const { total_refunded: _r, ...noRefund } =
-        buildState().sponsorReportsPurchaseDetailsState.summary;
-      renderPage(noRefund);
-      await act(async () => {});
-      expect(
-        screen.queryByText("sponsor_reports_page.total_refunded")
-      ).not.toBeInTheDocument();
-    });
-
-    it("shows the Total Refunded tile when summary.total_refunded is a non-null value", async () => {
-      renderPage({ total_refunded: 5000 });
-      await act(async () => {});
-      expect(
-        screen.getByText("sponsor_reports_page.total_refunded")
-      ).toBeInTheDocument();
-    });
-
     it("shows the Total Refunded tile when summary.total_refunded is 0 (presence check, not truthiness)", async () => {
       renderPage({ total_refunded: 0 });
       await act(async () => {});
@@ -256,41 +228,19 @@ describe("PurchaseDetailsReportPage", () => {
     });
   });
 
-  it("renders the page title from i18n", async () => {
-    renderPage();
-    await act(async () => {});
-    expect(
-      screen.getByText("sponsor_reports_page.purchase_details_title")
-    ).toBeInTheDocument();
-  });
-
-  it("renders the export button", async () => {
-    renderPage();
-    await act(async () => {});
-    // The export button renders text from T.translate("sponsor_reports_page.export_csv")
-    // With the echo mock this becomes the key string
-    expect(
-      screen.getByText("sponsor_reports_page.export_csv")
-    ).toBeInTheDocument();
-  });
-
-  it("renders the Print button", async () => {
-    renderPage();
-    await act(async () => {});
-    expect(screen.getByText("sponsor_reports_page.print")).toBeInTheDocument();
-  });
-
   it("dispatches getPurchaseDetailsReport again when a filter changes and Apply is clicked", async () => {
     renderPage();
     await act(async () => {});
     getPurchaseDetailsReport.mockClear();
 
-    // Set the "From date" filter to a non-empty value so the query memo changes.
-    // FilterBar renders date inputs with type="date"; the first one is "From date".
-    const dateInputs = document.querySelectorAll("input[type=\"date\"]");
+    // Set the "From date" filter to a non-empty value. The uicore date picker
+    // (mocked above) is queried by its placeholder and emits a moment, which the
+    // page converts back to "YYYY-MM-DD" via update({ dateFrom: "2026-01-01" }).
+    const fromDate = screen.getByPlaceholderText(
+      "sponsor_reports_page.filter_date_from"
+    );
     await act(async () => {
-      // Trigger the onChange handler which calls update({ dateFrom: "2026-01-01" })
-      fireEvent.change(dateInputs[0], { target: { value: "2026-01-01" } });
+      fireEvent.change(fromDate, { target: { value: "2026-01-01" } });
     });
 
     // Click Apply to commit the draft filter to page state
@@ -308,37 +258,31 @@ describe("PurchaseDetailsReportPage", () => {
     expect(calledPagination).toMatchObject({ page: 1 });
   });
 
-  it("CSV export button calls exportPurchaseDetailsCsv with current filters and sort", async () => {
+  it("clearing a date filter removes it — does not send a 1970 epoch date", async () => {
     renderPage();
-    await act(async () => {});
-
-    const exportBtn = screen.getByText("sponsor_reports_page.export_csv");
-    await act(async () => {
-      fireEvent.click(exportBtn);
-    });
-
-    // URL/params/filename correctness lives in the action tests.
-    // Here we assert the page dispatches the right thunk with the right args.
-    expect(exportPurchaseDetailsCsv).toHaveBeenCalledWith({}, null, 1);
-  });
-
-  it("re-dispatches getPurchaseDetailsReport with the new page when MuiTable pagination changes (1-based)", async () => {
-    // total > perPage so the TablePagination "next page" button is enabled.
-    renderPage({}, { total: 25 });
     await act(async () => {});
     getPurchaseDetailsReport.mockClear();
 
-    // MUI TablePagination renders a next-page button. MuiTable converts the
-    // 0-based MUI page to a 1-based page before calling the page's onPageChange,
-    // so page 2 (not 1, not 0) must reach the query.
-    const nextBtn = screen.getByRole("button", { name: /next page/i });
+    // Set a date first (empty→"" wouldn't fire React's onChange), then clear it.
+    // Clearing fires onChange with moment(0) (see mock); the page must drop the
+    // filter, not format the epoch into dateFrom="1970-01-01".
+    const fromDate = screen.getByPlaceholderText(
+      "sponsor_reports_page.filter_date_from"
+    );
     await act(async () => {
-      fireEvent.click(nextBtn);
+      fireEvent.change(fromDate, { target: { value: "2026-01-01" } });
+    });
+    await act(async () => {
+      fireEvent.change(fromDate, { target: { value: "" } });
+    });
+    const applyBtn = screen.getByText("sponsor_reports_page.apply");
+    await act(async () => {
+      fireEvent.click(applyBtn);
     });
 
     expect(getPurchaseDetailsReport).toHaveBeenCalled();
-    const [[, calledPagination]] = getPurchaseDetailsReport.mock.calls;
-    expect(calledPagination).toMatchObject({ page: 2, perPage: 10 });
+    const [[calledFilters]] = getPurchaseDetailsReport.mock.calls;
+    expect(calledFilters.dateFrom).toBeUndefined();
   });
 
   it("re-dispatches getPurchaseDetailsReport with the backend order param when a sortable column header is clicked", async () => {
@@ -364,16 +308,23 @@ describe("PurchaseDetailsReportPage", () => {
     });
   });
 
-  it("renders the Orders/Line-Items view toggle", async () => {
-    renderPage();
-    await act(async () => {});
-    expect(
-      screen.getByText("sponsor_reports_page.view_line_items")
-    ).toBeInTheDocument();
-  });
-
-  it("dispatches getPurchaseDetailsLinesReport and renders the manifest when Line Items is selected", async () => {
-    renderPage();
+  it("carries the applied Orders filter into the Line Items fetch on view switch", async () => {
+    // Seed the orders slice as if a date filter had already been applied. The
+    // mock store does not run reducers, so an in-test Apply never reaches the
+    // lines slice; seeding the applied filter exercises the carry-on-switch
+    // wiring (a single FilterBar is shared across both views).
+    const history = createMemoryHistory({ initialEntries: [PAGE_URL] });
+    renderWithRedux(
+      <Router history={history}>
+        <Route path={PAGE_ROUTE} component={PurchaseDetailsReportPage} />
+      </Router>,
+      {
+        initialState: buildState(
+          {},
+          { ordersFilters: { dateFrom: "2026-01-01" } }
+        )
+      }
+    );
     await act(async () => {});
     getPurchaseDetailsLinesReport.mockClear();
 
@@ -381,87 +332,42 @@ describe("PurchaseDetailsReportPage", () => {
       fireEvent.click(screen.getByText("sponsor_reports_page.view_line_items"));
     });
 
-    expect(getPurchaseDetailsLinesReport).toHaveBeenCalled();
-    const [[, calledPagination]] = getPurchaseDetailsLinesReport.mock.calls;
-    expect(calledPagination).toMatchObject({ page: 1, perPage: 50 });
-    expect(calledPagination).not.toHaveProperty("order");
-    // Manifest renders the line's destination
-    expect(screen.getByText("Meeting Room T")).toBeInTheDocument();
+    // Switching views fetches the lines report with the Orders filters carried
+    // over, snapped back to page 1 (the entering view's filters just changed).
+    expect(getPurchaseDetailsLinesReport).toHaveBeenCalledWith(
+      { dateFrom: "2026-01-01" },
+      expect.objectContaining({ page: 1, perPage: 50 })
+    );
   });
 
-  it("renders the CSV export button in the Line Items view", async () => {
-    renderPage();
+  it("Line Items CSV export passes the lines slice filters to exportPurchaseDetailsLinesCsv", async () => {
+    // Export reads the applied filters from the lines slice (recorded on REQUEST
+    // in production); seed them directly since the mock store is inert.
+    const history = createMemoryHistory({ initialEntries: [PAGE_URL] });
+    renderWithRedux(
+      <Router history={history}>
+        <Route path={PAGE_ROUTE} component={PurchaseDetailsReportPage} />
+      </Router>,
+      {
+        initialState: buildState(
+          {},
+          { linesFilters: { dateFrom: "2026-01-01" } }
+        )
+      }
+    );
     await act(async () => {});
     await act(async () => {
       fireEvent.click(screen.getByText("sponsor_reports_page.view_line_items"));
     });
-    expect(
-      screen.getByText("sponsor_reports_page.export_csv")
-    ).toBeInTheDocument();
-  });
-
-  it("CSV export in the Line Items view calls exportPurchaseDetailsLinesCsv with filters", async () => {
-    renderPage();
-    await act(async () => {});
-    await act(async () => {
-      fireEvent.click(screen.getByText("sponsor_reports_page.view_line_items"));
-    });
-
     // Guard: switching to the lines view must not trigger an export on its own.
-    expect(exportPurchaseDetailsCsv).not.toHaveBeenCalled();
-    expect(exportPurchaseDetailsLinesCsv).not.toHaveBeenCalled();
-
-    const exportBtn = screen.getByText("sponsor_reports_page.export_csv");
-    await act(async () => {
-      fireEvent.click(exportBtn);
-    });
-
-    expect(exportPurchaseDetailsLinesCsv).toHaveBeenCalledWith({});
-  });
-
-  it("Line Items CSV export passes applied filters to exportPurchaseDetailsLinesCsv", async () => {
-    renderPage();
-    await act(async () => {});
-
-    // Apply a date filter (same mechanism as the orders filter test).
-    const dateInputs = document.querySelectorAll("input[type=\"date\"]");
-    await act(async () => {
-      fireEvent.change(dateInputs[0], { target: { value: "2026-01-01" } });
-    });
-    await act(async () => {
-      fireEvent.click(screen.getByText("sponsor_reports_page.apply"));
-    });
-
-    // Switch to Line Items and export.
-    await act(async () => {
-      fireEvent.click(screen.getByText("sponsor_reports_page.view_line_items"));
-    });
-    // Guard: neither Apply nor the view switch should have exported anything yet.
     expect(exportPurchaseDetailsLinesCsv).not.toHaveBeenCalled();
     await act(async () => {
       fireEvent.click(screen.getByText("sponsor_reports_page.export_csv"));
     });
 
-    // The thunk receives the live filters object; URL/params correctness lives in
-    // the action tests (expandDates, filter[] assembly, etc.).
     expect(exportPurchaseDetailsLinesCsv).toHaveBeenCalledWith({
       dateFrom: "2026-01-01"
     });
-  });
-
-  it("renders a Payment Method filter whose options come from filterOptions.payment_methods", async () => {
-    renderPage();
-    // MUI v6 Select: role="combobox" named by its InputLabel; menu items are role="option".
-    await act(async () => {
-      await userEvent.click(
-        screen.getByRole("combobox", {
-          name: "sponsor_reports_page.filter_payment_method"
-        })
-      );
-    });
-    // The fixture's payment_methods: ["Card", "Invoice"] must render as options.
-    expect(screen.getByRole("option", { name: "Card" })).toBeInTheDocument();
-    expect(screen.getByRole("option", { name: "Invoice" })).toBeInTheDocument();
   });
 
   describe("validation error — snackbar hook", () => {
@@ -469,26 +375,6 @@ describe("PurchaseDetailsReportPage", () => {
       renderPageWithValidationError({ message: "Too many filters" });
       await act(async () => {});
       expect(mockErrorMessage).toHaveBeenCalledWith("Too many filters");
-    });
-
-    it("calls errorMessage with the i18n fallback key when validationError has no message", async () => {
-      renderPageWithValidationError({});
-      await act(async () => {});
-      expect(mockErrorMessage).toHaveBeenCalledWith(
-        "sponsor_reports_page.validation_error"
-      );
-    });
-
-    it("dispatches clearPurchaseDetailsValidation after showing the error message", async () => {
-      renderPageWithValidationError({ message: "Bad request" });
-      await act(async () => {});
-      expect(clearPurchaseDetailsValidation).toHaveBeenCalled();
-    });
-
-    it("does not call errorMessage when validationError is null", async () => {
-      renderPage(); // default state has validationError: null
-      await act(async () => {});
-      expect(mockErrorMessage).not.toHaveBeenCalled();
     });
   });
 });

@@ -8,6 +8,23 @@ import FilterBar from "../FilterBar";
 // Hoist mock above component import so T.translate returns the key.
 jest.mock("i18n-react/dist/i18n-react", () => ({ translate: (k) => k }));
 
+// Mock the uicore SearchInput to a plain input that calls onSearch synchronously,
+// so we test FilterBar's live-search WIRING without the real 500ms debounce.
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/search-input",
+  () => ({
+    __esModule: true,
+    default: ({ term, onSearch, placeholder }) => {
+      const React = require("react"); // eslint-disable-line global-require
+      return React.createElement("input", {
+        placeholder,
+        defaultValue: term,
+        onChange: (e) => onSearch(e.target.value)
+      });
+    }
+  })
+);
+
 const sponsors = [
   { id: 17, name: "Acme" },
   { id: 23, name: "Globex" }
@@ -29,35 +46,20 @@ describe("FilterBar", () => {
     );
   });
 
-  it("renders the Report Filters card title", () => {
-    renderWithRedux(<FilterBar sponsors={[]} value={{}} onApply={() => {}} />);
-    expect(
-      screen.getByText("sponsor_reports_page.report_filters")
-    ).toBeInTheDocument();
-  });
-
-  it("renders the search box only when showSearch is set, and emits the search string", () => {
+  it("applies search live (does not wait for the Apply button)", () => {
     const onApply = jest.fn();
-    const { rerender } = renderWithRedux(
-      <FilterBar
-        sponsors={sponsors}
-        onApply={onApply}
-        value={{ search: "acme" }}
-      />
+    // Pass a stable `value` like the real consumers do — omitting it makes the
+    // default `{}` a fresh object each render and loops the value-resync effect.
+    renderWithRedux(
+      <FilterBar sponsors={sponsors} onApply={onApply} value={{}} showSearch />
     );
-    // default: no search box
-    expect(screen.queryByLabelText(/search/i)).not.toBeInTheDocument();
-
-    rerender(
-      <FilterBar
-        sponsors={sponsors}
-        onApply={onApply}
-        value={{ search: "acme" }}
-        showSearch
-      />
+    fireEvent.change(
+      screen.getByPlaceholderText("sponsor_reports_page.search"),
+      {
+        target: { value: "acme" }
+      }
     );
-    expect(screen.getByLabelText(/search/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /apply/i }));
+    // onSearch commits + applies immediately — no Apply click.
     expect(onApply).toHaveBeenCalledWith(
       expect.objectContaining({ search: "acme" })
     );

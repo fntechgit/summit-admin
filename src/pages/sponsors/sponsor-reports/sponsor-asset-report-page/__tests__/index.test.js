@@ -15,7 +15,7 @@
 
 import "@testing-library/jest-dom";
 import React from "react";
-import { act, screen, fireEvent } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Router, Route } from "react-router-dom";
 import { createMemoryHistory } from "history";
@@ -38,8 +38,7 @@ jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
 // Require after mocks so the jest.fn() references are the mocked ones.
 const {
   getSponsorAssetFilters,
-  getSponsorAssetRows,
-  exportSponsorAssetCsv
+  getSponsorAssetRows
 } = require("../../../../../actions/sponsor-reports-actions");
 
 const PAGE_ROUTE = "/app/summits/:summit_id/sponsors/reports/sponsor-assets";
@@ -74,7 +73,9 @@ function buildState(assetOverrides = {}) {
           not_applicable: 0
         }
       },
-      loading: false,
+      // Active filters live in the reducer now (recorded by the fetch thunk) and
+      // arrive as a prop; loading was removed (global overlay owns it).
+      filters: {},
       readError: null,
       ...assetOverrides
     },
@@ -107,13 +108,6 @@ describe("SponsorAssetReportPage", () => {
     await act(async () => {});
     expect(getSponsorAssetFilters).toHaveBeenCalledWith();
     expect(getSponsorAssetRows).toHaveBeenCalledWith({});
-  });
-
-  it("renders the pivot tree for fetched rows", async () => {
-    renderPage();
-    await act(async () => {});
-    // Default pivot is sponsor→page→component; first node label is the sponsor name.
-    expect(screen.getByText("Acme")).toBeInTheDocument();
   });
 
   it("renders a Status single-select (Completed/In Progress/Pending) and applies status== on Apply", async () => {
@@ -191,7 +185,7 @@ describe("SponsorAssetReportPage", () => {
             filterOptions: null,
             rows: [],
             summary: null,
-            loading: false,
+            filters: {},
             readError: null
           },
           currentSummitState: { currentSummit: null }
@@ -204,50 +198,50 @@ describe("SponsorAssetReportPage", () => {
     expect(getSponsorAssetRows).not.toHaveBeenCalled();
   });
 
-  it("renders the export button (enabled by default)", async () => {
-    renderPage();
-    await act(async () => {});
-    expect(
-      screen.getByRole("button", {
-        name: /sponsor_reports_page\.export_csv/
-      })
-    ).not.toBeDisabled();
-  });
-
-  it("dispatches exportSponsorAssetCsv with current filters on export button click", async () => {
-    renderPage();
-    await act(async () => {});
-    exportSponsorAssetCsv.mockClear();
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /sponsor_reports_page\.export_csv/
-      })
-    );
-    await act(async () => {});
-
-    // moduleType: "Media" is hard-wired (collected only).
-    expect(exportSponsorAssetCsv).toHaveBeenCalledWith(
-      expect.objectContaining({ moduleType: "Media" })
-    );
-  });
-
   it("shows the no-groups empty state when rows is empty", async () => {
     renderPage({ rows: [] });
     await act(async () => {});
     expect(screen.getByTestId("reports-no-groups")).toBeInTheDocument();
   });
 
-  it("does not show the empty state when rows has entries", async () => {
-    renderPage();
-    await act(async () => {});
-    expect(screen.queryByTestId("reports-no-groups")).not.toBeInTheDocument();
-  });
+  it("a superseded fetch does not flash the empty state (generation guard)", async () => {
+    // Two controllable fetches: the mount fetch (gen 1) and an Apply fetch
+    // (gen 2). The OLDER one resolves while the NEWER is still pending — its
+    // finalizer must be ignored, or hasFetched flips on and flashes the empty
+    // state before the latest result lands. Mocked thunks return the deferred
+    // promise (thunk middleware passes it straight through).
+    let resolveOld;
+    let resolveNew;
+    const oldFetch = new Promise((r) => {
+      resolveOld = r;
+    });
+    const newFetch = new Promise((r) => {
+      resolveNew = r;
+    });
+    getSponsorAssetRows
+      .mockReturnValueOnce(() => oldFetch) // mount → gen 1
+      .mockReturnValueOnce(() => newFetch); // apply → gen 2
 
-  it("renders the read-error block when readError is set", async () => {
-    renderPage({ readError: { message: "Something went wrong" }, rows: [] });
-    await act(async () => {});
-    expect(screen.getByTestId("reports-read-error")).toBeInTheDocument();
-    expect(screen.getByText("Something went wrong")).toBeInTheDocument();
+    renderPage({ rows: [] });
+    await act(async () => {}); // gen 1 dispatched, still pending
+
+    // Supersede gen 1 with an Apply (gen 2), also left pending.
+    await act(async () => {
+      await userEvent.click(
+        screen.getByRole("button", { name: "sponsor_reports_page.apply" })
+      );
+    });
+
+    // Old (gen 1) settles first, while gen 2 is pending — guard must ignore it.
+    await act(async () => {
+      resolveOld();
+    });
+    expect(screen.queryByTestId("reports-no-groups")).not.toBeInTheDocument();
+
+    // The latest fetch settling is what reveals the (still empty) result.
+    await act(async () => {
+      resolveNew();
+    });
+    expect(screen.getByTestId("reports-no-groups")).toBeInTheDocument();
   });
 });

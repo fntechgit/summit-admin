@@ -136,6 +136,32 @@ describe("sponsor-reports-actions", () => {
       expect(capturedParams.per_page).toBe(25);
     });
 
+    it("records pagination/sort/filter via the getRequest REQUEST payload (5th arg)", async () => {
+      const store = mockStore(MOCK_STATE);
+      const filters = { status: "Paid" };
+      store.dispatch(
+        getPurchaseDetailsReport(filters, {
+          page: 2,
+          perPage: 25,
+          order: "number",
+          orderDir: -1
+        })
+      );
+      await flushPromises();
+
+      // The reducer records these off the REQUEST action so pagination/sort/filter
+      // persist across SPA navigation. uicore getRequest forwards its 5th argument
+      // as the REQUEST action payload.
+      const stateArg = getRequest.mock.calls[0][4];
+      expect(stateArg).toStrictEqual({
+        currentPage: 2,
+        perPage: 25,
+        order: "number",
+        orderDir: -1,
+        filters
+      });
+    });
+
     it("503 on read dispatches PURCHASE_DETAILS_READ_ERROR (clears loading, inline body)", async () => {
       // Simulate getRequest invoking the error handler with a 503 (feature-off /
       // export-disabled) response — a generic read error replaces the body.
@@ -241,16 +267,37 @@ describe("sponsor-reports-actions", () => {
     const rowB = { id: 2, name: "Asset B" };
     const page1Summary = { total_collected: 5 };
 
-    it("accumulates all pages and dispatches a single atomic RECEIVE_SPONSOR_ASSET_ROWS", async () => {
-      // Override the default happy mock with a 2-page sequence distinguished by call order.
+    it("records the active filters on the REQUEST_SPONSOR_ASSET action", async () => {
+      const store = mockStore(MOCK_STATE);
+      const filters = { sponsorIds: [17] };
+      await store.dispatch(getSponsorAssetRows(filters));
+      await flushPromises();
+
+      // The thunk dispatches REQUEST directly (not via getRequest's 5th arg) so the
+      // reducer records the active filters for SPA-navigation persistence.
+      const req = store
+        .getActions()
+        .find((a) => a.type === REQUEST_SPONSOR_ASSET);
+      expect(req).toBeDefined();
+      expect(req.payload).toStrictEqual({ filters });
+    });
+
+    it("bulk-loads all pages (page 1, then the rest in parallel) into one atomic RECEIVE_SPONSOR_ASSET_ROWS", async () => {
+      // Three pages keyed by page number so the parallel rest-page fetch (2+3) is
+      // exercised, not just a single trailing page.
+      const rowC = { id: 3, name: "Asset C" };
       const capturedPages = [];
+      const capturedPerPage = [];
       getRequest.mockImplementation(
         (_requestAC, receiveActionCreator) => (params) => (dispatch) => {
           capturedPages.push(params.page);
-          const response =
-            capturedPages.length === 1
-              ? { data: [rowA], last_page: 2, summary: page1Summary }
-              : { data: [rowB], last_page: 2 };
+          capturedPerPage.push(params.per_page);
+          const byPage = {
+            1: { data: [rowA], last_page: 3, summary: page1Summary },
+            2: { data: [rowB], last_page: 3 },
+            3: { data: [rowC], last_page: 3 }
+          };
+          const response = byPage[params.page];
           if (typeof receiveActionCreator === "function") {
             dispatch(receiveActionCreator({ response }));
           }
@@ -264,21 +311,76 @@ describe("sponsor-reports-actions", () => {
 
       const actions = store.getActions();
 
-      // 1. getRequest was called for page 1, then page 2 (two total fetches).
-      expect(getRequest).toHaveBeenCalledTimes(2);
-      expect(capturedPages).toEqual([1, 2]);
+      // 1. All three pages fetched (page 1 first, 2+3 bulk-loaded); order-independent.
+      expect(getRequest).toHaveBeenCalledTimes(3);
+      expect([...capturedPages].sort((a, b) => a - b)).toEqual([1, 2, 3]);
 
-      // 2. Exactly one RECEIVE_SPONSOR_ASSET_ROWS was dispatched.
+      // 2. A reasonable page size is requested — not one oversized page.
+      expect(capturedPerPage).toEqual([100, 100, 100]);
+
+      // 3. Exactly one atomic RECEIVE_SPONSOR_ASSET_ROWS was dispatched.
       const rowsActions = actions.filter(
         (a) => a.type === RECEIVE_SPONSOR_ASSET_ROWS
       );
       expect(rowsActions).toHaveLength(1);
 
-      // 3. That action's payload carries the concatenated rows in order.
-      expect(rowsActions[0].payload.response.data).toEqual([rowA, rowB]);
+      // 4. Its payload carries the rows concatenated in page order (Promise.all
+      //    preserves array order regardless of completion order).
+      expect(rowsActions[0].payload.response.data).toEqual([rowA, rowB, rowC]);
 
-      // 4. The carried summary is page 1's summary (embedded in the first response).
+      // 5. The carried summary is page 1's summary (embedded in the first response).
       expect(rowsActions[0].payload.response.summary).toEqual(page1Summary);
+    });
+
+    it("a superseded invocation does not fire its queued rest-page requests", async () => {
+      // Call A's page-1 fetch is deferred and reports last_page: 2, so A has a
+      // queued rest page. Call B runs fully first (bumping the seq). When A's page 1
+      // finally resolves, A is stale — its queued page-2 request must NOT hit the
+      // network (a stale identical-page request could abort the fresh call's).
+      let resolveAPage1;
+      let callNum = 0;
+      const capturedPages = [];
+      getRequest.mockImplementation(
+        (_requestAC, receiveActionCreator) => (params) => (dispatch) => {
+          callNum += 1;
+          const isAPage1 = callNum === 1;
+          capturedPages.push(params.page);
+          if (isAPage1) {
+            // A's page 1: deferred, and advertises a second page.
+            const response = {
+              data: [{ id: "A1" }],
+              last_page: 2,
+              summary: null
+            };
+            return new Promise((resolve) => {
+              resolveAPage1 = () => resolve({ response });
+            });
+          }
+          const response = {
+            data: [{ id: `p${params.page}` }],
+            last_page: 1,
+            summary: null
+          };
+          if (typeof receiveActionCreator === "function") {
+            dispatch(receiveActionCreator({ response }));
+          }
+          return Promise.resolve({ response });
+        }
+      );
+
+      const store = mockStore(MOCK_STATE);
+      // Let A advance — while still current (seq=1) — to its held page-1 fetch, so
+      // it is superseded DURING the load (not at the token-stage bail).
+      const stalePromise = store.dispatch(getSponsorAssetRows({})); // A
+      await flushPromises();
+      await store.dispatch(getSponsorAssetRows({})); // B runs fully, supersedes A
+      resolveAPage1(); // A resumes — now stale
+      await stalePromise;
+      await flushPromises();
+
+      // A must never have issued its page-2 request; only page-1 calls happened
+      // (A's deferred page 1 + B's page 1). No captured page is 2.
+      expect(capturedPages).not.toContain(2);
     });
 
     it("drops a stale RECEIVE_SPONSOR_ASSET_ROWS when a newer call supersedes it (request token)", async () => {
@@ -638,6 +740,14 @@ describe("sponsor-reports-actions", () => {
       const types = store.getActions().map((a) => a.type);
       expect(types).toContain("REQUEST_PURCHASE_DETAILS_LINES");
       expect(types).toContain("RECEIVE_PURCHASE_DETAILS_LINES");
+
+      // 5th arg → REQUEST_PURCHASE_DETAILS_LINES payload the reducer records.
+      const stateArg = getRequest.mock.calls[0][4];
+      expect(stateArg).toStrictEqual({
+        currentPage: 1,
+        perPage: 50,
+        filters: { sponsorIds: [17] }
+      });
     });
   });
 

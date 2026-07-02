@@ -9,16 +9,17 @@ import {
 import { SET_CURRENT_SUMMIT } from "../../../actions/summit-actions";
 
 describe("sponsor-reports-purchase-details-lines-reducer", () => {
-  it("returns DEFAULT_STATE for an unknown action", () => {
-    expect(reducer(undefined, { type: "X" })).toEqual(DEFAULT_STATE);
-  });
-
-  it("REQUEST sets loading and clears readError", () => {
+  it("REQUEST records paging/filters and clears readError", () => {
     const s = reducer(
       { ...DEFAULT_STATE, readError: { message: "old" } },
-      { type: REQUEST_PURCHASE_DETAILS_LINES }
+      {
+        type: REQUEST_PURCHASE_DETAILS_LINES,
+        payload: { currentPage: 2, perPage: 50, filters: { search: "acme" } }
+      }
     );
-    expect(s.loading).toBe(true);
+    expect(s.currentPage).toBe(2);
+    expect(s.perPage).toBe(50);
+    expect(s.filters).toEqual({ search: "acme" });
     expect(s.readError).toBeNull();
   });
 
@@ -43,18 +44,16 @@ describe("sponsor-reports-purchase-details-lines-reducer", () => {
       lastPage: 3,
       perPage: 50,
       summary: { total_orders: 1 },
-      loading: false,
       readError: null
     });
   });
 
-  it("READ_ERROR stores the error payload and clears loading", () => {
+  it("READ_ERROR stores the error payload", () => {
     const s = reducer(
-      { ...DEFAULT_STATE, loading: true },
+      { ...DEFAULT_STATE },
       { type: PURCHASE_DETAILS_LINES_READ_ERROR, payload: { message: "boom" } }
     );
     expect(s.readError).toEqual({ message: "boom" });
-    expect(s.loading).toBe(false);
   });
 
   it("resets to DEFAULT_STATE when the summit changes", () => {

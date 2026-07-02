@@ -11,21 +11,15 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Box,
-  Button,
-  MenuItem,
-  Stack,
-  TextField,
-  Typography
-} from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import DownloadIcon from "@mui/icons-material/Download";
 import CollectionsOutlinedIcon from "@mui/icons-material/CollectionsOutlined";
+import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
 import { isPositiveIntId } from "../../../../utils/methods";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
@@ -56,7 +50,7 @@ const SponsorAssetReportPage = ({
   filterOptions,
   rows,
   summary,
-  loading,
+  filters,
   readError,
   // From mapDispatchToProps
   getSponsorAssetRows: fetchRows,
@@ -69,21 +63,44 @@ const SponsorAssetReportPage = ({
   // route context and always has a valid currentSummit when rendered normally.
   const validSummit = !!(currentSummit && isPositiveIntId(currentSummit.id));
 
+  // Pivot/groupBy is a transient UI-only selection (client-side pivot), not server
+  // state — it stays local. Active `filters` live in the reducer (recorded on the
+  // fetch thunk) and arrive as a prop; there is no local filters state.
   const [pivotKey, setPivotKey] = useState(PIVOTS[0].key);
-  const [filters, setFilters] = useState({});
+  // Loading is owned by the global overlay (state.baseState.loading), so the empty
+  // state ("no groups") can no longer key off a per-slice loading flag. Track a
+  // local hasFetched instead so the empty panel is suppressed until the first row
+  // fetch resolves (avoids a no-results flash before data arrives).
+  const [hasFetched, setHasFetched] = useState(false);
 
-  // Fetch sponsor filter options once on mount; summit is read from store inside
-  // the action. Guard on validSummit so no network call fires when currentSummit
-  // is temporarily null (race on initial load or in test scaffolding).
-  useEffect(() => {
-    if (validSummit) fetchFilters();
-  }, []); // mount-only — validSummit is stable once the summit context is set
+  // Fetch rows and flag hasFetched once the fetch settles. Tolerates a mocked
+  // thunk that returns a plain action object (Promise.resolve normalizes both).
+  // Generation-guard the finalizer: a superseded fetch (summit change, or a
+  // rapid apply/clear) must not flip hasFetched back on and flash the empty
+  // state before the newer fetch settles — only the latest fetch commits.
+  const fetchGenRef = useRef(0);
+  const fetchRowsTracked = (next) => {
+    fetchGenRef.current += 1;
+    const gen = fetchGenRef.current;
+    return Promise.resolve(fetchRows(next)).finally(() => {
+      if (gen === fetchGenRef.current) setHasFetched(true);
+    });
+  };
 
-  // Fetch the full flat row set when filters change; server applies
-  // module_type==Media. Pivot is purely client-side — no refetch on pivot change.
+  // On mount (and summit change) fetch filter options + the full flat row set;
+  // summit is read from store inside each action. The thunk records the active
+  // `filters` into the reducer, so onApply/onClear drive the fetch directly and
+  // there is no filters-watching effect (which would double-fetch). Guard on
+  // validSummit so no network call fires when currentSummit is temporarily null.
   useEffect(() => {
-    if (validSummit) fetchRows(filters);
-  }, [filters]); // validSummit omitted intentionally — stable once summit loads
+    if (validSummit) {
+      // Re-arm the empty-state guard for this summit so "no groups" can't flash
+      // between the reducer reset and the new summit's first row fetch settling.
+      setHasFetched(false);
+      fetchFilters();
+      fetchRowsTracked(filters);
+    }
+  }, [currentSummit?.id]); // filters/validSummit read at call time — handlers drive refetches
 
   const activePivot = PIVOTS.find((p) => p.key === pivotKey) || PIVOTS[0];
   // Memoized pivot tree — only rebuilds when rows/axes change, so switching the
@@ -95,8 +112,8 @@ const SponsorAssetReportPage = ({
     [rows, activePivot.axes]
   );
 
-  const onApply = (next) => setFilters(next);
-  const onClear = () => setFilters({});
+  const onApply = (next) => fetchRowsTracked(next);
+  const onClear = () => fetchRowsTracked({});
 
   const tiles = STATUS_TILE_KEYS.map((key) => ({
     key,
@@ -161,32 +178,31 @@ const SponsorAssetReportPage = ({
           onClear={onClear}
           showSearch
           extraControls={(draft, update) => (
-            <TextField
-              select
-              size="small"
-              sx={{ minWidth: 160 }}
-              label={T.translate("sponsor_reports_page.filter_asset_status")}
-              value={draft.status || ""}
-              onChange={(e) => update({ status: e.target.value || undefined })}
-            >
-              <MenuItem value="">
-                {T.translate("sponsor_reports_page.any")}
-              </MenuItem>
-              {STATUS_TILE_KEYS.map((key) => (
-                <MenuItem key={key} value={key}>
-                  {T.translate(`sponsor_reports_page.status_${key}`)}
-                </MenuItem>
-              ))}
-            </TextField>
+            <Box sx={{ width: 200 }}>
+              <MuiDropdown
+                id="sa-filter-status"
+                size="small"
+                label={T.translate("sponsor_reports_page.filter_asset_status")}
+                placeholder={T.translate("sponsor_reports_page.any")}
+                value={draft.status || ""}
+                options={[
+                  { value: "", label: T.translate("sponsor_reports_page.any") },
+                  ...STATUS_TILE_KEYS.map((key) => ({
+                    value: key,
+                    label: T.translate(`sponsor_reports_page.status_${key}`)
+                  }))
+                ]}
+                onChange={(e) =>
+                  update({ status: e.target.value || undefined })
+                }
+              />
+            </Box>
           )}
         />
       </Box>
       {summary && <SummaryPanel tiles={tiles} />}
 
-      {loading && (
-        <Typography>{T.translate("sponsor_reports_page.loading")}</Typography>
-      )}
-      {!loading && readError && (
+      {readError && (
         <Box
           data-testid="reports-read-error"
           sx={{ p: 4, textAlign: "center" }}
@@ -197,14 +213,14 @@ const SponsorAssetReportPage = ({
           </Typography>
         </Box>
       )}
-      {!loading && !readError && rows.length === 0 && (
+      {!readError && hasFetched && rows.length === 0 && (
         <Box data-testid="reports-no-groups" sx={{ p: 4, textAlign: "center" }}>
           <Typography variant="h6">
             {T.translate("sponsor_reports_page.no_results")}
           </Typography>
         </Box>
       )}
-      {!loading && !readError && rows.length > 0 && (
+      {!readError && rows.length > 0 && (
         <PivotTree
           nodes={tree}
           summitId={currentSummit.id}

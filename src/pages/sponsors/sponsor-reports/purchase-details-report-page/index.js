@@ -11,16 +11,19 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
+import moment from "moment-timezone";
 import T from "i18n-react/dist/i18n-react";
-import { Alert, Box, Button, MenuItem, TextField } from "@mui/material";
+import { Alert, Box, Button } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import DownloadIcon from "@mui/icons-material/Download";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
+import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
 import FilterBar from "../../../../components/sponsors/reports/FilterBar";
@@ -36,25 +39,56 @@ import {
   exportPurchaseDetailsCsv,
   exportPurchaseDetailsLinesCsv
 } from "../../../../actions/sponsor-reports-actions";
-import {
-  DEFAULT_CURRENT_PAGE,
-  DEFAULT_PER_PAGE,
-  FIFTY_PER_PAGE
-} from "../../../../utils/constants";
+import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
+
+// Report date filters are date-only "YYYY-MM-DD" strings that the query builder
+// (expandDates) expands into UTC ISO datetimes. Drive the uicore date picker in
+// UTC so the on-screen date equals the stored string with no off-by-one, and
+// convert the picker's moment back to "YYYY-MM-DD" at the update boundary so the
+// backend query contract is untouched.
+const REPORT_DATE_TZ = "UTC";
+const REPORT_DATE_FORMAT = "YYYY-MM-DD";
+// The uicore picker emits moment(0) (epoch) on a CLEAR, not null — treat that
+// sentinel as "no date" so clearing removes the filter instead of sending
+// date>=1970-01-01. This matches the house filter convention (`.unix() || null`
+// in date-interval-filter.js), which likewise coalesces epoch-0 to "no date";
+// the harmless side effect (a literal 1970-01-01 pick reads as cleared) is
+// irrelevant for an event purchase-date filter.
+const toReportDate = (value) =>
+  value && moment.isMoment(value) && value.valueOf() !== 0
+    ? value.format(REPORT_DATE_FORMAT)
+    : undefined;
+const toPickerValue = (ymd) =>
+  ymd ? moment.tz(ymd, REPORT_DATE_FORMAT, REPORT_DATE_TZ) : "";
+
+// Shallow-stable equality for the shared filter object. Used on view switch to
+// decide whether the entering view can keep its own page (filters unchanged) or
+// must snap back to page 1 (the carried-over filters just changed).
+const sameFilters = (a, b) =>
+  JSON.stringify(a ?? {}) === JSON.stringify(b ?? {});
 
 const PurchaseDetailsReportPage = ({
-  // From mapStateToProps
+  // Orders slice (spread via mapStateToProps) — pagination/sort/filter now live
+  // in the reducer (recorded on REQUEST) so they survive SPA navigation.
   data,
   summary,
   filterOptions,
   total,
+  currentPage,
+  perPage,
+  order,
+  orderDir,
+  filters,
   readError,
   validationError,
-  // Lines slice (per-line manifest view)
+  // Lines slice (per-line manifest view) — its own pagination/filter.
   linesData,
   linesSummary,
   linesTotal,
   linesReadError,
+  linesCurrentPage,
+  linesPerPage,
+  linesFilters,
   // From mapDispatchToProps (object form — bound action creators)
   getPurchaseDetailsReport: fetchReport,
   getPurchaseDetailsLinesReport: fetchLinesReport,
@@ -65,6 +99,11 @@ const PurchaseDetailsReportPage = ({
 }) => {
   const print = usePrint();
   const { errorMessage } = useSnackbarMessage();
+
+  // "orders" | "lines" — a transient UI toggle (NOT server state), so it stays
+  // local. Everything else is sourced from the reducer slices above.
+  const [view, setView] = useState("orders");
+  const prevViewRef = useRef(view);
 
   // Show a global snackbar toast when the backend returns a 412 validation error,
   // then clear the redux slice so the toast fires only once per error.
@@ -78,37 +117,32 @@ const PurchaseDetailsReportPage = ({
     }
   }, [validationError]);
 
-  // Local pagination/sort state. MuiTable dir = 1 (asc) | -1 (desc).
-  const [filters, setFilters] = useState({});
-  const [currentPage, setCurrentPage] = useState(DEFAULT_CURRENT_PAGE);
-  const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
-  const [order, setOrder] = useState(null);
-  const [orderDir, setOrderDir] = useState(1);
-  const [view, setView] = useState("orders");
-  const [linesPage, setLinesPage] = useState(DEFAULT_CURRENT_PAGE);
-  const [linesPerPage, setLinesPerPage] = useState(FIFTY_PER_PAGE);
-
-  // Fetch filters once on mount. Summit is read from store inside the action.
-  // Empty deps is intentional: fetchFilters is stable from connect() and reads
-  // summit from Redux store inside the thunk.
+  // Fetch filter options once on mount. Summit is read from store inside the
+  // thunk; empty deps is intentional (fetchFilters is stable from connect()).
   useEffect(() => {
     fetchFilters();
   }, []); // mount-only
 
-  // Orders view: fetch the order-grain report when any primitive input changes.
-  // The thunk builds the API query (date expansion, filter[] assembly, sort) internally.
+  // Fetch the active view. Runs on mount (initial load) and on every view switch.
+  // A single FilterBar is shared across both views, so the filters applied in the
+  // view we're leaving are carried into the view we're entering; the entering view
+  // keeps its own page when those filters are unchanged, else snaps back to page 1.
   useEffect(() => {
-    if (view === "orders")
-      fetchReport(filters, { page: currentPage, perPage, order, orderDir });
-  }, [view, filters, currentPage, perPage, order, orderDir]);
-
-  // Line Items view: fetch the per-line feed when its inputs change. NO order param —
-  // CustomOrderingFilter would replace the default sponsor-name ordering and scatter
-  // the sponsor groups, so the manifest relies on the backend default ordering.
-  useEffect(() => {
-    if (view === "lines")
-      fetchLinesReport(filters, { page: linesPage, perPage: linesPerPage });
-  }, [view, filters, linesPage, linesPerPage]);
+    const prevView = prevViewRef.current;
+    prevViewRef.current = view;
+    const carried = prevView === "orders" ? filters : linesFilters;
+    if (view === "orders") {
+      const page = sameFilters(carried, filters)
+        ? currentPage
+        : DEFAULT_CURRENT_PAGE;
+      fetchReport(carried, { page, perPage, order, orderDir });
+    } else {
+      const page = sameFilters(carried, linesFilters)
+        ? linesCurrentPage
+        : DEFAULT_CURRENT_PAGE;
+      fetchLinesReport(carried, { page, perPage: linesPerPage });
+    }
+  }, [view]);
 
   // ── Summary tiles ───────────────────────────────────────────────────────────
   // D9: Total Refunded tile renders ONLY when total_refunded != null — a defensive
@@ -154,120 +188,153 @@ const PurchaseDetailsReportPage = ({
     : [];
 
   // ── FilterBar handlers ──────────────────────────────────────────────────────
+  // The active view's slice filters ARE the FilterBar value; each handler reads
+  // the current slice values from props and calls the thunk with the one changed
+  // axis (the thunk re-dispatches REQUEST, which re-records the slice state).
   // Applying/clearing a filter changes the result set → snap back to page 1.
   const handleApply = (next) => {
-    setFilters(next);
-    setCurrentPage(DEFAULT_CURRENT_PAGE);
-    setLinesPage(DEFAULT_CURRENT_PAGE);
+    if (view === "orders") {
+      fetchReport(next, {
+        page: DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir
+      });
+    } else {
+      fetchLinesReport(next, {
+        page: DEFAULT_CURRENT_PAGE,
+        perPage: linesPerPage
+      });
+    }
   };
-  const handleClear = () => {
-    setFilters({});
-    setCurrentPage(DEFAULT_CURRENT_PAGE);
-    setLinesPage(DEFAULT_CURRENT_PAGE);
-  };
+  const handleClear = () => handleApply({});
 
-  // ── Sort/pagination handlers ─────────────────────────────────────────────────
+  // ── Orders sort/pagination handlers ──────────────────────────────────────────
   const handleSort = (columnKey, dir) => {
-    setOrder(columnKey);
-    setOrderDir(dir);
-    setCurrentPage(DEFAULT_CURRENT_PAGE);
+    fetchReport(filters, {
+      page: DEFAULT_CURRENT_PAGE,
+      perPage,
+      order: columnKey,
+      orderDir: dir
+    });
   };
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    fetchReport(filters, { page, perPage, order, orderDir });
   };
   const handlePerPageChange = (newPerPage) => {
-    setPerPage(newPerPage);
-    setCurrentPage(DEFAULT_CURRENT_PAGE);
-  };
-  const handleLinesPageChange = (page) => setLinesPage(page);
-  const handleLinesPerPageChange = (newPerPage) => {
-    setLinesPerPage(newPerPage);
-    setLinesPage(DEFAULT_CURRENT_PAGE);
+    fetchReport(filters, {
+      page: DEFAULT_CURRENT_PAGE,
+      perPage: newPerPage,
+      order,
+      orderDir
+    });
   };
 
-  // ── Extra filter controls (status / type / date range) ──────────────────────
-  const statusOptions = filterOptions?.statuses || [];
+  // ── Lines pagination handlers (no sort — manifest keeps backend ordering) ────
+  const handleLinesPageChange = (page) => {
+    fetchLinesReport(linesFilters, { page, perPage: linesPerPage });
+  };
+  const handleLinesPerPageChange = (newPerPage) => {
+    fetchLinesReport(linesFilters, {
+      page: DEFAULT_CURRENT_PAGE,
+      perPage: newPerPage
+    });
+  };
+
+  // ── Extra filter controls (status / form / payment / date range) ─────────────
+  const anyLabel = T.translate("sponsor_reports_page.any");
+  const statusSelectOptions = [
+    { value: "", label: anyLabel },
+    ...(filterOptions?.statuses || []).map((s) => ({ value: s, label: s }))
+  ];
   // Drop forms with no display name — they render as unpickable blank rows.
-  const formOptions = (filterOptions?.forms || []).filter((f) =>
-    f.name?.trim()
-  );
-  const paymentMethodOptions = filterOptions?.payment_methods || [];
+  const formSelectOptions = [
+    { value: "", label: anyLabel },
+    ...(filterOptions?.forms || [])
+      .filter((f) => f.name?.trim())
+      .map((f) => ({ value: f.code, label: f.name }))
+  ];
+  const paymentMethodSelectOptions = [
+    { value: "", label: anyLabel },
+    ...(filterOptions?.payment_methods || []).map((pm) => ({
+      value: pm,
+      label: pm
+    }))
+  ];
 
   const extraControls = (draft, update) => (
     <>
-      <TextField
-        select
-        size="small"
-        sx={{ minWidth: 160 }}
-        label={T.translate("sponsor_reports_page.filter_status")}
-        value={draft.status || ""}
-        onChange={(e) => update({ status: e.target.value || undefined })}
-      >
-        <MenuItem value="">{T.translate("sponsor_reports_page.any")}</MenuItem>
-        {statusOptions.map((s) => (
-          <MenuItem key={s} value={s}>
-            {s}
-          </MenuItem>
-        ))}
-      </TextField>
-      <TextField
-        select
-        size="small"
-        sx={{ minWidth: 160 }}
-        label={T.translate("sponsor_reports_page.filter_form")}
-        value={draft.formCode || ""}
-        onChange={(e) => update({ formCode: e.target.value || undefined })}
-      >
-        <MenuItem value="">{T.translate("sponsor_reports_page.any")}</MenuItem>
-        {formOptions.map((f) => (
-          <MenuItem key={f.code} value={f.code}>
-            {f.name}
-          </MenuItem>
-        ))}
-      </TextField>
+      <Box sx={{ width: 200 }}>
+        <MuiDropdown
+          id="pd-filter-status"
+          size="small"
+          label={T.translate("sponsor_reports_page.filter_status")}
+          placeholder={anyLabel}
+          value={draft.status || ""}
+          options={statusSelectOptions}
+          onChange={(e) => update({ status: e.target.value || undefined })}
+        />
+      </Box>
+      <Box sx={{ width: 200 }}>
+        <MuiDropdown
+          id="pd-filter-form"
+          size="small"
+          label={T.translate("sponsor_reports_page.filter_form")}
+          placeholder={anyLabel}
+          value={draft.formCode || ""}
+          options={formSelectOptions}
+          onChange={(e) => update({ formCode: e.target.value || undefined })}
+        />
+      </Box>
       {/* Payment Method is an order-level attribute; only the orders endpoint
           filters on it (the lines filter set omits payment_method), so surface
           it in the orders view only — mirrors search being view-specific. */}
       {view === "orders" && (
-        <TextField
-          select
-          size="small"
-          sx={{ minWidth: 160 }}
-          label={T.translate("sponsor_reports_page.filter_payment_method")}
-          value={draft.paymentMethod || ""}
-          onChange={(e) =>
-            update({ paymentMethod: e.target.value || undefined })
-          }
-        >
-          <MenuItem value="">
-            {T.translate("sponsor_reports_page.any")}
-          </MenuItem>
-          {paymentMethodOptions.map((pm) => (
-            <MenuItem key={pm} value={pm}>
-              {pm}
-            </MenuItem>
-          ))}
-        </TextField>
+        <Box sx={{ width: 200 }}>
+          <MuiDropdown
+            id="pd-filter-payment-method"
+            size="small"
+            label={T.translate("sponsor_reports_page.filter_payment_method")}
+            placeholder={anyLabel}
+            value={draft.paymentMethod || ""}
+            options={paymentMethodSelectOptions}
+            onChange={(e) =>
+              update({ paymentMethod: e.target.value || undefined })
+            }
+          />
+        </Box>
       )}
-      {/* Date inputs emit ISO YYYY-MM-DD — expanded to ISO datetimes in buildQuery */}
-      <TextField
-        type="date"
-        size="small"
-        label={T.translate("sponsor_reports_page.filter_date_from")}
-        InputLabelProps={{ shrink: true }}
-        value={draft.dateFrom || ""}
-        onChange={(e) => update({ dateFrom: e.target.value || undefined })}
-      />
-      <TextField
-        type="date"
-        size="small"
-        label={T.translate("sponsor_reports_page.filter_date_to")}
-        InputLabelProps={{ shrink: true }}
-        value={draft.dateTo || ""}
-        onChange={(e) => update({ dateTo: e.target.value || undefined })}
-      />
+      {/* Date pickers keep draft.dateFrom/dateTo as "YYYY-MM-DD"; buildQuery
+          expands them to UTC ISO datetimes. Convert the picker's moment back to
+          "YYYY-MM-DD" at the update boundary so the query contract is unchanged. */}
+      <Box sx={{ width: 160 }}>
+        <DateTimePicker
+          id="pd-filter-date-from"
+          format={{ date: REPORT_DATE_FORMAT, time: false }}
+          timezone={REPORT_DATE_TZ}
+          inputProps={{
+            placeholder: T.translate("sponsor_reports_page.filter_date_from")
+          }}
+          value={toPickerValue(draft.dateFrom)}
+          onChange={(ev) => update({ dateFrom: toReportDate(ev.target.value) })}
+        />
+      </Box>
+      <Box sx={{ width: 160 }}>
+        <DateTimePicker
+          id="pd-filter-date-to"
+          format={{ date: REPORT_DATE_FORMAT, time: false }}
+          timezone={REPORT_DATE_TZ}
+          inputProps={{
+            placeholder: T.translate("sponsor_reports_page.filter_date_to")
+          }}
+          value={toPickerValue(draft.dateTo)}
+          onChange={(ev) => update({ dateTo: toReportDate(ev.target.value) })}
+        />
+      </Box>
     </>
   );
+
+  const activeFilters = view === "orders" ? filters : linesFilters;
 
   return (
     <ReportShell
@@ -287,7 +354,7 @@ const PurchaseDetailsReportPage = ({
             onClick={() =>
               view === "orders"
                 ? exportOrdersCsv(filters, order, orderDir)
-                : exportLinesCsv(filters)
+                : exportLinesCsv(linesFilters)
             }
           >
             {T.translate("sponsor_reports_page.export_csv")}
@@ -298,7 +365,7 @@ const PurchaseDetailsReportPage = ({
         <Box data-testid="reports-filter-bar">
           <FilterBar
             sponsors={filterOptions?.sponsors || []}
-            value={filters}
+            value={activeFilters}
             onApply={handleApply}
             onClear={handleClear}
             extraControls={extraControls}
@@ -328,7 +395,7 @@ const PurchaseDetailsReportPage = ({
         <LinesManifestView
           rows={linesData}
           total={linesTotal}
-          currentPage={linesPage}
+          currentPage={linesCurrentPage}
           perPage={linesPerPage}
           onPageChange={handleLinesPageChange}
           onPerPageChange={handleLinesPerPageChange}
@@ -346,7 +413,10 @@ const mapStateToProps = ({
   linesData: sponsorReportsPurchaseDetailsLinesState.data,
   linesSummary: sponsorReportsPurchaseDetailsLinesState.summary,
   linesTotal: sponsorReportsPurchaseDetailsLinesState.total,
-  linesReadError: sponsorReportsPurchaseDetailsLinesState.readError
+  linesReadError: sponsorReportsPurchaseDetailsLinesState.readError,
+  linesCurrentPage: sponsorReportsPurchaseDetailsLinesState.currentPage,
+  linesPerPage: sponsorReportsPurchaseDetailsLinesState.perPage,
+  linesFilters: sponsorReportsPurchaseDetailsLinesState.filters
 });
 
 const mapDispatchToProps = {

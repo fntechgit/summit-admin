@@ -7,13 +7,16 @@ import {
   stopLoading,
   authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
+import pLimit from "p-limit";
 import {
   getAccessTokenSafely,
   isPositiveIntId,
   escapeFilterValue
 } from "../utils/methods";
 import {
-  ALL_ROWS_PER_PAGE,
+  DEFAULT_CURRENT_PAGE,
+  HUNDRED_PER_PAGE,
+  TEN,
   ERROR_CODE_401,
   ERROR_CODE_404,
   ERROR_CODE_412
@@ -225,8 +228,11 @@ export const getPurchaseDetailsReport =
     if (!currentSummit?.id) return Promise.resolve();
     const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
+    const { page, perPage, order, orderDir } = pagination;
     const query = buildPurchaseQuery(filters, pagination);
     const params = { access_token: accessToken, ...query };
+    // 5th arg → REQUEST_PURCHASE_DETAILS payload: the reducer records these so
+    // pagination/sort/filter survive SPA navigation (cf. getTicketTypes).
     return getRequest(
       createAction(REQUEST_PURCHASE_DETAILS),
       createAction(RECEIVE_PURCHASE_DETAILS),
@@ -234,7 +240,8 @@ export const getPurchaseDetailsReport =
       reportReadErrorHandler({
         onReadError: createAction(PURCHASE_DETAILS_READ_ERROR),
         onValidationError: createAction(PURCHASE_DETAILS_VALIDATION_ERROR)
-      })
+      }),
+      { currentPage: page, perPage, order, orderDir, filters }
     )(params)(dispatch)
       .catch(() => {})
       .finally(() => dispatch(stopLoading()));
@@ -255,8 +262,11 @@ export const getPurchaseDetailsLinesReport =
     if (!currentSummit?.id) return Promise.resolve();
     const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
+    const { page, perPage } = pagination;
     const query = buildPurchaseLinesQuery(filters, pagination);
     const params = { access_token: accessToken, ...query };
+    // 5th arg → REQUEST_PURCHASE_DETAILS_LINES payload: the reducer records these
+    // so pagination/filter survive SPA navigation (cf. getTicketTypes).
     return getRequest(
       createAction(REQUEST_PURCHASE_DETAILS_LINES),
       createAction(RECEIVE_PURCHASE_DETAILS_LINES),
@@ -266,7 +276,8 @@ export const getPurchaseDetailsLinesReport =
         // input, so a 412 falls through to the read-error body, which still
         // clears loading rather than silently no-op.
         onReadError: createAction(PURCHASE_DETAILS_LINES_READ_ERROR)
-      })
+      }),
+      { currentPage: page, perPage, filters }
     )(params)(dispatch)
       .catch(() => {})
       .finally(() => dispatch(stopLoading()));
@@ -297,7 +308,7 @@ export const getSponsorAssetFilters = () => async (dispatch, getState) => {
   const accessToken = await getAccessTokenSafely();
   dispatch(startLoading());
   return getRequest(
-    null, // loading is owned by getSponsorAssetRows; filters must not toggle it
+    null, // no request action for the filters fetch (it records no report state)
     createAction(RECEIVE_SPONSOR_ASSET_FILTERS),
     `${base(currentSummit.id)}/sponsor-assets/filters`,
     reportReadErrorHandler({
@@ -310,10 +321,12 @@ export const getSponsorAssetFilters = () => async (dispatch, getState) => {
 
 // Fetch the WHOLE filtered collected-asset set for the current summit so the FE can pivot
 // client-side. The server applies filters + module_type==Media and computes the embedded
-// summary on the unpaginated set. One request at the raised cap covers normal summits; if
-// last_page > 1 we page the remainder (correctness safety net — no cap is a completeness
-// guarantee). Loading is atomic: REQUEST_SPONSOR_ASSET → (accumulate all pages) → ONE
-// RECEIVE_SPONSOR_ASSET_ROWS, so the tree never renders a partial set.
+// summary on the unpaginated set. Page 1 (at a normal page size) yields last_page + the
+// summary; the remaining pages bulk-load with a bounded-concurrency pool (pLimit + Promise.all,
+// pattern: ticket-actions.js) rather than one oversized page. Rows commit atomically:
+// REQUEST_SPONSOR_ASSET → (accumulate all pages) → ONE RECEIVE_SPONSOR_ASSET_ROWS, so the tree
+// never renders a partial set. The global overlay (state.baseState.loading) is bracketed via
+// guarded start/stopLoading so a superseded invocation cannot toggle it.
 export const getSponsorAssetRows =
   (filters = {}) =>
   async (dispatch, getState) => {
@@ -337,10 +350,13 @@ export const getSponsorAssetRows =
     // Superseded before the token resolved → do not fire any request. uicore getRequest
     // aborts the in-flight same-URL request, so a stale call would cancel the current load.
     if (mySeq !== sponsorAssetRowsSeq) return Promise.resolve();
-    guardedDispatch(createAction(REQUEST_SPONSOR_ASSET)({})); // loading:true, readError:null
+    // Guarded so only the still-current invocation drives the global overlay and
+    // records the active filters (REQUEST payload) for SPA-navigation persistence.
+    guardedDispatch(startLoading());
+    guardedDispatch(createAction(REQUEST_SPONSOR_ASSET)({ filters }));
     const baseQuery = buildReportQuery({ ...filters, moduleType: "Media" });
     const url = `${base(currentSummit.id)}/sponsor-assets`;
-    // null request action (loading already set); throwaway receive — we read {response}.
+    // null request action (REQUEST already dispatched above); throwaway receive — we read {response}.
     // guardedDispatch is passed so getRequest's internal error handler is also seq-guarded.
     const fetchPage = (page) =>
       getRequest(
@@ -353,24 +369,51 @@ export const getSponsorAssetRows =
       )({
         access_token: accessToken,
         ...baseQuery,
-        per_page: ALL_ROWS_PER_PAGE,
+        per_page: HUNDRED_PER_PAGE,
         page
       })(guardedDispatch);
     try {
+      // Page 1 first to learn last_page, then bulk-load the remainder in parallel
+      // with a concurrency cap. getRequest's in-flight abort key includes `page`
+      // (only access_token is stripped), so these parallel same-URL requests do
+      // NOT cancel each other; a superseded load is still aborted by the fresh
+      // invocation's identical-page requests, and guardedDispatch blocks any stale
+      // RECEIVE. Promise.all preserves order, so pages concat in sequence.
       const { response } = await fetchPage(1);
-      let allRows = response.data;
-      for (let p = 2; p <= (response.last_page || 1); p += 1) {
-        // Superseded mid-load → stop firing requests. Same abort rationale as above.
-        if (mySeq !== sponsorAssetRowsSeq) return Promise.resolve();
-        // eslint-disable-next-line no-await-in-loop
-        const next = await fetchPage(p);
-        allRows = allRows.concat(next.response.data);
-      }
+      const lastPage = response.last_page || 1;
+      const limit = pLimit(TEN);
+      // Pages 2..last_page (page 1 already fetched). Build 1..last_page with the
+      // house idiom (i + DEFAULT_CURRENT_PAGE) and drop the first.
+      const restPages = Array.from(
+        { length: lastPage },
+        (_, i) => i + DEFAULT_CURRENT_PAGE
+      ).slice(DEFAULT_CURRENT_PAGE);
+      // Re-check the seq INSIDE the pool callback: a superseded invocation's still
+      // queued jobs must not fire — an identical-page request from a stale job would
+      // abort the fresh invocation's in-flight same-page request (getRequest aborts
+      // by a page-bearing key). The empty placeholder is never consumed: the
+      // post-load guard below returns before the reduce for a stale invocation.
+      const rest = await Promise.all(
+        restPages.map((p) =>
+          limit(() =>
+            mySeq === sponsorAssetRowsSeq
+              ? fetchPage(p)
+              : Promise.resolve({ response: { data: [] } })
+          )
+        )
+      );
+      // Superseded mid-load → skip the commit; guardedDispatch would drop it anyway.
+      if (mySeq !== sponsorAssetRowsSeq) return Promise.resolve();
+      const allRows = rest.reduce(
+        (acc, r) => acc.concat(r.response.data),
+        response.data
+      );
       guardedDispatch(
         createAction(RECEIVE_SPONSOR_ASSET_ROWS)({
           response: { ...response, data: allRows }
         })
       );
+      guardedDispatch(stopLoading());
     } catch (e) {
       // HTTP failures are already handled by reportReadErrorHandler (it dispatched
       // SPONSOR_ASSET_READ_ERROR for 403/404/…, or delegated 401 to guarded reauth
@@ -383,6 +426,11 @@ export const getSponsorAssetRows =
           createAction(SPONSOR_ASSET_READ_ERROR)({ message: e.message })
         );
       }
+      // Clear the global overlay (guarded: a superseded call must not stop the
+      // overlay while the fresh invocation is still loading). HTTP-error branches
+      // (403/404/…) route through reportReadErrorHandler above; 401 delegates to
+      // uicore's authErrorHandler which also stops loading.
+      guardedDispatch(stopLoading());
     }
     return Promise.resolve();
   };

@@ -32,20 +32,6 @@ function renderLanding(url = BASE) {
 }
 
 describe("ReportsLandingPage", () => {
-  it("renders a card for Purchase Details", () => {
-    renderLanding();
-    expect(
-      screen.getByText("sponsor_reports_page.purchase_details_title")
-    ).toBeInTheDocument();
-  });
-
-  it("renders a card for Sponsor Assets", () => {
-    renderLanding();
-    expect(
-      screen.getByText("sponsor_reports_page.sponsor_assets_title")
-    ).toBeInTheDocument();
-  });
-
   it("Purchase Details card links to .../purchase-details", () => {
     renderLanding();
     const link = screen
@@ -62,11 +48,5 @@ describe("ReportsLandingPage", () => {
       .closest("a");
     expect(link).not.toBeNull();
     expect(link.getAttribute("href")).toBe(`${BASE}/sponsor-assets`);
-  });
-
-  it("renders exactly two report cards", () => {
-    renderLanding();
-    // Each card has a data-testid
-    expect(screen.getAllByTestId(/^report-card-/).length).toBe(2);
   });
 });

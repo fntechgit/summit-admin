@@ -1,26 +1,23 @@
 import React from "react";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { Box } from "@mui/material";
 import T from "i18n-react/dist/i18n-react";
+import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
 import { PIVOTS } from "./pivot-defs";
 
 const PivotSelector = ({ value, onChange }) => (
-  <FormControl size="small" sx={{ minWidth: 280 }}>
-    <InputLabel id="pivot-selector-label">
-      {T.translate("sponsor_reports_page.group_by")}
-    </InputLabel>
-    <Select
-      labelId="pivot-selector-label"
+  <Box sx={{ width: 280 }}>
+    <MuiDropdown
+      id="pivot-selector"
+      size="small"
       label={T.translate("sponsor_reports_page.group_by")}
       value={value}
+      options={PIVOTS.map((p) => ({
+        value: p.key,
+        label: T.translate(p.labelKey)
+      }))}
       onChange={(e) => onChange(e.target.value)}
-    >
-      {PIVOTS.map((p) => (
-        <MenuItem key={p.key} value={p.key}>
-          {T.translate(p.labelKey)}
-        </MenuItem>
-      ))}
-    </Select>
-  </FormControl>
+    />
+  </Box>
 );
 
 export default PivotSelector;

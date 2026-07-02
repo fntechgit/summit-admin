@@ -32,7 +32,6 @@ import T from "i18n-react/dist/i18n-react";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import StatusPill from "./StatusPill";
 import { formatCheckoutTime } from "./OrdersTable";
-import { bucketLinesBySponsor } from "./manifest-grouping";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_PER_PAGE,
@@ -59,6 +58,31 @@ const Destination = ({ name }) =>
       {T.translate("sponsor_reports_page.destination_booth_fallback")}
     </Typography>
   );
+
+// Buckets flat per-line rows into sponsor groups, preserving first-seen order.
+//
+// Do NOT rely on row adjacency: the backend orders lines by sponsor NAME
+// (purchase__sponsor__name) and dim_sponsor.name is not unique, so two distinct
+// sponsor ids sharing a name can interleave by date. Bucketing by sponsor.id
+// keeps each sponsor's lines in a single group regardless of row order.
+const bucketLinesBySponsor = (rows = []) => {
+  const groups = [];
+  const indexByKey = new Map();
+  rows.forEach((row) => {
+    const id = row.sponsor?.id ?? null;
+    const key = id === null ? "__null__" : id;
+    if (!indexByKey.has(key)) {
+      indexByKey.set(key, groups.length);
+      groups.push({
+        sponsorId: id,
+        sponsorName: row.sponsor?.name ?? "",
+        lines: []
+      });
+    }
+    groups[indexByKey.get(key)].lines.push(row);
+  });
+  return groups;
+};
 
 const HEADERS = [
   { key: "col_order" },

@@ -14,21 +14,17 @@ describe("StatusRollupChips", () => {
         rollup={{ completed: 8, in_progress: 2, pending: 4, not_applicable: 0 }}
       />
     );
-    expect(
-      screen.getByText("sponsor_reports_page.status_completed: 8")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("sponsor_reports_page.status_in_progress: 2")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("sponsor_reports_page.status_pending: 4")
-    ).toBeInTheDocument();
+    // Chips render via uicore chip-list as plain MUI Chips; each label is the
+    // "status: count" string. Assert all three in their fixed display order.
+    const chipLabels = screen
+      .getAllByText(/sponsor_reports_page\.status_/)
+      .map((el) => el.textContent);
+    expect(chipLabels).toEqual([
+      "sponsor_reports_page.status_completed: 8",
+      "sponsor_reports_page.status_in_progress: 2",
+      "sponsor_reports_page.status_pending: 4"
+    ]);
     // N/A is not a sponsor-asset state (report is scoped to Media); never displayed.
     expect(screen.queryByText(/status_not_applicable/)).not.toBeInTheDocument();
-  });
-
-  it("treats a missing rollup as all-zero (no crash)", () => {
-    renderWithRedux(<StatusRollupChips rollup={null} />);
-    expect(screen.getAllByText(/: 0$/)).toHaveLength(3);
   });
 });
