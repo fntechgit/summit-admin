@@ -1291,7 +1291,7 @@
     "name": "Name",
     "class": "Class",
     "seed_event_types": "Seed Types",
-    "remove_warning": "Are you sure you want to delete activity type "
+    "remove_warning": "Please verify you want to delete activity type "
   },
   "edit_event_type": {
     "event_type": "Activity Type",

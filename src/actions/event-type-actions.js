@@ -21,10 +21,11 @@ import {
   startLoading,
   showMessage,
   showSuccessMessage,
-  authErrorHandler
+  authErrorHandler,
+  escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
-import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
+import { DEFAULT_PER_PAGE, DEFAULT_CURRENT_PAGE } from "../utils/constants";
 
 export const REQUEST_EVENT_TYPES = "REQUEST_EVENT_TYPES";
 export const RECEIVE_EVENT_TYPES = "RECEIVE_EVENT_TYPES";
@@ -36,28 +37,52 @@ export const EVENT_TYPE_ADDED = "EVENT_TYPE_ADDED";
 export const EVENT_TYPE_DELETED = "EVENT_TYPE_DELETED";
 export const EVENT_TYPES_SEEDED = "EVENT_TYPES_SEEDED";
 
-export const getEventTypes = () => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
-  const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
+export const getEventTypes =
+  (
+    term = null,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = 1
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const filter = [];
 
-  dispatch(startLoading());
+    dispatch(startLoading());
 
-  const params = {
-    access_token: accessToken,
-    per_page: 100,
-    page: 1
+    const params = {
+      access_token: accessToken,
+      page,
+      per_page: perPage
+    };
+
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(`name=@${escapedTerm}`);
+    }
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      params.order = `${orderDirSign}${order}`;
+    }
+
+    return getRequest(
+      createAction(REQUEST_EVENT_TYPES),
+      createAction(RECEIVE_EVENT_TYPES),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/event-types`,
+      authErrorHandler,
+      { order, orderDir, term, perPage }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
   };
-
-  return getRequest(
-    createAction(REQUEST_EVENT_TYPES),
-    createAction(RECEIVE_EVENT_TYPES),
-    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/event-types`,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
-};
 
 export const getEventType = (eventTypeId) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -98,7 +123,7 @@ export const saveEventType = (entity) => async (dispatch, getState) => {
   const params = { access_token: accessToken };
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_EVENT_TYPE),
       createAction(EVENT_TYPE_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/event-types/${entity.id}`,
@@ -109,31 +134,26 @@ export const saveEventType = (entity) => async (dispatch, getState) => {
       dispatch(
         showSuccessMessage(T.translate("edit_event_type.event_type_saved"))
       );
-    });
-  } else {
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_event_type.event_type_created"),
-      type: "success"
-    };
-
-    postRequest(
-      createAction(UPDATE_EVENT_TYPE),
-      createAction(EVENT_TYPE_ADDED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/event-types`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then((payload) => {
-      dispatch(
-        showMessage(success_message, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/event-types/${payload.response.id}`
-          );
-        })
-      );
+      dispatch(stopLoading());
     });
   }
+  const success_message = {
+    title: T.translate("general.done"),
+    html: T.translate("edit_event_type.event_type_created"),
+    type: "success"
+  };
+
+  return postRequest(
+    createAction(UPDATE_EVENT_TYPE),
+    createAction(EVENT_TYPE_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/event-types`,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )(params)(dispatch).then(() => {
+    dispatch(showMessage(success_message, () => {}));
+    dispatch(stopLoading());
+  });
 };
 
 export const deleteEventType = (eventTypeId) => async (dispatch, getState) => {
