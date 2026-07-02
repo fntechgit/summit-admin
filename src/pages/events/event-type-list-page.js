@@ -29,12 +29,19 @@ import {
   resetEventTypeForm as resetEventTypeFormAction,
   saveEventType as saveEventTypeAction
 } from "../../actions/event-type-actions";
+import {
+  linkToPresentationType as linkToPresentationTypeAction,
+  unlinkFromPresentationType as unlinkFromPresentationTypeAction,
+  queryMediaUploads
+} from "../../actions/media-upload-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 import EventTypeDialog from "./components/event-type-dialog";
 
 const EventTypeListPage = ({
   currentSummit,
   eventTypes,
+  currentEventType,
+  currentEventTypeErrors,
   term,
   currentPage,
   perPage,
@@ -46,9 +53,16 @@ const EventTypeListPage = ({
   deleteEventType,
   seedEventTypes,
   resetEventTypeForm,
-  saveEventType
+  saveEventType,
+  linkToPresentationType,
+  unlinkFromPresentationType
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
+
+  const getMediaUploads = (input, callback) => {
+    if (!input) return Promise.resolve({ options: [] });
+    return queryMediaUploads(currentSummit.id, input, callback);
+  };
 
   useEffect(() => {
     getEventTypes();
@@ -192,8 +206,14 @@ const EventTypeListPage = ({
 
       {openPopup === "eventTypeForm" && (
         <EventTypeDialog
+          currentSummit={currentSummit}
+          entity={currentEventType}
+          errors={currentEventTypeErrors}
           onClose={() => setOpenPopup(null)}
           onSave={handleSave}
+          getMediaUploads={getMediaUploads}
+          onMediaUploadLink={linkToPresentationType}
+          onMediaUploadUnLink={unlinkFromPresentationType}
         />
       )}
     </div>
@@ -210,6 +230,8 @@ EventTypeListPage.propTypes = {
       is_default: PropTypes.bool
     })
   ).isRequired,
+  currentEventType: PropTypes.shape({ id: PropTypes.number }).isRequired,
+  currentEventTypeErrors: PropTypes.shape({}),
   term: PropTypes.string,
   currentPage: PropTypes.number,
   perPage: PropTypes.number,
@@ -221,10 +243,13 @@ EventTypeListPage.propTypes = {
   deleteEventType: PropTypes.func.isRequired,
   seedEventTypes: PropTypes.func.isRequired,
   resetEventTypeForm: PropTypes.func.isRequired,
-  saveEventType: PropTypes.func.isRequired
+  saveEventType: PropTypes.func.isRequired,
+  linkToPresentationType: PropTypes.func.isRequired,
+  unlinkFromPresentationType: PropTypes.func.isRequired
 };
 
 EventTypeListPage.defaultProps = {
+  currentEventTypeErrors: {},
   term: "",
   currentPage: 1,
   perPage: 10,
@@ -235,10 +260,13 @@ EventTypeListPage.defaultProps = {
 
 const mapStateToProps = ({
   currentSummitState,
-  currentEventTypeListState
+  currentEventTypeListState,
+  currentEventTypeState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
-  ...currentEventTypeListState
+  ...currentEventTypeListState,
+  currentEventType: currentEventTypeState.entity,
+  currentEventTypeErrors: currentEventTypeState.errors
 });
 
 export default connect(mapStateToProps, {
@@ -247,5 +275,7 @@ export default connect(mapStateToProps, {
   deleteEventType: deleteEventTypeAction,
   seedEventTypes: seedEventTypesAction,
   resetEventTypeForm: resetEventTypeFormAction,
-  saveEventType: saveEventTypeAction
+  saveEventType: saveEventTypeAction,
+  linkToPresentationType: linkToPresentationTypeAction,
+  unlinkFromPresentationType: unlinkFromPresentationTypeAction
 })(EventTypeListPage);

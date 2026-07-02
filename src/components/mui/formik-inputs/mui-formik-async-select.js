@@ -19,7 +19,7 @@ const MuiFormikAsyncAutocomplete = ({
   formatSelectedValue = null,
   queryParams = [],
   isMulti = false,
-  defaultOptions,
+  disabled = false,
   ...rest
 }) => {
   const [field, meta, helpers] = useField(name);
@@ -97,6 +97,7 @@ const MuiFormikAsyncAutocomplete = ({
       onChange={handleChange}
       loading={loading}
       multiple={isMultiSelect}
+      disabled={disabled}
       fullWidth
       getOptionLabel={(option) => option.label || ""}
       isOptionEqualToValue={(option, value) => option.value === value.value}
