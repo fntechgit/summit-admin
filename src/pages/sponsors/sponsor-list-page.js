@@ -69,12 +69,10 @@ const SponsorListPage = ({
     deleteSponsor(sponsorId);
   };
 
-  const handleNewSponsor = (sponsor) => {
-    addSponsorToSummit(sponsor).then(() => {
-      setShowAddSponsorModal(false);
-      getSponsors(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
-    });
-  };
+  const handleNewSponsor = (sponsor) =>
+    addSponsorToSummit(sponsor).then(() =>
+      getSponsors(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+    );
 
   const handlePageChange = (page) => {
     getSponsors(term, page, perPage, order, orderDir);
@@ -272,7 +270,6 @@ const SponsorListPage = ({
 
       {showAddSponsorModal && (
         <AddSponsorDialog
-          open={showAddSponsorModal}
           onClose={handleCloseAddSponsorPopup}
           onSubmit={handleNewSponsor}
           summitId={currentSummit.id}

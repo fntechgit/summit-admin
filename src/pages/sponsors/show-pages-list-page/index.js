@@ -106,7 +106,7 @@ const ShowPagesListPage = ({
   const handleShowArchivedForms = (ev) => {
     getShowPages(
       term,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,
@@ -125,12 +125,17 @@ const ShowPagesListPage = ({
     );
   };
 
-  const handleSaveShowPage = (entity) => {
-    saveShowPage(entity).then(() => {
-      setOpenPopup(null);
-      getShowPages();
-    });
-  };
+  const handleSaveShowPage = (entity) =>
+    saveShowPage(entity).then(() =>
+      getShowPages(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
 
   const handleOpenPageTemplatePopup = async (row) => {
     await Promise.all([

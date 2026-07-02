@@ -39,7 +39,9 @@ jest.mock(
         <div data-testid="page-template-popup">
           <span data-testid="popup-page-id">{pageTemplate?.id}</span>
           <button onClick={onClose}>Close</button>
-          <button onClick={() => onSave({ id: 1, name: "Test" })}>Save</button>
+          <button onClick={() => onSave({ id: 1, name: "Test" }).then(onClose)}>
+            Save
+          </button>
         </div>
       );
     }

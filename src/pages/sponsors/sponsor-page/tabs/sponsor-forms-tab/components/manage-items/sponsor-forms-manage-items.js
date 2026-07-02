@@ -129,7 +129,7 @@ const SponsorFormsManageItems = ({
     );
   };
 
-  const handleItemSave = (item) => {
+  const handleItemSave = (item) =>
     saveSponsorFormManagedItem(formId, item).then(() => {
       getSponsorCustomizedFormItems(
         formId,
@@ -141,9 +141,7 @@ const SponsorFormsManageItems = ({
         showArchived
       );
       resetSponsorFormManagedItem();
-      setOpenPopup(null);
     });
-  };
 
   const handleOpenItemPopup = () => {
     resetSponsorFormManagedItem();
