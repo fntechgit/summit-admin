@@ -19,10 +19,9 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  showMessage,
-  showSuccessMessage,
-  authErrorHandler,
-  escapeFilterValue
+  snackbarErrorHandler,
+  escapeFilterValue,
+  snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import { DEFAULT_PER_PAGE, DEFAULT_CURRENT_PAGE } from "../utils/constants";
@@ -77,7 +76,7 @@ export const getEventTypes =
       createAction(REQUEST_EVENT_TYPES),
       createAction(RECEIVE_EVENT_TYPES),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/event-types`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { order, orderDir, term, perPage }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -102,7 +101,7 @@ export const getEventType = (eventTypeId) => async (dispatch, getState) => {
     null,
     createAction(RECEIVE_EVENT_TYPE),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/event-types/${eventTypeId}`,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -128,30 +127,33 @@ export const saveEventType = (entity) => async (dispatch, getState) => {
       createAction(EVENT_TYPE_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/event-types/${entity.id}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch).then(() => {
       dispatch(
-        showSuccessMessage(T.translate("edit_event_type.event_type_saved"))
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_event_type.event_type_saved")
+        })
       );
       dispatch(stopLoading());
     });
   }
-  const success_message = {
-    title: T.translate("general.done"),
-    html: T.translate("edit_event_type.event_type_created"),
-    type: "success"
-  };
 
   return postRequest(
     createAction(UPDATE_EVENT_TYPE),
     createAction(EVENT_TYPE_ADDED),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/event-types`,
     normalizedEntity,
-    authErrorHandler,
+    snackbarErrorHandler,
     entity
   )(params)(dispatch).then(() => {
-    dispatch(showMessage(success_message, () => {}));
+    dispatch(
+      snackbarSuccessHandler({
+        title: T.translate("general.success"),
+        html: T.translate("edit_event_type.event_type_created")
+      })
+    );
     dispatch(stopLoading());
   });
 };
@@ -170,7 +172,7 @@ export const deleteEventType = (eventTypeId) => async (dispatch, getState) => {
     createAction(EVENT_TYPE_DELETED)({ eventTypeId }),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/event-types/${eventTypeId}`,
     null,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -190,9 +192,15 @@ export const seedEventTypes = () => async (dispatch, getState) => {
     createAction(EVENT_TYPES_SEEDED),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/event-types/seed-defaults`,
     null,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
+    dispatch(
+      snackbarSuccessHandler({
+        title: T.translate("general.success"),
+        html: T.translate("edit_event_type.event_types_seed")
+      })
+    );
   });
 };
 

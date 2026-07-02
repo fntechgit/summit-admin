@@ -1323,6 +1323,7 @@
     "media_upload_types": "Media Upload Types",
     "event_type_saved": "Activity Type saved successfully.",
     "event_type_created": "Activity Type created successfully.",
+    "event_types_seed": "Activity Types Seeded successfully.",
     "blackout_time_final": "Final",
     "blackout_time_proposed": "Proposed",
     "blackout_time_all": "All",
