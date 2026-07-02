@@ -1,5 +1,11 @@
 import React from "react";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  act,
+  fireEvent
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import EventTypeDialog from "../event-type-dialog";
 
@@ -51,12 +57,17 @@ jest.mock(
 jest.mock("../../../../hooks/useScrollToError", () => jest.fn());
 
 jest.mock("mui-color-input", () => ({
-  MuiColorInput: ({ value, onChange }) => (
-    <input
-      data-testid="color-input"
-      value={value || ""}
-      onChange={(e) => onChange(e.target.value)}
-    />
+  MuiColorInput: ({ value, onChange, onBlur, name, error, helperText }) => (
+    <>
+      <input
+        data-testid="color-input"
+        name={name}
+        value={value || ""}
+        onChange={(e) => onChange(e.target.value)}
+        onBlur={(e) => onBlur({ target: { name, value: e.target.value } })}
+      />
+      {error && <span>{helperText}</span>}
+    </>
   )
 }));
 
@@ -328,6 +339,28 @@ describe("EventTypeDialog", () => {
     );
   });
 
+  it("submits a newly picked color after it is blurred", async () => {
+    const user = userEvent.setup();
+    renderDialog({
+      ...BASE_ENTITY,
+      name: "Keynote",
+      class_name: "PRESENTATION_TYPE",
+      color: "#ff0000"
+    });
+
+    const colorInput = screen.getByTestId("color-input");
+    fireEvent.change(colorInput, { target: { value: "#00ff00" } });
+    fireEvent.blur(colorInput);
+
+    await act(async () => {
+      await user.click(screen.getByText("general.save").closest("button"));
+    });
+
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ color: "#00ff00" })
+    );
+  });
+
   it("renders an inline error for a field when the errors prop is populated", () => {
     renderDialog(
       { ...BASE_ENTITY, class_name: "EVENT_TYPE" },
@@ -335,6 +368,23 @@ describe("EventTypeDialog", () => {
     );
 
     expect(screen.getByText("Name already in use")).toBeInTheDocument();
+  });
+
+  it("clears a stale server-side color error once the user picks a valid color", async () => {
+    renderDialog(
+      { ...BASE_ENTITY, name: "Keynote", class_name: "EVENT_TYPE" },
+      { color: "Color already taken" }
+    );
+
+    expect(screen.getByText("Color already taken")).toBeInTheDocument();
+
+    const colorInput = screen.getByTestId("color-input");
+    fireEvent.change(colorInput, { target: { value: "#00ff00" } });
+    fireEvent.blur(colorInput);
+
+    await waitFor(() =>
+      expect(screen.queryByText("Color already taken")).not.toBeInTheDocument()
+    );
   });
 
   it("clears the selected ticket types when show_always_on_schedule is checked", async () => {

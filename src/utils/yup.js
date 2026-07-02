@@ -106,6 +106,14 @@ export const positiveNumberValidation = () =>
     .integer(T.translate("validation.integer"))
     .min(0, T.translate("validation.non_negative"));
 
+const HEX_COLOR_REGEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+
+export const hexColorValidation = () =>
+  yup.string().matches(HEX_COLOR_REGEX, {
+    message: T.translate("validation.wrong_format"),
+    excludeEmptyString: true
+  });
+
 export const formMetafieldsValidation = () =>
   yup.array().of(
     yup.object().shape({

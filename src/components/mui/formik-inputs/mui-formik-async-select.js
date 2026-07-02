@@ -20,6 +20,7 @@ const MuiFormikAsyncAutocomplete = ({
   queryParams = [],
   isMulti = false,
   disabled = false,
+  defaultOptions = false,
   ...rest
 }) => {
   const [field, meta, helpers] = useField(name);

@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { FormikProvider, useFormik } from "formik";
@@ -20,7 +20,6 @@ import { queryTicketTypes } from "openstack-uicore-foundation/lib/utils/query-ac
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
-import { MuiColorInput } from "mui-color-input";
 import Autocomplete from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -40,7 +39,11 @@ import CloseIcon from "@mui/icons-material/Close";
 import useScrollToError from "../../../hooks/useScrollToError";
 import MuiFormikAsyncAutocomplete from "../../../components/mui/formik-inputs/mui-formik-async-select";
 import MuiFormikSelect from "../../../components/mui/formik-inputs/mui-formik-select";
-import { positiveNumberValidation } from "../../../utils/yup";
+import MuiFormikColorField from "../../../components/mui/formik-inputs/mui-formik-color-field";
+import {
+  positiveNumberValidation,
+  hexColorValidation
+} from "../../../utils/yup";
 import { HUNDRED_PER_PAGE } from "../../../utils/constants";
 
 const NUMERIC_FIELDS = [
@@ -51,38 +54,6 @@ const NUMERIC_FIELDS = [
   "min_duration",
   "max_duration"
 ];
-
-const ColorPickerField = React.memo(({ initialValue, onChange, error }) => {
-  const [value, setValue] = useState(initialValue || "");
-
-  const handleChange = (newValue) => {
-    setValue(newValue);
-    onChange(newValue);
-  };
-
-  return (
-    <MuiColorInput
-      value={value}
-      format="hex"
-      margin="none"
-      fullWidth
-      onChange={handleChange}
-      error={!!error}
-      helperText={error || undefined}
-    />
-  );
-});
-
-ColorPickerField.propTypes = {
-  initialValue: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
-  error: PropTypes.string
-};
-
-ColorPickerField.defaultProps = {
-  initialValue: "",
-  error: ""
-};
 
 const toFormikTicketType = (tt) => ({ value: String(tt.id), label: tt.name });
 
@@ -107,8 +78,6 @@ const EventTypeDialog = ({
   const [isSaving, setIsSaving] = useState(false);
   const [selectedMediaUpload, setSelectedMediaUpload] = useState(null);
   const [mediaUploadOptions, setMediaUploadOptions] = useState([]);
-
-  const colorRef = useRef(entity?.color || "");
 
   const classNameDdl = [
     {
@@ -152,7 +121,7 @@ const EventTypeDialog = ({
 
   const handleSubmit = (values) => {
     if (isSaving) return Promise.resolve();
-    const normalizedValues = { ...values, color: colorRef.current };
+    const normalizedValues = { ...values };
     NUMERIC_FIELDS.forEach((field) => {
       const parsed = parseInt(values[field], 10);
       // A cleared/non-numeric field must never serialize as NaN -> null.
@@ -181,7 +150,8 @@ const EventTypeDialog = ({
       min_moderators: positiveNumberValidation(),
       max_moderators: positiveNumberValidation(),
       min_duration: positiveNumberValidation(),
-      max_duration: positiveNumberValidation()
+      max_duration: positiveNumberValidation(),
+      color: hexColorValidation()
     }),
     onSubmit: handleSubmit
   });
@@ -208,10 +178,6 @@ const EventTypeDialog = ({
       entity.allowed_media_upload_types ?? []
     );
   }, [entity.allowed_media_upload_types]);
-
-  const handleColorChange = useCallback((newValue) => {
-    colorRef.current = newValue;
-  }, []);
 
   const handleShowAlwaysChange = (ev) => {
     const { checked } = ev.target;
@@ -323,11 +289,7 @@ const EventTypeDialog = ({
                   <InputLabel htmlFor="color">
                     {T.translate("edit_event_type.color")}
                   </InputLabel>
-                  <ColorPickerField
-                    initialValue={entity?.color}
-                    onChange={handleColorChange}
-                    error={formik.touched.color ? formik.errors.color : ""}
-                  />
+                  <MuiFormikColorField name="color" />
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <InputLabel htmlFor="black_out_times">
