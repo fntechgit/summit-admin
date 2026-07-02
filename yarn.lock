@@ -9068,10 +9068,10 @@ open@^10.0.3:
     is-inside-container "^1.0.0"
     wsl-utils "^0.1.0"
 
-openstack-uicore-foundation@5.0.38-beta.2:
-  version "5.0.38-beta.2"
-  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-5.0.38-beta.2.tgz#246038cfb7d3bdba44553e5395ff3aaafbabcb20"
-  integrity sha512-PsuB3LxLCYllPokwcaZH1/rU3CZrQooxuwNnVLIMYL9xBtQB7pCZaj0HLuLoNGwwQs78MhF63zcU36zXpFatsQ==
+openstack-uicore-foundation@5.0.38-beta.3:
+  version "5.0.38-beta.3"
+  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-5.0.38-beta.3.tgz#9e7aa3ce165c43654f192006d4efcafa5c615e3e"
+  integrity sha512-5ZkT9eNKgEWMFTF0TM6wRVt0h6vysFtz27ND82XOimTChmAh0xvxuefVIJHe8iNMMK8Nl+EacRyLe/rUga3wYA==
   dependencies:
     use-sync-external-store "^1.6.0"
 
