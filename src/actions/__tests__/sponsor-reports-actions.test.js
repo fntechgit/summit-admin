@@ -845,4 +845,43 @@ describe("sponsor-reports-actions", () => {
       expect(readErr.payload).toMatchObject({ status: 404, kind: "not-found" });
     });
   });
+
+  // ─── No current summit: mount-fetch guard ────────────────────────────────────
+  // Refutes the "stale-summit / stuck-empty" review concern at the thunk layer: a
+  // mount fetch that fires without a summit in context is a safe no-op — it returns
+  // a resolved promise, dispatches nothing, and never issues a request. Paired with
+  // SummitIdLayout (summit-id-layout.test.js), which gates these pages so they only
+  // mount with a loaded, URL-matching summit and remounts on a summit switch, there
+  // is no reachable stuck-empty state.
+  describe("no current summit → mount fetches no-op", () => {
+    // null, {} and { id: 0 } must ALL be treated as "no summit". Testing only null
+    // would let a weaker guard survive: `if (!currentSummit) return` passes for null
+    // but wrongly proceeds for {} / { id: 0 } — the real guard is `!currentSummit?.id`.
+    const NO_SUMMIT_VALUES = [
+      ["null", null],
+      ["an empty object", {}],
+      ["id 0", { id: 0 }]
+    ];
+    const FETCHES = [
+      ["getSponsorAssetFilters", getSponsorAssetFilters],
+      ["getSponsorAssetRows", getSponsorAssetRows],
+      ["getPurchaseDetailsFilters", getPurchaseDetailsFilters]
+    ];
+
+    describe.each(NO_SUMMIT_VALUES)(
+      "currentSummit = %s",
+      (_label, currentSummit) => {
+        it.each(FETCHES)(
+          "%s dispatches nothing and issues no request",
+          async (_name, thunk) => {
+            const store = mockStore({ currentSummitState: { currentSummit } });
+            await store.dispatch(thunk());
+            await flushPromises();
+            expect(store.getActions()).toEqual([]);
+            expect(getRequest).not.toHaveBeenCalled();
+          }
+        );
+      }
+    );
+  });
 });
