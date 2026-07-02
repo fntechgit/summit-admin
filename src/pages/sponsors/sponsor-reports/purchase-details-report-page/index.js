@@ -1,0 +1,363 @@
+/**
+ * Copyright 2026 OpenStack Foundation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * */
+
+import React, { useEffect, useState } from "react";
+import { connect } from "react-redux";
+import { withRouter } from "react-router-dom";
+import T from "i18n-react/dist/i18n-react";
+import { Alert, Box, Button, MenuItem, TextField } from "@mui/material";
+import PrintIcon from "@mui/icons-material/Print";
+import DownloadIcon from "@mui/icons-material/Download";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
+import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
+import ReportShell from "../../../../components/sponsors/reports/ReportShell";
+import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
+import FilterBar from "../../../../components/sponsors/reports/FilterBar";
+import OrdersTable from "../../../../components/sponsors/reports/OrdersTable";
+import LinesManifestView from "../../../../components/sponsors/reports/LinesManifestView";
+import ReportViewToggle from "../../../../components/sponsors/reports/ReportViewToggle";
+import usePrint from "../../../../hooks/usePrint";
+import {
+  getPurchaseDetailsReport,
+  getPurchaseDetailsLinesReport,
+  getPurchaseDetailsFilters,
+  clearPurchaseDetailsValidation,
+  exportPurchaseDetailsCsv,
+  exportPurchaseDetailsLinesCsv
+} from "../../../../actions/sponsor-reports-actions";
+import {
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_PER_PAGE,
+  FIFTY_PER_PAGE
+} from "../../../../utils/constants";
+
+const PurchaseDetailsReportPage = ({
+  // From mapStateToProps
+  data,
+  summary,
+  filterOptions,
+  total,
+  readError,
+  validationError,
+  // Lines slice (per-line manifest view)
+  linesData,
+  linesSummary,
+  linesTotal,
+  linesReadError,
+  // From mapDispatchToProps (object form — bound action creators)
+  getPurchaseDetailsReport: fetchReport,
+  getPurchaseDetailsLinesReport: fetchLinesReport,
+  getPurchaseDetailsFilters: fetchFilters,
+  clearPurchaseDetailsValidation: clearValidation,
+  exportPurchaseDetailsCsv: exportOrdersCsv,
+  exportPurchaseDetailsLinesCsv: exportLinesCsv
+}) => {
+  const print = usePrint();
+  const { errorMessage } = useSnackbarMessage();
+
+  // Show a global snackbar toast when the backend returns a 412 validation error,
+  // then clear the redux slice so the toast fires only once per error.
+  useEffect(() => {
+    if (validationError) {
+      errorMessage(
+        validationError.message ||
+          T.translate("sponsor_reports_page.validation_error")
+      );
+      clearValidation();
+    }
+  }, [validationError]);
+
+  // Local pagination/sort state. MuiTable dir = 1 (asc) | -1 (desc).
+  const [filters, setFilters] = useState({});
+  const [currentPage, setCurrentPage] = useState(DEFAULT_CURRENT_PAGE);
+  const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
+  const [order, setOrder] = useState(null);
+  const [orderDir, setOrderDir] = useState(1);
+  const [view, setView] = useState("orders");
+  const [linesPage, setLinesPage] = useState(DEFAULT_CURRENT_PAGE);
+  const [linesPerPage, setLinesPerPage] = useState(FIFTY_PER_PAGE);
+
+  // Fetch filters once on mount. Summit is read from store inside the action.
+  // Empty deps is intentional: fetchFilters is stable from connect() and reads
+  // summit from Redux store inside the thunk.
+  useEffect(() => {
+    fetchFilters();
+  }, []); // mount-only
+
+  // Orders view: fetch the order-grain report when any primitive input changes.
+  // The thunk builds the API query (date expansion, filter[] assembly, sort) internally.
+  useEffect(() => {
+    if (view === "orders")
+      fetchReport(filters, { page: currentPage, perPage, order, orderDir });
+  }, [view, filters, currentPage, perPage, order, orderDir]);
+
+  // Line Items view: fetch the per-line feed when its inputs change. NO order param —
+  // CustomOrderingFilter would replace the default sponsor-name ordering and scatter
+  // the sponsor groups, so the manifest relies on the backend default ordering.
+  useEffect(() => {
+    if (view === "lines")
+      fetchLinesReport(filters, { page: linesPage, perPage: linesPerPage });
+  }, [view, filters, linesPage, linesPerPage]);
+
+  // ── Summary tiles ───────────────────────────────────────────────────────────
+  // D9: Total Refunded tile renders ONLY when total_refunded != null — a defensive
+  // presence check (the field is optional in the summary payload).
+  const activeSummary = view === "orders" ? summary : linesSummary;
+  // money: format integer CENTS via uicore; guard unexpected nulls with em dash.
+  const money = (cents) =>
+    cents == null ? "—" : currencyAmountFromCents(cents);
+  const tiles = activeSummary
+    ? [
+        {
+          key: "total_orders",
+          label: T.translate("sponsor_reports_page.total_orders"),
+          value: activeSummary.total_orders
+        },
+        {
+          key: "total_items",
+          label: T.translate("sponsor_reports_page.total_items"),
+          value: activeSummary.total_items
+        },
+        {
+          key: "total_paid",
+          label: T.translate("sponsor_reports_page.total_paid"),
+          value: money(activeSummary.total_paid),
+          tone: "success"
+        },
+        {
+          key: "total_pending",
+          label: T.translate("sponsor_reports_page.total_pending"),
+          value: money(activeSummary.total_pending),
+          tone: "warning"
+        },
+        ...(activeSummary.total_refunded != null
+          ? [
+              {
+                key: "total_refunded",
+                label: T.translate("sponsor_reports_page.total_refunded"),
+                value: money(activeSummary.total_refunded)
+              }
+            ]
+          : [])
+      ]
+    : [];
+
+  // ── FilterBar handlers ──────────────────────────────────────────────────────
+  // Applying/clearing a filter changes the result set → snap back to page 1.
+  const handleApply = (next) => {
+    setFilters(next);
+    setCurrentPage(DEFAULT_CURRENT_PAGE);
+    setLinesPage(DEFAULT_CURRENT_PAGE);
+  };
+  const handleClear = () => {
+    setFilters({});
+    setCurrentPage(DEFAULT_CURRENT_PAGE);
+    setLinesPage(DEFAULT_CURRENT_PAGE);
+  };
+
+  // ── Sort/pagination handlers ─────────────────────────────────────────────────
+  const handleSort = (columnKey, dir) => {
+    setOrder(columnKey);
+    setOrderDir(dir);
+    setCurrentPage(DEFAULT_CURRENT_PAGE);
+  };
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+  const handlePerPageChange = (newPerPage) => {
+    setPerPage(newPerPage);
+    setCurrentPage(DEFAULT_CURRENT_PAGE);
+  };
+  const handleLinesPageChange = (page) => setLinesPage(page);
+  const handleLinesPerPageChange = (newPerPage) => {
+    setLinesPerPage(newPerPage);
+    setLinesPage(DEFAULT_CURRENT_PAGE);
+  };
+
+  // ── Extra filter controls (status / type / date range) ──────────────────────
+  const statusOptions = filterOptions?.statuses || [];
+  // Drop forms with no display name — they render as unpickable blank rows.
+  const formOptions = (filterOptions?.forms || []).filter((f) =>
+    f.name?.trim()
+  );
+  const paymentMethodOptions = filterOptions?.payment_methods || [];
+
+  const extraControls = (draft, update) => (
+    <>
+      <TextField
+        select
+        size="small"
+        sx={{ minWidth: 160 }}
+        label={T.translate("sponsor_reports_page.filter_status")}
+        value={draft.status || ""}
+        onChange={(e) => update({ status: e.target.value || undefined })}
+      >
+        <MenuItem value="">{T.translate("sponsor_reports_page.any")}</MenuItem>
+        {statusOptions.map((s) => (
+          <MenuItem key={s} value={s}>
+            {s}
+          </MenuItem>
+        ))}
+      </TextField>
+      <TextField
+        select
+        size="small"
+        sx={{ minWidth: 160 }}
+        label={T.translate("sponsor_reports_page.filter_form")}
+        value={draft.formCode || ""}
+        onChange={(e) => update({ formCode: e.target.value || undefined })}
+      >
+        <MenuItem value="">{T.translate("sponsor_reports_page.any")}</MenuItem>
+        {formOptions.map((f) => (
+          <MenuItem key={f.code} value={f.code}>
+            {f.name}
+          </MenuItem>
+        ))}
+      </TextField>
+      {/* Payment Method is an order-level attribute; only the orders endpoint
+          filters on it (the lines filter set omits payment_method), so surface
+          it in the orders view only — mirrors search being view-specific. */}
+      {view === "orders" && (
+        <TextField
+          select
+          size="small"
+          sx={{ minWidth: 160 }}
+          label={T.translate("sponsor_reports_page.filter_payment_method")}
+          value={draft.paymentMethod || ""}
+          onChange={(e) =>
+            update({ paymentMethod: e.target.value || undefined })
+          }
+        >
+          <MenuItem value="">
+            {T.translate("sponsor_reports_page.any")}
+          </MenuItem>
+          {paymentMethodOptions.map((pm) => (
+            <MenuItem key={pm} value={pm}>
+              {pm}
+            </MenuItem>
+          ))}
+        </TextField>
+      )}
+      {/* Date inputs emit ISO YYYY-MM-DD — expanded to ISO datetimes in buildQuery */}
+      <TextField
+        type="date"
+        size="small"
+        label={T.translate("sponsor_reports_page.filter_date_from")}
+        InputLabelProps={{ shrink: true }}
+        value={draft.dateFrom || ""}
+        onChange={(e) => update({ dateFrom: e.target.value || undefined })}
+      />
+      <TextField
+        type="date"
+        size="small"
+        label={T.translate("sponsor_reports_page.filter_date_to")}
+        InputLabelProps={{ shrink: true }}
+        value={draft.dateTo || ""}
+        onChange={(e) => update({ dateTo: e.target.value || undefined })}
+      />
+    </>
+  );
+
+  return (
+    <ReportShell
+      title={T.translate("sponsor_reports_page.purchase_details_title")}
+      icon={<ShoppingCartOutlinedIcon />}
+      iconTone="primary"
+      subtitle={T.translate("sponsor_reports_page.purchase_details_subtitle")}
+      actions={
+        <>
+          <ReportViewToggle value={view} onChange={setView} />
+          <Button startIcon={<PrintIcon />} variant="outlined" onClick={print}>
+            {T.translate("sponsor_reports_page.print")}
+          </Button>
+          <Button
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            onClick={() =>
+              view === "orders"
+                ? exportOrdersCsv(filters, order, orderDir)
+                : exportLinesCsv(filters)
+            }
+          >
+            {T.translate("sponsor_reports_page.export_csv")}
+          </Button>
+        </>
+      }
+      filterBar={
+        <Box data-testid="reports-filter-bar">
+          <FilterBar
+            sponsors={filterOptions?.sponsors || []}
+            value={filters}
+            onApply={handleApply}
+            onClear={handleClear}
+            extraControls={extraControls}
+          />
+        </Box>
+      }
+    >
+      <SummaryPanel tiles={tiles} />
+      {(view === "orders" ? readError : linesReadError) ? (
+        <Alert data-testid="reports-read-error" severity="warning">
+          {(view === "orders" ? readError : linesReadError)?.message ||
+            T.translate("sponsor_reports_page.read_error")}
+        </Alert>
+      ) : view === "orders" ? (
+        <OrdersTable
+          rows={data}
+          totalRows={total}
+          currentPage={currentPage}
+          perPage={perPage}
+          order={order}
+          orderDir={orderDir}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSort={handleSort}
+        />
+      ) : (
+        <LinesManifestView
+          rows={linesData}
+          total={linesTotal}
+          currentPage={linesPage}
+          perPage={linesPerPage}
+          onPageChange={handleLinesPageChange}
+          onPerPageChange={handleLinesPerPageChange}
+        />
+      )}
+    </ReportShell>
+  );
+};
+
+const mapStateToProps = ({
+  sponsorReportsPurchaseDetailsState,
+  sponsorReportsPurchaseDetailsLinesState
+}) => ({
+  ...sponsorReportsPurchaseDetailsState,
+  linesData: sponsorReportsPurchaseDetailsLinesState.data,
+  linesSummary: sponsorReportsPurchaseDetailsLinesState.summary,
+  linesTotal: sponsorReportsPurchaseDetailsLinesState.total,
+  linesReadError: sponsorReportsPurchaseDetailsLinesState.readError
+});
+
+const mapDispatchToProps = {
+  getPurchaseDetailsReport,
+  getPurchaseDetailsLinesReport,
+  getPurchaseDetailsFilters,
+  clearPurchaseDetailsValidation,
+  exportPurchaseDetailsCsv,
+  exportPurchaseDetailsLinesCsv
+};
+
+export default withRouter(
+  connect(mapStateToProps, mapDispatchToProps)(PurchaseDetailsReportPage)
+);

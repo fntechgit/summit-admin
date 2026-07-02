@@ -47,6 +47,9 @@ const ShowPagesListPage = React.lazy(() =>
 const SponsorOrdersListPage = React.lazy(() =>
   import("../pages/sponsors/show-purchase-list-page")
 );
+const SponsorReportsLayout = React.lazy(() =>
+  import("./sponsor-reports-layout")
+);
 
 const SponsorLayout = ({ match }) => (
   <div>
@@ -98,6 +101,7 @@ const SponsorLayout = ({ match }) => (
           exact
           component={SponsorOrdersListPage}
         />
+        <Route path={`${match.url}/reports`} component={SponsorReportsLayout} />
         <Route
           strict
           exact
