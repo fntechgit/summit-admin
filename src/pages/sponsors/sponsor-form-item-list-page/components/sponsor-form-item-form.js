@@ -34,7 +34,7 @@ const buildInitialValues = (data) => ({ ...data });
 
 addIssAfterDateFieldValidator();
 
-const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
+const SponsorFormItemForm = ({ initialValues, onSubmit, onImageDeleted }) => {
   const formik = useFormik({
     initialValues: buildInitialValues(initialValues),
     validationSchema: yup.object({
@@ -56,6 +56,10 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
 
   // SCROLL TO ERROR
   useScrollToError(formik);
+
+  const handleDeleteImage = (id) => {
+    if (id) onImageDeleted(id);
+  };
 
   return (
     <FormikProvider value={formik}>
@@ -147,6 +151,7 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
                 id="item-image-upload"
                 name="images"
                 maxFiles={MAX_INVENTORY_IMAGES_UPLOAD_QTY}
+                onDelete={handleDeleteImage}
                 allowedExtensions={getFileUploadAllowedExtensions()}
               />
             </Box>

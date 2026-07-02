@@ -13,6 +13,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import {
   resetSponsorFormItem,
   saveSponsorFormItem,
+  removeItemFile,
   updateSponsorFormItem
 } from "../../../../actions/sponsor-forms-actions";
 import SponsorFormItemForm from "./sponsor-form-item-form";
@@ -24,7 +25,8 @@ const SponsorFormItemPopup = ({
   onClose,
   resetSponsorFormItem,
   saveSponsorFormItem,
-  updateSponsorFormItem
+  updateSponsorFormItem,
+  removeItemFile
 }) => {
   const handleClose = () => {
     // clear form from reducer
@@ -40,6 +42,10 @@ const SponsorFormItemPopup = ({
     });
   };
 
+  const handleRemoveImage = (imageId) => {
+    removeItemFile(formId, item.id, imageId);
+  };
+
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle
@@ -49,14 +55,19 @@ const SponsorFormItemPopup = ({
         <Typography variant="h5">
           {T.translate(
             `sponsor_form_item_list.edit_item.${item?.id ? "edit" : "new"}`
-          )}
+          )}{" "}
+          laksjdlkajsdklajds
         </Typography>
         <IconButton size="large" sx={{ p: 0 }} onClick={handleClose}>
           <CloseIcon fontSize="large" />
         </IconButton>
       </DialogTitle>
       <Divider />
-      <SponsorFormItemForm initialValues={item} onSubmit={handleOnSave} />
+      <SponsorFormItemForm
+        initialValues={item}
+        onSubmit={handleOnSave}
+        onImageDeleted={handleRemoveImage}
+      />
     </Dialog>
   );
 };
@@ -81,5 +92,6 @@ const mapStateToProps = ({
 export default connect(mapStateToProps, {
   resetSponsorFormItem,
   saveSponsorFormItem,
-  updateSponsorFormItem
+  updateSponsorFormItem,
+  removeItemFile
 })(SponsorFormItemPopup);

@@ -104,6 +104,7 @@ export const RESET_SPONSOR_FORM_ITEM = "RESET_SPONSOR_FORM_ITEM";
 export const SPONSOR_FORM_ITEM_DELETED = "SPONSOR_FORM_ITEM_DELETED";
 export const SPONSOR_FORM_ITEM_IMAGES_UPDATED =
   "SPONSOR_FORM_ITEM_IMAGES_UPDATED";
+export const SPONSOR_FORM_ITEM_FILE_DELETED = "SPONSOR_FORM_ITEM_FILE_DELETED";
 export const SPONSOR_FORM_ITEMS_ADDED = "SPONSOR_FORM_ITEMS_ADDED";
 export const SPONSOR_FORM_ITEM_ARCHIVED = "SPONSOR_FORM_ITEM_ARCHIVED";
 export const SPONSOR_FORM_ITEM_UNARCHIVED = "SPONSOR_FORM_ITEM_UNARCHIVED";
@@ -1226,6 +1227,26 @@ const saveItemImages =
     });
 
     return Promise.all(promises);
+  };
+
+export const removeItemFile =
+  (formId, formItemId, fileId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+    const accessToken = await getAccessTokenSafely();
+    const params = { access_token: accessToken };
+
+    dispatch(startLoading());
+
+    return deleteRequest(
+      null,
+      createAction(SPONSOR_FORM_ITEM_FILE_DELETED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images/${fileId}`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch).finally(() => {
+      dispatch(stopLoading());
+    });
   };
 
 export const saveSponsorFormItem =
