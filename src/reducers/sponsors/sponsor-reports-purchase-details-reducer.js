@@ -36,7 +36,6 @@ export const DEFAULT_STATE = {
   order: null,
   orderDir: null,
   filters: {},
-  query: {},
   readError: null, // replaces the body (read-disabled / not-found / unauthorized / unknown)
   validationError: null // 412 — inline/toast, body stays
 };

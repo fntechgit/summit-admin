@@ -12,7 +12,7 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { DEFAULT_CURRENT_PAGE, DEFAULT_PER_PAGE } from "../../utils/constants";
+import { DEFAULT_CURRENT_PAGE, FIFTY_PER_PAGE } from "../../utils/constants";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
   REQUEST_PURCHASE_DETAILS_LINES,
@@ -28,7 +28,7 @@ export const DEFAULT_STATE = {
   // navigation; the global overlay owns loading (state.baseState.loading).
   currentPage: DEFAULT_CURRENT_PAGE,
   lastPage: DEFAULT_CURRENT_PAGE,
-  perPage: DEFAULT_PER_PAGE,
+  perPage: FIFTY_PER_PAGE,
   filters: {},
   readError: null
 };

@@ -9,6 +9,10 @@ import {
 import { SET_CURRENT_SUMMIT } from "../../../actions/summit-actions";
 
 describe("sponsor-reports-purchase-details-lines-reducer", () => {
+  it("defaults perPage to the 50-row manifest page size", () => {
+    expect(DEFAULT_STATE.perPage).toBe(50);
+  });
+
   it("REQUEST records paging/filters and clears readError", () => {
     const s = reducer(
       { ...DEFAULT_STATE, readError: { message: "old" } },

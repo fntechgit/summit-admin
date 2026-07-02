@@ -12,13 +12,17 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import T from "i18n-react/dist/i18n-react";
 
+// Stable empty-object reference so an omitted `value` prop doesn't create a new
+// object every render (which would re-fire the resync effect and loop).
+const EMPTY_VALUE = {};
+
 // Sponsor is the ONLY multi-select (base-api-utils limitation). All other
 // dimensions are passed as single-select controls via `extraControls`.
 // `showSearch` is OFF by default: only the Sponsor Asset report supports `search`
 // server-side; Purchase Details does NOT.
 const FilterBar = ({
   sponsors = [],
-  value = {},
+  value = EMPTY_VALUE,
   onApply,
   onClear,
   extraControls,
