@@ -13,7 +13,15 @@ import "@testing-library/jest-dom";
 import MuiFormikColorField from "../formik-inputs/mui-formik-color-field";
 
 jest.mock("mui-color-input", () => ({
-  MuiColorInput: ({ value, onChange, onBlur, name, error, helperText }) => (
+  MuiColorInput: ({
+    value,
+    onChange,
+    onBlur,
+    onKeyDown,
+    name,
+    error,
+    helperText
+  }) => (
     <div>
       <input
         aria-label="color"
@@ -21,6 +29,7 @@ jest.mock("mui-color-input", () => ({
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         onBlur={(e) => onBlur({ target: { name, value: e.target.value } })}
+        onKeyDown={onKeyDown}
       />
       {error && <span>{helperText}</span>}
     </div>
@@ -82,6 +91,25 @@ describe("MuiFormikColorField", () => {
       await userEvent.click(screen.getByText("submit"));
     });
     expect(onSubmit).toHaveBeenLastCalledWith(
+      expect.objectContaining({ color: "#00ff00" }),
+      expect.anything()
+    );
+  });
+
+  it("submits the typed color when Enter submits the form before blur fires", async () => {
+    const onSubmit = jest.fn();
+    renderWithFormik({ onSubmit, initialValues: { color: "#ff0000" } });
+
+    const field = screen.getByLabelText("color");
+    fireEvent.change(field, { target: { value: "#00ff00" } });
+    // Implicit form submission: the browser dispatches keydown, then submit,
+    // without ever blurring the focused input.
+    fireEvent.keyDown(field, { key: "Enter" });
+    await act(async () => {
+      fireEvent.submit(field.closest("form"));
+    });
+
+    expect(onSubmit).toHaveBeenCalledWith(
       expect.objectContaining({ color: "#00ff00" }),
       expect.anything()
     );
