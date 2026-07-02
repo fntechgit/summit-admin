@@ -22,7 +22,10 @@ const ContentCell = ({ row }) => {
       <Box
         component="img"
         src={url}
-        alt={row.module?.title}
+        // Guarantee a string so React renders alt="" (decorative) rather than
+        // omitting the attribute when module/title is missing (mirrors PivotTree's
+        // component_name || title fallback on the same row shape).
+        alt={row.module?.title || row.module?.component_name || ""}
         sx={{
           width: "100%",
           height: 120,
