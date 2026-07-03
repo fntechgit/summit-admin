@@ -101,7 +101,7 @@ const EventTypeListPage = ({
   };
 
   const handleSort = (key, dir) => {
-    getEventTypes(term, currentPage, perPage, key, dir);
+    getEventTypes(term, DEFAULT_CURRENT_PAGE, perPage, key, dir);
   };
 
   const columns = [

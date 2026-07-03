@@ -90,7 +90,7 @@ const initialState = {
     eventTypes: [{ id: 7, name: "Talk", class_name: "PresentationType" }],
     totalEventTypes: 1,
     perPage: 10,
-    currentPage: 1,
+    currentPage: 3,
     term: "",
     order: "id",
     orderDir: 1
@@ -126,14 +126,8 @@ describe("EventTypeListPage", () => {
     expect(getEventTypes).toHaveBeenLastCalledWith("", 1, 20, "id", 1);
 
     await userEvent.click(screen.getByRole("button", { name: "sort-name" }));
-    // page semantics on sort are under discussion in the PR; assert only col/dir
-    expect(getEventTypes).toHaveBeenLastCalledWith(
-      "",
-      expect.anything(),
-      10,
-      "name",
-      0
-    );
+    // sorting resets to the first page so results reflect the new ordering
+    expect(getEventTypes).toHaveBeenLastCalledWith("", 1, 10, "name", 0);
   });
 
   it("fetches the entity and opens the dialog when clicking edit", async () => {
