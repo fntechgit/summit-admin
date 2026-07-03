@@ -9,49 +9,36 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
+import PropTypes from "prop-types";
 import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Restrict from "../routes/restrict";
 
-import EditEventTypePage from "../pages/events/edit-event-type-page";
 import EventTypeListPage from "../pages/events/event-type-list-page";
 import NoMatchPage from "../pages/no-match-page";
 
-class EventTypeLayout extends React.Component {
-  render() {
-    const { match } = this.props;
-    return (
-      <div>
-        <Breadcrumb
-          data={{
-            title: T.translate("event_type_list.event_types"),
-            pathname: match.url
-          }}
-        />
+const EventTypeLayout = ({ match }) => (
+  <div>
+    <Breadcrumb
+      data={{
+        title: T.translate("event_type_list.event_types"),
+        pathname: match.url
+      }}
+    />
 
-        <Switch>
-          <Route exact strict path={match.url} component={EventTypeListPage} />
-          <Route
-            strict
-            exact
-            path={`${match.url}/new`}
-            component={EditEventTypePage}
-          />
-          <Route
-            strict
-            exact
-            path={`${match.url}/:event_type_id(\\d+)`}
-            component={EditEventTypePage}
-          />
-          <Route component={NoMatchPage} />
-        </Switch>
-      </div>
-    );
-  }
-}
+    <Switch>
+      <Route exact strict path={match.url} component={EventTypeListPage} />
+      <Route component={NoMatchPage} />
+    </Switch>
+  </div>
+);
+
+EventTypeLayout.propTypes = {
+  match: PropTypes.shape({ url: PropTypes.string }).isRequired
+};
 
 export default Restrict(withRouter(EventTypeLayout), "events");

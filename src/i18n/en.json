@@ -1291,10 +1291,11 @@
     "name": "Name",
     "class": "Class",
     "seed_event_types": "Seed Types",
-    "remove_warning": "Are you sure you want to delete activity type "
+    "remove_warning": "Please verify you want to delete activity type "
   },
   "edit_event_type": {
     "event_type": "Activity Type",
+    "main": "Main",
     "name": "Name",
     "class": "Class",
     "color": "Color",
@@ -1322,6 +1323,7 @@
     "media_upload_types": "Media Upload Types",
     "event_type_saved": "Activity Type saved successfully.",
     "event_type_created": "Activity Type created successfully.",
+    "event_types_seed": "Activity Types Seeded successfully.",
     "blackout_time_final": "Final",
     "blackout_time_proposed": "Proposed",
     "blackout_time_all": "All",
@@ -1331,6 +1333,8 @@
     "time_restrictions_info": "this only applies to track chairs",
     "schedule_settings": "Schedule settings",
     "allowed_ticket_types": "Allowed ticket types",
+    "class_presentation_type": "Presentation",
+    "class_event_type": "Event",
     "placeholders": {
       "select_class": "Select Class",
       "allowed_ticket_types": "Select ticket types"

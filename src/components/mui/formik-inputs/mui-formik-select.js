@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Children } from "react";
 import PropTypes from "prop-types";
 import {
   Select,
@@ -49,7 +49,10 @@ const MuiFormikSelect = ({
           if (!selected || selected === "") {
             return <span style={{ color: "#aaa" }}>{placeholder}</span>;
           }
-          return selected;
+          const matchedOption = Children.toArray(children).find(
+            (child) => child.props.value === selected
+          );
+          return matchedOption ? matchedOption.props.children : selected;
         }}
         endAdornment={
           isClearable && field.value ? (

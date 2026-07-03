@@ -9,8 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_EVENT_TYPES,
   REQUEST_EVENT_TYPES,
@@ -19,10 +20,16 @@ import {
 } from "../../actions/event-type-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
-  eventTypes: []
+  eventTypes: [],
+  term: "",
+  order: "id",
+  orderDir: 1,
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10,
+  totalEventTypes: 0
 };
 
 const eventTypeListReducer = (state = DEFAULT_STATE, action) => {
@@ -33,30 +40,38 @@ const eventTypeListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_EVENT_TYPES: {
-      return { ...state };
+      const { order, orderDir, term, perPage } = payload;
+      return { ...state, order, orderDir, term, perPage };
     }
     case RECEIVE_EVENT_TYPES: {
-      let eventTypes = [...payload.response.data];
+      const { total, last_page, current_page } = payload.response;
+      const eventTypes = [...payload.response.data];
 
-      return { ...state, eventTypes };
+      return {
+        ...state,
+        eventTypes,
+        currentPage: current_page,
+        lastPage: last_page,
+        totalEventTypes: total
+      };
     }
     case EVENT_TYPE_DELETED: {
-      let { eventTypeId } = payload;
+      const { eventTypeId } = payload;
       return {
         ...state,
         eventTypes: state.eventTypes.filter((e) => e.id !== eventTypeId)
       };
     }
     case EVENT_TYPES_SEEDED: {
-      let eventTypesAdded = payload.response.data;
+      const eventTypesAdded = payload.response.data;
       if (eventTypesAdded.length > 0) {
         return {
           ...state,
-          eventTypes: [...state.eventTypes, ...eventTypesAdded]
+          eventTypes: [...state.eventTypes, ...eventTypesAdded],
+          totalEventTypes: state.totalEventTypes + eventTypesAdded.length
         };
-      } else {
-        return state;
       }
+      return state;
     }
     default:
       return state;
