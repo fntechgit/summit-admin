@@ -247,12 +247,15 @@ const PurchaseDetailsReportPage = ({
     { value: "", label: anyLabel },
     ...(filterOptions?.statuses || []).map((s) => ({ value: s, label: s }))
   ];
-  // Drop forms with no display name — they render as unpickable blank rows.
+  // Type options come from the filters endpoint as { code, name } where name is the
+  // form_type — which is often blank in the data (the table shows "{code} - " via the
+  // row's prebuilt form.display). Fall back to the code so a blank-name type is still
+  // pickable and the filter matches the table; only drop entries with no code at all.
   const formSelectOptions = [
     { value: "", label: anyLabel },
     ...(filterOptions?.forms || [])
-      .filter((f) => f.name?.trim())
-      .map((f) => ({ value: f.code, label: f.name }))
+      .filter((f) => f.code)
+      .map((f) => ({ value: f.code, label: f.name?.trim() || f.code }))
   ];
   const paymentMethodSelectOptions = [
     { value: "", label: anyLabel },
@@ -268,8 +271,10 @@ const PurchaseDetailsReportPage = ({
         <MuiDropdown
           id="pd-filter-status"
           size="small"
-          label={T.translate("sponsor_reports_page.filter_status")}
-          placeholder={anyLabel}
+          placeholder={T.translate("sponsor_reports_page.filter_status")}
+          SelectDisplayProps={{
+            "aria-label": T.translate("sponsor_reports_page.filter_status")
+          }}
           value={draft.status || ""}
           options={statusSelectOptions}
           onChange={(e) => update({ status: e.target.value || undefined })}
@@ -279,8 +284,10 @@ const PurchaseDetailsReportPage = ({
         <MuiDropdown
           id="pd-filter-form"
           size="small"
-          label={T.translate("sponsor_reports_page.filter_form")}
-          placeholder={anyLabel}
+          placeholder={T.translate("sponsor_reports_page.filter_form")}
+          SelectDisplayProps={{
+            "aria-label": T.translate("sponsor_reports_page.filter_form")
+          }}
           value={draft.formCode || ""}
           options={formSelectOptions}
           onChange={(e) => update({ formCode: e.target.value || undefined })}
@@ -294,8 +301,14 @@ const PurchaseDetailsReportPage = ({
           <MuiDropdown
             id="pd-filter-payment-method"
             size="small"
-            label={T.translate("sponsor_reports_page.filter_payment_method")}
-            placeholder={anyLabel}
+            placeholder={T.translate(
+              "sponsor_reports_page.filter_payment_method"
+            )}
+            SelectDisplayProps={{
+              "aria-label": T.translate(
+                "sponsor_reports_page.filter_payment_method"
+              )
+            }}
             value={draft.paymentMethod || ""}
             options={paymentMethodSelectOptions}
             onChange={(e) =>

@@ -182,8 +182,14 @@ const SponsorAssetReportPage = ({
               <MuiDropdown
                 id="sa-filter-status"
                 size="small"
-                label={T.translate("sponsor_reports_page.filter_asset_status")}
-                placeholder={T.translate("sponsor_reports_page.any")}
+                placeholder={T.translate(
+                  "sponsor_reports_page.filter_asset_status"
+                )}
+                SelectDisplayProps={{
+                  "aria-label": T.translate(
+                    "sponsor_reports_page.filter_asset_status"
+                  )
+                }}
                 value={draft.status || ""}
                 options={[
                   { value: "", label: T.translate("sponsor_reports_page.any") },
