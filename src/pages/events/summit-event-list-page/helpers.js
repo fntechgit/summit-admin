@@ -27,7 +27,11 @@ import {
   querySubmitterCompany
 } from "../../../actions/event-actions";
 import { formatDate, formatDuration } from "../../../utils/methods";
-import { DEFAULT_Z_INDEX, HIGH_Z_INDEX } from "../../../utils/constants";
+import {
+  DEFAULT_Z_INDEX,
+  HIGH_Z_INDEX,
+  SECONDS_TO_MINUTES
+} from "../../../utils/constants";
 import { buildNameIdDDL } from "../../../utils/events/summit-event-list-page.utils";
 
 // The table's column keys don't always match the API's order-by keys;
@@ -855,7 +859,11 @@ export const getCriterias = (summit, mediaUploadTypes) => [
         min: 0,
         integer: true
       }
-    }
+    },
+    // The API stores duration in seconds, but the user enters minutes here.
+    customParser: (f) => [
+      `duration${f.operator}${f.value * SECONDS_TO_MINUTES}`
+    ]
   },
   {
     key: "speakers_count",

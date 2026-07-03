@@ -14,9 +14,11 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
+import { Box, Button, Grid2 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
+import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   GridFilter,
   useGridFilter
@@ -24,7 +26,6 @@ import {
 import BulkEditTable from "openstack-uicore-foundation/lib/components/mui/bulk-edit-table";
 import {
   bulkUpdateEvents,
-  changeEventListSearchTerm,
   deleteEvent,
   exportEvents,
   getEvents,
@@ -77,7 +78,6 @@ const SummitEventListPage = ({
   exportEvents,
   importEventsCSV,
   importMP4AssetsFromMUX,
-  changeEventListSearchTerm,
   saveFilterCriteria,
   deleteFilterCriteria,
   bulkUpdateEvents
@@ -170,25 +170,6 @@ const SummitEventListPage = ({
 
   const handleNewEvent = () => {
     history.push(`/app/summits/${currentSummit.id}/events/new`);
-  };
-
-  const handleDeleteEvent = (row) => {
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("event_list.delete_event_warning")} ${row.title}`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteEvent(row.id);
-      }
-    });
-  };
-
-  const handleTermChange = (newTerm) => {
-    changeEventListSearchTerm(newTerm);
   };
 
   const handleFilterCriteriaSave = ({ name, id, visibility }) => {
@@ -323,12 +304,7 @@ const SummitEventListPage = ({
 
   const tableOptions = {
     sortCol: toUiSortKey(order),
-    sortDir: orderDir,
-    className: "summit-event-list-table",
-    actions: {
-      edit: { onClick: handleEdit },
-      delete: { onClick: handleDeleteEvent }
-    }
+    sortDir: orderDir
   };
 
   const selectedOptionalColumns = optionalColumns.filter((c) =>
@@ -346,88 +322,76 @@ const SummitEventListPage = ({
       <h3>
         {T.translate("event_list.event_list")} ({totalEvents})
       </h3>
-      <div
-        style={{
-          display: "flex",
+      <Grid2
+        container
+        spacing={2}
+        sx={{
           justifyContent: "space-between",
-          gap: "20px"
+          alignItems: "center",
+          mb: 2
         }}
       >
-        <div style={{ flex: 1 }}>
-          <FreeTextSearch
-            value={term ?? ""}
+        <Grid2 size={5}>
+          <SearchInput
+            term={term}
             placeholder={T.translate("event_list.placeholders.search_events")}
-            title={T.translate("event_list.placeholders.search_events")}
             onSearch={handleSearch}
-            onChange={handleTermChange}
           />
-        </div>
-        <button
-          className="btn btn-primary"
-          onClick={handleNewEvent}
-          type="button"
-        >
-          {T.translate("event_list.add_event")}
-        </button>
-        <button
-          className="btn btn-default"
-          onClick={handleExport}
-          type="button"
-        >
-          {T.translate("general.export")}
-        </button>
-        <button
-          className="btn btn-default"
-          onClick={handleMUXImport}
-          type="button"
-        >
-          {T.translate("event_list.mux_import")}
-        </button>
-        <button
-          className="btn btn-default"
-          onClick={() => setShowImportModal(true)}
-          type="button"
-        >
-          {T.translate("event_list.import")}
-        </button>
-      </div>
+        </Grid2>
+        <Grid2 size={7} sx={{ display: "flex", gap: 1, justifyContent: "end" }}>
+          <GridFilter
+            id={FILTER_ID}
+            criterias={getCriterias(currentSummit, mediaUploadTypes)}
+          />
+          <Button
+            variant="contained"
+            onClick={handleNewEvent}
+            startIcon={<AddIcon />}
+          >
+            {T.translate("event_list.add_event")}
+          </Button>
+          <Button variant="outlined" onClick={handleExport}>
+            {T.translate("general.export")}
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={handleMUXImport}
+            sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
+          >
+            {T.translate("event_list.mux_import")}
+          </Button>
+          <Button variant="outlined" onClick={() => setShowImportModal(true)}>
+            {T.translate("event_list.import")}
+          </Button>
+        </Grid2>
+      </Grid2>
       <hr />
-      <div style={{ display: "flex", gap: "20px" }}>
-        <div style={{ minWidth: "50%" }}>
-          <SelectFilterCriteria
-            summitId={currentSummit.id}
-            context={CONTEXT_ACTIVITIES}
-            onDelete={handleFilterCriteriaDelete}
-            selectedFilterCriteria={selectedFilterCriteria}
-            onChange={handleFilterCriteriaChange}
-          />
-        </div>
-        <GridFilter
-          id={FILTER_ID}
-          criterias={getCriterias(currentSummit, mediaUploadTypes)}
+      <div>
+        <SelectFilterCriteria
+          summitId={currentSummit.id}
+          context={CONTEXT_ACTIVITIES}
+          onDelete={handleFilterCriteriaDelete}
+          selectedFilterCriteria={selectedFilterCriteria}
+          onChange={handleFilterCriteriaChange}
+        />
+        <SaveFilterCriteria
+          onSave={handleFilterCriteriaSave}
+          selectedFilterCriteria={selectedFilterCriteria}
         />
       </div>
-      <SaveFilterCriteria
-        onSave={handleFilterCriteriaSave}
-        selectedFilterCriteria={selectedFilterCriteria}
-      />
+
       <hr />
-      <div className="row" style={{ marginBottom: 15 }}>
-        <div className="col-md-12">
-          <label htmlFor="select_fields">
-            {T.translate("event_list.select_fields")}
-          </label>
-          <Dropdown
-            id="select_fields"
-            placeholder={T.translate("event_list.placeholders.select_fields")}
-            value={selectedColumns}
-            onChange={handleColumnsChange}
-            options={handleDDLSortByLabel(columnDDLOptions)}
-            isClearable
-            isMulti
-          />
-        </div>
-      </div>
+      <Box sx={{ mb: 2 }}>
+        <MuiDropdown
+          id="select_fields"
+          label={T.translate("event_list.select_fields")}
+          placeholder={T.translate("event_list.placeholders.select_fields")}
+          value={selectedColumns}
+          onChange={handleColumnsChange}
+          options={handleDDLSortByLabel(columnDDLOptions)}
+          multiple
+        />
+      </Box>
 
       {events.length === 0 && <div>{T.translate("event_list.no_events")}</div>}
 
@@ -444,6 +408,12 @@ const SummitEventListPage = ({
             currentPage={currentPage}
             onPageChange={handlePageChange}
             onPerPageChange={handlePerPageChange}
+            onEdit={handleEdit}
+            onDelete={deleteEvent}
+            getName={(row) => row.title}
+            deleteDialogBody={(name) =>
+              `${T.translate("event_list.delete_event_warning")} ${name}`
+            }
           />
         </div>
       )}
@@ -479,7 +449,6 @@ export default connect(mapStateToProps, {
   exportEvents,
   importEventsCSV,
   importMP4AssetsFromMUX,
-  changeEventListSearchTerm,
   saveFilterCriteria,
   deleteFilterCriteria,
   bulkUpdateEvents,

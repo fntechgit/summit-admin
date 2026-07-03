@@ -1043,7 +1043,7 @@ export const importEventsCSV =
       access_token: accessToken
     };
 
-    postFile(
+    return postFile(
       null,
       createAction(EVENTS_IMPORTED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/csv`,

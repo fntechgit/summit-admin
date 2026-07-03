@@ -1221,6 +1221,7 @@
     "import_events_format_speaker_companies": "* speaker_companies ( list of companies | delimited) [optional]",
     "import_events_format_speaker_titles": "* speaker_titles ( list of titles | delimited) [optional]",
     "ingest": "Ingest",
+    "import_events_error": "Error while importing activities: {error}",
     "send_speaker_email": "Send Speaker Email (Email Flow Event ACTIVITES_SUBMISSIONS_IMPORT_ACTIVITY_SPEAKER)",
     "mux_import": "Import MP4 From MUX",
     "mux_token_id": "MUX Token ID",

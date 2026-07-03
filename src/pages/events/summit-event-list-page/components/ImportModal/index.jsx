@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { Modal } from "react-bootstrap";
 import T from "i18n-react";
 import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
+import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
 
 const ImportModal = ({ show, onClose, onImport }) => {
+  const { errorMessage } = useSnackbarMessage();
   const [importFile, setImportFile] = useState(null);
   const [sendSpeakerEmail, setSendSpeakerEmail] = useState(false);
 
@@ -14,11 +16,19 @@ const ImportModal = ({ show, onClose, onImport }) => {
   };
 
   const handleImportEvents = () => {
-    if (importFile) {
-      onImport(importFile, sendSpeakerEmail);
-    }
+    if (!importFile) return;
 
-    handleClose();
+    onImport(importFile, sendSpeakerEmail)
+      .then(() => {
+        handleClose();
+      })
+      .catch((error) => {
+        errorMessage(
+          T.translate("event_list.import_events_error", {
+            error: error.message || error
+          })
+        );
+      });
   };
 
   return (
