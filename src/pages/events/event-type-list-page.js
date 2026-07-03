@@ -77,10 +77,15 @@ const EventTypeListPage = ({
     setOpenPopup("eventTypeForm");
   };
 
+  // The dialog closes when this promise resolves, so it must track ONLY the
+  // save: a failed list refresh after a successful create would otherwise keep
+  // the dialog open and invite a duplicate-create retry.
   const handleSave = (eventTypeEntity) =>
-    saveEventType(eventTypeEntity).then(() =>
-      getEventTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
-    );
+    saveEventType(eventTypeEntity).then(() => {
+      getEventTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir).catch(
+        () => {}
+      );
+    });
 
   const handleDelete = (eventTypeId) => {
     deleteEventType(eventTypeId).then(() =>

@@ -64,11 +64,20 @@ jest.mock(
   })
 );
 
+// The stub mirrors the real popup contract from the popup-dialog pattern:
+// it closes only when the promise returned by onSave resolves.
 jest.mock("../components/event-type-dialog", () => ({
   __esModule: true,
   default: ({ onSave, onClose }) => (
     <div data-testid="event-type-dialog">
-      <button type="button" onClick={() => onSave({ id: 7 })}>
+      <button
+        type="button"
+        onClick={() =>
+          onSave({ id: 7 })
+            .then(() => onClose())
+            .catch(() => {})
+        }
+      >
         popup-save
       </button>
       <button type="button" onClick={onClose}>
@@ -163,6 +172,29 @@ describe("EventTypeListPage", () => {
     // Call 1: useEffect on mount; call 2: handleSave refresh
     expect(getEventTypes).toHaveBeenCalledTimes(2);
     expect(getEventTypes).toHaveBeenLastCalledWith("", 1, 10, "id", 1);
+  });
+
+  it("closes the dialog on save success even if the list refresh fails", async () => {
+    getEventTypes
+      .mockReturnValueOnce(() => Promise.resolve()) // mount fetch
+      .mockReturnValue(() => Promise.reject(new Error("refresh failed")));
+
+    renderWithRedux(<EventTypeListPage />, { initialState });
+
+    await act(async () => {
+      await userEvent.click(screen.getByRole("button", { name: "edit-row" }));
+      await flushPromises();
+    });
+
+    await act(async () => {
+      await userEvent.click(screen.getByRole("button", { name: "popup-save" }));
+      await flushPromises();
+    });
+
+    expect(saveEventType).toHaveBeenCalledTimes(1);
+    // a failed refresh must not keep the dialog open (it invites duplicate
+    // create retries after the entity was already persisted)
+    expect(screen.queryByTestId("event-type-dialog")).not.toBeInTheDocument();
   });
 
   it("reloads the list after a successful delete", async () => {
