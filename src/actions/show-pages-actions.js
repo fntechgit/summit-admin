@@ -19,7 +19,9 @@ import {
   putRequest,
   deleteRequest,
   startLoading,
-  stopLoading
+  stopLoading,
+  snackbarErrorHandler,
+  snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
@@ -28,7 +30,6 @@ import {
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE
 } from "../utils/constants";
-import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 import { normalizePageTemplateModules } from "../utils/page-template";
 
 export const REQUEST_SHOW_PAGES = "REQUEST_SHOW_PAGES";

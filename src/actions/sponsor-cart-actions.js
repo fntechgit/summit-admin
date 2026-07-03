@@ -19,15 +19,13 @@ import {
   postRequest,
   putRequest,
   startLoading,
-  stopLoading
+  stopLoading,
+  snackbarErrorHandler,
+  snackbarSuccessHandler,
+  setSnackbarMessage
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
-import {
-  setSnackbarMessage,
-  snackbarErrorHandler,
-  snackbarSuccessHandler
-} from "./base-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
