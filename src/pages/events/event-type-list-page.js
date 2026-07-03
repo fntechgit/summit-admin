@@ -104,6 +104,13 @@ const EventTypeListPage = ({
     getEventTypes(term, DEFAULT_CURRENT_PAGE, perPage, key, dir);
   };
 
+  // The seed endpoint returns only the created types; refetch so the table
+  // reflects server-side pagination and ordering.
+  const handleSeed = () =>
+    seedEventTypes().then(() =>
+      getEventTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+    );
+
   const columns = [
     {
       columnKey: "name",
@@ -151,7 +158,7 @@ const EventTypeListPage = ({
           </Grid2>
           <Button
             variant="outlined"
-            onClick={seedEventTypes}
+            onClick={handleSeed}
             sx={{
               height: "36px",
               padding: "6px 16px",

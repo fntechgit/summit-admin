@@ -10,7 +10,8 @@ import {
   getEventType,
   deleteEventType,
   resetEventTypeForm,
-  saveEventType
+  saveEventType,
+  seedEventTypes
 } from "../../../actions/event-type-actions";
 
 jest.mock("../../../actions/event-type-actions", () => ({
@@ -108,6 +109,7 @@ describe("EventTypeListPage", () => {
     getEventType.mockReturnValue(() => Promise.resolve());
     deleteEventType.mockReturnValue(() => Promise.resolve());
     saveEventType.mockReturnValue(() => Promise.resolve());
+    seedEventTypes.mockReturnValue(() => Promise.resolve());
     resetEventTypeForm.mockReturnValue({ type: "RESET_EVENT_TYPE_FORM" });
   });
 
@@ -174,6 +176,22 @@ describe("EventTypeListPage", () => {
     expect(deleteEventType).toHaveBeenCalledWith(7);
     // Call 1: useEffect on mount; call 2: handleDelete refresh
     expect(getEventTypes).toHaveBeenCalledTimes(2);
+  });
+
+  it("reloads the list after seeding default event types", async () => {
+    renderWithRedux(<EventTypeListPage />, { initialState });
+
+    await act(async () => {
+      await userEvent.click(
+        screen.getByRole("button", { name: "event_type_list.seed_event_types" })
+      );
+      await flushPromises();
+    });
+
+    expect(seedEventTypes).toHaveBeenCalledTimes(1);
+    // Call 1: useEffect on mount; call 2: post-seed refresh
+    expect(getEventTypes).toHaveBeenCalledTimes(2);
+    expect(getEventTypes).toHaveBeenLastCalledWith("", 1, 10, "id", 1);
   });
 
   it("resets the form when opening the add dialog and unmounts it on close", async () => {
