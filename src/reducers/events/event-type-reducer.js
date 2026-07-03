@@ -106,7 +106,7 @@ const eventTypeReducer = (state = DEFAULT_STATE, action) => {
           break;
       }
 
-      return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+      return { ...state, entity: { ...DEFAULT_ENTITY, ...entity }, errors: {} };
     }
     case MEDIA_UPLOAD_LINKED: {
       const { mediaUpload } = payload;
