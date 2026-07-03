@@ -156,7 +156,10 @@ describe("SponsorAssetReportPage", () => {
   });
 
   it("renders the by_status summary tiles from the summary object", async () => {
-    renderPage();
+    // rows:[] so the tiles (from summary.by_status) are the only place the status
+    // labels appear — a seeded row would also render a translated StatusPill and
+    // collide with the tile text under the key-echo i18n mock.
+    renderPage({ rows: [] });
     await act(async () => {});
     expect(
       screen.getByText("sponsor_reports_page.status_completed")

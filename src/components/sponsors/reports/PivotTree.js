@@ -34,7 +34,12 @@ const Leaf = ({ rows }) => (
             row.module?.title ||
             T.translate("sponsor_reports_page.pivot_unnamed_component")}
         </Typography>
-        <StatusPill status={row.status} label={row.status} />
+        <StatusPill
+          status={row.status}
+          label={T.translate(`sponsor_reports_page.status_${row.status}`, {
+            notFound: row.status
+          })}
+        />
         <Box sx={{ flex: 1, minWidth: 200 }}>
           <ContentCell row={row} />
         </Box>

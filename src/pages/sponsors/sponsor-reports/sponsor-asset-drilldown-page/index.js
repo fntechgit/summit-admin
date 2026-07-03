@@ -237,7 +237,13 @@ const SponsorAssetDrilldownPage = ({
                       >
                         {row.module?.title}
                       </Typography>
-                      <StatusPill status={row.status} label={row.status} />
+                      <StatusPill
+                        status={row.status}
+                        label={T.translate(
+                          `sponsor_reports_page.status_${row.status}`,
+                          { notFound: row.status }
+                        )}
+                      />
                     </Stack>
                     <ContentCell row={row} />
                   </Box>
