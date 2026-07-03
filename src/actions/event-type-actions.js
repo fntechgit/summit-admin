@@ -167,6 +167,8 @@ export const deleteEventType = (eventTypeId) => async (dispatch, getState) => {
     access_token: accessToken
   };
 
+  dispatch(startLoading());
+
   return deleteRequest(
     null,
     createAction(EVENT_TYPE_DELETED)({ eventTypeId }),
@@ -186,6 +188,8 @@ export const seedEventTypes = () => async (dispatch, getState) => {
   const params = {
     access_token: accessToken
   };
+
+  dispatch(startLoading());
 
   return postRequest(
     null,
