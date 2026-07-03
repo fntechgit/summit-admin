@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { useField } from "formik";
 import { MuiColorInput } from "mui-color-input";
@@ -13,6 +13,13 @@ import { MuiColorInput } from "mui-color-input";
 const MuiFormikColorField = ({ name, ...props }) => {
   const [field, meta, helpers] = useField(name);
   const [value, setValue] = useState(field.value || "");
+
+  // External Formik value changes (enableReinitialize after a mid-dialog
+  // entity update, resetForm, setFieldValue from outside) must win over the
+  // local drag buffer, or the displayed color diverges from what saves.
+  useEffect(() => {
+    setValue(field.value || "");
+  }, [field.value]);
 
   const handleChange = (newValue) => {
     setValue(newValue);

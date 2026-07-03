@@ -115,6 +115,35 @@ describe("MuiFormikColorField", () => {
     );
   });
 
+  it("reflects an external Formik value change in the input", async () => {
+    render(
+      <Formik initialValues={{ color: "#ff0000" }} onSubmit={jest.fn()}>
+        {(formik) => (
+          <Form>
+            <MuiFormikColorField name="color" />
+            <button
+              type="button"
+              onClick={() => formik.setFieldValue("color", "#123456")}
+            >
+              external-set
+            </button>
+          </Form>
+        )}
+      </Formik>
+    );
+
+    const field = screen.getByLabelText("color");
+    expect(field).toHaveValue("#ff0000");
+
+    // e.g. enableReinitialize resetting values after a mid-dialog entity
+    // update - the displayed color must follow, or it diverges from what saves
+    await act(async () => {
+      fireEvent.click(screen.getByText("external-set"));
+    });
+
+    expect(field).toHaveValue("#123456");
+  });
+
   it("clears a validation error after a corrective edit and blur", async () => {
     renderWithFormik({
       onSubmit: jest.fn(),
