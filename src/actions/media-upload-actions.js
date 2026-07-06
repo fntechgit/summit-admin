@@ -20,15 +20,13 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  showMessage,
-  showSuccessMessage,
-  authErrorHandler,
+  snackbarErrorHandler,
+  snackbarSuccessHandler,
   escapeFilterValue,
   fetchResponseHandler,
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import debounce from "lodash/debounce"
-import history from "../history";
+import debounce from "lodash/debounce";
 import { getAccessTokenSafely } from "../utils/methods";
 import { DEBOUNCE_WAIT, DEFAULT_PER_PAGE } from "../utils/constants";
 
@@ -89,9 +87,9 @@ export const getMediaUploads =
       createAction(REQUEST_MEDIA_UPLOADS),
       createAction(RECEIVE_MEDIA_UPLOADS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types`,
-      authErrorHandler,
-      { order, orderDir, term }
-    )(params)(dispatch).then(() => {
+      snackbarErrorHandler,
+      { order, orderDir, term, perPage }
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -111,94 +109,89 @@ export const getMediaUpload = (mediaUploadId) => async (dispatch, getState) => {
     null,
     createAction(RECEIVE_MEDIA_UPLOAD),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${mediaUploadId}`,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
+    snackbarErrorHandler
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
 
-export const queryMediaUploads = debounce(
-  async (summitId, input, callback) => {
-    const accessToken = await getAccessTokenSafely();
-    const apiUrl = URI(
-      `${window.API_BASE_URL}/api/v1/summits/${summitId}/media-upload-types`
-    );
+export const queryMediaUploads = debounce(async (summitId, input, callback) => {
+  const accessToken = await getAccessTokenSafely();
+  const apiUrl = URI(
+    `${window.API_BASE_URL}/api/v1/summits/${summitId}/media-upload-types`
+  );
 
-    apiUrl.addQuery("access_token", accessToken);
-    apiUrl.addQuery("order", "name");
-    apiUrl.addQuery("expand", "type");
-    apiUrl.addQuery("per_page", DEFAULT_PER_PAGE);
+  apiUrl.addQuery("access_token", accessToken);
+  apiUrl.addQuery("order", "name");
+  apiUrl.addQuery("expand", "type");
+  apiUrl.addQuery("per_page", DEFAULT_PER_PAGE);
 
-    if (input) {
-      input = escapeFilterValue(input);
-      apiUrl.addQuery("filter[]", `name=@${input}`);
-    }
+  if (input) {
+    input = escapeFilterValue(input);
+    apiUrl.addQuery("filter[]", `name=@${input}`);
+  }
 
-    fetch(apiUrl.toString())
-      .then(fetchResponseHandler)
-      .then((json) => {
-        const options = [...json.data];
-        callback(options);
-      })
-      .catch(fetchErrorHandler);
-  },
-  DEBOUNCE_WAIT
-);
+  fetch(apiUrl.toString())
+    .then(fetchResponseHandler)
+    .then((json) => {
+      const options = [...json.data];
+      callback(options);
+    })
+    .catch(fetchErrorHandler);
+}, DEBOUNCE_WAIT);
 
 export const resetMediaUploadForm = () => (dispatch) => {
   dispatch(createAction(RESET_MEDIA_UPLOAD_FORM)({}));
 };
 
-export const saveMediaUpload =
-  (entity, noAlert = false) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
+export const saveMediaUpload = (entity) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
 
-    dispatch(startLoading());
+  dispatch(startLoading());
 
-    const normalizedEntity = normalizeEntity(entity);
-    const params = { access_token: accessToken };
+  const normalizedEntity = normalizeEntity(entity);
+  const params = { access_token: accessToken };
 
-    if (entity.id) {
-      putRequest(
-        createAction(UPDATE_MEDIA_UPLOAD),
-        createAction(MEDIA_UPLOAD_UPDATED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${entity.id}`,
-        normalizedEntity,
-        authErrorHandler,
-        entity
-      )(params)(dispatch).then(() => {
-        if (!noAlert)
-          dispatch(showSuccessMessage(T.translate("media_upload.saved")));
-        else dispatch(stopLoading());
-      });
-    } else {
-      const successMessage = {
-        title: T.translate("general.done"),
-        html: T.translate("media_upload.created"),
-        type: "success"
-      };
-
-      postRequest(
-        createAction(UPDATE_MEDIA_UPLOAD),
-        createAction(MEDIA_UPLOAD_ADDED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types`,
-        normalizedEntity,
-        authErrorHandler,
-        entity
-      )(params)(dispatch).then((payload) => {
+  if (entity.id) {
+    return putRequest(
+      createAction(UPDATE_MEDIA_UPLOAD),
+      createAction(MEDIA_UPLOAD_UPDATED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${entity.id}`,
+      normalizedEntity,
+      snackbarErrorHandler,
+      entity
+    )(params)(dispatch)
+      .then(() => {
         dispatch(
-          showMessage(successMessage, () => {
-            history.push(
-              `/app/summits/${currentSummit.id}/media-uploads/${payload.response.id}`
-            );
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("media_upload.saved")
           })
         );
-      });
-    }
-  };
+      })
+      .finally(() => dispatch(stopLoading()));
+  }
+
+  return postRequest(
+    createAction(UPDATE_MEDIA_UPLOAD),
+    createAction(MEDIA_UPLOAD_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types`,
+    normalizedEntity,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("media_upload.created")
+        })
+      );
+    })
+    .finally(() => dispatch(stopLoading()));
+};
 
 export const linkToPresentationType =
   (mediaUpload, presentationTypeId) => async (dispatch, getState) => {
@@ -215,8 +208,8 @@ export const linkToPresentationType =
       createAction(MEDIA_UPLOAD_LINKED)({ mediaUpload }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${mediaUpload.id}/presentation-types/${presentationTypeId}`,
       null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
+      snackbarErrorHandler
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -236,8 +229,8 @@ export const unlinkFromPresentationType =
       createAction(MEDIA_UPLOAD_UNLINKED)({ mediaUploadId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${mediaUploadId}/presentation-types/${presentationTypeId}`,
       null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
+      snackbarErrorHandler
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -257,10 +250,8 @@ export const deleteMediaUpload =
       createAction(MEDIA_UPLOAD_DELETED)({ mediaUploadId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${mediaUploadId}`,
       null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+      snackbarErrorHandler
+    )(params)(dispatch);
   };
 
 export const copyMediaUploads = (summitId) => async (dispatch, getState) => {
@@ -272,16 +263,23 @@ export const copyMediaUploads = (summitId) => async (dispatch, getState) => {
 
   const params = { access_token: accessToken };
 
-  postRequest(
+  return postRequest(
     null,
     createAction(MEDIA_UPLOADS_COPIED),
     `${window.API_BASE_URL}/api/v1/summits/${summitId}/media-upload-types/all/clone/${currentSummit.id}`,
     null,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-    dispatch(getMediaUploads());
-  });
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("media_upload.media_uploads_copied")
+        })
+      );
+      dispatch(getMediaUploads());
+    })
+    .finally(() => dispatch(stopLoading()));
 };
 
 const normalizeEntity = (entity) => {
