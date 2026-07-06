@@ -1,6 +1,8 @@
 import {
   getMediaInputValue,
+  htmlToPlainText,
   isImageUrl,
+  isPositiveIntId,
   normalizeSelectAllField,
   getSafePageAfterRemove
 } from "../methods";
@@ -183,5 +185,42 @@ describe("getSafePageAfterRemove", () => {
 
   it("should stay on current page when removal does not reduce page count", () => {
     expect(getSafePageAfterRemove(20, 10, 2)).toBe(2);
+  });
+});
+
+describe("isPositiveIntId", () => {
+  it("accepts positive integers (number or string)", () => {
+    expect(isPositiveIntId(5)).toBe(true);
+    expect(isPositiveIntId("17")).toBe(true);
+  });
+  it("rejects zero, negatives, non-integers, junk", () => {
+    expect(isPositiveIntId(0)).toBe(false);
+    expect(isPositiveIntId("0")).toBe(false);
+    expect(isPositiveIntId(-3)).toBe(false);
+    expect(isPositiveIntId("1.5")).toBe(false);
+    expect(isPositiveIntId("abc")).toBe(false);
+    expect(isPositiveIntId(null)).toBe(false);
+    expect(isPositiveIntId(undefined)).toBe(false);
+  });
+});
+
+describe("htmlToPlainText", () => {
+  it("returns '' for null/undefined", () => {
+    expect(htmlToPlainText(null)).toBe("");
+    expect(htmlToPlainText(undefined)).toBe("");
+  });
+  it("strips tags with a space at boundaries (no word fusing)", () => {
+    expect(htmlToPlainText("<p>a</p><b>b</b>")).toBe("a b");
+    expect(htmlToPlainText("<p>Hello</p>  <b>world</b>")).toBe("Hello world");
+  });
+  it("decodes valid named + numeric entities", () => {
+    expect(htmlToPlainText("a &amp; b")).toBe("a & b");
+    expect(htmlToPlainText("5 &deg;")).toBe("5 °");
+    expect(htmlToPlainText("&copy;")).toBe("©");
+    expect(htmlToPlainText("&#169;")).toBe("©");
+  });
+  it("leaves malformed-case entities literal (DOMParser is case-sensitive)", () => {
+    expect(htmlToPlainText("&Copy;")).toBe("&Copy;");
+    expect(htmlToPlainText("x&NBSP;y")).toBe("x&NBSP;y");
   });
 });
