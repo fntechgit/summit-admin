@@ -2,12 +2,12 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ImportMUXModal from "../index";
 
-const errorMessage = jest.fn();
+const mockErrorMessage = jest.fn();
 
 jest.mock(
   "openstack-uicore-foundation/lib/components/mui/snackbar-notification",
   () => ({
-    useSnackbarMessage: () => ({ errorMessage })
+    useSnackbarMessage: () => ({ errorMessage: mockErrorMessage })
   })
 );
 
@@ -25,7 +25,7 @@ describe("ImportMUXModal", () => {
 
   beforeEach(() => {
     onClose.mockClear();
-    errorMessage.mockClear();
+    mockErrorMessage.mockClear();
   });
 
   const setup = (onImport) =>
@@ -37,7 +37,9 @@ describe("ImportMUXModal", () => {
 
     fireEvent.click(screen.getByText("event_list.import"));
 
-    expect(errorMessage).toHaveBeenCalledWith("event_list.missing_token_error");
+    expect(mockErrorMessage).toHaveBeenCalledWith(
+      "event_list.missing_token_error"
+    );
     expect(onImport).not.toHaveBeenCalled();
   });
 
@@ -82,7 +84,7 @@ describe("ImportMUXModal", () => {
     fireEvent.click(screen.getByText("event_list.import"));
 
     await waitFor(() =>
-      expect(errorMessage).toHaveBeenCalledWith(
+      expect(mockErrorMessage).toHaveBeenCalledWith(
         expect.stringContaining("event_list.mux_import_error")
       )
     );

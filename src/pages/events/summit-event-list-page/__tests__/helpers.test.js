@@ -6,6 +6,15 @@ import {
   getCriterias
 } from "../helpers";
 
+// formatDuration relies on the moment-duration-format plugin, which is only
+// registered as a side effect of importing event-list-reducer.js elsewhere
+// in the app — not loaded in this test's module graph. Mock it out rather
+// than depend on that incidental registration.
+jest.mock("../../../../utils/methods", () => ({
+  ...jest.requireActual("../../../../utils/methods"),
+  formatDuration: jest.fn(() => "01:00")
+}));
+
 // ─── sort key aliasing ──────────────────────────────────────────────────────
 
 describe("toApiSortKey / toUiSortKey", () => {
@@ -54,8 +63,8 @@ describe("getOptionalColumns", () => {
 
   test("duration render shows the formatted value only when the event type allows publishing dates", () => {
     const { render } = byKey("duration");
-    expect(render(3600, { type: { allows_publishing_dates: true } })).not.toBe(
-      "N/A"
+    expect(render(3600, { type: { allows_publishing_dates: true } })).toBe(
+      "01:00"
     );
     expect(render(3600, { type: { allows_publishing_dates: false } })).toBe(
       "N/A"

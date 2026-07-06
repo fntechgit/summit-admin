@@ -331,14 +331,14 @@ const SummitEventListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={5}>
+        <Grid2 size={4}>
           <SearchInput
             term={term}
             placeholder={T.translate("event_list.placeholders.search_events")}
             onSearch={handleSearch}
           />
         </Grid2>
-        <Grid2 size={7} sx={{ display: "flex", gap: 1, justifyContent: "end" }}>
+        <Grid2 size={8} sx={{ display: "flex", gap: 1, justifyContent: "end" }}>
           <GridFilter
             id={FILTER_ID}
             criterias={getCriterias(currentSummit, mediaUploadTypes)}

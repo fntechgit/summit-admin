@@ -2,12 +2,12 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ImportModal from "../index";
 
-const errorMessage = jest.fn();
+const mockErrorMessage = jest.fn();
 
 jest.mock(
   "openstack-uicore-foundation/lib/components/mui/snackbar-notification",
   () => ({
-    useSnackbarMessage: () => ({ errorMessage })
+    useSnackbarMessage: () => ({ errorMessage: mockErrorMessage })
   })
 );
 
@@ -47,7 +47,7 @@ describe("ImportModal", () => {
 
   beforeEach(() => {
     onClose.mockClear();
-    errorMessage.mockClear();
+    mockErrorMessage.mockClear();
   });
 
   const setup = (onImport) =>
@@ -110,7 +110,7 @@ describe("ImportModal", () => {
     fireEvent.click(screen.getByText("event_list.ingest"));
 
     await waitFor(() =>
-      expect(errorMessage).toHaveBeenCalledWith(
+      expect(mockErrorMessage).toHaveBeenCalledWith(
         expect.stringContaining("event_list.import_events_error")
       )
     );
