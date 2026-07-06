@@ -248,11 +248,10 @@ export const getPurchaseDetailsReport =
   };
 
 // Clears the Purchase Details validation toast (dispatched from the Snackbar
-// onClose). A plain action creator lets the page bind it via the object form of
-// mapDispatchToProps instead of receiving raw dispatch.
-export const clearPurchaseDetailsValidation = () => ({
-  type: PURCHASE_DETAILS_VALIDATION_CLEAR
-});
+// onClose).
+export const clearPurchaseDetailsValidation = () => (dispatch) => {
+  dispatch(createAction(PURCHASE_DETAILS_VALIDATION_CLEAR)({}));
+};
 
 export const getPurchaseDetailsLinesReport =
   (filters = {}, pagination = {}) =>

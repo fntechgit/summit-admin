@@ -48,10 +48,12 @@ describe("FilterBar", () => {
 
   it("applies search live (does not wait for the Apply button)", () => {
     const onApply = jest.fn();
-    // Pass a stable `value` like the real consumers do — omitting it makes the
-    // default `{}` a fresh object each render and loops the value-resync effect.
+    // `value` deliberately OMITTED: exercises the module-level EMPTY_VALUE
+    // default. An inline `{}` default would be a fresh identity each render
+    // and loop the value-resync effect ("Maximum update depth exceeded") —
+    // this test guards that regression.
     renderWithRedux(
-      <FilterBar sponsors={sponsors} onApply={onApply} value={{}} showSearch />
+      <FilterBar sponsors={sponsors} onApply={onApply} showSearch />
     );
     fireEvent.change(
       screen.getByPlaceholderText("sponsor_reports_page.search"),

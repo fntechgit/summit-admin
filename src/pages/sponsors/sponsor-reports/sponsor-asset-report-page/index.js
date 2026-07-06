@@ -27,22 +27,17 @@ import FilterBar from "../../../../components/sponsors/reports/FilterBar";
 import PivotSelector from "../../../../components/sponsors/reports/PivotSelector";
 import PivotTree from "../../../../components/sponsors/reports/PivotTree";
 import { PIVOTS } from "../../../../components/sponsors/reports/pivot-defs";
-import { buildPivotTree } from "../../../../components/sponsors/reports/build-pivot-tree";
+import {
+  buildPivotTree,
+  STATUS_KEYS
+} from "../../../../components/sponsors/reports/build-pivot-tree";
+import { statusTone } from "../../../../components/sponsors/reports/StatusPill";
 import usePrint from "../../../../hooks/usePrint";
 import {
   exportSponsorAssetCsv,
   getSponsorAssetFilters,
   getSponsorAssetRows
 } from "../../../../actions/sponsor-reports-actions";
-
-// not_applicable is omitted — the report is scoped to Media assets (server applies
-// module_type==Media), which never yield an N/A status, so the tile was always zero.
-const STATUS_TILE_KEYS = ["completed", "in_progress", "pending"];
-const TILE_TONE = {
-  completed: "success",
-  in_progress: "info",
-  pending: "warning"
-};
 
 const SponsorAssetReportPage = ({
   // From mapStateToProps
@@ -115,11 +110,11 @@ const SponsorAssetReportPage = ({
   const onApply = (next) => fetchRowsTracked(next);
   const onClear = () => fetchRowsTracked({});
 
-  const tiles = STATUS_TILE_KEYS.map((key) => ({
+  const tiles = STATUS_KEYS.map((key) => ({
     key,
     label: T.translate(`sponsor_reports_page.status_${key}`),
     value: summary?.by_status?.[key] ?? 0,
-    tone: TILE_TONE[key]
+    tone: statusTone(key)
   }));
 
   if (!validSummit) {
@@ -193,7 +188,7 @@ const SponsorAssetReportPage = ({
                 value={draft.status || ""}
                 options={[
                   { value: "", label: T.translate("sponsor_reports_page.any") },
-                  ...STATUS_TILE_KEYS.map((key) => ({
+                  ...STATUS_KEYS.map((key) => ({
                     value: key,
                     label: T.translate(`sponsor_reports_page.status_${key}`)
                   }))

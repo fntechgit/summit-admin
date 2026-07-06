@@ -1,12 +1,16 @@
 import { AXES } from "./pivot-defs";
 
-const STATUS_KEYS = ["completed", "in_progress", "pending"];
+// Asset statuses the report displays, in fixed display order. Single source of
+// truth for the rollup, the header chips (StatusRollupChips) and the summary
+// tiles. not_applicable is omitted — the report is scoped to Media assets
+// (server applies module_type==Media), which never yield an N/A status.
+export const STATUS_KEYS = ["completed", "in_progress", "pending"];
 // Symbol sentinel for the "key is null" (unknown) bucket — collision-free with any
 // real id/string key, and (unlike a string literal) impossible to clash with data.
 const UNKNOWN = Symbol("unknown");
 
 const rollupOf = (rows) => {
-  const r = { completed: 0, in_progress: 0, pending: 0 };
+  const r = Object.fromEntries(STATUS_KEYS.map((key) => [key, 0]));
   rows.forEach((row) => {
     if (STATUS_KEYS.includes(row.status)) r[row.status] += 1;
   });

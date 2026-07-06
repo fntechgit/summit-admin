@@ -1,11 +1,10 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import ChipList from "../../mui/chip-list";
+import { STATUS_KEYS } from "./build-pivot-tree";
 
 // Render the displayed status keys in a fixed order so cards line up. A missing
-// rollup degrades to all-zero. not_applicable is intentionally omitted — the report
-// is scoped to Media assets, which never produce that status.
-const STATUS_KEYS = ["completed", "in_progress", "pending"];
+// rollup degrades to all-zero.
 
 const StatusRollupChips = ({ rollup }) => {
   const r = rollup || {};
