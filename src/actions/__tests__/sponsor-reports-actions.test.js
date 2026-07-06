@@ -201,6 +201,59 @@ describe("sponsor-reports-actions", () => {
       });
       expect(readErr.payload.kind).toBeUndefined();
     });
+
+    it("drops a stale RECEIVE_PURCHASE_DETAILS when a newer call supersedes it (sequence token)", async () => {
+      // Call A's response is held so it lands AFTER call B completes. Different
+      // filters → different getRequest abort keys, so A is never cancelled; only
+      // the sequence guard keeps its late RECEIVE from overwriting B's data.
+      let releaseStale;
+      let callNum = 0;
+      getRequest.mockImplementation(
+        (requestAC, receiveActionCreator) => () => (dispatch) => {
+          callNum += 1;
+          if (typeof requestAC === "function") dispatch(requestAC({}));
+          if (callNum === 1) {
+            return new Promise((resolve) => {
+              releaseStale = () => {
+                // Real getRequest dispatches RECEIVE when the response arrives.
+                dispatch(
+                  receiveActionCreator({
+                    response: { data: [{ id: "stale" }] }
+                  })
+                );
+                resolve();
+              };
+            });
+          }
+          dispatch(
+            receiveActionCreator({ response: { data: [{ id: "fresh" }] } })
+          );
+          return Promise.resolve();
+        }
+      );
+
+      const store = mockStore(MOCK_STATE);
+      // A: fires its request while still current, parks at the held response.
+      const stalePromise = store.dispatch(
+        getPurchaseDetailsReport({ status: "Paid" }, { page: 1 })
+      );
+      await flushPromises();
+      // B supersedes A and completes.
+      await store.dispatch(
+        getPurchaseDetailsReport({ status: "Pending" }, { page: 1 })
+      );
+      await flushPromises();
+      // A's response finally lands — its RECEIVE must be suppressed.
+      releaseStale();
+      await stalePromise;
+      await flushPromises();
+
+      const receives = store
+        .getActions()
+        .filter((a) => a.type === RECEIVE_PURCHASE_DETAILS);
+      expect(receives).toHaveLength(1);
+      expect(receives[0].payload.response.data).toEqual([{ id: "fresh" }]);
+    });
   });
 
   // ─── getPurchaseDetailsFilters ───────────────────────────────────────────────
@@ -229,6 +282,65 @@ describe("sponsor-reports-actions", () => {
       const types = store.getActions().map((a) => a.type);
       expect(types).toContain(RECEIVE_PURCHASE_DETAILS_FILTERS);
       expect(capturedParams.access_token).toBe("TOKEN");
+    });
+
+    it("drops the old summit's stale RECEIVE_PURCHASE_DETAILS_FILTERS after a summit switch (sequence token)", async () => {
+      // Summit switch: the URL changes with the summit id, so the old summit's
+      // in-flight filters request is never cancelled (different abort key). If
+      // its response lands after the new summit's, the sequence guard must drop
+      // it — otherwise filterOptions repopulate with the OLD summit's options.
+      let releaseStale;
+      let callNum = 0;
+      getRequest.mockImplementation(
+        (_requestAC, receiveActionCreator) => () => (dispatch) => {
+          callNum += 1;
+          if (callNum === 1) {
+            return new Promise((resolve) => {
+              releaseStale = () => {
+                dispatch(
+                  receiveActionCreator({
+                    response: { sponsors: [{ id: 1, name: "old-summit" }] }
+                  })
+                );
+                resolve();
+              };
+            });
+          }
+          dispatch(
+            receiveActionCreator({
+              response: { sponsors: [{ id: 2, name: "new-summit" }] }
+            })
+          );
+          return Promise.resolve();
+        }
+      );
+
+      // Old summit (42) fetch parks at its held response; the summit switch
+      // remounts the page, which fetches the new summit (43).
+      const oldStore = mockStore(MOCK_STATE);
+      const stalePromise = oldStore.dispatch(getPurchaseDetailsFilters());
+      await flushPromises();
+      const newStore = mockStore({
+        currentSummitState: { currentSummit: { id: 43 } }
+      });
+      await newStore.dispatch(getPurchaseDetailsFilters());
+      await flushPromises();
+      releaseStale();
+      await stalePromise;
+      await flushPromises();
+
+      // The stale receive must be suppressed entirely; only the new summit's commits.
+      const staleReceives = oldStore
+        .getActions()
+        .filter((a) => a.type === RECEIVE_PURCHASE_DETAILS_FILTERS);
+      expect(staleReceives).toHaveLength(0);
+      const freshReceives = newStore
+        .getActions()
+        .filter((a) => a.type === RECEIVE_PURCHASE_DETAILS_FILTERS);
+      expect(freshReceives).toHaveLength(1);
+      expect(freshReceives[0].payload.response.sponsors[0].name).toBe(
+        "new-summit"
+      );
     });
   });
 
@@ -698,6 +810,48 @@ describe("sponsor-reports-actions", () => {
       // a 503 must also clear loading via an error action.
       expect(types).toContain(SPONSOR_DRILLDOWN_READ_ERROR);
     });
+
+    it("drops sponsor A's stale RECEIVE_SPONSOR_DRILLDOWN after navigating to sponsor B (sequence token)", async () => {
+      // A → B navigation: different sponsorId = different abort key, so A's
+      // in-flight request is never cancelled. If A's response lands after B's,
+      // the sequence guard must drop it — otherwise the drill-down shows
+      // sponsor A's data under sponsor B's URL.
+      let releaseStale;
+      let callNum = 0;
+      getRequest.mockImplementation(
+        (requestAC, receiveActionCreator) => () => (dispatch) => {
+          callNum += 1;
+          if (typeof requestAC === "function") dispatch(requestAC({}));
+          if (callNum === 1) {
+            return new Promise((resolve) => {
+              releaseStale = () => {
+                dispatch(
+                  receiveActionCreator({ response: { sponsor: { id: 683 } } })
+                );
+                resolve();
+              };
+            });
+          }
+          dispatch(receiveActionCreator({ response: { sponsor: { id: 17 } } }));
+          return Promise.resolve();
+        }
+      );
+
+      const store = mockStore(MOCK_STATE);
+      const stalePromise = store.dispatch(getSponsorAssetSponsor(683));
+      await flushPromises();
+      await store.dispatch(getSponsorAssetSponsor(17));
+      await flushPromises();
+      releaseStale();
+      await stalePromise;
+      await flushPromises();
+
+      const receives = store
+        .getActions()
+        .filter((a) => a.type === RECEIVE_SPONSOR_DRILLDOWN);
+      expect(receives).toHaveLength(1);
+      expect(receives[0].payload.response.sponsor.id).toBe(17);
+    });
   });
 
   // ─── getPurchaseDetailsLinesReport ──────────────────────────────────────────
@@ -748,6 +902,58 @@ describe("sponsor-reports-actions", () => {
         perPage: 50,
         filters: { sponsorIds: [17] }
       });
+    });
+
+    it("drops a stale RECEIVE_PURCHASE_DETAILS_LINES when a newer call supersedes it (sequence token)", async () => {
+      const {
+        getPurchaseDetailsLinesReport
+      } = require("../sponsor-reports-actions");
+      // Call A (page 1) is held so its response lands AFTER call B (page 2)
+      // completes; the abort key includes `page`, so A is never cancelled and
+      // only the sequence guard keeps its stale RECEIVE out of the store.
+      let releaseStale;
+      let callNum = 0;
+      getRequest.mockImplementation(
+        (requestAC, receiveActionCreator) => () => (dispatch) => {
+          callNum += 1;
+          if (typeof requestAC === "function") dispatch(requestAC({}));
+          if (callNum === 1) {
+            return new Promise((resolve) => {
+              releaseStale = () => {
+                dispatch(
+                  receiveActionCreator({
+                    response: { data: [{ id: "stale" }] }
+                  })
+                );
+                resolve();
+              };
+            });
+          }
+          dispatch(
+            receiveActionCreator({ response: { data: [{ id: "fresh" }] } })
+          );
+          return Promise.resolve();
+        }
+      );
+
+      const store = mockStore(MOCK_STATE);
+      const stalePromise = store.dispatch(
+        getPurchaseDetailsLinesReport({}, { page: 1, perPage: 50 })
+      );
+      await flushPromises();
+      await store.dispatch(
+        getPurchaseDetailsLinesReport({}, { page: 2, perPage: 50 })
+      );
+      await flushPromises();
+      releaseStale();
+      await stalePromise;
+      await flushPromises();
+
+      const receives = store
+        .getActions()
+        .filter((a) => a.type === "RECEIVE_PURCHASE_DETAILS_LINES");
+      expect(receives).toHaveLength(1);
+      expect(receives[0].payload.response.data).toEqual([{ id: "fresh" }]);
     });
   });
 

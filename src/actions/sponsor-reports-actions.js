@@ -47,11 +47,42 @@ export const RECEIVE_PURCHASE_DETAILS_LINES = "RECEIVE_PURCHASE_DETAILS_LINES";
 export const PURCHASE_DETAILS_LINES_READ_ERROR =
   "PURCHASE_DETAILS_LINES_READ_ERROR";
 
-// Monotonically-increasing counter used to detect stale getSponsorAssetRows completions.
-// Each invocation captures the counter value at entry; only the invocation whose captured
-// value still matches the current counter (i.e. no newer call was started) is allowed to
-// commit its RECEIVE_SPONSOR_ASSET_ROWS dispatch.
-let sponsorAssetRowsSeq = 0;
+// Per-thunk sequence-token factory guarding against stale-response commits.
+// Two concurrent invocations of the same thunk (different filters/page/sponsor)
+// carry different getRequest abort keys (only access_token is stripped from the
+// key), so they never cancel each other and whichever response lands LAST would
+// win — even the older one. Each begin(dispatch) bumps the thunk's counter and
+// returns helpers scoped to that invocation:
+//   isCurrent()        — false once a newer invocation has begun
+//   guardedDispatch(a) — forwards to dispatch only while current, so a
+//                        superseded invocation cannot mutate state at all
+//                        (REQUEST, RECEIVE, error handlers, start/stopLoading).
+// The newest invocation is always current, so the overlay is always cleared by
+// whichever call finishes last. A STALE call's 401 re-login is also dropped
+// (uicore authErrorHandler reaches doLogin by dispatching a thunk through the
+// dispatch it is given) — safe: the fresh call carries the same token, so it
+// 401s too and drives the re-login, and uicore's isClearingSessionState guard
+// dedupes concurrent attempts.
+const sequenced = () => {
+  let seq = 0;
+  return (dispatch) => {
+    seq += 1;
+    const mySeq = seq;
+    return {
+      isCurrent: () => mySeq === seq,
+      guardedDispatch: (action) => {
+        if (mySeq === seq) dispatch(action);
+      }
+    };
+  };
+};
+// One sequence per thunk that commits fetched data to the store.
+const purchaseDetailsSeq = sequenced();
+const purchaseLinesSeq = sequenced();
+const purchaseFiltersSeq = sequenced();
+const sponsorAssetRowsSeq = sequenced();
+const assetFiltersSeq = sequenced();
+const sponsorDrilldownSeq = sequenced();
 
 // Base URL helper — scoped to a specific summit's reports endpoint.
 const base = (summitId) =>
@@ -226,8 +257,15 @@ export const getPurchaseDetailsReport =
     // No summit in context → skip. Otherwise base(currentSummit.id) throws
     // synchronously after startLoading() and the spinner is never cleared.
     if (!currentSummit?.id) return Promise.resolve();
+    // Sequence-guard (see sequenced()): concurrent calls with different
+    // filters/page/sort never abort each other, so a stale response could land
+    // last and overwrite the fresh one. guardedDispatch drops every dispatch
+    // (REQUEST/RECEIVE/errors/loading) from a superseded invocation.
+    const { isCurrent, guardedDispatch } = purchaseDetailsSeq(dispatch);
     const accessToken = await getAccessTokenSafely();
-    dispatch(startLoading());
+    // Superseded while awaiting the token → don't fire a request at all.
+    if (!isCurrent()) return Promise.resolve();
+    guardedDispatch(startLoading());
     const { page, perPage, order, orderDir } = pagination;
     const query = buildPurchaseQuery(filters, pagination);
     const params = { access_token: accessToken, ...query };
@@ -242,9 +280,9 @@ export const getPurchaseDetailsReport =
         onValidationError: createAction(PURCHASE_DETAILS_VALIDATION_ERROR)
       }),
       { currentPage: page, perPage, order, orderDir, filters }
-    )(params)(dispatch)
+    )(params)(guardedDispatch)
       .catch(() => {})
-      .finally(() => dispatch(stopLoading()));
+      .finally(() => guardedDispatch(stopLoading()));
   };
 
 // Clears the Purchase Details validation toast (dispatched from the Snackbar
@@ -259,8 +297,12 @@ export const getPurchaseDetailsLinesReport =
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
     if (!currentSummit?.id) return Promise.resolve();
+    // Sequence-guard (see sequenced()): drops every dispatch from a superseded
+    // invocation so a stale lines response cannot land over a fresh one.
+    const { isCurrent, guardedDispatch } = purchaseLinesSeq(dispatch);
     const accessToken = await getAccessTokenSafely();
-    dispatch(startLoading());
+    if (!isCurrent()) return Promise.resolve();
+    guardedDispatch(startLoading());
     const { page, perPage } = pagination;
     const query = buildPurchaseLinesQuery(filters, pagination);
     const params = { access_token: accessToken, ...query };
@@ -277,17 +319,23 @@ export const getPurchaseDetailsLinesReport =
         onReadError: createAction(PURCHASE_DETAILS_LINES_READ_ERROR)
       }),
       { currentPage: page, perPage, filters }
-    )(params)(dispatch)
+    )(params)(guardedDispatch)
       .catch(() => {})
-      .finally(() => dispatch(stopLoading()));
+      .finally(() => guardedDispatch(stopLoading()));
   };
 
 export const getPurchaseDetailsFilters = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const { currentSummit } = currentSummitState;
   if (!currentSummit?.id) return Promise.resolve();
+  // Sequence-guard (see sequenced()): same-summit duplicates share an abort key
+  // (no user-varying params) so getRequest cancels them, but a summit SWITCH
+  // changes the URL — the old summit's late response would land after the
+  // SET_CURRENT_SUMMIT reset and repopulate filterOptions with stale options.
+  const { isCurrent, guardedDispatch } = purchaseFiltersSeq(dispatch);
   const accessToken = await getAccessTokenSafely();
-  dispatch(startLoading());
+  if (!isCurrent()) return Promise.resolve();
+  guardedDispatch(startLoading());
   return getRequest(
     null,
     createAction(RECEIVE_PURCHASE_DETAILS_FILTERS),
@@ -295,17 +343,21 @@ export const getPurchaseDetailsFilters = () => async (dispatch, getState) => {
     reportReadErrorHandler({
       onReadError: createAction(PURCHASE_DETAILS_READ_ERROR)
     })
-  )({ access_token: accessToken })(dispatch)
+  )({ access_token: accessToken })(guardedDispatch)
     .catch(() => {})
-    .finally(() => dispatch(stopLoading()));
+    .finally(() => guardedDispatch(stopLoading()));
 };
 
 export const getSponsorAssetFilters = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const { currentSummit } = currentSummitState;
   if (!currentSummit?.id) return Promise.resolve();
+  // Sequence-guard: see getPurchaseDetailsFilters — protects the summit-switch
+  // case (different summit id → different abort key → no cancellation).
+  const { isCurrent, guardedDispatch } = assetFiltersSeq(dispatch);
   const accessToken = await getAccessTokenSafely();
-  dispatch(startLoading());
+  if (!isCurrent()) return Promise.resolve();
+  guardedDispatch(startLoading());
   return getRequest(
     null, // no request action for the filters fetch (it records no report state)
     createAction(RECEIVE_SPONSOR_ASSET_FILTERS),
@@ -313,9 +365,9 @@ export const getSponsorAssetFilters = () => async (dispatch, getState) => {
     reportReadErrorHandler({
       onReadError: createAction(SPONSOR_ASSET_READ_ERROR)
     })
-  )({ access_token: accessToken })(dispatch)
+  )({ access_token: accessToken })(guardedDispatch)
     .catch(() => {})
-    .finally(() => dispatch(stopLoading()));
+    .finally(() => guardedDispatch(stopLoading()));
 };
 
 // Fetch the WHOLE filtered collected-asset set for the current summit so the FE can pivot
@@ -332,23 +384,16 @@ export const getSponsorAssetRows =
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
     if (!currentSummit?.id) return Promise.resolve();
-    // Capture the sequence token immediately so any concurrent call that starts after this
-    // one will bump the counter and render this invocation "stale" before we finish.
-    sponsorAssetRowsSeq += 1;
-    const mySeq = sponsorAssetRowsSeq;
-    // Single guard wrapper: every state mutation in this thunk goes through guardedDispatch
-    // so a superseded invocation cannot mutate state at all. Covers:
+    // Begin the sequence immediately so any concurrent call that starts after this
+    // one renders this invocation "stale" before we finish. guardedDispatch covers:
     //   • REQUEST_SPONSOR_ASSET after the token await (stuck-loading hole)
     //   • per-page error dispatches inside getRequest's error handler (stale-error hole)
     //   • both terminal dispatches (RECEIVE and SPONSOR_ASSET_READ_ERROR in catch)
-    // The only un-gated path is doLogin on a stale 401 — acceptable.
-    const guardedDispatch = (action) => {
-      if (mySeq === sponsorAssetRowsSeq) dispatch(action);
-    };
+    const { isCurrent, guardedDispatch } = sponsorAssetRowsSeq(dispatch);
     const accessToken = await getAccessTokenSafely();
     // Superseded before the token resolved → do not fire any request. uicore getRequest
     // aborts the in-flight same-URL request, so a stale call would cancel the current load.
-    if (mySeq !== sponsorAssetRowsSeq) return Promise.resolve();
+    if (!isCurrent()) return Promise.resolve();
     // Guarded so only the still-current invocation drives the global overlay and
     // records the active filters (REQUEST payload) for SPA-navigation persistence.
     guardedDispatch(startLoading());
@@ -395,14 +440,14 @@ export const getSponsorAssetRows =
       const rest = await Promise.all(
         restPages.map((p) =>
           limit(() =>
-            mySeq === sponsorAssetRowsSeq
+            isCurrent()
               ? fetchPage(p)
               : Promise.resolve({ response: { data: [] } })
           )
         )
       );
       // Superseded mid-load → skip the commit; guardedDispatch would drop it anyway.
-      if (mySeq !== sponsorAssetRowsSeq) return Promise.resolve();
+      if (!isCurrent()) return Promise.resolve();
       const allRows = rest.reduce(
         (acc, r) => acc.concat(r.response.data),
         response.data
@@ -484,8 +529,13 @@ export const getSponsorAssetSponsor =
     // No summit in context → skip. Otherwise base(currentSummit.id) throws
     // synchronously after startLoading() and the spinner is never cleared.
     if (!currentSummit?.id) return Promise.resolve();
+    // Sequence-guard (see sequenced()): sponsor A's late response must not land
+    // over sponsor B's after an A → B navigation (different sponsorId = different
+    // abort key, so the requests never cancel each other).
+    const { isCurrent, guardedDispatch } = sponsorDrilldownSeq(dispatch);
     const accessToken = await getAccessTokenSafely();
-    dispatch(startLoading());
+    if (!isCurrent()) return Promise.resolve();
+    guardedDispatch(startLoading());
     return getRequest(
       createAction(REQUEST_SPONSOR_DRILLDOWN),
       createAction(RECEIVE_SPONSOR_DRILLDOWN),
@@ -496,9 +546,9 @@ export const getSponsorAssetSponsor =
         // carries kind:"not-found" so the page renders its sponsor-not-found panel.
         onReadError: createAction(SPONSOR_DRILLDOWN_READ_ERROR)
       })
-    )({ access_token: accessToken })(dispatch)
+    )({ access_token: accessToken })(guardedDispatch)
       .catch(() => {})
-      .finally(() => dispatch(stopLoading()));
+      .finally(() => guardedDispatch(stopLoading()));
   };
 
 // Sponsor-asset CSV — flat export: drop grouping/order/pagination so the export
