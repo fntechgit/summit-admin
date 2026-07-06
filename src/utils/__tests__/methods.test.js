@@ -1,4 +1,10 @@
-import { getMediaInputValue, normalizeSelectAllField } from "../methods";
+import {
+  getMediaInputValue,
+  htmlToPlainText,
+  isImageUrl,
+  isPositiveIntId,
+  normalizeSelectAllField
+} from "../methods";
 
 const FIXED_NOW = 1_772_551_911_231;
 beforeAll(() => jest.spyOn(Date, "now").mockReturnValue(FIXED_NOW));
@@ -119,5 +125,71 @@ describe("getMediaInputValue", () => {
         items: [1, 2]
       });
     });
+  });
+});
+
+describe("isImageUrl", () => {
+  it.each(["jpg", "jpeg", "png", "gif", "webp", "svg", "bmp"])(
+    "returns true for .%s extension",
+    (ext) => {
+      expect(isImageUrl(`https://example.com/file.${ext}`)).toBe(true);
+    }
+  );
+
+  it("is case-insensitive", () => {
+    expect(isImageUrl("https://example.com/file.JPG")).toBe(true);
+    expect(isImageUrl("https://example.com/file.PNG")).toBe(true);
+  });
+
+  it("works with query strings", () => {
+    expect(isImageUrl("https://example.com/file.png?v=123")).toBe(true);
+  });
+
+  it.each(["pdf", "mp4", "doc", "csv", "pptx"])(
+    "returns false for .%s extension",
+    (ext) => {
+      expect(isImageUrl(`https://example.com/file.${ext}`)).toBe(false);
+    }
+  );
+
+  it("returns false for empty string", () => {
+    expect(isImageUrl("")).toBe(false);
+  });
+});
+
+describe("isPositiveIntId", () => {
+  it("accepts positive integers (number or string)", () => {
+    expect(isPositiveIntId(5)).toBe(true);
+    expect(isPositiveIntId("17")).toBe(true);
+  });
+  it("rejects zero, negatives, non-integers, junk", () => {
+    expect(isPositiveIntId(0)).toBe(false);
+    expect(isPositiveIntId("0")).toBe(false);
+    expect(isPositiveIntId(-3)).toBe(false);
+    expect(isPositiveIntId("1.5")).toBe(false);
+    expect(isPositiveIntId("abc")).toBe(false);
+    expect(isPositiveIntId(null)).toBe(false);
+    expect(isPositiveIntId(undefined)).toBe(false);
+  });
+});
+
+describe("htmlToPlainText", () => {
+  it("returns '' for null/undefined", () => {
+    expect(htmlToPlainText(null)).toBe("");
+    expect(htmlToPlainText(undefined)).toBe("");
+  });
+  it("strips tags with a space at boundaries (no word fusing)", () => {
+    expect(htmlToPlainText("<p>a</p><b>b</b>")).toBe("a b");
+    expect(htmlToPlainText("<p>Hello</p>  <b>world</b>")).toBe("Hello world");
+  });
+  it("decodes valid named + numeric entities", () => {
+    expect(htmlToPlainText("a &amp; b")).toBe("a & b");
+    expect(htmlToPlainText("5 &deg;")).toBe("5 °");
+    expect(htmlToPlainText("&copy;")).toBe("©");
+    expect(htmlToPlainText("&#169;")).toBe("©");
+  });
+  it("leaves malformed-case entities literal (DOMParser is case-sensitive)", () => {
+    expect(htmlToPlainText("&Copy;")).toBe("&Copy;");
+    expect(htmlToPlainText("x&NBSP;y")).toBe("x&NBSP;y");
   });
 });
