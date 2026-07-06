@@ -23,7 +23,8 @@ import {
   startLoading,
   stopLoading,
   snackbarErrorHandler,
-  snackbarSuccessHandler
+  snackbarSuccessHandler,
+  snackbarErrorMsg
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
@@ -35,7 +36,6 @@ import {
   IMPORT_SPONSOR_USERS_STATUS,
   SPONSOR_USER_ASSIGNMENT_TYPE
 } from "../utils/constants";
-import { snackbarErrorMsg } from "./base-actions";
 
 export const RECEIVE_SPONSOR_USER_GROUPS = "RECEIVE_SPONSOR_USER_GROUPS";
 export const REQUEST_SPONSOR_USER_REQUESTS = "REQUEST_SPONSOR_USER_REQUESTS";
