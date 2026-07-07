@@ -16,15 +16,20 @@ import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
   REQUEST_SYNC_CONFIG,
   RECEIVE_SYNC_CONFIG,
-  SYNC_CONFIG_UPDATED
+  SYNC_CONFIG_UPDATED,
+  REQUEST_ALLOWLIST_OPTIONS,
+  RECEIVE_ALLOWLIST_OPTIONS,
+  ALLOWLIST_OPTIONS_ERROR
 } from "../../actions/dropbox-sync-actions";
 
 const DEFAULT_STATE = {
   syncConfig: {
     summit_id: null,
     dropbox_sync_enabled: false,
-    preflight_alert_email: null
+    preflight_alert_email: null,
+    materialized_media_upload_types: []
   },
+  allowlistOptions: { options: [], error: null },
   loading: false
 };
 
@@ -46,6 +51,12 @@ const dropboxSyncReducer = (state = DEFAULT_STATE, action) => {
         syncConfig: payload.response ?? DEFAULT_STATE.syncConfig,
         loading: false
       };
+    case REQUEST_ALLOWLIST_OPTIONS:
+      return { ...state, allowlistOptions: { options: [], error: null } };
+    case RECEIVE_ALLOWLIST_OPTIONS:
+      return { ...state, allowlistOptions: { options: payload, error: null } };
+    case ALLOWLIST_OPTIONS_ERROR:
+      return { ...state, allowlistOptions: { options: [], error: payload } };
     case SET_CURRENT_SUMMIT:
     case LOGOUT_USER:
       return { ...DEFAULT_STATE };
