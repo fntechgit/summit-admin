@@ -27,7 +27,9 @@ import {
   showMessage,
   showSuccessMessage,
   startLoading,
-  stopLoading
+  stopLoading,
+  snackbarErrorHandler,
+  snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
 import Swal from "sweetalert2";
@@ -48,7 +50,6 @@ import {
   EXPORT_PAGE_SIZE_100,
   TEN
 } from "../utils/constants";
-import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
 export const REQUEST_TICKETS = "REQUEST_TICKETS";
 export const RECEIVE_TICKETS = "RECEIVE_TICKETS";

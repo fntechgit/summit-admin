@@ -19,14 +19,15 @@ import {
   deleteRequest,
   startLoading,
   stopLoading,
-  escapeFilterValue
+  escapeFilterValue,
+  snackbarErrorHandler,
+  snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
 import {
   getAccessTokenSafely,
   normalizeSelectAllField
 } from "../utils/methods";
-import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,

@@ -15,7 +15,6 @@ import {
   createAction,
   authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { CODE_200 } from "../utils/constants";
 
 export const REQUEST_TIMEZONES = "REQUEST_TIMEZONES";
 export const RECEIVE_TIMEZONES = "RECEIVE_TIMEZONES";
@@ -41,19 +40,3 @@ export const clearSnackbarMessage = () => (dispatch) => {
 export const setSnackbarMessage = (message) => (dispatch) => {
   dispatch(createAction(SET_SNACKBAR_MESSAGE)(message));
 };
-
-export const snackbarErrorHandler = (err, res) => (dispatch, state) => {
-  authErrorHandler(err, res, setSnackbarMessage)(dispatch, state);
-};
-
-export const snackbarSuccessHandler = (message) => (dispatch, state) =>
-  setSnackbarMessage({ ...message, type: "success", code: CODE_200 })(
-    dispatch,
-    state
-  );
-
-export const snackbarErrorMsg = (message) => (dispatch, state) =>
-  setSnackbarMessage({ ...message, type: "error", code: CODE_200 })(
-    dispatch,
-    state
-  );

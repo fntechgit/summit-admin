@@ -27,7 +27,9 @@ import {
   escapeFilterValue,
   fetchResponseHandler,
   fetchErrorHandler,
-  postFile
+  postFile,
+  snackbarErrorHandler,
+  snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import debounce from "lodash/debounce";
 import URI from "urijs";
@@ -42,7 +44,6 @@ import {
   FIVE_PER_PAGE,
   HUNDRED_PER_PAGE
 } from "../utils/constants";
-import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
 URI.escapeQuerySpace = false;
 

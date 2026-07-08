@@ -20,11 +20,11 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  authErrorHandler
+  authErrorHandler,
+  snackbarErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import moment from "moment-timezone";
 import { getAccessTokenSafely } from "../utils/methods";
-import { snackbarErrorHandler } from "./base-actions";
 import { DEFAULT_PER_PAGE } from "../utils/constants";
 
 export const REQUEST_MEMBERS = "REQUEST_MEMBERS";

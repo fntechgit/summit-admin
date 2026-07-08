@@ -21,7 +21,9 @@ import {
   stopLoading,
   startLoading,
   authErrorHandler,
-  escapeFilterValue
+  escapeFilterValue,
+  snackbarErrorHandler,
+  snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
@@ -29,7 +31,6 @@ import {
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE
 } from "../utils/constants";
-import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 import { normalizePageTemplateModules } from "../utils/page-template";
 import { GLOBAL_PAGE_CLONED } from "./sponsor-pages-actions";
 
