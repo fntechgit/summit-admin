@@ -170,7 +170,7 @@ const SponsorMediaUploadTab = ({
         width: 80,
         align: "center",
         render: (row) => {
-          const isImage = row.media_upload?.file_mimetype.includes("image");
+          const isImage = row.media_upload?.file_mimetype?.includes("image");
           return (
             <IconButton
               size="large"
