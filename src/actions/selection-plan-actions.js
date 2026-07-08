@@ -24,6 +24,7 @@ import {
   showMessage,
   authErrorHandler,
   snackbarErrorHandler,
+  snackbarSuccessHandler,
   postFile
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
@@ -35,7 +36,6 @@ import {
   fetchErrorHandler
 } from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";
-import { snackbarSuccessHandler } from "./base-actions";
 import {
   DEBOUNCE_WAIT,
   DEFAULT_CURRENT_PAGE,

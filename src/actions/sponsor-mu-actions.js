@@ -17,7 +17,8 @@ import {
   putRequest,
   deleteRequest,
   startLoading,
-  stopLoading
+  stopLoading,
+  snackbarErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
@@ -25,7 +26,6 @@ import {
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE
 } from "../utils/constants";
-import { snackbarErrorHandler } from "./base-actions";
 
 export const REQUEST_SPONSOR_MEDIA_UPLOADS = "REQUEST_SPONSOR_MEDIA_UPLOADS";
 export const RECEIVE_SPONSOR_MEDIA_UPLOADS = "RECEIVE_SPONSOR_MEDIA_UPLOADS";

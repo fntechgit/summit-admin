@@ -20,7 +20,8 @@ import {
   postRequest,
   putRequest,
   startLoading,
-  stopLoading
+  stopLoading,
+  snackbarErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
 import debounce from "lodash/debounce";
@@ -35,7 +36,6 @@ import {
   DEFAULT_PER_PAGE,
   DOUBLE_PER_PAGE
 } from "../utils/constants";
-import { snackbarErrorHandler } from "./base-actions";
 
 URI.escapeQuerySpace = false;
 

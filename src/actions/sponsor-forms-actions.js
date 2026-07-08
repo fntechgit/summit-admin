@@ -19,7 +19,9 @@ import {
   postRequest,
   putRequest,
   startLoading,
-  stopLoading
+  stopLoading,
+  snackbarErrorHandler,
+  snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 
 import T from "i18n-react/dist/i18n-react";
@@ -34,7 +36,6 @@ import {
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE
 } from "../utils/constants";
-import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
 export const REQUEST_SPONSOR_FORMS = "REQUEST_SPONSOR_FORMS";
 export const RECEIVE_SPONSOR_FORMS = "RECEIVE_SPONSOR_FORMS";

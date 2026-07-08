@@ -77,6 +77,21 @@ describe("saveSelectionPlan", () => {
         actionTypes.indexOf("SELECTION_PLAN_ADDED")
       );
     });
+
+    it("dispatches a success SET_SNACKBAR_MESSAGE on save", async () => {
+      const store = mockStore(storeState);
+      store.dispatch(saveSelectionPlan({ name: "CFP 2026", is_enabled: true }));
+      await flushPromises();
+
+      const snackbarAction = store
+        .getActions()
+        .find((a) => a.type === "SET_SNACKBAR_MESSAGE");
+      expect(snackbarAction).toBeDefined();
+      expect(snackbarAction.payload).toMatchObject({
+        type: "success",
+        code: 200
+      });
+    });
   });
 
   describe("update path (entity has id)", () => {
@@ -102,6 +117,23 @@ describe("saveSelectionPlan", () => {
       expect(actionTypes.indexOf("STOP_LOADING")).toBeGreaterThan(
         actionTypes.indexOf("SELECTION_PLAN_UPDATED")
       );
+    });
+
+    it("dispatches a success SET_SNACKBAR_MESSAGE on save", async () => {
+      const store = mockStore(storeState);
+      store.dispatch(
+        saveSelectionPlan({ id: 1, name: "CFP 2026", is_enabled: true })
+      );
+      await flushPromises();
+
+      const snackbarAction = store
+        .getActions()
+        .find((a) => a.type === "SET_SNACKBAR_MESSAGE");
+      expect(snackbarAction).toBeDefined();
+      expect(snackbarAction.payload).toMatchObject({
+        type: "success",
+        code: 200
+      });
     });
   });
 });
