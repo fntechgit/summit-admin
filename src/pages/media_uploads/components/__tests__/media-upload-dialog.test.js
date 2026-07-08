@@ -35,6 +35,27 @@ jest.mock(
 );
 
 jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/file-size-field",
+  () =>
+    function MockFilesizeField({ name }) {
+      // eslint-disable-next-line global-require
+      const { useField } = require("formik");
+      const [field, meta] = useField(name);
+      return (
+        <>
+          <input
+            data-testid={`filesize-${name}`}
+            name={name}
+            value={field.value ?? ""}
+            onChange={field.onChange}
+          />
+          {meta.touched && meta.error && <span>{meta.error}</span>}
+        </>
+      );
+    }
+);
+
+jest.mock(
   "../../../../components/mui/formik-inputs/mui-formik-select",
   () =>
     function MockSelect({ name, children }) {
@@ -113,7 +134,7 @@ describe("MediaUploadDialog", () => {
     renderDialog();
 
     expect(screen.getByTestId("textfield-name")).toBeInTheDocument();
-    expect(screen.getByTestId("textfield-max_size")).toBeInTheDocument();
+    expect(screen.getByTestId("filesize-max_size")).toBeInTheDocument();
   });
 
   it("only shows the TTL field once use_temporary_links_on_public_storage is checked", async () => {
@@ -209,7 +230,7 @@ describe("MediaUploadDialog", () => {
       const user = userEvent.setup();
       renderDialog({ ...BASE_ENTITY, name: "Slides", max_size: 1024 });
 
-      const maxSizeInput = screen.getByTestId("textfield-max_size");
+      const maxSizeInput = screen.getByTestId("filesize-max_size");
       await act(async () => {
         await user.clear(maxSizeInput);
         await user.click(screen.getByText("general.save").closest("button"));

@@ -33,6 +33,7 @@ import TextField from "@mui/material/TextField";
 import CloseIcon from "@mui/icons-material/Close";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
+import MuiFormikFilesizeField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/file-size-field";
 import useScrollToError from "../../../hooks/useScrollToError";
 import MuiFormikSelect from "../../../components/mui/formik-inputs/mui-formik-select";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
@@ -177,9 +178,10 @@ const MediaUploadDialog = ({
                 <InputLabel htmlFor="max_size">
                   {T.translate("media_upload.max_size")} *
                 </InputLabel>
-                <MuiFormikTextField
+                <MuiFormikFilesizeField
                   name="max_size"
-                  type="number"
+                  valueUnit="KB"
+                  displayUnit="KB"
                   margin="none"
                   fullWidth
                 />
