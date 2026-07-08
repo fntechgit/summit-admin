@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
 import {
@@ -17,7 +17,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
 import CheckBoxList from "openstack-uicore-foundation/lib/components/mui/checkbox-list";
+import { snackbarErrorMsg } from "openstack-uicore-foundation/lib/utils/actions";
 import {
+  fetchSponsorByCompany,
   fetchSponsorUsersBySummit,
   importSponsorUsers
 } from "../../../../actions/sponsor-users-actions";
@@ -27,7 +29,7 @@ import { querySponsors } from "../../../../actions/sponsor-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 
 const SponsorGlobalImportUsersPopup = ({
-  currentSummit,
+  summitId,
   onClose,
   importSponsorUsers
 }) => {
@@ -36,6 +38,7 @@ const SponsorGlobalImportUsersPopup = ({
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loadMoreRequestIdRef = useRef(0);
 
   const formik = useFormik({
     initialValues: { sponsor: { id: "", name: "" } },
@@ -54,11 +57,12 @@ const SponsorGlobalImportUsersPopup = ({
 
   useEffect(() => {
     if (selectedSummit && sponsorId && companyId) {
+      loadMoreRequestIdRef.current += 1; // invalidate in-flight load-more requests
       let cancelled = false;
       setUserOptions(null);
       setSelectedUsers([]);
       fetchSponsorUsersBySummit(
-        currentSummit.id,
+        summitId,
         selectedSummit,
         companyId,
         DEFAULT_CURRENT_PAGE
@@ -72,24 +76,38 @@ const SponsorGlobalImportUsersPopup = ({
         cancelled = true;
       };
     }
+    setUserOptions(null);
+    setSelectedUsers([]);
   }, [selectedSummit, sponsorId, companyId]);
 
   const handleLoadMoreUsers = () => {
-    if (isLoadingMore) return;
+    if (isLoadingMore || !userOptions) return;
     if (userOptions.current_page < userOptions.last_page) {
+      const requestId = ++loadMoreRequestIdRef.current;
       setIsLoadingMore(true);
       fetchSponsorUsersBySummit(
-        currentSummit.id,
+        summitId,
         selectedSummit,
         companyId,
         userOptions.current_page + 1
       )
         .then((userData) => {
-          setUserOptions((value) => ({
-            ...userData,
-            data: [...value.data, ...userData.data]
-          }));
+          if (requestId !== loadMoreRequestIdRef.current || !userData?.data)
+            return;
+          setUserOptions((prev) => {
+            if (!prev) return userData;
+            return {
+              ...userData,
+              data: [...(prev.data || []), ...userData.data]
+            };
+          });
         })
+        .catch(() =>
+          snackbarErrorMsg({
+            title: T.translate("general.error"),
+            html: T.translate("sponsor_users.import_users.fetch_users_fail")
+          })
+        )
         .finally(() => setIsLoadingMore(false));
     }
   };
@@ -102,8 +120,23 @@ const SponsorGlobalImportUsersPopup = ({
   const handleImport = async () => {
     if (isSaving) return;
     setIsSaving(true);
-    importSponsorUsers(sponsorId, companyId, selectedSummit, selectedUsers)
-      .then(() => onClose())
+
+    const runImport = (targetSponsorId) =>
+      importSponsorUsers(
+        targetSponsorId,
+        companyId,
+        selectedSummit,
+        selectedUsers
+      ).then(() => onClose());
+
+    // "apply to all" is resolved by the backend via companyId + target summit,
+    // so only the specific-users path needs the target summit's own sponsor id.
+    (selectedUsers === "all"
+      ? runImport(sponsorId)
+      : fetchSponsorByCompany(companyId, summitId).then((targetSponsor) =>
+          runImport(targetSponsor.id)
+        )
+    )
       .catch(() => {})
       .finally(() => setIsSaving(false));
   };
@@ -146,10 +179,11 @@ const SponsorGlobalImportUsersPopup = ({
           <SummitsDropdown
             onChange={(val) => {
               setSelectedSummit(val);
+              formik.setFieldValue("sponsor", { id: "", name: "" });
               setUserOptions(null);
               setSelectedUsers([]);
             }}
-            excludeSummitIds={[currentSummit.id]}
+            excludeSummitIds={[summitId]}
           />
           {selectedSummit && (
             <Box sx={{ mb: 2, mt: 2 }}>
@@ -218,10 +252,6 @@ const SponsorGlobalImportUsersPopup = ({
   );
 };
 
-const mapStateToProps = ({ currentSummitState }) => ({
-  currentSummit: currentSummitState.currentSummit
-});
-
-export default connect(mapStateToProps, {
+export default connect(null, {
   importSponsorUsers
 })(SponsorGlobalImportUsersPopup);

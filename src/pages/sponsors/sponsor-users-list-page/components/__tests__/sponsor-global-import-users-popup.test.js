@@ -18,6 +18,7 @@ jest.mock("../../../../../actions/sponsor-users-actions", () => {
     __esModule: true,
     ...original,
     fetchSponsorUsersBySummit: jest.fn(),
+    fetchSponsorByCompany: jest.fn(),
     importSponsorUsers: jest.fn(() => () => Promise.resolve())
   };
 });
@@ -132,7 +133,11 @@ const baseState = {
 
 const renderPopup = (props = {}) =>
   renderWithRedux(
-    <SponsorGlobalImportUsersPopup onClose={jest.fn()} {...props} />,
+    <SponsorGlobalImportUsersPopup
+      onClose={jest.fn()}
+      summitId={mockCurrentSummit.id}
+      {...props}
+    />,
     { initialState: baseState }
   );
 
@@ -154,6 +159,10 @@ describe("SponsorGlobalImportUsersPopup", () => {
     sponsorUsersActions.fetchSponsorUsersBySummit.mockResolvedValue(
       mockUserData
     );
+    sponsorUsersActions.fetchSponsorByCompany.mockResolvedValue({
+      id: 999,
+      name: "Test Sponsor"
+    });
     sponsorUsersActions.importSponsorUsers.mockReturnValue(() =>
       Promise.resolve()
     );
@@ -246,8 +255,12 @@ describe("SponsorGlobalImportUsersPopup", () => {
     });
 
     await waitFor(() => {
+      expect(sponsorUsersActions.fetchSponsorByCompany).toHaveBeenCalledWith(
+        42, // companyId
+        mockCurrentSummit.id // current (target) summitId
+      );
       expect(sponsorUsersActions.importSponsorUsers).toHaveBeenCalledWith(
-        1, // sponsorId (formik.values.sponsor.value)
+        999, // sponsorId resolved via fetchSponsorByCompany for the target summit
         42, // companyId
         2, // selectedSummitId
         [10] // selectedUsers
