@@ -35,10 +35,12 @@ const NewUserPopup = ({
   };
 
   const handleOnSave = (values) => {
-    sendSponsorUserInvite(values.email).finally(() => {
-      getSponsorUsers(sponsorId);
-      handleClose();
-    });
+    sendSponsorUserInvite(values.email)
+      .catch(() => {})
+      .finally(() => {
+        getSponsorUsers(sponsorId);
+        handleClose();
+      });
   };
 
   const formik = useFormik({

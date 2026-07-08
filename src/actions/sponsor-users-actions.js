@@ -23,8 +23,8 @@ import {
   startLoading,
   stopLoading,
   snackbarErrorHandler,
-  snackbarSuccessHandler,
-  snackbarErrorMsg
+  snackbarErrorMsg,
+  snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
@@ -531,7 +531,6 @@ export const sendSponsorUserInvite =
       entity
     )(params)(dispatch)
       .then(() => {
-        dispatch(stopLoading());
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),

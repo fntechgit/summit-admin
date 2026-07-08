@@ -2989,7 +2989,8 @@
       "import_users": "Import Users",
       "running": "Users import running on background.",
       "success": "Users imported successfully.",
-      "fail": "Import failed"
+      "fail": "Import failed",
+      "fetch_users_fail": "There was an error fetching the users list."
     }
   },
   "sponsorship_list": {

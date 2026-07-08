@@ -68,14 +68,11 @@ const ImportUsersPopup = ({
   };
 
   const handleImport = async () => {
-    importSponsorUsers(
-      sponsorId,
-      companyId,
-      selectedSummit,
-      selectedUsers
-    ).then(() => {
-      onClose();
-    });
+    importSponsorUsers(sponsorId, companyId, selectedSummit, selectedUsers)
+      .then(() => {
+        onClose();
+      })
+      .catch(() => {});
   };
 
   const handleSelectOnChange = (items, all = false) => {

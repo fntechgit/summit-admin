@@ -135,6 +135,7 @@ const SponsorGlobalNewUserPopup = ({
 SponsorGlobalNewUserPopup.propTypes = {
   onClose: PropTypes.func.isRequired,
   sendSponsorUserInvite: PropTypes.func.isRequired,
+  getSponsorUsers: PropTypes.func.isRequired,
   summitId: PropTypes.number.isRequired
 };
 
