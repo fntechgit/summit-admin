@@ -157,7 +157,8 @@ const InventoryListPage = ({
       columnKey: "code",
       header: T.translate("inventory_item_list.code_column_label"),
       width: 120,
-      sortable: true
+      sortable: true,
+      truncateText: true
     },
     {
       columnKey: "name",
