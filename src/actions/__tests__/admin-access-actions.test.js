@@ -90,6 +90,23 @@ describe("saveAdminAccess", () => {
       );
     });
 
+    it("dispatches a success SET_SNACKBAR_MESSAGE on save", async () => {
+      const store = mockStore({});
+      store.dispatch(
+        saveAdminAccess({ title: "Group A", members: [], summits: [] })
+      );
+      await flushPromises();
+
+      const snackbarAction = store
+        .getActions()
+        .find((a) => a.type === "SET_SNACKBAR_MESSAGE");
+      expect(snackbarAction).toBeDefined();
+      expect(snackbarAction.payload).toMatchObject({
+        type: "success",
+        code: 200
+      });
+    });
+
     it("still dispatches STOP_LOADING when postRequest rejects", async () => {
       postRequest.mockImplementation(rejectMock);
       const store = mockStore({});
@@ -144,6 +161,23 @@ describe("saveAdminAccess", () => {
       expect(actionTypes.indexOf("STOP_LOADING")).toBeGreaterThan(
         actionTypes.indexOf("ADMIN_ACCESS_UPDATED")
       );
+    });
+
+    it("dispatches a success SET_SNACKBAR_MESSAGE on save", async () => {
+      const store = mockStore({});
+      store.dispatch(
+        saveAdminAccess({ id: 1, title: "Group A", members: [], summits: [] })
+      );
+      await flushPromises();
+
+      const snackbarAction = store
+        .getActions()
+        .find((a) => a.type === "SET_SNACKBAR_MESSAGE");
+      expect(snackbarAction).toBeDefined();
+      expect(snackbarAction.payload).toMatchObject({
+        type: "success",
+        code: 200
+      });
     });
 
     it("still dispatches STOP_LOADING when putRequest rejects", async () => {
