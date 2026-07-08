@@ -280,7 +280,8 @@ const SponsorFormsTab = ({
       columnKey: "code",
       header: T.translate("edit_sponsor.forms_tab.code"),
       sortable: true,
-      width: 90
+      width: 90,
+      truncateText: true
     },
     {
       columnKey: "allowed_add_ons",
