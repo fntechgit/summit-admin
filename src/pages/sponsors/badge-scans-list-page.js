@@ -14,7 +14,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Table from "openstack-uicore-foundation/lib/components/table"
+import Table from "openstack-uicore-foundation/lib/components/table";
 import SponsorInput from "openstack-uicore-foundation/lib/components/inputs/sponsor-input";
 import { querySponsorsWithBadgeScans } from "openstack-uicore-foundation/lib/utils/query-actions";
 import { Pagination } from "react-bootstrap";
@@ -100,7 +100,8 @@ const BadgeScansListPage = ({
     {
       columnKey: "attendee_email",
       value: T.translate("badge_scan_list.email"),
-      sortable: true
+      sortable: true,
+      truncateText: true
     },
     {
       columnKey: "attendee_company",

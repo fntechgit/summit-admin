@@ -151,7 +151,8 @@ const SponsorBadgeScans = ({
     {
       columnKey: "attendee_email",
       header: T.translate("sponsor_badge_scans.email"),
-      sortable: true
+      sortable: true,
+      truncateText: true
     },
     {
       columnKey: "attendee_company",
