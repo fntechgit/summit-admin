@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
@@ -23,8 +23,10 @@ import {
   deleteSponsorUser,
   deleteSponsorUserRequest,
   getSponsorUserRequests,
-  getSponsorUsers
+  getSponsorUsers,
+  trackImportSponsorUsers
 } from "../../../actions/sponsor-users-actions";
+import { TEN_SECONDS_IN_MILLISECONDS } from "../../../utils/constants";
 import RequestTable from "./components/request-table";
 import UsersTable from "./components/users-table";
 import EditUserPopup from "./components/edit-user-popup";
@@ -37,18 +39,38 @@ const SponsorUsersListPage = ({
   requests,
   users,
   term,
+  importTasks,
   getSponsorUserRequests,
   getSponsorUsers,
   deleteSponsorUserRequest,
-  deleteSponsorUser
+  deleteSponsorUser,
+  trackImportSponsorUsers
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
   const [userEdit, setUserEdit] = useState(null);
+  const importIntervalRef = useRef(null);
+  const hasImportTasks = !!importTasks?.length;
 
   useEffect(() => {
     getSponsorUserRequests();
     getSponsorUsers();
   }, []);
+
+  useEffect(() => {
+    if (hasImportTasks && !importIntervalRef.current) {
+      importIntervalRef.current = setInterval(
+        () => trackImportSponsorUsers(),
+        TEN_SECONDS_IN_MILLISECONDS
+      );
+    } else if (!hasImportTasks && importIntervalRef.current) {
+      clearInterval(importIntervalRef.current);
+      importIntervalRef.current = null;
+    }
+    return () => {
+      clearInterval(importIntervalRef.current);
+      importIntervalRef.current = null;
+    };
+  }, [hasImportTasks]);
 
   const handleSearch = (searchTerm) => {
     getSponsorUserRequests(null, searchTerm);
@@ -163,5 +185,6 @@ export default connect(mapStateToProps, {
   getSponsorUserRequests,
   getSponsorUsers,
   deleteSponsorUserRequest,
-  deleteSponsorUser
+  deleteSponsorUser,
+  trackImportSponsorUsers
 })(SponsorUsersListPage);
