@@ -22,18 +22,19 @@ describe("toApiSortKey / toUiSortKey", () => {
     expect(toApiSortKey("name")).toBe("last_name");
     expect(toApiSortKey("submitter_company")).toBe("created_by_company");
     expect(toApiSortKey("progress_flags")).toBe("actions");
-    expect(toApiSortKey("track_name")).toBe("track");
   });
 
   test("passes through keys with no alias unchanged", () => {
     expect(toApiSortKey("title")).toBe("title");
+    // "track" needs no aliasing: the column key already matches the API's
+    // order-by key directly.
+    expect(toApiSortKey("track")).toBe("track");
   });
 
   test("aliases an API order-by key back to its UI column key", () => {
     expect(toUiSortKey("last_name")).toBe("name");
     expect(toUiSortKey("created_by_company")).toBe("submitter_company");
     expect(toUiSortKey("actions")).toBe("progress_flags");
-    expect(toUiSortKey("track")).toBe("track_name");
   });
 
   test("passes through keys with no alias unchanged (reverse direction)", () => {
@@ -51,10 +52,10 @@ describe("getOptionalColumns", () => {
     const keys = columns.map((c) => c.columnKey);
     expect(keys).toEqual(
       expect.arrayContaining([
-        "speaker_names",
+        "speakers",
         "created_by_fullname",
         "duration",
-        "track_name",
+        "track",
         "tags",
         "media_uploads"
       ])
@@ -85,6 +86,21 @@ describe("getOptionalColumns", () => {
     const { render } = byKey("location");
     expect(render({ name: "Room A" })).toBe("Room A");
     expect(render(null)).toBe("N/A");
+  });
+
+  // columnKey must stay "speakers"/"track" (the real event fields BulkEditTable
+  // writes edits back onto), so display goes through an explicit render of the
+  // precomputed speaker_names/track_name strings instead of the default
+  // row[columnKey] fallback, which would try to render row.speakers (an array)
+  // or row.track (an object) directly.
+  test("speakers render shows the precomputed speaker_names string", () => {
+    const { render } = byKey("speakers");
+    expect(render(null, { speaker_names: "Jane Doe" })).toBe("Jane Doe");
+  });
+
+  test("track render shows the precomputed track_name string", () => {
+    const { render } = byKey("track");
+    expect(render(null, { track_name: "Track A" })).toBe("Track A");
   });
 });
 

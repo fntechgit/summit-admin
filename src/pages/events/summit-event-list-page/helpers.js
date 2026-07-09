@@ -40,8 +40,7 @@ import { buildNameIdDDL } from "../../../utils/events/summit-event-list-page.uti
 const SORT_KEY_TO_API_KEY = {
   name: "last_name",
   submitter_company: "created_by_company",
-  progress_flags: "actions",
-  track_name: "track"
+  progress_flags: "actions"
 };
 
 const API_KEY_TO_SORT_KEY = Object.fromEntries(
@@ -118,9 +117,16 @@ export const getOptionalColumns = (
   currentSummitId
 ) => [
   {
-    columnKey: "speaker_names",
+    columnKey: "speakers",
     customStyle: { minWidth: "350px" },
     label: T.translate("event_list.speakers"),
+    // BulkEditTable writes edits back onto row[columnKey], and normalizeEvent
+    // expects the edited value on row.speakers — so columnKey must be the
+    // real field, not the speaker_names display string. Render from
+    // speaker_names (precomputed in formatEventData) instead of the default
+    // row[columnKey] fallback, since row.speakers is an array of speaker
+    // objects, not display-ready text.
+    render: (_, row) => row.speaker_names,
     editableField: (extraProps) => {
       const useSpeakers = extraProps.row.type?.use_speakers;
       return (
@@ -181,9 +187,16 @@ export const getOptionalColumns = (
     label: T.translate("event_list.speaker_company")
   },
   {
-    columnKey: "track_name",
+    columnKey: "track",
     sortable: true,
     label: T.translate("event_list.track"),
+    // BulkEditTable writes edits back onto row[columnKey], and
+    // normalizeBulkEvents reads row.track for track_id — so columnKey must
+    // be the real field, not the track_name display string. Render from
+    // track_name (precomputed in formatEventData) instead of the default
+    // row[columnKey] fallback, since row.track is an object, not
+    // display-ready text.
+    render: (_, row) => row.track_name,
     editableField: (extraProps) => {
       const trackOptions = buildNameIdDDL(allTracks);
 

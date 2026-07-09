@@ -100,6 +100,24 @@ describe("Event Actions", () => {
     expect(capturedParams.fields).toContain("type.use_speakers");
   });
 
+  test("requests speakers.email in fields so the bulk-edit speaker label isn't (undefined)", async () => {
+    const store = mockStore({
+      currentSummitState: {
+        currentSummit: {
+          id: 1,
+          time_zone: { name: "UTC" }
+        }
+      }
+    });
+
+    store.dispatch(getEvents());
+
+    await flushPromises();
+
+    expect(capturedParams).toBeTruthy();
+    expect(capturedParams.fields).toContain("speakers.email");
+  });
+
   test("passes pre-built operator filter strings through to the request", async () => {
     const store = mockStore({
       currentSummitState: {
