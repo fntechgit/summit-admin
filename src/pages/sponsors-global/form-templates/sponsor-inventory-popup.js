@@ -85,7 +85,7 @@ const SponsorItemDialog = ({
   };
 
   const handleIDeleteImage = (id) => {
-    if (id) onImageDeleted(id);
+    if (id && onImageDeleted) onImageDeleted(id);
   };
 
   return (

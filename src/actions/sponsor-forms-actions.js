@@ -94,7 +94,8 @@ export const SPONSOR_CUSTOMIZED_FORM_ITEMS_ADDED =
   "SPONSOR_CUSTOMIZED_FORM_ITEMS_ADDED";
 export const RESET_SPONSOR_FORM_MANAGED_ITEM =
   "RESET_SPONSOR_FORM_MANAGED_ITEM";
-
+export const SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED =
+  "SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED";
 // ITEMS
 export const REQUEST_SPONSOR_FORM_ITEMS = "REQUEST_SPONSOR_FORM_ITEMS";
 export const RECEIVE_SPONSOR_FORM_ITEMS = "RECEIVE_SPONSOR_FORM_ITEMS";
@@ -1639,7 +1640,7 @@ export const removeSponsorCustomizedFormItemImages =
 
     return deleteRequest(
       null,
-      createAction(SPONSOR_CUSTOMIZED_FORM_ITEM_DELETED),
+      createAction(SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${formItemId}/images/${fileId}`,
       null,
       snackbarErrorHandler
