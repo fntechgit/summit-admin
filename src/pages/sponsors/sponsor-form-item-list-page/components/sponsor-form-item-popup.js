@@ -47,7 +47,7 @@ const SponsorFormItemPopup = ({ item, onClose, onSave, onRemoveImage }) => {
         <Typography variant="h5">
           {T.translate(
             `sponsor_form_item_list.edit_item.${item?.id ? "edit" : "new"}`
-          )}{" "}
+          )}
         </Typography>
         <IconButton
           size="large"
