@@ -11,15 +11,6 @@ jest.mock(
   })
 );
 
-jest.mock("react-bootstrap", () => {
-  const Modal = ({ show, children }) => (show ? <div>{children}</div> : null);
-  Modal.Header = ({ children }) => <div>{children}</div>;
-  Modal.Title = ({ children }) => <div>{children}</div>;
-  Modal.Body = ({ children }) => <div>{children}</div>;
-  Modal.Footer = ({ children }) => <div>{children}</div>;
-  return { Modal };
-});
-
 describe("ImportMUXModal", () => {
   const onClose = jest.fn();
 
@@ -88,6 +79,72 @@ describe("ImportMUXModal", () => {
         expect.stringContaining("event_list.mux_import_error")
       )
     );
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  test("a second click while an import is in flight does not fire a second onImport call", async () => {
+    let resolveImport;
+    const onImport = jest.fn(
+      () =>
+        new Promise((resolve) => {
+          resolveImport = resolve;
+        })
+    );
+    setup(onImport);
+
+    fireEvent.change(screen.getByLabelText("event_list.mux_token_id"), {
+      target: { value: "tid" }
+    });
+    fireEvent.change(screen.getByLabelText("event_list.mux_token_secret"), {
+      target: { value: "tsecret" }
+    });
+    fireEvent.click(screen.getByText("event_list.import"));
+    fireEvent.click(screen.getByText("event_list.import"));
+
+    expect(onImport).toHaveBeenCalledTimes(1);
+
+    resolveImport();
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  });
+
+  test("disables the import and close buttons while an import is in flight", async () => {
+    let resolveImport;
+    const onImport = jest.fn(
+      () =>
+        new Promise((resolve) => {
+          resolveImport = resolve;
+        })
+    );
+    setup(onImport);
+
+    fireEvent.change(screen.getByLabelText("event_list.mux_token_id"), {
+      target: { value: "tid" }
+    });
+    fireEvent.change(screen.getByLabelText("event_list.mux_token_secret"), {
+      target: { value: "tsecret" }
+    });
+    fireEvent.click(screen.getByText("event_list.import"));
+
+    expect(screen.getByText("event_list.import")).toBeDisabled();
+    expect(screen.getByLabelText("close")).toBeDisabled();
+
+    resolveImport();
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  });
+
+  test("the close button does not call onClose while an import is in flight", () => {
+    const onImport = jest.fn(() => new Promise(() => {}));
+    setup(onImport);
+
+    fireEvent.change(screen.getByLabelText("event_list.mux_token_id"), {
+      target: { value: "tid" }
+    });
+    fireEvent.change(screen.getByLabelText("event_list.mux_token_secret"), {
+      target: { value: "tsecret" }
+    });
+    fireEvent.click(screen.getByText("event_list.import"));
+    fireEvent.click(screen.getByLabelText("close"));
+
     expect(onClose).not.toHaveBeenCalled();
   });
 });

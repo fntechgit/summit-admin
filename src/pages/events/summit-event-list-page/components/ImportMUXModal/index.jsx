@@ -1,28 +1,54 @@
 import React, { useState } from "react";
-import { Modal } from "react-bootstrap";
 import T from "i18n-react";
-import { Input } from "@mui/material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Divider from "@mui/material/Divider";
+import Grid2 from "@mui/material/Grid2";
+import IconButton from "@mui/material/IconButton";
+import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
+import CloseIcon from "@mui/icons-material/Close";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
+
+const FieldLabel = ({ htmlFor, label, info }) => (
+  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}>
+    <Typography component="label" htmlFor={htmlFor}>
+      {label}
+    </Typography>
+    <Tooltip title={info}>
+      <InfoOutlinedIcon fontSize="small" />
+    </Tooltip>
+  </Box>
+);
 
 const ImportMUXModal = ({ show, onClose, onImport }) => {
   const { errorMessage } = useSnackbarMessage();
   const [tokenId, setTokenId] = useState("");
   const [tokenSecret, setTokenSecret] = useState("");
   const [emailTo, setEmailTo] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleClose = () => {
+    if (isSaving) return;
     setTokenId("");
     setTokenSecret("");
     setEmailTo("");
     onClose();
   };
 
-  const handleImport = (ev) => {
-    ev.preventDefault();
+  const handleImport = () => {
+    if (isSaving) return;
     if (!tokenId || !tokenSecret) {
       errorMessage(T.translate("event_list.missing_token_error"));
       return;
     }
+    setIsSaving(true);
     onImport(tokenId, tokenSecret, emailTo)
       .then(() => {
         handleClose();
@@ -33,84 +59,95 @@ const ImportMUXModal = ({ show, onClose, onImport }) => {
             error: error.message || error
           })
         );
-      });
+      })
+      .finally(() => setIsSaving(false));
   };
 
   return (
-    <Modal show={show} onHide={handleClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>{T.translate("event_list.mux_import")}</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <div className="row">
-          <div className="col-md-4">
-            <label htmlFor="mux_token_id">
-              {" "}
-              {T.translate("event_list.mux_token_id")}
-            </label>
-            &nbsp;
-            <i
-              className="fa fa-info-circle"
-              aria-hidden="true"
-              title={T.translate("event_list.mux_token_id_info")}
+    <Dialog
+      open={show}
+      onClose={handleClose}
+      disableEscapeKeyDown={isSaving}
+      maxWidth="md"
+      fullWidth
+    >
+      <DialogTitle
+        component="div"
+        sx={{ display: "flex", justifyContent: "space-between" }}
+      >
+        <Typography variant="h5">
+          {T.translate("event_list.mux_import")}
+        </Typography>
+        <IconButton
+          size="small"
+          onClick={handleClose}
+          disabled={isSaving}
+          aria-label="close"
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </DialogTitle>
+      <Divider />
+      <DialogContent>
+        <Grid2 container spacing={2}>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <FieldLabel
+              htmlFor="mux_token_id"
+              label={T.translate("event_list.mux_token_id")}
+              info={T.translate("event_list.mux_token_id_info")}
             />
-            <Input
+            <TextField
               id="mux_token_id"
               value={tokenId}
               onChange={(ev) => setTokenId(ev.target.value)}
-              className="form-control"
+              fullWidth
+              size="small"
             />
-          </div>
-          <div className="col-md-4">
-            <label htmlFor="mux_token_secret">
-              {" "}
-              {T.translate("event_list.mux_token_secret")}
-            </label>
-            &nbsp;
-            <i
-              className="fa fa-info-circle"
-              aria-hidden="true"
-              title={T.translate("event_list.mux_token_secret_info")}
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <FieldLabel
+              htmlFor="mux_token_secret"
+              label={T.translate("event_list.mux_token_secret")}
+              info={T.translate("event_list.mux_token_secret_info")}
             />
-            <Input
+            <TextField
               id="mux_token_secret"
               type="password"
               value={tokenSecret}
               onChange={(ev) => setTokenSecret(ev.target.value)}
-              className="form-control"
+              fullWidth
+              size="small"
             />
-          </div>
-          <div className="col-md-4">
-            <label htmlFor="mux_email_to">
-              {" "}
-              {T.translate("event_list.mux_email_to")}
-            </label>
-            &nbsp;
-            <i
-              className="fa fa-info-circle"
-              aria-hidden="true"
-              title={T.translate("event_list.mux_email_to_info")}
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <FieldLabel
+              htmlFor="mux_email_to"
+              label={T.translate("event_list.mux_email_to")}
+              info={T.translate("event_list.mux_email_to_info")}
             />
-            <Input
+            <TextField
               id="mux_email_to"
               type="email"
               value={emailTo}
               onChange={(ev) => setEmailTo(ev.target.value)}
-              className="form-control"
+              fullWidth
+              size="small"
             />
-          </div>
-        </div>
-      </Modal.Body>
-      <Modal.Footer>
-        <button
-          className="btn btn-primary"
+          </Grid2>
+        </Grid2>
+      </DialogContent>
+      <Divider />
+      <DialogActions>
+        <Button
+          variant="contained"
+          fullWidth
+          disabled={isSaving}
           onClick={handleImport}
-          type="button"
         >
           {T.translate("event_list.import")}
-        </button>
-      </Modal.Footer>
-    </Modal>
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
