@@ -112,13 +112,11 @@ const SummitEventListPage = ({
   };
 
   useEffect(() => {
-    if (currentSummit) {
+    if (currentSummit?.id) {
       getMediaUploads("", 1, MAX_PER_PAGE, "name", 1);
-      getEvents();
-      // GridFilter persists criteria to localStorage under a summit-agnostic
-      // FILTER_ID, so it survives a summit switch unless cleared explicitly here.
       setSelectedFilterCriteria(null);
-      resetFilters();
+      // events fetch is left to the parsedFilter effect below — getSummitById
+      // already resets GridFilter before this mounts, so it won't be stale.
     }
   }, [currentSummit?.id]);
 
