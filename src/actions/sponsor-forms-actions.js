@@ -850,7 +850,8 @@ export const getSponsorCustomizedFormItems =
     const params = {
       page,
       per_page: perPage,
-      access_token: accessToken
+      access_token: accessToken,
+      expand: "images"
     };
 
     filter.push(`is_archived==${showArchived ? 1 : 0}`);
@@ -1575,9 +1576,12 @@ export const saveSponsorFormManagedItem =
       snackbarErrorHandler,
       entity
     )(params)(dispatch)
-      .then(() => {
-        dispatch(snackbarSuccessHandler(successMessage));
-      })
+      .then(({ response }) =>
+        saveImages(response.id).then(() => {
+          dispatch(snackbarSuccessHandler(successMessage));
+          return response;
+        })
+      )
       .finally(() => {
         dispatch(stopLoading());
       });
@@ -1772,4 +1776,27 @@ export const unarchiveSponsorCustomizedFormItem =
       })
       .catch(() => {})
       .finally(() => dispatch(stopLoading()));
+  };
+
+export const removeSponsorCustomizedFormItemImages =
+  (formId, formItemId, fileId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+    const params = { access_token: accessToken };
+
+    dispatch(startLoading());
+
+    return deleteRequest(
+      null,
+      createAction(SPONSOR_CUSTOMIZED_FORM_ITEM_DELETED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${formItemId}/images/${fileId}`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch).finally(() => {
+      dispatch(stopLoading());
+    });
   };
