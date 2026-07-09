@@ -48,7 +48,6 @@ const SponsorFormItemPopup = ({ item, onClose, onSave, onRemoveImage }) => {
           {T.translate(
             `sponsor_form_item_list.edit_item.${item?.id ? "edit" : "new"}`
           )}{" "}
-          laksjdlkajsdklajds
         </Typography>
         <IconButton
           size="large"

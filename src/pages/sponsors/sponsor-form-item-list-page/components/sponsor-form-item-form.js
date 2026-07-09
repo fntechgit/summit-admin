@@ -58,7 +58,7 @@ const SponsorFormItemForm = ({ initialValues, onSubmit, isSaving, onImageDeleted
   useScrollToError(formik);
 
   const handleDeleteImage = (id) => {
-    if (id) onImageDeleted(id);
+    if (id && onImageDeleted) onImageDeleted(id);
   };
 
   return (
