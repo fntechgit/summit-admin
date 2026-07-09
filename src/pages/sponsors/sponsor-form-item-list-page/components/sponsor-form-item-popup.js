@@ -55,7 +55,7 @@ const SponsorFormItemPopup = ({
         <Typography variant="h5">
           {T.translate(
             `sponsor_form_item_list.edit_item.${item?.id ? "edit" : "new"}`
-          )}{" "}
+          )}
         </Typography>
         <IconButton size="large" sx={{ p: 0 }} onClick={handleClose}>
           <CloseIcon fontSize="large" />
