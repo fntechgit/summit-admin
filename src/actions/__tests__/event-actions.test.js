@@ -165,6 +165,7 @@ describe("Event Actions", () => {
       // so we verify the success path ran via the other dispatched action
       // instead of the reload call itself.
       const actions = store.getActions();
+      expect(actions.some((a) => a.type === "START_LOADING")).toBe(true);
       expect(actions.some((a) => a.type === "STOP_LOADING")).toBe(true);
     });
 

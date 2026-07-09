@@ -1043,6 +1043,8 @@ export const importEventsCSV =
       access_token: accessToken
     };
 
+    dispatch(startLoading());
+
     return postFile(
       null,
       createAction(EVENTS_IMPORTED),
