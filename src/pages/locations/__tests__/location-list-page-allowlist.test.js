@@ -1,11 +1,12 @@
 import React from "react";
 import { screen, fireEvent, act } from "@testing-library/react";
-import LocationListPage, {
+import LocationListPage from "../location-list-page";
+import {
   normalizeName,
   isValidEntry,
   RECONCILE_CASE,
   reconcileAllowlist
-} from "../location-list-page";
+} from "../../../models/materializer-allowlist";
 import { renderWithRedux } from "../../../utils/test-utils";
 import {
   getSyncConfig,
@@ -67,7 +68,14 @@ const buildState = ({ syncConfig = {}, allowlistOptions = {} } = {}) => ({
       materialized_media_upload_types: [],
       ...syncConfig
     },
-    allowlistOptions: { options: [], error: null, ...allowlistOptions }
+    // loaded defaults true: most tests model the post-fetch state. The
+    // not-loaded gating test overrides it explicitly.
+    allowlistOptions: {
+      options: [],
+      error: null,
+      loaded: true,
+      ...allowlistOptions
+    }
   }
 });
 
@@ -407,15 +415,40 @@ describe("reconcileAllowlist Case 0 + dedup pipeline", () => {
 // ===========================================================================
 
 describe("Allowlist panel - mount + options filtering", () => {
-  test("dispatches the aggregator on mount inside the materializer gate", () => {
+  test("dispatches the aggregator on mount inside the materializer gate", async () => {
     mountPanel();
+    // The aggregator is chained behind getSyncConfig's promise, so it fires
+    // on the next microtask, not synchronously with mount.
+    await act(async () => {});
     expect(getAllMediaUploadTypesForAllowlist).toHaveBeenCalledTimes(1);
     expect(getSyncConfig).toHaveBeenCalledTimes(1);
   });
 
-  test("does NOT dispatch the aggregator when the materializer flag is absent", () => {
+  test("mount chains the fetches: the aggregator waits for getSyncConfig to resolve", async () => {
+    // getSyncConfig has no startLoading of its own but clears the global
+    // overlay on completion; if the two fetches ran in parallel, whichever
+    // resolved first would drop the overlay for both, exposing stored rows
+    // reconciled against an empty options list (every row briefly "missing").
+    let resolveSyncConfig;
+    getSyncConfig.mockImplementationOnce(
+      () => () =>
+        new Promise((resolve) => {
+          resolveSyncConfig = resolve;
+        })
+    );
+    mountPanel();
+    expect(getSyncConfig).toHaveBeenCalledTimes(1);
+    expect(getAllMediaUploadTypesForAllowlist).not.toHaveBeenCalled();
+    await act(async () => {
+      resolveSyncConfig();
+    });
+    expect(getAllMediaUploadTypesForAllowlist).toHaveBeenCalledTimes(1);
+  });
+
+  test("does NOT dispatch the aggregator when the materializer flag is absent", async () => {
     delete window.DROPBOX_MATERIALIZER_API_BASE_URL;
     mountPanel();
+    await act(async () => {});
     expect(getAllMediaUploadTypesForAllowlist).not.toHaveBeenCalled();
   });
 
@@ -797,13 +830,15 @@ describe("Allowlist panel - Case 7 remove-and-repick", () => {
 });
 
 describe("Allowlist panel - error + empty gating", () => {
-  test("error state: options hidden, Alert + Retry rendered, Save disabled", () => {
+  test("error state: options hidden, Alert + Retry rendered, Save disabled", async () => {
     mountPanel({
       syncConfig: {
         materialized_media_upload_types: [{ id: 1, name: "Poster" }]
       },
       allowlistOptions: { options: [], error: "fetch failed" }
     });
+    // Flush the chained mount fetch so it registers as the first call.
+    await act(async () => {});
     expect(screen.getByTestId("allowlist-error")).toBeInTheDocument();
     expect(screen.queryByTestId("allowlist-option-1")).not.toBeInTheDocument();
     expect(saveButton()).toBeDisabled();
@@ -812,6 +847,46 @@ describe("Allowlist panel - error + empty gating", () => {
       fireEvent.click(screen.getByTestId("allowlist-retry"));
     });
     expect(getAllMediaUploadTypesForAllowlist).toHaveBeenCalledTimes(2);
+  });
+
+  test("options not yet loaded: stored rows are NOT reconciled (no Case-8 flash) and Save is disabled", () => {
+    // The global overlay is a shared non-ref-counted boolean, so a parallel
+    // fetch (getLocations) finishing first can drop it while the options
+    // aggregator is still running. The panel must gate on data, not overlay:
+    // stored rows must not render badged "missing" against an options list
+    // that merely hasn't arrived, and Save must not persist that state.
+    mountPanel({
+      syncConfig: {
+        materialized_media_upload_types: [{ id: 1, name: "Poster" }]
+      },
+      allowlistOptions: { options: [], error: null, loaded: false }
+    });
+    expect(screen.queryByTestId("allowlist-badge")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("allowlist-check-stored-0")
+    ).not.toBeInTheDocument();
+    expect(saveButton()).toBeDisabled();
+  });
+
+  test("Save AND the sync toggle are disabled while a sync config request is in flight (syncLoading)", () => {
+    // Same fixture as the recovery test below (which asserts enabled with
+    // loading false) — only dropboxSyncState.loading differs. Both actions
+    // (getSyncConfig and updateSyncConfig) flip the flag pre-token, so this
+    // single guard is what makes GET and PUT mutually exclusive: neither the
+    // toggle nor Save can start a PUT while the other request is in flight.
+    const state = buildState({
+      syncConfig: {
+        materialized_media_upload_types: [{ id: 1, name: "Poster" }]
+      },
+      allowlistOptions: { options: [dropboxType(1, "Poster")], error: null }
+    });
+    state.dropboxSyncState.loading = true;
+    renderWithRedux(<LocationListPage history={{ push: jest.fn() }} />, {
+      initialState: state
+    });
+    expect(saveButton()).toBeDisabled();
+    // react-switch renders a hidden checkbox input carrying the id + disabled.
+    expect(document.getElementById("dropbox_sync_enabled")).toBeDisabled();
   });
 
   test("recovery: fresh mount with options + selection re-enables Save", () => {

@@ -5,6 +5,7 @@ import {
   REQUEST_SYNC_CONFIG,
   RECEIVE_SYNC_CONFIG,
   SYNC_CONFIG_UPDATED,
+  SYNC_CONFIG_ERROR,
   REQUEST_ALLOWLIST_OPTIONS,
   RECEIVE_ALLOWLIST_OPTIONS,
   ALLOWLIST_OPTIONS_ERROR
@@ -17,7 +18,7 @@ const DEFAULT_STATE = {
     preflight_alert_email: null,
     materialized_media_upload_types: []
   },
-  allowlistOptions: { options: [], error: null },
+  allowlistOptions: { options: [], error: null, loaded: false },
   loading: false
 };
 
@@ -70,6 +71,28 @@ describe("dropboxSyncReducer", () => {
 
     expect(state.syncConfig).toEqual(payload.response);
     expect(state.loading).toBe(false);
+  });
+
+  test("SYNC_CONFIG_ERROR clears loading but keeps the stored syncConfig", () => {
+    const storedConfig = {
+      summit_id: 1,
+      dropbox_sync_enabled: true,
+      preflight_alert_email: null,
+      materialized_media_upload_types: [{ id: 1, name: "Final Poster" }]
+    };
+    const prevState = {
+      ...DEFAULT_STATE,
+      syncConfig: storedConfig,
+      loading: true
+    };
+
+    const state = dropboxSyncReducer(prevState, {
+      type: SYNC_CONFIG_ERROR,
+      payload: {}
+    });
+
+    expect(state.loading).toBe(false);
+    expect(state.syncConfig).toEqual(storedConfig);
   });
 
   test("SET_CURRENT_SUMMIT resets to default state", () => {
@@ -160,7 +183,8 @@ describe("dropboxSyncReducer", () => {
       syncConfig: { ...DEFAULT_STATE.syncConfig, dropbox_sync_enabled: true },
       allowlistOptions: {
         options: [{ id: 1, name: "Video", private_storage_type: "dropbox" }],
-        error: null
+        error: null,
+        loaded: true
       }
     };
 
@@ -169,7 +193,11 @@ describe("dropboxSyncReducer", () => {
       payload: {}
     });
 
-    expect(state.allowlistOptions).toEqual({ options: [], error: null });
+    expect(state.allowlistOptions).toEqual({
+      options: [],
+      error: null,
+      loaded: false
+    });
     expect(state.syncConfig.dropbox_sync_enabled).toBe(true);
   });
 
@@ -184,7 +212,11 @@ describe("dropboxSyncReducer", () => {
       payload: options
     });
 
-    expect(state.allowlistOptions).toEqual({ options, error: null });
+    expect(state.allowlistOptions).toEqual({
+      options,
+      error: null,
+      loaded: true
+    });
   });
 
   test("ALLOWLIST_OPTIONS_ERROR clears options and sets error message", () => {
@@ -192,7 +224,8 @@ describe("dropboxSyncReducer", () => {
       ...DEFAULT_STATE,
       allowlistOptions: {
         options: [{ id: 1, name: "Video", private_storage_type: "dropbox" }],
-        error: null
+        error: null,
+        loaded: true
       }
     };
 
@@ -203,7 +236,8 @@ describe("dropboxSyncReducer", () => {
 
     expect(state.allowlistOptions).toEqual({
       options: [],
-      error: "fetch failed"
+      error: "fetch failed",
+      loaded: false
     });
   });
 });

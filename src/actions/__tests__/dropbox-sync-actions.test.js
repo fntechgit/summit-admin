@@ -8,9 +8,9 @@ import flushPromises from "flush-promises";
 import {
   getRequest,
   putRequest,
-  postRequest,
-  authErrorHandler
+  postRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
+import { snackbarErrorHandler } from "../base-actions";
 import * as DropboxSyncActions from "../dropbox-sync-actions";
 import * as methods from "../../utils/methods";
 import * as MediaUploadActions from "../media-upload-actions";
@@ -78,6 +78,9 @@ describe("dropbox sync actions", () => {
     const actions = store.getActions();
     expect(actions).toEqual([
       { payload: {}, type: "REQUEST_SYNC_CONFIG" },
+      // uicore's internal receive is a DUMMY; the real commit happens through
+      // the summit-guarded commitDispatch below it.
+      { payload: { response: {} }, type: "DUMMY" },
       { payload: { response: {} }, type: "RECEIVE_SYNC_CONFIG" },
       { payload: undefined, type: "STOP_LOADING" }
     ]);
@@ -108,7 +111,7 @@ describe("dropbox sync actions", () => {
     expect(methods.getAccessTokenSafely).not.toHaveBeenCalled();
   });
 
-  test("updateSyncConfig dispatches START_LOADING, SYNC_CONFIG_UPDATED, STOP_LOADING", async () => {
+  test("updateSyncConfig dispatches START_LOADING, REQUEST_SYNC_CONFIG, SYNC_CONFIG_UPDATED, STOP_LOADING", async () => {
     store.dispatch(
       DropboxSyncActions.updateSyncConfig({ dropbox_sync_enabled: true })
     );
@@ -116,12 +119,251 @@ describe("dropbox sync actions", () => {
 
     const actions = store.getActions();
     expect(actions[0]).toEqual({ payload: undefined, type: "START_LOADING" });
-    expect(actions[1]).toEqual({
+    // REQUEST_SYNC_CONFIG is dispatched by the thunk itself (pre-token, before
+    // putRequest) so dropboxSyncState.loading covers the full save duration
+    // and the Save/toggle/Rebuild disabled guards block overlapping saves.
+    expect(actions[1]).toEqual({ payload: {}, type: "REQUEST_SYNC_CONFIG" });
+    // uicore's internal receive is a DUMMY; the commit is summit-guarded.
+    expect(actions[2]).toEqual({ payload: { response: {} }, type: "DUMMY" });
+    expect(actions[3]).toEqual({
       payload: { response: {} },
       type: "SYNC_CONFIG_UPDATED"
     });
-    expect(actions[2]).toEqual({ payload: undefined, type: "STOP_LOADING" });
+    expect(actions[4]).toEqual({ payload: undefined, type: "STOP_LOADING" });
     expect(putRequest).toHaveBeenCalledTimes(1);
+  });
+
+  test("getSyncConfig gates BEFORE the token await: REQUEST_SYNC_CONFIG is dispatched synchronously", () => {
+    // The mount GET must flip syncLoading immediately so the toggle/Save/
+    // Rebuild guards disable mutations for the GET's whole duration — a PUT
+    // started during a slow token refresh could otherwise interleave with
+    // the GET (early flag clear, or a stale GET overwriting the PUT's config).
+    store.dispatch(DropboxSyncActions.getSyncConfig());
+
+    const types = store.getActions().map((a) => a.type);
+    expect(types).toContain("REQUEST_SYNC_CONFIG");
+    expect(getRequest).not.toHaveBeenCalled();
+  });
+
+  test("updateSyncConfig gates BEFORE the token await: START_LOADING + REQUEST_SYNC_CONFIG are dispatched synchronously", () => {
+    // No flushPromises: a slow token refresh must not leave a window where
+    // Save/toggle are still enabled (dropboxSyncState.loading false) and a
+    // second click can start an overlapping PUT.
+    store.dispatch(
+      DropboxSyncActions.updateSyncConfig({ dropbox_sync_enabled: true })
+    );
+
+    const types = store.getActions().map((a) => a.type);
+    expect(types).toContain("START_LOADING");
+    expect(types).toContain("REQUEST_SYNC_CONFIG");
+    // The PUT itself has not started yet (token still pending).
+    expect(putRequest).not.toHaveBeenCalled();
+  });
+
+  // Request-identity guard: getSyncConfig/updateSyncConfig share a sequence;
+  // only the newest invocation for the still-current summit may commit.
+  describe("sync-config request-identity guard", () => {
+    // Deferred mock that emulates the real uicore contract: on resolution it
+    // dispatches the receive action creator through the dispatch it was
+    // handed, THEN resolves. Without that emulation these tests would pass
+    // vacuously against pre-guard code, which relied on uicore dispatching
+    // the receive creator internally.
+    const deferredRequestImpl =
+      (register) =>
+      (requestActionCreator, receiveActionCreator) =>
+      () =>
+      (dispatch) =>
+        new Promise((resolve, reject) => {
+          if (
+            requestActionCreator &&
+            typeof requestActionCreator === "function"
+          )
+            dispatch(requestActionCreator({}));
+          register({
+            resolve: (payload) => {
+              if (typeof receiveActionCreator === "function")
+                dispatch(receiveActionCreator(payload));
+              resolve(payload);
+            },
+            reject
+          });
+        });
+
+    test("stale GET response for a previous summit is NOT committed after a summit switch", async () => {
+      let currentState = { currentSummitState: { currentSummit: { id: 1 } } };
+      const gStore = mockStore(() => currentState);
+      let inFlight;
+      getRequest.mockImplementation(
+        deferredRequestImpl((handle) => {
+          inFlight = handle;
+        })
+      );
+
+      gStore.dispatch(DropboxSyncActions.getSyncConfig());
+      await flushPromises();
+      expect(getRequest).toHaveBeenCalledTimes(1);
+
+      // Summit switch while the response is in flight.
+      currentState = { currentSummitState: { currentSummit: { id: 2 } } };
+      inFlight.resolve({
+        response: { summit_id: 1, dropbox_sync_enabled: true }
+      });
+      await flushPromises();
+
+      // Summit 1's config must not repopulate summit 2's slice.
+      const types = gStore.getActions().map((a) => a.type);
+      expect(types).not.toContain("RECEIVE_SYNC_CONFIG");
+    });
+
+    test("superseded GET's failure does not clear the newer GET's loading flag (identical-key abort)", async () => {
+      let rejectA;
+      let resolveB;
+      getRequest
+        .mockImplementationOnce(
+          () => () => () =>
+            new Promise((_resolve, reject) => {
+              rejectA = reject;
+            })
+        )
+        .mockImplementationOnce(
+          () => () => () =>
+            new Promise((resolve) => {
+              resolveB = resolve;
+            })
+        );
+
+      store.dispatch(DropboxSyncActions.getSyncConfig()); // A
+      await flushPromises();
+      store.dispatch(DropboxSyncActions.getSyncConfig()); // B supersedes A
+      await flushPromises();
+
+      // uicore aborts A when B fires with the identical token-stripped key;
+      // A's catch must NOT dispatch RECEIVE_SYNC_CONFIG({}) — that would
+      // clear loading (and wipe the config) while B is still in flight.
+      rejectA(new Error("aborted"));
+      await flushPromises();
+      let types = store.getActions().map((a) => a.type);
+      expect(types.filter((t) => t === "RECEIVE_SYNC_CONFIG")).toHaveLength(0);
+
+      resolveB({ response: { summit_id: 1 } });
+      await flushPromises();
+      types = store.getActions().map((a) => a.type);
+      expect(types.filter((t) => t === "RECEIVE_SYNC_CONFIG")).toHaveLength(1);
+    });
+
+    test("PUT superseded by a GET that bails on summit switch: the inherited overlay is still cleared", async () => {
+      // The superseded PUT's terminal dispatches are sequence-suppressed and
+      // the superseding GET never started the overlay — the GET's bail path
+      // is the only live party that can clear it.
+      let currentState = { currentSummitState: { currentSummit: { id: 1 } } };
+      const gStore = mockStore(() => currentState);
+      putRequest.mockImplementation(deferredRequestImpl(() => {}));
+      let resolveTokenB;
+      methods.getAccessTokenSafely
+        .mockReturnValueOnce("TOKEN") // PUT A
+        .mockReturnValueOnce(
+          new Promise((resolve) => {
+            resolveTokenB = resolve;
+          })
+        ); // GET B
+
+      gStore.dispatch(
+        DropboxSyncActions.updateSyncConfig({ dropbox_sync_enabled: true })
+      );
+      await flushPromises(); // A past its token; PUT in flight; overlay started
+      gStore.dispatch(DropboxSyncActions.getSyncConfig()); // B supersedes A, token pending
+      // Summit switches while B awaits its token.
+      currentState = { currentSummitState: { currentSummit: { id: 2 } } };
+      const stopsBefore = gStore
+        .getActions()
+        .filter((a) => a.type === "STOP_LOADING").length;
+
+      resolveTokenB("TOKEN");
+      await flushPromises(); // B bails (newest, summit switched)
+
+      const stopsAfter = gStore
+        .getActions()
+        .filter((a) => a.type === "STOP_LOADING").length;
+      expect(stopsAfter).toBe(stopsBefore + 1);
+      expect(getRequest).not.toHaveBeenCalled(); // B really bailed pre-HTTP
+    });
+
+    test("superseded PUT that succeeded triggers a same-summit refetch so redux converges", async () => {
+      // A GET issued after the PUT was sent can be answered with the PRE-save
+      // snapshot; with the PUT's own commit suppressed, redux would hold
+      // stale config indefinitely without the convergence refetch.
+      const getHandles = [];
+      const putHandles = [];
+      getRequest.mockImplementation(
+        deferredRequestImpl((h) => getHandles.push(h))
+      );
+      putRequest.mockImplementation(
+        deferredRequestImpl((h) => putHandles.push(h))
+      );
+
+      store.dispatch(
+        DropboxSyncActions.updateSyncConfig({ dropbox_sync_enabled: true })
+      ); // PUT A
+      await flushPromises();
+      store.dispatch(DropboxSyncActions.getSyncConfig()); // GET B supersedes A
+      await flushPromises();
+      expect(getRequest).toHaveBeenCalledTimes(1);
+
+      putHandles[0].resolve({
+        response: { summit_id: 1, dropbox_sync_enabled: true }
+      }); // A succeeds server-side; its commit is suppressed
+      await flushPromises();
+      const types = store.getActions().map((a) => a.type);
+      expect(types).not.toContain("SYNC_CONFIG_UPDATED");
+      // The convergence refetch (GET C) fired.
+      expect(getRequest).toHaveBeenCalledTimes(2);
+
+      // B answers with the PRE-save snapshot — superseded by C, not committed.
+      getHandles[0].resolve({
+        response: { summit_id: 1, dropbox_sync_enabled: false }
+      });
+      await flushPromises();
+      expect(
+        store.getActions().filter((a) => a.type === "RECEIVE_SYNC_CONFIG")
+      ).toHaveLength(0);
+
+      // C answers with the post-save state — the one commit that lands.
+      getHandles[1].resolve({
+        response: { summit_id: 1, dropbox_sync_enabled: true }
+      });
+      await flushPromises();
+      const receives = store
+        .getActions()
+        .filter((a) => a.type === "RECEIVE_SYNC_CONFIG");
+      expect(receives).toHaveLength(1);
+      expect(receives[0].payload.response.dropbox_sync_enabled).toBe(true);
+    });
+
+    test("stale PUT response is NOT committed after a summit switch (but its overlay is still cleared)", async () => {
+      let currentState = { currentSummitState: { currentSummit: { id: 1 } } };
+      const gStore = mockStore(() => currentState);
+      let inFlight;
+      putRequest.mockImplementation(
+        deferredRequestImpl((handle) => {
+          inFlight = handle;
+        })
+      );
+
+      gStore.dispatch(
+        DropboxSyncActions.updateSyncConfig({ dropbox_sync_enabled: true })
+      );
+      await flushPromises();
+      currentState = { currentSummitState: { currentSummit: { id: 2 } } };
+      inFlight.resolve({
+        response: { summit_id: 1, dropbox_sync_enabled: true }
+      });
+      await flushPromises();
+
+      const types = gStore.getActions().map((a) => a.type);
+      expect(types).not.toContain("SYNC_CONFIG_UPDATED");
+      // Still the newest invocation, so the overlay it started is cleared.
+      expect(types).toContain("STOP_LOADING");
+    });
   });
 
   test("rebuildSync dispatches START_LOADING, REBUILD_SYNC_DISPATCHED, STOP_LOADING", async () => {
@@ -159,10 +401,15 @@ describe("dropbox sync actions", () => {
     await flushPromises();
 
     const actions = store.getActions();
-    expect(actions).toEqual([{ payload: {}, type: "RECEIVE_SYNC_CONFIG" }]);
+    // REQUEST (pre-token) then RECEIVE({}) from the catch: loading is set and
+    // then cleared even when the GET fails — no stranded flag.
+    expect(actions).toEqual([
+      { payload: {}, type: "REQUEST_SYNC_CONFIG" },
+      { payload: {}, type: "RECEIVE_SYNC_CONFIG" }
+    ]);
   });
 
-  test("updateSyncConfig dispatches STOP_LOADING on failure", async () => {
+  test("updateSyncConfig on failure: loading is set (REQUEST) and then cleared (SYNC_CONFIG_ERROR), no deadlock", async () => {
     putRequest.mockImplementation(() => mockRequestImplReject());
 
     store.dispatch(
@@ -171,8 +418,14 @@ describe("dropbox sync actions", () => {
     await flushPromises();
 
     const actions = store.getActions();
+    // REQUEST_SYNC_CONFIG comes from the thunk's own pre-token dispatch, so
+    // it fires even though the reject mock bypasses uicore's request action —
+    // this pins that a failed save cannot strand dropboxSyncState.loading.
     expect(actions[0]).toEqual({ payload: undefined, type: "START_LOADING" });
-    expect(actions[1]).toEqual({ payload: undefined, type: "STOP_LOADING" });
+    expect(actions[1]).toEqual({ payload: {}, type: "REQUEST_SYNC_CONFIG" });
+    expect(actions[2]).toEqual({ payload: undefined, type: "STOP_LOADING" });
+    // Clears the loading flag without resetting the stored syncConfig.
+    expect(actions[3]).toEqual({ payload: {}, type: "SYNC_CONFIG_ERROR" });
   });
 
   test("rebuildSync dispatches STOP_LOADING on failure", async () => {
@@ -579,7 +832,7 @@ describe("getAllMediaUploadTypesForAllowlist", () => {
     expect(newActions.map((a) => a.type)).not.toContain("STOP_LOADING");
   });
 
-  it("every getRequest call is constructed with authErrorHandler; a 401 page still ends with the ERROR action dispatched", async () => {
+  it("handler identity pin: every getRequest call is constructed with snackbarErrorHandler, and a rejected page still ends with the ERROR action (does NOT exercise snackbar delivery — the mock rejects before the handler runs)", async () => {
     getRequest.mockImplementation(
       () => () => () => Promise.reject(new Error("Unauthorized"))
     );
@@ -589,7 +842,7 @@ describe("getAllMediaUploadTypesForAllowlist", () => {
 
     expect(getRequest.mock.calls.length).toBeGreaterThan(0);
     getRequest.mock.calls.forEach((call) => {
-      expect(call[3]).toBe(authErrorHandler);
+      expect(call[3]).toBe(snackbarErrorHandler);
     });
 
     const types = store.getActions().map((a) => a.type);
