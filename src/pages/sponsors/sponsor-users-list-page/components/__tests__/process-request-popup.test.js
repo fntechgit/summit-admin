@@ -7,6 +7,11 @@ import * as sponsorUsersActions from "../../../../../actions/sponsor-users-actio
 import summitsMock from "./summits.mock.json";
 import userGroupsMock from "./userGroups.mock.json";
 
+// jsdom does not implement scrollIntoView; polyfill so useScrollToError
+// (triggered here because the new-company-request test has validation
+// errors) does not throw.
+window.HTMLElement.prototype.scrollIntoView = jest.fn();
+
 // Mock the actions to return plain objects (not async functions)
 jest.mock("../../../../../actions/sponsor-users-actions", () => {
   const originalModule = jest.requireActual(
@@ -125,5 +130,43 @@ describe("ProcessRequestPopup", () => {
     });
     expect(sponsorUsersActions.processSponsorUserRequest).toHaveBeenCalled();
     expect(onCloseMock).toHaveBeenCalled();
+  });
+
+  it("should not mark the company field as invalid when creating a new sponsor for a company that does not exist yet", async () => {
+    const onCloseMock = jest.fn();
+
+    const requestMock = {
+      id: 30,
+      requester_first_name: "Sebastian German Marset",
+      requester_email: "smarcet@gmail.com",
+      company_id: 0,
+      company_name: "telemat",
+      created: "July 10th 2026, 12:04:30 pm"
+    };
+
+    renderWithRedux(
+      <ProcessRequestPopup request={requestMock} onClose={onCloseMock} />,
+      {
+        initialState: {
+          sponsorUsersListState: userGroupsMock,
+          currentSummitState: summitsMock
+        }
+      }
+    );
+
+    const processRequestButton = screen.getAllByText(
+      "sponsor_users.process_request.save"
+    )[0];
+
+    // Submitting touches every field, which is what surfaces the
+    // "This field is required." error under the company field in the bug.
+    await act(async () => {
+      await userEvent.click(processRequestButton);
+    });
+
+    const companyInput = screen.getByPlaceholderText(
+      "sponsor_users.process_request.select_company"
+    );
+    expect(companyInput).toHaveAttribute("aria-invalid", "false");
   });
 });
