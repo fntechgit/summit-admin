@@ -18,6 +18,7 @@ import {
   AccordionSummary,
   Box,
   Chip,
+  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -28,6 +29,8 @@ import {
   Typography
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import T from "i18n-react/dist/i18n-react";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import StatusPill from "./StatusPill";
@@ -243,6 +246,7 @@ const ByItemView = ({
               <Table size="small">
                 <TableHead>
                   <TableRow>
+                    <TableCell padding="checkbox" />
                     {ITEM_HEADERS.map((h) => (
                       <TableCell key={h.key} align={h.align || "left"}>
                         {T.translate(`sponsor_reports_page.${h.key}`)}
@@ -261,6 +265,26 @@ const ByItemView = ({
                           onClick={() => toggleItem(key)}
                           sx={{ cursor: "pointer" }}
                         >
+                          <TableCell padding="checkbox">
+                            <IconButton
+                              size="small"
+                              aria-label={T.translate(
+                                "sponsor_reports_page.byitem_contributing_orders"
+                              )}
+                              aria-expanded={expanded}
+                              onClick={(e) => {
+                                // Row click also toggles; don't double-fire.
+                                e.stopPropagation();
+                                toggleItem(key);
+                              }}
+                            >
+                              {expanded ? (
+                                <KeyboardArrowUpIcon fontSize="small" />
+                              ) : (
+                                <KeyboardArrowDownIcon fontSize="small" />
+                              )}
+                            </IconButton>
+                          </TableCell>
                           <TableCell>{item.itemCode ?? "—"}</TableCell>
                           <TableCell>{item.label}</TableCell>
                           <TableCell align="right" sx={{ fontWeight: 700 }}>
@@ -284,7 +308,7 @@ const ByItemView = ({
                         {expanded && (
                           <TableRow>
                             <TableCell
-                              colSpan={ITEM_HEADERS.length}
+                              colSpan={ITEM_HEADERS.length + 1}
                               sx={{ bgcolor: "grey.50", py: 1.5 }}
                             >
                               <Typography

@@ -249,6 +249,21 @@ describe("ByItemView", () => {
     expect(screen.queryByText("OCP-1")).not.toBeInTheDocument();
   });
 
+  it("expand button toggles the drill-down and reflects aria-expanded", () => {
+    renderView();
+    const toggle = screen.getByRole("button", {
+      name: "sponsor_reports_page.byitem_contributing_orders"
+    });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByText("OCP-1")).not.toBeInTheDocument();
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("OCP-1")).toBeInTheDocument();
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByText("OCP-1")).not.toBeInTheDocument();
+  });
+
   it("renders the status mix as chips keyed by real purchase statuses", () => {
     renderView();
     expect(screen.getByText("Paid: 1")).toBeInTheDocument();
