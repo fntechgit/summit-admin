@@ -74,7 +74,10 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
               .test(
                 "company-required",
                 T.translate("validation.required"),
-                (value) => value && value.id && value.name
+                (value) =>
+                  Boolean(value) &&
+                  Number.isInteger(value.id) &&
+                  Boolean(value.name)
               )
               .required(T.translate("validation.required")),
           otherwise: (schema) => schema.notRequired()
