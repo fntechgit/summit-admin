@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
 import { FormikProvider, useFormik } from "formik";
@@ -24,8 +24,6 @@ import {
   MuiFormItemTable,
   getCurrentApplicableRate
 } from "openstack-uicore-foundation/lib/components";
-import NotesModal from "openstack-uicore-foundation/lib/components/mui/notes-modal";
-import ItemSettingsModal from "openstack-uicore-foundation/lib/components/mui/item-settings-modal";
 import { DISCOUNT_TYPES } from "../../../../../../../utils/constants";
 import showConfirmDialog from "../../../../../../../components/mui/showConfirmDialog";
 
@@ -38,11 +36,12 @@ const parseValue = (item, timeZone) => {
     case "RadioButtonList":
     case "ComboBox": {
       const defaultVal = item.values.find((v) => v.is_default)?.id;
-      return item.current_value || defaultVal || "";
+      const val = item.current_value || defaultVal;
+      return val ? String(val) : "";
     }
     case "CheckBoxList": {
       const defaultVal = item.values.find((v) => v.is_default)?.id;
-      return item.current_value || (defaultVal ? [defaultVal] : []);
+      return item.current_value || (defaultVal ? [String(defaultVal)] : []);
     }
     case "Text":
     case "TextArea":
@@ -67,39 +66,33 @@ const getYupValidation = (field) => {
 
   switch (field.type) {
     case "Quantity": {
-      schema = yup.number(T.translate("validation.number"));
+      schema = yup.number();
       if (field.minimum_quantity > 0) {
-        schema = schema.min(
-          field.minimum_quantity,
-          T.translate("validation.minimum", { minimum: field.minimum_quantity })
-        );
+        schema = schema.min(field.minimum_quantity, " ");
       }
       if (field.maximum_quantity > 0) {
-        schema = schema.max(
-          field.maximum_quantity,
-          T.translate("validation.maximum", { maximum: field.maximum_quantity })
-        );
+        schema = schema.max(field.maximum_quantity, " ");
       }
       if (field.is_required) {
-        schema = schema.required(T.translate("validation.required"));
+        schema = schema.required(" ");
       }
       break;
     }
     case "Text":
     case "TextArea": {
-      schema = yup.string(T.translate("validation.string"));
+      schema = yup.string();
 
       if (field.is_required) {
-        schema = schema.required(T.translate("validation.required"));
+        schema = schema.required(" ");
       }
       break;
     }
     case "Time":
     case "DateTime": {
-      schema = yup.date(T.translate("validation.date"));
+      schema = yup.date();
 
       if (field.is_required) {
-        schema = schema.required(T.translate("validation.required"));
+        schema = schema.required(" ");
       } else {
         schema = schema.nullable();
       }
@@ -107,10 +100,10 @@ const getYupValidation = (field) => {
     }
     case "RadioButtonList":
     case "ComboBox": {
-      schema = yup.string(T.translate("validation.string"));
+      schema = yup.string();
 
       if (field.is_required) {
-        schema = schema.required(T.translate("validation.required"));
+        schema = schema.required(" ");
       }
       break;
     }
@@ -118,26 +111,23 @@ const getYupValidation = (field) => {
       schema = yup.boolean();
 
       if (field.is_required) {
-        schema = schema.oneOf([true], T.translate("validation.required"));
+        schema = schema.oneOf([true], " ");
       }
       break;
     }
     case "CheckBoxList": {
-      schema = yup
-        .array()
-        .of(yup.string())
-        .typeError(T.translate("validation.wrong_format"));
+      schema = yup.array().of(yup.string()).typeError(" ");
 
       if (field.is_required) {
-        schema = schema.min(1, T.translate("validation.required"));
+        schema = schema.min(1, " ");
       }
       break;
     }
     default: {
-      schema = yup.string(T.translate("validation.wrong_format"));
+      schema = yup.string();
 
       if (field.is_required) {
-        schema = schema.required(T.translate("validation.required"));
+        schema = schema.required(" ");
       }
       break;
     }
@@ -177,30 +167,20 @@ const buildValidationSchema = (items) => {
     const quantityKey = `i-${item.form_item_id}-c-global-f-quantity`;
 
     // notes
-    acc[`i-${item.form_item_id}-c-global-f-notes`] = yup.string(
-      T.translate("validation.string")
-    );
+    acc[`i-${item.form_item_id}-c-global-f-notes`] = yup.string();
     // validation for the global quantity input
-    let globalQtySchema = yup
-      .number(T.translate("validation.number"))
-      .min(0, `${T.translate("validation.minimum")} 0`);
+    let globalQtySchema = yup.number().min(0, " ");
 
     if (item.quantity_limit_per_sponsor > 0) {
       globalQtySchema = globalQtySchema.max(
         item.quantity_limit_per_sponsor,
-        T.translate("validation.maximum", {
-          maximum: item.quantity_limit_per_sponsor
-        })
+        " "
       );
     }
-    globalQtySchema = globalQtySchema.required(
-      T.translate("validation.required")
-    );
+    globalQtySchema = globalQtySchema.required(" ");
     acc[quantityKey] = globalQtySchema;
     // custom rate
-    acc[`i-${item.form_item_id}-c-global-f-custom_rate`] = yup.number(
-      T.translate("validation.number")
-    );
+    acc[`i-${item.form_item_id}-c-global-f-custom_rate`] = yup.number();
 
     item.meta_fields.map((f) => {
       acc[`i-${item.form_item_id}-c-${f.class_field}-f-${f.type_id}`] = yup
@@ -215,10 +195,8 @@ const buildValidationSchema = (items) => {
     return acc;
   }, {});
 
-  schema.discount_amount = yup.number(T.translate("validation.number"));
-  schema.discount_type = yup
-    .string(T.translate("validation.string"))
-    .nullable();
+  schema.discount_amount = yup.number();
+  schema.discount_type = yup.string().nullable();
 
   return schema;
 };
@@ -230,9 +208,6 @@ const EditForm = ({
   onSaveForm,
   onCancel
 }) => {
-  const [notesItem, setNotesItem] = useState(null);
-  const [settingsItem, setSettingsItem] = useState(null);
-
   const currentApplicableRate = useMemo(
     () => getCurrentApplicableRate(showTimeZone, showMetadata),
     [showMetadata, showTimeZone]
@@ -318,10 +293,6 @@ const EditForm = ({
   // wait for formik to re-initialize with form items
   if (!form || Object.keys(formik.values).length === 0) return null;
 
-  const hasItemFieldErrors = Object.keys(formik.errors).some(
-    (key) => key.includes("-c-Item-") && formik.touched[key]
-  );
-
   return (
     <>
       <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
@@ -332,14 +303,19 @@ const EditForm = ({
         {form?.items.length} {T.translate("general.items")}
       </Box>
       <FormikProvider value={formik}>
-        <Box component="form" onSubmit={formik.handleSubmit} autoComplete="off">
+        <Box
+          component="form"
+          onSubmit={formik.handleSubmit}
+          autoComplete="off"
+          noValidate
+        >
           <MuiFormItemTable
             data={form.items}
             currentApplicableRate={currentApplicableRate}
             values={formik.values}
+            touched={formik.touched}
+            errors={formik.errors}
             timeZone={showTimeZone}
-            onNotesClick={setNotesItem}
-            onSettingsClick={setSettingsItem}
           />
           <Box
             component="div"
@@ -364,29 +340,7 @@ const EditForm = ({
               {T.translate("general.save")}
             </Button>
           </Box>
-          {hasItemFieldErrors && (
-            <Box component="div" sx={{ mt: 1 }}>
-              <Typography
-                variant="caption"
-                color="error"
-                display="block"
-                sx={{ mt: 0.25, textAlign: "right" }}
-              >
-                {T.translate("validation.additional_items")}
-              </Typography>
-            </Box>
-          )}
         </Box>
-        <NotesModal
-          item={notesItem}
-          open={!!notesItem}
-          onClose={() => setNotesItem(null)}
-        />
-        <ItemSettingsModal
-          item={settingsItem}
-          open={!!settingsItem}
-          onClose={() => setSettingsItem(null)}
-        />
       </FormikProvider>
     </>
   );
