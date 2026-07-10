@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import moment from "moment-timezone";
@@ -30,6 +30,9 @@ import FilterBar from "../../../../components/sponsors/reports/FilterBar";
 import OrdersTable from "../../../../components/sponsors/reports/OrdersTable";
 import LinesManifestView from "../../../../components/sponsors/reports/LinesManifestView";
 import ReportViewToggle from "../../../../components/sponsors/reports/ReportViewToggle";
+import ByItemView, {
+  groupLinesBySponsorItem
+} from "../../../../components/sponsors/reports/ByItemView";
 import usePrint from "../../../../hooks/usePrint";
 import {
   getPurchaseDetailsReport,
@@ -37,7 +40,9 @@ import {
   getPurchaseDetailsFilters,
   clearPurchaseDetailsValidation,
   exportPurchaseDetailsCsv,
-  exportPurchaseDetailsLinesCsv
+  exportPurchaseDetailsLinesCsv,
+  getPurchaseDetailsByItemRows,
+  setPurchaseDetailsByItemPaging
 } from "../../../../actions/sponsor-reports-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 
@@ -89,6 +94,15 @@ const PurchaseDetailsReportPage = ({
   linesCurrentPage,
   linesPerPage,
   linesFilters,
+  // By Item slice (whole-set rows + client paging over derived sponsor groups)
+  byItemData,
+  byItemSummary,
+  byItemReadError,
+  byItemCurrentPage,
+  byItemPerPage,
+  byItemFilters,
+  getPurchaseDetailsByItemRows: fetchByItemRows,
+  setPurchaseDetailsByItemPaging: setByItemPaging,
   // From mapDispatchToProps (object form — bound action creators)
   getPurchaseDetailsReport: fetchReport,
   getPurchaseDetailsLinesReport: fetchLinesReport,
@@ -100,8 +114,8 @@ const PurchaseDetailsReportPage = ({
   const print = usePrint();
   const { errorMessage } = useSnackbarMessage();
 
-  // "orders" | "lines" — a transient UI toggle (NOT server state), so it stays
-  // local. Everything else is sourced from the reducer slices above.
+  // "orders" | "lines" | "byitem" — a transient UI toggle (NOT server state), so
+  // it stays local. Everything else is sourced from the reducer slices above.
   const [view, setView] = useState("orders");
   const prevViewRef = useRef(view);
 
@@ -124,30 +138,50 @@ const PurchaseDetailsReportPage = ({
   }, []); // mount-only
 
   // Fetch the active view. Runs on mount (initial load) and on every view switch.
-  // A single FilterBar is shared across both views, so the filters applied in the
+  // A single FilterBar is shared across all views, so the filters applied in the
   // view we're leaving are carried into the view we're entering; the entering view
   // keeps its own page when those filters are unchanged, else snaps back to page 1.
   useEffect(() => {
     const prevView = prevViewRef.current;
     prevViewRef.current = view;
-    const carried = prevView === "orders" ? filters : linesFilters;
+    const carried =
+      prevView === "orders"
+        ? filters
+        : prevView === "lines"
+        ? linesFilters
+        : byItemFilters;
     if (view === "orders") {
       const page = sameFilters(carried, filters)
         ? currentPage
         : DEFAULT_CURRENT_PAGE;
       fetchReport(carried, { page, perPage, order, orderDir });
-    } else {
+    } else if (view === "lines") {
       const page = sameFilters(carried, linesFilters)
         ? linesCurrentPage
         : DEFAULT_CURRENT_PAGE;
       fetchLinesReport(carried, { page, perPage: linesPerPage });
+    } else {
+      // Whole-set fetch (no server page). Keep the user's client page when the
+      // carried filters match; else snap back to page 1 (result set changed).
+      if (!sameFilters(carried, byItemFilters)) {
+        setByItemPaging({
+          currentPage: DEFAULT_CURRENT_PAGE,
+          perPage: byItemPerPage
+        });
+      }
+      fetchByItemRows(carried);
     }
   }, [view]);
 
   // ── Summary tiles ───────────────────────────────────────────────────────────
   // D9: Total Refunded tile renders ONLY when total_refunded != null — a defensive
   // presence check (the field is optional in the summary payload).
-  const activeSummary = view === "orders" ? summary : linesSummary;
+  const activeSummary =
+    view === "orders"
+      ? summary
+      : view === "lines"
+      ? linesSummary
+      : byItemSummary;
   // money: format integer CENTS via uicore; guard unexpected nulls with em dash.
   const money = (cents) =>
     cents == null ? "—" : currencyAmountFromCents(cents);
@@ -200,11 +234,18 @@ const PurchaseDetailsReportPage = ({
         order,
         orderDir
       });
-    } else {
+    } else if (view === "lines") {
       fetchLinesReport(next, {
         page: DEFAULT_CURRENT_PAGE,
         perPage: linesPerPage
       });
+    } else {
+      // New result set → client page resets to 1.
+      setByItemPaging({
+        currentPage: DEFAULT_CURRENT_PAGE,
+        perPage: byItemPerPage
+      });
+      fetchByItemRows(next);
     }
   };
   const handleClear = () => handleApply({});
@@ -347,7 +388,25 @@ const PurchaseDetailsReportPage = ({
     </>
   );
 
-  const activeFilters = view === "orders" ? filters : linesFilters;
+  const activeFilters =
+    view === "orders"
+      ? filters
+      : view === "lines"
+      ? linesFilters
+      : byItemFilters;
+
+  const activeReadError =
+    view === "orders"
+      ? readError
+      : view === "lines"
+      ? linesReadError
+      : byItemReadError;
+
+  // Memoized: regroups only when the whole-set rows change, not on every render.
+  const byItemGroups = useMemo(
+    () => groupLinesBySponsorItem(byItemData),
+    [byItemData]
+  );
 
   return (
     <ReportShell
@@ -367,7 +426,9 @@ const PurchaseDetailsReportPage = ({
             onClick={() =>
               view === "orders"
                 ? exportOrdersCsv(filters, order, orderDir)
-                : exportLinesCsv(linesFilters)
+                : view === "lines"
+                ? exportLinesCsv(linesFilters)
+                : exportLinesCsv(byItemFilters)
             }
           >
             {T.translate("sponsor_reports_page.export_csv")}
@@ -387,9 +448,9 @@ const PurchaseDetailsReportPage = ({
       }
     >
       <SummaryPanel tiles={tiles} />
-      {(view === "orders" ? readError : linesReadError) ? (
+      {activeReadError ? (
         <Alert data-testid="reports-read-error" severity="warning">
-          {(view === "orders" ? readError : linesReadError)?.message ||
+          {activeReadError?.message ||
             T.translate("sponsor_reports_page.read_error")}
         </Alert>
       ) : view === "orders" ? (
@@ -404,7 +465,7 @@ const PurchaseDetailsReportPage = ({
           onPerPageChange={handlePerPageChange}
           onSort={handleSort}
         />
-      ) : (
+      ) : view === "lines" ? (
         <LinesManifestView
           rows={linesData}
           total={linesTotal}
@@ -413,6 +474,21 @@ const PurchaseDetailsReportPage = ({
           onPageChange={handleLinesPageChange}
           onPerPageChange={handleLinesPerPageChange}
         />
+      ) : (
+        <ByItemView
+          groups={byItemGroups}
+          currentPage={byItemCurrentPage}
+          perPage={byItemPerPage}
+          onPageChange={(page) =>
+            setByItemPaging({ currentPage: page, perPage: byItemPerPage })
+          }
+          onPerPageChange={(newPerPage) =>
+            setByItemPaging({
+              currentPage: DEFAULT_CURRENT_PAGE,
+              perPage: newPerPage
+            })
+          }
+        />
       )}
     </ReportShell>
   );
@@ -420,7 +496,8 @@ const PurchaseDetailsReportPage = ({
 
 const mapStateToProps = ({
   sponsorReportsPurchaseDetailsState,
-  sponsorReportsPurchaseDetailsLinesState
+  sponsorReportsPurchaseDetailsLinesState,
+  sponsorReportsPurchaseDetailsByItemState
 }) => ({
   ...sponsorReportsPurchaseDetailsState,
   linesData: sponsorReportsPurchaseDetailsLinesState.data,
@@ -429,7 +506,13 @@ const mapStateToProps = ({
   linesReadError: sponsorReportsPurchaseDetailsLinesState.readError,
   linesCurrentPage: sponsorReportsPurchaseDetailsLinesState.currentPage,
   linesPerPage: sponsorReportsPurchaseDetailsLinesState.perPage,
-  linesFilters: sponsorReportsPurchaseDetailsLinesState.filters
+  linesFilters: sponsorReportsPurchaseDetailsLinesState.filters,
+  byItemData: sponsorReportsPurchaseDetailsByItemState.data,
+  byItemSummary: sponsorReportsPurchaseDetailsByItemState.summary,
+  byItemReadError: sponsorReportsPurchaseDetailsByItemState.readError,
+  byItemCurrentPage: sponsorReportsPurchaseDetailsByItemState.currentPage,
+  byItemPerPage: sponsorReportsPurchaseDetailsByItemState.perPage,
+  byItemFilters: sponsorReportsPurchaseDetailsByItemState.filters
 });
 
 const mapDispatchToProps = {
@@ -438,7 +521,9 @@ const mapDispatchToProps = {
   getPurchaseDetailsFilters,
   clearPurchaseDetailsValidation,
   exportPurchaseDetailsCsv,
-  exportPurchaseDetailsLinesCsv
+  exportPurchaseDetailsLinesCsv,
+  getPurchaseDetailsByItemRows,
+  setPurchaseDetailsByItemPaging
 };
 
 export default withRouter(

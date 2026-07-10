@@ -25,6 +25,9 @@ const ReportViewToggle = ({ value, onChange }) => (
     <ToggleButton value="lines">
       {T.translate("sponsor_reports_page.view_line_items")}
     </ToggleButton>
+    <ToggleButton value="byitem">
+      {T.translate("sponsor_reports_page.view_by_item")}
+    </ToggleButton>
   </ToggleButtonGroup>
 );
 

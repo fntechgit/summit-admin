@@ -47,6 +47,17 @@ export const RECEIVE_PURCHASE_DETAILS_LINES = "RECEIVE_PURCHASE_DETAILS_LINES";
 export const PURCHASE_DETAILS_LINES_READ_ERROR =
   "PURCHASE_DETAILS_LINES_READ_ERROR";
 
+export const REQUEST_PURCHASE_DETAILS_BY_ITEM =
+  "REQUEST_PURCHASE_DETAILS_BY_ITEM";
+export const RECEIVE_PURCHASE_DETAILS_BY_ITEM_PAGE =
+  "RECEIVE_PURCHASE_DETAILS_BY_ITEM_PAGE"; // throwaway per-page action
+export const RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS =
+  "RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS";
+export const PURCHASE_DETAILS_BY_ITEM_READ_ERROR =
+  "PURCHASE_DETAILS_BY_ITEM_READ_ERROR";
+export const SET_PURCHASE_DETAILS_BY_ITEM_PAGING =
+  "SET_PURCHASE_DETAILS_BY_ITEM_PAGING";
+
 // Per-thunk sequence-token factory guarding against stale-response commits.
 // Two concurrent invocations of the same thunk (different filters/page/sponsor)
 // carry different getRequest abort keys (only access_token is stripped from the
@@ -83,6 +94,7 @@ const purchaseFiltersSeq = sequenced();
 const sponsorAssetRowsSeq = sequenced();
 const assetFiltersSeq = sequenced();
 const sponsorDrilldownSeq = sequenced();
+const purchaseByItemSeq = sequenced();
 
 // Base URL helper — scoped to a specific summit's reports endpoint.
 const base = (summitId) =>
@@ -477,6 +489,101 @@ export const getSponsorAssetRows =
       guardedDispatch(stopLoading());
     }
     return Promise.resolve();
+  };
+
+// Fetch the WHOLE filtered line set for the By Item rollup — same whole-set
+// client-side-pivot flow as getSponsorAssetRows above (see that thunk for the
+// full sequencing rationale). Page 1 yields last_page + the embedded summary
+// (the backend computes it over the unpaginated filtered set); pages 2..last
+// bulk-load with a bounded-concurrency pool. Rows commit atomically in ONE
+// RECEIVE so the rollup never renders a partial set.
+export const getPurchaseDetailsByItemRows =
+  (filters = {}) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+    if (!currentSummit?.id) return Promise.resolve();
+    const { isCurrent, guardedDispatch } = purchaseByItemSeq(dispatch);
+    const accessToken = await getAccessTokenSafely();
+    if (!isCurrent()) return Promise.resolve();
+    guardedDispatch(startLoading());
+    guardedDispatch(
+      createAction(REQUEST_PURCHASE_DETAILS_BY_ITEM)({ filters })
+    );
+    // Lines-grain query (drops paymentMethod); one arg → no page/per_page emitted.
+    const baseQuery = buildPurchaseLinesQuery(filters);
+    const url = `${base(currentSummit.id)}/purchase-details/lines`;
+    const fetchPage = (page) =>
+      getRequest(
+        null,
+        createAction(RECEIVE_PURCHASE_DETAILS_BY_ITEM_PAGE),
+        url,
+        reportReadErrorHandler({
+          onReadError: createAction(PURCHASE_DETAILS_BY_ITEM_READ_ERROR)
+        })
+      )({
+        access_token: accessToken,
+        ...baseQuery,
+        per_page: HUNDRED_PER_PAGE,
+        page
+      })(guardedDispatch);
+    try {
+      const { response } = await fetchPage(1);
+      const lastPage = response.last_page || 1;
+      const limit = pLimit(TEN);
+      const restPages = Array.from(
+        { length: lastPage },
+        (_, i) => i + DEFAULT_CURRENT_PAGE
+      ).slice(DEFAULT_CURRENT_PAGE);
+      // Re-check the seq INSIDE the pool callback: a superseded invocation's
+      // queued jobs must not fire (see getSponsorAssetRows).
+      const rest = await Promise.all(
+        restPages.map((p) =>
+          limit(() =>
+            isCurrent()
+              ? fetchPage(p)
+              : Promise.resolve({ response: { data: [] } })
+          )
+        )
+      );
+      if (!isCurrent()) return Promise.resolve();
+      const allRows = rest.reduce(
+        (acc, r) => acc.concat(r.response.data),
+        response.data
+      );
+      guardedDispatch(
+        createAction(RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS)({
+          response: { ...response, data: allRows }
+        })
+      );
+      guardedDispatch(stopLoading());
+    } catch (e) {
+      // Only a genuine non-HTTP Error lands here (HTTP errors already routed
+      // through reportReadErrorHandler) — see getSponsorAssetRows.
+      if (e instanceof Error) {
+        guardedDispatch(
+          createAction(PURCHASE_DETAILS_BY_ITEM_READ_ERROR)({
+            message: e.message
+          })
+        );
+      }
+      guardedDispatch(stopLoading());
+    }
+    return Promise.resolve();
+  };
+
+// Client-side paging over the DERIVED By Item sponsor groups — recorded in redux
+// (not local state) so the user's place survives the Orders ↔ By Item toggle and
+// SPA navigation. Pure client dispatch (cf. clearPurchaseDetailsValidation).
+export const setPurchaseDetailsByItemPaging =
+  ({ currentPage, perPage }) =>
+  (dispatch) => {
+    dispatch(
+      createAction(SET_PURCHASE_DETAILS_BY_ITEM_PAGING)({
+        currentPage,
+        perPage
+      })
+    );
   };
 
 // Orders CSV export — owns URL + params + filename (cf. exportEventRsvpsCSV).

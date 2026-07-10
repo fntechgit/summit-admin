@@ -29,7 +29,11 @@ import {
   SPONSOR_ASSET_READ_ERROR,
   REQUEST_SPONSOR_DRILLDOWN,
   RECEIVE_SPONSOR_DRILLDOWN,
-  SPONSOR_DRILLDOWN_READ_ERROR
+  SPONSOR_DRILLDOWN_READ_ERROR,
+  getPurchaseDetailsByItemRows,
+  REQUEST_PURCHASE_DETAILS_BY_ITEM,
+  RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS,
+  PURCHASE_DETAILS_BY_ITEM_READ_ERROR
 } from "../sponsor-reports-actions";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
@@ -1199,5 +1203,206 @@ describe("sponsor-reports-actions", () => {
         );
       }
     );
+  });
+
+  // ─── getPurchaseDetailsByItemRows ────────────────────────────────────────────
+
+  describe("getPurchaseDetailsByItemRows", () => {
+    const rowA = { item_code: "A1", quantity: 1 };
+    const rowB = { item_code: "B1", quantity: 2 };
+    const rowC = { item_code: "C1", quantity: 3 };
+    const page1Summary = { total_orders: 11 };
+
+    it("records the active filters on REQUEST and hits the lines endpoint without paymentMethod", async () => {
+      const store = mockStore(MOCK_STATE);
+      const filters = { sponsorIds: [17], paymentMethod: "Card" };
+      await store.dispatch(getPurchaseDetailsByItemRows(filters));
+      await flushPromises();
+
+      const req = store
+        .getActions()
+        .find((a) => a.type === REQUEST_PURCHASE_DETAILS_BY_ITEM);
+      expect(req).toBeDefined();
+      expect(req.payload).toStrictEqual({ filters });
+      // toContain, NOT toBe with a hardcoded base: the export describes in this
+      // file set window.SPONSOR_REPORTS_API_URL in their beforeEach and never
+      // clear it, so the resolved base depends on declaration order.
+      expect(capturedUrl).toContain(
+        "/summits/42/reports/purchase-details/lines"
+      );
+      // buildPurchaseLinesQuery drops paymentMethod (order-level attribute).
+      const filterClauses = capturedParams["filter[]"] || [];
+      expect(
+        filterClauses.some((c) => String(c).includes("payment_method"))
+      ).toBe(false);
+    });
+
+    it("bulk-loads all pages (page 1, then the rest in parallel) into one atomic RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS", async () => {
+      const capturedPages = [];
+      const capturedPerPage = [];
+      getRequest.mockImplementation(
+        (_requestAC, receiveActionCreator) => (params) => (dispatch) => {
+          capturedPages.push(params.page);
+          capturedPerPage.push(params.per_page);
+          const byPage = {
+            1: { data: [rowA], last_page: 3, summary: page1Summary },
+            2: { data: [rowB], last_page: 3 },
+            3: { data: [rowC], last_page: 3 }
+          };
+          const response = byPage[params.page];
+          if (typeof receiveActionCreator === "function") {
+            dispatch(receiveActionCreator({ response }));
+          }
+          return Promise.resolve({ response });
+        }
+      );
+
+      const store = mockStore(MOCK_STATE);
+      await store.dispatch(getPurchaseDetailsByItemRows({}));
+      await flushPromises();
+
+      expect(getRequest).toHaveBeenCalledTimes(3);
+      expect([...capturedPages].sort((a, b) => a - b)).toEqual([1, 2, 3]);
+      expect(capturedPerPage).toEqual([100, 100, 100]);
+
+      const rowsActions = store
+        .getActions()
+        .filter((a) => a.type === RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS);
+      expect(rowsActions).toHaveLength(1);
+      expect(rowsActions[0].payload.response.data).toEqual([rowA, rowB, rowC]);
+      // Summary rides page 1 (backend computes it over the whole filtered set).
+      expect(rowsActions[0].payload.response.summary).toEqual(page1Summary);
+    });
+
+    it("a superseded invocation does not fire its queued rest-page requests", async () => {
+      let resolveAPage1;
+      let callNum = 0;
+      const capturedPages = [];
+      getRequest.mockImplementation(
+        (_requestAC, receiveActionCreator) => (params) => (dispatch) => {
+          callNum += 1;
+          const isAPage1 = callNum === 1;
+          capturedPages.push(params.page);
+          if (isAPage1) {
+            const response = {
+              data: [{ id: "A1" }],
+              last_page: 2,
+              summary: null
+            };
+            return new Promise((resolve) => {
+              resolveAPage1 = () => resolve({ response });
+            });
+          }
+          const response = {
+            data: [{ id: `p${params.page}` }],
+            last_page: 1,
+            summary: null
+          };
+          if (typeof receiveActionCreator === "function") {
+            dispatch(receiveActionCreator({ response }));
+          }
+          return Promise.resolve({ response });
+        }
+      );
+
+      const store = mockStore(MOCK_STATE);
+      const stalePromise = store.dispatch(getPurchaseDetailsByItemRows({}));
+      await flushPromises();
+      await store.dispatch(getPurchaseDetailsByItemRows({}));
+      resolveAPage1();
+      await stalePromise;
+      await flushPromises();
+
+      expect(capturedPages).not.toContain(2);
+    });
+
+    it("drops a stale RECEIVE when a newer call supersedes it", async () => {
+      let resolveFirstPage;
+      let getRequestCallNum = 0;
+      getRequest.mockImplementation(
+        (_requestAC, receiveActionCreator) => () => (dispatch) => {
+          getRequestCallNum += 1;
+          const callNum = getRequestCallNum;
+          const data = callNum === 1 ? [{ id: "stale" }] : [{ id: "fresh" }];
+          const response = { data, last_page: 1, summary: null };
+          if (typeof receiveActionCreator === "function") {
+            dispatch(receiveActionCreator({ response }));
+          }
+          if (callNum === 1) {
+            return new Promise((resolve) => {
+              resolveFirstPage = () => resolve({ response });
+            });
+          }
+          return Promise.resolve({ response });
+        }
+      );
+
+      const store = mockStore(MOCK_STATE);
+      const stalePromise = store.dispatch(getPurchaseDetailsByItemRows({}));
+      await flushPromises();
+      await store.dispatch(getPurchaseDetailsByItemRows({}));
+      await flushPromises();
+      resolveFirstPage();
+      await stalePromise;
+      await flushPromises();
+
+      const rowsActions = store
+        .getActions()
+        .filter((a) => a.type === RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS);
+      expect(rowsActions).toHaveLength(1);
+      expect(rowsActions[0].payload.response.data).toEqual([{ id: "fresh" }]);
+    });
+
+    it("suppresses PURCHASE_DETAILS_BY_ITEM_READ_ERROR from a stale call's error handler", async () => {
+      let fireStaleError;
+      let callNum = 0;
+      getRequest.mockImplementation(
+        (_requestAC, receiveActionCreator, _url, errorHandler) =>
+          () =>
+          (guardedOrDispatch) => {
+            callNum += 1;
+            if (callNum === 1) {
+              // A's page 1 stays IN FLIGHT until fireStaleError, which routes a
+              // 403 through the error handler via A's guardedDispatch (stale →
+              // suppressed) and resolves with NO {response} → A's destructure
+              // then throws a TypeError → catch also guarded.
+              return new Promise((resolve) => {
+                fireStaleError = () => {
+                  errorHandler({ status: 403 }, {})(guardedOrDispatch);
+                  resolve();
+                };
+              });
+            }
+            const response = {
+              data: [{ id: "fresh" }],
+              last_page: 1,
+              summary: null
+            };
+            if (typeof receiveActionCreator === "function") {
+              guardedOrDispatch(receiveActionCreator({ response }));
+            }
+            return Promise.resolve({ response });
+          }
+      );
+
+      const store = mockStore(MOCK_STATE);
+      const stalePromise = store.dispatch(getPurchaseDetailsByItemRows({}));
+      // A is now past the token guard with its page-1 request in flight.
+      await flushPromises();
+      await store.dispatch(getPurchaseDetailsByItemRows({}));
+      fireStaleError();
+      await stalePromise;
+      await flushPromises();
+
+      const errors = store
+        .getActions()
+        .filter((a) => a.type === PURCHASE_DETAILS_BY_ITEM_READ_ERROR);
+      expect(errors).toHaveLength(0);
+      const receives = store
+        .getActions()
+        .filter((a) => a.type === RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS);
+      expect(receives).toHaveLength(1);
+      expect(receives[0].payload.response.data).toEqual([{ id: "fresh" }]);
+    });
   });
 });

@@ -77,6 +77,12 @@ jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
   exportPurchaseDetailsLinesCsv: jest.fn(() => ({
     type: "EXPORT_PD_LINES_CSV"
   })),
+  getPurchaseDetailsByItemRows: jest.fn(() => ({
+    type: "REQUEST_PURCHASE_DETAILS_BY_ITEM"
+  })),
+  setPurchaseDetailsByItemPaging: jest.fn(() => ({
+    type: "SET_PURCHASE_DETAILS_BY_ITEM_PAGING"
+  })),
   PURCHASE_DETAILS_VALIDATION_CLEAR: "PURCHASE_DETAILS_VALIDATION_CLEAR",
   PURCHASE_DETAILS_READ_ERROR: "PURCHASE_DETAILS_READ_ERROR"
 }));
@@ -85,7 +91,9 @@ jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
 const {
   getPurchaseDetailsReport,
   getPurchaseDetailsLinesReport,
-  exportPurchaseDetailsLinesCsv
+  exportPurchaseDetailsLinesCsv,
+  getPurchaseDetailsByItemRows,
+  setPurchaseDetailsByItemPaging
 } = require("../../../../../actions/sponsor-reports-actions");
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -130,7 +138,7 @@ const PAGE_URL = "/app/summits/42/sponsors/reports/purchase-details";
 
 function buildState(
   summaryOverrides = {},
-  { total = 1, ordersFilters = {}, linesFilters = {} } = {}
+  { total = 1, ordersFilters = {}, linesFilters = {}, byItemFilters = {} } = {}
 ) {
   return {
     sponsorReportsPurchaseDetailsState: {
@@ -178,6 +186,14 @@ function buildState(
       lastPage: 1,
       perPage: 50,
       filters: linesFilters,
+      readError: null
+    },
+    sponsorReportsPurchaseDetailsByItemState: {
+      data: [],
+      summary: null,
+      currentPage: 1,
+      perPage: 10,
+      filters: byItemFilters,
       readError: null
     }
   };
@@ -368,6 +384,96 @@ describe("PurchaseDetailsReportPage", () => {
     expect(exportPurchaseDetailsLinesCsv).toHaveBeenCalledWith({
       dateFrom: "2026-01-01"
     });
+  });
+
+  it("switching to By Item fetches the whole line set with the carried Orders filters", async () => {
+    const history = createMemoryHistory({ initialEntries: [PAGE_URL] });
+    renderWithRedux(
+      <Router history={history}>
+        <Route path={PAGE_ROUTE} component={PurchaseDetailsReportPage} />
+      </Router>,
+      {
+        initialState: buildState(
+          {},
+          { ordersFilters: { dateFrom: "2026-01-01" } }
+        )
+      }
+    );
+    await act(async () => {});
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.view_by_item"));
+    });
+    // Whole-set fetch with the Orders filters carried over — not {} and not
+    // the byitem slice's own (empty) filters.
+    expect(getPurchaseDetailsByItemRows).toHaveBeenCalledWith({
+      dateFrom: "2026-01-01"
+    });
+  });
+
+  it("Export CSV in the By Item view dispatches the LINES csv export with the byitem slice filters", async () => {
+    const history = createMemoryHistory({ initialEntries: [PAGE_URL] });
+    renderWithRedux(
+      <Router history={history}>
+        <Route path={PAGE_ROUTE} component={PurchaseDetailsReportPage} />
+      </Router>,
+      { initialState: buildState({}, { byItemFilters: { status: "Paid" } }) }
+    );
+    await act(async () => {});
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.view_by_item"));
+    });
+    // Guard: switching views must not trigger an export on its own.
+    expect(exportPurchaseDetailsLinesCsv).not.toHaveBeenCalled();
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.export_csv"));
+    });
+    expect(exportPurchaseDetailsLinesCsv).toHaveBeenCalledWith({
+      status: "Paid"
+    });
+  });
+
+  it("changing rows-per-page in the By Item view dispatches SET paging reset to page 1", async () => {
+    const history = createMemoryHistory({ initialEntries: [PAGE_URL] });
+    renderWithRedux(
+      <Router history={history}>
+        <Route path={PAGE_ROUTE} component={PurchaseDetailsReportPage} />
+      </Router>,
+      { initialState: buildState() }
+    );
+    await act(async () => {});
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.view_by_item"));
+    });
+    // MUI 6 Select trigger is role="combobox"; options are role="option".
+    // FilterBar renders its own comboboxes in the same tree, so scope to the
+    // last one on the page — the pagination footer's rows-per-page select.
+    await act(async () => {
+      fireEvent.mouseDown(screen.getAllByRole("combobox").at(-1));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("option", { name: "20" }));
+    });
+    expect(setPurchaseDetailsByItemPaging).toHaveBeenCalledWith({
+      currentPage: 1,
+      perPage: 20
+    });
+  });
+
+  it("hides the Payment Method filter in the By Item view (lines filter set omits it)", async () => {
+    const history = createMemoryHistory({ initialEntries: [PAGE_URL] });
+    renderWithRedux(
+      <Router history={history}>
+        <Route path={PAGE_ROUTE} component={PurchaseDetailsReportPage} />
+      </Router>,
+      { initialState: buildState() }
+    );
+    await act(async () => {});
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.view_by_item"));
+    });
+    expect(
+      document.querySelector("#pd-filter-payment-method")
+    ).not.toBeInTheDocument();
   });
 
   describe("validation error — snackbar hook", () => {
