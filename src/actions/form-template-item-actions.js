@@ -20,9 +20,10 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  escapeFilterValue
+  escapeFilterValue,
+  snackbarErrorHandler,
+  snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
@@ -393,18 +394,54 @@ export const deleteItemImage = (
 
 /* **************************************  ARCHIVE  ************************************** */
 
-export const archiveFormTemplateItem = (formTemplateId, formTemplateItem) => {
-  const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItem.id}/archive`,
-    updatedActionName: FORM_TEMPLATE_ITEM_ARCHIVED
+export const archiveFormTemplateItem =
+  (formTemplateId, formTemplateItem) => async (dispatch, getState) => {
+    const settings = {
+      url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItem.id}/archive`,
+      updatedActionName: FORM_TEMPLATE_ITEM_ARCHIVED
+    };
+    try {
+      await archiveItem(formTemplateItem, settings)(dispatch);
+    } catch (e) {
+      return undefined;
+    }
+    const { term, currentPage, perPage, order, orderDir, showArchived } =
+      getState().currentFormTemplateItemListState;
+    return dispatch(
+      getFormTemplateItems(
+        formTemplateId,
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
   };
-  return archiveItem(formTemplateItem, settings);
-};
 
-export const unarchiveFormTemplateItem = (formTemplateId, formTemplateItem) => {
-  const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItem.id}/archive`,
-    deletedActionName: FORM_TEMPLATE_ITEM_UNARCHIVED
+export const unarchiveFormTemplateItem =
+  (formTemplateId, formTemplateItem) => async (dispatch, getState) => {
+    const settings = {
+      url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItem.id}/archive`,
+      deletedActionName: FORM_TEMPLATE_ITEM_UNARCHIVED
+    };
+    try {
+      await unarchiveItem(formTemplateItem, settings)(dispatch);
+    } catch (e) {
+      return undefined;
+    }
+    const { term, currentPage, perPage, order, orderDir, showArchived } =
+      getState().currentFormTemplateItemListState;
+    return dispatch(
+      getFormTemplateItems(
+        formTemplateId,
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      )
+    );
   };
-  return unarchiveItem(formTemplateItem, settings);
-};

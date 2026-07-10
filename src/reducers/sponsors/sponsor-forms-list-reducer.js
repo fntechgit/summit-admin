@@ -28,6 +28,7 @@ import {
   SET_CURRENT_SUMMIT,
   RECEIVE_SUMMIT_SPONSORSHIP_TYPES
 } from "../../actions/summit-actions";
+import { getSafePageAfterRemove } from "../../utils/methods";
 
 export const DEFAULT_STATE = {
   sponsorForms: [],
@@ -152,21 +153,31 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
     }
     case SPONSOR_FORM_ARCHIVED: {
       const { id: formId } = payload.response;
+      const { totalCount, perPage, currentPage } = state;
 
       const sponsorForms = state.sponsorForms.map((item) =>
         item.id === formId ? { ...item, is_archived: true } : item
       );
 
-      return { ...state, sponsorForms };
+      return {
+        ...state,
+        sponsorForms,
+        currentPage: getSafePageAfterRemove(totalCount, perPage, currentPage)
+      };
     }
     case SPONSOR_FORM_UNARCHIVED: {
       const { formId } = payload;
+      const { totalCount, perPage, currentPage } = state;
 
       const sponsorForms = state.sponsorForms.map((item) =>
         item.id === formId ? { ...item, is_archived: false } : item
       );
 
-      return { ...state, sponsorForms };
+      return {
+        ...state,
+        sponsorForms,
+        currentPage: getSafePageAfterRemove(totalCount, perPage, currentPage)
+      };
     }
     case SPONSOR_FORM_DELETED: {
       const { formId } = payload;

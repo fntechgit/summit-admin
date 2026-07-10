@@ -25,6 +25,7 @@ import {
   INVENTORY_ITEM_UNARCHIVED,
   INVENTORY_ITEM_IMAGE_SAVED
 } from "../../actions/inventory-item-actions";
+import { getSafePageAfterRemove } from "../../utils/methods";
 
 const DEFAULT_STATE = {
   inventoryItems: [],
@@ -102,10 +103,16 @@ const inventoryItemListReducer = (state = DEFAULT_STATE, action = {}) => {
     }
     case INVENTORY_ITEM_DELETED: {
       const { inventoryItemId } = payload;
+      const { totalInventoryItems, perPage, currentPage } = state;
       return {
         ...state,
         inventoryItems: state.inventoryItems.filter(
           (a) => a.id !== inventoryItemId
+        ),
+        currentPage: getSafePageAfterRemove(
+          totalInventoryItems,
+          perPage,
+          currentPage
         )
       };
     }
@@ -199,19 +206,35 @@ const inventoryItemListReducer = (state = DEFAULT_STATE, action = {}) => {
     }
     case INVENTORY_ITEM_ARCHIVED: {
       const updatedItem = payload.response;
-
+      const { totalInventoryItems, perPage, currentPage } = state;
       const updatedInventoryItems = state.inventoryItems.map((item) =>
         item.id === updatedItem.id ? { ...item, is_archived: true } : item
       );
-      return { ...state, inventoryItems: updatedInventoryItems };
+      return {
+        ...state,
+        inventoryItems: updatedInventoryItems,
+        currentPage: getSafePageAfterRemove(
+          totalInventoryItems,
+          perPage,
+          currentPage
+        )
+      };
     }
     case INVENTORY_ITEM_UNARCHIVED: {
       const updatedItemId = payload;
-
+      const { totalInventoryItems, perPage, currentPage } = state;
       const updatedInventoryItems = state.inventoryItems.map((item) =>
         item.id === updatedItemId ? { ...item, is_archived: false } : item
       );
-      return { ...state, inventoryItems: updatedInventoryItems };
+      return {
+        ...state,
+        inventoryItems: updatedInventoryItems,
+        currentPage: getSafePageAfterRemove(
+          totalInventoryItems,
+          perPage,
+          currentPage
+        )
+      };
     }
     case INVENTORY_ITEM_IMAGE_SAVED: {
       const newImage = payload.response;

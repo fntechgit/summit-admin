@@ -19,14 +19,15 @@ import {
   deleteRequest,
   startLoading,
   stopLoading,
-  escapeFilterValue
+  escapeFilterValue,
+  snackbarErrorHandler,
+  snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
 import {
   getAccessTokenSafely,
   normalizeSelectAllField
 } from "../utils/methods";
-import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
@@ -494,10 +495,22 @@ export const archiveCustomizedPage = (pageId) => async (dispatch, getState) => {
           html: T.translate("edit_sponsor.pages_tab.customized_page_archived")
         })
       );
+      const { term, showArchived, customizedPages } =
+        getState().sponsorPagePagesListState;
+      const { currentPage, perPage, order, orderDir } = customizedPages;
+      return dispatch(
+        getSponsorCustomizedPages(
+          term,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        )
+      );
     })
-    .finally(() => {
-      dispatch(stopLoading());
-    });
+    .catch(() => {})
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const unarchiveCustomizedPage =
@@ -528,10 +541,22 @@ export const unarchiveCustomizedPage =
             )
           })
         );
+        const { term, showArchived, customizedPages } =
+          getState().sponsorPagePagesListState;
+        const { currentPage, perPage, order, orderDir } = customizedPages;
+        return dispatch(
+          getSponsorCustomizedPages(
+            term,
+            currentPage,
+            perPage,
+            order,
+            orderDir,
+            showArchived
+          )
+        );
       })
-      .finally(() => {
-        dispatch(stopLoading());
-      });
+      .catch(() => {})
+      .finally(() => dispatch(stopLoading()));
   };
 
 export const deleteSponsorCustomizedPage =

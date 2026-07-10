@@ -21,7 +21,9 @@ import {
   stopLoading,
   startLoading,
   authErrorHandler,
-  escapeFilterValue
+  escapeFilterValue,
+  snackbarErrorHandler,
+  snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
@@ -29,7 +31,6 @@ import {
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE
 } from "../utils/constants";
-import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 import { normalizePageTemplateModules } from "../utils/page-template";
 import { GLOBAL_PAGE_CLONED } from "./sponsor-pages-actions";
 
@@ -211,35 +212,69 @@ export const savePageTemplate = (entity) => async (dispatch) => {
 
 /* **************************************  ARCHIVE  ************************************** */
 
-export const archivePageTemplate = (pageTemplateId) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
-  const params = { access_token: accessToken };
+export const archivePageTemplate =
+  (pageTemplateId) => async (dispatch, getState) => {
+    const accessToken = await getAccessTokenSafely();
+    const params = { access_token: accessToken };
 
-  return putRequest(
-    null,
-    createAction(PAGE_TEMPLATE_ARCHIVED),
-    `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${pageTemplateId}/archive`,
-    null,
-    snackbarErrorHandler
-  )(params)(dispatch);
-};
+    dispatch(startLoading());
 
-export const unarchivePageTemplate = (pageTemplateId) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
-  const params = { access_token: accessToken };
+    return putRequest(
+      null,
+      createAction(PAGE_TEMPLATE_ARCHIVED),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${pageTemplateId}/archive`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        const { term, currentPage, perPage, order, orderDir, showArchived } =
+          getState().pageTemplateListState;
+        return dispatch(
+          getPageTemplates(
+            term,
+            currentPage,
+            perPage,
+            order,
+            orderDir,
+            showArchived
+          )
+        );
+      })
+      .catch(() => {})
+      .finally(() => dispatch(stopLoading()));
+  };
 
-  dispatch(startLoading());
+export const unarchivePageTemplate =
+  (pageTemplateId) => async (dispatch, getState) => {
+    const accessToken = await getAccessTokenSafely();
+    const params = { access_token: accessToken };
 
-  return deleteRequest(
-    null,
-    createAction(PAGE_TEMPLATE_UNARCHIVED)({ pageTemplateId }),
-    `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${pageTemplateId}/archive`,
-    null,
-    snackbarErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
-};
+    dispatch(startLoading());
+
+    return deleteRequest(
+      null,
+      createAction(PAGE_TEMPLATE_UNARCHIVED)({ pageTemplateId }),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${pageTemplateId}/archive`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        const { term, currentPage, perPage, order, orderDir, showArchived } =
+          getState().pageTemplateListState;
+        return dispatch(
+          getPageTemplates(
+            term,
+            currentPage,
+            perPage,
+            order,
+            orderDir,
+            showArchived
+          )
+        );
+      })
+      .catch(() => {})
+      .finally(() => dispatch(stopLoading()));
+  };
 
 export const clonePageTemplate = (templateId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();

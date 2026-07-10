@@ -20,6 +20,7 @@ import {
   PAGE_TEMPLATE_UNARCHIVED
 } from "../../actions/page-template-actions";
 import { PAGES_MODULE_KINDS } from "../../utils/constants";
+import { getSafePageAfterRemove } from "../../utils/methods";
 
 const DEFAULT_STATE = {
   pageTemplates: [],
@@ -97,30 +98,52 @@ const pageTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
     }
     case PAGE_TEMPLATE_DELETED: {
       const { pageTemplateId } = payload;
+      const { totalPageTemplates, perPage, currentPage } = state;
       return {
         ...state,
         pageTemplates: state.pageTemplates.filter(
           (a) => a.id !== pageTemplateId
+        ),
+        currentPage: getSafePageAfterRemove(
+          totalPageTemplates,
+          perPage,
+          currentPage
         )
       };
     }
     case PAGE_TEMPLATE_ARCHIVED: {
       const updatedFormTemplate = payload.response;
-
+      const { totalPageTemplates, perPage, currentPage } = state;
       const updatedPageTemplates = state.pageTemplates.map((item) =>
         item.id === updatedFormTemplate.id
           ? { ...item, is_archived: true }
           : item
       );
-      return { ...state, pageTemplates: updatedPageTemplates };
+      return {
+        ...state,
+        pageTemplates: updatedPageTemplates,
+        currentPage: getSafePageAfterRemove(
+          totalPageTemplates,
+          perPage,
+          currentPage
+        )
+      };
     }
     case PAGE_TEMPLATE_UNARCHIVED: {
       const { pageTemplateId } = payload;
-
+      const { totalPageTemplates, perPage, currentPage } = state;
       const updatedPageTemplates = state.pageTemplates.map((item) =>
         item.id === pageTemplateId ? { ...item, is_archived: false } : item
       );
-      return { ...state, pageTemplates: updatedPageTemplates };
+      return {
+        ...state,
+        pageTemplates: updatedPageTemplates,
+        currentPage: getSafePageAfterRemove(
+          totalPageTemplates,
+          perPage,
+          currentPage
+        )
+      };
     }
     default:
       return state;

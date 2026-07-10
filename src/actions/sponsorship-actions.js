@@ -23,10 +23,11 @@ import {
   startLoading,
   escapeFilterValue,
   fetchResponseHandler,
-  fetchErrorHandler
+  fetchErrorHandler,
+  snackbarErrorHandler,
+  snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
-import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
   DEBOUNCE_WAIT,

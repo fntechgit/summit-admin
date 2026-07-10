@@ -104,7 +104,7 @@ describe("InventoryPopup", () => {
     );
 
     const user = userEvent.setup();
-    const node = screen.getByTestId("CloseIcon");
+    const node = screen.getByTestId("close-dialog");
     await user.click(node);
 
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -161,7 +161,7 @@ describe("InventoryPopup", () => {
     const textNode = await screen.findByText("1 items selected");
     expect(textNode.textContent).toBe("1 items selected");
 
-    const node = screen.getByTestId("CloseIcon");
+    const node = screen.getByTestId("close-dialog");
     await user.click(node);
 
     const textNode2 = screen.getByText("0 items selected");

@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useCallback, useRef, useState } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { FormikProvider, useFormik } from "formik";
@@ -38,12 +38,13 @@ import { getCountryList } from "openstack-uicore-foundation/lib/utils/query-acti
 import Table from "openstack-uicore-foundation/lib/components/mui/table";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
-import { MuiColorInput } from "mui-color-input";
 // import MuiFormikAsyncAutocomplete from "openstack-uicore-foundation/lib/components/mui/formik-inputs/async-select";
 import useScrollToError from "../../../hooks/useScrollToError";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
 import MuiFormikAsyncAutocomplete from "../../../components/mui/formik-inputs/mui-formik-async-select";
+import MuiFormikColorField from "../../../components/mui/formik-inputs/mui-formik-color-field";
 import showConfirmDialog from "../../../components/mui/showConfirmDialog";
+import { hexColorValidation } from "../../../utils/yup";
 
 const MEMBER_LEVELS = [
   { label: "Platinum", value: "Platinum" },
@@ -60,25 +61,6 @@ const getLogoValue = (value) => {
   return [{ filename: value.filename, file_path: value.filepath }];
 };
 
-const ColorPickerField = React.memo(({ initialValue, onChange }) => {
-  const [value, setValue] = useState(initialValue || "");
-
-  const handleChange = (newValue) => {
-    setValue(newValue);
-    onChange(newValue);
-  };
-
-  return (
-    <MuiColorInput
-      value={value}
-      format="hex"
-      margin="none"
-      fullWidth
-      onChange={handleChange}
-    />
-  );
-});
-
 const CompanyDialog = ({
   entity: initialEntity,
   sponsoredProjects = [],
@@ -94,8 +76,6 @@ const CompanyDialog = ({
   const [selectedSponsorShipType, setSelectedSponsorShipType] = useState(null);
   const [sponsorShipTypes, setSponsorShipTypes] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
-
-  const colorRef = useRef(initialEntity?.color || "");
 
   const formik = useFormik({
     initialValues: {
@@ -120,13 +100,13 @@ const CompanyDialog = ({
     },
     enableReinitialize: true,
     validationSchema: yup.object().shape({
-      name: yup.string().required(T.translate("validation.required"))
+      name: yup.string().required(T.translate("validation.required")),
+      color: hexColorValidation()
     }),
     onSubmit: (values) => {
       if (isSaving) return;
       const valuesToSave = {
         ...values,
-        color: colorRef.current,
         country:
           typeof values.country === "object"
             ? values.country?.value
@@ -229,10 +209,6 @@ const CompanyDialog = ({
     }
   };
 
-  const handleColorChange = useCallback((newValue) => {
-    colorRef.current = newValue;
-  }, []);
-
   const handleOnClose = () => {
     if (isSaving) return;
     onClose();
@@ -323,10 +299,7 @@ const CompanyDialog = ({
                 <InputLabel htmlFor="color">
                   {T.translate("edit_company.color")}
                 </InputLabel>
-                <ColorPickerField
-                  initialValue={initialEntity?.color}
-                  onChange={handleColorChange}
-                />
+                <MuiFormikColorField name="color" />
               </Grid2>
               <Grid2 size={4}>
                 <InputLabel htmlFor="admin_email">

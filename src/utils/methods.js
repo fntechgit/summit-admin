@@ -644,3 +644,30 @@ export const getFileUploadAllowedExtensions = () => {
 
 export const isImageUrl = (url) =>
   /\.(jpe?g|png|gif|webp|svg|bmp)(\?|$)/i.test(url);
+
+export const getSafePageAfterRemove = (totalCount, perPage, currentPage) => {
+  const lastPage = Math.ceil(totalCount / perPage);
+  const isOnLastPage = currentPage === lastPage;
+  // last page had exactly one item, so removing it shrinks the page count
+  const pageCountDecreases = Number.isInteger((totalCount - 1) / perPage);
+  return isOnLastPage && pageCountDecreases && currentPage > 1
+    ? currentPage - 1
+    : currentPage;
+};
+
+// Strict positive-integer route-id validator. Route params arrive as strings;
+// accept only positive integers so a malformed/tampered id can't be interpolated
+// into a filter clause, a URL path, or a download filename.
+export const isPositiveIntId = (v) => /^[1-9]\d*$/.test(String(v));
+
+// Flatten HTML-ish text to plain text: tag boundaries become spaces (so adjacent
+// tags don't fuse words), entities are decoded via the browser parser, whitespace
+// is collapsed and trimmed. Use this instead of the existing htmlToString, which
+// is documentElement.textContent and fuses adjacent-tag text.
+export const htmlToPlainText = (html) => {
+  if (html == null) return "";
+  const spaced = String(html).replace(/<[^>]*>/g, " ");
+  const decoded = new DOMParser().parseFromString(spaced, "text/html")
+    .documentElement.textContent;
+  return decoded.replace(/\s+/g, " ").trim();
+};

@@ -1,5 +1,11 @@
 import React from "react";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  act,
+  fireEvent
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CompanyDialog from "../company-dialog";
 
@@ -76,11 +82,13 @@ jest.mock("../../../../components/mui/showConfirmDialog", () =>
 jest.mock("../../../../hooks/useScrollToError", () => jest.fn());
 
 jest.mock("mui-color-input", () => ({
-  MuiColorInput: ({ value, onChange }) => (
+  MuiColorInput: ({ value, onChange, onBlur, name }) => (
     <input
       data-testid="color-input"
+      name={name}
       value={value || ""}
       onChange={(e) => onChange(e.target.value)}
+      onBlur={(e) => onBlur({ target: { name, value: e.target.value } })}
     />
   )
 }));
@@ -156,6 +164,30 @@ describe("CompanyDialog", () => {
       expect.objectContaining({ country: "AR" })
     );
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("submits a newly picked color after it is blurred", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <CompanyDialog
+        entity={{ ...BASE_ENTITY, id: 1, name: "Acme Corp", color: "#ff0000" }}
+        onSave={onSave}
+        onClose={onClose}
+      />
+    );
+
+    const colorInput = screen.getByTestId("color-input");
+    fireEvent.change(colorInput, { target: { value: "#00ff00" } });
+    fireEvent.blur(colorInput);
+
+    await act(async () => {
+      await user.click(screen.getByText("general.save"));
+    });
+
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ color: "#00ff00" })
+    );
   });
 
   it("keeps dialog open and re-enables save when onSave rejects", async () => {
