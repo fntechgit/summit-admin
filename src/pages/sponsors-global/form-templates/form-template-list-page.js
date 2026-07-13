@@ -347,20 +347,21 @@ const FormTemplateListPage = ({
           onMaterialDeleted={deleteFormTemplateMaterial}
         />
       )}
-      <FormTemplateFromDuplicateDialog
-        open={formTemplateFromDuplicatePopupOpen}
-        options={tableOptions}
-        onClose={handleDuplicatePopupClose}
-        onDuplicate={handleDuplicateForm}
-        onSearch={handleSearch}
-        onSort={handleSort}
-        perPage={perPage}
-        currentPage={currentPage}
-        totalRows={totalFormTemplates}
-        onPageChange={handlePageChange}
-        onPerPageChange={handlePerPageChange}
-        formTemplates={formTemplates}
-      />
+      {formTemplateFromDuplicatePopupOpen && (
+        <FormTemplateFromDuplicateDialog
+          options={tableOptions}
+          onClose={handleDuplicatePopupClose}
+          onDuplicate={handleDuplicateForm}
+          onSearch={handleSearch}
+          onSort={handleSort}
+          perPage={perPage}
+          currentPage={currentPage}
+          totalRows={totalFormTemplates}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          formTemplates={formTemplates}
+        />
+      )}
     </div>
   );
 };

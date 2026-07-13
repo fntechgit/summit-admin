@@ -45,7 +45,6 @@ jest.mock("openstack-uicore-foundation/lib/utils/money", () => ({
 describe("InventoryPopup", () => {
   it("check if title is being rendered", async () => {
     const formId = "AAA";
-    const open = true;
     const onClose = jest.fn();
 
     const inventoryItems = {
@@ -58,16 +57,13 @@ describe("InventoryPopup", () => {
       totalInventoryItems: 2
     };
 
-    renderWithRedux(
-      <InventoryPopup formId={formId} open={open} onClose={onClose} />,
-      {
-        initialState: {
-          currentInventoryItemListState: {
-            inventoryItems
-          }
+    renderWithRedux(<InventoryPopup formId={formId} onClose={onClose} />, {
+      initialState: {
+        currentInventoryItemListState: {
+          inventoryItems
         }
       }
-    );
+    });
 
     const node = screen.getByText(
       "sponsor_form_item_list.add_from_inventory.title"
@@ -79,7 +75,6 @@ describe("InventoryPopup", () => {
 
   it("check if close button calls close callback", async () => {
     const formId = "AAA";
-    const open = true;
     const onClose = jest.fn();
 
     const inventoryItems = {
@@ -92,16 +87,13 @@ describe("InventoryPopup", () => {
       totalInventoryItems: 2
     };
 
-    renderWithRedux(
-      <InventoryPopup formId={formId} open={open} onClose={onClose} />,
-      {
-        initialState: {
-          currentInventoryItemListState: {
-            inventoryItems
-          }
+    renderWithRedux(<InventoryPopup formId={formId} onClose={onClose} />, {
+      initialState: {
+        currentInventoryItemListState: {
+          inventoryItems
         }
       }
-    );
+    });
 
     const user = userEvent.setup();
     const node = screen.getByTestId("close-dialog");
@@ -112,46 +104,42 @@ describe("InventoryPopup", () => {
 
   it("check if close button clears selected rows", async () => {
     const formId = "AAA";
-    const open = true;
     const onClose = jest.fn();
 
-    renderWithRedux(
-      <InventoryPopup formId={formId} open={open} onClose={onClose} />,
-      {
-        initialState: {
-          currentInventoryItemListState: {
-            inventoryItems: [
-              {
-                id: "123",
-                code: "AAA",
-                name: "My Item",
-                early_bird_rate: "100",
-                standard_rate: "100",
-                onsite_rate: "100",
-                hasImage: false,
-                images: []
-              },
-              {
-                id: "456",
-                code: "AAAA",
-                name: "My Item",
-                early_bird_rate: "100",
-                standard_rate: "100",
-                onsite_rate: "100",
-                hasImage: false,
-                images: []
-              }
-            ],
-            term: "",
-            order: "",
-            orderDir: "1",
-            currentPage: 1,
-            perPage: 10,
-            totalInventoryItems: 2
-          }
+    renderWithRedux(<InventoryPopup formId={formId} onClose={onClose} />, {
+      initialState: {
+        currentInventoryItemListState: {
+          inventoryItems: [
+            {
+              id: "123",
+              code: "AAA",
+              name: "My Item",
+              early_bird_rate: "100",
+              standard_rate: "100",
+              onsite_rate: "100",
+              hasImage: false,
+              images: []
+            },
+            {
+              id: "456",
+              code: "AAAA",
+              name: "My Item",
+              early_bird_rate: "100",
+              standard_rate: "100",
+              onsite_rate: "100",
+              hasImage: false,
+              images: []
+            }
+          ],
+          term: "",
+          order: "",
+          orderDir: "1",
+          currentPage: 1,
+          perPage: 10,
+          totalInventoryItems: 2
         }
       }
-    );
+    });
 
     const user = userEvent.setup();
 

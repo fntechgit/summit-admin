@@ -24,7 +24,6 @@ import {
 } from "../../../../../../actions/sponsor-users-actions";
 
 const NewUserPopup = ({
-  open,
   onClose,
   sponsorId,
   sendSponsorUserInvite,
@@ -61,13 +60,7 @@ const NewUserPopup = ({
   });
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      disableEscapeKeyDown={isSaving}
-    >
+    <Dialog open onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between" }}
         component="div"
@@ -121,7 +114,6 @@ const NewUserPopup = ({
 };
 
 NewUserPopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   sendSponsorUserInvite: PropTypes.func.isRequired
 };

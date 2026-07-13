@@ -27,7 +27,6 @@ import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 
 const SponsorFormAddItemFromInventoryPopup = ({
   formId,
-  open,
   onClose,
   addInventoryItems,
   getInventoryItems,
@@ -161,7 +160,7 @@ const SponsorFormAddItemFromInventoryPopup = ({
   ];
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="lg" fullWidth>
+    <Dialog open onClose={handleClose} maxWidth="lg" fullWidth>
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between" }}
         component="div"
@@ -228,7 +227,6 @@ const SponsorFormAddItemFromInventoryPopup = ({
 };
 
 SponsorFormAddItemFromInventoryPopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   formId: PropTypes.string.isRequired,
   addInventoryItems: PropTypes.func.isRequired,

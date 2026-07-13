@@ -157,7 +157,6 @@ const renderWithStore = (props, storeState = {}) => {
   const store = mockStore(defaultState);
 
   const defaultProps = {
-    open: true,
     summitId: 1,
     sponsor: { id: 10, name: "Test Sponsor" },
     onClose: jest.fn(),
@@ -195,16 +194,6 @@ describe("SelectFormDialog", () => {
       renderWithStore();
 
       expect(getSponsorFormsForCart).toHaveBeenCalled();
-    });
-
-    test("does not call getSponsorFormsForCart when dialog is closed", () => {
-      const {
-        getSponsorFormsForCart
-      } = require("../../../../../../../../actions/sponsor-cart-actions");
-
-      renderWithStore({ open: false });
-
-      expect(getSponsorFormsForCart).not.toHaveBeenCalled();
     });
 
     test("displays initial selection count as 0", () => {

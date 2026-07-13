@@ -23,7 +23,6 @@ const FormTemplatePopup = ({
   summitTZ,
   sponsorships,
   formTemplate,
-  open,
   onClose,
   getSummitSponsorshipTypes,
   resetFormTemplate,
@@ -67,7 +66,7 @@ const FormTemplatePopup = ({
 
   return (
     <Dialog
-      open={open}
+      open
       onClose={() => {
         handleClose();
       }}
@@ -111,7 +110,6 @@ const FormTemplatePopup = ({
 };
 
 FormTemplatePopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   edit: PropTypes.bool.isRequired
 };

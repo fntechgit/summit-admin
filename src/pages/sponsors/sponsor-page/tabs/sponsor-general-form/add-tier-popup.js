@@ -23,7 +23,7 @@ import useScrollToError from "../../../../../hooks/useScrollToError";
 import SponsorshipsBySummitSelectMUI from "../../../../../components/mui/formik-inputs/sponsorship-summit-select-mui";
 import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
 
-const AddTierPopup = ({ sponsor, open, onClose, onSubmit, summitId }) => {
+const AddTierPopup = ({ sponsor, onClose, onSubmit, summitId }) => {
   const formik = useFormik({
     initialValues: {
       company: sponsor.company?.name,
@@ -68,7 +68,7 @@ const AddTierPopup = ({ sponsor, open, onClose, onSubmit, summitId }) => {
   }, [formik.values]);
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
+    <Dialog open onClose={handleClose} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {T.translate("edit_sponsor.add_tier")}
@@ -147,7 +147,6 @@ const AddTierPopup = ({ sponsor, open, onClose, onSubmit, summitId }) => {
 };
 
 AddTierPopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   summitId: PropTypes.number.isRequired

@@ -432,15 +432,15 @@ const SponsorFormsListPage = ({
           />
         </div>
       )}
-      <GlobalTemplatePopup
-        open={openPopup === "clone"}
-        onClose={() => setOpenPopup(null)}
-      />
-      <FormTemplatePopup
-        open={openPopup === "new" || openPopup === "edit"}
-        onClose={() => setOpenPopup(null)}
-        edit={openPopup === "edit"}
-      />
+      {openPopup === "clone" && (
+        <GlobalTemplatePopup onClose={() => setOpenPopup(null)} />
+      )}
+      {(openPopup === "new" || openPopup === "edit") && (
+        <FormTemplatePopup
+          onClose={() => setOpenPopup(null)}
+          edit={openPopup === "edit"}
+        />
+      )}
     </div>
   );
 };
