@@ -76,7 +76,7 @@ const TagListPage = ({
 
   const handleSaveTag = (entity) =>
     saveTag(entity).then(() =>
-      getTags(search, currentPage, perPage, order, orderDir)
+      getTags(search, currentPage, perPage, order, orderDir).catch(() => {})
     );
 
   const handleDeleteTag = (id) => {

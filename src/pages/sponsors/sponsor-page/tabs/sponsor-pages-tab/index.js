@@ -258,7 +258,7 @@ const SponsorPagesTab = ({
         order,
         orderDir,
         showArchived
-      );
+      ).catch(() => {});
     });
 
   const handleSaveCustomizedPage = (entity) =>
@@ -271,7 +271,7 @@ const SponsorPagesTab = ({
         order,
         orderDir,
         showArchived
-      );
+      ).catch(() => {});
     });
 
   const handleSaveManagedPage = (entity) =>
@@ -283,7 +283,7 @@ const SponsorPagesTab = ({
         managedPages.order,
         managedPages.orderDir,
         showArchived
-      );
+      ).catch(() => {});
       getSponsorCustomizedPages(
         term,
         DEFAULT_CURRENT_PAGE,
@@ -291,7 +291,7 @@ const SponsorPagesTab = ({
         customizedPages.order,
         customizedPages.orderDir,
         showArchived
-      );
+      ).catch(() => {});
     });
 
   const handleClosePagePopup = () => {

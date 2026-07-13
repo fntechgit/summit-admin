@@ -141,7 +141,7 @@ const InventoryListPage = ({
         order,
         orderDir,
         showArchived
-      )
+      ).catch(() => {})
     );
 
   const handleArchiveItem = (item) =>

@@ -184,7 +184,7 @@ const FormTemplateItemListPage = ({
         order,
         orderDir,
         showArchived
-      )
+      ).catch(() => {})
     );
 
   const columns = [

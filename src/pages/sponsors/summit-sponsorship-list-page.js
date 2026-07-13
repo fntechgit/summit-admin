@@ -95,11 +95,10 @@ const SummitSponsorshipListPage = ({
     updateSummitSponsorhipOrder(newOrder, itemId, newItemOrder);
   };
 
-  const handleSaveSummitSponsorship = (sponsorship) => {
+  const handleSaveSummitSponsorship = (sponsorship) =>
     saveSummitSponsorship(sponsorship).then(() =>
       getSummitSponsorships(DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
     );
-  };
 
   const columns = [
     {

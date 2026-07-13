@@ -123,7 +123,7 @@ const PageTemplateListPage = ({
         order,
         orderDir,
         showArchived
-      )
+      ).catch(() => {})
     );
 
   const handleArchive = (item) =>

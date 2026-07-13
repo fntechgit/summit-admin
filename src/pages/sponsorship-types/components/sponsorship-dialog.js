@@ -47,6 +47,7 @@ const SponsorshipDialog = ({ entity: initialEntity, onClose, onSave }) => {
       setIsSaving(true);
       onSave(values)
         .then(() => onClose())
+        .catch(() => {})
         .finally(() => setIsSaving(false));
     }
   });

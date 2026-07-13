@@ -81,7 +81,13 @@ const SponsorshipListPage = ({
 
   const handleSave = (entity) =>
     saveSponsorship(entity).then(() =>
-      getSponsorships(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+      getSponsorships(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir
+      ).catch(() => {})
     );
 
   const handleDelete = (sponsorshipId) => {

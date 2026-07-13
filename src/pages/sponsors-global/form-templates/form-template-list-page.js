@@ -139,6 +139,11 @@ const FormTemplateListPage = ({
     setFormTemplateFromDuplicatePopupOpen(false);
   };
 
+  const handleCloseFormTemplateDialog = () => {
+    resetFormTemplateForm();
+    setFormTemplatePopupOpen(false);
+  };
+
   const handleDuplicatePopupClose = () => {
     getFormTemplates(
       "",
@@ -221,7 +226,7 @@ const FormTemplateListPage = ({
         order,
         orderDir,
         showArchived
-      )
+      ).catch(() => {})
     );
 
   return (
@@ -330,17 +335,18 @@ const FormTemplateListPage = ({
           />
         </div>
       )}
-      <FormTemplateDialog
-        entity={currentFormTemplate}
-        errors={currentFormTemplateErrors}
-        open={formTemplatePopupOpen}
-        onSave={handleOnSave}
-        toDuplicate={formTemplateDuplicate}
-        onClose={() => setFormTemplatePopupOpen(false)}
-        onMetaFieldTypeDeleted={deleteFormTemplateMetaFieldType}
-        onMetaFieldTypeValueDeleted={deleteFormTemplateMetaFieldTypeValue}
-        onMaterialDeleted={deleteFormTemplateMaterial}
-      />
+      {formTemplatePopupOpen && (
+        <FormTemplateDialog
+          entity={currentFormTemplate}
+          errors={currentFormTemplateErrors}
+          onSave={handleOnSave}
+          toDuplicate={formTemplateDuplicate}
+          onClose={handleCloseFormTemplateDialog}
+          onMetaFieldTypeDeleted={deleteFormTemplateMetaFieldType}
+          onMetaFieldTypeValueDeleted={deleteFormTemplateMetaFieldTypeValue}
+          onMaterialDeleted={deleteFormTemplateMaterial}
+        />
+      )}
       <FormTemplateFromDuplicateDialog
         open={formTemplateFromDuplicatePopupOpen}
         options={tableOptions}

@@ -75,6 +75,7 @@ const EditTierDialog = ({
       setIsSaving(true);
       onSubmit(values)
         .then(() => onClose())
+        .catch(() => {})
         .finally(() => setIsSaving(false));
     },
     enableReinitialize: true

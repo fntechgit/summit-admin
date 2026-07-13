@@ -130,6 +130,7 @@ const PageTemplatePopup = ({
       }),
       modules: yup.array().of(moduleSchema)
     }),
+    enableReinitialize: true,
     onSubmit: (values) => {
       if (isSaving) return;
       setIsSaving(true);
@@ -140,6 +141,7 @@ const PageTemplatePopup = ({
 
       onSave({ ...values, modules: modulesWithOrder })
         .then(() => onClose())
+        .catch(() => {})
         .finally(() => setIsSaving(false));
     }
   });

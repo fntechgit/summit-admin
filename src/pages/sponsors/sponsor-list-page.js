@@ -71,7 +71,9 @@ const SponsorListPage = ({
 
   const handleNewSponsor = (sponsor) =>
     addSponsorToSummit(sponsor).then(() =>
-      getSponsors(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+      getSponsors(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir).catch(
+        () => {}
+      )
     );
 
   const handlePageChange = (page) => {
