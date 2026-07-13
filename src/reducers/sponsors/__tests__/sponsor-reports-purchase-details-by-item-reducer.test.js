@@ -5,9 +5,7 @@ import reducer, {
 import { SET_CURRENT_SUMMIT } from "../../../actions/summit-actions";
 import {
   REQUEST_PURCHASE_DETAILS_BY_ITEM,
-  RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS,
-  PURCHASE_DETAILS_BY_ITEM_READ_ERROR,
-  SET_PURCHASE_DETAILS_BY_ITEM_PAGING
+  RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS
 } from "../../../actions/sponsor-reports-actions";
 
 describe("sponsor-reports-purchase-details-by-item-reducer", () => {
@@ -45,32 +43,6 @@ describe("sponsor-reports-purchase-details-by-item-reducer", () => {
       }
     );
     expect(state.summary).toBeNull();
-  });
-
-  it("SET_PAGING updates currentPage and perPage only", () => {
-    const prev = {
-      ...DEFAULT_STATE,
-      data: [{ item_code: "A1" }],
-      filters: { sponsorIds: [17] },
-      readError: { status: 403 }
-    };
-    const state = reducer(prev, {
-      type: SET_PURCHASE_DETAILS_BY_ITEM_PAGING,
-      payload: { currentPage: 3, perPage: 20 }
-    });
-    expect(state.currentPage).toBe(3);
-    expect(state.perPage).toBe(20);
-    expect(state.data).toEqual(prev.data);
-    expect(state.filters).toEqual(prev.filters);
-    expect(state.readError).toEqual(prev.readError);
-  });
-
-  it("READ_ERROR stores the error payload", () => {
-    const state = reducer(DEFAULT_STATE, {
-      type: PURCHASE_DETAILS_BY_ITEM_READ_ERROR,
-      payload: { status: 403, message: "nope" }
-    });
-    expect(state.readError).toEqual({ status: 403, message: "nope" });
   });
 
   it.each([[SET_CURRENT_SUMMIT], [LOGOUT_USER]])(

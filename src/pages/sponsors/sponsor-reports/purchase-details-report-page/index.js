@@ -72,6 +72,12 @@ const toPickerValue = (ymd) =>
 const sameFilters = (a, b) =>
   JSON.stringify(a ?? {}) === JSON.stringify(b ?? {});
 
+// Pick a per-view value by the current toggle state, keeping the growing view
+// set out of nested ternaries. Keys map 1:1 to "orders" | "lines" | "byitem".
+// Pass plain values to select one, or thunks when the branches must stay lazy
+// (e.g. the export handler, so only the active view's exporter runs).
+const byView = (key, choices) => choices[key];
+
 const PurchaseDetailsReportPage = ({
   // Orders slice (spread via mapStateToProps) — pagination/sort/filter now live
   // in the reducer (recorded on REQUEST) so they survive SPA navigation.
@@ -144,12 +150,11 @@ const PurchaseDetailsReportPage = ({
   useEffect(() => {
     const prevView = prevViewRef.current;
     prevViewRef.current = view;
-    const carried =
-      prevView === "orders"
-        ? filters
-        : prevView === "lines"
-        ? linesFilters
-        : byItemFilters;
+    const carried = byView(prevView, {
+      orders: filters,
+      lines: linesFilters,
+      byitem: byItemFilters
+    });
     if (view === "orders") {
       const page = sameFilters(carried, filters)
         ? currentPage
@@ -185,12 +190,11 @@ const PurchaseDetailsReportPage = ({
   // ── Summary tiles ───────────────────────────────────────────────────────────
   // D9: Total Refunded tile renders ONLY when total_refunded != null — a defensive
   // presence check (the field is optional in the summary payload).
-  const activeSummary =
-    view === "orders"
-      ? summary
-      : view === "lines"
-      ? linesSummary
-      : byItemSummary;
+  const activeSummary = byView(view, {
+    orders: summary,
+    lines: linesSummary,
+    byitem: byItemSummary
+  });
   // money: format integer CENTS via uicore; guard unexpected nulls with em dash.
   const money = (cents) =>
     cents == null ? "—" : currencyAmountFromCents(cents);
@@ -397,19 +401,17 @@ const PurchaseDetailsReportPage = ({
     </>
   );
 
-  const activeFilters =
-    view === "orders"
-      ? filters
-      : view === "lines"
-      ? linesFilters
-      : byItemFilters;
+  const activeFilters = byView(view, {
+    orders: filters,
+    lines: linesFilters,
+    byitem: byItemFilters
+  });
 
-  const activeReadError =
-    view === "orders"
-      ? readError
-      : view === "lines"
-      ? linesReadError
-      : byItemReadError;
+  const activeReadError = byView(view, {
+    orders: readError,
+    lines: linesReadError,
+    byitem: byItemReadError
+  });
 
   // Memoized: regroups only when the whole-set rows change, not on every render.
   const byItemGroups = useMemo(
@@ -433,11 +435,11 @@ const PurchaseDetailsReportPage = ({
             startIcon={<DownloadIcon />}
             variant="outlined"
             onClick={() =>
-              view === "orders"
-                ? exportOrdersCsv(filters, order, orderDir)
-                : view === "lines"
-                ? exportLinesCsv(linesFilters)
-                : exportLinesCsv(byItemFilters)
+              byView(view, {
+                orders: () => exportOrdersCsv(filters, order, orderDir),
+                lines: () => exportLinesCsv(linesFilters),
+                byitem: () => exportLinesCsv(byItemFilters)
+              })()
             }
           >
             {T.translate("sponsor_reports_page.export_csv")}
@@ -462,42 +464,48 @@ const PurchaseDetailsReportPage = ({
           {activeReadError?.message ||
             T.translate("sponsor_reports_page.read_error")}
         </Alert>
-      ) : view === "orders" ? (
-        <OrdersTable
-          rows={data}
-          totalRows={total}
-          currentPage={currentPage}
-          perPage={perPage}
-          order={order}
-          orderDir={orderDir}
-          onPageChange={handlePageChange}
-          onPerPageChange={handlePerPageChange}
-          onSort={handleSort}
-        />
-      ) : view === "lines" ? (
-        <LinesManifestView
-          rows={linesData}
-          total={linesTotal}
-          currentPage={linesCurrentPage}
-          perPage={linesPerPage}
-          onPageChange={handleLinesPageChange}
-          onPerPageChange={handleLinesPerPageChange}
-        />
       ) : (
-        <ByItemView
-          groups={byItemGroups}
-          currentPage={byItemCurrentPage}
-          perPage={byItemPerPage}
-          onPageChange={(page) =>
-            setByItemPaging({ currentPage: page, perPage: byItemPerPage })
-          }
-          onPerPageChange={(newPerPage) =>
-            setByItemPaging({
-              currentPage: DEFAULT_CURRENT_PAGE,
-              perPage: newPerPage
-            })
-          }
-        />
+        byView(view, {
+          orders: (
+            <OrdersTable
+              rows={data}
+              totalRows={total}
+              currentPage={currentPage}
+              perPage={perPage}
+              order={order}
+              orderDir={orderDir}
+              onPageChange={handlePageChange}
+              onPerPageChange={handlePerPageChange}
+              onSort={handleSort}
+            />
+          ),
+          lines: (
+            <LinesManifestView
+              rows={linesData}
+              total={linesTotal}
+              currentPage={linesCurrentPage}
+              perPage={linesPerPage}
+              onPageChange={handleLinesPageChange}
+              onPerPageChange={handleLinesPerPageChange}
+            />
+          ),
+          byitem: (
+            <ByItemView
+              groups={byItemGroups}
+              currentPage={byItemCurrentPage}
+              perPage={byItemPerPage}
+              onPageChange={(page) =>
+                setByItemPaging({ currentPage: page, perPage: byItemPerPage })
+              }
+              onPerPageChange={(newPerPage) =>
+                setByItemPaging({
+                  currentPage: DEFAULT_CURRENT_PAGE,
+                  perPage: newPerPage
+                })
+              }
+            />
+          )
+        })
       )}
     </ReportShell>
   );
