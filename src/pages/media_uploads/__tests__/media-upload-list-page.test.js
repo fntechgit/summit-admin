@@ -169,7 +169,7 @@ describe("MediaUploadListPage", () => {
     expect(screen.getByTestId("media-upload-dialog")).toBeInTheDocument();
   });
 
-  it("reloads the list after a successful save", async () => {
+  it("reloads the list at the current page after a successful edit", async () => {
     renderWithRedux(<MediaUploadListPage />, { initialState });
 
     await act(async () => {
@@ -185,7 +185,9 @@ describe("MediaUploadListPage", () => {
     expect(saveMediaUpload).toHaveBeenCalledWith({ id: 7 });
     // Call 1: useEffect on mount; call 2: handleSave refresh
     expect(getMediaUploads).toHaveBeenCalledTimes(2);
-    expect(getMediaUploads).toHaveBeenLastCalledWith("", 1, 10, "id", 1);
+    // Editing an existing entity (has id) stays on the current page (3)
+    // instead of bouncing back to the default page.
+    expect(getMediaUploads).toHaveBeenLastCalledWith("", 3, 10, "id", 1);
   });
 
   it("closes the dialog on save success even if the list refresh fails", async () => {

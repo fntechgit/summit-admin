@@ -226,7 +226,7 @@ describe("MediaUploadDialog", () => {
       expect(onSave).not.toHaveBeenCalled();
     });
 
-    it("submits 0 instead of NaN when max_size is cleared to empty", async () => {
+    it("blocks submit and shows a required error when max_size is cleared to empty", async () => {
       const user = userEvent.setup();
       renderDialog({ ...BASE_ENTITY, name: "Slides", max_size: 1024 });
 
@@ -236,11 +236,10 @@ describe("MediaUploadDialog", () => {
         await user.click(screen.getByText("general.save").closest("button"));
       });
 
-      expect(onSave).toHaveBeenCalledWith(
-        expect.objectContaining({ max_size: 0 })
-      );
-      const [submittedValues] = onSave.mock.calls[0];
-      expect(Number.isNaN(submittedValues.max_size)).toBe(false);
+      expect(
+        screen.getByTestId("filesize-max_size").nextSibling
+      ).toHaveTextContent("validation.required");
+      expect(onSave).not.toHaveBeenCalled();
     });
   });
 
