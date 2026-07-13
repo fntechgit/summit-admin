@@ -104,10 +104,22 @@ const MediaUploadDialog = ({
     initialValues: entity,
     validationSchema: yup.object().shape({
       name: yup.string().required(T.translate("validation.required")),
-      max_size: positiveNumberValidation(),
+      max_size: positiveNumberValidation()
+        .moreThan(0, T.translate("validation.positive"))
+        .required(T.translate("validation.required")),
       min_uploads_qty: positiveNumberValidation(),
       max_uploads_qty: positiveNumberValidation(),
-      temporary_links_public_storage_ttl: positiveNumberValidation()
+      temporary_links_public_storage_ttl: positiveNumberValidation().when(
+        "use_temporary_links_on_public_storage",
+        {
+          is: true,
+          then: (schema) =>
+            schema
+              .moreThan(0, T.translate("validation.positive"))
+              .required(T.translate("validation.required")),
+          otherwise: (schema) => schema
+        }
+      )
     }),
     onSubmit: handleSubmit
   });

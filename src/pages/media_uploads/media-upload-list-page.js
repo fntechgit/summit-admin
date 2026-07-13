@@ -75,9 +75,10 @@ const MediaUploadListPage = ({
   // the dialog open and invite a duplicate-create retry.
   const handleSave = (mediaUploadEntity) =>
     saveMediaUpload(mediaUploadEntity).then(() => {
+      // Saving a new entity resets to the default page; editing stays put.
       getMediaUploads(
         term,
-        DEFAULT_CURRENT_PAGE,
+        mediaUploadEntity.id ? currentPage : DEFAULT_CURRENT_PAGE,
         perPage,
         order,
         orderDir
