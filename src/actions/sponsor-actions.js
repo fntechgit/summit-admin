@@ -1140,24 +1140,24 @@ export const saveSummitSponsorship = (entity) => async (dispatch, getState) => {
         showSuccessMessage(T.translate("edit_sponsorship.sponsorship_saved"))
       );
     });
-  } 
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_sponsorship.sponsorship_created"),
-      type: "success"
-    };
+  }
 
-    return postRequest(
-      createAction(UPDATE_SUMMIT_SPONSORSHIP),
-      createAction(SUMMIT_SPONSORSHIP_ADDED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then(() => {
-      dispatch(showMessage(success_message));
-    });
-  
+  const success_message = {
+    title: T.translate("general.done"),
+    html: T.translate("edit_sponsorship.sponsorship_created"),
+    type: "success"
+  };
+
+  return postRequest(
+    createAction(UPDATE_SUMMIT_SPONSORSHIP),
+    createAction(SUMMIT_SPONSORSHIP_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )(params)(dispatch).then(() => {
+    dispatch(showMessage(success_message));
+  });
 };
 
 export const uploadSponsorshipBadgeImage =

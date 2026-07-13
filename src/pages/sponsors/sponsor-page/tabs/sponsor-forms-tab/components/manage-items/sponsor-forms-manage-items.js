@@ -139,7 +139,7 @@ const SponsorFormsManageItems = ({
         order,
         orderDir,
         showArchived
-      );
+      ).catch(() => {});
       resetSponsorFormManagedItem();
     });
 

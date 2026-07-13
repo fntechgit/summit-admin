@@ -82,6 +82,7 @@ const AddSponsorPageTemplatePopup = ({
       };
       onSubmit(entity)
         .then(() => onClose())
+        .catch(() => {})
         .finally(() => setIsSaving(false));
     },
     enableReinitialize: true

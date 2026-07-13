@@ -134,7 +134,7 @@ const ShowPagesListPage = ({
         order,
         orderDir,
         showArchived
-      )
+      ).catch(() => {})
     );
 
   const handleOpenPageTemplatePopup = async (row) => {

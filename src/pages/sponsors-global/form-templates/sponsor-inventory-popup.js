@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import PropTypes from "prop-types";
 import { FormikProvider, useFormik } from "formik";
@@ -72,6 +72,7 @@ const SponsorItemDialog = ({
       setIsSaving(true);
       onSave(values)
         .then(() => onClose())
+        .catch(() => {})
         .finally(() => setIsSaving(false));
     }
   });

@@ -58,6 +58,7 @@ const AddSponsorDialog = ({ onClose, onSubmit, summitId }) => {
       setIsSaving(true);
       onSubmit(values)
         .then(() => onClose())
+        .catch(() => {})
         .finally(() => setIsSaving(false));
     },
     enableReinitialize: true

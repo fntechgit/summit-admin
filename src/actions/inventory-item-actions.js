@@ -286,6 +286,7 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
         })
         .catch((err) => {
           console.error(err);
+          throw err;
         })
         .finally(() => {
           dispatch(stopLoading());
