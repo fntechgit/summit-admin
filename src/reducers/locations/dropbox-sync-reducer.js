@@ -16,15 +16,25 @@ import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
   REQUEST_SYNC_CONFIG,
   RECEIVE_SYNC_CONFIG,
-  SYNC_CONFIG_UPDATED
+  SYNC_CONFIG_UPDATED,
+  SYNC_CONFIG_ERROR,
+  REQUEST_ALLOWLIST_OPTIONS,
+  RECEIVE_ALLOWLIST_OPTIONS,
+  ALLOWLIST_OPTIONS_ERROR
 } from "../../actions/dropbox-sync-actions";
 
 const DEFAULT_STATE = {
   syncConfig: {
     summit_id: null,
     dropbox_sync_enabled: false,
-    preflight_alert_email: null
+    preflight_alert_email: null,
+    materialized_media_upload_types: []
   },
+  // loaded stays false until the first RECEIVE for the current summit: the
+  // panel must not reconcile stored rows against an options list that simply
+  // hasn't arrived yet (options: [] is also the legitimate loaded-empty
+  // state, so the flag — not the array — is the "has data" signal).
+  allowlistOptions: { options: [], error: null, loaded: false },
   loading: false
 };
 
@@ -45,6 +55,24 @@ const dropboxSyncReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         syncConfig: payload.response ?? DEFAULT_STATE.syncConfig,
         loading: false
+      };
+    case SYNC_CONFIG_ERROR:
+      // Failed PUT: clear the in-flight flag but keep the stored syncConfig.
+      return { ...state, loading: false };
+    case REQUEST_ALLOWLIST_OPTIONS:
+      return {
+        ...state,
+        allowlistOptions: { options: [], error: null, loaded: false }
+      };
+    case RECEIVE_ALLOWLIST_OPTIONS:
+      return {
+        ...state,
+        allowlistOptions: { options: payload, error: null, loaded: true }
+      };
+    case ALLOWLIST_OPTIONS_ERROR:
+      return {
+        ...state,
+        allowlistOptions: { options: [], error: payload, loaded: false }
       };
     case SET_CURRENT_SUMMIT:
     case LOGOUT_USER:

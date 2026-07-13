@@ -4,15 +4,21 @@ import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
   REQUEST_SYNC_CONFIG,
   RECEIVE_SYNC_CONFIG,
-  SYNC_CONFIG_UPDATED
+  SYNC_CONFIG_UPDATED,
+  SYNC_CONFIG_ERROR,
+  REQUEST_ALLOWLIST_OPTIONS,
+  RECEIVE_ALLOWLIST_OPTIONS,
+  ALLOWLIST_OPTIONS_ERROR
 } from "../../actions/dropbox-sync-actions";
 
 const DEFAULT_STATE = {
   syncConfig: {
     summit_id: null,
     dropbox_sync_enabled: false,
-    preflight_alert_email: null
+    preflight_alert_email: null,
+    materialized_media_upload_types: []
   },
+  allowlistOptions: { options: [], error: null, loaded: false },
   loading: false
 };
 
@@ -67,6 +73,28 @@ describe("dropboxSyncReducer", () => {
     expect(state.loading).toBe(false);
   });
 
+  test("SYNC_CONFIG_ERROR clears loading but keeps the stored syncConfig", () => {
+    const storedConfig = {
+      summit_id: 1,
+      dropbox_sync_enabled: true,
+      preflight_alert_email: null,
+      materialized_media_upload_types: [{ id: 1, name: "Final Poster" }]
+    };
+    const prevState = {
+      ...DEFAULT_STATE,
+      syncConfig: storedConfig,
+      loading: true
+    };
+
+    const state = dropboxSyncReducer(prevState, {
+      type: SYNC_CONFIG_ERROR,
+      payload: {}
+    });
+
+    expect(state.loading).toBe(false);
+    expect(state.syncConfig).toEqual(storedConfig);
+  });
+
   test("SET_CURRENT_SUMMIT resets to default state", () => {
     const prevState = {
       syncConfig: {
@@ -101,5 +129,115 @@ describe("dropboxSyncReducer", () => {
     });
 
     expect(state).toEqual(DEFAULT_STATE);
+  });
+
+  // regression pins — must pass before AND after implementation
+  test("RECEIVE_SYNC_CONFIG populates materialized_media_upload_types when present in response", () => {
+    const payload = {
+      response: {
+        summit_id: 1,
+        dropbox_sync_enabled: true,
+        preflight_alert_email: "test@example.com",
+        materialized_media_upload_types: [
+          { id: 1, name: "Video", private_storage_type: "dropbox" }
+        ]
+      }
+    };
+
+    const state = dropboxSyncReducer(DEFAULT_STATE, {
+      type: RECEIVE_SYNC_CONFIG,
+      payload
+    });
+
+    expect(state.syncConfig.materialized_media_upload_types).toEqual([
+      { id: 1, name: "Video", private_storage_type: "dropbox" }
+    ]);
+  });
+
+  test("SYNC_CONFIG_UPDATED populates materialized_media_upload_types when present in response", () => {
+    const payload = {
+      response: {
+        summit_id: 1,
+        dropbox_sync_enabled: false,
+        preflight_alert_email: "test@example.com",
+        materialized_media_upload_types: [
+          { id: 2, name: "Image", private_storage_type: "local" }
+        ]
+      }
+    };
+
+    const state = dropboxSyncReducer(DEFAULT_STATE, {
+      type: SYNC_CONFIG_UPDATED,
+      payload
+    });
+
+    expect(state.syncConfig.materialized_media_upload_types).toEqual([
+      { id: 2, name: "Image", private_storage_type: "local" }
+    ]);
+  });
+
+  // allowlist action tests
+  test("REQUEST_ALLOWLIST_OPTIONS resets allowlistOptions and leaves syncConfig untouched", () => {
+    const prevState = {
+      ...DEFAULT_STATE,
+      syncConfig: { ...DEFAULT_STATE.syncConfig, dropbox_sync_enabled: true },
+      allowlistOptions: {
+        options: [{ id: 1, name: "Video", private_storage_type: "dropbox" }],
+        error: null,
+        loaded: true
+      }
+    };
+
+    const state = dropboxSyncReducer(prevState, {
+      type: REQUEST_ALLOWLIST_OPTIONS,
+      payload: {}
+    });
+
+    expect(state.allowlistOptions).toEqual({
+      options: [],
+      error: null,
+      loaded: false
+    });
+    expect(state.syncConfig.dropbox_sync_enabled).toBe(true);
+  });
+
+  test("RECEIVE_ALLOWLIST_OPTIONS sets options array and clears error", () => {
+    const options = [
+      { id: 1, name: "Video", private_storage_type: "dropbox" },
+      { id: 2, name: "Image", private_storage_type: "local" }
+    ];
+
+    const state = dropboxSyncReducer(DEFAULT_STATE, {
+      type: RECEIVE_ALLOWLIST_OPTIONS,
+      payload: options
+    });
+
+    expect(state.allowlistOptions).toEqual({
+      options,
+      error: null,
+      loaded: true
+    });
+  });
+
+  test("ALLOWLIST_OPTIONS_ERROR clears options and sets error message", () => {
+    const prevState = {
+      ...DEFAULT_STATE,
+      allowlistOptions: {
+        options: [{ id: 1, name: "Video", private_storage_type: "dropbox" }],
+        error: null,
+        loaded: true
+      }
+    };
+
+    const state = dropboxSyncReducer(prevState, {
+      type: ALLOWLIST_OPTIONS_ERROR,
+      payload: "fetch failed"
+    });
+
+    expect(state.allowlistOptions).toEqual({
+      options: [],
+      error: "fetch failed",
+      loaded: false
+    });
   });
 });

@@ -18,6 +18,7 @@ import Swal from "sweetalert2";
 import Switch from "react-switch";
 import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
 import SummitDropdown from "../../components/summit-dropdown";
+import AllowlistPanel from "../../components/locations/allowlist-panel";
 
 import { getSummitById } from "../../actions/summit-actions";
 import {
@@ -30,7 +31,8 @@ import {
 import {
   getSyncConfig,
   updateSyncConfig,
-  rebuildSync
+  rebuildSync,
+  getAllMediaUploadTypesForAllowlist
 } from "../../actions/dropbox-sync-actions";
 
 function LocationListPage({
@@ -41,11 +43,24 @@ function LocationListPage({
   dropboxSyncState,
   ...props
 }) {
+  const {
+    syncConfig,
+    loading: syncLoading,
+    allowlistOptions
+  } = dropboxSyncState;
+
   useEffect(() => {
     if (currentSummit) {
       props.getLocations();
       if (window.DROPBOX_MATERIALIZER_API_BASE_URL) {
-        props.getSyncConfig();
+        // Chained, not parallel: getSyncConfig has no startLoading of its own
+        // but clears the global overlay on completion, while the options fetch
+        // brackets the same (non-ref-counted) overlay — run in parallel,
+        // whichever resolves first drops the overlay for both, exposing the
+        // panel with stored rows reconciled against an empty options list.
+        props
+          .getSyncConfig()
+          .then(() => props.getAllMediaUploadTypesForAllowlist());
       }
     }
   }, [currentSummit?.id]);
@@ -102,6 +117,11 @@ function LocationListPage({
     });
   };
 
+  const handleSaveAllowlist = (types) =>
+    props.updateSyncConfig({
+      materialized_media_upload_types: types
+    });
+
   const columns = [
     { columnKey: "name", value: T.translate("location_list.name") },
     { columnKey: "class_name", value: T.translate("location_list.class_name") }
@@ -116,7 +136,6 @@ function LocationListPage({
 
   const sortedLocations = locations.sort((a, b) => a.order - b.order);
 
-  const { syncConfig, loading: syncLoading } = dropboxSyncState;
   const showSyncPanel = !!window.DROPBOX_MATERIALIZER_API_BASE_URL;
 
   return (
@@ -155,6 +174,14 @@ function LocationListPage({
                 </p>
               </div>
             </div>
+            <hr />
+            <AllowlistPanel
+              syncConfig={syncConfig}
+              allowlistOptions={allowlistOptions}
+              syncLoading={syncLoading}
+              onSave={handleSaveAllowlist}
+              onRetryOptions={props.getAllMediaUploadTypesForAllowlist}
+            />
             <hr />
             <div className="row form-group">
               <div className="col-md-6">
@@ -229,5 +256,6 @@ export default connect(mapStateToProps, {
   copyLocations,
   getSyncConfig,
   updateSyncConfig,
-  rebuildSync
+  rebuildSync,
+  getAllMediaUploadTypesForAllowlist
 })(LocationListPage);
