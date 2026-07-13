@@ -138,7 +138,14 @@ const PAGE_URL = "/app/summits/42/sponsors/reports/purchase-details";
 
 function buildState(
   summaryOverrides = {},
-  { total = 1, ordersFilters = {}, linesFilters = {}, byItemFilters = {} } = {}
+  {
+    total = 1,
+    ordersFilters = {},
+    linesFilters = {},
+    byItemFilters = {},
+    byItemData = [],
+    byItemReadError = null
+  } = {}
 ) {
   return {
     sponsorReportsPurchaseDetailsState: {
@@ -189,12 +196,12 @@ function buildState(
       readError: null
     },
     sponsorReportsPurchaseDetailsByItemState: {
-      data: [],
+      data: byItemData,
       summary: null,
       currentPage: 1,
       perPage: 10,
       filters: byItemFilters,
-      readError: null
+      readError: byItemReadError
     }
   };
 }
@@ -408,6 +415,81 @@ describe("PurchaseDetailsReportPage", () => {
     expect(getPurchaseDetailsByItemRows).toHaveBeenCalledWith({
       dateFrom: "2026-01-01"
     });
+  });
+
+  it("does NOT re-fetch the By Item whole-set on view toggle when rows are already loaded and filters are unchanged", async () => {
+    const history = createMemoryHistory({ initialEntries: [PAGE_URL] });
+    renderWithRedux(
+      <Router history={history}>
+        <Route path={PAGE_ROUTE} component={PurchaseDetailsReportPage} />
+      </Router>,
+      // Rows already loaded; Orders and By Item filters both empty (unchanged).
+      { initialState: buildState({}, { byItemData: [SAMPLE_LINE] }) }
+    );
+    await act(async () => {});
+    // orders → byitem → orders → byitem: the expensive whole-set burst must not
+    // re-fire when nothing changed and the set is already loaded.
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.view_by_item"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.view_orders"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.view_by_item"));
+    });
+    expect(getPurchaseDetailsByItemRows).not.toHaveBeenCalled();
+  });
+
+  it("DOES re-fetch the By Item whole-set on entry when rows are loaded but the carried filters differ", async () => {
+    const history = createMemoryHistory({ initialEntries: [PAGE_URL] });
+    renderWithRedux(
+      <Router history={history}>
+        <Route path={PAGE_ROUTE} component={PurchaseDetailsReportPage} />
+      </Router>,
+      // Rows already loaded, but Orders filters differ from the byitem slice's:
+      // the cache gate must NOT hit — the loaded set is for different filters.
+      {
+        initialState: buildState(
+          {},
+          {
+            byItemData: [SAMPLE_LINE],
+            ordersFilters: { dateFrom: "2026-01-01" },
+            byItemFilters: {}
+          }
+        )
+      }
+    );
+    await act(async () => {});
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.view_by_item"));
+    });
+    // Carried (Orders) filters win and drive a fresh whole-set fetch.
+    expect(getPurchaseDetailsByItemRows).toHaveBeenCalledWith({
+      dateFrom: "2026-01-01"
+    });
+  });
+
+  it("DOES re-fetch the By Item whole-set on re-entry when the prior fetch errored (stale rows must not serve as a cache hit)", async () => {
+    const history = createMemoryHistory({ initialEntries: [PAGE_URL] });
+    renderWithRedux(
+      <Router history={history}>
+        <Route path={PAGE_ROUTE} component={PurchaseDetailsReportPage} />
+      </Router>,
+      // Nonempty (stale) rows + unchanged filters, but the last fetch errored —
+      // re-entry must retry rather than skip.
+      {
+        initialState: buildState(
+          {},
+          { byItemData: [SAMPLE_LINE], byItemReadError: { message: "boom" } }
+        )
+      }
+    );
+    await act(async () => {});
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.view_by_item"));
+    });
+    expect(getPurchaseDetailsByItemRows).toHaveBeenCalledWith({});
   });
 
   it("Export CSV in the By Item view dispatches the LINES csv export with the byitem slice filters", async () => {

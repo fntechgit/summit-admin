@@ -4,7 +4,9 @@ import flushPromises from "flush-promises";
 import {
   getRequest,
   getCSV,
-  authErrorHandler
+  authErrorHandler,
+  START_LOADING,
+  STOP_LOADING
 } from "openstack-uicore-foundation/lib/utils/actions";
 import * as methods from "../../utils/methods";
 
@@ -1351,6 +1353,50 @@ describe("sponsor-reports-actions", () => {
         .filter((a) => a.type === RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS);
       expect(rowsActions).toHaveLength(1);
       expect(rowsActions[0].payload.response.data).toEqual([{ id: "fresh" }]);
+    });
+
+    it("drops the whole-set commit when the summit changes mid-flight (nothing re-invokes By Item to bump the seq)", async () => {
+      // The seq guard is per-thunk, not summit-aware, and a summit switch remounts
+      // on Orders — it never re-invokes By Item, so the seq is NOT bumped. Without
+      // the explicit summit guard the parked in-flight fetch would commit the old
+      // summit's rows over the reset slice (a stale cross-summit false cache hit).
+      let resolvePage1;
+      getRequest.mockImplementation(() => () => () => {
+        const response = {
+          data: [{ id: "old-summit" }],
+          last_page: 1,
+          summary: null
+        };
+        return new Promise((resolve) => {
+          resolvePage1 = () => resolve({ response });
+        });
+      });
+
+      // Function-backed getState so the summit id can flip under the in-flight thunk.
+      let summitId = 42;
+      const store = mockStore(() => ({
+        currentSummitState: { currentSummit: { id: summitId } }
+      }));
+      const pending = store.dispatch(getPurchaseDetailsByItemRows({}));
+      await flushPromises();
+      // Summit switches; no new By Item dispatch bumps the seq.
+      summitId = 43;
+      resolvePage1();
+      await pending;
+      await flushPromises();
+
+      const rowsActions = store
+        .getActions()
+        .filter((a) => a.type === RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS);
+      expect(rowsActions).toHaveLength(0);
+      // The summit-bail must leave the global overlay CLEARED — otherwise a
+      // startLoading dispatched under the old summit sticks (the reducer sets
+      // loading to a flag, so nothing after it clears it). Assert the terminal
+      // loading transition is a stop, not just balanced counts.
+      const loadingActions = store
+        .getActions()
+        .filter((a) => a.type === START_LOADING || a.type === STOP_LOADING);
+      expect(loadingActions.at(-1)?.type).toBe(STOP_LOADING);
     });
 
     it("suppresses PURCHASE_DETAILS_BY_ITEM_READ_ERROR from a stale call's error handler", async () => {

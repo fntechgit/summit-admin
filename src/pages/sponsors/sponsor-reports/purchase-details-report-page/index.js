@@ -163,13 +163,22 @@ const PurchaseDetailsReportPage = ({
     } else {
       // Whole-set fetch (no server page). Keep the user's client page when the
       // carried filters match; else snap back to page 1 (result set changed).
-      if (!sameFilters(carried, byItemFilters)) {
+      const filtersUnchanged = sameFilters(carried, byItemFilters);
+      if (!filtersUnchanged) {
         setByItemPaging({
           currentPage: DEFAULT_CURRENT_PAGE,
           perPage: byItemPerPage
         });
       }
-      fetchByItemRows(carried);
+      // Unlike the Orders/Lines single-page fetches above, this drives a
+      // multi-page whole-set burst. Skip it when re-entering By Item with
+      // unchanged filters and rows already loaded (a plain view toggle).
+      // Guard on !byItemReadError so a failed filtered fetch (which leaves stale
+      // rows + the new filters in the slice) still retries on re-entry instead
+      // of serving the stale set as a false cache hit.
+      if (!(filtersUnchanged && byItemData.length > 0 && !byItemReadError)) {
+        fetchByItemRows(carried);
+      }
     }
   }, [view]);
 

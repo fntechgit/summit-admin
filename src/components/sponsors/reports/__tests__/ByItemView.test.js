@@ -142,7 +142,41 @@ describe("groupLinesBySponsorItem", () => {
     });
   });
 
-  it("reconciles: Σ item qty == Σ input quantity and Σ contributors == input line count", () => {
+  it("EXCLUDES canceled lines from qty/money/purchasedCount/Σqty but keeps them as contributors", () => {
+    const rows = [
+      line({
+        item_code: "AV1",
+        quantity: 2,
+        line_total: 100000,
+        is_canceled: true
+      }),
+      line({ item_code: "AV1", quantity: 3, line_total: 150000 }),
+      line({
+        item_code: "Z1",
+        description: "Canceled only",
+        quantity: 4,
+        line_total: 40000,
+        is_canceled: true
+      })
+    ];
+    const [group] = groupLinesBySponsorItem(rows);
+    const av1 = group.items.find((i) => i.itemCode === "AV1");
+    // canceled qty (2) and money (100000) excluded; live line still counts
+    expect(av1.qty).toBe(3);
+    expect(av1.totalCents).toBe(150000);
+    // both lines remain structurally, and the canceled one is still a contributor
+    expect(av1.lines).toBe(2);
+    expect(av1.contributors).toHaveLength(2);
+    const z1 = group.items.find((i) => i.itemCode === "Z1");
+    // an item whose only line is canceled reports qty 0 and null money (renders —)
+    expect(z1.qty).toBe(0);
+    expect(z1.totalCents).toBeNull();
+    // Z1 is not "purchased"; only AV1 counts
+    expect(group.purchasedCount).toBe(1);
+    expect(group.totalQty).toBe(3);
+  });
+
+  it("reconciles non-canceled input: Σ item qty == Σ input quantity and Σ contributors == input line count", () => {
     const rows = [
       line({ quantity: 3 }),
       line({ item_code: "B", quantity: 0 }),

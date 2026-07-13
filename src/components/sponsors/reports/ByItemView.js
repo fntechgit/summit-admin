@@ -88,11 +88,17 @@ export const groupLinesBySponsorItem = (rows = []) => {
     if (isEmptyString(item.label) && !isEmptyString(row.description)) {
       item.label = row.description.trim();
     }
-    item.qty += row.quantity ?? 0;
     item.lines += 1;
-    // Null-safe money: all-null stays null (renders "—"); mixed sums non-nulls.
-    if (row.line_total != null) {
-      item.totalCents = (item.totalCents ?? 0) + row.line_total;
+    // Canceled lines are shown struck-through in the drill-down (as contributors
+    // below) but excluded from the "purchased" aggregates: qty, money, and the
+    // derived purchasedCount / Σ qty. Counting them would let a canceled-only
+    // line report an item as purchased.
+    if (!row.is_canceled) {
+      item.qty += row.quantity ?? 0;
+      // Null-safe money: all-null stays null (renders "—"); mixed sums non-nulls.
+      if (row.line_total != null) {
+        item.totalCents = (item.totalCents ?? 0) + row.line_total;
+      }
     }
     const purchaseId = row.purchase?.id ?? null;
     if (purchaseId != null) {

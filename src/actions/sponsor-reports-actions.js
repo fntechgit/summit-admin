@@ -546,7 +546,17 @@ export const getPurchaseDetailsByItemRows =
           )
         )
       );
-      if (!isCurrent()) return Promise.resolve();
+      // Drop a late commit if superseded OR the summit changed: the seq guard is
+      // per-thunk, and a summit switch remounts on Orders (never re-invoking By
+      // Item) so it never bumps the seq. stopLoading balances our own startLoading
+      // on that path (guardedDispatch no-ops when superseded — the newer call clears it).
+      if (
+        !isCurrent() ||
+        getState().currentSummitState.currentSummit?.id !== currentSummit.id
+      ) {
+        guardedDispatch(stopLoading());
+        return Promise.resolve();
+      }
       const allRows = rest.reduce(
         (acc, r) => acc.concat(r.response.data),
         response.data
