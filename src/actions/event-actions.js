@@ -94,6 +94,12 @@ const fieldsBoundToQuestions = [
   SOCIAL_DESCRIPTION
 ];
 
+// Extracts the id whether the field arrives as a raw id or as the full
+// nested object the API returns (e.g. bulk-table rows vs. form state).
+const toId = (value) => (typeof value === "number" ? value : value?.id);
+
+const toIdArray = (values) => values.map(toId).filter((id) => !!id);
+
 export const normalizeEvent = (entity, eventTypeConfig, summit) => {
   const normalizedEntity = { ...entity };
   if (!normalizedEntity.start_date) delete normalizedEntity.start_date;
@@ -112,14 +118,19 @@ export const normalizeEvent = (entity, eventTypeConfig, summit) => {
     });
 
   if (normalizedEntity.hasOwnProperty("sponsors"))
-    normalizedEntity.sponsors = normalizedEntity.sponsors
-      .map((s) => (typeof s === "number" ? s : s?.id))
-      .filter((s) => !!s);
+    normalizedEntity.sponsors = toIdArray(normalizedEntity.sponsors);
 
   if (normalizedEntity.hasOwnProperty("speakers"))
-    normalizedEntity.speakers = normalizedEntity.speakers
-      .map((s) => (typeof s === "number" ? s : s?.id))
-      .filter((s) => !!s);
+    normalizedEntity.speakers = toIdArray(normalizedEntity.speakers);
+
+  // API responses nest location/track/type as full objects; collapse them
+  // down to the *_id the update endpoints expect.
+  ["location", "track", "type"].forEach((key) => {
+    if (normalizedEntity.hasOwnProperty(key)) {
+      normalizedEntity[`${key}_id`] = toId(normalizedEntity[key]);
+      delete normalizedEntity[key];
+    }
+  });
 
   if (
     normalizedEntity.hasOwnProperty("moderator") &&
@@ -135,13 +146,25 @@ export const normalizeEvent = (entity, eventTypeConfig, summit) => {
     normalizedEntity.created_by_id = normalizedEntity.created_by?.id;
   }
 
-  // if selection plan is null set is as 0 and remove the current selection plan
+  // selection_plan may arrive as a nested object (bulk-table rows) or as a
+  // selection_plan_id already set by form state; only derive it from the
+  // nested object when selection_plan_id hasn't been explicitly set, so a
+  // deliberate clear (selection_plan_id: null, stale selection_plan object
+  // left over) below isn't overridden.
+  if (
+    normalizedEntity.hasOwnProperty("selection_plan") &&
+    !normalizedEntity.hasOwnProperty("selection_plan_id")
+  ) {
+    normalizedEntity.selection_plan_id = toId(normalizedEntity.selection_plan);
+  }
+  delete normalizedEntity.selection_plan;
+
+  // if selection plan is null set is as 0
   if (
     normalizedEntity.hasOwnProperty("selection_plan_id") &&
     normalizedEntity.selection_plan_id == null
   ) {
     normalizedEntity.selection_plan_id = 0;
-    delete normalizedEntity.selection_plan;
   }
 
   if (eventTypeConfig) {
@@ -189,44 +212,39 @@ export const normalizeEvent = (entity, eventTypeConfig, summit) => {
   return normalizedEntity;
 };
 
-export const normalizeBulkEvents = (entity) => {
-  const normalizedEntity = entity.map((e) => {
-    const normalizedEvent = {
-      id: e.id,
-      title: e.title,
-      selection_plan_id:
-        e.selection_plan?.id ||
-        (typeof e.selection_plan === "number"
-          ? e.selection_plan
-          : e.selection_plan_id),
-      location_id:
-        e.location?.id ||
-        (typeof e.location === "number" ? e.location : e.location_id),
-      start_date: e.start_date,
-      end_date: e.end_date,
-      type_id: e.type?.id || (typeof e.type === "number" ? e.type : e.type_id),
-      track_id:
-        e.track?.id || (typeof e.track === "number" ? e.track : e.track_id),
-      duration: e.duration,
-      streaming_url: e.streaming_url,
-      streaming_type: e.streaming_type,
-      meeting_url: e.meeting_url,
-      etherpad_link: e.etherpad_link,
-      allow_feedback: e.allow_feedback,
-      to_record: e.to_record
-    };
-    Object.keys(normalizedEvent).forEach((property) => {
-      if (
-        normalizedEvent[property] === undefined ||
-        normalizedEvent[property] === null
-      ) {
-        delete normalizedEvent[property];
+// Fields the bulk events table (see summit-event-list-page/helpers.js) can
+// edit and that should therefore be sent in the bulk update payload. Add a
+// field here when a new column becomes editable in that table.
+const BULK_EVENT_FIELDS = [
+  "id",
+  "title",
+  "selection_plan_id",
+  "location_id",
+  "start_date",
+  "end_date",
+  "type_id",
+  "track_id",
+  "duration",
+  "streaming_url",
+  "streaming_type",
+  "meeting_url",
+  "etherpad_link",
+  "allow_feedback",
+  "to_record",
+  "speakers"
+];
+
+// Expects each entity to already be normalized (see normalizeEvent) so
+// fields like speakers/location_id/track_id are in their final shape here.
+export const normalizeBulkEvents = (entities) =>
+  entities.map((entity) =>
+    BULK_EVENT_FIELDS.reduce((normalizedEvent, field) => {
+      if (entity[field] !== undefined && entity[field] !== null) {
+        normalizedEvent[field] = entity[field];
       }
-    });
-    return normalizedEvent;
-  });
-  return normalizedEntity;
-};
+      return normalizedEvent;
+    }, {})
+  );
 
 export const getEvents =
   (
@@ -315,7 +333,9 @@ export const bulkUpdateEvents = (events) => async (dispatch, getState) => {
     events.map((event) =>
       normalizeEvent(
         event,
-        currentSummit.event_types.find((et) => et.id === event.type_id)
+        currentSummit.event_types.find(
+          (et) => et.id === (toId(event.type) ?? event.type_id)
+        )
       )
     )
   );
