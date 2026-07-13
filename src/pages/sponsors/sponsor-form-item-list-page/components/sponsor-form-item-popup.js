@@ -20,7 +20,6 @@ import SponsorFormItemForm from "./sponsor-form-item-form";
 const SponsorFormItemPopup = ({
   formId,
   item,
-  open,
   onClose,
   resetSponsorFormItem,
   saveSponsorFormItem,
@@ -41,7 +40,7 @@ const SponsorFormItemPopup = ({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between" }}
         component="div"
@@ -62,7 +61,6 @@ const SponsorFormItemPopup = ({
 };
 
 SponsorFormItemPopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   formId: PropTypes.string.isRequired,
   resetSponsorFormItem: PropTypes.func.isRequired,

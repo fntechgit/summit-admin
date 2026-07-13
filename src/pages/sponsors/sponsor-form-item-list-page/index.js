@@ -301,16 +301,18 @@ const SponsorFormItemListPage = ({
           />
         </div>
       )}
-      <SponsorFormItemPopup
-        formId={formId}
-        open={openPopup === "crud"}
-        onClose={() => setOpenPopup(null)}
-      />
-      <SponsorFormAddItemFromInventoryPopup
-        formId={formId}
-        open={openPopup === "inventory"}
-        onClose={() => setOpenPopup(null)}
-      />
+      {openPopup === "crud" && (
+        <SponsorFormItemPopup
+          formId={formId}
+          onClose={() => setOpenPopup(null)}
+        />
+      )}
+      {openPopup === "inventory" && (
+        <SponsorFormAddItemFromInventoryPopup
+          formId={formId}
+          onClose={() => setOpenPopup(null)}
+        />
+      )}
     </div>
   );
 };

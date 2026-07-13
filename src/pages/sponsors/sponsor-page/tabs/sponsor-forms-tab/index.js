@@ -496,15 +496,16 @@ const SponsorFormsTab = ({
         />
       )}
 
-      <CustomizedFormPopup
-        formId={customFormEdit?.id || null}
-        open={!!customFormEdit}
-        upgradeManaged={upgradeManaged}
-        onClose={handleCloseCustomizedPopup}
-        onSaved={handleCustomizedFormSaved}
-        sponsor={sponsor}
-        summitId={currentSummit.id}
-      />
+      {!!customFormEdit && (
+        <CustomizedFormPopup
+          formId={customFormEdit?.id || null}
+          upgradeManaged={upgradeManaged}
+          onClose={handleCloseCustomizedPopup}
+          onSaved={handleCustomizedFormSaved}
+          sponsor={sponsor}
+          summitId={currentSummit.id}
+        />
+      )}
     </Box>
   );
 };

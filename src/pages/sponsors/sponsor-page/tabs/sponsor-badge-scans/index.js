@@ -244,7 +244,6 @@ const SponsorBadgeScans = ({
       {showEditBadgeScanPopup && (
         <EditBadgeScanPopup
           badgeScan={currentBadgeScan}
-          open={showEditBadgeScanPopup}
           onClose={handleCloseEditBadgeScanPopup}
           onSubmit={handleBadgeScanSave}
         />

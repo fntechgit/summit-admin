@@ -22,7 +22,6 @@ import {
 } from "../../../../../../actions/sponsor-users-actions";
 
 const ImportUsersPopup = ({
-  open,
   currentSummit,
   sponsorId,
   companyId,
@@ -84,7 +83,7 @@ const ImportUsersPopup = ({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog open onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between", p: 2 }}
         component="div"

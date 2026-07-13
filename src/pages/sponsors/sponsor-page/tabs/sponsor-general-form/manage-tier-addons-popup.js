@@ -28,7 +28,6 @@ import MuiFormikSummitAddonSelect from "../../../../../components/mui/formik-inp
 
 const ManageTierAddonsPopup = ({
   sponsorship,
-  open,
   onClose,
   onSubmit,
   summitId,
@@ -169,7 +168,7 @@ const ManageTierAddonsPopup = ({
   }, [formik.values]);
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog open onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="2.4rem">
           {T.translate("edit_sponsor.manage_addons")}
@@ -396,7 +395,6 @@ const ManageTierAddonsPopup = ({
 };
 
 ManageTierAddonsPopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   onSponsorshipAddonRemove: PropTypes.func.isRequired,

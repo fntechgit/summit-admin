@@ -26,7 +26,6 @@ const SelectFormDialog = ({
   availableForms,
   summitId,
   sponsor,
-  open,
   onSave,
   onClose,
   getSponsorFormsForCart
@@ -36,10 +35,8 @@ const SelectFormDialog = ({
   const { forms, currentPage, term, order, orderDir, total } = availableForms;
 
   useEffect(() => {
-    if (open) {
-      getSponsorFormsForCart();
-    }
-  }, [open]);
+    getSponsorFormsForCart();
+  }, []);
 
   const handleSort = (key, dir) => {
     getSponsorFormsForCart(term, 1, key, dir);
@@ -110,7 +107,7 @@ const SelectFormDialog = ({
   ];
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between" }}
         component="div"

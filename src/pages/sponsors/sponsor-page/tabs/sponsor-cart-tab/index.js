@@ -70,13 +70,14 @@ const SponsorCartTab = ({ sponsor, currentSummit, match }) => {
                   <CartView onAddForm={handleOnAddForm} />
                 )}
 
-                <SelectFormDialog
-                  open={!!openAddFormDialog}
-                  summitId={currentSummit.id}
-                  sponsor={sponsor}
-                  onSave={handleFormSelected}
-                  onClose={() => setOpenAddFormDialog(false)}
-                />
+                {!!openAddFormDialog && (
+                  <SelectFormDialog
+                    summitId={currentSummit.id}
+                    sponsor={sponsor}
+                    onSave={handleFormSelected}
+                    onClose={() => setOpenAddFormDialog(false)}
+                  />
+                )}
               </>
             )}
           />
