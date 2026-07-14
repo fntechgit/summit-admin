@@ -45,4 +45,4 @@ const FormTemplateLayout = ({ match }) => (
   </div>
 );
 
-export default Restrict(withRouter(FormTemplateLayout), "form-template");
+export default Restrict(withRouter(FormTemplateLayout), "inventory");

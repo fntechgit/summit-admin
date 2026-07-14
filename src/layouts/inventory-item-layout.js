@@ -33,4 +33,4 @@ const InventoryItemLayout = ({ match }) => (
   </div>
 );
 
-export default Restrict(withRouter(InventoryItemLayout), "inventory-item");
+export default Restrict(withRouter(InventoryItemLayout), "inventory");
