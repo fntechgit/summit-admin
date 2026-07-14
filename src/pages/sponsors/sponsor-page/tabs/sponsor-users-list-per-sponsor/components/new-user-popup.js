@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
@@ -16,8 +16,8 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
-import CustomAlert from "../../../../../../components/mui/custom-alert";
-import MuiFormikTextField from "../../../../../../components/mui/formik-inputs/mui-formik-textfield";
+import CustomAlert from "openstack-uicore-foundation/lib/components/mui/custom-alert";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import {
   sendSponsorUserInvite,
   getSponsorUsers
@@ -30,17 +30,11 @@ const NewUserPopup = ({
   sendSponsorUserInvite,
   getSponsorUsers
 }) => {
-  const handleClose = () => {
-    onClose();
-  };
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleOnSave = (values) => {
-    sendSponsorUserInvite(values.email)
-      .catch(() => {})
-      .finally(() => {
-        getSponsorUsers(sponsorId);
-        handleClose();
-      });
+  const handleClose = () => {
+    if (isSaving) return;
+    onClose();
   };
 
   const formik = useFormik({
@@ -51,13 +45,29 @@ const NewUserPopup = ({
         .email(T.translate("validation.email"))
         .required(T.translate("validation.required"))
     }),
-    onSubmit: handleOnSave,
+    onSubmit: (values) => {
+      if (isSaving) return;
+      setIsSaving(true);
+      sendSponsorUserInvite(values.email)
+        .then(() => {
+          getSponsorUsers(sponsorId);
+          handleClose();
+        })
+        .catch(() => {})
+        .finally(() => setIsSaving(false));
+    },
     validateOnBlur: false,
     enableReinitialize: true
   });
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      disableEscapeKeyDown={isSaving}
+    >
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between" }}
         component="div"
@@ -65,7 +75,12 @@ const NewUserPopup = ({
         <Typography variant="h5">
           {T.translate("sponsor_users.new_user.add_user")}
         </Typography>
-        <IconButton size="large" sx={{ p: 0 }} onClick={handleClose}>
+        <IconButton
+          size="large"
+          sx={{ p: 0 }}
+          onClick={handleClose}
+          disabled={isSaving}
+        >
           <CloseIcon fontSize="large" />
         </IconButton>
       </DialogTitle>
@@ -90,7 +105,12 @@ const NewUserPopup = ({
           </DialogContent>
           <Divider />
           <DialogActions>
-            <Button type="submit" fullWidth variant="contained">
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={isSaving}
+            >
               {T.translate("sponsor_users.new_user.invite")}
             </Button>
           </DialogActions>

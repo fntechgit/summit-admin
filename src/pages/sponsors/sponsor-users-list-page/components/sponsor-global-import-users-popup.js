@@ -17,14 +17,14 @@ import CloseIcon from "@mui/icons-material/Close";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
 import CheckBoxList from "openstack-uicore-foundation/lib/components/mui/checkbox-list";
+import SummitsDropdown from "openstack-uicore-foundation/lib/components/mui/summits-dropdown";
+import MuiFormikAsyncAutocomplete from "openstack-uicore-foundation/lib/components/mui/formik-inputs/async-select";
 import { snackbarErrorMsg } from "openstack-uicore-foundation/lib/utils/actions";
 import {
   fetchSponsorByCompany,
   fetchSponsorUsersBySummit,
   importSponsorUsers
 } from "../../../../actions/sponsor-users-actions";
-import SummitsDropdown from "../../../../components/mui/summits-dropdown";
-import MuiFormikAsyncAutocomplete from "../../../../components/mui/formik-inputs/mui-formik-async-select";
 import { querySponsors } from "../../../../actions/sponsor-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 
@@ -41,11 +41,15 @@ const SponsorGlobalImportUsersPopup = ({
   const loadMoreRequestIdRef = useRef(0);
 
   const formik = useFormik({
-    initialValues: { sponsor: { id: "", name: "" } },
+    initialValues: { sponsor: null },
     validationSchema: yup.object({
-      sponsor: yup.object({
-        id: yup.string().required(T.translate("validation.required"))
-      })
+      sponsor: yup
+        .object()
+        .nullable()
+        .required(T.translate("validation.required"))
+        .shape({
+          value: yup.mixed().required(T.translate("validation.required"))
+        })
     }),
     onSubmit: () => {},
     validateOnBlur: false,
@@ -179,7 +183,7 @@ const SponsorGlobalImportUsersPopup = ({
           <SummitsDropdown
             onChange={(val) => {
               setSelectedSummit(val);
-              formik.setFieldValue("sponsor", { id: "", name: "" });
+              formik.setFieldValue("sponsor", null);
               setUserOptions(null);
               setSelectedUsers([]);
             }}
