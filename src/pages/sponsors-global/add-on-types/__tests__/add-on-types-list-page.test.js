@@ -13,6 +13,7 @@ import flushPromises from "flush-promises";
 import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import AddOnTypesListPage from "../add-on-types-list-page";
+import AddOnTypesDialog from "../add-on-types-dialog";
 
 const mockGetAddOnTypes = jest.fn();
 const mockGetAddOnType = jest.fn();
@@ -59,7 +60,12 @@ jest.mock(
 jest.mock("../add-on-types-dialog", () => {
   const MockDialog = ({ onSave, onClose }) => (
     <div data-testid="add-on-types-dialog">
-      <button type="button" onClick={() => onSave({ name: "New Type" })}>
+      <button
+        type="button"
+        onClick={() => {
+          MockDialog.lastSaveResult = onSave({ name: "New Type" });
+        }}
+      >
         submit-form
       </button>
       <button type="button" onClick={onClose} aria-label="close">
@@ -182,6 +188,26 @@ describe("AddOnTypesListPage", () => {
     expect(mockGetAddOnTypes.mock.calls.length).toBeGreaterThan(callsBefore);
     const lastArgs = mockGetAddOnTypes.mock.calls.at(-1);
     expect(lastArgs[1]).toBe(1);
+  });
+
+  it("resolves the save handler when the follow-up list refresh fails, so the dialog can still close", async () => {
+    mockGetAddOnTypes
+      .mockReturnValueOnce(() => Promise.resolve()) // initial mount fetch
+      .mockReturnValueOnce(() => Promise.reject(new Error("refresh failed"))); // post-save refresh
+
+    renderPage();
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /add_on_types_list\.add_add_on_type/i
+      })
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("add-on-types-dialog")).toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "submit-form" }));
+
+    await expect(AddOnTypesDialog.lastSaveResult).resolves.toBeUndefined();
   });
 
   it("reloads the list from page 1 after a successful delete", async () => {
