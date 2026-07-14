@@ -32,21 +32,24 @@ jest.mock("../../../../../actions/sponsor-actions", () => {
   };
 });
 
-jest.mock("../../../../../components/mui/summits-dropdown", () => ({
-  __esModule: true,
-  default: ({ onChange, excludeSummitIds }) => (
-    <button
-      data-testid="summit-select"
-      type="button"
-      onClick={() => onChange(2)}
-    >
-      {`Select Summit (excluding: ${excludeSummitIds})`}
-    </button>
-  )
-}));
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/summits-dropdown",
+  () => ({
+    __esModule: true,
+    default: ({ onChange, excludeSummitIds }) => (
+      <button
+        data-testid="summit-select"
+        type="button"
+        onClick={() => onChange(2)}
+      >
+        {`Select Summit (excluding: ${excludeSummitIds})`}
+      </button>
+    )
+  })
+);
 
 jest.mock(
-  "../../../../../components/mui/formik-inputs/mui-formik-async-select",
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/async-select",
   () => {
     const React = require("react");
     const { useFormikContext } = require("formik");
