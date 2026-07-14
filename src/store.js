@@ -178,6 +178,8 @@ import sponsorReportsPurchaseDetailsReducer from "./reducers/sponsors/sponsor-re
 import sponsorReportsPurchaseDetailsLinesReducer from "./reducers/sponsors/sponsor-reports-purchase-details-lines-reducer";
 import sponsorReportsSponsorAssetReducer from "./reducers/sponsors/sponsor-reports-sponsor-asset-reducer";
 import sponsorReportsDrilldownReducer from "./reducers/sponsors/sponsor-reports-drilldown-reducer";
+import addOnTypeReducer from "./reducers/sponsors_inventory/add-on-type-reducer.js";
+import addOnTypesListReducer from "./reducers/sponsors_inventory/add-on-types-list-reducer.js";
 
 // default: localStorage if web, AsyncStorage if react-native
 
@@ -356,9 +358,11 @@ const reducers = persistCombineReducers(config, {
   dropboxSyncState: dropboxSyncReducer,
   sponsorReportsPurchaseDetailsState: sponsorReportsPurchaseDetailsReducer,
   sponsorReportsPurchaseDetailsLinesState:
-    sponsorReportsPurchaseDetailsLinesReducer,
+  sponsorReportsPurchaseDetailsLinesReducer,
   sponsorReportsSponsorAssetState: sponsorReportsSponsorAssetReducer,
-  sponsorReportsDrilldownState: sponsorReportsDrilldownReducer
+  sponsorReportsDrilldownState: sponsorReportsDrilldownReducer,
+  currentAddOnTypesListState: addOnTypesListReducer,
+  currentAddOnTypeState: addOnTypeReducer,
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

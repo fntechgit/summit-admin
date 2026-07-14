@@ -225,7 +225,8 @@
     "sponsors_inventory": "Sponsors",
     "form_templates": "Form Templates",
     "inventory": "Inventory",
-    "page_templates": "Pages"
+    "page_templates": "Pages",
+    "add_on_types": "Add-On Types"
   },
   "schedule": {
     "schedule": "Schedule",
@@ -4236,6 +4237,20 @@
       "module_remove_warning": "Please verify you want to delete this {name}"
     },
     "clone_success": "Page template cloned successfully."
+  },
+  "add_on_types_list": {
+    "add_on_types": "Add-On Types",
+    "add_on_type": "Add-On Type",
+    "id_column_label": "Id",
+    "name_column_label": "Name",
+    "add_add_on_type": "Add Add-On Type",
+    "add_on_type_created": "Add-On Type Created",
+    "add_on_type_saved": "Add-On Type Saved",
+    "delete_add_on_type_warning": "Are you sure you want to delete Add-On Type {name}",
+    "no_results": "No items found for this search criteria.",
+    "placeholders": {
+      "search_add_on_types": "Search by name"
+    }
   },
   "dropbox_sync": {
     "panel_title": "Synchronization Settings",
