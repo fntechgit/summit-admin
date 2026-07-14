@@ -20,9 +20,10 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  escapeFilterValue
+  escapeFilterValue,
+  snackbarErrorHandler,
+  snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import { DEFAULT_PER_PAGE } from "../utils/constants";
 
