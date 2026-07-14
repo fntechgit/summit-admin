@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
-import { FormikProvider, useFormik } from "formik";
+import { FormikProvider, useFormik, yupToFormErrors } from "formik";
 import * as yup from "yup";
 import MuiDropdownCheckbox from "openstack-uicore-foundation/lib/components/mui/dropdown-checkbox";
 import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
@@ -32,6 +32,74 @@ import {
 } from "../../../../utils/constants";
 import MuiFormikSelectGroup from "../../../../components/mui/formik-inputs/mui-formik-select-group";
 import { querySponsorAddons } from "../../../../actions/sponsor-actions";
+
+const infoModuleSchema = yup.object().shape({
+  kind: yup.string().equals([PAGES_MODULE_KINDS.INFO]),
+  content: yup.string().required(T.translate("validation.required"))
+});
+
+const documentModuleSchema = yup.object().shape({
+  kind: yup.string().equals([PAGES_MODULE_KINDS.DOCUMENT]),
+  name: yup.string().required(T.translate("validation.required")),
+  description: yup.string().required(T.translate("validation.required")),
+  external_url: yup.string().when("type", {
+    is: PAGE_MODULES_DOWNLOAD.URL,
+    then: (schema) => schema.required(T.translate("validation.required")),
+    otherwise: (schema) => schema.nullable()
+  }),
+  file: yup.array().when("type", {
+    is: PAGE_MODULES_DOWNLOAD.FILE,
+    then: (schema) =>
+      schema
+        .nullable()
+        .required(T.translate("validation.file_required"))
+        .min(1, T.translate("validation.file_required")),
+    otherwise: (schema) => schema.nullable()
+  })
+});
+
+const mediaModuleSchema = yup.object().shape({
+  kind: yup.string().equals([PAGES_MODULE_KINDS.MEDIA]),
+  name: yup.string().required(T.translate("validation.required")),
+  type: yup.string().required(T.translate("validation.required")),
+  upload_deadline: yup.date().when("$isGlobal", {
+    is: true,
+    then: (s) => s.nullable(),
+    otherwise: (s) => s.required(T.translate("validation.required"))
+  }),
+  description: yup.string().required(T.translate("validation.required")),
+  max_file_size: yup.number().when("type", {
+    is: PAGE_MODULES_MEDIA_TYPES.FILE,
+    then: (schema) =>
+      schema
+        .min(BYTES_PER_MB, T.translate("validation.non_negative"))
+        .required(T.translate("validation.required"))
+        .test(
+          "mib-aligned",
+          T.translate("validation.mib_aligned"),
+          (value) => value == null || value % BYTES_PER_MB === 0
+        ),
+    otherwise: (schema) => schema.nullable()
+  }),
+  file_type_id: yup.number().when("type", {
+    is: PAGE_MODULES_MEDIA_TYPES.FILE,
+    then: (schema) => schema.required(T.translate("validation.required")),
+    otherwise: (schema) => schema.nullable()
+  })
+});
+
+const moduleSchema = yup.lazy((value) => {
+  switch (value?.kind) {
+    case PAGES_MODULE_KINDS.INFO:
+      return infoModuleSchema;
+    case PAGES_MODULE_KINDS.DOCUMENT:
+      return documentModuleSchema;
+    case PAGES_MODULE_KINDS.MEDIA:
+      return mediaModuleSchema;
+    default:
+      return yup.object();
+  }
+});
 
 const PageTemplatePopup = ({
   pageTemplate,
@@ -54,87 +122,34 @@ const PageTemplatePopup = ({
 
   const showAllowedAddons = summitId && sponsorId && sponsorshipIds?.length > 0;
 
-  const infoModuleSchema = yup.object().shape({
-    kind: yup.string().equals([PAGES_MODULE_KINDS.INFO]),
-    content: yup.string().required(T.translate("validation.required"))
-  });
-
-  const documentModuleSchema = yup.object().shape({
-    kind: yup.string().equals([PAGES_MODULE_KINDS.DOCUMENT]),
-    name: yup.string().required(T.translate("validation.required")),
-    description: yup.string().required(T.translate("validation.required")),
-    external_url: yup.string().when("type", {
-      is: PAGE_MODULES_DOWNLOAD.URL,
-      then: (schema) => schema.required(T.translate("validation.required")),
-      otherwise: (schema) => schema.nullable()
-    }),
-    file: yup.array().when("type", {
-      is: PAGE_MODULES_DOWNLOAD.FILE,
-      then: (schema) =>
-        schema
-          .nullable()
-          .required(T.translate("validation.file_required"))
-          .min(1, T.translate("validation.file_required")),
-      otherwise: (schema) => schema.nullable()
-    })
-  });
-
-  const mediaModuleSchema = yup.object().shape({
-    kind: yup.string().equals([PAGES_MODULE_KINDS.MEDIA]),
-    name: yup.string().required(T.translate("validation.required")),
-    type: yup.string().required(T.translate("validation.required")),
-    upload_deadline: yup.date().when("$isGlobal", {
-      is: true,
-      then: (s) => s.nullable(),
-      otherwise: (s) => s.required(T.translate("validation.required"))
-    }),
-    description: yup.string().required(T.translate("validation.required")),
-    max_file_size: yup.number().when("type", {
-      is: PAGE_MODULES_MEDIA_TYPES.FILE,
-      then: (schema) =>
-        schema
-          .min(BYTES_PER_MB, T.translate("validation.non_negative"))
-          .required(T.translate("validation.required"))
-          .test(
-            "mib-aligned",
-            T.translate("validation.mib_aligned"),
-            (value) => value == null || value % BYTES_PER_MB === 0
-          ),
-      otherwise: (schema) => schema.nullable()
-    }),
-    file_type_id: yup.number().when("type", {
-      is: PAGE_MODULES_MEDIA_TYPES.FILE,
-      then: (schema) => schema.required(T.translate("validation.required")),
-      otherwise: (schema) => schema.nullable()
-    })
-  });
-
-  const moduleSchema = yup.lazy((value) => {
-    switch (value?.kind) {
-      case PAGES_MODULE_KINDS.INFO:
-        return infoModuleSchema;
-      case PAGES_MODULE_KINDS.DOCUMENT:
-        return documentModuleSchema;
-      case PAGES_MODULE_KINDS.MEDIA:
-        return mediaModuleSchema;
-      default:
-        return yup.object();
-    }
-  });
+  const validationSchema = React.useMemo(
+    () =>
+      yup.object().shape({
+        code: yup.string().required(T.translate("validation.required")),
+        name: yup.string().required(T.translate("validation.required")),
+        ...(showSponsorships && {
+          sponsorship_types: yup
+            .array()
+            .min(1, T.translate("validation.required"))
+        }),
+        modules: yup.array().of(moduleSchema)
+      }),
+    [showSponsorships]
+  );
 
   const formik = useFormik({
     initialValues: pageTemplate,
-    validationContext: { isGlobal },
-    validationSchema: yup.object().shape({
-      code: yup.string().required(T.translate("validation.required")),
-      name: yup.string().required(T.translate("validation.required")),
-      ...(showSponsorships && {
-        sponsorship_types: yup
-          .array()
-          .min(1, T.translate("validation.required"))
-      }),
-      modules: yup.array().of(moduleSchema)
-    }),
+    validate: (values) => {
+      try {
+        validationSchema.validateSync(values, {
+          abortEarly: false,
+          context: { isGlobal }
+        });
+        return {};
+      } catch (err) {
+        return yupToFormErrors(err);
+      }
+    },
     enableReinitialize: true,
     onSubmit: (values) => {
       const modulesWithOrder = values.modules.map((m, idx) => ({
