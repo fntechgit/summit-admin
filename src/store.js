@@ -361,7 +361,7 @@ const reducers = persistCombineReducers(config, {
   sponsorReportsPurchaseDetailsLinesReducer,
   sponsorReportsSponsorAssetState: sponsorReportsSponsorAssetReducer,
   sponsorReportsDrilldownState: sponsorReportsDrilldownReducer,
-  currentAddonTypesListState: addOnTypesListReducer,
+  currentAddOnTypesListState: addOnTypesListReducer,
   currentAddOnTypeState: addOnTypeReducer,
 });
 

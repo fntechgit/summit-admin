@@ -38,7 +38,9 @@ const SponsoredProjectLayout = React.lazy(() =>
 const TagLayout = React.lazy(() => import("./tag-layout"));
 const SponsorshipLayout = React.lazy(() => import("./sponsorship-layout"));
 const PageTemplateLayout = React.lazy(() => import("./page-template-layout"));
-const AddOnTypesLayout = React.lazy(() => import("./add-on-types-layout"));
+const AddOnTypesListPage = React.lazy(() =>
+  import("../pages/sponsors-global/add-on-types/add-on-types-list-page")
+);
 
 const PrimaryLayout = ({ match, currentSummit, location, member }) => {
   let extraClass = "container";
@@ -77,7 +79,12 @@ const PrimaryLayout = ({ match, currentSummit, location, member }) => {
             <Route path="/app/inventory" component={InventoryItemLayout} />
             <Route path="/app/form-templates" component={FormTemplateLayout} />
             <Route path="/app/page-templates" component={PageTemplateLayout} />
-            <Route path="/app/add-on-types" component={AddOnTypesLayout} />
+            <Route
+              strict
+              exact
+              path="/app/add-on-types"
+              component={AddOnTypesListPage}
+            />
             <Route
               path="/app/sponsorship-types"
               component={SponsorshipLayout}

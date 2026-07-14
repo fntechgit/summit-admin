@@ -39,4 +39,4 @@ const PageTemplateLayout = ({ match }) => (
   </div>
 );
 
-export default Restrict(withRouter(PageTemplateLayout), "page-template");
+export default Restrict(withRouter(PageTemplateLayout), "inventory");

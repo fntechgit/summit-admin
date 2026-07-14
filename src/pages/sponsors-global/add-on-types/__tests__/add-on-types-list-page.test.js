@@ -79,7 +79,7 @@ const middlewares = [thunk];
 const mockStore = configureStore(middlewares);
 
 const baseState = {
-  currentAddonTypesListState: {
+  currentAddOnTypesListState: {
     addOnTypes: [{ id: 1, name: "Early Bird" }],
     totalAddOnTypes: 1,
     term: "",
@@ -89,7 +89,8 @@ const baseState = {
     lastPage: 1,
     perPage: 10
   },
-  currentAddOnTypeState: { entity: { id: 0, name: "" }, errors: {} }
+  currentAddOnTypeState: { entity: { id: 0, name: "" }, errors: {} },
+  loggedUserState: { member: { groups: [{ code: "super-admins" }] } }
 };
 
 const renderPage = (stateOverride = {}) => {
@@ -97,7 +98,7 @@ const renderPage = (stateOverride = {}) => {
   render(
     <Provider store={store}>
       <MemoryRouter>
-        <AddOnTypesListPage />
+        <AddOnTypesListPage match={{ url: "/app/add-on-types" }} />
       </MemoryRouter>
     </Provider>
   );
@@ -122,8 +123,8 @@ describe("AddOnTypesListPage", () => {
 
   it("shows no-results message when list is empty", () => {
     renderPage({
-      currentAddonTypesListState: {
-        ...baseState.currentAddonTypesListState,
+      currentAddOnTypesListState: {
+        ...baseState.currentAddOnTypesListState,
         addOnTypes: [],
         totalAddOnTypes: 0
       }
@@ -157,8 +158,8 @@ describe("AddOnTypesListPage", () => {
 
   it("reloads the list from page 1 after a successful save", async () => {
     renderPage({
-      currentAddonTypesListState: {
-        ...baseState.currentAddonTypesListState,
+      currentAddOnTypesListState: {
+        ...baseState.currentAddOnTypesListState,
         currentPage: 3
       }
     });
@@ -185,8 +186,8 @@ describe("AddOnTypesListPage", () => {
 
   it("reloads the list from page 1 after a successful delete", async () => {
     renderPage({
-      currentAddonTypesListState: {
-        ...baseState.currentAddonTypesListState,
+      currentAddOnTypesListState: {
+        ...baseState.currentAddOnTypesListState,
         currentPage: 3
       }
     });

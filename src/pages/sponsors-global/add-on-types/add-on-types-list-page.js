@@ -17,8 +17,10 @@ import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { connect } from "react-redux";
+import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import Restrict from "../../../routes/restrict";
 import {
   getAddOnTypes,
   getAddOnType,
@@ -30,6 +32,7 @@ import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 import AddOnTypesDialog from "./add-on-types-dialog";
 
 const AddOnTypesListPage = ({
+  match,
   addOnTypes,
   currentAddOnType,
   currentPage,
@@ -83,14 +86,17 @@ const AddOnTypesListPage = ({
   };
 
   const handleDelete = (addOnTypeId) =>
-    deleteAddOnType(addOnTypeId).then(() =>
-      getAddOnTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
-    );
+    deleteAddOnType(addOnTypeId).then(() => {
+      getAddOnTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir).catch(
+        () => {}
+      );
+    });
 
   const handleAddOnTypeSave = (item) =>
-    saveAddOnType(item).then(() =>
-      getAddOnTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
-    );
+    saveAddOnType(item).then(() => {
+      const page = item.id ? currentPage : DEFAULT_CURRENT_PAGE;
+      getAddOnTypes(term, page, perPage, order, orderDir).catch(() => {});
+    });
 
   const columns = [
     {
@@ -113,6 +119,12 @@ const AddOnTypesListPage = ({
 
   return (
     <div className="container">
+      <Breadcrumb
+        data={{
+          title: T.translate("add_on_types_list.add_on_types"),
+          pathname: match.url
+        }}
+      />
       <h3> {T.translate("add_on_types_list.add_on_types")}</h3>
       <Grid2
         container
@@ -203,17 +215,20 @@ const AddOnTypesListPage = ({
 };
 
 const mapStateToProps = ({
-  currentAddonTypesListState,
+  currentAddOnTypesListState,
   currentAddOnTypeState
 }) => ({
-  ...currentAddonTypesListState,
+  ...currentAddOnTypesListState,
   currentAddOnType: currentAddOnTypeState.entity
 });
 
-export default connect(mapStateToProps, {
-  getAddOnTypes,
-  getAddOnType,
-  resetAddOnTypeForm,
-  saveAddOnType,
-  deleteAddOnType
-})(AddOnTypesListPage);
+export default Restrict(
+  connect(mapStateToProps, {
+    getAddOnTypes,
+    getAddOnType,
+    resetAddOnTypeForm,
+    saveAddOnType,
+    deleteAddOnType
+  })(AddOnTypesListPage),
+  "inventory"
+);
