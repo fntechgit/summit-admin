@@ -278,7 +278,7 @@ export const queryCompanies = debounce(async (input, callback) => {
   endpoint.addQuery("fields", "id,name");
   endpoint.addQuery("relations", "none");
   if (input) {
-    endpoint.addQuery("filter", `name=@${input}`);
+    endpoint.addQuery("filter", `name@@${input}`);
   }
   fetch(endpoint)
     .then(fetchResponseHandler)
