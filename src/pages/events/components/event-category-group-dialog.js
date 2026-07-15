@@ -61,56 +61,66 @@ const EventCategoryGroupDialog = ({
   onAllowedGroupUnLink
 }) => {
   const [isSaving, setIsSaving] = useState(false);
-  const [trackInput, setTrackInput] = useState("");
-  const [trackOptions, setTrackOptions] = useState([]);
-  const [trackLoading, setTrackLoading] = useState(false);
-  const [selectedTrack, setSelectedTrack] = useState(null);
-  const [trackPage, setTrackPage] = useState(1);
-  const [trackPerPage, setTrackPerPage] = useState(DEFAULT_PER_PAGE);
-  const [groupInput, setGroupInput] = useState("");
-  const [groupOptions, setGroupOptions] = useState([]);
-  const [groupLoading, setGroupLoading] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState(null);
-  const [groupPage, setGroupPage] = useState(1);
-  const [groupPerPage, setGroupPerPage] = useState(DEFAULT_PER_PAGE);
+  const [trackState, setTrackState] = useState({
+    input: "",
+    options: [],
+    loading: false,
+    selected: null,
+    page: 1,
+    perPage: DEFAULT_PER_PAGE
+  });
+  const [groupState, setGroupState] = useState({
+    input: "",
+    options: [],
+    loading: false,
+    selected: null,
+    page: 1,
+    perPage: DEFAULT_PER_PAGE
+  });
 
   const isNew = !initialEntity?.id;
 
   useEffect(() => {
-    if (!trackInput) {
-      setTrackOptions([]);
+    if (!trackState.input) {
+      setTrackState((prev) => ({ ...prev, options: [] }));
       return undefined;
     }
-    setTrackLoading(true);
+    setTrackState((prev) => ({ ...prev, loading: true }));
     const timer = setTimeout(() => {
       const excludedIds = initialEntity?.tracks?.map((t) => t.id) ?? [];
       queryTracks(
         currentSummit.id,
-        trackInput,
+        trackState.input,
         (results) => {
-          setTrackOptions(results);
-          setTrackLoading(false);
+          setTrackState((prev) => ({
+            ...prev,
+            options: results,
+            loading: false
+          }));
         },
         excludedIds
       );
     }, DEBOUNCE_WAIT_250);
     return () => clearTimeout(timer);
-  }, [trackInput]);
+  }, [trackState.input]);
 
   useEffect(() => {
-    if (!groupInput) {
-      setGroupOptions([]);
+    if (!groupState.input) {
+      setGroupState((prev) => ({ ...prev, options: [] }));
       return undefined;
     }
-    setGroupLoading(true);
+    setGroupState((prev) => ({ ...prev, loading: true }));
     const timer = setTimeout(() => {
-      queryGroups(groupInput, (results) => {
-        setGroupOptions(results);
-        setGroupLoading(false);
+      queryGroups(groupState.input, (results) => {
+        setGroupState((prev) => ({
+          ...prev,
+          options: results,
+          loading: false
+        }));
       });
     }, DEBOUNCE_WAIT_250);
     return () => clearTimeout(timer);
-  }, [groupInput]);
+  }, [groupState.input]);
 
   const toEpoch = (momentValue) => {
     if (!momentValue || !momentValue.isValid()) return 0;
@@ -192,11 +202,14 @@ const EventCategoryGroupDialog = ({
   ];
 
   const handleAddTrack = () => {
-    if (!selectedTrack) return;
-    onTrackLink(initialEntity.id, selectedTrack);
-    setSelectedTrack(null);
-    setTrackInput("");
-    setTrackOptions([]);
+    if (!trackState.selected) return;
+    onTrackLink(initialEntity.id, trackState.selected);
+    setTrackState((prev) => ({
+      ...prev,
+      selected: null,
+      input: "",
+      options: []
+    }));
   };
 
   const handleTrackDelete = (trackId) => {
@@ -204,11 +217,14 @@ const EventCategoryGroupDialog = ({
   };
 
   const handleAddGroup = () => {
-    if (!selectedGroup) return;
-    onAllowedGroupLink(initialEntity.id, selectedGroup);
-    setSelectedGroup(null);
-    setGroupInput("");
-    setGroupOptions([]);
+    if (!groupState.selected) return;
+    onAllowedGroupLink(initialEntity.id, groupState.selected);
+    setGroupState((prev) => ({
+      ...prev,
+      selected: null,
+      input: "",
+      options: []
+    }));
   };
 
   const handleAllowedGroupDelete = (groupId) => {
@@ -217,14 +233,14 @@ const EventCategoryGroupDialog = ({
 
   const tracks = initialEntity?.tracks ?? [];
   const paginatedTracks = tracks.slice(
-    (trackPage - 1) * trackPerPage,
-    trackPage * trackPerPage
+    (trackState.page - 1) * trackState.perPage,
+    trackState.page * trackState.perPage
   );
 
   const allowedGroups = initialEntity?.allowed_groups ?? [];
   const paginatedGroups = allowedGroups.slice(
-    (groupPage - 1) * groupPerPage,
-    groupPage * groupPerPage
+    (groupState.page - 1) * groupState.perPage,
+    groupState.page * groupState.perPage
   );
 
   const title = isNew
@@ -481,20 +497,32 @@ const EventCategoryGroupDialog = ({
                           <Autocomplete
                             size="small"
                             fullWidth
-                            options={trackOptions}
+                            options={trackState.options}
                             getOptionLabel={(option) => option.name || ""}
                             isOptionEqualToValue={(option, value) =>
                               option.id === value.id
                             }
-                            loading={trackLoading}
-                            value={selectedTrack}
-                            onChange={(_, track) => setSelectedTrack(track)}
+                            loading={trackState.loading}
+                            value={trackState.selected}
+                            onChange={(_, track) =>
+                              setTrackState((prev) => ({
+                                ...prev,
+                                selected: track
+                              }))
+                            }
                             onInputChange={(_, val, reason) => {
-                              if (reason === "input") setTrackInput(val);
+                              if (reason === "input")
+                                setTrackState((prev) => ({
+                                  ...prev,
+                                  input: val
+                                }));
                               if (reason === "clear") {
-                                setSelectedTrack(null);
-                                setTrackInput("");
-                                setTrackOptions([]);
+                                setTrackState((prev) => ({
+                                  ...prev,
+                                  selected: null,
+                                  input: "",
+                                  options: []
+                                }));
                               }
                             }}
                             filterOptions={(x) => x}
@@ -511,7 +539,7 @@ const EventCategoryGroupDialog = ({
                                     ...params.InputProps,
                                     endAdornment: (
                                       <>
-                                        {trackLoading && (
+                                        {trackState.loading && (
                                           <CircularProgress
                                             color="inherit"
                                             size={16}
@@ -530,7 +558,7 @@ const EventCategoryGroupDialog = ({
                           <Button
                             variant="contained"
                             size="small"
-                            disabled={!selectedTrack}
+                            disabled={!trackState.selected}
                             onClick={handleAddTrack}
                           >
                             {T.translate("general.add")}
@@ -541,12 +569,17 @@ const EventCategoryGroupDialog = ({
                         columns={tracksColumns}
                         data={paginatedTracks}
                         totalRows={tracks.length}
-                        perPage={trackPerPage}
-                        currentPage={trackPage}
-                        onPageChange={setTrackPage}
+                        perPage={trackState.perPage}
+                        currentPage={trackState.page}
+                        onPageChange={(page) =>
+                          setTrackState((prev) => ({ ...prev, page }))
+                        }
                         onPerPageChange={(n) => {
-                          setTrackPerPage(parseInt(n, 10));
-                          setTrackPage(1);
+                          setTrackState((prev) => ({
+                            ...prev,
+                            perPage: parseInt(n, 10),
+                            page: 1
+                          }));
                         }}
                         onDelete={handleTrackDelete}
                         getName={(row) => row.name}
@@ -573,20 +606,32 @@ const EventCategoryGroupDialog = ({
                             <Autocomplete
                               size="small"
                               fullWidth
-                              options={groupOptions}
+                              options={groupState.options}
                               getOptionLabel={(option) => option.title || ""}
                               isOptionEqualToValue={(option, value) =>
                                 option.id === value.id
                               }
-                              loading={groupLoading}
-                              value={selectedGroup}
-                              onChange={(_, group) => setSelectedGroup(group)}
+                              loading={groupState.loading}
+                              value={groupState.selected}
+                              onChange={(_, group) =>
+                                setGroupState((prev) => ({
+                                  ...prev,
+                                  selected: group
+                                }))
+                              }
                               onInputChange={(_, val, reason) => {
-                                if (reason === "input") setGroupInput(val);
+                                if (reason === "input")
+                                  setGroupState((prev) => ({
+                                    ...prev,
+                                    input: val
+                                  }));
                                 if (reason === "clear") {
-                                  setSelectedGroup(null);
-                                  setGroupInput("");
-                                  setGroupOptions([]);
+                                  setGroupState((prev) => ({
+                                    ...prev,
+                                    selected: null,
+                                    input: "",
+                                    options: []
+                                  }));
                                 }
                               }}
                               filterOptions={(x) => x}
@@ -603,7 +648,7 @@ const EventCategoryGroupDialog = ({
                                       ...params.InputProps,
                                       endAdornment: (
                                         <>
-                                          {groupLoading && (
+                                          {groupState.loading && (
                                             <CircularProgress
                                               color="inherit"
                                               size={16}
@@ -622,7 +667,7 @@ const EventCategoryGroupDialog = ({
                             <Button
                               variant="contained"
                               size="small"
-                              disabled={!selectedGroup}
+                              disabled={!groupState.selected}
                               onClick={handleAddGroup}
                             >
                               {T.translate("general.add")}
@@ -633,12 +678,17 @@ const EventCategoryGroupDialog = ({
                           columns={allowedGroupsColumns}
                           data={paginatedGroups}
                           totalRows={allowedGroups.length}
-                          perPage={groupPerPage}
-                          currentPage={groupPage}
-                          onPageChange={setGroupPage}
+                          perPage={groupState.perPage}
+                          currentPage={groupState.page}
+                          onPageChange={(page) =>
+                            setGroupState((prev) => ({ ...prev, page }))
+                          }
                           onPerPageChange={(n) => {
-                            setGroupPerPage(parseInt(n, 10));
-                            setGroupPage(1);
+                            setGroupState((prev) => ({
+                              ...prev,
+                              perPage: parseInt(n, 10),
+                              page: 1
+                            }));
                           }}
                           onDelete={handleAllowedGroupDelete}
                           getName={(row) => row.title}
