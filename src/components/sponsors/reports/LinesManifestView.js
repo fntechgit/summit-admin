@@ -40,7 +40,9 @@ import {
   TWENTY_PER_PAGE
 } from "../../../utils/constants";
 
-const PER_PAGE_OPTIONS = [
+// Shared with ByItemView (single source for the report views' page-size list,
+// cf. STATUS_KEYS in build-pivot-tree).
+export const PER_PAGE_OPTIONS = [
   DEFAULT_PER_PAGE,
   TWENTY_PER_PAGE,
   FIFTY_PER_PAGE,
@@ -50,7 +52,7 @@ const PER_PAGE_OPTIONS = [
 // Destination = the line's add-on (e.g. "Meeting Room T"); when absent, the
 // logistics convention is the sponsor's booth. The booth NUMBER ships with
 // slice #1 — until then show a muted "Booth" placeholder.
-const Destination = ({ name }) =>
+export const Destination = ({ name }) =>
   name ? (
     <>{name}</>
   ) : (

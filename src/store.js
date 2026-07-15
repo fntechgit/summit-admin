@@ -178,6 +178,7 @@ import sponsorReportsPurchaseDetailsReducer from "./reducers/sponsors/sponsor-re
 import sponsorReportsPurchaseDetailsLinesReducer from "./reducers/sponsors/sponsor-reports-purchase-details-lines-reducer";
 import sponsorReportsSponsorAssetReducer from "./reducers/sponsors/sponsor-reports-sponsor-asset-reducer";
 import sponsorReportsDrilldownReducer from "./reducers/sponsors/sponsor-reports-drilldown-reducer";
+import sponsorReportsPurchaseDetailsByItemReducer from "./reducers/sponsors/sponsor-reports-purchase-details-by-item-reducer";
 import addOnTypeReducer from "./reducers/sponsors_inventory/add-on-type-reducer.js";
 import addOnTypesListReducer from "./reducers/sponsors_inventory/add-on-types-list-reducer.js";
 
@@ -190,6 +191,7 @@ const config = {
     "dropboxSyncState",
     "sponsorReportsPurchaseDetailsState",
     "sponsorReportsPurchaseDetailsLinesState",
+    "sponsorReportsPurchaseDetailsByItemState",
     "sponsorReportsSponsorAssetState",
     "sponsorReportsDrilldownState"
   ]
@@ -358,7 +360,9 @@ const reducers = persistCombineReducers(config, {
   dropboxSyncState: dropboxSyncReducer,
   sponsorReportsPurchaseDetailsState: sponsorReportsPurchaseDetailsReducer,
   sponsorReportsPurchaseDetailsLinesState:
-  sponsorReportsPurchaseDetailsLinesReducer,
+    sponsorReportsPurchaseDetailsLinesReducer,
+  sponsorReportsPurchaseDetailsByItemState:
+    sponsorReportsPurchaseDetailsByItemReducer,
   sponsorReportsSponsorAssetState: sponsorReportsSponsorAssetReducer,
   sponsorReportsDrilldownState: sponsorReportsDrilldownReducer,
   currentAddOnTypesListState: addOnTypesListReducer,
