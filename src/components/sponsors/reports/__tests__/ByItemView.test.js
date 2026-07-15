@@ -176,6 +176,29 @@ describe("groupLinesBySponsorItem", () => {
     expect(group.totalQty).toBe(3);
   });
 
+  it("excludes a canceled-only line's order from orders/statusMix, same as qty/money", () => {
+    const rows = [
+      line({
+        item_code: "Z1",
+        description: "Canceled only",
+        quantity: 4,
+        line_total: 40000,
+        is_canceled: true,
+        purchase: { id: 5001, number: "OCP-1", status: "Paid" }
+      })
+    ];
+    const [group] = groupLinesBySponsorItem(rows);
+    const z1 = group.items.find((i) => i.itemCode === "Z1");
+    expect(z1.qty).toBe(0);
+    expect(z1.totalCents).toBeNull();
+    // no live line contributes this order, so it is not a distinct paid order
+    expect(z1.orders).toBe(0);
+    expect(z1.statusMix).toEqual({});
+    // the canceled line is still visible in the drill-down
+    expect(z1.lines).toBe(1);
+    expect(z1.contributors).toHaveLength(1);
+  });
+
   it("reconciles non-canceled input: Σ item qty == Σ input quantity and Σ contributors == input line count", () => {
     const rows = [
       line({ quantity: 3 }),

@@ -90,24 +90,25 @@ export const groupLinesBySponsorItem = (rows = []) => {
     }
     item.lines += 1;
     // Canceled lines are shown struck-through in the drill-down (as contributors
-    // below) but excluded from the "purchased" aggregates: qty, money, and the
-    // derived purchasedCount / Σ qty. Counting them would let a canceled-only
-    // line report an item as purchased.
+    // below) but excluded from ALL "purchased" aggregates: qty, money, orders,
+    // and statusMix. Counting them would let a canceled-only line report an item
+    // as purchased (Qty 0 next to Orders 1 / Paid 1). A mixed order keeps its
+    // count because the live line for the same item still adds the order id.
     if (!row.is_canceled) {
       item.qty += row.quantity ?? 0;
       // Null-safe money: all-null stays null (renders "—"); mixed sums non-nulls.
       if (row.line_total != null) {
         item.totalCents = (item.totalCents ?? 0) + row.line_total;
       }
-    }
-    const purchaseId = row.purchase?.id ?? null;
-    if (purchaseId != null) {
-      item.orderIds.add(purchaseId);
-      const status = row.purchase?.status ?? "";
-      if (!item.statusOrderIds.has(status)) {
-        item.statusOrderIds.set(status, new Set());
+      const purchaseId = row.purchase?.id ?? null;
+      if (purchaseId != null) {
+        item.orderIds.add(purchaseId);
+        const status = row.purchase?.status ?? "";
+        if (!item.statusOrderIds.has(status)) {
+          item.statusOrderIds.set(status, new Set());
+        }
+        item.statusOrderIds.get(status).add(purchaseId);
       }
-      item.statusOrderIds.get(status).add(purchaseId);
     }
     item.contributors.push({
       number: row.purchase?.number ?? "",
