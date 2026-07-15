@@ -17,4 +17,13 @@ describe("ReportViewToggle", () => {
     fireEvent.click(screen.getByText("sponsor_reports_page.view_orders"));
     expect(onChange).not.toHaveBeenCalled();
   });
+
+  it("renders the By Item option and reports it on click", () => {
+    const onChange = jest.fn();
+    render(<ReportViewToggle value="orders" onChange={onChange} />);
+    fireEvent.click(
+      screen.getByRole("button", { name: "sponsor_reports_page.view_by_item" })
+    );
+    expect(onChange).toHaveBeenCalledWith("byitem");
+  });
 });
