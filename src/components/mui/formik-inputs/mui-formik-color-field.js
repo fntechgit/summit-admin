@@ -3,6 +3,9 @@ import PropTypes from "prop-types";
 import { useField } from "formik";
 import { MuiColorInput } from "mui-color-input";
 
+// Stays local: wraps the third-party mui-color-input package. uicore has no
+// color-field concept at all, so there's nothing to migrate to.
+//
 // MuiColorInput fires onChange on every pointermove while dragging the color
 // panel, so the picked value is kept in local state for instant visual
 // feedback and only committed to Formik (value + touched + validation) on
