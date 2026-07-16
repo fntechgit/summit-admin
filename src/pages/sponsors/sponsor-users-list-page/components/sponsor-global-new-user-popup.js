@@ -18,7 +18,7 @@ import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
 import MuiSponsorInput from "openstack-uicore-foundation/lib/components/mui/formik-inputs/sponsor-input";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
-import CustomAlert from "../../../../components/mui/custom-alert";
+import CustomAlert from "openstack-uicore-foundation/lib/components/mui/custom-alert";
 import {
   sendSponsorUserInvite,
   getSponsorUsers
