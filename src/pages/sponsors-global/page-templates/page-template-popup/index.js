@@ -20,7 +20,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
 import MuiDropdownCheckbox from "openstack-uicore-foundation/lib/components/mui/dropdown-checkbox";
-import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikSelectGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select-group";
 import PageModules from "./page-template-modules-form";
 import {
   BYTES_PER_MB,
@@ -30,7 +31,6 @@ import {
   PAGE_MODULES_MEDIA_TYPES,
   PAGE_MODULES_DOWNLOAD
 } from "../../../../utils/constants";
-import MuiFormikSelectGroup from "../../../../components/mui/formik-inputs/mui-formik-select-group";
 import { querySponsorAddons } from "../../../../actions/sponsor-actions";
 
 const PageTemplatePopup = ({

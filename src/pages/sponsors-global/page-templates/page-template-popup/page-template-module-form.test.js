@@ -38,7 +38,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../components/mui/formik-inputs/mui-formik-textfield",
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield",
   () =>
     function MockMuiFormikTextField({ name }) {
       return <input data-testid={`textfield-${name}`} />;
@@ -46,7 +46,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../components/mui/formik-inputs/mui-formik-select",
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/select",
   () =>
     function MockMuiFormikSelect({ name, children }) {
       return <select data-testid={`select-${name}`}>{children}</select>;
@@ -62,7 +62,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../components/mui/formik-inputs/mui-formik-radio-group",
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/radio-group",
   () =>
     function MockMuiFormikRadioGroup({ name }) {
       return <div data-testid={`radio-group-${name}`} />;

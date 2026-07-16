@@ -36,9 +36,9 @@ import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
 import CloseIcon from "@mui/icons-material/Close";
+import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
 import useScrollToError from "../../../hooks/useScrollToError";
 import MuiFormikAsyncAutocomplete from "../../../components/mui/formik-inputs/mui-formik-async-select";
-import MuiFormikSelect from "../../../components/mui/formik-inputs/mui-formik-select";
 import MuiFormikColorField from "../../../components/mui/formik-inputs/mui-formik-color-field";
 import {
   positiveNumberValidation,
@@ -260,6 +260,21 @@ const EventTypeDialog = ({
                       "edit_event_type.placeholders.select_class"
                     )}
                     disabled={values.id !== 0}
+                    renderValue={(selected) => {
+                      if (!selected) {
+                        return (
+                          <span style={{ color: "#00000061" }}>
+                            {T.translate(
+                              "edit_event_type.placeholders.select_class"
+                            )}
+                          </span>
+                        );
+                      }
+                      const selectedOption = classNameDdl.find(
+                        (opt) => opt.value === selected
+                      );
+                      return selectedOption?.label || selected;
+                    }}
                   >
                     {classNameDdl.map((opt) => (
                       <MenuItem key={opt.value} value={opt.value}>
@@ -295,7 +310,15 @@ const EventTypeDialog = ({
                   <InputLabel htmlFor="black_out_times">
                     {T.translate("edit_event_type.black_out_times")}
                   </InputLabel>
-                  <MuiFormikSelect name="black_out_times">
+                  <MuiFormikSelect
+                    name="black_out_times"
+                    renderValue={(selected) => {
+                      const selectedOption = blackoutTimesDdl.find(
+                        (opt) => opt.value === selected
+                      );
+                      return selectedOption?.label || selected;
+                    }}
+                  >
                     {blackoutTimesDdl.map((opt) => (
                       <MenuItem key={opt.value} value={opt.value}>
                         {opt.label}

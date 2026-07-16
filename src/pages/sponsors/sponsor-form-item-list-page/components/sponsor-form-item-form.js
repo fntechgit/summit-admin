@@ -15,6 +15,8 @@ import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
 import { MuiFormikUpload } from "openstack-uicore-foundation/lib/components";
 import AdditionalInputList from "openstack-uicore-foundation/lib/components/mui/formik-inputs/additional-input-list";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikQuantityField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/quantity-field";
 import {
   addIssAfterDateFieldValidator,
   nullableDecimalValidation,
@@ -22,11 +24,9 @@ import {
   positiveNumberValidation,
   requiredStringValidation
 } from "../../../../utils/yup";
-import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
 import useScrollToError from "../../../../hooks/useScrollToError";
 import ItemPriceTiers from "../../../../components/mui/formik-inputs/item-price-tiers";
 import FormikTextEditor from "../../../../components/inputs/formik-text-editor";
-import MuiFormikQuantityField from "../../../../components/mui/formik-inputs/mui-formik-quantity-field";
 import { MAX_INVENTORY_IMAGES_UPLOAD_QTY } from "../../../../utils/constants";
 import { getFileUploadAllowedExtensions } from "../../../../utils/methods";
 

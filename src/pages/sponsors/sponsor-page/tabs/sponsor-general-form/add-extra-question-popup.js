@@ -24,11 +24,11 @@ import InfoIcon from "@mui/icons-material/Info";
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import useScrollToError from "../../../../../hooks/useScrollToError";
-import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
-import MuiFormikSelect from "../../../../../components/mui/formik-inputs/mui-formik-select";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
+import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
 import FormikTextEditor from "../../../../../components/inputs/formik-text-editor";
-import MuiFormikCheckbox from "../../../../../components/mui/formik-inputs/mui-formik-checkbox";
+import useScrollToError from "../../../../../hooks/useScrollToError";
 import DragAndDropList from "../../../../../components/mui/dnd-list";
 import {
   deleteSponsorExtraQuestionValue,

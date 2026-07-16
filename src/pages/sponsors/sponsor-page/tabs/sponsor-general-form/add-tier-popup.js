@@ -19,9 +19,9 @@ import {
 
 import CloseIcon from "@mui/icons-material/Close";
 
+import SponsorshipsBySummitSelectMUI from "openstack-uicore-foundation/lib/components/mui/formik-inputs/sponsorship-summit-select";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import useScrollToError from "../../../../../hooks/useScrollToError";
-import SponsorshipsBySummitSelectMUI from "../../../../../components/mui/formik-inputs/sponsorship-summit-select-mui";
-import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
 
 const AddTierPopup = ({ sponsor, open, onClose, onSubmit, summitId }) => {
   const formik = useFormik({

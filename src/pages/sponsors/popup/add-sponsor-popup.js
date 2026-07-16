@@ -19,9 +19,9 @@ import {
 
 import CloseIcon from "@mui/icons-material/Close";
 
+import CompanyInputMUI from "openstack-uicore-foundation/lib/components/mui/formik-inputs/company-input";
+import SponsorshipsBySummitSelectMUI from "openstack-uicore-foundation/lib/components/mui/formik-inputs/sponsorship-summit-select";
 import useScrollToError from "../../../hooks/useScrollToError";
-import CompanyInputMUI from "../../../components/mui/formik-inputs/company-input-mui";
-import SponsorshipsBySummitSelectMUI from "../../../components/mui/formik-inputs/sponsorship-summit-select-mui";
 
 const AddSponsorDialog = ({ open, onClose, onSubmit, summitId }) => {
   const formik = useFormik({

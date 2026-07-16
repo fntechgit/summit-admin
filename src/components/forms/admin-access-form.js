@@ -21,7 +21,7 @@ import Grid2 from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input";
 import SummitInput from "openstack-uicore-foundation/lib/components/inputs/summit-input";
-import MuiFormikTextField from "../mui/formik-inputs/mui-formik-textfield";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import { requiredStringValidation } from "../../utils/yup";
 
 const validationSchema = yup.object().shape({
