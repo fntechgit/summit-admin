@@ -5,11 +5,11 @@ import { connect } from "react-redux";
 import { getIn, useFormikContext } from "formik";
 import { Divider, Grid2, InputLabel, MenuItem } from "@mui/material";
 import MuiFormikDatepicker from "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker";
-import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
-import MuiFormikRadioGroup from "../../../../../components/mui/formik-inputs/mui-formik-radio-group";
-import MuiFormikFilesizeField from "../../../../../components/mui/formik-inputs/mui-formik-file-size-field";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikRadioGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/radio-group";
+import MuiFormikFilesizeField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/file-size-field";
+import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
 import { PAGE_MODULES_MEDIA_TYPES } from "../../../../../utils/constants";
-import MuiFormikSelect from "../../../../../components/mui/formik-inputs/mui-formik-select";
 
 const MediaRequestModule = ({ baseName, index, mediaFileTypes }) => {
   const { values } = useFormikContext();

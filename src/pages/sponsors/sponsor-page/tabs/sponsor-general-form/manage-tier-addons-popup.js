@@ -22,9 +22,9 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikSummitAddonSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/summit-addon-select";
 import useScrollToError from "../../../../../hooks/useScrollToError";
-import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
-import MuiFormikSummitAddonSelect from "../../../../../components/mui/formik-inputs/mui-formik-summit-addon-select";
 
 const ManageTierAddonsPopup = ({
   sponsorship,

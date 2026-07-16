@@ -35,6 +35,7 @@ import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import MuiFormikSelectGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select-group";
 import MenuButton from "../../../../../../../components/mui/menu-button";
 import { querySponsorAddons } from "../../../../../../../actions/sponsor-actions";
 import { getShowPages } from "../../../../../../../actions/show-pages-actions";
@@ -42,7 +43,6 @@ import {
   DEFAULT_CURRENT_PAGE,
   FIVE_PER_PAGE
 } from "../../../../../../../utils/constants";
-import MuiFormikSelectGroup from "../../../../../../../components/mui/formik-inputs/mui-formik-select-group";
 
 const AddSponsorPageTemplatePopup = ({
   onClose,
