@@ -20,7 +20,10 @@ import {
   SPONSOR_PURCHASE_STATUS_UPDATED
 } from "../../actions/sponsor-purchases-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
+import {
+  MILLISECONDS_TO_SECONDS,
+  PURCHASE_STATUS
+} from "../../utils/constants";
 
 const DEFAULT_STATE = {
   purchases: [],
@@ -70,7 +73,7 @@ const showPurchaseListReducer = (state = DEFAULT_STATE, action) => {
           ? moment(a.purchased_date * MILLISECONDS_TO_SECONDS).format(
               "YYYY/MM/DD HH:mm a"
             )
-          : "N/A"
+          : PURCHASE_STATUS.PENDING
       }));
 
       return {

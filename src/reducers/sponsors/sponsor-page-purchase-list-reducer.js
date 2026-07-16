@@ -24,7 +24,10 @@ import {
   SPONSOR_PURCHASE_STATUS_UPDATED
 } from "../../actions/sponsor-purchases-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
+import {
+  MILLISECONDS_TO_SECONDS,
+  PURCHASE_STATUS
+} from "../../utils/constants";
 import { normalizeOrder } from "../../pages/sponsors/sponsor-page/utils";
 
 const DEFAULT_STATE = {
@@ -71,9 +74,11 @@ const sponsorPagePurchaseListReducer = (state = DEFAULT_STATE, action) => {
         ...a,
         order: a.order_number,
         amount: `$${amountFromCents(a.net_amount)}`,
-        purchased: moment(a.purchased_date * MILLISECONDS_TO_SECONDS).format(
-          "YYYY/MM/DD HH:mm a"
-        )
+        purchased: a.purchased_date
+          ? moment(a.purchased_date * MILLISECONDS_TO_SECONDS).format(
+              "YYYY/MM/DD HH:mm a"
+            )
+          : PURCHASE_STATUS.PENDING
       }));
 
       return {
