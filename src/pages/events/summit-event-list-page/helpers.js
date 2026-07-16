@@ -51,6 +51,31 @@ export const toApiSortKey = (key) => SORT_KEY_TO_API_KEY[key] ?? key;
 
 export const toUiSortKey = (key) => API_KEY_TO_SORT_KEY[key] ?? key;
 
+// filter-criteria-api persists `criteria` verbatim but has no column for a
+// top-level join_operator yet (confirmed: it round-trips `criteria` as-is,
+// join_operator is silently dropped from the response). Until the backend
+// adds that column, smuggle it in as a pseudo-criteria entry so saved
+// filters remember ALL vs ANY, and strip it back out on load.
+const JOIN_OPERATOR_CRITERIA_KEY = "__join_operator__";
+
+export const packJoinOperatorIntoCriteria = (filterValues, joinOperator) => [
+  ...filterValues,
+  { criteria: JOIN_OPERATOR_CRITERIA_KEY, operator: "==", value: joinOperator }
+];
+
+export const unpackJoinOperatorFromCriteria = (filterCriteria) => {
+  const criteria = filterCriteria?.criteria ?? [];
+  const joinOperatorEntry = criteria.find(
+    (c) => c.criteria === JOIN_OPERATOR_CRITERIA_KEY
+  );
+
+  return {
+    criteria: criteria.filter((c) => c.criteria !== JOIN_OPERATOR_CRITERIA_KEY),
+    // Prefer a real join_operator column if the backend ever adds one.
+    joinOperator: filterCriteria?.join_operator ?? joinOperatorEntry?.value
+  };
+};
+
 // Adds display-only fields for the table to render; never overwrites a real
 // event field, since the same row object is sent back as-is to bulkUpdateEvents.
 export const formatEventData = (e, summit) => {

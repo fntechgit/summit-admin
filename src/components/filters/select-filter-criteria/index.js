@@ -17,6 +17,7 @@ import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import AsyncSelect from "react-select/lib/Async";
 import { queryFilterCriterias } from "../../../actions/filter-criteria-actions";
+import { HIGH_Z_INDEX } from "../../../utils/constants";
 
 const SelectFilterCriteria = ({
   summitId,
@@ -94,6 +95,7 @@ const SelectFilterCriteria = ({
           isClearable
           defaultOptions={defaultOptions}
           onMenuOpen={handleMenuOpen}
+          styles={{ menu: (base) => ({ ...base, zIndex: HIGH_Z_INDEX }) }}
           {...rest}
         />
       </div>

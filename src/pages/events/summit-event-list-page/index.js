@@ -54,8 +54,10 @@ import {
   formatEventData,
   getCriterias,
   getOptionalColumns,
+  packJoinOperatorIntoCriteria,
   toApiSortKey,
-  toUiSortKey
+  toUiSortKey,
+  unpackJoinOperatorFromCriteria
 } from "./helpers";
 
 const FILTER_ID = "summit_activity_list";
@@ -86,7 +88,7 @@ const SummitEventListPage = ({
   const [showImportFromMUXModal, setShowImportFromMUXModal] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState(extraColumns ?? []);
   const [selectedFilterCriteria, setSelectedFilterCriteria] = useState(null);
-  const { parsedFilter, resetFilters, filterValues, setFilters } =
+  const { parsedFilter, resetFilters, filterValues, setFilters, joinOperator } =
     useGridFilter(FILTER_ID);
 
   // eslint-disable-next-line no-underscore-dangle
@@ -121,12 +123,14 @@ const SummitEventListPage = ({
   }, [currentSummit?.id]);
 
   useEffect(() => {
-    _getEvents();
+    _getEvents({ page: DEFAULT_CURRENT_PAGE });
   }, [parsedFilter.join(",")]);
 
   useEffect(() => {
     if (selectedFilterCriteria) {
-      setFilters(selectedFilterCriteria.criteria);
+      const { criteria, joinOperator: savedJoinOperator } =
+        unpackJoinOperatorFromCriteria(selectedFilterCriteria);
+      setFilters(criteria, savedJoinOperator);
     } else {
       resetFilters();
     }
@@ -177,7 +181,8 @@ const SummitEventListPage = ({
       name,
       enabled_filters: filterValues.map((f) => f.criteria),
       // only save criteria for enabled filters
-      criteria: filterValues,
+      criteria: packJoinOperatorIntoCriteria(filterValues, joinOperator),
+      join_operator: joinOperator,
       context: CONTEXT_ACTIVITIES,
       visibility
     };
