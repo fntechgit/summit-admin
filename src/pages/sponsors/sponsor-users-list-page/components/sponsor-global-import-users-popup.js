@@ -30,6 +30,7 @@ import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 
 const SponsorGlobalImportUsersPopup = ({
   summitId,
+  summits,
   onClose,
   importSponsorUsers
 }) => {
@@ -187,12 +188,14 @@ const SponsorGlobalImportUsersPopup = ({
               setUserOptions(null);
               setSelectedUsers([]);
             }}
+            summits={summits}
             excludeSummitIds={[summitId]}
           />
           {selectedSummit && (
             <Box sx={{ mb: 2, mt: 2 }}>
               <MuiFormikAsyncAutocomplete
                 name="sponsor"
+                key={selectedSummit}
                 queryFunction={querySponsors}
                 queryParams={[selectedSummit]}
                 placeholder={T.translate(
@@ -256,6 +259,10 @@ const SponsorGlobalImportUsersPopup = ({
   );
 };
 
-export default connect(null, {
+const mapStateToProps = ({ directoryState }) => ({
+  summits: directoryState.allSummits
+});
+
+export default connect(mapStateToProps, {
   importSponsorUsers
 })(SponsorGlobalImportUsersPopup);
