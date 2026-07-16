@@ -67,10 +67,13 @@ jest.mock(
   }
 );
 
-jest.mock("../../../../../components/mui/custom-alert", () => ({
-  __esModule: true,
-  default: () => null
-}));
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/custom-alert",
+  () => ({
+    __esModule: true,
+    default: () => null
+  })
+);
 
 const defaultProps = {
   onClose: jest.fn(),

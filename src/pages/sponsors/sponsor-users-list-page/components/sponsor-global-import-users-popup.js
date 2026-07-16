@@ -30,7 +30,6 @@ import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 
 const SponsorGlobalImportUsersPopup = ({
   summitId,
-  summits,
   onClose,
   importSponsorUsers
 }) => {
@@ -188,7 +187,7 @@ const SponsorGlobalImportUsersPopup = ({
               setUserOptions(null);
               setSelectedUsers([]);
             }}
-            summits={summits}
+            summits={[]}
             excludeSummitIds={[summitId]}
           />
           {selectedSummit && (
@@ -259,10 +258,6 @@ const SponsorGlobalImportUsersPopup = ({
   );
 };
 
-const mapStateToProps = ({ directoryState }) => ({
-  summits: directoryState.allSummits
-});
-
-export default connect(mapStateToProps, {
+export default connect(null, {
   importSponsorUsers
 })(SponsorGlobalImportUsersPopup);
