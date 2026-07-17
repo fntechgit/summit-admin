@@ -264,44 +264,38 @@ const SponsorPagesTab = ({
       .finally(() => setOpenPopup(null));
   };
 
-  const handleSaveCustomizedPage = (entity) => {
-    saveSponsorCustomizedPage(entity)
-      .then(() => {
-        const { perPage, order, orderDir } = customizedPages;
-        getSponsorCustomizedPages(
-          term,
-          DEFAULT_CURRENT_PAGE,
-          perPage,
-          order,
-          orderDir,
-          showArchived
-        );
-      })
-      .finally(() => setOpenPopup(null));
-  };
+  const handleSaveCustomizedPage = (entity) =>
+    saveSponsorCustomizedPage(entity).then(() => {
+      const { perPage, order, orderDir } = customizedPages;
+      getSponsorCustomizedPages(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      );
+    });
 
-  const handleSaveManagedPage = (entity) => {
-    saveSponsorManagedPage(entity)
-      .then(() => {
-        getSponsorManagedPages(
-          term,
-          DEFAULT_CURRENT_PAGE,
-          managedPages.perPage,
-          managedPages.order,
-          managedPages.orderDir,
-          showArchived
-        );
-        getSponsorCustomizedPages(
-          term,
-          DEFAULT_CURRENT_PAGE,
-          customizedPages.perPage,
-          customizedPages.order,
-          customizedPages.orderDir,
-          showArchived
-        );
-      })
-      .finally(() => setOpenPopup(null));
-  };
+  const handleSaveManagedPage = (entity) =>
+    saveSponsorManagedPage(entity).then(() => {
+      getSponsorManagedPages(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        managedPages.perPage,
+        managedPages.order,
+        managedPages.orderDir,
+        showArchived
+      );
+      getSponsorCustomizedPages(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        customizedPages.perPage,
+        customizedPages.order,
+        customizedPages.orderDir,
+        showArchived
+      );
+    });
 
   const handleClosePagePopup = () => {
     resetSponsorPage();

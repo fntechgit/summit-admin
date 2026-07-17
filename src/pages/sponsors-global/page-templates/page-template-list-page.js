@@ -114,9 +114,7 @@ const PageTemplateListPage = ({
     setOpenCloneDialog(true);
   };
 
-  const handleSavePageTemplate = (entity) => {
-    savePageTemplate(entity).then(() => setOpenPageDialog(false));
-  };
+  const handleSavePageTemplate = (entity) => savePageTemplate(entity);
 
   const handleArchive = (item) =>
     item.is_archived

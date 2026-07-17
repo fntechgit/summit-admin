@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import PropTypes from "prop-types";
 import {
@@ -17,10 +17,16 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
-import { FormikProvider, useFormik, yupToFormErrors } from "formik";
+import {
+  FormikProvider,
+  prepareDataForValidation,
+  useFormik,
+  yupToFormErrors
+} from "formik";
 import * as yup from "yup";
 import MuiDropdownCheckbox from "openstack-uicore-foundation/lib/components/mui/dropdown-checkbox";
-import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikSelectGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select-group";
 import PageModules from "./page-template-modules-form";
 import {
   BYTES_PER_MB,
@@ -30,7 +36,6 @@ import {
   PAGE_MODULES_MEDIA_TYPES,
   PAGE_MODULES_DOWNLOAD
 } from "../../../../utils/constants";
-import MuiFormikSelectGroup from "../../../../components/mui/formik-inputs/mui-formik-select-group";
 import { querySponsorAddons } from "../../../../actions/sponsor-actions";
 
 const infoModuleSchema = yup.object().shape({
@@ -112,6 +117,7 @@ const PageTemplatePopup = ({
   title,
   isGlobal
 }) => {
+  const [isSaving, setIsSaving] = useState(false);
   const popupTitle =
     title ??
     (pageTemplate?.id
@@ -119,6 +125,11 @@ const PageTemplatePopup = ({
       : T.translate("page_template_list.page_crud.title_create"));
   const showSponsorships =
     Array.isArray(sponsorships) && sponsorships.length > 0;
+
+  const handleClose = () => {
+    if (isSaving) return;
+    onClose();
+  };
 
   const showAllowedAddons = summitId && sponsorId && sponsorshipIds?.length > 0;
 
@@ -141,7 +152,7 @@ const PageTemplatePopup = ({
     initialValues: pageTemplate,
     validate: (values) => {
       try {
-        validationSchema.validateSync(values, {
+        validationSchema.validateSync(prepareDataForValidation(values), {
           abortEarly: false,
           context: { isGlobal }
         });
@@ -152,12 +163,22 @@ const PageTemplatePopup = ({
     },
     enableReinitialize: true,
     onSubmit: (values) => {
+      if (isSaving) return;
+      setIsSaving(true);
+
       const modulesWithOrder = values.modules.map((m, idx) => ({
         ...m,
         custom_order: idx
       }));
 
-      onSave({ ...values, modules: modulesWithOrder });
+      onSave({ ...values, modules: modulesWithOrder })
+        .then(() => {
+          onClose();
+        })
+        .catch(() => {})
+        .finally(() => {
+          setIsSaving(false);
+        });
     }
   });
 
@@ -201,10 +222,21 @@ const PageTemplatePopup = ({
   };
 
   return (
-    <Dialog open onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog
+      open
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      disableEscapeKeyDown={isSaving}
+    >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">{popupTitle}</Typography>
-        <IconButton size="small" onClick={onClose} sx={{ mr: 1 }}>
+        <IconButton
+          size="small"
+          onClick={handleClose}
+          disabled={isSaving}
+          sx={{ mr: 1 }}
+        >
           <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
@@ -327,7 +359,12 @@ const PageTemplatePopup = ({
           </DialogContent>
           <Divider />
           <DialogActions>
-            <Button type="submit" fullWidth variant="contained">
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={isSaving}
+            >
               {T.translate("page_template_list.page_crud.save")}
             </Button>
           </DialogActions>

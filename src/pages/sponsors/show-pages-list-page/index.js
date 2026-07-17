@@ -125,12 +125,10 @@ const ShowPagesListPage = ({
     );
   };
 
-  const handleSaveShowPage = (entity) => {
+  const handleSaveShowPage = (entity) =>
     saveShowPage(entity).then(() => {
-      setOpenPopup(null);
       getShowPages();
     });
-  };
 
   const handleOpenPageTemplatePopup = async (row) => {
     await Promise.all([

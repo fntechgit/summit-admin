@@ -14,8 +14,8 @@ import { connect } from "react-redux";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DeleteIcon from "@mui/icons-material/Delete";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
-import DragAndDropList from "../../../../components/mui/dnd-list";
-import showConfirmDialog from "../../../../components/mui/showConfirmDialog";
+import DragAndDropList from "openstack-uicore-foundation/lib/components/mui/dnd-list";
+import showConfirmDialog from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
 import {
   DEBOUNCE_WAIT_150,
   PAGES_MODULE_KINDS

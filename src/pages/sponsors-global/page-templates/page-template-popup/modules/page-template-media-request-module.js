@@ -1,19 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
 import { getIn, useFormikContext } from "formik";
 import { Divider, Grid2, InputLabel, MenuItem } from "@mui/material";
 import MuiFormikDatepicker from "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker";
-import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
-import MuiFormikRadioGroup from "../../../../../components/mui/formik-inputs/mui-formik-radio-group";
-import MuiFormikFilesizeField from "../../../../../components/mui/formik-inputs/mui-formik-file-size-field";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikRadioGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/radio-group";
+import MuiFormikFilesizeField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/file-size-field";
+import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
 import {
   COLUMN_6,
   COLUMN_12,
   PAGE_MODULES_MEDIA_TYPES
 } from "../../../../../utils/constants";
-import MuiFormikSelect from "../../../../../components/mui/formik-inputs/mui-formik-select";
 
 const MediaRequestModule = ({
   baseName,
@@ -21,11 +21,22 @@ const MediaRequestModule = ({
   mediaFileTypes,
   showUploadDeadline
 }) => {
-  const { values } = useFormikContext();
+  const { values, setFieldValue } = useFormikContext();
   const buildFieldName = (field) => `${baseName}[${index}].${field}`;
 
   const mediaType =
     getIn(values, buildFieldName("type")) || PAGE_MODULES_MEDIA_TYPES.FILE;
+
+  // clears a stale upload_deadline hydrated from a legacy module once the field is hidden;
+  // only needs to run on mount, since showUploadDeadline doesn't change during a module's lifetime
+  useEffect(() => {
+    if (
+      !showUploadDeadline &&
+      getIn(values, buildFieldName("upload_deadline"))
+    ) {
+      setFieldValue(buildFieldName("upload_deadline"), null);
+    }
+  }, []);
 
   const mediaTypeOptions = [
     {
