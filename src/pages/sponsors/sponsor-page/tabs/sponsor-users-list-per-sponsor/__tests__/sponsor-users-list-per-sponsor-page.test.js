@@ -301,6 +301,26 @@ describe("SponsorUsersListPerSponsorPage", () => {
     });
   });
 
+  // ── Import-in-progress indicator ──────────────────────────────────────────
+
+  describe("import-in-progress indicator", () => {
+    it("shows the indicator while an import task is pending", () => {
+      renderPage({ importTasks: [{ id: 1, status: "running" }] });
+
+      expect(
+        screen.getByText("sponsor_users.import_users.in_progress")
+      ).toBeInTheDocument();
+    });
+
+    it("hides the indicator when there are no import tasks", () => {
+      renderPage({ importTasks: [] });
+
+      expect(
+        screen.queryByText("sponsor_users.import_users.in_progress")
+      ).not.toBeInTheDocument();
+    });
+  });
+
   // ── Popup behavior ─────────────────────────────────────────────────────────
 
   describe("popup behavior", () => {

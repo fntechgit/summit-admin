@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -16,20 +15,11 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
-import CustomAlert from "openstack-uicore-foundation/lib/components/mui/custom-alert";
+import MuiSponsorInput from "openstack-uicore-foundation/lib/components/mui/formik-inputs/sponsor-input";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
-import {
-  sendSponsorUserInvite,
-  getSponsorUsers
-} from "../../../../../../actions/sponsor-users-actions";
+import CustomAlert from "openstack-uicore-foundation/lib/components/mui/custom-alert";
 
-const NewUserPopup = ({
-  open,
-  onClose,
-  sponsorId,
-  sendSponsorUserInvite,
-  getSponsorUsers
-}) => {
+const SponsorGlobalNewUserPopup = ({ onClose, summitId, onSave }) => {
   const [isSaving, setIsSaving] = useState(false);
 
   const handleClose = () => {
@@ -37,32 +27,36 @@ const NewUserPopup = ({
     onClose();
   };
 
+  const handleOnSave = (values) => {
+    if (isSaving) return;
+    setIsSaving(true);
+    onSave(values.email, values.sponsor.id)
+      .then(() => {
+        handleClose();
+      })
+      .catch(() => {})
+      .finally(() => setIsSaving(false));
+  };
+
   const formik = useFormik({
-    initialValues: { email: "" },
+    initialValues: { sponsor: { id: "", name: "" }, email: "" },
     validationSchema: yup.object({
+      sponsor: yup.object({
+        id: yup.string().required(T.translate("validation.required"))
+      }),
       email: yup
         .string(T.translate("validation.string"))
         .email(T.translate("validation.email"))
         .required(T.translate("validation.required"))
     }),
-    onSubmit: (values) => {
-      if (isSaving) return;
-      setIsSaving(true);
-      sendSponsorUserInvite(values.email)
-        .then(() => {
-          getSponsorUsers(sponsorId);
-          handleClose();
-        })
-        .catch(() => {})
-        .finally(() => setIsSaving(false));
-    },
+    onSubmit: handleOnSave,
     validateOnBlur: false,
     enableReinitialize: true
   });
 
   return (
     <Dialog
-      open={open}
+      open
       onClose={handleClose}
       maxWidth="sm"
       fullWidth
@@ -93,6 +87,13 @@ const NewUserPopup = ({
           autoComplete="off"
         >
           <DialogContent sx={{ p: 2 }}>
+            <MuiSponsorInput
+              name="sponsor"
+              summitId={summitId}
+              placeholder={T.translate(
+                "sponsor_users.process_request.select_sponsor"
+              )}
+            />
             <MuiFormikTextField
               name="email"
               label={T.translate("sponsor_users.new_user.email")}
@@ -120,13 +121,10 @@ const NewUserPopup = ({
   );
 };
 
-NewUserPopup.propTypes = {
-  open: PropTypes.bool.isRequired,
+SponsorGlobalNewUserPopup.propTypes = {
   onClose: PropTypes.func.isRequired,
-  sendSponsorUserInvite: PropTypes.func.isRequired
+  summitId: PropTypes.number.isRequired,
+  onSave: PropTypes.func.isRequired
 };
 
-export default connect(() => {}, {
-  sendSponsorUserInvite,
-  getSponsorUsers
-})(NewUserPopup);
+export default SponsorGlobalNewUserPopup;

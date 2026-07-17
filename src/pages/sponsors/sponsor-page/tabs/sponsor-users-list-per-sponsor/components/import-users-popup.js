@@ -14,8 +14,8 @@ import {
   Typography
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import CheckBoxList from "../../../../../../components/mui/checkbox-list";
-import SummitsDropdown from "../../../../../../components/mui/summits-dropdown";
+import CheckBoxList from "openstack-uicore-foundation/lib/components/mui/checkbox-list";
+import SummitsDropdown from "openstack-uicore-foundation/lib/components/mui/summits-dropdown";
 import {
   fetchSponsorUsersBySummit,
   importSponsorUsers
@@ -68,14 +68,11 @@ const ImportUsersPopup = ({
   };
 
   const handleImport = async () => {
-    importSponsorUsers(
-      sponsorId,
-      companyId,
-      selectedSummit,
-      selectedUsers
-    ).then(() => {
-      onClose();
-    });
+    importSponsorUsers(sponsorId, companyId, selectedSummit, selectedUsers)
+      .then(() => {
+        onClose();
+      })
+      .catch(() => {});
   };
 
   const handleSelectOnChange = (items, all = false) => {
