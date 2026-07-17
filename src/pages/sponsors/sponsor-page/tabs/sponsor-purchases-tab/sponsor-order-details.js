@@ -29,7 +29,6 @@ import {
 import {
   ACCESS_ROUTES,
   DATE_FORMAT,
-  PURCHASE_STATUS,
   PURCHASE_TYPES
 } from "../../../../../utils/constants";
 import Restrict from "../../../../../routes/restrict";
@@ -68,7 +67,7 @@ const SponsorOrderDetails = ({
       ),
       value: currentOrder.purchased_date
         ? formatDate(currentOrder.purchased_date, "LOC", DATE_FORMAT)
-        : PURCHASE_STATUS.PENDING
+        : T.translate("edit_sponsor.purchase_tab.order_details.pending")
     },
     {
       label: T.translate(
