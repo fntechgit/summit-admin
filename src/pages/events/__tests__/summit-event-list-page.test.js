@@ -1,29 +1,31 @@
 import React from "react";
+import { screen, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import "@testing-library/jest-dom";
+import flushPromises from "flush-promises";
 import SummitEventListPage from "../summit-event-list-page";
 import { renderWithRedux } from "../../../utils/test-utils";
+import { unpackJoinOperatorFromCriteria } from "../summit-event-list-page/helpers";
+import {
+  saveFilterCriteria,
+  deleteFilterCriteria
+} from "../../../actions/filter-criteria-actions";
 
 const mockEditableTableSpy = jest.fn(() => null);
 
-jest.mock("openstack-uicore-foundation/lib/components", () => ({
-  CompanyInput: () => null,
-  DateTimePicker: () => null,
-  Dropdown: () => null,
-  FreeTextSearch: () => null,
-  Input: () => null,
-  MemberInput: () => null,
-  OperatorInput: () => null,
-  SpeakerInput: () => null,
-  TagInput: () => null,
-  UploadInput: () => null
+jest.mock("../../../actions/filter-criteria-actions", () => ({
+  saveFilterCriteria: jest.fn(),
+  deleteFilterCriteria: jest.fn()
 }));
 
 jest.mock(
-  "../../../components/tables/editable-table/EditableTable",
+  "openstack-uicore-foundation/lib/components/mui/bulk-edit-table",
   () =>
-    function EditableTableMock(props) {
+    function BulkEditTableMock(props) {
       mockEditableTableSpy(props);
       return null;
-    }
+    },
+  { virtual: true }
 );
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
@@ -51,13 +53,63 @@ jest.mock("react-bootstrap", () => {
   };
 });
 
-jest.mock("../../../components/filters/media-type-filter", () => () => null);
-jest.mock("../../../components/filters/or-and-filter", () => () => null);
-jest.mock("../../../components/filters/save-filter-criteria", () => () => null);
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/snackbar-notification",
+  () => ({
+    ...jest.requireActual(
+      "openstack-uicore-foundation/lib/components/mui/snackbar-notification"
+    ),
+    useSnackbarMessage: () => ({
+      errorMessage: jest.fn(),
+      successMessage: jest.fn()
+    })
+  })
+);
+
+// Stubs the real popup: exposes a button that calls onSave with a fixed
+// "save this filter" payload, mirroring how the real dialog invokes onSave.
+jest.mock(
+  "../../../components/filters/save-filter-criteria",
+  () =>
+    function SaveFilterCriteriaMock({ onSave }) {
+      return (
+        <button
+          type="button"
+          onClick={() =>
+            onSave({
+              name: "My saved filter",
+              id: null,
+              visibility: "everyone"
+            })
+          }
+        >
+          save-filter-criteria
+        </button>
+      );
+    }
+);
 jest.mock(
   "../../../components/filters/select-filter-criteria",
   () => () => null
 );
+
+// Mutable shared state so tests can seed the GridFilter's current
+// filterValues/joinOperator before mounting the page.
+const mockGridFilterState = {
+  parsedFilter: [],
+  resetFilters: jest.fn(),
+  filterValues: [],
+  setFilters: jest.fn(),
+  joinOperator: undefined
+};
+
+jest.mock("openstack-uicore-foundation/lib/components/mui/grid-filter", () => ({
+  ...jest.requireActual(
+    "openstack-uicore-foundation/lib/components/mui/grid-filter"
+  ),
+  GridFilter: () => null,
+  useGridFilter: () => mockGridFilterState
+}));
 
 describe("SummitEventListPage", () => {
   let windowOpenSpy;
@@ -65,58 +117,15 @@ describe("SummitEventListPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     windowOpenSpy = jest.spyOn(window, "open").mockImplementation(() => null);
+    mockGridFilterState.parsedFilter = [];
+    mockGridFilterState.filterValues = [];
+    mockGridFilterState.joinOperator = undefined;
+    saveFilterCriteria.mockReturnValue(() => Promise.resolve());
+    deleteFilterCriteria.mockReturnValue(() => Promise.resolve());
   });
 
   afterEach(() => {
     windowOpenSpy.mockRestore();
-  });
-
-  test("does not pass afterUpdate prop to EditableTable in bulk mode", () => {
-    renderWithRedux(<SummitEventListPage />, {
-      initialState: {
-        currentSummitState: {
-          currentSummit: {
-            id: 12,
-            time_zone: { name: "UTC" },
-            time_zone_id: "UTC",
-            selection_plans: [],
-            tracks: [],
-            event_types: [],
-            locations: [],
-            presentation_action_types: []
-          }
-        },
-        currentEventListState: {
-          events: [
-            {
-              id: 101,
-              type: { id: 1, name: "Presentation", use_speakers: true },
-              title: "Sample event",
-              selection_status: "pending",
-              media_uploads: []
-            }
-          ],
-          lastPage: 1,
-          currentPage: 1,
-          order: "id",
-          orderDir: 1,
-          totalEvents: 1,
-          term: "",
-          filters: {},
-          extraColumns: ["media_uploads"],
-          perPage: 10,
-          enabledFilters: []
-        }
-      }
-    });
-
-    expect(mockEditableTableSpy).toHaveBeenCalled();
-
-    const editableTableProps =
-      mockEditableTableSpy.mock.calls[
-        mockEditableTableSpy.mock.calls.length - 1
-      ][0];
-    expect(editableTableProps.afterUpdate).toBeUndefined();
   });
 
   test("opens media upload material link using row event id", async () => {
@@ -133,6 +142,9 @@ describe("SummitEventListPage", () => {
             locations: [],
             presentation_action_types: []
           }
+        },
+        mediaUploadListState: {
+          media_uploads: []
         },
         currentEventListState: {
           events: [
@@ -161,8 +173,7 @@ describe("SummitEventListPage", () => {
           term: "",
           filters: {},
           extraColumns: ["media_uploads"],
-          perPage: 10,
-          enabledFilters: []
+          perPage: 10
         }
       }
     });
@@ -196,7 +207,8 @@ describe("SummitEventListPage", () => {
 
     expect(windowOpenSpy).toHaveBeenCalledWith(
       "/app/summits/12/events/101/materials/999",
-      "_blank"
+      "_blank",
+      "noopener,noreferrer"
     );
   });
 
@@ -214,6 +226,9 @@ describe("SummitEventListPage", () => {
             locations: [],
             presentation_action_types: []
           }
+        },
+        mediaUploadListState: {
+          media_uploads: []
         },
         currentEventListState: {
           events: [
@@ -239,8 +254,7 @@ describe("SummitEventListPage", () => {
           term: "",
           filters: {},
           extraColumns: ["media_uploads"],
-          perPage: 10,
-          enabledFilters: []
+          perPage: 10
         }
       }
     });
@@ -271,7 +285,8 @@ describe("SummitEventListPage", () => {
 
     expect(windowOpenSpy).toHaveBeenCalledWith(
       "/app/summits/12/events/101/materials/999",
-      "_blank"
+      "_blank",
+      "noopener,noreferrer"
     );
   });
 
@@ -289,6 +304,9 @@ describe("SummitEventListPage", () => {
             locations: [],
             presentation_action_types: []
           }
+        },
+        mediaUploadListState: {
+          media_uploads: []
         },
         currentEventListState: {
           events: [
@@ -315,8 +333,7 @@ describe("SummitEventListPage", () => {
           term: "",
           filters: {},
           extraColumns: ["media_uploads"],
-          perPage: 10,
-          enabledFilters: []
+          perPage: 10
         }
       }
     });
@@ -347,5 +364,72 @@ describe("SummitEventListPage", () => {
     });
 
     expect(windowOpenSpy).not.toHaveBeenCalled();
+  });
+
+  test("persists the ALL/ANY join operator when saving the current GridFilter criteria", async () => {
+    mockGridFilterState.filterValues = [
+      { criteria: "type", operator: "==", value: "1" }
+    ];
+    mockGridFilterState.joinOperator = "ANY";
+
+    renderWithRedux(<SummitEventListPage />, {
+      initialState: {
+        currentSummitState: {
+          currentSummit: {
+            id: 12,
+            time_zone: { name: "UTC" },
+            time_zone_id: "UTC",
+            selection_plans: [],
+            tracks: [],
+            event_types: [],
+            locations: [],
+            presentation_action_types: []
+          }
+        },
+        mediaUploadListState: {
+          media_uploads: []
+        },
+        currentEventListState: {
+          events: [],
+          lastPage: 1,
+          currentPage: 1,
+          order: "id",
+          orderDir: 1,
+          totalEvents: 0,
+          term: "",
+          filters: {},
+          extraColumns: [],
+          perPage: 10
+        }
+      }
+    });
+
+    await act(async () => {
+      await userEvent.click(
+        screen.getByRole("button", { name: "save-filter-criteria" })
+      );
+      await flushPromises();
+    });
+
+    expect(saveFilterCriteria).toHaveBeenCalledTimes(1);
+    const [savedPayload] = saveFilterCriteria.mock.calls[0];
+
+    // The backend doesn't persist a top-level join_operator column yet
+    // (confirmed empirically: it's silently dropped from the response), so
+    // this is sent defensively for forward-compat...
+    expect(savedPayload.join_operator).toBe("ANY");
+
+    // ...but what actually round-trips today is the pack/unpack hack: the
+    // join operator smuggled into the criteria array and stripped back out
+    // on load. Assert the real, currently-working path.
+    const {
+      joinOperator: rehydratedJoinOperator,
+      criteria: rehydratedCriteria
+    } = unpackJoinOperatorFromCriteria(savedPayload);
+
+    expect(rehydratedJoinOperator).toBe("ANY");
+    expect(rehydratedCriteria).toEqual([
+      { criteria: "type", operator: "==", value: "1" }
+    ]);
   });
 });

@@ -9,16 +9,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import AsyncSelect from "react-select/lib/Async";
-
-import styles from "./index.module.less";
 import { queryFilterCriterias } from "../../../actions/filter-criteria-actions";
+import { HIGH_Z_INDEX } from "../../../utils/constants";
 
 const SelectFilterCriteria = ({
   summitId,
@@ -30,7 +29,6 @@ const SelectFilterCriteria = ({
 }) => {
   const [selectedFilter, setSelectedFilter] = useState(null);
   const [defaultOptions, setDefaultOptions] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!selectedFilterCriteria) setSelectedFilter(null);
@@ -44,9 +42,9 @@ const SelectFilterCriteria = ({
   const handleFilterDelete = () => {
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("select_filter_criteria.remove_filter_criteria_warning") +
-        `"${selectedFilter.label}"`,
+      text: `${T.translate(
+        "select_filter_criteria.remove_filter_criteria_warning"
+      )}"${selectedFilter.label}"`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
@@ -59,7 +57,6 @@ const SelectFilterCriteria = ({
   };
 
   const getCriterias = (input, callback) => {
-    setIsLoading(true);
     // we need to map into value/label because of a bug in react-select 2
     // https://github.com/JedWatson/react-select/issues/2998
 
@@ -69,7 +66,6 @@ const SelectFilterCriteria = ({
         label: c.name,
         ...c
       }));
-      setIsLoading(false);
       callback(newOptions);
     };
 
@@ -88,18 +84,18 @@ const SelectFilterCriteria = ({
   };
 
   return (
-    <div className={`${styles.selectFilterWrapper} row`}>
+    <div className="row">
       <div className="col-md-10">
         <AsyncSelect
-          id={"filter_criteria_select"}
+          id="filter_criteria_select"
           value={selectedFilter}
           placeholder={T.translate("select_filter_criteria.placeholder")}
           onChange={handleFilterChange}
           loadOptions={getCriterias}
-          isClearable={true}
+          isClearable
           defaultOptions={defaultOptions}
           onMenuOpen={handleMenuOpen}
-          isLoading={true}
+          styles={{ menu: (base) => ({ ...base, zIndex: HIGH_Z_INDEX }) }}
           {...rest}
         />
       </div>

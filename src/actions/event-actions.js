@@ -36,11 +36,9 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 import URI from "urijs";
 import history from "../history";
 import {
-  checkOrFilter,
   getAccessTokenSafely,
   isNumericString,
-  joinCVSChunksAndNormalizeHeaders,
-  parseDateRangeFilter
+  joinCVSChunksAndNormalizeHeaders
 } from "../utils/methods";
 import { getQAUsersBySummitEvent } from "./user-chat-roles-actions";
 import { getAuditLog } from "./audit-log-actions";
@@ -51,11 +49,8 @@ import {
   DEFAULT_PER_PAGE,
   EXPORT_PAGE_SIZE_200,
   FIVE_PER_PAGE,
-  HOUR_AND_HALF,
-  SECONDS_TO_MINUTES,
-  TWO
+  HOUR_AND_HALF
 } from "../utils/constants";
-import { getIdValue } from "../utils/summitUtils";
 
 URI.escapeQuerySpace = false;
 
@@ -99,322 +94,11 @@ const fieldsBoundToQuestions = [
   SOCIAL_DESCRIPTION
 ];
 
-const parseFilters = (filters, term = null) => {
-  const filter = [];
+// Extracts the id whether the field arrives as a raw id or as the full
+// nested object the API returns (e.g. bulk-table rows vs. form state).
+const toId = (value) => (typeof value === "number" ? value : value?.id);
 
-  if (
-    filters.hasOwnProperty("event_type_capacity_filter") &&
-    Array.isArray(filters.event_type_capacity_filter) &&
-    filters.event_type_capacity_filter.length > 0
-  ) {
-    if (
-      filters.event_type_capacity_filter.includes("allows_attendee_vote_filter")
-    ) {
-      filter.push("type_allows_attendee_vote==1");
-    }
-    if (filters.event_type_capacity_filter.includes("allows_location_filter")) {
-      filter.push("type_allows_location==1");
-    }
-    if (
-      filters.event_type_capacity_filter.includes(
-        "allows_publishing_dates_filter"
-      )
-    ) {
-      filter.push("type_allows_publishing_dates==1");
-    }
-  }
-
-  if (
-    filters.hasOwnProperty("selection_plan_id_filter") &&
-    Array.isArray(filters.selection_plan_id_filter) &&
-    filters.selection_plan_id_filter.length > 0
-  ) {
-    filter.push(
-      `selection_plan_id==${filters.selection_plan_id_filter.join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("location_id_filter") &&
-    Array.isArray(filters.location_id_filter) &&
-    filters.location_id_filter.length > 0
-  ) {
-    filter.push(`location_id==${filters.location_id_filter.join("||")}`);
-  }
-
-  if (
-    filters.hasOwnProperty("selection_status_filter") &&
-    Array.isArray(filters.selection_status_filter) &&
-    filters.selection_status_filter.length > 0
-  ) {
-    filter.push(
-      `selection_status==${filters.selection_status_filter.join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("review_status_filter") &&
-    Array.isArray(filters.review_status_filter) &&
-    filters.review_status_filter.length > 0
-  ) {
-    filter.push(`review_status==${filters.review_status_filter.join("||")}`);
-  }
-
-  if (filters?.progress_flag?.length > 0) {
-    filter.push(
-      filters.progress_flag
-        .map((pf) => `actions==type_id==${pf}&&is_completed==1`)
-        .join(",")
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("track_id_filter") &&
-    Array.isArray(filters.track_id_filter) &&
-    filters.track_id_filter.length > 0
-  ) {
-    filter.push(`track_id==${filters.track_id_filter.join("||")}`);
-  }
-
-  if (
-    filters.hasOwnProperty("event_type_id_filter") &&
-    Array.isArray(filters.event_type_id_filter) &&
-    filters.event_type_id_filter.length > 0
-  ) {
-    filter.push(`event_type_id==${filters.event_type_id_filter.join("||")}`);
-  }
-
-  if (
-    filters.hasOwnProperty("speaker_id_filter") &&
-    Array.isArray(filters.speaker_id_filter) &&
-    filters.speaker_id_filter.length > 0
-  ) {
-    filter.push(
-      `speaker_id==${filters.speaker_id_filter
-        .map((speaker) => speaker.id)
-        .join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("level_filter") &&
-    Array.isArray(filters.level_filter) &&
-    filters.level_filter.length > 0
-  ) {
-    filter.push(`level==${filters.level_filter.join("||")}`);
-  }
-
-  if (
-    filters.hasOwnProperty("tags_filter") &&
-    Array.isArray(filters.tags_filter) &&
-    filters.tags_filter.length > 0
-  ) {
-    filter.push(`tags==${filters.tags_filter.map((t) => t.tag).join("||")}`);
-  }
-
-  if (filters.published_filter) {
-    filter.push(
-      `published==${filters.published_filter === "published" ? "1" : "0"}`
-    );
-  }
-
-  if (filters.has_rsvp_filter) {
-    filter.push(
-      `rsvp_type${filters.has_rsvp_filter === "yes" ? "<>" : "=="}None`
-    );
-  }
-
-  if (filters.start_date_filter) {
-    parseDateRangeFilter(filter, filters.start_date_filter, "start_date");
-  }
-
-  if (filters.end_date_filter) {
-    parseDateRangeFilter(filter, filters.end_date_filter, "end_date");
-  }
-
-  if (filters.created_filter) {
-    parseDateRangeFilter(filter, filters.created_filter, "created");
-  }
-
-  if (filters.modified_filter) {
-    parseDateRangeFilter(filter, filters.modified_filter, "last_edited");
-  }
-
-  if (filters.duration_filter) {
-    // multiply values to send the minutes in seconds
-    if (Array.isArray(filters.duration_filter)) {
-      // between
-      filter.push(
-        `duration[]${filters.duration_filter[0] * SECONDS_TO_MINUTES}&&${
-          filters.duration_filter[1] * SECONDS_TO_MINUTES
-        }`
-      );
-    } else {
-      filter.push(
-        `duration${filters.duration_filter.replace(/\d/g, "")}${
-          filters.duration_filter.replace(/\D/g, "") * SECONDS_TO_MINUTES
-        }`
-      );
-    }
-  }
-
-  if (filters.speakers_count_filter) {
-    if (
-      Array.isArray(filters.speakers_count_filter) &&
-      filters.speakers_count_filter.length === TWO
-    ) {
-      // between
-      filter.push(
-        `speakers_count[]${filters.speakers_count_filter[0]}&&${filters.speakers_count_filter[1]}`
-      );
-    } else {
-      filter.push(`speakers_count${filters.speakers_count_filter}`);
-    }
-  }
-
-  if (
-    filters.hasOwnProperty("submitters") &&
-    Array.isArray(filters.submitters) &&
-    filters.submitters.length > 0
-  ) {
-    // created by fullname | created_by_email
-    filter.push(
-      filters.submitters.map((tt) => {
-        const escapedFullName = escapeFilterValue(
-          `${tt.first_name} ${tt.last_name}`
-        );
-        const escapedEmail = escapeFilterValue(tt.email);
-        const fullNameFilter = `created_by_fullname==${escapedFullName}`;
-        const emailFilter = `created_by_email==${escapedEmail}`;
-        return [fullNameFilter, emailFilter];
-      }, "")
-    );
-  }
-
-  if (filters.hasOwnProperty("streaming_url") && filters.streaming_url) {
-    const searchString = escapeFilterValue(filters.streaming_url);
-    filter.push(`streaming_url@@${searchString}`);
-  }
-  if (filters.hasOwnProperty("meeting_url") && filters.meeting_url) {
-    const searchString = escapeFilterValue(filters.meeting_url);
-    filter.push(`meeting_url@@${searchString}`);
-  }
-  if (filters.hasOwnProperty("etherpad_link") && filters.etherpad_link) {
-    const searchString = escapeFilterValue(filters.etherpad_link);
-    filter.push(`etherpad_link@@${searchString}`);
-  }
-
-  if (filters.hasOwnProperty("streaming_type") && filters.streaming_type) {
-    filter.push(`streaming_type==${filters.streaming_type}`);
-  }
-
-  if (
-    filters.hasOwnProperty("submission_source_filter") &&
-    filters.submission_source_filter
-  ) {
-    filter.push(`submission_source==${filters.submission_source_filter}`);
-  }
-
-  if (
-    filters.hasOwnProperty("speaker_company") &&
-    Array.isArray(filters.speaker_company) &&
-    filters.speaker_company.length > 0
-  ) {
-    filter.push(
-      `speaker_company==${filters.speaker_company
-        .map((c) => escapeFilterValue(c.name))
-        .join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("submitter_company") &&
-    Array.isArray(filters.submitter_company) &&
-    filters.submitter_company.length > 0
-  ) {
-    filter.push(
-      `created_by_company==${filters.submitter_company
-        .map((c) => escapeFilterValue(c.name))
-        .join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("sponsor") &&
-    Array.isArray(filters.sponsor) &&
-    filters.sponsor.length > 0
-  ) {
-    filter.push(
-      `sponsor==${filters.sponsor.map((sponsor) => sponsor.name).join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("all_companies") &&
-    Array.isArray(filters.all_companies) &&
-    filters.all_companies.length > 0
-  ) {
-    const companies = filters.all_companies
-      .map((c) => escapeFilterValue(c.name))
-      .join("||");
-    filter.push(
-      `speaker_company==${companies},created_by_company==${companies},sponsor==${companies}`
-    );
-  }
-
-  if (filters.is_public) {
-    filter.push("is_public==1");
-  }
-
-  if (filters.is_activity) {
-    filter.push("is_activity==1");
-  }
-
-  if (
-    filters.hasOwnProperty("submission_status_filter") &&
-    Array.isArray(filters.submission_status_filter) &&
-    filters.submission_status_filter.length > 0
-  ) {
-    filter.push(
-      `submission_status==${filters.submission_status_filter.join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("media_upload_with_type") &&
-    filters.media_upload_with_type.operator !== null &&
-    Array.isArray(filters.media_upload_with_type.value) &&
-    filters.media_upload_with_type.value.length > 0
-  ) {
-    const concatOperator =
-      filters.media_upload_with_type.operator === "has_media_upload_with_type=="
-        ? "||"
-        : "&&";
-    filter.push(
-      `${
-        filters.media_upload_with_type.operator
-      }${filters.media_upload_with_type.value
-        .map((v) => v.id)
-        .join(concatOperator)}`
-    );
-  }
-
-  if (term) {
-    const escapedTerm = escapeFilterValue(term);
-    let searchString =
-      `title=@${escapedTerm},` +
-      `abstract=@${escapedTerm},` +
-      `speaker_title=@${escapedTerm}`;
-
-    if (isNumericString(term)) {
-      searchString += `,id==${term}`;
-    }
-
-    filter.push(searchString);
-  }
-
-  return checkOrFilter(filters, filter);
-};
+const toIdArray = (values) => values.map(toId).filter((id) => !!id);
 
 export const normalizeEvent = (entity, eventTypeConfig, summit) => {
   const normalizedEntity = { ...entity };
@@ -434,14 +118,19 @@ export const normalizeEvent = (entity, eventTypeConfig, summit) => {
     });
 
   if (normalizedEntity.hasOwnProperty("sponsors"))
-    normalizedEntity.sponsors = normalizedEntity.sponsors
-      .map((s) => (typeof s === "number" ? s : s?.id))
-      .filter((s) => !!s);
+    normalizedEntity.sponsors = toIdArray(normalizedEntity.sponsors);
 
   if (normalizedEntity.hasOwnProperty("speakers"))
-    normalizedEntity.speakers = normalizedEntity.speakers
-      .map((s) => (typeof s === "number" ? s : s?.id))
-      .filter((s) => !!s);
+    normalizedEntity.speakers = toIdArray(normalizedEntity.speakers);
+
+  // API responses nest location/track/type as full objects; collapse them
+  // down to the *_id the update endpoints expect.
+  ["location", "track", "type"].forEach((key) => {
+    if (normalizedEntity.hasOwnProperty(key)) {
+      normalizedEntity[`${key}_id`] = toId(normalizedEntity[key]);
+      delete normalizedEntity[key];
+    }
+  });
 
   if (
     normalizedEntity.hasOwnProperty("moderator") &&
@@ -457,13 +146,25 @@ export const normalizeEvent = (entity, eventTypeConfig, summit) => {
     normalizedEntity.created_by_id = normalizedEntity.created_by?.id;
   }
 
-  // if selection plan is null set is as 0 and remove the current selection plan
+  // selection_plan may arrive as a nested object (bulk-table rows) or as a
+  // selection_plan_id already set by form state; only derive it from the
+  // nested object when selection_plan_id hasn't been explicitly set, so a
+  // deliberate clear (selection_plan_id: null, stale selection_plan object
+  // left over) below isn't overridden.
+  if (
+    normalizedEntity.hasOwnProperty("selection_plan") &&
+    !normalizedEntity.hasOwnProperty("selection_plan_id")
+  ) {
+    normalizedEntity.selection_plan_id = toId(normalizedEntity.selection_plan);
+  }
+  delete normalizedEntity.selection_plan;
+
+  // if selection plan is null set is as 0
   if (
     normalizedEntity.hasOwnProperty("selection_plan_id") &&
     normalizedEntity.selection_plan_id == null
   ) {
     normalizedEntity.selection_plan_id = 0;
-    delete normalizedEntity.selection_plan;
   }
 
   if (eventTypeConfig) {
@@ -511,46 +212,48 @@ export const normalizeEvent = (entity, eventTypeConfig, summit) => {
   return normalizedEntity;
 };
 
-export const normalizeBulkEvents = (entity) => {
-  const normalizedEntity = entity.map((e) => {
-    const normalizedEvent = {
-      id: e.id,
-      title: e.title,
-      selection_plan_id: getIdValue(e.selection_plan) || e.selection_plan_id,
-      location_id: e.location?.id || e.location_id,
-      start_date: e.start_date,
-      end_date: e.end_date,
-      type_id: getIdValue(e.type) || e.type_id,
-      track_id: getIdValue(e.track) || e.track_id,
-      duration: e.duration,
-      streaming_url: e.streaming_url,
-      streaming_type: e.streaming_type,
-      meeting_url: e.meeting_url,
-      etherpad_link: e.etherpad_link,
-      allow_feedback: e.allow_feedback,
-      to_record: e.to_record
-    };
-    Object.keys(normalizedEvent).forEach((property) => {
-      if (
-        normalizedEvent[property] === undefined ||
-        normalizedEvent[property] === null
-      ) {
-        delete normalizedEvent[property];
+// Fields the bulk events table (see summit-event-list-page/helpers.js) can
+// edit and that should therefore be sent in the bulk update payload. Add a
+// field here when a new column becomes editable in that table.
+const BULK_EVENT_FIELDS = [
+  "id",
+  "title",
+  "selection_plan_id",
+  "location_id",
+  "start_date",
+  "end_date",
+  "type_id",
+  "track_id",
+  "duration",
+  "streaming_url",
+  "streaming_type",
+  "meeting_url",
+  "etherpad_link",
+  "allow_feedback",
+  "to_record",
+  "speakers"
+];
+
+// Expects each entity to already be normalized (see normalizeEvent) so
+// fields like speakers/location_id/track_id are in their final shape here.
+export const normalizeBulkEvents = (entities) =>
+  entities.map((entity) =>
+    BULK_EVENT_FIELDS.reduce((normalizedEvent, field) => {
+      if (entity[field] !== undefined && entity[field] !== null) {
+        normalizedEvent[field] = entity[field];
       }
-    });
-    return normalizedEvent;
-  });
-  return normalizedEntity;
-};
+      return normalizedEvent;
+    }, {})
+  );
 
 export const getEvents =
   (
-    term = null,
+    term = "",
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    filters = {},
+    filters = [],
     extraColumns = []
   ) =>
   async (dispatch, getState) => {
@@ -558,10 +261,23 @@ export const getEvents =
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const summitTZ = currentSummit.time_zone.name;
+    const filter = Array.isArray(filters) ? [...filters] : [];
 
     dispatch(startLoading());
 
-    const filter = parseFilters(filters, term);
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      let searchString =
+        `title=@${escapedTerm},` +
+        `abstract=@${escapedTerm},` +
+        `speaker_title=@${escapedTerm}`;
+
+      if (isNumericString(term)) {
+        searchString += `,id==${term}`;
+      }
+
+      filter.push(searchString);
+    }
 
     const params = {
       expand:
@@ -569,7 +285,7 @@ export const getEvents =
       relations:
         "none,speakers.none,selection_plan.none,track.none,type.none,created_by.none,location.none,media_uploads.media_upload_type.none",
       fields:
-        "id,created,last_edited,title,start_date,end_date,summit_id,duration,class_name,is_published,level,published_date,meeting_url,status,progress,selection_status,streaming_url,streaming_type,etherpad_link,location.id,location.name,speakers.id,speakers.first_name,speakers.last_name,speakers.company,track.name,track.id,created_by.first_name,created_by.last_name,created_by.email,created_by.company,selection_plan.name,selection_plan.id,media_uploads.id,media_uploads.presentation_id,media_uploads.created,media_uploads.class_name,media_uploads.display_on_site,media_uploads.media_upload_type.name,media_uploads.media_upload_type.id,type.id,type.name,type.use_speakers,type.allows_location,type.allows_attendee_vote,type.allows_publishing_dates,sponsors.id,sponsors.name,allow_feedback,to_record,review_status",
+        "id,created,last_edited,title,start_date,end_date,summit_id,duration,class_name,is_published,level,published_date,meeting_url,status,progress,selection_status,streaming_url,streaming_type,etherpad_link,location.id,location.name,speakers.id,speakers.first_name,speakers.last_name,speakers.email,speakers.company,track.name,track.id,created_by.first_name,created_by.last_name,created_by.email,created_by.company,selection_plan.name,selection_plan.id,media_uploads.id,media_uploads.presentation_id,media_uploads.created,media_uploads.class_name,media_uploads.display_on_site,media_uploads.media_upload_type.name,media_uploads.media_upload_type.id,type.id,type.name,type.use_speakers,type.allows_location,type.allows_attendee_vote,type.allows_publishing_dates,sponsors.id,sponsors.name,allow_feedback,to_record,review_status",
       page,
       per_page: perPage,
       access_token: accessToken
@@ -607,66 +323,67 @@ export const getEvents =
     });
   };
 
-export const bulkUpdateEvents =
-  (summitId, events) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    dispatch(startLoading());
+export const bulkUpdateEvents = (events) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  dispatch(startLoading());
 
-    const normalizedEvents = normalizeBulkEvents(
-      events.map((event) =>
-        normalizeEvent(
-          event,
-          currentSummit.event_types.find((et) => et.id === event.type_id)
+  const normalizedEvents = normalizeBulkEvents(
+    events.map((event) =>
+      normalizeEvent(
+        event,
+        currentSummit.event_types.find(
+          (et) => et.id === (toId(event.type) ?? event.type_id)
         )
       )
-    );
+    )
+  );
 
-    return putRequest(
-      null,
-      createAction(UPDATED_REMOTE_EVENTS)({}),
-      `${window.API_BASE_URL}/api/v1/summits/${summitId}/events/?access_token=${accessToken}`,
-      {
-        events: normalizedEvents
-      },
-      authErrorHandler
-    )({})(dispatch)
-      .then(() => {
-        dispatch(stopLoading());
-        dispatch(
-          showSuccessMessage(
-            T.translate("bulk_actions_page.messages.update_success"),
-            () => history.push(`/app/summits/${currentSummit.id}/events/`)
-          )
-        );
-        const {
-          currentEventListState: {
-            term,
-            currentPage,
-            perPage,
-            order,
-            orderDir,
-            filters,
-            extraColumns
-          }
-        } = getState();
-        dispatch(
-          getEvents(
-            term,
-            currentPage,
-            perPage,
-            order,
-            orderDir,
-            filters,
-            extraColumns
-          )
-        );
-      })
-      .catch(() => {
-        console.log("ERROR");
-      });
-  };
+  return putRequest(
+    null,
+    createAction(UPDATED_REMOTE_EVENTS)({}),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/?access_token=${accessToken}`,
+    {
+      events: normalizedEvents
+    },
+    authErrorHandler
+  )({})(dispatch)
+    .then(() => {
+      dispatch(stopLoading());
+      dispatch(
+        showSuccessMessage(
+          T.translate("bulk_actions_page.messages.update_success"),
+          () => history.push(`/app/summits/${currentSummit.id}/events/`)
+        )
+      );
+      const {
+        currentEventListState: {
+          term,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          filters,
+          extraColumns
+        }
+      } = getState();
+      dispatch(
+        getEvents(
+          term,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          filters,
+          extraColumns
+        )
+      );
+    })
+    .catch(() => {
+      dispatch(stopLoading());
+    });
+};
 
 export const getActionTypes =
   (selectionPlanId) => async (dispatch, getState) => {
@@ -1236,26 +953,34 @@ export const deleteEvent = (eventId) => async (dispatch, getState) => {
 };
 
 export const exportEvents =
-  (
-    term = null,
-    order = "id",
-    orderDir = DEFAULT_ORDER_DIR,
-    extraFilters = {}
-  ) =>
+  (term = null, order = "id", orderDir = DEFAULT_ORDER_DIR, filters = []) =>
   async (dispatch, getState) => {
-    dispatch(startLoading());
     const { currentSummitState, currentEventListState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const { totalEvents } = currentEventListState;
-
     const csvMIME = "text/csv;charset=utf-8";
     const filename = `${currentSummit.name}-Activities.csv`;
     const totalPages = Math.ceil(totalEvents / EXPORT_PAGE_SIZE_200);
-
     const endpoint = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/csv`;
 
-    const filter = parseFilters(extraFilters, term);
+    const filter = Array.isArray(filters) ? [...filters] : [];
+
+    dispatch(startLoading());
+
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      let searchString =
+        `title=@${escapedTerm},` +
+        `abstract=@${escapedTerm},` +
+        `speaker_title=@${escapedTerm}`;
+
+      if (isNumericString(term)) {
+        searchString += `,id==${term}`;
+      }
+
+      filter.push(searchString);
+    }
 
     const params = Array.from({ length: totalPages }, (_, i) => {
       const res = {
@@ -1338,7 +1063,9 @@ export const importEventsCSV =
       access_token: accessToken
     };
 
-    postFile(
+    dispatch(startLoading());
+
+    return postFile(
       null,
       createAction(EVENTS_IMPORTED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/csv`,
@@ -1489,19 +1216,23 @@ export const getEventComments =
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
     const summitTZ = currentSummit.time_zone_id;
+    const filter = [];
 
     dispatch(startLoading());
 
-    const filter = parseFilters(filters);
+    if (filters.is_public) {
+      filter.push("is_public==1");
+    }
+
+    if (filters.is_activity) {
+      filter.push("is_activity==1");
+    }
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
       const searchString = `body=@${escapedTerm},creator_id==${escapedTerm},`;
       filter.push(searchString);
     }
-
-    // `is_public==${escapedTerm},`;
-    // `is_activity==${escapedTerm},`;
 
     const params = {
       page,

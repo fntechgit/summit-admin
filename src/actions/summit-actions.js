@@ -25,6 +25,7 @@ import {
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import moment from "moment-timezone";
+import { resetAllFilters } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import {
   DEFAULT_CURRENT_PAGE,
   DUMMY_ACTION,
@@ -94,6 +95,10 @@ export const getSummitById = (summitId) => async (dispatch, getState) => {
   if (currentSummit?.id !== summitId) {
     // TODO: change this action name to something more meaningful like SUMMIT_CHANGED
     dispatch(createAction(SET_CURRENT_SUMMIT)({}));
+    // GridFilter filters are persisted by a host-chosen id, not scoped to the
+    // current summit, so they'd otherwise leak filter criteria from whatever
+    // summit was last viewed into the next one.
+    dispatch(resetAllFilters());
   }
 
   // set id
