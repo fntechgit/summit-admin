@@ -23,8 +23,8 @@ import {
   startLoading,
   stopLoading,
   snackbarErrorHandler,
-  snackbarSuccessHandler,
-  snackbarErrorMsg
+  snackbarErrorMsg,
+  snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
@@ -314,11 +314,12 @@ export const fetchSponsorByCompany = async (companyId, summitId) => {
     `${window.API_BASE_URL}/api/v2/summits/${summitId}/sponsors?filter=company_id==${companyId}&access_token=${accessToken}&fields=id,company.name,company.id&relations=company&expand=company`
   )
     .then(fetchResponseHandler)
-    .then((json) => ({
-      id: json.data[0].id,
-      name: json.data[0].company.name
-    }))
-    .catch(fetchErrorHandler);
+    .then((json) => {
+      if (!json.data?.length) {
+        throw new Error("sponsor_not_found_in_target_summit");
+      }
+      return { id: json.data[0].id, name: json.data[0].company.name };
+    });
 };
 
 export const processSponsorUserRequest = (request) => async (dispatch) => {
@@ -502,46 +503,46 @@ export const deleteSponsorUser =
 
 /** ****************  SPONSOR USERS TAB  *************************************** */
 
-export const sendSponsorUserInvite = (email) => async (dispatch, getState) => {
-  const { currentSummitState, currentSponsorState } = getState();
-  const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
-  const { entity } = currentSponsorState;
+export const sendSponsorUserInvite =
+  (email, sponsorId = null) =>
+  async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const { entity } = currentSponsorState;
 
-  const params = {
-    access_token: accessToken
+    const params = {
+      access_token: accessToken
+    };
+
+    dispatch(startLoading());
+
+    const payload = {
+      user_email: email,
+      sponsor_id: sponsorId || entity.id,
+      summit_id: currentSummit.id
+    };
+
+    return postRequest(
+      null,
+      createAction(DUMMY_ACTION),
+      `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users`,
+      payload,
+      snackbarErrorHandler,
+      entity
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("sponsor_users.new_user.success")
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
-
-  dispatch(startLoading());
-
-  const payload = {
-    user_email: email,
-    sponsor_id: entity.id,
-    summit_id: currentSummit.id
-  };
-
-  return postRequest(
-    null,
-    createAction(DUMMY_ACTION),
-    `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users`,
-    payload,
-    snackbarErrorHandler,
-    entity
-  )(params)(dispatch)
-    .then(() => {
-      dispatch(stopLoading());
-      dispatch(
-        snackbarSuccessHandler({
-          title: T.translate("general.success"),
-          html: T.translate("sponsor_users.new_user.success")
-        })
-      );
-    })
-    .catch(console.log) // need to catch promise reject
-    .finally(() => {
-      dispatch(stopLoading());
-    });
-};
 
 export const fetchSponsorUsersBySummit = async (
   currentSummitId,
@@ -575,34 +576,51 @@ export const trackImportSponsorUsers = () => async (dispatch, getState) => {
       createAction(RECEIVE_SPONSOR_USERS_IMPORT_STATUS),
       `${window.SPONSOR_USERS_API_URL}/api/v1/tasks/${taskId}`,
       authErrorHandler
-    )(params)(dispatch).then(({ response }) => {
-      if (response.status === IMPORT_SPONSOR_USERS_STATUS.SUCCESS) {
-        dispatch(
-          snackbarSuccessHandler({
-            title: T.translate("general.success"),
-            html: T.translate("sponsor_users.import_users.success")
-          })
-        );
+    )(params)(dispatch)
+      .then(({ response }) => {
+        if (response.status === IMPORT_SPONSOR_USERS_STATUS.SUCCESS) {
+          dispatch(
+            snackbarSuccessHandler({
+              title: T.translate("general.success"),
+              html: T.translate("sponsor_users.import_users.success")
+            })
+          );
 
-        if (response.result.errors.length > 0) {
+          if (response.result.errors.length > 0) {
+            dispatch(
+              snackbarErrorMsg({
+                title: T.translate("sponsor_users.import_users.fail"),
+                html: response.result.errors.map((e) => e.error).join("<br/>")
+              })
+            );
+          }
+
+          dispatch(getSponsorUsers(sponsor.id));
+        } else if (response.status === IMPORT_SPONSOR_USERS_STATUS.FAILURE) {
           dispatch(
             snackbarErrorMsg({
               title: T.translate("sponsor_users.import_users.fail"),
-              html: response.result.errors.map((e) => e.error).join("<br/>")
+              html: response.error
             })
           );
         }
-
-        dispatch(getSponsorUsers(sponsor.id));
-      } else if (response.status === IMPORT_SPONSOR_USERS_STATUS.FAILURE) {
+      })
+      .catch(() => {
+        dispatch(
+          createAction(RECEIVE_SPONSOR_USERS_IMPORT_STATUS)({
+            response: {
+              task_id: taskId,
+              status: IMPORT_SPONSOR_USERS_STATUS.FAILURE
+            }
+          })
+        );
         dispatch(
           snackbarErrorMsg({
             title: T.translate("sponsor_users.import_users.fail"),
-            html: response.error
+            html: T.translate("sponsor_users.import_users.status_check_failed")
           })
         );
-      }
-    });
+      });
   });
 };
 
@@ -650,7 +668,6 @@ export const importSponsorUsers =
           })
         );
       })
-      .catch(console.log) // need to catch promise reject
       .finally(() => {
         dispatch(stopLoading());
       });

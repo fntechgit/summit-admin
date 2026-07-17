@@ -8,9 +8,9 @@ import flushPromises from "flush-promises";
 import {
   getRequest,
   putRequest,
-  postRequest
+  postRequest,
+  snackbarErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { snackbarErrorHandler } from "../base-actions";
 import * as DropboxSyncActions from "../dropbox-sync-actions";
 import * as methods from "../../utils/methods";
 import * as MediaUploadActions from "../media-upload-actions";

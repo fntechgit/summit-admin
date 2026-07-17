@@ -11,11 +11,11 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button, CircularProgress, Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
@@ -23,29 +23,58 @@ import {
   deleteSponsorUser,
   deleteSponsorUserRequest,
   getSponsorUserRequests,
-  getSponsorUsers
+  getSponsorUsers,
+  trackImportSponsorUsers,
+  sendSponsorUserInvite,
+  importSponsorUsers
 } from "../../../actions/sponsor-users-actions";
+import { TEN_SECONDS_IN_MILLISECONDS } from "../../../utils/constants";
 import RequestTable from "./components/request-table";
 import UsersTable from "./components/users-table";
 import EditUserPopup from "./components/edit-user-popup";
+import SponsorGlobalNewUserPopup from "./components/sponsor-global-new-user-popup";
+import SponsorGlobalImportUsersPopup from "./components/sponsor-global-import-users-popup";
 
 const SponsorUsersListPage = ({
+  summitId,
   match,
   requests,
   users,
   term,
+  importTasks,
   getSponsorUserRequests,
   getSponsorUsers,
   deleteSponsorUserRequest,
-  deleteSponsorUser
+  deleteSponsorUser,
+  trackImportSponsorUsers,
+  sendSponsorUserInvite,
+  importSponsorUsers
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
   const [userEdit, setUserEdit] = useState(null);
+  const importIntervalRef = useRef(null);
+  const hasImportTasks = !!importTasks?.length;
 
   useEffect(() => {
     getSponsorUserRequests();
     getSponsorUsers();
   }, []);
+
+  useEffect(() => {
+    if (hasImportTasks && !importIntervalRef.current) {
+      importIntervalRef.current = setInterval(
+        () => trackImportSponsorUsers(),
+        TEN_SECONDS_IN_MILLISECONDS
+      );
+    } else if (!hasImportTasks && importIntervalRef.current) {
+      clearInterval(importIntervalRef.current);
+      importIntervalRef.current = null;
+    }
+    return () => {
+      clearInterval(importIntervalRef.current);
+      importIntervalRef.current = null;
+    };
+  }, [hasImportTasks]);
 
   const handleSearch = (searchTerm) => {
     getSponsorUserRequests(null, searchTerm);
@@ -55,6 +84,18 @@ const SponsorUsersListPage = ({
   const handleUserEdit = (user) => {
     setUserEdit(user);
   };
+
+  const handleNewUserSave = (email, sponsorId) =>
+    sendSponsorUserInvite(email, sponsorId).then(() => {
+      getSponsorUsers().catch(() => {});
+    });
+
+  const handleImportSave = (
+    targetSponsorId,
+    companyId,
+    sourceSummitId,
+    userIds
+  ) => importSponsorUsers(targetSponsorId, companyId, sourceSummitId, userIds);
 
   return (
     <div className="container">
@@ -111,6 +152,21 @@ const SponsorUsersListPage = ({
         </Grid2>
       </Grid2>
 
+      {hasImportTasks && (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            mb: 2,
+            color: "text.secondary"
+          }}
+        >
+          <CircularProgress size={16} />
+          {T.translate("sponsor_users.import_users.in_progress")}
+        </Box>
+      )}
+
       <RequestTable
         requests={requests}
         term={term}
@@ -130,9 +186,21 @@ const SponsorUsersListPage = ({
         onEdit={handleUserEdit}
       />
 
-      {openPopup === "new" && <div />}
+      {openPopup === "new" && (
+        <SponsorGlobalNewUserPopup
+          summitId={summitId}
+          onClose={() => setOpenPopup(null)}
+          onSave={handleNewUserSave}
+        />
+      )}
 
-      {openPopup === "import" && <div />}
+      {openPopup === "import" && (
+        <SponsorGlobalImportUsersPopup
+          summitId={summitId}
+          onClose={() => setOpenPopup(null)}
+          onSave={handleImportSave}
+        />
+      )}
 
       {userEdit && (
         <EditUserPopup user={userEdit} onClose={() => setUserEdit(null)} />
@@ -141,13 +209,17 @@ const SponsorUsersListPage = ({
   );
 };
 
-const mapStateToProps = ({ sponsorUsersListState }) => ({
-  ...sponsorUsersListState
+const mapStateToProps = ({ sponsorUsersListState, currentSummitState }) => ({
+  ...sponsorUsersListState,
+  summitId: currentSummitState.currentSummit.id
 });
 
 export default connect(mapStateToProps, {
   getSponsorUserRequests,
   getSponsorUsers,
   deleteSponsorUserRequest,
-  deleteSponsorUser
+  deleteSponsorUser,
+  trackImportSponsorUsers,
+  sendSponsorUserInvite,
+  importSponsorUsers
 })(SponsorUsersListPage);

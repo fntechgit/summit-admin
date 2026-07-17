@@ -3016,7 +3016,11 @@
       "import_users": "Import Users",
       "running": "Users import running on background.",
       "success": "Users imported successfully.",
-      "fail": "Import failed"
+      "fail": "Import failed",
+      "fetch_users_fail": "There was an error fetching the users list.",
+      "no_target_sponsor": "The selected company does not have a sponsor record on the target summit.",
+      "status_check_failed": "There was an error checking the import status.",
+      "in_progress": "Import in progress..."
     }
   },
   "sponsorship_list": {
