@@ -14,7 +14,10 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   __esModule: true,
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
-  snackbarErrorMsg: jest.fn()
+  snackbarErrorMsg: jest.fn((payload) => ({
+    type: "SNACKBAR_ERROR_MSG_MOCK",
+    payload
+  }))
 }));
 
 jest.mock("../../../../../actions/sponsor-users-actions", () => {
@@ -283,7 +286,7 @@ describe("SponsorGlobalImportUsersPopup", () => {
     );
     const onClose = jest.fn();
     const onSave = jest.fn(() => Promise.resolve());
-    renderPopup({ onClose, onSave });
+    const { store } = renderPopup({ onClose, onSave });
 
     await selectSummitAndSponsor();
     await act(async () => {
@@ -304,6 +307,16 @@ describe("SponsorGlobalImportUsersPopup", () => {
         })
       );
     });
+    // Regression guard: snackbarErrorMsg is a thunk - being *called* is not
+    // enough, it must actually reach the store via a connected dispatch.
+    expect(store.getActions()).toContainEqual(
+      expect.objectContaining({
+        type: "SNACKBAR_ERROR_MSG_MOCK",
+        payload: expect.objectContaining({
+          html: "sponsor_users.import_users.no_target_sponsor"
+        })
+      })
+    );
     expect(onClose).not.toHaveBeenCalled();
     expect(onSave).not.toHaveBeenCalled();
   });

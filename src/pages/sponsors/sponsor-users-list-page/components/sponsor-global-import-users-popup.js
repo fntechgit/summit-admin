@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
+import { connect } from "react-redux";
+import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import {
   Box,
@@ -18,7 +20,7 @@ import * as yup from "yup";
 import CheckBoxList from "openstack-uicore-foundation/lib/components/mui/checkbox-list";
 import SummitsDropdown from "openstack-uicore-foundation/lib/components/mui/summits-dropdown";
 import MuiFormikAsyncAutocomplete from "openstack-uicore-foundation/lib/components/mui/formik-inputs/async-select";
-import { snackbarErrorMsg } from "openstack-uicore-foundation/lib/utils/actions";
+import { snackbarErrorMsg as snackbarErrorMsgAction } from "openstack-uicore-foundation/lib/utils/actions";
 import {
   fetchSponsorByCompany,
   fetchSponsorUsersBySummit
@@ -26,7 +28,12 @@ import {
 import { querySponsors } from "../../../../actions/sponsor-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 
-const SponsorGlobalImportUsersPopup = ({ summitId, onClose, onSave }) => {
+const SponsorGlobalImportUsersPopup = ({
+  summitId,
+  onClose,
+  onSave,
+  snackbarErrorMsg
+}) => {
   const [selectedSummit, setSelectedSummit] = useState(null);
   const [userOptions, setUserOptions] = useState(null);
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -254,4 +261,13 @@ const SponsorGlobalImportUsersPopup = ({ summitId, onClose, onSave }) => {
   );
 };
 
-export default SponsorGlobalImportUsersPopup;
+SponsorGlobalImportUsersPopup.propTypes = {
+  summitId: PropTypes.number.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+  snackbarErrorMsg: PropTypes.func.isRequired
+};
+
+export default connect(null, {
+  snackbarErrorMsg: snackbarErrorMsgAction
+})(SponsorGlobalImportUsersPopup);

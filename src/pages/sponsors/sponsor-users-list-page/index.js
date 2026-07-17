@@ -15,7 +15,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button, CircularProgress, Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
@@ -151,6 +151,21 @@ const SponsorUsersListPage = ({
           </Button>
         </Grid2>
       </Grid2>
+
+      {hasImportTasks && (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            mb: 2,
+            color: "text.secondary"
+          }}
+        >
+          <CircularProgress size={16} />
+          {T.translate("sponsor_users.import_users.in_progress")}
+        </Box>
+      )}
 
       <RequestTable
         requests={requests}

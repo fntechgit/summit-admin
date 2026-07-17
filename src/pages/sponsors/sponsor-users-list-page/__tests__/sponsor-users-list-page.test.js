@@ -1,5 +1,5 @@
 import React from "react";
-import { act, render } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import SponsorUsersListPage from "../index";
 import { renderWithRedux } from "../../../../utils/test-utils";
 import {
@@ -187,6 +187,24 @@ describe("SponsorUsersListPage", () => {
       });
 
       expect(trackImportSponsorUsers).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("import-in-progress indicator", () => {
+    it("shows the indicator while an import task is pending", () => {
+      renderPage({ importTasks: [123] });
+
+      expect(
+        screen.getByText("sponsor_users.import_users.in_progress")
+      ).toBeInTheDocument();
+    });
+
+    it("hides the indicator when there are no import tasks", () => {
+      renderPage({ importTasks: [] });
+
+      expect(
+        screen.queryByText("sponsor_users.import_users.in_progress")
+      ).not.toBeInTheDocument();
     });
   });
 });
