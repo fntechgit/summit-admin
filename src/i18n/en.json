@@ -2669,6 +2669,7 @@
       "order_details": {
         "order": "Order",
         "purchase_date": "Purchase Date",
+        "pending": "Pending",
         "purchased_by": "Purchased by",
         "show": "Show",
         "sponsor": "Sponsor",
