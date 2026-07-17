@@ -19,12 +19,10 @@ import {
   queryTracks,
   queryGroups
 } from "openstack-uicore-foundation/lib/utils/query-actions";
-import {
-  Input,
-  SimpleLinkList,
-  Dropdown,
-  DateTimePicker
-} from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
+import SimpleLinkList from "openstack-uicore-foundation/lib/components/simple-link-list";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import Swal from "sweetalert2";
 import {

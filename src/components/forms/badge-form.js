@@ -16,13 +16,11 @@ import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import moment from "moment-timezone";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import {
-  Dropdown,
-  SimpleLinkList,
-  Table,
-  FreeTextSearch,
-  DateTimePicker
-} from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import SimpleLinkList from "openstack-uicore-foundation/lib/components/simple-link-list";
+import Table from "openstack-uicore-foundation/lib/components/table";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { Pagination } from "react-bootstrap";
 import { shallowEqual } from "../../utils/methods";

@@ -21,9 +21,9 @@ import {
   stopLoading,
   startLoading,
   showSuccessMessage,
-  authErrorHandler
+  authErrorHandler,
+  snackbarErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { snackbarErrorHandler } from "./base-actions";
 import { getAccessTokenSafely, range } from "../utils/methods";
 import { MAX_PER_PAGE, TEN, TWO } from "../utils/constants";
 

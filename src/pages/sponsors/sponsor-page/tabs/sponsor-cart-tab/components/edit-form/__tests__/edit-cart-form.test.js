@@ -29,25 +29,28 @@ jest.mock("../../../../../../../../actions/sponsor-cart-actions", () => ({
 }));
 
 // Mock the uicore component bundle — prevents setTexts() crash on module init
-jest.mock("openstack-uicore-foundation/lib/components", () => {
-  const React = require("react");
-  return {
-    __esModule: true,
-    MuiFormItemTable: ({ data }) =>
-      React.createElement(
-        "div",
-        null,
-        (data || []).map((item) =>
-          React.createElement(
-            "div",
-            { key: item.form_item_id },
-            React.createElement("span", null, item.name)
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/form-item-table",
+  () => {
+    const React = require("react");
+    return {
+      __esModule: true,
+      default: ({ data }) =>
+        React.createElement(
+          "div",
+          null,
+          (data || []).map((item) =>
+            React.createElement(
+              "div",
+              { key: item.form_item_id },
+              React.createElement("span", null, item.name)
+            )
           )
-        )
-      ),
-    getCurrentApplicableRate: () => "standard"
-  };
-});
+        ),
+      getCurrentApplicableRate: () => "standard"
+    };
+  }
+);
 
 // Mock sub-components used directly by index.js
 jest.mock("openstack-uicore-foundation/lib/components/mui/notes-modal", () => {
