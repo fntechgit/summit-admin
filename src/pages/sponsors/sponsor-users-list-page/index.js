@@ -24,7 +24,9 @@ import {
   deleteSponsorUserRequest,
   getSponsorUserRequests,
   getSponsorUsers,
-  trackImportSponsorUsers
+  trackImportSponsorUsers,
+  sendSponsorUserInvite,
+  importSponsorUsers
 } from "../../../actions/sponsor-users-actions";
 import { TEN_SECONDS_IN_MILLISECONDS } from "../../../utils/constants";
 import RequestTable from "./components/request-table";
@@ -44,7 +46,9 @@ const SponsorUsersListPage = ({
   getSponsorUsers,
   deleteSponsorUserRequest,
   deleteSponsorUser,
-  trackImportSponsorUsers
+  trackImportSponsorUsers,
+  sendSponsorUserInvite,
+  importSponsorUsers
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
   const [userEdit, setUserEdit] = useState(null);
@@ -80,6 +84,18 @@ const SponsorUsersListPage = ({
   const handleUserEdit = (user) => {
     setUserEdit(user);
   };
+
+  const handleNewUserSave = (email, sponsorId) =>
+    sendSponsorUserInvite(email, sponsorId).then(() => {
+      getSponsorUsers().catch(() => {});
+    });
+
+  const handleImportSave = (
+    targetSponsorId,
+    companyId,
+    sourceSummitId,
+    userIds
+  ) => importSponsorUsers(targetSponsorId, companyId, sourceSummitId, userIds);
 
   return (
     <div className="container">
@@ -159,6 +175,7 @@ const SponsorUsersListPage = ({
         <SponsorGlobalNewUserPopup
           summitId={summitId}
           onClose={() => setOpenPopup(null)}
+          onSave={handleNewUserSave}
         />
       )}
 
@@ -166,6 +183,7 @@ const SponsorUsersListPage = ({
         <SponsorGlobalImportUsersPopup
           summitId={summitId}
           onClose={() => setOpenPopup(null)}
+          onSave={handleImportSave}
         />
       )}
 
@@ -186,5 +204,7 @@ export default connect(mapStateToProps, {
   getSponsorUsers,
   deleteSponsorUserRequest,
   deleteSponsorUser,
-  trackImportSponsorUsers
+  trackImportSponsorUsers,
+  sendSponsorUserInvite,
+  importSponsorUsers
 })(SponsorUsersListPage);

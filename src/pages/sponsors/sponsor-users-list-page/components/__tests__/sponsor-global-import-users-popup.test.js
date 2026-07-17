@@ -1,6 +1,7 @@
 import React from "react";
 import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { snackbarErrorMsg } from "openstack-uicore-foundation/lib/utils/actions";
 import { renderWithRedux } from "../../../../../utils/test-utils";
 import SponsorGlobalImportUsersPopup from "../sponsor-global-import-users-popup";
 import * as sponsorUsersActions from "../../../../../actions/sponsor-users-actions";
@@ -8,6 +9,12 @@ import * as sponsorUsersActions from "../../../../../actions/sponsor-users-actio
 jest.mock("i18n-react/dist/i18n-react", () => ({
   __esModule: true,
   default: { translate: (key) => key }
+}));
+
+jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
+  __esModule: true,
+  ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
+  snackbarErrorMsg: jest.fn()
 }));
 
 jest.mock("../../../../../actions/sponsor-users-actions", () => {
@@ -270,6 +277,36 @@ describe("SponsorGlobalImportUsersPopup", () => {
       );
       expect(onClose).toHaveBeenCalled();
     });
+  });
+
+  it("shows an error and keeps the dialog open when the target summit has no sponsor for the picked company", async () => {
+    sponsorUsersActions.fetchSponsorByCompany.mockRejectedValue(
+      new Error("sponsor_not_found_in_target_summit")
+    );
+    const onClose = jest.fn();
+    renderPopup({ onClose });
+
+    await selectSummitAndSponsor();
+    await act(async () => {
+      await userEvent.click(screen.getByTestId("user-item-10"));
+    });
+    await act(async () => {
+      await userEvent.click(
+        screen.getByRole("button", {
+          name: "sponsor_users.import_users.import_users"
+        })
+      );
+    });
+
+    await waitFor(() => {
+      expect(snackbarErrorMsg).toHaveBeenCalledWith(
+        expect.objectContaining({
+          html: "sponsor_users.import_users.no_target_sponsor"
+        })
+      );
+    });
+    expect(onClose).not.toHaveBeenCalled();
+    expect(sponsorUsersActions.importSponsorUsers).not.toHaveBeenCalled();
   });
 
   it("calls importSponsorUsers with 'all' when select all is used", async () => {

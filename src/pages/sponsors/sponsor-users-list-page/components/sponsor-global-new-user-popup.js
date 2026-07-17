@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -19,17 +18,8 @@ import * as yup from "yup";
 import MuiSponsorInput from "openstack-uicore-foundation/lib/components/mui/formik-inputs/sponsor-input";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import CustomAlert from "openstack-uicore-foundation/lib/components/mui/custom-alert";
-import {
-  sendSponsorUserInvite,
-  getSponsorUsers
-} from "../../../../actions/sponsor-users-actions";
 
-const SponsorGlobalNewUserPopup = ({
-  onClose,
-  summitId,
-  sendSponsorUserInvite,
-  getSponsorUsers
-}) => {
+const SponsorGlobalNewUserPopup = ({ onClose, summitId, onSave }) => {
   const [isSaving, setIsSaving] = useState(false);
 
   const handleClose = () => {
@@ -40,9 +30,8 @@ const SponsorGlobalNewUserPopup = ({
   const handleOnSave = (values) => {
     if (isSaving) return;
     setIsSaving(true);
-    sendSponsorUserInvite(values.email, values.sponsor.id)
+    onSave(values.email, values.sponsor.id)
       .then(() => {
-        getSponsorUsers();
         handleClose();
       })
       .catch(() => {})
@@ -134,12 +123,8 @@ const SponsorGlobalNewUserPopup = ({
 
 SponsorGlobalNewUserPopup.propTypes = {
   onClose: PropTypes.func.isRequired,
-  sendSponsorUserInvite: PropTypes.func.isRequired,
-  getSponsorUsers: PropTypes.func.isRequired,
-  summitId: PropTypes.number.isRequired
+  summitId: PropTypes.number.isRequired,
+  onSave: PropTypes.func.isRequired
 };
 
-export default connect(() => {}, {
-  sendSponsorUserInvite,
-  getSponsorUsers
-})(SponsorGlobalNewUserPopup);
+export default SponsorGlobalNewUserPopup;

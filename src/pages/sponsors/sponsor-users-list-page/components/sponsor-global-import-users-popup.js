@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
-import { connect } from "react-redux";
 import {
   Box,
   Button,
@@ -22,17 +21,12 @@ import MuiFormikAsyncAutocomplete from "openstack-uicore-foundation/lib/componen
 import { snackbarErrorMsg } from "openstack-uicore-foundation/lib/utils/actions";
 import {
   fetchSponsorByCompany,
-  fetchSponsorUsersBySummit,
-  importSponsorUsers
+  fetchSponsorUsersBySummit
 } from "../../../../actions/sponsor-users-actions";
 import { querySponsors } from "../../../../actions/sponsor-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 
-const SponsorGlobalImportUsersPopup = ({
-  summitId,
-  onClose,
-  importSponsorUsers
-}) => {
+const SponsorGlobalImportUsersPopup = ({ summitId, onClose, onSave }) => {
   const [selectedSummit, setSelectedSummit] = useState(null);
   const [userOptions, setUserOptions] = useState(null);
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -126,12 +120,9 @@ const SponsorGlobalImportUsersPopup = ({
     setIsSaving(true);
 
     const runImport = (targetSponsorId) =>
-      importSponsorUsers(
-        targetSponsorId,
-        companyId,
-        selectedSummit,
-        selectedUsers
-      ).then(() => onClose());
+      onSave(targetSponsorId, companyId, selectedSummit, selectedUsers).then(
+        () => onClose()
+      );
 
     // "apply to all" is resolved by the backend via companyId + target summit,
     // so only the specific-users path needs the target summit's own sponsor id.
@@ -141,7 +132,12 @@ const SponsorGlobalImportUsersPopup = ({
           runImport(targetSponsor.id)
         )
     )
-      .catch(() => {})
+      .catch(() =>
+        snackbarErrorMsg({
+          title: T.translate("general.error"),
+          html: T.translate("sponsor_users.import_users.no_target_sponsor")
+        })
+      )
       .finally(() => setIsSaving(false));
   };
 
@@ -258,6 +254,4 @@ const SponsorGlobalImportUsersPopup = ({
   );
 };
 
-export default connect(null, {
-  importSponsorUsers
-})(SponsorGlobalImportUsersPopup);
+export default SponsorGlobalImportUsersPopup;
