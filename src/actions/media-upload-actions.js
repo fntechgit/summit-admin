@@ -64,8 +64,9 @@ export const getMediaUploads =
       access_token: accessToken,
       page,
       per_page: perPage,
-      fields: "id,name,description",
-      relations: "none"
+      expand: "type",
+      fields: "id,name,description,type.is_system_defined",
+      relations: "none,presentation_types"
     };
 
     if (term) {

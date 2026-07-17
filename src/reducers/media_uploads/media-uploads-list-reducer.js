@@ -51,7 +51,8 @@ const mediaUploadListReducer = (state = DEFAULT_STATE, action = {}) => {
       const media_uploads = payload.response.data.map((mft) => ({
         id: mft.id,
         name: mft.name,
-        description: mft.description
+        description: mft.description,
+        is_system_defined: mft.type?.is_system_defined
       }));
 
       return {
