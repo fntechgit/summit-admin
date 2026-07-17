@@ -25,8 +25,7 @@ jest.mock("../../../../../actions/sponsor-users-actions", () => {
     __esModule: true,
     ...original,
     fetchSponsorUsersBySummit: jest.fn(),
-    fetchSponsorByCompany: jest.fn(),
-    importSponsorUsers: jest.fn(() => () => Promise.resolve())
+    fetchSponsorByCompany: jest.fn()
   };
 });
 
@@ -146,6 +145,7 @@ const renderPopup = (props = {}) =>
     <SponsorGlobalImportUsersPopup
       onClose={jest.fn()}
       summitId={mockCurrentSummit.id}
+      onSave={jest.fn(() => Promise.resolve())}
       {...props}
     />,
     { initialState: baseState }
@@ -173,9 +173,6 @@ describe("SponsorGlobalImportUsersPopup", () => {
       id: 999,
       name: "Test Sponsor"
     });
-    sponsorUsersActions.importSponsorUsers.mockReturnValue(() =>
-      Promise.resolve()
-    );
   });
 
   it("renders the title, summit dropdown and excludes the current summit", () => {
@@ -246,9 +243,10 @@ describe("SponsorGlobalImportUsersPopup", () => {
     ).not.toBeDisabled();
   });
 
-  it("calls importSponsorUsers with correct params and closes on success", async () => {
+  it("calls onSave with correct params and closes on success", async () => {
     const onClose = jest.fn();
-    renderPopup({ onClose });
+    const onSave = jest.fn(() => Promise.resolve());
+    renderPopup({ onClose, onSave });
 
     await selectSummitAndSponsor();
 
@@ -269,7 +267,7 @@ describe("SponsorGlobalImportUsersPopup", () => {
         42, // companyId
         mockCurrentSummit.id // current (target) summitId
       );
-      expect(sponsorUsersActions.importSponsorUsers).toHaveBeenCalledWith(
+      expect(onSave).toHaveBeenCalledWith(
         999, // sponsorId resolved via fetchSponsorByCompany for the target summit
         42, // companyId
         2, // selectedSummitId
@@ -284,7 +282,8 @@ describe("SponsorGlobalImportUsersPopup", () => {
       new Error("sponsor_not_found_in_target_summit")
     );
     const onClose = jest.fn();
-    renderPopup({ onClose });
+    const onSave = jest.fn(() => Promise.resolve());
+    renderPopup({ onClose, onSave });
 
     await selectSummitAndSponsor();
     await act(async () => {
@@ -306,11 +305,12 @@ describe("SponsorGlobalImportUsersPopup", () => {
       );
     });
     expect(onClose).not.toHaveBeenCalled();
-    expect(sponsorUsersActions.importSponsorUsers).not.toHaveBeenCalled();
+    expect(onSave).not.toHaveBeenCalled();
   });
 
-  it("calls importSponsorUsers with 'all' when select all is used", async () => {
-    renderPopup();
+  it("calls onSave with 'all' when select all is used", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    renderPopup({ onSave });
 
     await selectSummitAndSponsor();
 
@@ -327,12 +327,7 @@ describe("SponsorGlobalImportUsersPopup", () => {
     });
 
     await waitFor(() => {
-      expect(sponsorUsersActions.importSponsorUsers).toHaveBeenCalledWith(
-        1,
-        42,
-        2,
-        "all"
-      );
+      expect(onSave).toHaveBeenCalledWith(1, 42, 2, "all");
     });
   });
 
