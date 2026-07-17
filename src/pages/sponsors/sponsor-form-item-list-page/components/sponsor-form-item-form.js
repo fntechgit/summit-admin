@@ -13,7 +13,7 @@ import {
 import T from "i18n-react";
 import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
-import { MuiFormikUpload } from "openstack-uicore-foundation/lib/components";
+import MuiFormikUpload from "openstack-uicore-foundation/lib/components/mui/formik-inputs/upload";
 import AdditionalInputList from "openstack-uicore-foundation/lib/components/mui/formik-inputs/additional-input-list";
 import {
   addIssAfterDateFieldValidator,

@@ -23,7 +23,7 @@ import {
   Typography
 } from "@mui/material";
 import PropTypes from "prop-types";
-import { UploadInputV3 } from "openstack-uicore-foundation/lib/components";
+import UploadInputV3 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v3";
 import T from "i18n-react/dist/i18n-react";
 import CloseIcon from "@mui/icons-material/Close";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";

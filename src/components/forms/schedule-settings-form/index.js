@@ -9,26 +9,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import {
-  Dropdown,
-  Input,
-  SimpleLinkList
-} from "openstack-uicore-foundation/lib/components";
-import {
-  isEmpty,
-  scrollToError,
-  shallowEqual,
-  hasErrors
-} from "../../../utils/methods";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import Switch from "react-switch";
+import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
+import { isEmpty, scrollToError, shallowEqual } from "../../../utils/methods";
 import EditLabelSlider from "../../inputs/edit-label-slider";
 import PreFilterInput from "./pre-filter-input";
-import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
 
 class ScheduleSettingsForm extends React.Component {
   constructor(props) {
@@ -40,7 +32,7 @@ class ScheduleSettingsForm extends React.Component {
     };
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -70,11 +62,11 @@ class ScheduleSettingsForm extends React.Component {
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   };
 
   updateFilterOrder = (filters, filterId, newOrder) => {
-    console.log(`updateFilterOrder`, filters, filterId, newOrder);
+    console.log("updateFilterOrder", filters, filterId, newOrder);
   };
 
   onSwitchChange = (id, val) => {
@@ -136,17 +128,15 @@ class ScheduleSettingsForm extends React.Component {
     const columns = [
       {
         columnKey: "type",
-        render: (filter) => {
-          return (
-            <EditLabelSlider
-              checked={filter.is_enabled}
-              id={filter.type}
-              value={filter.label}
-              onChange={this.onFilterChange}
-              disabled={!entity.is_enabled}
-            />
-          );
-        }
+        render: (filter) => (
+          <EditLabelSlider
+            checked={filter.is_enabled}
+            id={filter.type}
+            value={filter.label}
+            onChange={this.onFilterChange}
+            disabled={!entity.is_enabled}
+          />
+        )
       }
     ];
 

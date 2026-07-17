@@ -9,21 +9,25 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
   default: { translate: (key) => key }
 }));
 
-jest.mock("openstack-uicore-foundation/lib/components", () => {
-  const React = require("react");
-  const { useField } = require("formik");
-  return {
-    MuiFormikTextField: ({ name, label, ...props }) => {
-      const [field] = useField(name);
-      return React.createElement("input", {
-        "aria-label": label,
-        id: name,
-        ...field,
-        ...props
-      });
-    }
-  };
-});
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield",
+  () => {
+    const React = require("react");
+    const { useField } = require("formik");
+    return {
+      __esModule: true,
+      default: ({ name, label, ...props }) => {
+        const [field] = useField(name);
+        return React.createElement("input", {
+          "aria-label": label,
+          id: name,
+          ...field,
+          ...props
+        });
+      }
+    };
+  }
+);
 
 describe("ClientForm", () => {
   beforeEach(() => {
