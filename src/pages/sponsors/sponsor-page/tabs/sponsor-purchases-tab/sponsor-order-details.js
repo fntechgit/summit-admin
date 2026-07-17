@@ -65,7 +65,9 @@ const SponsorOrderDetails = ({
       label: T.translate(
         "edit_sponsor.purchase_tab.order_details.purchase_date"
       ),
-      value: formatDate(currentOrder.created, "LOC", DATE_FORMAT)
+      value: currentOrder.purchased_date
+        ? formatDate(currentOrder.purchased_date, "LOC", DATE_FORMAT)
+        : T.translate("edit_sponsor.purchase_tab.order_details.pending")
     },
     {
       label: T.translate(

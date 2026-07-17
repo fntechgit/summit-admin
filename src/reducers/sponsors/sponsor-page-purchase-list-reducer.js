@@ -12,6 +12,7 @@
  * */
 
 import moment from "moment-timezone";
+import T from "i18n-react/dist/i18n-react";
 import { amountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
@@ -71,9 +72,11 @@ const sponsorPagePurchaseListReducer = (state = DEFAULT_STATE, action) => {
         ...a,
         order: a.order_number,
         amount: `$${amountFromCents(a.net_amount)}`,
-        purchased: moment(a.purchased_date * MILLISECONDS_TO_SECONDS).format(
-          "YYYY/MM/DD HH:mm a"
-        )
+        purchased: a.purchased_date
+          ? moment(a.purchased_date * MILLISECONDS_TO_SECONDS).format(
+              "YYYY/MM/DD HH:mm a"
+            )
+          : T.translate("edit_sponsor.purchase_tab.order_details.pending")
       }));
 
       return {
