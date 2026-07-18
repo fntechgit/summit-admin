@@ -78,3 +78,35 @@ describe("OrdersTable finance columns", () => {
     expect(screen.getAllByText("—")).toHaveLength(4);
   });
 });
+
+describe("OrdersTable Type column (contained forms)", () => {
+  it("renders the full contained form set joined when forms is present", () => {
+    renderTable([
+      {
+        ...sampleRow,
+        forms: [
+          { code: "CL", name: "Cleaning" },
+          { code: "EL", name: "Electrical" }
+        ]
+      }
+    ]);
+    expect(
+      screen.getByText("CL - Cleaning, EL - Electrical")
+    ).toBeInTheDocument();
+  });
+
+  it("falls back to form.display when forms is absent (pre-deploy API)", () => {
+    renderTable(); // sampleRow has no forms property
+    expect(screen.getByText("Booth")).toBeInTheDocument();
+  });
+
+  it("falls back to form.display when forms is an empty array", () => {
+    renderTable([{ ...sampleRow, forms: [] }]);
+    expect(screen.getByText("Booth")).toBeInTheDocument();
+  });
+
+  it("renders the bare code when a form name is null (pre-backfill rows)", () => {
+    renderTable([{ ...sampleRow, forms: [{ code: "CL", name: null }] }]);
+    expect(screen.getByText("CL")).toBeInTheDocument();
+  });
+});

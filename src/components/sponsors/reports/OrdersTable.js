@@ -78,7 +78,16 @@ const columns = [
     columnKey: "form_display",
     header: T.translate("sponsor_reports_page.col_type"),
     sortable: false, // not a backend ordering field
-    render: (row) => row.form?.display ?? ""
+    // `forms` is the order's full contained form set (the form_code filter matches by
+    // containment, so the row must show every form, not just the first line's label).
+    // Falls back to the legacy first-line `form.display` until the API ships `forms`.
+    // A null form name is a pre-backfill row: show the bare code.
+    render: (row) =>
+      row.forms?.length
+        ? row.forms
+            .map((f) => (f.name ? `${f.code} - ${f.name}` : f.code))
+            .join(", ")
+        : row.form?.display ?? ""
   },
   {
     columnKey: "status",

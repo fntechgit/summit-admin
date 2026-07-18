@@ -105,3 +105,36 @@ describe("LinesManifestView", () => {
     });
   });
 });
+
+describe("Destination booth fallback", () => {
+  it("prefers the line's own add_on_name over sponsor_booth", () => {
+    renderView({ rows: [line({ sponsor_booth: "C3 | C4" })] });
+    expect(screen.getByText("Meeting Room T")).toBeInTheDocument();
+    expect(screen.queryByText("C3 | C4")).not.toBeInTheDocument();
+  });
+
+  it("falls back to the sponsor's booth when the line has no add-on", () => {
+    renderView({
+      rows: [line({ add_on_name: null, sponsor_booth: "C3 | C4" })]
+    });
+    expect(screen.getByText("C3 | C4")).toBeInTheDocument();
+  });
+
+  it("falls back on an EMPTY-STRING add_on_name (|| precedence, matching the backend CSV's `or`)", () => {
+    // discriminates || from ??: a ?? implementation would render the muted
+    // placeholder here instead of the booth
+    renderView({
+      rows: [line({ add_on_name: "", sponsor_booth: "C3 | C4" })]
+    });
+    expect(screen.getByText("C3 | C4")).toBeInTheDocument();
+  });
+
+  it("keeps the muted placeholder when neither add-on nor booth exists", () => {
+    renderView({
+      rows: [line({ add_on_name: null, sponsor_booth: null })]
+    });
+    expect(
+      screen.getByText("sponsor_reports_page.destination_booth_fallback")
+    ).toBeInTheDocument();
+  });
+});
