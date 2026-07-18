@@ -109,4 +109,9 @@ describe("OrdersTable Type column (contained forms)", () => {
     renderTable([{ ...sampleRow, forms: [{ code: "CL", name: null }] }]);
     expect(screen.getByText("CL")).toBeInTheDocument();
   });
+
+  it("renders the bare code when a form name is an empty string", () => {
+    renderTable([{ ...sampleRow, forms: [{ code: "CL", name: "" }] }]);
+    expect(screen.getByText("CL")).toBeInTheDocument();
+  });
 });

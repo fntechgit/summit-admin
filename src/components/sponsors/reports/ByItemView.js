@@ -366,11 +366,9 @@ const ByItemView = ({
                                       <TableCell>{c.number}</TableCell>
                                       <TableCell>{c.formCode}</TableCell>
                                       <TableCell>
-                                        {/* || not ??: empty-string add-on falls
-                                            through to the booth, mirroring
-                                            LinesManifestView */}
                                         <Destination
-                                          name={c.addOnName || c.sponsorBooth}
+                                          name={c.addOnName}
+                                          booth={c.sponsorBooth}
                                         />
                                       </TableCell>
                                       <TableCell>
