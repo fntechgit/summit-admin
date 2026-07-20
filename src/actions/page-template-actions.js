@@ -178,7 +178,7 @@ export const savePageTemplate = (entity) => async (dispatch) => {
         getPageTemplates()(dispatch);
       })
       .catch((err) => {
-        console.error(err);
+        throw err;
       })
       .finally(() => {
         dispatch(stopLoading());
@@ -203,7 +203,7 @@ export const savePageTemplate = (entity) => async (dispatch) => {
       getPageTemplates()(dispatch);
     })
     .catch((err) => {
-      console.error(err);
+      throw err;
     })
     .finally(() => {
       dispatch(stopLoading());
