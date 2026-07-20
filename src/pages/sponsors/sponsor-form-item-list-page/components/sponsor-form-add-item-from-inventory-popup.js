@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import { connect } from "react-redux";
 import {
   Button,
   Checkbox,
@@ -21,14 +20,11 @@ import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { ImagePreviewCell } from "../../../../components/image-preview-cell";
 import { formatRateFromCents } from "../../../../utils/rate-helpers";
-import { addInventoryItems } from "../../../../actions/sponsor-forms-actions";
-import { getInventoryItems } from "../../../../actions/inventory-item-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 
 const SponsorFormAddItemFromInventoryPopup = ({
-  formId,
   onClose,
-  addInventoryItems,
+  onSave,
   getInventoryItems,
   inventoryItems
 }) => {
@@ -42,16 +38,21 @@ const SponsorFormAddItemFromInventoryPopup = ({
     totalInventoryItems: total
   } = inventoryItems;
   const [selectedRows, setSelectedRows] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleClose = () => {
+    if (isSaving) return;
     setSelectedRows([]);
     onClose();
   };
 
   const handleOnAdd = () => {
-    addInventoryItems(formId, selectedRows).finally(() => {
-      handleClose();
-    });
+    if (isSaving) return;
+    setIsSaving(true);
+    onSave(selectedRows)
+      .then(() => onClose())
+      .catch(() => {})
+      .finally(() => setIsSaving(false));
   };
 
   const handleOnCheck = (rowId, checked) => {
@@ -160,7 +161,13 @@ const SponsorFormAddItemFromInventoryPopup = ({
   ];
 
   return (
-    <Dialog open onClose={handleClose} maxWidth="lg" fullWidth>
+    <Dialog
+      open
+      onClose={handleClose}
+      maxWidth="lg"
+      fullWidth
+      disableEscapeKeyDown={isSaving}
+    >
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between" }}
         component="div"
@@ -172,6 +179,7 @@ const SponsorFormAddItemFromInventoryPopup = ({
           size="large"
           sx={{ p: 0 }}
           onClick={handleClose}
+          disabled={isSaving}
           data-testid="close-dialog"
         >
           <CloseIcon fontSize="large" />
@@ -216,7 +224,7 @@ const SponsorFormAddItemFromInventoryPopup = ({
         <Button
           fullWidth
           variant="contained"
-          disabled={selectedRows.length === 0}
+          disabled={selectedRows.length === 0 || isSaving}
           onClick={handleOnAdd}
         >
           {T.translate("sponsor_form_item_list.add_from_inventory.save")}
@@ -228,16 +236,9 @@ const SponsorFormAddItemFromInventoryPopup = ({
 
 SponsorFormAddItemFromInventoryPopup.propTypes = {
   onClose: PropTypes.func.isRequired,
-  formId: PropTypes.string.isRequired,
-  addInventoryItems: PropTypes.func.isRequired,
-  getInventoryItems: PropTypes.func.isRequired
+  onSave: PropTypes.func.isRequired,
+  getInventoryItems: PropTypes.func.isRequired,
+  inventoryItems: PropTypes.object.isRequired
 };
 
-const mapStateToProps = ({ currentInventoryItemListState }) => ({
-  inventoryItems: currentInventoryItemListState
-});
-
-export default connect(mapStateToProps, {
-  addInventoryItems,
-  getInventoryItems
-})(SponsorFormAddItemFromInventoryPopup);
+export default SponsorFormAddItemFromInventoryPopup;
