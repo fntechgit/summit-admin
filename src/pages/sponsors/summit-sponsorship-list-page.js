@@ -97,7 +97,12 @@ const SummitSponsorshipListPage = ({
 
   const handleSaveSummitSponsorship = (sponsorship) =>
     saveSummitSponsorship(sponsorship).then(() =>
-      getSummitSponsorships(DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+      getSummitSponsorships(
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir
+      ).catch(() => {})
     );
 
   const columns = [
