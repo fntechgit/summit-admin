@@ -30,10 +30,7 @@ const MediaRequestModule = ({
   // clears a stale upload_deadline hydrated from a legacy module once the field is hidden;
   // only needs to run on mount, since showUploadDeadline doesn't change during a module's lifetime
   useEffect(() => {
-    if (
-      !showUploadDeadline &&
-      getIn(values, buildFieldName("upload_deadline"))
-    ) {
+    if (!showUploadDeadline) {
       setFieldValue(buildFieldName("upload_deadline"), null);
     }
   }, []);
