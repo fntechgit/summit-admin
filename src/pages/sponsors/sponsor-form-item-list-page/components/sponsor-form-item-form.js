@@ -34,7 +34,7 @@ const buildInitialValues = (data) => ({ ...data });
 
 addIssAfterDateFieldValidator();
 
-const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
+const SponsorFormItemForm = ({ initialValues, onSubmit, isSaving }) => {
   const formik = useFormik({
     initialValues: buildInitialValues(initialValues),
     validationSchema: yup.object({
@@ -154,7 +154,12 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
         </DialogContent>
         <Divider />
         <DialogActions>
-          <Button type="submit" fullWidth variant="contained">
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            disabled={isSaving}
+          >
             {T.translate("sponsor_form_item_list.edit_item.save")}
           </Button>
         </DialogActions>
