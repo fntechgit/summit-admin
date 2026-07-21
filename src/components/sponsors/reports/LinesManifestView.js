@@ -50,16 +50,21 @@ export const PER_PAGE_OPTIONS = [
 ];
 
 // Destination = the line's add-on (e.g. "Meeting Room T"); when absent, the
-// logistics convention is the sponsor's booth. The booth NUMBER ships with
-// slice #1 — until then show a muted "Booth" placeholder.
-export const Destination = ({ name }) =>
-  name ? (
-    <>{name}</>
+// logistics convention is the sponsor's booth — the API supplies it as
+// `sponsor_booth` (the sponsor's Booth-type add-on name(s)). The muted "Booth"
+// placeholder remains only for sponsors with no booth add-on on file.
+// `name || booth`, not ??: an empty-string add-on falls through to the booth,
+// matching the backend CSV's `or` precedence.
+export const Destination = ({ name, booth }) => {
+  const label = name || booth;
+  return label ? (
+    <>{label}</>
   ) : (
     <Typography component="span" variant="body2" color="text.disabled">
       {T.translate("sponsor_reports_page.destination_booth_fallback")}
     </Typography>
   );
+};
 
 // Buckets flat per-line rows into sponsor groups, preserving first-seen order.
 //
@@ -161,7 +166,10 @@ const LinesManifestView = ({
                       <TableCell>{line.item_code}</TableCell>
                       <TableCell>{line.description}</TableCell>
                       <TableCell>
-                        <Destination name={line.add_on_name} />
+                        <Destination
+                          name={line.add_on_name}
+                          booth={line.sponsor_booth}
+                        />
                       </TableCell>
                       <TableCell>
                         {formatCheckoutTime(line.purchase?.checkout_at)}

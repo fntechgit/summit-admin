@@ -133,6 +133,7 @@ describe("groupLinesBySponsorItem", () => {
       number: "OCP-1",
       formCode: "AV",
       addOnName: "Meeting Room T",
+      sponsorBooth: null,
       checkoutAt: 1735000000,
       rateName: "Early",
       status: "Paid",
@@ -372,5 +373,45 @@ describe("ByItemView", () => {
     fireEvent.mouseDown(screen.getByRole("combobox"));
     fireEvent.click(screen.getByRole("option", { name: "20" }));
     expect(onPerPageChange).toHaveBeenCalledWith(20);
+  });
+});
+
+describe("Destination booth fallback (By Item drill-down)", () => {
+  it("carries sponsor_booth through grouping as contributor sponsorBooth", () => {
+    const [withBooth] = groupLinesBySponsorItem([
+      line({ sponsor_booth: "C3 | C4" })
+    ]);
+    expect(withBooth.items[0].contributors[0].sponsorBooth).toBe("C3 | C4");
+    const [without] = groupLinesBySponsorItem([line()]);
+    expect(without.items[0].contributors[0].sponsorBooth).toBeNull();
+  });
+
+  it("drill-down falls back to the sponsor booth on an empty add-on (|| precedence)", () => {
+    renderView({
+      groups: [
+        group({
+          items: [
+            item({
+              contributors: [
+                {
+                  number: "OCP-1",
+                  formCode: "AV",
+                  addOnName: "",
+                  sponsorBooth: "C3 | C4",
+                  checkoutAt: 1735000000,
+                  rateName: "Early",
+                  status: "Paid",
+                  qty: 3,
+                  lineTotalCents: 150000,
+                  isCanceled: false
+                }
+              ]
+            })
+          ]
+        })
+      ]
+    });
+    fireEvent.click(screen.getByText("AV1"));
+    expect(screen.getByText("C3 | C4")).toBeInTheDocument();
   });
 });
