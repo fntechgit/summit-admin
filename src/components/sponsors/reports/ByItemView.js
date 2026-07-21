@@ -114,6 +114,7 @@ export const groupLinesBySponsorItem = (rows = []) => {
       number: row.purchase?.number ?? "",
       formCode: row.form?.code ?? "",
       addOnName: row.add_on_name ?? null,
+      sponsorBooth: row.sponsor_booth ?? null,
       checkoutAt: row.purchase?.checkout_at ?? null,
       rateName: row.rate_name ?? "",
       status: row.purchase?.status ?? "",
@@ -365,7 +366,10 @@ const ByItemView = ({
                                       <TableCell>{c.number}</TableCell>
                                       <TableCell>{c.formCode}</TableCell>
                                       <TableCell>
-                                        <Destination name={c.addOnName} />
+                                        <Destination
+                                          name={c.addOnName}
+                                          booth={c.sponsorBooth}
+                                        />
                                       </TableCell>
                                       <TableCell>
                                         {formatCheckoutTime(c.checkoutAt)}
