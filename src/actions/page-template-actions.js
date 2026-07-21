@@ -175,7 +175,6 @@ export const savePageTemplate = (entity) => async (dispatch) => {
             html: T.translate("page_template_list.page_crud.page_saved")
           })
         );
-        getPageTemplates()(dispatch);
       })
       .catch((err) => {
         throw err;
@@ -200,7 +199,6 @@ export const savePageTemplate = (entity) => async (dispatch) => {
           html: T.translate("page_template_list.page_crud.page_created")
         })
       );
-      getPageTemplates()(dispatch);
     })
     .catch((err) => {
       throw err;

@@ -115,7 +115,7 @@ const PageTemplateListPage = ({
   };
 
   const handleSavePageTemplate = (entity) =>
-    savePageTemplate(entity).then(() =>
+    savePageTemplate(entity).then(() => {
       getPageTemplates(
         term,
         DEFAULT_CURRENT_PAGE,
@@ -123,8 +123,8 @@ const PageTemplateListPage = ({
         order,
         orderDir,
         showArchived
-      ).catch(() => {})
-    );
+      ).catch(() => {});
+    });
 
   const handleArchive = (item) =>
     item.is_archived
@@ -293,6 +293,7 @@ const PageTemplateListPage = ({
           pageTemplate={pageTemplate}
           onClose={handleClosePageDialog}
           onSave={handleSavePageTemplate}
+          isGlobal
         />
       )}
       {openCloneDialog && (
