@@ -12,10 +12,10 @@
  * */
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
-import TextArea from "openstack-uicore-foundation/lib/components/inputs/textarea-input"
-import Panel from "openstack-uicore-foundation/lib/components/sections/panel"
+import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
+import TextArea from "openstack-uicore-foundation/lib/components/inputs/textarea-input";
+import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import Switch from "react-switch";
 import Swal from "sweetalert2";
@@ -30,7 +30,8 @@ class BadgeSettingsForm extends React.Component {
     this.state = {
       entity: { ...props.entity },
       errors: props.errors,
-      showSection: null
+      showSection: null,
+      isSaving: false
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -159,6 +160,8 @@ class BadgeSettingsForm extends React.Component {
   handleSubmit(ev) {
     ev.preventDefault();
 
+    if (this.state.isSaving) return;
+
     // save only the settings with the following conditions
     const settingsToSave = Object.fromEntries(
       Object.entries(this.state.entity).filter(
@@ -166,19 +169,27 @@ class BadgeSettingsForm extends React.Component {
       )
     );
 
-    this.props.onSubmit(settingsToSave).then(() => {
-      const success_message = {
-        title: T.translate("general.done"),
-        html: T.translate("badge_settings.badge_template_settings_updated"),
-        type: "success"
-      };
+    this.setState({ isSaving: true });
 
-      Swal.fire(success_message);
-    });
+    this.props
+      .onSubmit(settingsToSave)
+      .then(() => {
+        const success_message = {
+          title: T.translate("general.done"),
+          html: T.translate("badge_settings.badge_template_settings_updated"),
+          type: "success"
+        };
+
+        Swal.fire(success_message);
+      })
+      .catch(() => {})
+      .finally(() => {
+        this.setState({ isSaving: false });
+      });
   }
 
   render() {
-    const { entity, showSection } = this.state;
+    const { entity, showSection, isSaving } = this.state;
     const { currentSummit } = this.props;
 
     const ddlAlignOptions = [
@@ -1580,6 +1591,7 @@ class BadgeSettingsForm extends React.Component {
               onClick={this.handleSubmit}
               className="btn btn-primary pull-right"
               value={T.translate("general.save")}
+              disabled={isSaving}
             />
           </div>
         </div>
