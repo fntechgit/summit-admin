@@ -1091,6 +1091,19 @@
       "add_button": "Add Domains",
       "added_toast": "Added {added} · skipped {invalid} invalid · {dup} duplicates",
       "configured_count": "Configured Domains ({n})",
+      "search_placeholder": "Search domains...",
+      "search_aria": "Search domains",
+      "type_filter_aria": "Filter domains by type",
+      "add_aria": "Add allowed email domains",
+      "row_select_aria": "Select {entry}",
+      "filter": {
+        "all": "All",
+        "at_domain": "@domain",
+        "tld": ".tld",
+        "email": "user@email"
+      },
+      "select_all": "Select All",
+      "delete_selected": "Delete Selected ({n})",
       "done": "Done",
       "cancel": "Cancel"
     },
