@@ -747,6 +747,11 @@ class EventForm extends React.Component {
     );
   }
 
+  isDraftComplete() {
+    const { entity } = this.state;
+    return entity?.status === "NonReceived" && entity?.progress === "COMPLETE";
+  }
+
   getMissingDraftFields() {
     const { entity } = this.state;
     const missing = [];
@@ -754,16 +759,7 @@ class EventForm extends React.Component {
     if (!entity.title) missing.push("Title");
     if (!entity.type_id) missing.push("Activity Type");
     if (!entity.track_id) missing.push("Activity Category");
-
-    if (!entity.type_id || this.shouldShowField("allows_publishing_dates")) {
-      if (!entity.start_date) missing.push("Start Date");
-      if (!entity.end_date) missing.push("End Date");
-      if (!entity.duration) missing.push("Duration");
-    }
-
-    if (!entity.type_id || this.isEventType(EVENT_TYPE_PRESENTATION)) {
-      if (!entity.disclaimer_accepted) missing.push("Disclaimer Accepted");
-    }
+    if (!entity.speakers?.length) missing.push("Speakers");
 
     return missing;
   }
@@ -1085,15 +1081,17 @@ class EventForm extends React.Component {
       { label: "Submission", value: "Submission" }
     ];
 
+    const showDraftUI =
+      this.isPresentation() && !this.isNew() && !this.isComplete();
     const missingDraftFields =
-      !this.isPresentation() || this.isNew() || this.isComplete()
-        ? []
-        : this.getMissingDraftFields();
+      showDraftUI && !this.isDraftComplete()
+        ? this.getMissingDraftFields()
+        : [];
 
     return (
       <div>
         <input type="hidden" id="id" value={entity.id} />
-        {this.isPresentation() && !this.isNew() && !this.isComplete() && (
+        {showDraftUI && (
           <div className="alert alert-warning" role="alert">
             <div
               style={{
@@ -2146,7 +2144,11 @@ class EventForm extends React.Component {
                   type="button"
                   onClick={(ev) => this.triggerFormSubmit(ev, false)}
                   className="btn btn-primary pull-right"
-                  value={T.translate("edit_event.save_and_mark_complete")}
+                  value={T.translate(
+                    showDraftUI && !this.isDraftComplete()
+                      ? "edit_event.save_and_mark_complete"
+                      : "general.save"
+                  )}
                 />
                 <input
                   type="button"
@@ -2154,16 +2156,14 @@ class EventForm extends React.Component {
                   className="btn btn-success pull-right"
                   value={T.translate("general.save_and_publish")}
                 />
-                {this.isPresentation() &&
-                  !this.isNew() &&
-                  !this.isComplete() && (
-                    <input
-                      type="button"
-                      onClick={this.handleSaveIncomplete}
-                      className="btn btn-warning pull-right"
-                      value={T.translate("edit_event.save_as_incomplete")}
-                    />
-                  )}
+                {showDraftUI && !this.isDraftComplete() && (
+                  <input
+                    type="button"
+                    onClick={this.handleSaveIncomplete}
+                    className="btn btn-warning pull-right"
+                    value={T.translate("edit_event.save_as_incomplete")}
+                  />
+                )}
               </div>
             )}
 
