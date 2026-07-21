@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { Grid2, Box, InputLabel } from "@mui/material";
 
-import FormikTextEditor from "../../../../../components/inputs/formik-text-editor";
+import FormikTextEditor from "openstack-uicore-foundation/lib/components/mui/formik-inputs/texteditor";
 
 const InfoModule = ({ baseName, index }) => {
   const name = `${baseName}[${index}].content`;
@@ -15,7 +15,12 @@ const InfoModule = ({ baseName, index }) => {
       </InputLabel>
       <Grid2 size={12}>
         <Box width="100%">
-          <FormikTextEditor name={name} fullWidth margin="none" />
+          <FormikTextEditor
+            name={name}
+            fullWidth
+            margin="none"
+            license={process.env.JODIT_LICENSE_KEY}
+          />
         </Box>
       </Grid2>
     </Grid2>
