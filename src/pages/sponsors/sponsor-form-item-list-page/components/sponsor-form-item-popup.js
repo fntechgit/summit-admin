@@ -13,6 +13,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import {
   resetSponsorFormItem,
   saveSponsorFormItem,
+  removeItemFile,
   updateSponsorFormItem
 } from "../../../../actions/sponsor-forms-actions";
 import SponsorFormItemForm from "./sponsor-form-item-form";
@@ -24,7 +25,8 @@ const SponsorFormItemPopup = ({
   onClose,
   resetSponsorFormItem,
   saveSponsorFormItem,
-  updateSponsorFormItem
+  updateSponsorFormItem,
+  removeItemFile
 }) => {
   const handleClose = () => {
     // clear form from reducer
@@ -38,6 +40,10 @@ const SponsorFormItemPopup = ({
     save(formId, values).finally(() => {
       handleClose();
     });
+  };
+
+  const handleRemoveImage = (imageId) => {
+    removeItemFile(formId, item.id, imageId);
   };
 
   return (
@@ -56,7 +62,11 @@ const SponsorFormItemPopup = ({
         </IconButton>
       </DialogTitle>
       <Divider />
-      <SponsorFormItemForm initialValues={item} onSubmit={handleOnSave} />
+      <SponsorFormItemForm
+        initialValues={item}
+        onSubmit={handleOnSave}
+        onImageDeleted={handleRemoveImage}
+      />
     </Dialog>
   );
 };
@@ -81,5 +91,6 @@ const mapStateToProps = ({
 export default connect(mapStateToProps, {
   resetSponsorFormItem,
   saveSponsorFormItem,
-  updateSponsorFormItem
+  updateSponsorFormItem,
+  removeItemFile
 })(SponsorFormItemPopup);

@@ -36,7 +36,8 @@ import {
   deleteSponsorFormManagedItem,
   resetSponsorFormManagedItem,
   unarchiveSponsorCustomizedFormItem,
-  getSponsorFormManagedItem
+  getSponsorFormManagedItem,
+  removeSponsorCustomizedFormItemImages
 } from "../../../../../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../../../../../components/mui/custom-alert";
 import SponsorInventoryDialog from "../../../../../../sponsors-global/form-templates/sponsor-inventory-popup";
@@ -67,7 +68,8 @@ const SponsorFormsManageItems = ({
   deleteSponsorFormManagedItem,
   archiveSponsorCustomizedFormItem,
   unarchiveSponsorCustomizedFormItem,
-  getSponsorFormManagedItem
+  getSponsorFormManagedItem,
+  removeSponsorCustomizedFormItemImages
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -199,6 +201,14 @@ const SponsorFormsManageItems = ({
         orderDir,
         showArchived
       )
+    );
+  };
+
+  const handleImageRemove = (imageId) => {
+    removeSponsorCustomizedFormItemImages(
+      formId,
+      currentInventoryItem.id,
+      imageId
     );
   };
 
@@ -384,6 +394,7 @@ const SponsorFormsManageItems = ({
           entity={currentInventoryItem}
           onSave={handleItemSave}
           onClose={handleClose}
+          onImageDeleted={handleImageRemove}
         />
       )}
 
@@ -411,7 +422,8 @@ export default Restrict(
     deleteSponsorFormManagedItem,
     getSponsorFormManagedItem,
     archiveSponsorCustomizedFormItem,
-    unarchiveSponsorCustomizedFormItem
+    unarchiveSponsorCustomizedFormItem,
+    removeSponsorCustomizedFormItemImages
   })(SponsorFormsManageItems),
   ACCESS_ROUTES.ADMIN_SPONSORS
 );

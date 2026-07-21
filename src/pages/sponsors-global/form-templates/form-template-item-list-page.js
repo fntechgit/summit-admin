@@ -189,6 +189,10 @@ const FormTemplateItemListPage = ({
     setShowInventoryItemModal(false);
   };
 
+  const handleRemoveImage = (imageId) => {
+    deleteItemImage(formTemplateId, currentFormTemplateItem.id, imageId);
+  };
+
   const columns = [
     {
       columnKey: "code",
@@ -321,7 +325,7 @@ const FormTemplateItemListPage = ({
           onClose={() => setShowInventoryItemModal(false)}
           onMetaFieldTypeDeleted={deleteItemMetaFieldType}
           onMetaFieldTypeValueDeleted={deleteItemMetaFieldTypeValue}
-          onImageDeleted={deleteItemImage}
+          onImageDeleted={handleRemoveImage}
         />
       )}
     </div>
