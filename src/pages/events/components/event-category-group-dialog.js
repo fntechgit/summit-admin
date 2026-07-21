@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import PropTypes from "prop-types";
 import { FormikProvider, useFormik } from "formik";
@@ -25,9 +25,6 @@ import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Divider from "@mui/material/Divider";
 import Grid2 from "@mui/material/Grid2";
-import Autocomplete from "@mui/material/Autocomplete";
-import CircularProgress from "@mui/material/CircularProgress";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
@@ -42,10 +39,10 @@ import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikSelectV2 from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select-v2";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
+import MuiFormikAsyncAutocomplete from "openstack-uicore-foundation/lib/components/mui/formik-inputs/async-select";
 import MuiFormikColorInput from "../../../components/mui/formik-inputs/mui-formik-color-input";
 import useScrollToError from "../../../hooks/useScrollToError";
 import { requiredStringValidation } from "../../../utils/yup";
-import { DEBOUNCE_WAIT_250 } from "../../../utils/constants";
 
 const DEFAULT_PER_PAGE = 10;
 
@@ -62,65 +59,28 @@ const EventCategoryGroupDialog = ({
 }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [trackState, setTrackState] = useState({
-    input: "",
-    options: [],
-    loading: false,
-    selected: null,
     page: 1,
     perPage: DEFAULT_PER_PAGE
   });
   const [groupState, setGroupState] = useState({
-    input: "",
-    options: [],
-    loading: false,
-    selected: null,
     page: 1,
     perPage: DEFAULT_PER_PAGE
   });
 
+  const trackSearchFormik = useFormik({
+    initialValues: { track: null },
+    onSubmit: () => {}
+  });
+  const groupSearchFormik = useFormik({
+    initialValues: { group: null },
+    onSubmit: () => {}
+  });
+
   const isNew = !initialEntity?.id;
 
-  useEffect(() => {
-    if (!trackState.input) {
-      setTrackState((prev) => ({ ...prev, options: [] }));
-      return undefined;
-    }
-    setTrackState((prev) => ({ ...prev, loading: true }));
-    const timer = setTimeout(() => {
-      const excludedIds = initialEntity?.tracks?.map((t) => t.id) ?? [];
-      queryTracks(
-        currentSummit.id,
-        trackState.input,
-        (results) => {
-          setTrackState((prev) => ({
-            ...prev,
-            options: results,
-            loading: false
-          }));
-        },
-        excludedIds
-      );
-    }, DEBOUNCE_WAIT_250);
-    return () => clearTimeout(timer);
-  }, [trackState.input]);
-
-  useEffect(() => {
-    if (!groupState.input) {
-      setGroupState((prev) => ({ ...prev, options: [] }));
-      return undefined;
-    }
-    setGroupState((prev) => ({ ...prev, loading: true }));
-    const timer = setTimeout(() => {
-      queryGroups(groupState.input, (results) => {
-        setGroupState((prev) => ({
-          ...prev,
-          options: results,
-          loading: false
-        }));
-      });
-    }, DEBOUNCE_WAIT_250);
-    return () => clearTimeout(timer);
-  }, [groupState.input]);
+  const excludedTrackIds = initialEntity?.tracks?.map((t) => t.id) ?? [];
+  const queryTrackOptions = (input, callback) =>
+    queryTracks(currentSummit.id, input, callback, excludedTrackIds);
 
   const toEpoch = (momentValue) => {
     if (!momentValue || !momentValue.isValid()) return 0;
@@ -202,14 +162,10 @@ const EventCategoryGroupDialog = ({
   ];
 
   const handleAddTrack = () => {
-    if (!trackState.selected) return;
-    onTrackLink(initialEntity.id, trackState.selected);
-    setTrackState((prev) => ({
-      ...prev,
-      selected: null,
-      input: "",
-      options: []
-    }));
+    const track = trackSearchFormik.values.track?.raw;
+    if (!track) return;
+    onTrackLink(initialEntity.id, track);
+    trackSearchFormik.setFieldValue("track", null);
   };
 
   const handleTrackDelete = (trackId) => {
@@ -217,14 +173,10 @@ const EventCategoryGroupDialog = ({
   };
 
   const handleAddGroup = () => {
-    if (!groupState.selected) return;
-    onAllowedGroupLink(initialEntity.id, groupState.selected);
-    setGroupState((prev) => ({
-      ...prev,
-      selected: null,
-      input: "",
-      options: []
-    }));
+    const group = groupSearchFormik.values.group?.raw;
+    if (!group) return;
+    onAllowedGroupLink(initialEntity.id, group);
+    groupSearchFormik.setFieldValue("group", null);
   };
 
   const handleAllowedGroupDelete = (groupId) => {
@@ -494,71 +446,26 @@ const EventCategoryGroupDialog = ({
                         sx={{ mb: 1 }}
                       >
                         <Grid2 size="grow">
-                          <Autocomplete
-                            size="small"
-                            fullWidth
-                            options={trackState.options}
-                            getOptionLabel={(option) => option.name || ""}
-                            isOptionEqualToValue={(option, value) =>
-                              option.id === value.id
-                            }
-                            loading={trackState.loading}
-                            value={trackState.selected}
-                            onChange={(_, track) =>
-                              setTrackState((prev) => ({
-                                ...prev,
-                                selected: track
-                              }))
-                            }
-                            onInputChange={(_, val, reason) => {
-                              if (reason === "input")
-                                setTrackState((prev) => ({
-                                  ...prev,
-                                  input: val
-                                }));
-                              if (reason === "clear") {
-                                setTrackState((prev) => ({
-                                  ...prev,
-                                  selected: null,
-                                  input: "",
-                                  options: []
-                                }));
-                              }
-                            }}
-                            filterOptions={(x) => x}
-                            renderInput={(params) => (
-                              /* eslint-disable-next-line react/jsx-props-no-spreading */
-                              <TextField
-                                {...params}
-                                size="small"
-                                placeholder={T.translate(
-                                  "edit_event_category_group.placeholders.search_categories"
-                                )}
-                                slotProps={{
-                                  input: {
-                                    ...params.InputProps,
-                                    endAdornment: (
-                                      <>
-                                        {trackState.loading && (
-                                          <CircularProgress
-                                            color="inherit"
-                                            size={16}
-                                          />
-                                        )}
-                                        {params.InputProps.endAdornment}
-                                      </>
-                                    )
-                                  }
-                                }}
-                              />
-                            )}
-                          />
+                          <FormikProvider value={trackSearchFormik}>
+                            <MuiFormikAsyncAutocomplete
+                              name="track"
+                              placeholder={T.translate(
+                                "edit_event_category_group.placeholders.search_categories"
+                              )}
+                              queryFunction={queryTrackOptions}
+                              formatOption={(track) => ({
+                                value: track.id,
+                                label: track.name,
+                                raw: track
+                              })}
+                            />
+                          </FormikProvider>
                         </Grid2>
                         <Grid2>
                           <Button
                             variant="contained"
                             size="small"
-                            disabled={!trackState.selected}
+                            disabled={!trackSearchFormik.values.track}
                             onClick={handleAddTrack}
                           >
                             {T.translate("general.add")}
@@ -603,71 +510,26 @@ const EventCategoryGroupDialog = ({
                           sx={{ mb: 1 }}
                         >
                           <Grid2 size="grow">
-                            <Autocomplete
-                              size="small"
-                              fullWidth
-                              options={groupState.options}
-                              getOptionLabel={(option) => option.title || ""}
-                              isOptionEqualToValue={(option, value) =>
-                                option.id === value.id
-                              }
-                              loading={groupState.loading}
-                              value={groupState.selected}
-                              onChange={(_, group) =>
-                                setGroupState((prev) => ({
-                                  ...prev,
-                                  selected: group
-                                }))
-                              }
-                              onInputChange={(_, val, reason) => {
-                                if (reason === "input")
-                                  setGroupState((prev) => ({
-                                    ...prev,
-                                    input: val
-                                  }));
-                                if (reason === "clear") {
-                                  setGroupState((prev) => ({
-                                    ...prev,
-                                    selected: null,
-                                    input: "",
-                                    options: []
-                                  }));
-                                }
-                              }}
-                              filterOptions={(x) => x}
-                              renderInput={(params) => (
-                                /* eslint-disable-next-line react/jsx-props-no-spreading */
-                                <TextField
-                                  {...params}
-                                  size="small"
-                                  placeholder={T.translate(
-                                    "edit_event_category_group.placeholders.search_groups"
-                                  )}
-                                  slotProps={{
-                                    input: {
-                                      ...params.InputProps,
-                                      endAdornment: (
-                                        <>
-                                          {groupState.loading && (
-                                            <CircularProgress
-                                              color="inherit"
-                                              size={16}
-                                            />
-                                          )}
-                                          {params.InputProps.endAdornment}
-                                        </>
-                                      )
-                                    }
-                                  }}
-                                />
-                              )}
-                            />
+                            <FormikProvider value={groupSearchFormik}>
+                              <MuiFormikAsyncAutocomplete
+                                name="group"
+                                placeholder={T.translate(
+                                  "edit_event_category_group.placeholders.search_groups"
+                                )}
+                                queryFunction={queryGroups}
+                                formatOption={(group) => ({
+                                  value: group.id,
+                                  label: group.title,
+                                  raw: group
+                                })}
+                              />
+                            </FormikProvider>
                           </Grid2>
                           <Grid2>
                             <Button
                               variant="contained"
                               size="small"
-                              disabled={!groupState.selected}
+                              disabled={!groupSearchFormik.values.group}
                               onClick={handleAddGroup}
                             >
                               {T.translate("general.add")}
