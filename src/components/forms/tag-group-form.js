@@ -9,16 +9,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import { queryTags } from "openstack-uicore-foundation/lib/utils/query-actions";
-import {
-  Input,
-  SimpleLinkList
-} from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
+import SimpleLinkList from "openstack-uicore-foundation/lib/components/simple-link-list";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 
 class TagGroupForm extends React.Component {
@@ -36,7 +34,7 @@ class TagGroupForm extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -55,17 +53,17 @@ class TagGroupForm extends React.Component {
   }
 
   handleChange(ev) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
-    let { value, id } = ev.target;
+    const entity = { ...this.state.entity };
+    const errors = { ...this.state.errors };
+    const { value, id } = ev.target;
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleSubmit(ev) {
-    let entity = { ...this.state.entity };
+    const entity = { ...this.state.entity };
 
     ev.preventDefault();
 
@@ -73,7 +71,7 @@ class TagGroupForm extends React.Component {
   }
 
   hasErrors(field) {
-    let { errors } = this.state;
+    const { errors } = this.state;
     if (field in errors) {
       return errors[field];
     }
@@ -91,13 +89,12 @@ class TagGroupForm extends React.Component {
 
   render() {
     const { entity } = this.state;
-    const { currentSummit } = this.props;
 
-    let allowedTagsColumns = [
+    const allowedTagsColumns = [
       { columnKey: "tag", value: T.translate("edit_tag_group.tag") }
     ];
 
-    let allowedTagsOptions = {
+    const allowedTagsOptions = {
       title: T.translate("edit_tag_group.allowed_tags"),
       sortCol: "tag",
       valueKey: "id",

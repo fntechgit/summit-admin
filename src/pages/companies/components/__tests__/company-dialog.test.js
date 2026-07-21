@@ -23,25 +23,29 @@ jest.mock("openstack-uicore-foundation/lib/utils/query-actions", () => ({
   })
 }));
 
-jest.mock("openstack-uicore-foundation/lib/components", () => ({
-  UploadInputV3: ({ id, onUploadComplete, onUploadStart, value }) => (
-    <div
-      data-testid={`upload-input-${id}`}
-      data-logo={value?.[0]?.file_path ?? ""}
-    >
-      <button
-        type="button"
-        data-testid={`trigger-upload-${id}`}
-        onClick={() => {
-          onUploadStart?.();
-          onUploadComplete({ path: "/uploads/", name: `${id}.png` });
-        }}
+jest.mock(
+  "openstack-uicore-foundation/lib/components/inputs/upload-input-v3",
+  () => ({
+    __esModule: true,
+    default: ({ id, onUploadComplete, onUploadStart, value }) => (
+      <div
+        data-testid={`upload-input-${id}`}
+        data-logo={value?.[0]?.file_path ?? ""}
       >
-        Upload
-      </button>
-    </div>
-  )
-}));
+        <button
+          type="button"
+          data-testid={`trigger-upload-${id}`}
+          onClick={() => {
+            onUploadStart?.();
+            onUploadComplete({ path: "/uploads/", name: `${id}.png` });
+          }}
+        >
+          Upload
+        </button>
+      </div>
+    )
+  })
+);
 
 jest.mock(
   "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield",
