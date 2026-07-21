@@ -21,12 +21,13 @@ import {
   startLoading,
   showMessage,
   showSuccessMessage,
-  authErrorHandler
+  authErrorHandler,
+  escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
 import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
-import { HUNDRED_PER_PAGE } from "../utils/constants";
+import { DEFAULT_PER_PAGE, DEFAULT_CURRENT_PAGE } from "../utils/constants";
 
 export const REQUEST_EVENT_CATEGORIES = "REQUEST_EVENT_CATEGORIES";
 export const RECEIVE_EVENT_CATEGORIES = "RECEIVE_EVENT_CATEGORIES";
@@ -380,31 +381,55 @@ const normalizeEntity = (entity) => {
 
 /** *********************************  CATEGORY GROUPS ************************************************** */
 
-export const getEventCategoryGroups = () => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
-  const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
+export const getEventCategoryGroups =
+  (
+    term = null,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = 1
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const filter = [];
 
-  dispatch(startLoading());
+    dispatch(startLoading());
 
-  const params = {
-    access_token: accessToken,
-    page: 1,
-    per_page: HUNDRED_PER_PAGE,
-    expand: "tracks",
-    fields: "id,name,class_name,color,tracks.name,tracks.id",
-    relations: "tracks.none"
+    const params = {
+      access_token: accessToken,
+      page,
+      per_page: perPage,
+      expand: "tracks",
+      fields: "id,name,class_name,color,tracks.name,tracks.id",
+      relations: "tracks.none"
+    };
+
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(`name=@${escapedTerm}`);
+    }
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      params.order = `${orderDirSign}${order}`;
+    }
+
+    return getRequest(
+      createAction(REQUEST_EVENT_CATEGORY_GROUPS),
+      createAction(RECEIVE_EVENT_CATEGORY_GROUPS),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-groups`,
+      authErrorHandler,
+      { order, orderDir, term, perPage, currentPage: page }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
   };
-
-  return getRequest(
-    createAction(REQUEST_EVENT_CATEGORY_GROUPS),
-    createAction(RECEIVE_EVENT_CATEGORY_GROUPS),
-    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-groups`,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
-};
 
 export const getEventCategoryGroup =
   (groupId) => async (dispatch, getState) => {

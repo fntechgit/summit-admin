@@ -9,8 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_EVENT_CATEGORY_GROUPS,
   REQUEST_EVENT_CATEGORY_GROUPS,
@@ -18,10 +19,16 @@ import {
 } from "../../actions/event-category-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
-  eventCategoryGroups: []
+  eventCategoryGroups: [],
+  term: "",
+  order: "id",
+  orderDir: 1,
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10,
+  totalEventCategoryGroups: 0
 };
 
 const eventCategoryGroupListReducer = (state = DEFAULT_STATE, action) => {
@@ -32,29 +39,36 @@ const eventCategoryGroupListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_EVENT_CATEGORY_GROUPS: {
-      return { ...state };
+      const { order, orderDir, term, perPage, currentPage } = payload;
+      return { ...state, order, orderDir, term, perPage, currentPage };
     }
     case RECEIVE_EVENT_CATEGORY_GROUPS: {
-      let eventCategoryGroups = payload.response.data.map((e) => {
-        return {
-          id: e.id,
-          name: e.name,
-          color: `<div style="background-color: ${e.color}">&nbsp;</div>`,
-          type:
-            e.class_name === "PresentationCategoryGroup" ? "Public" : "Private",
-          categories: e.tracks.map((c) => c.name).join(", ")
-        };
-      });
+      const { total, last_page, current_page } = payload.response;
+      const eventCategoryGroups = payload.response.data.map((e) => ({
+        id: e.id,
+        name: e.name,
+        color: e.color,
+        type:
+          e.class_name === "PresentationCategoryGroup" ? "Public" : "Private",
+        categories: e.tracks.map((c) => c.name).join(", ")
+      }));
 
-      return { ...state, eventCategoryGroups };
+      return {
+        ...state,
+        eventCategoryGroups,
+        currentPage: current_page,
+        lastPage: last_page,
+        totalEventCategoryGroups: total
+      };
     }
     case EVENT_CATEGORY_GROUP_DELETED: {
-      let { groupId } = payload;
+      const { groupId } = payload;
       return {
         ...state,
         eventCategoryGroups: state.eventCategoryGroups.filter(
           (g) => g.id !== groupId
-        )
+        ),
+        totalEventCategoryGroups: state.totalEventCategoryGroups - 1
       };
     }
     default:
