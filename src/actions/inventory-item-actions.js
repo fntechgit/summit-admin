@@ -233,23 +233,20 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
           promises.push(saveItemMetaFieldTypes(normalizedEntity)(dispatch));
         }
 
-        Promise.all(promises)
-          .then(() => {
-            dispatch(
-              showSuccessMessage(
-                T.translate("edit_inventory_item.inventory_item_saved")
-              )
-            );
-          })
-          .catch((err) => {
-            console.error(err);
-          })
-          .finally(() => {
-            dispatch(stopLoading());
-          });
+        return Promise.all(promises).then(() => {
+          dispatch(
+            showSuccessMessage(
+              T.translate("edit_inventory_item.inventory_item_saved")
+            )
+          );
+        });
       })
       .catch((err) => {
         console.error(err);
+        throw err;
+      })
+      .finally(() => {
+        dispatch(stopLoading());
       });
   }
 
@@ -279,23 +276,20 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
         promises.push(saveItemMetaFieldTypes(inventoryItem)(dispatch));
       }
 
-      Promise.all(promises)
-        .then(() => {
-          dispatch(
-            showMessage(success_message, () => {
-              history.push("/app/inventory");
-            })
-          );
-        })
-        .catch((err) => {
-          console.error(err);
-        })
-        .finally(() => {
-          dispatch(stopLoading());
-        });
+      return Promise.all(promises).then(() => {
+        dispatch(
+          showMessage(success_message, () => {
+            history.push("/app/inventory");
+          })
+        );
+      });
     })
     .catch((err) => {
       console.error(err);
+      throw err;
+    })
+    .finally(() => {
+      dispatch(stopLoading());
     });
 };
 

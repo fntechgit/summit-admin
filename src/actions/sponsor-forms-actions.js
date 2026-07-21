@@ -1322,7 +1322,9 @@ export const updateSponsorFormItem =
           );
         });
       })
-      .catch(console.log) // need to catch promise reject
+      .catch((err) => {
+        throw err;
+      })
       .finally(() => {
         dispatch(stopLoading());
       });
@@ -1457,7 +1459,9 @@ export const addInventoryItems =
           })
         );
       })
-      .catch(console.log) // need to catch promise reject
+      .catch((err) => {
+        throw err;
+      })
       .finally(() => {
         dispatch(stopLoading());
       });

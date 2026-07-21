@@ -22,7 +22,6 @@ import CheckBoxList from "../../../../../../components/mui/checkbox-list";
 import showConfirmDialog from "../../../../../../components/mui/showConfirmDialog";
 
 const ProcessRequestPopup = ({
-  open,
   sponsorId,
   companyId,
   requests,
@@ -77,7 +76,7 @@ const ProcessRequestPopup = ({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog open onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between", p: 2 }}
         component="div"

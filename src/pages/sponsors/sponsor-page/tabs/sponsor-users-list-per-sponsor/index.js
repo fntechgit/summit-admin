@@ -165,7 +165,6 @@ const SponsorUsersListPerSponsorPage = ({
 
       {openPopup === "new_user" && (
         <NewUserPopup
-          open={openPopup === "new_user"}
           onClose={() => setOpenPopup(null)}
           sponsorId={sponsor.id}
         />
@@ -177,7 +176,6 @@ const SponsorUsersListPerSponsorPage = ({
 
       {openPopup === "access_request" && (
         <ProcessRequestPopup
-          open={openPopup === "access_request"}
           onClose={() => setOpenPopup(null)}
           requests={requests}
           sponsorId={sponsor.id}
@@ -187,7 +185,6 @@ const SponsorUsersListPerSponsorPage = ({
 
       {openPopup === "import" && (
         <ImportUsersPopup
-          open={openPopup === "import"}
           onClose={() => setOpenPopup(null)}
           sponsorId={sponsor.id}
           companyId={sponsor.company?.id}

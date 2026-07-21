@@ -39,7 +39,9 @@ jest.mock(
         <div data-testid="page-template-popup">
           <span data-testid="popup-page-id">{pageTemplate?.id}</span>
           <button onClick={onClose}>Close</button>
-          <button onClick={() => onSave({ id: 1, name: "Test" })}>Save</button>
+          <button onClick={() => onSave({ id: 1, name: "Test" }).then(onClose)}>
+            Save
+          </button>
         </div>
       );
     }
@@ -47,8 +49,8 @@ jest.mock(
 
 jest.mock("../../../../../../actions/sponsor-pages-actions", () => ({
   ...jest.requireActual("../../../../../../actions/sponsor-pages-actions"),
-  getSponsorManagedPages: jest.fn(() => ({ type: "MOCK_ACTION" })),
-  getSponsorCustomizedPages: jest.fn(() => ({ type: "MOCK_ACTION" })),
+  getSponsorManagedPages: jest.fn(() => () => Promise.resolve()),
+  getSponsorCustomizedPages: jest.fn(() => () => Promise.resolve()),
   getSponsorCustomizedPage: jest.fn(
     () => () => Promise.resolve({ id: 1, name: "Test Page" })
   ),

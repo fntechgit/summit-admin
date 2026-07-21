@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
@@ -23,7 +23,9 @@ import useScrollToError from "../../../hooks/useScrollToError";
 import CompanyInputMUI from "../../../components/mui/formik-inputs/company-input-mui";
 import SponsorshipsBySummitSelectMUI from "../../../components/mui/formik-inputs/sponsorship-summit-select-mui";
 
-const AddSponsorDialog = ({ open, onClose, onSubmit, summitId }) => {
+const AddSponsorDialog = ({ onClose, onSubmit, summitId }) => {
+  const [isSaving, setIsSaving] = useState(false);
+
   const formik = useFormik({
     initialValues: {
       company: null,
@@ -51,7 +53,14 @@ const AddSponsorDialog = ({ open, onClose, onSubmit, summitId }) => {
         )
         .min(1, "At least one sponsorship is required")
     }),
-    onSubmit,
+    onSubmit: (values) => {
+      if (isSaving) return;
+      setIsSaving(true);
+      onSubmit(values)
+        .then(() => onClose())
+        .catch(() => {})
+        .finally(() => setIsSaving(false));
+    },
     enableReinitialize: true
   });
 
@@ -59,6 +68,7 @@ const AddSponsorDialog = ({ open, onClose, onSubmit, summitId }) => {
   useScrollToError(formik);
 
   const handleClose = () => {
+    if (isSaving) return;
     formik.resetForm();
     onClose();
   };
@@ -70,12 +80,23 @@ const AddSponsorDialog = ({ open, onClose, onSubmit, summitId }) => {
   }, [formik.errors]);
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
+    <Dialog
+      open
+      onClose={handleClose}
+      maxWidth="xs"
+      fullWidth
+      disableEscapeKeyDown={isSaving}
+    >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {T.translate("sponsor_list.add_sponsor")}
         </Typography>
-        <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
+        <IconButton
+          size="small"
+          onClick={() => handleClose()}
+          sx={{ mr: 1 }}
+          disabled={isSaving}
+        >
           <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
@@ -135,7 +156,8 @@ const AddSponsorDialog = ({ open, onClose, onSubmit, summitId }) => {
               variant="contained"
               disabled={
                 !formik.values.company ||
-                formik.values.sponsorships.length === 0
+                formik.values.sponsorships.length === 0 ||
+                isSaving
               }
             >
               {T.translate("sponsor_list.add_sponsor")}
@@ -148,7 +170,6 @@ const AddSponsorDialog = ({ open, onClose, onSubmit, summitId }) => {
 };
 
 AddSponsorDialog.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   summitId: PropTypes.number.isRequired

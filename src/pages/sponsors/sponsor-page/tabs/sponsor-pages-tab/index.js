@@ -248,60 +248,51 @@ const SponsorPagesTab = ({
     );
   };
 
-  const handleSaveManagedPageFromTemplate = (entity) => {
-    saveSponsorManagedPage(entity)
-      .then(() => {
-        const { perPage, order, orderDir } = managedPages;
-        getSponsorManagedPages(
-          term,
-          DEFAULT_CURRENT_PAGE,
-          perPage,
-          order,
-          orderDir,
-          showArchived
-        );
-      })
-      .finally(() => setOpenPopup(null));
-  };
+  const handleSaveManagedPageFromTemplate = (entity) =>
+    saveSponsorManagedPage(entity).then(() => {
+      const { perPage, order, orderDir } = managedPages;
+      getSponsorManagedPages(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      ).catch(() => {});
+    });
 
-  const handleSaveCustomizedPage = (entity) => {
-    saveSponsorCustomizedPage(entity)
-      .then(() => {
-        const { perPage, order, orderDir } = customizedPages;
-        getSponsorCustomizedPages(
-          term,
-          DEFAULT_CURRENT_PAGE,
-          perPage,
-          order,
-          orderDir,
-          showArchived
-        );
-      })
-      .finally(() => setOpenPopup(null));
-  };
+  const handleSaveCustomizedPage = (entity) =>
+    saveSponsorCustomizedPage(entity).then(() => {
+      const { perPage, order, orderDir } = customizedPages;
+      getSponsorCustomizedPages(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      ).catch(() => {});
+    });
 
-  const handleSaveManagedPage = (entity) => {
-    saveSponsorManagedPage(entity)
-      .then(() => {
-        getSponsorManagedPages(
-          term,
-          DEFAULT_CURRENT_PAGE,
-          managedPages.perPage,
-          managedPages.order,
-          managedPages.orderDir,
-          showArchived
-        );
-        getSponsorCustomizedPages(
-          term,
-          DEFAULT_CURRENT_PAGE,
-          customizedPages.perPage,
-          customizedPages.order,
-          customizedPages.orderDir,
-          showArchived
-        );
-      })
-      .finally(() => setOpenPopup(null));
-  };
+  const handleSaveManagedPage = (entity) =>
+    saveSponsorManagedPage(entity).then(() => {
+      getSponsorManagedPages(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        managedPages.perPage,
+        managedPages.order,
+        managedPages.orderDir,
+        showArchived
+      ).catch(() => {});
+      getSponsorCustomizedPages(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        customizedPages.perPage,
+        customizedPages.order,
+        customizedPages.orderDir,
+        showArchived
+      ).catch(() => {});
+    });
 
   const handleClosePagePopup = () => {
     resetSponsorPage();

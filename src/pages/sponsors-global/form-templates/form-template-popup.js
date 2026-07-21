@@ -27,7 +27,6 @@ import {
 } from "../../../utils/yup";
 
 const FormTemplateDialog = ({
-  open,
   onClose,
   onSave,
   toDuplicate = false,
@@ -74,9 +73,9 @@ const FormTemplateDialog = ({
       if (isSaving) return;
 
       setIsSaving(true);
-      Promise.resolve(onSave(finalValues))
+      onSave(finalValues)
         .then(() => {
-          closePopup();
+          onClose();
         })
         .catch(() => {
           // keep dialog open on save error to preserve user input
@@ -96,7 +95,7 @@ const FormTemplateDialog = ({
 
   return (
     <Dialog
-      open={open}
+      open
       onClose={handleClose}
       maxWidth="md"
       fullWidth
@@ -197,7 +196,6 @@ const FormTemplateDialog = ({
 };
 
 FormTemplateDialog.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   entity: PropTypes.object

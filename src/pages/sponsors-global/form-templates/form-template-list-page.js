@@ -139,6 +139,11 @@ const FormTemplateListPage = ({
     setFormTemplateFromDuplicatePopupOpen(false);
   };
 
+  const handleCloseFormTemplateDialog = () => {
+    resetFormTemplateForm();
+    setFormTemplatePopupOpen(false);
+  };
+
   const handleDuplicatePopupClose = () => {
     getFormTemplates(
       "",
@@ -212,17 +217,17 @@ const FormTemplateListPage = ({
     sortDir: orderDir
   };
 
-  const handleOnSave = async (values) => {
-    await saveFormTemplate(values);
-    getFormTemplates(
-      "",
-      DEFAULT_CURRENT_PAGE,
-      perPage,
-      order,
-      orderDir,
-      showArchived
+  const handleOnSave = (values) =>
+    saveFormTemplate(values).then(() =>
+      getFormTemplates(
+        "",
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      ).catch(() => {})
     );
-  };
 
   return (
     <div className="container">
@@ -330,31 +335,33 @@ const FormTemplateListPage = ({
           />
         </div>
       )}
-      <FormTemplateDialog
-        entity={currentFormTemplate}
-        errors={currentFormTemplateErrors}
-        open={formTemplatePopupOpen}
-        onSave={handleOnSave}
-        toDuplicate={formTemplateDuplicate}
-        onClose={() => setFormTemplatePopupOpen(false)}
-        onMetaFieldTypeDeleted={deleteFormTemplateMetaFieldType}
-        onMetaFieldTypeValueDeleted={deleteFormTemplateMetaFieldTypeValue}
-        onMaterialDeleted={deleteFormTemplateMaterial}
-      />
-      <FormTemplateFromDuplicateDialog
-        open={formTemplateFromDuplicatePopupOpen}
-        options={tableOptions}
-        onClose={handleDuplicatePopupClose}
-        onDuplicate={handleDuplicateForm}
-        onSearch={handleSearch}
-        onSort={handleSort}
-        perPage={perPage}
-        currentPage={currentPage}
-        totalRows={totalFormTemplates}
-        onPageChange={handlePageChange}
-        onPerPageChange={handlePerPageChange}
-        formTemplates={formTemplates}
-      />
+      {formTemplatePopupOpen && (
+        <FormTemplateDialog
+          entity={currentFormTemplate}
+          errors={currentFormTemplateErrors}
+          onSave={handleOnSave}
+          toDuplicate={formTemplateDuplicate}
+          onClose={handleCloseFormTemplateDialog}
+          onMetaFieldTypeDeleted={deleteFormTemplateMetaFieldType}
+          onMetaFieldTypeValueDeleted={deleteFormTemplateMetaFieldTypeValue}
+          onMaterialDeleted={deleteFormTemplateMaterial}
+        />
+      )}
+      {formTemplateFromDuplicatePopupOpen && (
+        <FormTemplateFromDuplicateDialog
+          options={tableOptions}
+          onClose={handleDuplicatePopupClose}
+          onDuplicate={handleDuplicateForm}
+          onSearch={handleSearch}
+          onSort={handleSort}
+          perPage={perPage}
+          currentPage={currentPage}
+          totalRows={totalFormTemplates}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          formTemplates={formTemplates}
+        />
+      )}
     </div>
   );
 };

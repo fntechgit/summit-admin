@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import PropTypes from "prop-types";
 import {
@@ -43,6 +43,7 @@ const PageTemplatePopup = ({
   sponsorshipIds,
   title
 }) => {
+  const [isSaving, setIsSaving] = useState(false);
   const popupTitle =
     title ??
     (pageTemplate?.id
@@ -131,12 +132,17 @@ const PageTemplatePopup = ({
     }),
     enableReinitialize: true,
     onSubmit: (values) => {
+      if (isSaving) return;
+      setIsSaving(true);
       const modulesWithOrder = values.modules.map((m, idx) => ({
         ...m,
         custom_order: idx
       }));
 
-      onSave({ ...values, modules: modulesWithOrder });
+      onSave({ ...values, modules: modulesWithOrder })
+        .then(() => onClose())
+        .catch(() => {})
+        .finally(() => setIsSaving(false));
     }
   });
 
@@ -179,11 +185,27 @@ const PageTemplatePopup = ({
     });
   };
 
+  const handleClose = () => {
+    if (isSaving) return;
+    onClose();
+  };
+
   return (
-    <Dialog open onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog
+      open
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      disableEscapeKeyDown={isSaving}
+    >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">{popupTitle}</Typography>
-        <IconButton size="small" onClick={onClose} sx={{ mr: 1 }}>
+        <IconButton
+          size="small"
+          onClick={handleClose}
+          sx={{ mr: 1 }}
+          disabled={isSaving}
+        >
           <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
@@ -306,7 +328,12 @@ const PageTemplatePopup = ({
           </DialogContent>
           <Divider />
           <DialogActions>
-            <Button type="submit" fullWidth variant="contained">
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={isSaving}
+            >
               {T.translate("page_template_list.page_crud.save")}
             </Button>
           </DialogActions>

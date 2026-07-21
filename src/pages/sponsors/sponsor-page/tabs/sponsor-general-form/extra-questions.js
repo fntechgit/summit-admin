@@ -209,7 +209,6 @@ const SponsorExtraQuestions = ({
       </Box>
       {showAddExtraQuestionPopup && (
         <AddSponsorExtraQuestionPopup
-          open={showAddExtraQuestionPopup}
           summit={summit}
           onClose={handleCloseExtraQuestionPopup}
           onSubmit={handleSubmitExtraQuestion}
