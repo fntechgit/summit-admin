@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Box from "@mui/material/Box";
@@ -22,13 +22,24 @@ import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   getEventCategoryGroups,
-  deleteEventCategoryGroup
+  getEventCategoryGroup,
+  getEventCategoryGroupMeta,
+  resetEventCategoryGroupForm,
+  saveEventCategoryGroup,
+  deleteEventCategoryGroup,
+  addCategoryToGroup,
+  removeCategoryFromGroup,
+  addAllowedGroupToGroup,
+  removeAllowedGroupFromGroup
 } from "../../actions/event-category-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+import EventCategoryGroupDialog from "./components/event-category-group-dialog";
 
 const EventCategoryGroupListPage = ({
   currentSummit,
   eventCategoryGroups,
+  currentEntity,
+  allClasses,
   term,
   currentPage,
   perPage,
@@ -36,24 +47,54 @@ const EventCategoryGroupListPage = ({
   orderDir,
   totalEventCategoryGroups,
   getEventCategoryGroups,
+  getEventCategoryGroup,
+  getEventCategoryGroupMeta,
+  resetEventCategoryGroupForm,
+  saveEventCategoryGroup,
   deleteEventCategoryGroup,
-  history
+  addCategoryToGroup,
+  removeCategoryFromGroup,
+  addAllowedGroupToGroup,
+  removeAllowedGroupFromGroup
 }) => {
+  const [openDialog, setOpenDialog] = useState(false);
+
   useEffect(() => {
     if (currentSummit?.id) {
       getEventCategoryGroups();
     }
   }, [currentSummit?.id]);
 
-  const handleEdit = (row) => {
-    history.push(
-      `/app/summits/${currentSummit.id}/event-category-groups/${row.id}`
-    );
-  };
+  useEffect(() => {
+    if (currentSummit && allClasses.length === 0) {
+      getEventCategoryGroupMeta();
+    }
+  }, [currentSummit]);
 
   const handleNew = () => {
-    history.push(`/app/summits/${currentSummit.id}/event-category-groups/new`);
+    resetEventCategoryGroupForm();
+    setOpenDialog(true);
   };
+
+  const handleEdit = (row) => {
+    getEventCategoryGroup(row.id).then(() => setOpenDialog(true));
+  };
+
+  const handleClose = () => {
+    resetEventCategoryGroupForm();
+    setOpenDialog(false);
+  };
+
+  const handleSave = (entity) =>
+    saveEventCategoryGroup(entity).then(() => {
+      getEventCategoryGroups(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir
+      );
+    });
 
   const handleDelete = (groupId) => {
     deleteEventCategoryGroup(groupId).then(() =>
@@ -126,7 +167,7 @@ const EventCategoryGroupListPage = ({
           sx={{
             width: 24,
             height: 24,
-            backgroundColor: row.color,
+            backgroundColor: `#${row.color}`,
             borderRadius: 1
           }}
         />
@@ -193,6 +234,7 @@ const EventCategoryGroupListPage = ({
           onSort={handleSort}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          getName={(row) => row.name}
           deleteDialogBody={(name) =>
             `${T.translate("event_category_group_list.delete_warning")} ${name}`
           }
@@ -203,19 +245,44 @@ const EventCategoryGroupListPage = ({
       {eventCategoryGroups.length === 0 && (
         <div>{T.translate("event_category_group_list.no_items")}</div>
       )}
+
+      {openDialog && (
+        <EventCategoryGroupDialog
+          entity={currentEntity}
+          allClasses={allClasses}
+          currentSummit={currentSummit}
+          onSave={handleSave}
+          onClose={handleClose}
+          onTrackLink={addCategoryToGroup}
+          onTrackUnLink={removeCategoryFromGroup}
+          onAllowedGroupLink={addAllowedGroupToGroup}
+          onAllowedGroupUnLink={removeAllowedGroupFromGroup}
+        />
+      )}
     </div>
   );
 };
 
 const mapStateToProps = ({
   currentSummitState,
-  currentEventCategoryGroupListState
+  currentEventCategoryGroupListState,
+  currentEventCategoryGroupState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
-  ...currentEventCategoryGroupListState
+  ...currentEventCategoryGroupListState,
+  currentEntity: currentEventCategoryGroupState.entity,
+  allClasses: currentEventCategoryGroupState.allClasses
 });
 
 export default connect(mapStateToProps, {
   getEventCategoryGroups,
-  deleteEventCategoryGroup
+  getEventCategoryGroup,
+  getEventCategoryGroupMeta,
+  resetEventCategoryGroupForm,
+  saveEventCategoryGroup,
+  deleteEventCategoryGroup,
+  addCategoryToGroup,
+  removeCategoryFromGroup,
+  addAllowedGroupToGroup,
+  removeAllowedGroupFromGroup
 })(EventCategoryGroupListPage);
