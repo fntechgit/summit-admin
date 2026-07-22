@@ -33,12 +33,14 @@ import {
   getSponsorCustomizedForms,
   getSponsorManagedForms,
   saveSponsorManagedForm,
+  overrideSponsorManagedForm,
   unarchiveSponsorCustomizedForm
 } from "../../../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../../../components/mui/custom-alert";
 import AddSponsorFormTemplatePopup from "./components/add-sponsor-form-template-popup";
 import CustomizedFormPopup from "./components/customized-form/customized-form-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../../../utils/constants";
+import showConfirmDialog from "../../../../../components/mui/showConfirmDialog";
 
 const SponsorFormsTab = ({
   term,
@@ -51,6 +53,7 @@ const SponsorFormsTab = ({
   getSponsorManagedForms,
   getSponsorCustomizedForms,
   saveSponsorManagedForm,
+  overrideSponsorManagedForm,
   archiveSponsorCustomizedForm,
   unarchiveSponsorCustomizedForm,
   deleteSponsorCustomizedForm
@@ -157,8 +160,15 @@ const SponsorFormsTab = ({
     );
   };
 
-  const handleManagedFormManageItems = (item) => {
-    console.log("Managed Form Item Edit : ", item);
+  const handleOverrideForm = async (form) => {
+    const confirmed = await showConfirmDialog({
+      title: T.translate("general.are_you_sure"),
+      text: T.translate("edit_sponsor.forms_tab.override_warning")
+    });
+
+    if (confirmed) {
+      overrideSponsorManagedForm(form.id);
+    }
   };
 
   const handleCustomizedEdit = (item) => {
@@ -257,12 +267,12 @@ const SponsorFormsTab = ({
     );
   };
 
-  const baseColumns = (name, manageItemsFn) => [
+  const baseColumns = (name) => [
     {
       columnKey: "name",
       header: name,
       sortable: true,
-      width: 235,
+      width: 250,
       render: (row) =>
         row.original_show_form_id > 0 ? (
           <>
@@ -316,7 +326,63 @@ const SponsorFormsTab = ({
             ? T.translate("edit_sponsor.forms_tab.item")
             : T.translate("edit_sponsor.forms_tab.items")
         }`
+    }
+  ];
+
+  const managedFormsColumns = [
+    ...baseColumns(T.translate("edit_sponsor.forms_tab.managed_forms")),
+    {
+      columnKey: "override",
+      header: "",
+      align: "left",
+      width: 130,
+      render: (row) => (
+        <Button
+          variant="text"
+          size="small"
+          sx={{
+            padding: 0,
+            color: "rgba(0,0,0,0.56)",
+            fontSize: "13px",
+            fontWeight: "normal"
+          }}
+          onClick={() => handleOverrideForm(row)}
+        >
+          {T.translate("edit_sponsor.forms_tab.override")}
+        </Button>
+      )
     },
+    {
+      columnKey: "archive",
+      header: "",
+      width: 60,
+      render: () => null
+    },
+    {
+      columnKey: "customize",
+      header: "",
+      width: 120,
+      align: "center",
+      render: (row) => (
+        <Button
+          variant="text"
+          color="inherit"
+          size="small"
+          sx={{ px: 0, color: "rgba(0,0,0,0.56)", fontWeight: "normal" }}
+          onClick={() => handleCustomizeForm(row)}
+        >
+          {T.translate("edit_sponsor.forms_tab.customize")}
+          <ArrowForwardIcon fontSize="large" sx={{ marginLeft: 1, px: 0 }} />
+        </Button>
+      ),
+      dottedBorder: true
+    }
+  ];
+
+  const customizedFormsColumns = [
+    ...baseColumns(
+      T.translate("edit_sponsor.forms_tab.sponsor_customized_forms")
+    ),
     {
       columnKey: "manage_items",
       header: "",
@@ -332,51 +398,12 @@ const SponsorFormsTab = ({
             fontSize: "13px",
             fontWeight: "normal"
           }}
-          onClick={() => manageItemsFn(row)}
+          onClick={() => handleCustomizedFormManageItems(row)}
         >
           {T.translate("edit_sponsor.forms_tab.manage_items")}
         </Button>
       )
     }
-  ];
-
-  const managedFormsColumns = [
-    ...baseColumns(
-      T.translate("edit_sponsor.forms_tab.managed_forms"),
-      handleManagedFormManageItems
-    ),
-    {
-      columnKey: "archive",
-      header: "",
-      width: 60,
-      render: () => null
-    },
-    {
-      columnKey: "customize",
-      header: "",
-      width: 100,
-      align: "center",
-      render: (row) => (
-        <Button
-          variant="text"
-          color="inherit"
-          size="medium"
-          sx={{ px: 0, color: "rgba(0,0,0,0.56)", fontWeight: "normal" }}
-          onClick={() => handleCustomizeForm(row)}
-        >
-          {T.translate("edit_sponsor.forms_tab.customize")}
-          <ArrowForwardIcon fontSize="large" sx={{ marginLeft: 1, px: 0 }} />
-        </Button>
-      ),
-      dottedBorder: true
-    }
-  ];
-
-  const customizedFormsColumns = [
-    ...baseColumns(
-      T.translate("edit_sponsor.forms_tab.sponsor_customized_forms"),
-      handleCustomizedFormManageItems
-    )
   ];
 
   return (
@@ -522,6 +549,7 @@ const mapStateToProps = ({
 export default connect(mapStateToProps, {
   getSponsorManagedForms,
   saveSponsorManagedForm,
+  overrideSponsorManagedForm,
   getSponsorCustomizedForms,
   archiveSponsorCustomizedForm,
   unarchiveSponsorCustomizedForm,
