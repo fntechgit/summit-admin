@@ -55,6 +55,8 @@ export const REQUEST_SPONSOR_MANAGED_FORM = "REQUEST_SPONSOR_MANAGED_FORM";
 export const RECEIVE_SPONSOR_MANAGED_FORM = "RECEIVE_SPONSOR_MANAGED_FORM";
 export const SPONSOR_MANAGED_FORMS_ADDED = "SPONSOR_MANAGED_FORMS_ADDED";
 export const SPONSOR_MANAGED_FORMS_UPGRADED = "SPONSOR_MANAGED_FORMS_UPGRADED";
+export const SPONSOR_MANAGED_FORMS_OVERRIDEN =
+  "SPONSOR_MANAGED_FORMS_OVERRIDEN";
 
 export const REQUEST_SPONSOR_CUSTOMIZED_FORMS =
   "REQUEST_SPONSOR_CUSTOMIZED_FORMS";
@@ -620,6 +622,37 @@ export const saveSponsorManagedForm =
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
+  };
+
+export const overrideSponsorManagedForm =
+  (formId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return postRequest(
+      null,
+      createAction(SPONSOR_MANAGED_FORMS_OVERRIDEN),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-forms/${formId}/override`,
+      {},
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(getSponsorManagedForms());
+        dispatch(getSponsorCustomizedForms());
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 export const upgradeSponsorManagedForm =
