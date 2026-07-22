@@ -3009,7 +3009,7 @@
     "label": "Label",
     "size": "Size",
     "order": "Order",
-    "remove_warning": "Are you sure you want to delete tier {name}",
+    "remove_warning": "Please verify you want to delete {name}",
     "placeholders": {
       "search": "Search tier"
     }
