@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -25,10 +25,13 @@ import {
 import DownloadIcon from "@mui/icons-material/Download";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
+import { generateInvoicePDF } from "openstack-uicore-foundation/lib/components/order-invoice-pdf";
 import history from "../../../../../history";
 import {
   approveSponsorPurchase,
   getSponsorPurchases,
+  getSponsorOrder,
   rejectSponsorPurchase
 } from "../../../../../actions/sponsor-purchases-actions";
 import {
@@ -36,6 +39,7 @@ import {
   PURCHASE_METHODS,
   PURCHASE_STATUS
 } from "../../../../../utils/constants";
+import logoInvoice from "../../../../../assets/fn-invoice-header.png";
 
 const SponsorPurchasesTab = ({
   sponsor,
@@ -46,13 +50,18 @@ const SponsorPurchasesTab = ({
   currentPage,
   perPage,
   totalCount,
+  currentSummit,
   getSponsorPurchases,
+  getSponsorOrder,
   approveSponsorPurchase,
   rejectSponsorPurchase
 }) => {
   useEffect(() => {
     getSponsorPurchases();
   }, [sponsor?.id]);
+
+  const { errorMessage } = useSnackbarMessage();
+  const [loadingPDF, setLoadingPDF] = useState(false);
 
   const handlePageChange = (page) => {
     getSponsorPurchases(term, page, perPage, order, orderDir);
@@ -80,8 +89,17 @@ const SponsorPurchasesTab = ({
     history.push(`purchases/${item.id}`);
   };
 
-  const handleMenu = (item) => {
-    console.log("MENU : ", item);
+  const handleInvoiceDownload = (item) => {
+    if (loadingPDF) return;
+    setLoadingPDF(true);
+    getSponsorOrder(item.id, sponsor.id)
+      .then(({ response: fetchedOrder }) =>
+        generateInvoicePDF(fetchedOrder, currentSummit, {
+          logoSrc: logoInvoice
+        })
+      )
+      .catch(() => errorMessage(T.translate("errors.invoice_generation")))
+      .finally(() => setLoadingPDF(false));
   };
 
   const handleStatusChange = (purchaseId, newStatus) => {
@@ -167,7 +185,7 @@ const SponsorPurchasesTab = ({
         <IconButton
           size="large"
           sx={{ color: "primary.main" }}
-          onClick={() => handleMenu(row)}
+          onClick={() => handleInvoiceDownload(row)}
         >
           <DownloadIcon fontSize="large" />
         </IconButton>
@@ -218,14 +236,17 @@ const SponsorPurchasesTab = ({
 
 const mapStateToProps = ({
   sponsorPagePurchaseListState,
-  currentSponsorState
+  currentSponsorState,
+  currentSummitState
 }) => ({
   ...sponsorPagePurchaseListState,
-  sponsor: currentSponsorState.entity
+  sponsor: currentSponsorState.entity,
+  currentSummit: currentSummitState.currentSummit
 });
 
 export default connect(mapStateToProps, {
   getSponsorPurchases,
+  getSponsorOrder,
   approveSponsorPurchase,
   rejectSponsorPurchase
 })(SponsorPurchasesTab);

@@ -297,29 +297,33 @@ export const rejectSponsorPurchase =
       });
   };
 
-export const getSponsorOrder = (orderId) => async (dispatch, getState) => {
-  const { currentSummitState, currentSponsorState } = getState();
-  const { currentSummit } = currentSummitState;
-  const { entity: sponsor } = currentSponsorState;
-  const accessToken = await getAccessTokenSafely();
+export const getSponsorOrder =
+  (orderId, sponsorId = null) =>
+  async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const { entity: sponsor } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
 
-  dispatch(startLoading());
+    const sponsor_id = sponsor.id || sponsorId;
 
-  const params = {
-    access_token: accessToken,
-    expand:
-      "forms,forms.items,forms.items.meta_fields,forms.items.type,refunds,payments,notes,fees"
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken,
+      expand:
+        "forms,forms.items,forms.items.meta_fields,forms.items.type,refunds,payments,notes,fees"
+    };
+
+    return getRequest(
+      null,
+      createAction(RECEIVE_SPONSOR_ORDER),
+      `${window.PURCHASES_API_URL}/api/v2/summits/${currentSummit.id}/sponsors/${sponsor_id}/purchases/${orderId}`,
+      authErrorHandler
+    )(params)(dispatch).finally(() => {
+      dispatch(stopLoading());
+    });
   };
-
-  return getRequest(
-    null,
-    createAction(RECEIVE_SPONSOR_ORDER),
-    `${window.PURCHASES_API_URL}/api/v2/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases/${orderId}`,
-    authErrorHandler
-  )(params)(dispatch).finally(() => {
-    dispatch(stopLoading());
-  });
-};
 
 export const clearSponsorOrder = () => async (dispatch) => {
   dispatch(createAction(CLEAR_SPONSOR_ORDER)({}));
