@@ -37,6 +37,13 @@ jest.mock("../../../../../../actions/sponsor-purchases-actions", () => ({
   rejectSponsorPurchase: jest.fn(() => () => Promise.resolve())
 }));
 
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/snackbar-notification",
+  () => ({
+    useSnackbarMessage: () => ({ errorMessage: jest.fn() })
+  })
+);
+
 /**
  * SearchInput mock: plain <input> that fires onSearch on Enter key,
  * matching the real component behaviour without TextField overhead.
@@ -87,6 +94,9 @@ const createInitialState = (overrides = {}) => {
     sponsorPagePurchaseListState: state,
     currentSponsorState: {
       entity: { id: 123 }
+    },
+    currentSummitState: {
+      currentSummit: { id: 1 }
     }
   };
 };
