@@ -105,7 +105,7 @@ const ShowPurchaseListPage = ({
           logoSrc: logoInvoice
         })
       )
-      .catch(() => errorMessage(t("errors.invoice_generation")))
+      .catch(() => errorMessage(T.translate("errors.invoice_generation")))
       .finally(() => setLoadingPDF(false));
   };
 
@@ -203,6 +203,7 @@ const ShowPurchaseListPage = ({
           size="large"
           sx={{ color: "primary.main" }}
           onClick={() => handleInvoiceDownload(row)}
+          aria-label={T.translate("general.download_invoice")}
         >
           <DownloadIcon fontSize="large" />
         </IconButton>

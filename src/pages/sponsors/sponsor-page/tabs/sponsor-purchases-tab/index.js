@@ -186,6 +186,7 @@ const SponsorPurchasesTab = ({
           size="large"
           sx={{ color: "primary.main" }}
           onClick={() => handleInvoiceDownload(row)}
+          aria-label={T.translate("general.download_invoice")}
         >
           <DownloadIcon fontSize="large" />
         </IconButton>

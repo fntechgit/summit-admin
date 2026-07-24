@@ -305,7 +305,7 @@ export const getSponsorOrder =
     const { entity: sponsor } = currentSponsorState;
     const accessToken = await getAccessTokenSafely();
 
-    const sponsor_id = sponsor.id || sponsorId;
+    const sponsor_id = sponsorId || (sponsor && sponsor.id);
 
     dispatch(startLoading());
 
