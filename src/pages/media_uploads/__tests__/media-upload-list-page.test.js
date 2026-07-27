@@ -7,25 +7,14 @@ import { renderWithRedux } from "../../../utils/test-utils";
 import MediaUploadListPage from "../media-upload-list-page";
 import {
   getMediaUploads,
-  getMediaUpload,
   deleteMediaUpload,
-  copyMediaUploads,
-  resetMediaUploadForm,
-  saveMediaUpload
+  copyMediaUploads
 } from "../../../actions/media-upload-actions";
-import { getAllMediaFileTypes } from "../../../actions/media-file-type-actions";
 
 jest.mock("../../../actions/media-upload-actions", () => ({
   getMediaUploads: jest.fn(),
-  getMediaUpload: jest.fn(),
   deleteMediaUpload: jest.fn(),
-  copyMediaUploads: jest.fn(),
-  resetMediaUploadForm: jest.fn(),
-  saveMediaUpload: jest.fn()
-}));
-
-jest.mock("../../../actions/media-file-type-actions", () => ({
-  getAllMediaFileTypes: jest.fn()
+  copyMediaUploads: jest.fn()
 }));
 
 jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => ({
@@ -72,29 +61,6 @@ jest.mock("../../../components/summit-dropdown", () => ({
   )
 }));
 
-// The stub mirrors the real popup contract from the popup-dialog pattern:
-// it closes only when the promise returned by onSave resolves.
-jest.mock("../components/media-upload-dialog", () => ({
-  __esModule: true,
-  default: ({ onSave, onClose }) => (
-    <div data-testid="media-upload-dialog">
-      <button
-        type="button"
-        onClick={() =>
-          onSave({ id: 7 })
-            .then(() => onClose())
-            .catch(() => {})
-        }
-      >
-        popup-save
-      </button>
-      <button type="button" onClick={onClose}>
-        popup-close
-      </button>
-    </div>
-  )
-}));
-
 jest.mock("i18n-react/dist/i18n-react", () => ({
   __esModule: true,
   default: { translate: (key) => key }
@@ -112,35 +78,33 @@ const initialState = {
     term: "",
     order: "id",
     orderDir: 1
-  },
-  mediaUploadState: {
-    entity: { id: 0, name: "", description: "" },
-    errors: {},
-    media_file_types: []
   }
 };
 
 describe("MediaUploadListPage", () => {
+  let history;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    history = { push: jest.fn() };
     getMediaUploads.mockReturnValue(() => Promise.resolve());
-    getMediaUpload.mockReturnValue(() => Promise.resolve());
     deleteMediaUpload.mockReturnValue(() => Promise.resolve());
-    saveMediaUpload.mockReturnValue(() => Promise.resolve());
     copyMediaUploads.mockReturnValue(() => Promise.resolve());
-    resetMediaUploadForm.mockReturnValue({ type: "RESET_MEDIA_UPLOAD_FORM" });
-    getAllMediaFileTypes.mockReturnValue(() => Promise.resolve());
   });
 
-  it("fetches media uploads and media file types on mount", () => {
-    renderWithRedux(<MediaUploadListPage />, { initialState });
+  const renderPage = () =>
+    renderWithRedux(<MediaUploadListPage history={history} />, {
+      initialState
+    });
+
+  it("fetches media uploads on mount", () => {
+    renderPage();
 
     expect(getMediaUploads).toHaveBeenCalledTimes(1);
-    expect(getAllMediaFileTypes).toHaveBeenCalledTimes(1);
   });
 
   it("threads search, pagination and sort params to getMediaUploads", async () => {
-    renderWithRedux(<MediaUploadListPage />, { initialState });
+    renderPage();
 
     await userEvent.click(screen.getByRole("button", { name: "search-foo" }));
     expect(getMediaUploads).toHaveBeenLastCalledWith("foo", 1, 10, "id", 1);
@@ -155,64 +119,33 @@ describe("MediaUploadListPage", () => {
     expect(getMediaUploads).toHaveBeenLastCalledWith("", 1, 10, "name", 0);
   });
 
-  it("fetches the entity and opens the dialog when clicking edit", async () => {
-    renderWithRedux(<MediaUploadListPage />, { initialState });
-
-    expect(screen.queryByTestId("media-upload-dialog")).not.toBeInTheDocument();
+  it("navigates to the edit route when clicking edit", async () => {
+    renderPage();
 
     await act(async () => {
       await userEvent.click(screen.getByRole("button", { name: "edit-row" }));
       await flushPromises();
     });
 
-    expect(getMediaUpload).toHaveBeenCalledWith(7);
-    expect(screen.getByTestId("media-upload-dialog")).toBeInTheDocument();
+    expect(history.push).toHaveBeenCalledWith(
+      "/app/summits/42/media-uploads/7"
+    );
   });
 
-  it("reloads the list at the current page after a successful edit", async () => {
-    renderWithRedux(<MediaUploadListPage />, { initialState });
+  it("navigates to the new route when clicking add", async () => {
+    renderPage();
 
-    await act(async () => {
-      await userEvent.click(screen.getByRole("button", { name: "edit-row" }));
-      await flushPromises();
-    });
+    await userEvent.click(
+      screen.getByRole("button", { name: "media_upload.add" })
+    );
 
-    await act(async () => {
-      await userEvent.click(screen.getByRole("button", { name: "popup-save" }));
-      await flushPromises();
-    });
-
-    expect(saveMediaUpload).toHaveBeenCalledWith({ id: 7 });
-    // Call 1: useEffect on mount; call 2: handleSave refresh
-    expect(getMediaUploads).toHaveBeenCalledTimes(2);
-    // Editing an existing entity (has id) stays on the current page (3)
-    // instead of bouncing back to the default page.
-    expect(getMediaUploads).toHaveBeenLastCalledWith("", 3, 10, "id", 1);
-  });
-
-  it("closes the dialog on save success even if the list refresh fails", async () => {
-    getMediaUploads
-      .mockReturnValueOnce(() => Promise.resolve()) // mount fetch
-      .mockReturnValue(() => Promise.reject(new Error("refresh failed")));
-
-    renderWithRedux(<MediaUploadListPage />, { initialState });
-
-    await act(async () => {
-      await userEvent.click(screen.getByRole("button", { name: "edit-row" }));
-      await flushPromises();
-    });
-
-    await act(async () => {
-      await userEvent.click(screen.getByRole("button", { name: "popup-save" }));
-      await flushPromises();
-    });
-
-    expect(saveMediaUpload).toHaveBeenCalledTimes(1);
-    expect(screen.queryByTestId("media-upload-dialog")).not.toBeInTheDocument();
+    expect(history.push).toHaveBeenCalledWith(
+      "/app/summits/42/media-uploads/new"
+    );
   });
 
   it("reloads the list after a successful delete", async () => {
-    renderWithRedux(<MediaUploadListPage />, { initialState });
+    renderPage();
 
     await act(async () => {
       await userEvent.click(screen.getByRole("button", { name: "delete-row" }));
@@ -225,7 +158,7 @@ describe("MediaUploadListPage", () => {
   });
 
   it("copies media uploads from the selected summit", async () => {
-    renderWithRedux(<MediaUploadListPage />, { initialState });
+    renderPage();
 
     await act(async () => {
       await userEvent.click(
@@ -235,20 +168,5 @@ describe("MediaUploadListPage", () => {
     });
 
     expect(copyMediaUploads).toHaveBeenCalledWith(99);
-  });
-
-  it("resets the form when opening the add dialog and unmounts it on close", async () => {
-    renderWithRedux(<MediaUploadListPage />, { initialState });
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "media_upload.add" })
-    );
-
-    expect(resetMediaUploadForm).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId("media-upload-dialog")).toBeInTheDocument();
-
-    await userEvent.click(screen.getByRole("button", { name: "popup-close" }));
-
-    expect(screen.queryByTestId("media-upload-dialog")).not.toBeInTheDocument();
   });
 });

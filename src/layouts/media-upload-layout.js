@@ -19,6 +19,7 @@ import { Breadcrumb } from "react-breadcrumbs";
 import Restrict from "../routes/restrict";
 
 import MediaUploadListPage from "../pages/media_uploads/media-upload-list-page";
+import EditMediaUploadPage from "../pages/media_uploads/edit-media-upload-page";
 import NoMatchPage from "../pages/no-match-page";
 
 const MediaUploadLayout = ({ match }) => (
@@ -32,6 +33,16 @@ const MediaUploadLayout = ({ match }) => (
 
     <Switch>
       <Route exact strict path={match.url} component={MediaUploadListPage} />
+      <Route
+        strict
+        exact
+        path={`${match.url}/new`}
+        component={EditMediaUploadPage}
+      />
+      <Route
+        path={`${match.url}/:media_upload_id(\\d+)`}
+        component={EditMediaUploadPage}
+      />
       <Route component={NoMatchPage} />
     </Switch>
   </div>

@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
@@ -24,66 +24,36 @@ import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-i
 import SummitDropdown from "../../components/summit-dropdown";
 import {
   getMediaUploads as getMediaUploadsAction,
-  getMediaUpload as getMediaUploadAction,
   deleteMediaUpload as deleteMediaUploadAction,
-  copyMediaUploads as copyMediaUploadsAction,
-  resetMediaUploadForm as resetMediaUploadFormAction,
-  saveMediaUpload as saveMediaUploadAction
+  copyMediaUploads as copyMediaUploadsAction
 } from "../../actions/media-upload-actions";
-import { getAllMediaFileTypes as getAllMediaFileTypesAction } from "../../actions/media-file-type-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
-import MediaUploadDialog from "./components/media-upload-dialog";
 
 const MediaUploadListPage = ({
   currentSummit,
   media_uploads,
-  currentMediaUpload,
-  currentMediaUploadErrors,
-  mediaFileTypes,
   term,
   currentPage,
   perPage,
   order,
   orderDir,
   totalMediaUploads,
+  history,
   getMediaUploads,
-  getMediaUpload,
   deleteMediaUpload,
-  copyMediaUploads,
-  resetMediaUploadForm,
-  saveMediaUpload,
-  getAllMediaFileTypes
+  copyMediaUploads
 }) => {
-  const [openPopup, setOpenPopup] = useState(null);
-
   useEffect(() => {
     getMediaUploads();
-    getAllMediaFileTypes();
   }, []);
 
   const handleEdit = (row) => {
-    getMediaUpload(row.id).then(() => setOpenPopup("mediaUploadForm"));
+    history.push(`/app/summits/${currentSummit.id}/media-uploads/${row.id}`);
   };
 
   const handleNew = () => {
-    resetMediaUploadForm();
-    setOpenPopup("mediaUploadForm");
+    history.push(`/app/summits/${currentSummit.id}/media-uploads/new`);
   };
-
-  // The dialog closes when this promise resolves, so it must track ONLY the
-  // save: a failed list refresh after a successful create would otherwise keep
-  // the dialog open and invite a duplicate-create retry.
-  const handleSave = (mediaUploadEntity) =>
-    saveMediaUpload(mediaUploadEntity).then(() => {
-      // Saving a new entity resets to the default page; editing stays put.
-      getMediaUploads(
-        term,
-        mediaUploadEntity.id ? currentPage : DEFAULT_CURRENT_PAGE,
-        perPage,
-        order,
-        orderDir
-      ).catch(() => {});
-    });
 
   const handleDelete = (mediaUploadId) => {
     deleteMediaUpload(mediaUploadId).then(() =>
@@ -205,17 +175,6 @@ const MediaUploadListPage = ({
       {media_uploads.length === 0 && (
         <div>{T.translate("media_upload.no_results")}</div>
       )}
-
-      {openPopup === "mediaUploadForm" && (
-        <MediaUploadDialog
-          currentSummit={currentSummit}
-          entity={currentMediaUpload}
-          errors={currentMediaUploadErrors}
-          mediaFileTypes={mediaFileTypes}
-          onClose={() => setOpenPopup(null)}
-          onSave={handleSave}
-        />
-      )}
     </div>
   );
 };
@@ -229,27 +188,19 @@ MediaUploadListPage.propTypes = {
       description: PropTypes.string
     })
   ).isRequired,
-  currentMediaUpload: PropTypes.shape({ id: PropTypes.number }).isRequired,
-  currentMediaUploadErrors: PropTypes.shape({}),
-  mediaFileTypes: PropTypes.arrayOf(PropTypes.shape({})),
   term: PropTypes.string,
   currentPage: PropTypes.number,
   perPage: PropTypes.number,
   order: PropTypes.string,
   orderDir: PropTypes.number,
   totalMediaUploads: PropTypes.number,
+  history: PropTypes.shape({ push: PropTypes.func }).isRequired,
   getMediaUploads: PropTypes.func.isRequired,
-  getMediaUpload: PropTypes.func.isRequired,
   deleteMediaUpload: PropTypes.func.isRequired,
-  copyMediaUploads: PropTypes.func.isRequired,
-  resetMediaUploadForm: PropTypes.func.isRequired,
-  saveMediaUpload: PropTypes.func.isRequired,
-  getAllMediaFileTypes: PropTypes.func.isRequired
+  copyMediaUploads: PropTypes.func.isRequired
 };
 
 MediaUploadListPage.defaultProps = {
-  currentMediaUploadErrors: {},
-  mediaFileTypes: [],
   term: "",
   currentPage: 1,
   perPage: 10,
@@ -258,24 +209,13 @@ MediaUploadListPage.defaultProps = {
   totalMediaUploads: 0
 };
 
-const mapStateToProps = ({
-  currentSummitState,
-  mediaUploadListState,
-  mediaUploadState
-}) => ({
+const mapStateToProps = ({ currentSummitState, mediaUploadListState }) => ({
   currentSummit: currentSummitState.currentSummit,
-  ...mediaUploadListState,
-  currentMediaUpload: mediaUploadState.entity,
-  currentMediaUploadErrors: mediaUploadState.errors,
-  mediaFileTypes: mediaUploadState.media_file_types
+  ...mediaUploadListState
 });
 
 export default connect(mapStateToProps, {
   getMediaUploads: getMediaUploadsAction,
-  getMediaUpload: getMediaUploadAction,
   deleteMediaUpload: deleteMediaUploadAction,
-  copyMediaUploads: copyMediaUploadsAction,
-  resetMediaUploadForm: resetMediaUploadFormAction,
-  saveMediaUpload: saveMediaUploadAction,
-  getAllMediaFileTypes: getAllMediaFileTypesAction
+  copyMediaUploads: copyMediaUploadsAction
 })(MediaUploadListPage);

@@ -7,7 +7,7 @@ import {
   fireEvent
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import MediaUploadDialog from "../media-upload-dialog";
+import MediaUploadForm from "../media-upload-form";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   translate: jest.fn((key) => key)
@@ -56,7 +56,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../components/mui/formik-inputs/mui-formik-select",
+  "../../mui/formik-inputs/mui-formik-select",
   () =>
     function MockSelect({ name, children }) {
       return <div data-testid={`select-${name}`}>{children}</div>;
@@ -64,14 +64,14 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../components/inputs/formik-text-editor",
+  "../../inputs/formik-text-editor",
   () =>
     function MockTextEditor({ name }) {
       return <textarea data-testid={`editor-${name}`} name={name} />;
     }
 );
 
-jest.mock("../../../../hooks/useScrollToError", () => jest.fn());
+jest.mock("../../../hooks/useScrollToError", () => jest.fn());
 
 const BASE_ENTITY = {
   id: 0,
@@ -99,39 +99,32 @@ const CURRENT_SUMMIT = {
   ]
 };
 
-describe("MediaUploadDialog", () => {
-  let onSave;
-  let onClose;
+describe("MediaUploadForm", () => {
+  let onSubmit;
 
   beforeEach(() => {
     jest.clearAllMocks();
     window.PUBLIC_STORAGES = [];
-    onSave = jest.fn(() => Promise.resolve());
-    onClose = jest.fn();
+    onSubmit = jest.fn(() => Promise.resolve());
   });
 
   afterEach(() => {
     delete window.PUBLIC_STORAGES;
   });
 
-  const renderDialog = (
-    entity = BASE_ENTITY,
-    errors = {},
-    mediaFileTypes = []
-  ) =>
+  const renderForm = (entity = BASE_ENTITY, errors = {}, mediaFileTypes = []) =>
     render(
-      <MediaUploadDialog
+      <MediaUploadForm
         currentSummit={CURRENT_SUMMIT}
         entity={entity}
         errors={errors}
         mediaFileTypes={mediaFileTypes}
-        onSave={onSave}
-        onClose={onClose}
+        onSubmit={onSubmit}
       />
     );
 
   it("renders the name and max_size fields by default", () => {
-    renderDialog();
+    renderForm();
 
     expect(screen.getByTestId("textfield-name")).toBeInTheDocument();
     expect(screen.getByTestId("filesize-max_size")).toBeInTheDocument();
@@ -139,7 +132,7 @@ describe("MediaUploadDialog", () => {
 
   it("only shows the TTL field once use_temporary_links_on_public_storage is checked", async () => {
     const user = userEvent.setup();
-    renderDialog();
+    renderForm();
 
     expect(
       screen.queryByTestId("textfield-temporary_links_public_storage_ttl")
@@ -160,14 +153,14 @@ describe("MediaUploadDialog", () => {
 
   it("disables the save button while saving and re-enables after resolve", async () => {
     let resolveSave;
-    onSave = jest.fn(
+    onSubmit = jest.fn(
       () =>
         new Promise((res) => {
           resolveSave = res;
         })
     );
     const user = userEvent.setup();
-    renderDialog({ ...BASE_ENTITY, name: "Slides", max_size: 1024 });
+    renderForm({ ...BASE_ENTITY, name: "Slides", max_size: 1024 });
 
     const saveButton = screen.getByText("general.save").closest("button");
     expect(saveButton).not.toBeDisabled();
@@ -185,10 +178,10 @@ describe("MediaUploadDialog", () => {
     await waitFor(() => expect(saveButton).not.toBeDisabled());
   });
 
-  it("keeps the dialog open and re-enables save when onSave rejects", async () => {
-    onSave = jest.fn(() => Promise.reject(new Error("server error")));
+  it("re-enables save when onSubmit rejects", async () => {
+    onSubmit = jest.fn(() => Promise.reject(new Error("server error")));
     const user = userEvent.setup();
-    renderDialog({ ...BASE_ENTITY, name: "Slides", max_size: 1024 });
+    renderForm({ ...BASE_ENTITY, name: "Slides", max_size: 1024 });
 
     const saveButton = screen.getByText("general.save").closest("button");
 
@@ -197,24 +190,12 @@ describe("MediaUploadDialog", () => {
     });
 
     await waitFor(() => expect(saveButton).not.toBeDisabled());
-    expect(onClose).not.toHaveBeenCalled();
-  });
-
-  it("calls onClose when the close icon is clicked and not saving", async () => {
-    const user = userEvent.setup();
-    renderDialog();
-
-    await act(async () => {
-      await user.click(screen.getByLabelText("close"));
-    });
-
-    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   describe("Yup validation", () => {
     it("blocks submit and shows a required error when name is empty", async () => {
       const user = userEvent.setup();
-      renderDialog({ ...BASE_ENTITY, name: "", max_size: 1024 });
+      renderForm({ ...BASE_ENTITY, name: "", max_size: 1024 });
 
       await act(async () => {
         await user.click(screen.getByText("general.save").closest("button"));
@@ -223,12 +204,12 @@ describe("MediaUploadDialog", () => {
       expect(
         screen.getByTestId("textfield-name").nextSibling
       ).toHaveTextContent("validation.required");
-      expect(onSave).not.toHaveBeenCalled();
+      expect(onSubmit).not.toHaveBeenCalled();
     });
 
     it("blocks submit and shows a required error when max_size is cleared to empty", async () => {
       const user = userEvent.setup();
-      renderDialog({ ...BASE_ENTITY, name: "Slides", max_size: 1024 });
+      renderForm({ ...BASE_ENTITY, name: "Slides", max_size: 1024 });
 
       const maxSizeInput = screen.getByTestId("filesize-max_size");
       await act(async () => {
@@ -239,12 +220,12 @@ describe("MediaUploadDialog", () => {
       expect(
         screen.getByTestId("filesize-max_size").nextSibling
       ).toHaveTextContent("validation.required");
-      expect(onSave).not.toHaveBeenCalled();
+      expect(onSubmit).not.toHaveBeenCalled();
     });
   });
 
   it("renders an inline error for a field when the errors prop is populated", () => {
-    renderDialog(
+    renderForm(
       { ...BASE_ENTITY, name: "Slides", max_size: 1024 },
       { name: "Name already in use" }
     );
@@ -253,7 +234,7 @@ describe("MediaUploadDialog", () => {
   });
 
   it("clears a stale server-side error once the user edits the field", async () => {
-    renderDialog(
+    renderForm(
       { ...BASE_ENTITY, name: "Slides", max_size: 1024 },
       { name: "Name already in use" }
     );
@@ -270,7 +251,7 @@ describe("MediaUploadDialog", () => {
 
   describe("presentation_types", () => {
     it("shows pre-selected presentation types as chips when editing an existing entity", () => {
-      renderDialog({
+      renderForm({
         ...BASE_ENTITY,
         id: 7,
         name: "Slides",
@@ -285,7 +266,7 @@ describe("MediaUploadDialog", () => {
 
     it("adds the selected presentation type id and submits it on save", async () => {
       const user = userEvent.setup();
-      renderDialog({ ...BASE_ENTITY, name: "Slides", max_size: 1024 });
+      renderForm({ ...BASE_ENTITY, name: "Slides", max_size: 1024 });
 
       const combobox = screen.getByRole("combobox", {
         name: "media_upload.presentation_types"
@@ -303,7 +284,7 @@ describe("MediaUploadDialog", () => {
         await user.click(screen.getByText("general.save").closest("button"));
       });
 
-      expect(onSave).toHaveBeenCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         expect.objectContaining({ presentation_types: [1] })
       );
     });
