@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Box from "@mui/material/Box";
@@ -22,79 +22,38 @@ import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   getEventCategoryGroups,
-  getEventCategoryGroup,
-  getEventCategoryGroupMeta,
-  resetEventCategoryGroupForm,
-  saveEventCategoryGroup,
-  deleteEventCategoryGroup,
-  addCategoryToGroup,
-  removeCategoryFromGroup,
-  addAllowedGroupToGroup,
-  removeAllowedGroupFromGroup
+  deleteEventCategoryGroup
 } from "../../actions/event-category-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
-import EventCategoryGroupDialog from "./components/event-category-group-dialog";
 
 const EventCategoryGroupListPage = ({
   currentSummit,
   eventCategoryGroups,
-  currentEntity,
-  allClasses,
   term,
   currentPage,
   perPage,
   order,
   orderDir,
   totalEventCategoryGroups,
+  history,
   getEventCategoryGroups,
-  getEventCategoryGroup,
-  getEventCategoryGroupMeta,
-  resetEventCategoryGroupForm,
-  saveEventCategoryGroup,
-  deleteEventCategoryGroup,
-  addCategoryToGroup,
-  removeCategoryFromGroup,
-  addAllowedGroupToGroup,
-  removeAllowedGroupFromGroup
+  deleteEventCategoryGroup
 }) => {
-  const [openDialog, setOpenDialog] = useState(false);
-
   useEffect(() => {
     if (currentSummit?.id) {
       getEventCategoryGroups();
     }
   }, [currentSummit?.id]);
 
-  useEffect(() => {
-    if (currentSummit && allClasses.length === 0) {
-      getEventCategoryGroupMeta();
-    }
-  }, [currentSummit]);
-
   const handleNew = () => {
-    resetEventCategoryGroupForm();
-    setOpenDialog(true);
+    history.push(`/app/summits/${currentSummit.id}/event-category-groups/new`);
   };
 
   const handleEdit = (row) => {
-    getEventCategoryGroup(row.id).then(() => setOpenDialog(true));
+    history.push(
+      `/app/summits/${currentSummit.id}/event-category-groups/${row.id}`
+    );
   };
-
-  const handleClose = () => {
-    resetEventCategoryGroupForm();
-    setOpenDialog(false);
-  };
-
-  const handleSave = (entity) =>
-    saveEventCategoryGroup(entity).then(() => {
-      getEventCategoryGroups(
-        term,
-        DEFAULT_CURRENT_PAGE,
-        perPage,
-        order,
-        orderDir
-      );
-    });
 
   const handleDelete = (groupId) => {
     deleteEventCategoryGroup(groupId).then(() =>
@@ -245,44 +204,19 @@ const EventCategoryGroupListPage = ({
       {eventCategoryGroups.length === 0 && (
         <div>{T.translate("event_category_group_list.no_items")}</div>
       )}
-
-      {openDialog && (
-        <EventCategoryGroupDialog
-          entity={currentEntity}
-          allClasses={allClasses}
-          currentSummit={currentSummit}
-          onSave={handleSave}
-          onClose={handleClose}
-          onTrackLink={addCategoryToGroup}
-          onTrackUnLink={removeCategoryFromGroup}
-          onAllowedGroupLink={addAllowedGroupToGroup}
-          onAllowedGroupUnLink={removeAllowedGroupFromGroup}
-        />
-      )}
     </div>
   );
 };
 
 const mapStateToProps = ({
   currentSummitState,
-  currentEventCategoryGroupListState,
-  currentEventCategoryGroupState
+  currentEventCategoryGroupListState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
-  ...currentEventCategoryGroupListState,
-  currentEntity: currentEventCategoryGroupState.entity,
-  allClasses: currentEventCategoryGroupState.allClasses
+  ...currentEventCategoryGroupListState
 });
 
 export default connect(mapStateToProps, {
   getEventCategoryGroups,
-  getEventCategoryGroup,
-  getEventCategoryGroupMeta,
-  resetEventCategoryGroupForm,
-  saveEventCategoryGroup,
-  deleteEventCategoryGroup,
-  addCategoryToGroup,
-  removeCategoryFromGroup,
-  addAllowedGroupToGroup,
-  removeAllowedGroupFromGroup
+  deleteEventCategoryGroup
 })(EventCategoryGroupListPage);

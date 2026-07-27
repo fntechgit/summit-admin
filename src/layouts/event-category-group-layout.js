@@ -12,12 +12,14 @@
  * */
 
 import React from "react";
-import { Switch, Route, Redirect, withRouter } from "react-router-dom";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Restrict from "../routes/restrict";
 
+import EditEventCategoryGroupPage from "../pages/events/edit-event-category-group-page";
 import EventCategoryGroupListPage from "../pages/events/event-category-group-list-page";
+import NoMatchPage from "../pages/no-match-page";
 
 const EventCategoryGroupLayout = ({ match }) => (
   <div>
@@ -34,7 +36,19 @@ const EventCategoryGroupLayout = ({ match }) => (
         path={match.url}
         component={EventCategoryGroupListPage}
       />
-      <Redirect to={match.url} />
+      <Route
+        exact
+        strict
+        path={`${match.url}/new`}
+        component={EditEventCategoryGroupPage}
+      />
+      <Route
+        exact
+        strict
+        path={`${match.url}/:group_id(\\d+)`}
+        component={EditEventCategoryGroupPage}
+      />
+      <Route component={NoMatchPage} />
     </Switch>
   </div>
 );
