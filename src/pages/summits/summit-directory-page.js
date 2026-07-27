@@ -26,9 +26,9 @@ import FormGroup from "@mui/material/FormGroup";
 import Grid2 from "@mui/material/Grid2";
 import AddIcon from "@mui/icons-material/Add";
 import {
-  loadSummits,
   clearCurrentSummit,
-  deleteSummit
+  deleteSummit,
+  loadSummits
 } from "../../actions/summit-actions";
 import Member from "../../models/member";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
@@ -79,179 +79,160 @@ const SummitDirectoryPage = ({
       ? memberObj.canDeleteSummits()
       : false;
 
-  try {
-    const handlePageChange = (page) => {
-      loadSummits(page, perPage, searchTerm, hidePastEvents);
-    };
+  const handlePageChange = (page) => {
+    loadSummits(page, perPage, searchTerm, hidePastEvents);
+  };
 
-    const handlePerPageChange = (newPerPage) => {
-      loadSummits(DEFAULT_CURRENT_PAGE, newPerPage, searchTerm, hidePastEvents);
-    };
+  const handlePerPageChange = (newPerPage) => {
+    loadSummits(DEFAULT_CURRENT_PAGE, newPerPage, searchTerm, hidePastEvents);
+  };
 
-    const handleSearch = (value) => {
-      setSearchTerm(value);
-      loadSummits(DEFAULT_CURRENT_PAGE, perPage, value, hidePastEvents);
-    };
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+    loadSummits(DEFAULT_CURRENT_PAGE, perPage, value, hidePastEvents);
+  };
 
-    const handleHidePastEventsChange = (ev) => {
-      const { checked } = ev.target;
-      setHidePastEvents(checked);
-      loadSummits(DEFAULT_CURRENT_PAGE, perPage, searchTerm, checked);
-    };
+  const handleHidePastEventsChange = (ev) => {
+    const { checked } = ev.target;
+    setHidePastEvents(checked);
+    loadSummits(DEFAULT_CURRENT_PAGE, perPage, searchTerm, checked);
+  };
 
-    const handleNewSummit = () => {
-      history.push("/app/summits/new");
-    };
+  const handleNewSummit = () => {
+    history.push("/app/summits/new");
+  };
 
-    const handleEditSummit = (summit) => {
-      history.push(`/app/summits/${summit.id}`);
-    };
+  const handleEditSummit = (summit) => {
+    history.push(`/app/summits/${summit.id}`);
+  };
 
-    const handleSelectSummit = (summit) => {
-      history.push(`/app/summits/${summit.id}/dashboard`);
-    };
+  const handleSelectSummit = (summit) => {
+    history.push(`/app/summits/${summit.id}/dashboard`);
+  };
 
-    const columns = [
-      {
-        columnKey: "id",
-        header: T.translate("directory.id"),
-        width: 80
-      },
-      {
-        columnKey: "name",
-        header: T.translate("directory.summit_name")
-      },
-      {
-        columnKey: "sponsor_qty",
-        header: T.translate("directory.sponsors"),
-        render: (row) => row.sponsor_qty ?? 0
-      },
-      {
-        columnKey: "sponsor_forms_qty",
-        header: T.translate("directory.forms"),
-        render: (row) => row.sponsor_forms_qty ?? 0
-      },
-      {
-        columnKey: "sponsor_attachments_qty",
-        header: T.translate("directory.attachments"),
-        render: (row) => row.sponsor_attachments_qty ?? 0
-      },
-      {
-        columnKey: "start_date",
-        header: T.translate("directory.start_date"),
-        render: (row) => formatEpoch(row.start_date, "MMMM Do YYYY")
-      },
-      {
-        columnKey: "end_date",
-        header: T.translate("directory.end_date"),
-        render: (row) => formatEpoch(row.end_date, "MMMM Do YYYY")
-      },
-      {
-        columnKey: "invite_only_registration",
-        header: "",
-        width: 120,
-        render: (row) =>
-          row.invite_only_registration ? (
-            <Chip label={T.translate("directory.invitation_only")} />
-          ) : null
-      }
-    ];
+  const columns = [
+    {
+      columnKey: "id",
+      header: T.translate("directory.id")
+    },
+    {
+      columnKey: "name",
+      header: T.translate("directory.summit_name")
+    },
+    {
+      columnKey: "sponsor_qty",
+      header: T.translate("directory.sponsors"),
+      render: (row) => row.sponsor_qty ?? 0
+    },
+    {
+      columnKey: "sponsor_forms_qty",
+      header: T.translate("directory.forms"),
+      render: (row) => row.sponsor_forms_qty ?? 0
+    },
+    {
+      columnKey: "sponsor_attachments_qty",
+      header: T.translate("directory.attachments"),
+      render: (row) => row.sponsor_attachments_qty ?? 0
+    },
+    {
+      columnKey: "start_date",
+      header: T.translate("directory.start_date"),
+      render: (row) => formatEpoch(row.start_date, "MMMM Do YYYY")
+    },
+    {
+      columnKey: "end_date",
+      header: T.translate("directory.end_date"),
+      render: (row) => formatEpoch(row.end_date, "MMMM Do YYYY")
+    },
+    {
+      columnKey: "invite_only_registration",
+      header: "",
+      width: 120,
+      render: (row) =>
+        row.invite_only_registration ? (
+          <Chip label={T.translate("directory.invitation_only")} />
+        ) : null
+    }
+  ];
 
-    return (
-      <Box className="container">
-        <h3>{T.translate("directory.summits")}</h3>
+  return (
+    <Box className="container">
+      <h3>
+        {T.translate("directory.summits")} ({totalSummits})
+      </h3>
+      <Grid2 container spacing={2} sx={{ mb: 2, width: "100%" }}>
+        <Grid2 size={{ xs: 12, sm: 4 }}>
+          <MuiSearchInput
+            term={searchTerm}
+            onSearch={handleSearch}
+            placeholder={T.translate("directory.placeholders.search")}
+          />
+        </Grid2>
         <Grid2
-          container
+          size={{ xs: 12, sm: 8 }}
           sx={{
-            mb: 2,
-            width: "100%",
-            alignItems: "center",
+            display: "flex",
             justifyContent: "space-between",
-            flexWrap: "wrap"
+            flexWrap: "wrap",
+            rowGap: 1,
+            gap: 2
           }}
         >
-          <Box component="span" sx={{ minWidth: 120 }}>
-            {totalSummits} {T.translate("directory.shows")}
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    onChange={handleHidePastEventsChange}
-                    checked={hidePastEvents}
-                    inputProps={{
-                      "aria-label": T.translate("directory.hide_past_events")
-                    }}
-                  />
-                }
-                label={T.translate("directory.hide_past_events")}
-              />
-            </FormGroup>
-            <Box sx={{ width: 300, maxWidth: "100%" }}>
-              <MuiSearchInput
-                term={searchTerm}
-                onSearch={handleSearch}
-                placeholder={T.translate("directory.placeholders.search")}
-              />
-            </Box>
-            {canAddSummits && (
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<AddIcon />}
-                onClick={handleNewSummit}
-                sx={{
-                  height: "36px",
-                  padding: "6px 16px",
-                  fontSize: "1.4rem",
-                  lineHeight: "2.4rem",
-                  letterSpacing: "0.4px"
-                }}
-              >
-                {T.translate("directory.add_summit")}
-              </Button>
-            )}
-          </Box>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  onChange={handleHidePastEventsChange}
+                  checked={hidePastEvents}
+                  inputProps={{
+                    "aria-label": T.translate("directory.hide_past_events")
+                  }}
+                />
+              }
+              label={T.translate("directory.hide_past_events")}
+            />
+          </FormGroup>
+          {canAddSummits && (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon />}
+              onClick={handleNewSummit}
+              sx={{
+                height: "36px",
+                padding: "6px 16px",
+                fontSize: "1.4rem",
+                lineHeight: "2.4rem",
+                letterSpacing: "0.4px"
+              }}
+            >
+              {T.translate("directory.add_summit")}
+            </Button>
+          )}
         </Grid2>
-        <MuiTable
-          columns={columns}
-          data={safeSummits}
-          tableSx={{ tableLayout: "auto", minWidth: 980 }}
-          totalRows={totalSummits}
-          perPage={perPage}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-          onPerPageChange={handlePerPageChange}
-          onEdit={canEditSummit ? handleEditSummit : undefined}
-          onDelete={canDeleteSummits ? (id) => deleteSummit(id) : undefined}
-          onSelect={handleSelectSummit}
-          getName={(row) => row.name}
-          deleteDialogTitle={T.translate("general.are_you_sure")}
-          deleteDialogBody={(name) =>
-            `${T.translate("directory.remove_warning")} ${name}`
-          }
-          deleteDialogConfirmText={T.translate("general.yes_delete")}
-          confirmButtonColor="error"
-        />
-      </Box>
-    );
-  } catch (err) {
-    return (
-      <div
-        className="container"
-        style={{
-          background: "#fff",
-          borderRadius: 4,
-          padding: 32,
-          color: "red"
-        }}
-      >
-        <h3>{T.translate("directory.error_loading")}</h3>
-        <pre>{err.message}</pre>
-      </div>
-    );
-  }
+      </Grid2>
+      <MuiTable
+        columns={columns}
+        data={safeSummits}
+        tableSx={{ tableLayout: "auto", minWidth: 980 }}
+        totalRows={totalSummits}
+        perPage={perPage}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+        onPerPageChange={handlePerPageChange}
+        onEdit={canEditSummit ? handleEditSummit : undefined}
+        onDelete={canDeleteSummits ? (id) => deleteSummit(id) : undefined}
+        onSelect={handleSelectSummit}
+        getName={(row) => row.name}
+        deleteDialogTitle={T.translate("general.are_you_sure")}
+        deleteDialogBody={(name) =>
+          `${T.translate("directory.remove_warning")} ${name}`
+        }
+        deleteDialogConfirmText={T.translate("general.yes_delete")}
+        confirmButtonColor="error"
+      />
+    </Box>
+  );
 };
 
 const mapStateToProps = ({ directoryState, loggedUserState }) => ({
