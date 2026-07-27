@@ -217,6 +217,7 @@ const SummitDirectoryPage = ({
         <MuiTable
           columns={columns}
           data={safeSummits}
+          tableSx={{ tableLayout: "auto", minWidth: 980 }}
           totalRows={totalSummits}
           perPage={perPage}
           currentPage={currentPage}
