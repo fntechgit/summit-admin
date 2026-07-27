@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { Switch, Route, withRouter } from "react-router-dom";
@@ -21,44 +21,36 @@ import EditEventCategoryGroupPage from "../pages/events/edit-event-category-grou
 import EventCategoryGroupListPage from "../pages/events/event-category-group-list-page";
 import NoMatchPage from "../pages/no-match-page";
 
-class EventCategoryGroupLayout extends React.Component {
-  render() {
-    const { match } = this.props;
-    return (
-      <div>
-        <Breadcrumb
-          data={{
-            title: T.translate(
-              "event_category_group_list.event_category_groups"
-            ),
-            pathname: match.url
-          }}
-        />
-
-        <Switch>
-          <Route
-            exact
-            strict
-            path={match.url}
-            component={EventCategoryGroupListPage}
-          />
-          <Route
-            exact
-            strict
-            path={`${match.url}/new`}
-            component={EditEventCategoryGroupPage}
-          />
-          <Route
-            exact
-            strict
-            path={`${match.url}/:group_id(\\d+)`}
-            component={EditEventCategoryGroupPage}
-          />
-          <Route component={NoMatchPage} />
-        </Switch>
-      </div>
-    );
-  }
-}
+const EventCategoryGroupLayout = ({ match }) => (
+  <div>
+    <Breadcrumb
+      data={{
+        title: T.translate("event_category_group_list.event_category_groups"),
+        pathname: match.url
+      }}
+    />
+    <Switch>
+      <Route
+        exact
+        strict
+        path={match.url}
+        component={EventCategoryGroupListPage}
+      />
+      <Route
+        exact
+        strict
+        path={`${match.url}/new`}
+        component={EditEventCategoryGroupPage}
+      />
+      <Route
+        exact
+        strict
+        path={`${match.url}/:group_id(\\d+)`}
+        component={EditEventCategoryGroupPage}
+      />
+      <Route component={NoMatchPage} />
+    </Switch>
+  </div>
+);
 
 export default Restrict(withRouter(EventCategoryGroupLayout), "events");

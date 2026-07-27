@@ -1,4 +1,4 @@
-/* *
+/**
  * Copyright 2017 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,360 +11,520 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
+import PropTypes from "prop-types";
+import { FormikProvider, useFormik } from "formik";
+import * as yup from "yup";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import Divider from "@mui/material/Divider";
+import Grid2 from "@mui/material/Grid2";
+import Typography from "@mui/material/Typography";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   queryTracks,
   queryGroups
 } from "openstack-uicore-foundation/lib/utils/query-actions";
-import {
-  Input,
-  SimpleLinkList,
-  Dropdown,
-  DateTimePicker
-} from "openstack-uicore-foundation/lib/components";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikSelectV2 from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select-v2";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
-import Swal from "sweetalert2";
-import {
-  isEmpty,
-  scrollToError,
-  shallowEqual,
-  hasErrors
-} from "../../utils/methods";
+import MuiFormikAsyncAutocomplete from "openstack-uicore-foundation/lib/components/mui/formik-inputs/async-select";
+import MuiFormikColorField from "../mui/formik-inputs/mui-formik-color-field";
+import useScrollToError from "../../hooks/useScrollToError";
+import { requiredStringValidation } from "../../utils/yup";
 
-class EventCategoryGroupForm extends React.Component {
-  constructor(props) {
-    super(props);
+const DEFAULT_PER_PAGE = 10;
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors
-    };
+const EventCategoryGroupForm = ({
+  entity: initialEntity,
+  allClasses,
+  currentSummit,
+  onSubmit,
+  onTrackLink,
+  onTrackUnLink,
+  onAllowedGroupLink,
+  onAllowedGroupUnLink
+}) => {
+  const [isSaving, setIsSaving] = useState(false);
+  const [trackState, setTrackState] = useState({
+    page: 1,
+    perPage: DEFAULT_PER_PAGE
+  });
+  const [groupState, setGroupState] = useState({
+    page: 1,
+    perPage: DEFAULT_PER_PAGE
+  });
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleTrackLink = this.handleTrackLink.bind(this);
-    this.handleTrackUnLink = this.handleTrackUnLink.bind(this);
-    this.handleAllowedGroupLink = this.handleAllowedGroupLink.bind(this);
-    this.handleAllowedGroupUnLink = this.handleAllowedGroupUnLink.bind(this);
-  }
+  const trackSearchFormik = useFormik({
+    initialValues: { track: null },
+    onSubmit: () => {}
+  });
+  const groupSearchFormik = useFormik({
+    initialValues: { group: null },
+    onSubmit: () => {}
+  });
 
-  componentDidUpdate(prevProps) {
-    const state = {};
-    scrollToError(this.props.errors);
+  const isNew = !initialEntity?.id;
 
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
+  const excludedTrackIds = initialEntity?.tracks?.map((t) => t.id) ?? [];
+  const queryTrackOptions = (input, callback) =>
+    queryTracks(currentSummit.id, input, callback, excludedTrackIds);
+
+  const toEpoch = (momentValue) => {
+    if (!momentValue || !momentValue.isValid()) return 0;
+    return momentValue.unix();
+  };
+
+  const fromEpoch = (epoch) => {
+    if (!epoch) return null;
+    return epochToMomentTimeZone(epoch, currentSummit.time_zone_id);
+  };
+
+  const formik = useFormik({
+    initialValues: {
+      id: initialEntity?.id ?? 0,
+      class_name: initialEntity?.class_name ?? null,
+      name: initialEntity?.name ?? "",
+      color: initialEntity?.color ?? "",
+      begin_attendee_voting_period_date:
+        initialEntity?.begin_attendee_voting_period_date ?? 0,
+      end_attendee_voting_period_date:
+        initialEntity?.end_attendee_voting_period_date ?? 0,
+      max_attendee_votes: initialEntity?.max_attendee_votes ?? 0,
+      submission_begin_date: initialEntity?.submission_begin_date ?? 0,
+      submission_end_date: initialEntity?.submission_end_date ?? 0,
+      max_submission_allowed_per_user:
+        initialEntity?.max_submission_allowed_per_user ?? 0,
+      description: initialEntity?.description ?? ""
+    },
+    enableReinitialize: true,
+    validationSchema: yup.object().shape({
+      name: requiredStringValidation(),
+      class_name: yup
+        .string()
+        .nullable()
+        .required(T.translate("validation.required"))
+    }),
+    onSubmit: (values) => {
+      if (isSaving) return;
+      setIsSaving(true);
+      Promise.resolve(onSubmit(values)).finally(() => {
+        setIsSaving(false);
+      });
     }
+  });
 
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
+  useScrollToError(formik, true);
+
+  const selectedClass = allClasses.find(
+    (c) => c.class_name === formik.values.class_name
+  );
+  const showSubmissionFields = selectedClass?.submission_begin_date ?? false;
+  const showAllowedGroups = selectedClass?.allowed_groups ?? false;
+
+  const classNameDdl = allClasses.map((c) => ({
+    label: c.class_name,
+    value: c.class_name
+  }));
+
+  const tracksColumns = [
+    { columnKey: "name", header: T.translate("edit_event_category.name") },
+    { columnKey: "code", header: T.translate("edit_event_category.code") }
+  ];
+
+  const allowedGroupsColumns = [
+    { columnKey: "title", header: T.translate("edit_event_category.name") },
+    {
+      columnKey: "description",
+      header: T.translate("edit_event_category.description")
     }
+  ];
 
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
-    }
-  }
+  const handleAddTrack = () => {
+    const track = trackSearchFormik.values.track?.raw;
+    if (!track) return;
+    onTrackLink(initialEntity.id, track);
+    trackSearchFormik.setFieldValue("track", null);
+  };
 
-  handleChange(ev) {
-    const entity = { ...this.state.entity };
-    const errors = { ...this.state.errors };
-    let { value, id } = ev.target;
+  const handleTrackDelete = (trackId) => {
+    onTrackUnLink(initialEntity.id, trackId);
+  };
 
-    if (ev.target.type === "datetime") {
-      value = value.unix();
-    }
+  const handleAddGroup = () => {
+    const group = groupSearchFormik.values.group?.raw;
+    if (!group) return;
+    onAllowedGroupLink(initialEntity.id, group);
+    groupSearchFormik.setFieldValue("group", null);
+  };
 
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ entity, errors });
-  }
+  const handleAllowedGroupDelete = (groupId) => {
+    onAllowedGroupUnLink(initialEntity.id, groupId);
+  };
 
-  handleSubmit(ev) {
-    ev.preventDefault();
-    this.props.onSubmit(this.state.entity);
-  }
+  const tracks = initialEntity?.tracks ?? [];
+  const paginatedTracks = tracks.slice(
+    (trackState.page - 1) * trackState.perPage,
+    trackState.page * trackState.perPage
+  );
 
-  handleTrackLink(value) {
-    const { entity } = this.state;
-    this.props.onTrackLink(entity.id, value);
-  }
+  const allowedGroups = initialEntity?.allowed_groups ?? [];
+  const paginatedGroups = allowedGroups.slice(
+    (groupState.page - 1) * groupState.perPage,
+    groupState.page * groupState.perPage
+  );
 
-  handleTrackUnLink(valueId) {
-    const { entity } = this.state;
-    const { onTrackUnLink } = this.props;
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: T.translate("edit_event_category_group.unlink_track_warning"),
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonText: T.translate("general.yes")
-    }).then((result) => {
-      if (result.value) {
-        onTrackUnLink(entity.id, valueId);
-      }
-    });
-  }
-
-  handleAllowedGroupLink(value) {
-    const { entity } = this.state;
-    this.props.onAllowedGroupLink(entity.id, value);
-  }
-
-  handleAllowedGroupUnLink(valueId) {
-    const { entity } = this.state;
-    this.props.onAllowedGroupUnLink(entity.id, valueId);
-  }
-
-  shouldShowField(flag) {
-    const { entity } = this.state;
-    if (!entity.class_name) return false;
-    const class_name = this.props.allClasses.find(
-      (c) => c.class_name === entity.class_name
-    );
-
-    return class_name[flag];
-  }
-
-  render() {
-    const { entity, errors } = this.state;
-    const { currentSummit, allClasses } = this.props;
-    const selectedTrackIds = entity?.tracks?.map((t) => t.id) || [];
-
-    const tracksColumns = [
-      { columnKey: "name", value: T.translate("edit_event_category.name") },
-      { columnKey: "code", value: T.translate("edit_event_category.code") }
-    ];
-
-    const tracksOptions = {
-      title: T.translate("edit_event_category_group.tracks"),
-      valueKey: "name",
-      labelKey: "name",
-      actions: {
-        search: (input, callback) => {
-          queryTracks(currentSummit.id, input, callback, selectedTrackIds);
-        },
-        delete: { onClick: this.handleTrackUnLink },
-        add: { onClick: this.handleTrackLink }
-      }
-    };
-
-    const allowedGroupsColumns = [
-      { columnKey: "title", value: T.translate("edit_event_category.name") },
-      {
-        columnKey: "description",
-        value: T.translate("edit_event_category.description")
-      }
-    ];
-
-    const allowedGroupsOptions = {
-      title: T.translate("edit_event_category_group.allowed_groups"),
-      valueKey: "id",
-      labelKey: "title",
-      actions: {
-        search: queryGroups,
-        delete: { onClick: this.handleAllowedGroupUnLink },
-        add: { onClick: this.handleAllowedGroupLink }
-      }
-    };
-
-    const class_name_ddl = allClasses.map((i) => ({
-      label: i.class_name,
-      value: i.class_name
-    }));
-
-    return (
-      <form className="event-type-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("edit_event_category_group.class")} *</label>
-            <Dropdown
-              id="class_name"
-              disabled={entity.id !== 0}
-              value={entity.class_name}
-              onChange={this.handleChange}
-              placeholder={T.translate(
-                "edit_event_category_group.placeholders.select_class"
-              )}
-              options={class_name_ddl}
-              error={hasErrors("class_name", errors)}
-            />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_event_category_group.name")} *</label>
-            <Input
-              id="name"
-              value={entity.name}
-              onChange={this.handleChange}
-              className="form-control"
-              error={hasErrors("name", errors)}
-            />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_event_category_group.color")} *</label>
-            <Input
-              id="color"
-              type="color"
-              value={entity.color}
-              onChange={this.handleChange}
-              className="form-control"
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label>
-              {" "}
-              {T.translate(
-                "edit_event_category_group.begin_attendee_voting_period_date"
-              )}
-            </label>
-            <DateTimePicker
-              id="begin_attendee_voting_period_date"
-              onChange={this.handleChange}
-              format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-              timezone={currentSummit.time_zone_id}
-              value={epochToMomentTimeZone(
-                entity.begin_attendee_voting_period_date,
-                currentSummit.time_zone_id
-              )}
-            />
-          </div>
-          <div className="col-md-4">
-            <label>
-              {" "}
-              {T.translate(
-                "edit_event_category_group.end_attendee_voting_period_date"
-              )}
-            </label>
-            <DateTimePicker
-              id="end_attendee_voting_period_date"
-              onChange={this.handleChange}
-              format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-              timezone={currentSummit.time_zone_id}
-              value={epochToMomentTimeZone(
-                entity.end_attendee_voting_period_date,
-                currentSummit.time_zone_id
-              )}
-            />
-          </div>
-          <div className="col-md-4">
-            <label>
-              {" "}
-              {T.translate("edit_event_category_group.max_attendee_votes")}
-            </label>
-            <Input
-              id="max_attendee_votes"
-              type="number"
-              value={entity.max_attendee_votes}
-              onChange={this.handleChange}
-              className="form-control"
-            />
-          </div>
-        </div>
-        {this.shouldShowField("submission_begin_date") && (
-          <div className="row form-group">
-            <div className="col-md-4">
-              <label>
-                {" "}
-                {T.translate("edit_event_category_group.submission_begin_date")}
-              </label>
-              <DateTimePicker
-                id="submission_begin_date"
-                onChange={this.handleChange}
-                format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                timezone={currentSummit.time_zone_id}
-                value={epochToMomentTimeZone(
-                  entity.submission_begin_date,
-                  currentSummit.time_zone_id
+  return (
+    <LocalizationProvider dateAdapter={AdapterMoment}>
+      <FormikProvider value={formik}>
+        <Box component="form" onSubmit={formik.handleSubmit} noValidate>
+          <Grid2 container spacing={2} alignItems="flex-start">
+            <Grid2 size={4}>
+              <Typography
+                variant="body2"
+                component="label"
+                htmlFor="class_name"
+              >
+                {T.translate("edit_event_category_group.class")} *
+              </Typography>
+              <MuiFormikSelectV2
+                name="class_name"
+                placeholder={T.translate(
+                  "edit_event_category_group.placeholders.select_class"
                 )}
+                options={classNameDdl}
+                isDisabled={!isNew}
+                isClearable={false}
+                size="small"
               />
-            </div>
-            <div className="col-md-4">
-              <label>
-                {" "}
-                {T.translate("edit_event_category_group.submission_end_date")}
-              </label>
-              <DateTimePicker
-                id="submission_end_date"
-                onChange={this.handleChange}
-                format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                timezone={currentSummit.time_zone_id}
-                value={epochToMomentTimeZone(
-                  entity.submission_end_date,
-                  currentSummit.time_zone_id
-                )}
+            </Grid2>
+            <Grid2 size={4}>
+              <Typography variant="body2" component="label" htmlFor="name">
+                {T.translate("edit_event_category_group.name")} *
+              </Typography>
+              <MuiFormikTextField
+                variant="outlined"
+                name="name"
+                id="name"
+                size="small"
+                margin="none"
+                fullWidth
+                required
               />
-            </div>
-            <div className="col-md-4">
-              <label>
-                {" "}
+            </Grid2>
+            <Grid2 size={4}>
+              <Typography variant="body2" component="label">
+                {T.translate("edit_event_category_group.color")} *
+              </Typography>
+              <MuiFormikColorField name="color" />
+            </Grid2>
+
+            <Grid2 size={4}>
+              <Typography variant="body2" component="label">
                 {T.translate(
-                  "edit_event_category_group.max_submission_allowed_per_user"
+                  "edit_event_category_group.begin_attendee_voting_period_date"
                 )}
-              </label>
-              <Input
-                id="max_submission_allowed_per_user"
-                type="number"
-                value={entity.max_submission_allowed_per_user}
-                onChange={this.handleChange}
-                className="form-control"
+              </Typography>
+              <DateTimePicker
+                value={fromEpoch(
+                  formik.values.begin_attendee_voting_period_date
+                )}
+                onChange={(val) =>
+                  formik.setFieldValue(
+                    "begin_attendee_voting_period_date",
+                    toEpoch(val)
+                  )
+                }
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    size: "small"
+                  }
+                }}
               />
-            </div>
-          </div>
-        )}
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label>
-              {" "}
-              {T.translate("edit_event_category_group.description")}{" "}
-            </label>
-            <TextEditorV3
-              id="description"
-              value={entity.description}
-              onChange={this.handleChange}
-              error={hasErrors("description", errors)}
-              license={process.env.JODIT_LICENSE_KEY}
-            />
-          </div>
-        </div>
+            </Grid2>
+            <Grid2 size={4}>
+              <Typography variant="body2" component="label">
+                {T.translate(
+                  "edit_event_category_group.end_attendee_voting_period_date"
+                )}
+              </Typography>
+              <DateTimePicker
+                value={fromEpoch(formik.values.end_attendee_voting_period_date)}
+                onChange={(val) =>
+                  formik.setFieldValue(
+                    "end_attendee_voting_period_date",
+                    toEpoch(val)
+                  )
+                }
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    size: "small"
+                  }
+                }}
+              />
+            </Grid2>
+            <Grid2 size={4}>
+              <Typography
+                variant="body2"
+                component="label"
+                htmlFor="max_attendee_votes"
+              >
+                {T.translate("edit_event_category_group.max_attendee_votes")}
+              </Typography>
+              <MuiFormikTextField
+                variant="outlined"
+                name="max_attendee_votes"
+                id="max_attendee_votes"
+                type="number"
+                size="small"
+                margin="none"
+                fullWidth
+              />
+            </Grid2>
 
-        <hr />
-        {entity.id !== 0 && (
-          <SimpleLinkList
-            values={entity.tracks}
-            columns={tracksColumns}
-            options={tracksOptions}
-          />
-        )}
-        <br />
-        <br />
-        {entity.id !== 0 && this.shouldShowField("allowed_groups") && (
-          <SimpleLinkList
-            values={entity.allowed_groups}
-            columns={allowedGroupsColumns}
-            options={allowedGroupsOptions}
-          />
-        )}
+            {showSubmissionFields && (
+              <>
+                <Grid2 size={4}>
+                  <Typography variant="body2" component="label">
+                    {T.translate(
+                      "edit_event_category_group.submission_begin_date"
+                    )}
+                  </Typography>
+                  <DateTimePicker
+                    value={fromEpoch(formik.values.submission_begin_date)}
+                    onChange={(val) =>
+                      formik.setFieldValue(
+                        "submission_begin_date",
+                        toEpoch(val)
+                      )
+                    }
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        size: "small"
+                      }
+                    }}
+                  />
+                </Grid2>
+                <Grid2 size={4}>
+                  <Typography variant="body2" component="label">
+                    {T.translate(
+                      "edit_event_category_group.submission_end_date"
+                    )}
+                  </Typography>
+                  <DateTimePicker
+                    value={fromEpoch(formik.values.submission_end_date)}
+                    onChange={(val) =>
+                      formik.setFieldValue("submission_end_date", toEpoch(val))
+                    }
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        size: "small"
+                      }
+                    }}
+                  />
+                </Grid2>
+                <Grid2 size={4}>
+                  <Typography
+                    variant="body2"
+                    component="label"
+                    htmlFor="max_submission_allowed_per_user"
+                  >
+                    {T.translate(
+                      "edit_event_category_group.max_submission_allowed_per_user"
+                    )}
+                  </Typography>
+                  <MuiFormikTextField
+                    variant="outlined"
+                    name="max_submission_allowed_per_user"
+                    id="max_submission_allowed_per_user"
+                    type="number"
+                    margin="none"
+                    fullWidth
+                  />
+                </Grid2>
+              </>
+            )}
 
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
-        </div>
-      </form>
-    );
-  }
-}
+            <Grid2 size={12}>
+              <Typography variant="body2" component="label">
+                {T.translate("edit_event_category_group.description")}
+              </Typography>
+              <Box sx={{ mt: 0.5 }}>
+                <TextEditorV3
+                  id="description"
+                  value={formik.values.description}
+                  onChange={(ev) =>
+                    formik.setFieldValue("description", ev.target.value)
+                  }
+                  license={process.env.JODIT_LICENSE_KEY}
+                />
+              </Box>
+            </Grid2>
+
+            {!isNew && (
+              <>
+                <Grid2 size={12}>
+                  <Divider sx={{ my: 1 }} />
+                  <Typography variant="h6" sx={{ mb: 1 }}>
+                    {T.translate("edit_event_category_group.tracks")}
+                  </Typography>
+                  <Grid2
+                    container
+                    spacing={1}
+                    alignItems="flex-start"
+                    sx={{ mb: 1 }}
+                  >
+                    <Grid2 size="grow">
+                      <FormikProvider value={trackSearchFormik}>
+                        <MuiFormikAsyncAutocomplete
+                          name="track"
+                          placeholder={T.translate(
+                            "edit_event_category_group.placeholders.search_categories"
+                          )}
+                          queryFunction={queryTrackOptions}
+                          formatOption={(track) => ({
+                            value: track.id,
+                            label: track.name,
+                            raw: track
+                          })}
+                        />
+                      </FormikProvider>
+                    </Grid2>
+                    <Grid2>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        disabled={!trackSearchFormik.values.track}
+                        onClick={handleAddTrack}
+                      >
+                        {T.translate("general.add")}
+                      </Button>
+                    </Grid2>
+                  </Grid2>
+                  <MuiTable
+                    columns={tracksColumns}
+                    data={paginatedTracks}
+                    totalRows={tracks.length}
+                    perPage={trackState.perPage}
+                    currentPage={trackState.page}
+                    onPageChange={(page) =>
+                      setTrackState((prev) => ({ ...prev, page }))
+                    }
+                    onPerPageChange={(n) => {
+                      setTrackState((prev) => ({
+                        ...prev,
+                        perPage: parseInt(n, 10),
+                        page: 1
+                      }));
+                    }}
+                    onDelete={handleTrackDelete}
+                    getName={(row) => row.name}
+                    deleteDialogBody={T.translate(
+                      "edit_event_category_group.unlink_track_warning"
+                    )}
+                  />
+                </Grid2>
+
+                {showAllowedGroups && (
+                  <Grid2 size={12}>
+                    <Typography variant="h6" sx={{ mb: 1 }}>
+                      {T.translate("edit_event_category_group.allowed_groups")}
+                    </Typography>
+                    <Grid2
+                      container
+                      spacing={1}
+                      alignItems="flex-start"
+                      sx={{ mb: 1 }}
+                    >
+                      <Grid2 size="grow">
+                        <FormikProvider value={groupSearchFormik}>
+                          <MuiFormikAsyncAutocomplete
+                            name="group"
+                            placeholder={T.translate(
+                              "edit_event_category_group.placeholders.search_groups"
+                            )}
+                            queryFunction={queryGroups}
+                            formatOption={(group) => ({
+                              value: group.id,
+                              label: group.title,
+                              raw: group
+                            })}
+                          />
+                        </FormikProvider>
+                      </Grid2>
+                      <Grid2>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          disabled={!groupSearchFormik.values.group}
+                          onClick={handleAddGroup}
+                        >
+                          {T.translate("general.add")}
+                        </Button>
+                      </Grid2>
+                    </Grid2>
+                    <MuiTable
+                      columns={allowedGroupsColumns}
+                      data={paginatedGroups}
+                      totalRows={allowedGroups.length}
+                      perPage={groupState.perPage}
+                      currentPage={groupState.page}
+                      onPageChange={(page) =>
+                        setGroupState((prev) => ({ ...prev, page }))
+                      }
+                      onPerPageChange={(n) => {
+                        setGroupState((prev) => ({
+                          ...prev,
+                          perPage: parseInt(n, 10),
+                          page: 1
+                        }));
+                      }}
+                      onDelete={handleAllowedGroupDelete}
+                      getName={(row) => row.title}
+                    />
+                  </Grid2>
+                )}
+              </>
+            )}
+          </Grid2>
+          <Divider sx={{ my: 3 }} />
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button type="submit" variant="contained" disabled={isSaving}>
+              {T.translate("general.save")}
+            </Button>
+          </Box>
+        </Box>
+      </FormikProvider>
+    </LocalizationProvider>
+  );
+};
+
+EventCategoryGroupForm.propTypes = {
+  entity: PropTypes.shape({}),
+  allClasses: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  currentSummit: PropTypes.shape({}).isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  onTrackLink: PropTypes.func,
+  onTrackUnLink: PropTypes.func,
+  onAllowedGroupLink: PropTypes.func,
+  onAllowedGroupUnLink: PropTypes.func
+};
+
+EventCategoryGroupForm.defaultProps = {
+  entity: null,
+  onTrackLink: () => {},
+  onTrackUnLink: () => {},
+  onAllowedGroupLink: () => {},
+  onAllowedGroupUnLink: () => {}
+};
 
 export default EventCategoryGroupForm;

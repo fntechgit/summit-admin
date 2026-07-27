@@ -35,9 +35,9 @@ const EventCategoryGroupListPage = ({
   order,
   orderDir,
   totalEventCategoryGroups,
+  history,
   getEventCategoryGroups,
-  deleteEventCategoryGroup,
-  history
+  deleteEventCategoryGroup
 }) => {
   useEffect(() => {
     if (currentSummit?.id) {
@@ -45,14 +45,14 @@ const EventCategoryGroupListPage = ({
     }
   }, [currentSummit?.id]);
 
+  const handleNew = () => {
+    history.push(`/app/summits/${currentSummit.id}/event-category-groups/new`);
+  };
+
   const handleEdit = (row) => {
     history.push(
       `/app/summits/${currentSummit.id}/event-category-groups/${row.id}`
     );
-  };
-
-  const handleNew = () => {
-    history.push(`/app/summits/${currentSummit.id}/event-category-groups/new`);
   };
 
   const handleDelete = (groupId) => {
@@ -126,7 +126,7 @@ const EventCategoryGroupListPage = ({
           sx={{
             width: 24,
             height: 24,
-            backgroundColor: row.color,
+            backgroundColor: `#${row.color}`,
             borderRadius: 1
           }}
         />
@@ -193,6 +193,7 @@ const EventCategoryGroupListPage = ({
           onSort={handleSort}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          getName={(row) => row.name}
           deleteDialogBody={(name) =>
             `${T.translate("event_category_group_list.delete_warning")} ${name}`
           }
