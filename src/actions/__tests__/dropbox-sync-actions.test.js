@@ -381,7 +381,7 @@ describe("dropbox sync actions", () => {
   });
 
   test("resyncRoom dispatches START_LOADING, RESYNC_ROOM_DISPATCHED, STOP_LOADING", async () => {
-    store.dispatch(DropboxSyncActions.resyncRoom("Main Venue", "Room A"));
+    store.dispatch(DropboxSyncActions.resyncRoom(12, 345));
     await flushPromises();
 
     const actions = store.getActions();
@@ -392,6 +392,22 @@ describe("dropbox sync actions", () => {
     });
     expect(actions[2]).toEqual({ payload: undefined, type: "STOP_LOADING" });
     expect(postRequest).toHaveBeenCalled();
+  });
+
+  test("resyncRoom targets the materializer's integer venue/room route", async () => {
+    // The materializer route is /<int:summit_id>/<int:venue_id>/<int:room_id>/.
+    // It previously took names, and sending names does not resolve at all —
+    // the request 404s and the resync silently never happens. The older
+    // assertions here only checked that postRequest was called, so they stayed
+    // green through that regression; pin the URL itself.
+    store.dispatch(DropboxSyncActions.resyncRoom(12, 345));
+    await flushPromises();
+
+    expect(postRequest).toHaveBeenCalledTimes(1);
+    const url = postRequest.mock.calls[0][2];
+    expect(url).toBe(
+      "https://test-api.example.com/api/v1/sync/materialize/1/12/345/"
+    );
   });
 
   test("getSyncConfig dispatches RECEIVE_SYNC_CONFIG with empty payload on failure", async () => {
@@ -442,7 +458,7 @@ describe("dropbox sync actions", () => {
   test("resyncRoom dispatches STOP_LOADING on failure", async () => {
     postRequest.mockImplementation(() => mockRequestImplReject());
 
-    store.dispatch(DropboxSyncActions.resyncRoom("Main Venue", "Room A"));
+    store.dispatch(DropboxSyncActions.resyncRoom(12, 345));
     await flushPromises();
 
     const actions = store.getActions();

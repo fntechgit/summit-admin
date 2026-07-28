@@ -14,10 +14,10 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import CountryDropdown from "openstack-uicore-foundation/lib/components/inputs/country-dropdown"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
-import Table from "openstack-uicore-foundation/lib/components/table"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import CountryDropdown from "openstack-uicore-foundation/lib/components/inputs/country-dropdown";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
+import Table from "openstack-uicore-foundation/lib/components/table";
 import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import { GMap } from "openstack-uicore-foundation/lib/components/google-map";
@@ -212,11 +212,13 @@ class LocationForm extends React.Component {
   }
 
   handleRoomResync(roomId) {
-    const { entity } = this.state;
-    const persistedVenueName = this.props.entity.name;
-    const room = entity.rooms.find((r) => r.id === roomId);
-    if (room && this.props.onRoomResync) {
-      this.props.onRoomResync(persistedVenueName, room.name);
+    // IDs, not names: the materializer's resync route takes integer
+    // venue/room ids. Read the venue id off props (the persisted entity), not
+    // state, so an unsaved rename in the form cannot be sent as the target. A
+    // venue that has never been saved has id 0 and no rooms to resync.
+    const venueId = this.props.entity.id;
+    if (venueId && roomId && this.props.onRoomResync) {
+      this.props.onRoomResync(venueId, roomId);
     }
   }
 
