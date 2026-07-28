@@ -11,434 +11,478 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useFormik, FormikProvider } from "formik";
+import * as yup from "yup";
 import T from "i18n-react/dist/i18n-react";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
-import Panel from "openstack-uicore-foundation/lib/components/sections/panel"
-import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input"
-import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input"
-import AccessLevelsInput from "openstack-uicore-foundation/lib/components/inputs/access-levels-input"
-import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
-import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import {
-  isEmpty,
-  scrollToError,
-  shallowEqual,
-  hasErrors
-} from "../../utils/methods";
-import TrackDropdown from "../inputs/track-dropdown";
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Autocomplete,
+  Box,
+  Button,
+  Grid2,
+  InputLabel,
+  TextField,
+  Tooltip,
+  Typography
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { UploadInputV3 } from "openstack-uicore-foundation/lib/components";
+import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
+import MuiTableSortable from "openstack-uicore-foundation/lib/components/mui/sortable-table";
+import {
+  queryTags,
+  queryAccessLevels
+} from "openstack-uicore-foundation/lib/utils/query-actions";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
+import FormikTextEditor from "openstack-uicore-foundation/lib/components/mui/formik-inputs/texteditor";
+import MuiFormikAsyncAutocomplete from "openstack-uicore-foundation/lib/components/mui/formik-inputs/async-select";
+import MuiFormikColorField from "../mui/formik-inputs/mui-formik-color-field";
+import useScrollToError from "../../hooks/useScrollToError";
+import {
+  requiredStringValidation,
+  requiredHTMLValidation,
+  hexColorValidation
+} from "../../utils/yup";
 
-class EventCategoryForm extends React.Component {
-  constructor(props) {
-    super(props);
+const validationSchema = yup.object().shape({
+  name: requiredStringValidation(),
+  code: requiredStringValidation(),
+  color: hexColorValidation().required(T.translate("validation.required")),
+  text_color: hexColorValidation().required(T.translate("validation.required")),
+  description: requiredHTMLValidation()
+});
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors,
-      showSection: "main",
-      subtrack: null
+const subtrackColumns = [
+  { columnKey: "id", header: T.translate("general.id") },
+  { columnKey: "name", header: T.translate("event_category_list.name") },
+  { columnKey: "code", header: T.translate("event_category_list.code") },
+  {
+    columnKey: "color",
+    header: T.translate("event_category_list.color"),
+    render: (row) => (
+      <Box
+        sx={{
+          width: 24,
+          height: 24,
+          borderRadius: 0.5,
+          backgroundColor: row.color?.startsWith("#")
+            ? row.color
+            : `#${row.color}`
+        }}
+      />
+    )
+  }
+];
+
+const EventCategoryForm = ({
+  currentSummit,
+  entity,
+  errors,
+  history,
+  onSubmit,
+  onRemoveImage,
+  onLinkSubCategory,
+  onUnlinkSubCategory,
+  onUpdateSubCategoryOrder
+}) => {
+  const { errorMessage } = useSnackbarMessage();
+  const [isSaving, setIsSaving] = useState(false);
+  const [subtrackToLink, setSubtrackToLink] = useState(null);
+  const [iconUrl, setIconUrl] = useState(entity.icon_url);
+  const [scheduleSettingsExpanded, setScheduleSettingsExpanded] =
+    useState(false);
+
+  useEffect(() => {
+    setIconUrl(entity.icon_url);
+  }, [entity.icon_url]);
+
+  const handleSubmit = (values) => {
+    setIsSaving(true);
+    const normalizedValues = {
+      ...values,
+      allowed_tags: values.allowed_tags.map((t) => ({
+        id: parseInt(t.value, 10),
+        tag: t.label
+      })),
+      allowed_access_levels: values.allowed_access_levels.map((al) => ({
+        id: parseInt(al.value, 10),
+        name: al.label
+      }))
     };
+    Promise.resolve(onSubmit(normalizedValues)).finally(() =>
+      setIsSaving(false)
+    );
+  };
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleUploadPic = this.handleUploadPic.bind(this);
-    this.handleRemovePic = this.handleRemovePic.bind(this);
-    this.handleEditSubCategory = this.handleEditSubCategory.bind(this);
-    this.handleLinkSubCategory = this.handleLinkSubCategory.bind(this);
-    this.handleUnlinkSubCategory = this.handleUnlinkSubCategory.bind(this);
-    this.handleUpdateSubCategoryOrder =
-      this.handleUpdateSubCategoryOrder.bind(this);
-  }
+  const formik = useFormik({
+    initialValues: {
+      id: entity.id,
+      name: entity.name,
+      code: entity.code,
+      color: entity.color,
+      text_color: entity.text_color,
+      description: entity.description,
+      session_count: entity.session_count,
+      alternate_count: entity.alternate_count,
+      lightning_count: entity.lightning_count,
+      lightning_alternate_count: entity.lightning_alternate_count,
+      voting_visible: entity.voting_visible,
+      chair_visible: entity.chair_visible,
+      allowed_tags: (entity.allowed_tags || []).map((t) => ({
+        value: String(t.id),
+        label: t.tag
+      })),
+      allowed_access_levels: (entity.allowed_access_levels || []).map((al) => ({
+        value: String(al.id),
+        label: al.name
+      })),
+      proposed_schedule_transition_time:
+        entity.proposed_schedule_transition_time ?? ""
+    },
+    validationSchema,
+    enableReinitialize: true,
+    onSubmit: handleSubmit
+  });
 
-  componentDidUpdate(prevProps) {
-    const state = {};
-    scrollToError(this.props.errors);
+  useScrollToError(formik);
 
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
+  useEffect(() => {
+    if (errors && Object.keys(errors).length > 0) {
+      formik.setErrors(errors);
+      formik.setTouched(
+        Object.keys(errors).reduce((acc, key) => ({ ...acc, [key]: true }), {})
+      );
     }
+  }, [errors]);
 
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
-    }
+  const handleIconUploadComplete = (response) => {
+    setIconUrl(response.url ?? response.file_url ?? response.path ?? null);
+  };
 
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
-    }
-  }
+  const handleIconUploadError = () => {
+    errorMessage(T.translate("edit_event_category.icon_upload_error"));
+  };
 
-  handleChange(ev) {
-    const entity = { ...this.state.entity };
-    const errors = { ...this.state.errors };
-    let { value, id } = ev.target;
+  const handleRemoveIcon = () => {
+    setIconUrl(null);
+    onRemoveImage(entity.id);
+  };
 
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
+  const availableSubTracks = currentSummit.tracks.filter(
+    (t) =>
+      !t.parent_id &&
+      !entity.subtracks?.map((st) => st.id).includes(t.id) &&
+      t.id !== entity.id
+  );
 
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ entity, errors });
-  }
+  const handleAddSubtrack = () => {
+    if (!subtrackToLink) return;
+    onLinkSubCategory(entity.id, subtrackToLink.id);
+    setSubtrackToLink(null);
+  };
 
-  handleSubmit(ev) {
-    ev.preventDefault();
-    this.props.onSubmit(this.state.entity);
-  }
-
-  handleRemovePic() {
-    this.props.onRemoveImage(this.state.entity.id);
-  }
-
-  handleUploadPic(file) {
-    const formData = new FormData();
-    formData.append("file", file);
-    this.props.onUploadImage(this.state.entity, formData);
-  }
-
-  toggleSection(section, ev) {
-    const { showSection } = this.state;
-    const newShowSection = showSection === section ? "main" : section;
-    ev.preventDefault();
-
-    this.setState({ showSection: newShowSection });
-  }
-
-  handleEditSubCategory(id) {
-    const { history, currentSummit } = this.props;
-    history.push(`/app/summits/${currentSummit.id}/event-categories/${id}`);
-  }
-
-  handleLinkSubCategory() {
-    const { entity, subtrack } = this.state;
-    this.setState({ subtrack: null });
-    this.props.onLinkSubCategory(entity.id, subtrack);
-  }
-
-  handleUnlinkSubCategory(subtrackId) {
-    const { entity } = this.state;
-    this.props.onUnlinkSubCategory(entity.id, subtrackId);
-  }
-
-  handleUpdateSubCategoryOrder(subtracks, subtrackId, newOrder) {
-    const { entity } = this.state;
-    this.props.onUpdateSubCategoryOrder(entity.id, subtrackId, newOrder);
-  }
-
-  render() {
-    const { entity, errors, showSection } = this.state;
-    const { currentSummit } = this.props;
-
-    const availableSubTracks = currentSummit.tracks.filter(
-      (t) =>
-        !t.parent_id &&
-        !entity.subtracks.map((t) => t.id).includes(t.id) &&
-        t.id !== entity.id
+  const handleEditSubtrack = (subtrack) =>
+    history.push(
+      `/app/summits/${currentSummit.id}/event-categories/${subtrack.id}`
     );
 
-    const table_options = {
-      actions: {
-        edit: { onClick: this.handleEditSubCategory },
-        delete: { onClick: this.handleUnlinkSubCategory }
-      }
-    };
+  const handleUnlinkSubtrack = (subtrackId) =>
+    onUnlinkSubCategory(entity.id, subtrackId);
 
-    const columns = [
-      { columnKey: "id", value: T.translate("general.id") },
-      { columnKey: "name", value: T.translate("event_category_list.name") },
-      { columnKey: "code", value: T.translate("event_category_list.code") },
-      { columnKey: "color", value: T.translate("event_category_list.color") }
-    ];
+  const handleReorderSubtracks = (_newOrder, subtrackId, newSubtrackOrder) =>
+    onUpdateSubCategoryOrder(entity.id, subtrackId, newSubtrackOrder);
 
-    return (
-      <form className="event-type-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("edit_event_category.name")} *</label>
-            <Input
-              id="name"
-              value={entity.name}
-              onChange={this.handleChange}
-              className="form-control"
-              error={hasErrors("name", errors)}
-            />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_event_category.code")} *</label>
-            <Input
-              id="code"
-              value={entity.code}
-              onChange={this.handleChange}
-              className="form-control"
-              error={hasErrors("code", errors)}
-            />
-          </div>
-          <div className="col-md-2">
-            <label> {T.translate("edit_event_category.color")} *</label>
-            <Input
-              id="color"
-              type="color"
-              value={entity.color}
-              onChange={this.handleChange}
-              className="form-control"
-            />
-          </div>
-          <div className="col-md-2">
-            <label> {T.translate("edit_event_category.text_color")} *</label>
-            <Input
-              id="text_color"
-              type="color"
-              value={entity.text_color}
-              onChange={this.handleChange}
-              className="form-control"
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label> {T.translate("edit_event_category.description")} *</label>
-            <TextEditorV3
-              id="description"
-              placeholder="Enter text"
-              value={entity.description}
-              onChange={this.handleChange}
-              error={hasErrors("description", errors)}
-              license={process.env.JODIT_LICENSE_KEY}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-3">
-            <label> {T.translate("edit_event_category.number_sessions")}</label>
-            <Input
+  return (
+    <FormikProvider value={formik}>
+      <Box component="form" onSubmit={formik.handleSubmit}>
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="name">
+              {T.translate("edit_event_category.name")} *
+            </InputLabel>
+            <MuiFormikTextField name="name" margin="none" fullWidth />
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="code">
+              {T.translate("edit_event_category.code")} *
+            </InputLabel>
+            <MuiFormikTextField name="code" margin="none" fullWidth />
+          </Grid2>
+          <Grid2 size={{ xs: 6, md: 2 }}>
+            <InputLabel htmlFor="color">
+              {T.translate("edit_event_category.color")} *
+            </InputLabel>
+            <MuiFormikColorField name="color" />
+          </Grid2>
+          <Grid2 size={{ xs: 6, md: 2 }}>
+            <InputLabel htmlFor="text_color">
+              {T.translate("edit_event_category.text_color")} *
+            </InputLabel>
+            <MuiFormikColorField name="text_color" />
+          </Grid2>
+        </Grid2>
+
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={12}>
+            <InputLabel htmlFor="description">
+              {T.translate("edit_event_category.description")} *
+            </InputLabel>
+            <FormikTextEditor name="description" />
+          </Grid2>
+        </Grid2>
+
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+            <InputLabel htmlFor="session_count">
+              {T.translate("edit_event_category.number_sessions")}
+            </InputLabel>
+            <MuiFormikTextField
+              name="session_count"
               type="number"
-              id="session_count"
-              value={entity.session_count}
-              onChange={this.handleChange}
-              className="form-control"
-              error={hasErrors("session_count", errors)}
+              margin="none"
+              fullWidth
             />
-          </div>
-          <div className="col-md-3">
-            <label>
-              {" "}
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+            <InputLabel htmlFor="alternate_count">
               {T.translate("edit_event_category.number_alternates")}
-            </label>
-            <Input
+            </InputLabel>
+            <MuiFormikTextField
+              name="alternate_count"
               type="number"
-              id="alternate_count"
-              value={entity.alternate_count}
-              onChange={this.handleChange}
-              className="form-control"
-              error={hasErrors("alternate_count", errors)}
+              margin="none"
+              fullWidth
             />
-          </div>
-          <div className="col-md-3">
-            <label>
-              {" "}
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+            <InputLabel htmlFor="lightning_count">
               {T.translate("edit_event_category.number_lightning")}
-            </label>
-            <Input
+            </InputLabel>
+            <MuiFormikTextField
+              name="lightning_count"
               type="number"
-              id="lightning_count"
-              value={entity.lightning_count}
-              onChange={this.handleChange}
-              className="form-control"
-              error={hasErrors("lightning_count", errors)}
+              margin="none"
+              fullWidth
             />
-          </div>
-          <div className="col-md-3">
-            <label>
-              {" "}
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+            <InputLabel htmlFor="lightning_alternate_count">
               {T.translate("edit_event_category.number_lightning_alternates")}
-            </label>
-            <Input
+            </InputLabel>
+            <MuiFormikTextField
+              name="lightning_alternate_count"
               type="number"
-              id="lightning_alternate_count"
-              value={entity.lightning_alternate_count}
-              onChange={this.handleChange}
-              className="form-control"
-              error={hasErrors("lightning_alternate_count", errors)}
+              margin="none"
+              fullWidth
             />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-3 checkboxes-div">
-            <div className="form-check abc-checkbox">
-              <input
-                type="checkbox"
-                id="voting_visible"
-                checked={entity.voting_visible}
-                onChange={this.handleChange}
-                className="form-check-input"
-              />
-              <label className="form-check-label" htmlFor="voting_visible">
-                {T.translate("edit_event_category.visible_voters")}
-              </label>
-            </div>
-          </div>
-          <div className="col-md-6 checkboxes-div">
-            <div className="form-check abc-checkbox">
-              <input
-                type="checkbox"
-                id="chair_visible"
-                checked={entity.chair_visible}
-                onChange={this.handleChange}
-                className="form-check-input"
-              />
-              <label className="form-check-label" htmlFor="chair_visible">
-                {T.translate("edit_event_category.visible_track_chairs")}
-              </label>
-            </div>
-          </div>
-        </div>
+          </Grid2>
+        </Grid2>
 
-        <hr />
-
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label> {T.translate("edit_event_category.tags")} </label>
-            <TagInput
-              id="allowed_tags"
-              value={entity.allowed_tags}
-              summitId={currentSummit.id}
-              onChange={this.handleChange}
-              error={hasErrors("allowed_tags", errors)}
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
+            <MuiFormikCheckbox
+              name="voting_visible"
+              label={T.translate("edit_event_category.visible_voters")}
             />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label>
-              {" "}
-              {T.translate("edit_event_category.allowed_access_levels")}&nbsp;
-              <i
-                className="fa fa-info-circle"
-                aria-hidden="true"
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 8 }}>
+            <MuiFormikCheckbox
+              name="chair_visible"
+              label={T.translate("edit_event_category.visible_track_chairs")}
+            />
+          </Grid2>
+        </Grid2>
+
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={12}>
+            <InputLabel htmlFor="allowed_tags">
+              {T.translate("edit_event_category.tags")}
+            </InputLabel>
+            <MuiFormikAsyncAutocomplete
+              name="allowed_tags"
+              isMulti
+              fullWidth
+              placeholder={T.translate(
+                "edit_event_category.placeholders.select_tags"
+              )}
+              queryFunction={(input, callback) =>
+                queryTags(currentSummit.id, input, callback)
+              }
+              formatOption={(tag) => ({
+                value: tag.id.toString(),
+                label: tag.tag
+              })}
+              formatSelectedValue={(s) => ({ value: s.value, label: s.label })}
+            />
+          </Grid2>
+        </Grid2>
+
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={12}>
+            <InputLabel
+              htmlFor="allowed_access_levels"
+              sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+            >
+              {T.translate("edit_event_category.allowed_access_levels")}
+              <Tooltip
                 title={T.translate(
                   "edit_event_category.allowed_access_levels_info"
                 )}
-              />
-            </label>
-            <AccessLevelsInput
-              id="allowed_access_levels"
-              value={entity.allowed_access_levels}
-              summitId={currentSummit.id}
-              onChange={this.handleChange}
+              >
+                <InfoOutlinedIcon fontSize="small" />
+              </Tooltip>
+            </InputLabel>
+            <MuiFormikAsyncAutocomplete
+              name="allowed_access_levels"
               isMulti
-              error={hasErrors("allowed_access_levels", errors)}
+              fullWidth
+              placeholder={T.translate(
+                "edit_event_category.placeholders.select_access_levels"
+              )}
+              queryFunction={(input, callback) =>
+                queryAccessLevels(currentSummit.id, input, callback)
+              }
+              formatOption={(al) => ({
+                value: al.id.toString(),
+                label: al.name
+              })}
+              formatSelectedValue={(s) => ({ value: s.value, label: s.label })}
             />
-          </div>
-        </div>
+          </Grid2>
+        </Grid2>
 
         {entity.id !== 0 && (
-          <div className="row form-group">
-            <div className="col-md-12">
-              <label> {T.translate("edit_event_category.pic")}</label>
-              <UploadInput
-                value={entity.icon_url}
-                handleUpload={this.handleUploadPic}
-                handleRemove={() => this.handleRemovePic()}
-                className="dropzone col-md-6"
-                multiple={false}
-                accept="image/*"
+          <Grid2 container spacing={2} sx={{ mb: 2 }}>
+            <Grid2 size={{ xs: 12, md: 6 }}>
+              <InputLabel htmlFor="icon_url">
+                {T.translate("edit_event_category.pic")}
+              </InputLabel>
+              <UploadInputV3
+                id="icon_url"
+                value={
+                  iconUrl ? [{ filename: iconUrl, file_path: iconUrl }] : []
+                }
+                onUploadComplete={handleIconUploadComplete}
+                onError={handleIconUploadError}
+                onRemove={handleRemoveIcon}
+                postUrl={`${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tracks/${entity.id}/icon`}
+                djsConfig={{ withCredentials: true }}
+                maxFiles={1}
+                canAdd={!iconUrl}
+                mediaType={{
+                  type: {
+                    allowed_extensions: ["jpg", "jpeg", "png", "gif", "svg"]
+                  }
+                }}
               />
-            </div>
-          </div>
+            </Grid2>
+          </Grid2>
         )}
-        <Panel
-          show={showSection === "proposed_schedule_settings"}
-          title={T.translate(
-            "edit_event_category.proposed_schedule_settings.title"
-          )}
-          handleClick={this.toggleSection.bind(
-            this,
-            "proposed_schedule_settings"
-          )}
+
+        <Accordion
+          expanded={scheduleSettingsExpanded}
+          onChange={() => setScheduleSettingsExpanded((prev) => !prev)}
+          sx={{ mb: 2 }}
         >
-          <div className="row form-group">
-            <div className="col-md-4">
-              <label>
-                {" "}
-                {T.translate(
-                  "edit_event_category.proposed_schedule_settings.transition_time"
-                )}
-              </label>
-              <Input
-                type="number"
-                id="proposed_schedule_transition_time"
-                value={entity.proposed_schedule_transition_time}
-                onChange={this.handleChange}
-                placeholder={T.translate(
-                  "edit_event_category.proposed_schedule_settings.placeholders.transition_time"
-                )}
-                className="form-control"
-                min="1"
-                max="240"
-                error={hasErrors("proposed_schedule_transition_time", errors)}
-              />
-            </div>
-          </div>
-        </Panel>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography>
+              {T.translate(
+                "edit_event_category.proposed_schedule_settings.title"
+              )}
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Grid2 container spacing={2}>
+              <Grid2 size={{ xs: 12, md: 4 }}>
+                <InputLabel htmlFor="proposed_schedule_transition_time">
+                  {T.translate(
+                    "edit_event_category.proposed_schedule_settings.transition_time"
+                  )}
+                </InputLabel>
+                <MuiFormikTextField
+                  name="proposed_schedule_transition_time"
+                  type="number"
+                  margin="none"
+                  fullWidth
+                  placeholder={T.translate(
+                    "edit_event_category.proposed_schedule_settings.placeholders.transition_time"
+                  )}
+                  slotProps={{ htmlInput: { min: 1, max: 240 } }}
+                />
+              </Grid2>
+            </Grid2>
+          </AccordionDetails>
+        </Accordion>
 
         {!!entity.id && !entity.parent?.id && (
-          <div>
-            <hr />
-            <div className="row">
-              <div className="col-md-6">
-                <label> {T.translate("edit_event_category.subtracks")}</label>
-                &nbsp;(<i>Nested tracks on schedule filter widget</i>)
-              </div>
-              <div className="col-md pull-right btn-group subtrackddlgrp">
-                <TrackDropdown
-                  onChange={(ev) =>
-                    this.setState({ subtrack: ev.target.value })
-                  }
-                  tracks={availableSubTracks}
-                  value={this.state.subtrack}
-                  id="subtracks"
-                  className="subtrackddl btn-group text-left"
+          <Box sx={{ mb: 2 }}>
+            <Grid2 container spacing={2} sx={{ mb: 1 }}>
+              <Grid2 size={12}>
+                <InputLabel>
+                  {T.translate("edit_event_category.subtracks")}
+                  &nbsp;(<i>Nested tracks on schedule filter widget</i>)
+                </InputLabel>
+              </Grid2>
+            </Grid2>
+            <Grid2 container spacing={1} sx={{ mb: 2, alignItems: "stretch" }}>
+              <Grid2 size={{ xs: 12, sm: 6 }}>
+                <Autocomplete
+                  options={availableSubTracks}
+                  getOptionLabel={(t) => t.name}
+                  value={subtrackToLink}
+                  onChange={(_ev, value) => setSubtrackToLink(value)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder={T.translate(
+                        "edit_event_category.placeholders.select_subtrack"
+                      )}
+                      variant="outlined"
+                    />
+                  )}
                 />
-                <button
-                  type="button"
-                  className="btn btn-default add-button"
-                  onClick={this.handleLinkSubCategory}
-                  disabled={!this.state.subtrack}
+              </Grid2>
+              <Grid2>
+                <Button
+                  variant="outlined"
+                  disabled={!subtrackToLink}
+                  onClick={handleAddSubtrack}
+                  sx={{ height: "100%" }}
                 >
                   {T.translate("general.add")}
-                </button>
-              </div>
-            </div>
-            <div className="row form-group">
-              <div className="col-md-12">
-                <SortableTable
-                  options={table_options}
-                  data={entity.subtracks}
-                  columns={columns}
-                  dropCallback={this.handleUpdateSubCategoryOrder}
-                  orderField="order"
-                />
-              </div>
-            </div>
-          </div>
+                </Button>
+              </Grid2>
+            </Grid2>
+            <MuiTableSortable
+              data={entity.subtracks}
+              columns={subtrackColumns}
+              getName={(subtrack) => subtrack.name}
+              onEdit={handleEditSubtrack}
+              onDelete={handleUnlinkSubtrack}
+              deleteDialogBody={(name) =>
+                `${T.translate(
+                  "edit_event_category.unlink_subtrack_warning"
+                )}${name}`
+              }
+              confirmButtonColor="error"
+              onReorder={handleReorderSubtracks}
+            />
+          </Box>
         )}
 
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
-        </div>
-      </form>
-    );
-  }
-}
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+          <Button type="submit" variant="contained" disabled={isSaving}>
+            {T.translate("general.save")}
+          </Button>
+        </Box>
+      </Box>
+    </FormikProvider>
+  );
+};
 
 export default EventCategoryForm;

@@ -14,37 +14,51 @@
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
+import { Button } from "@mui/material";
 import EventCategoryForm from "../../components/forms/event-category-form";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getEventCategory,
   resetEventCategoryForm,
   saveEventCategory,
-  uploadImage,
   removeImage,
   linkSubCategory,
   unlinkSubCategory,
   updateSubCategoryOrder
 } from "../../actions/event-category-actions";
-import "../../styles/edit-event-category-page.less";
-import AddNewButton from "../../components/buttons/add-new-button";
 
-function EditEventCategoryPage({
+const EditEventCategoryPage = ({
   currentSummit,
   entity,
   errors,
   history,
-  ...rest
-}) {
+  saveEventCategory,
+  removeImage,
+  linkSubCategory,
+  unlinkSubCategory,
+  updateSubCategoryOrder
+}) => {
   const title = entity.id
     ? T.translate("general.edit")
     : T.translate("general.add");
+
+  const handleAddNew = () => {
+    if (!entity?.id) return null;
+
+    history.push(`/app/summits/${currentSummit.id}/event-categories/new`);
+  };
 
   return (
     <div className="container">
       <h3>
         {title} {T.translate("edit_event_category.event_category")}
-        <AddNewButton entity={entity} />
+        <Button
+          variant="outlined"
+          sx={{ float: "right" }}
+          onClick={handleAddNew}
+        >
+          Add new
+        </Button>
       </h3>
       <hr />
       {currentSummit && (
@@ -53,17 +67,16 @@ function EditEventCategoryPage({
           currentSummit={currentSummit}
           entity={entity}
           errors={errors}
-          onSubmit={rest.saveEventCategory}
-          onUploadImage={rest.uploadImage}
-          onRemoveImage={rest.removeImage}
-          onLinkSubCategory={rest.linkSubCategory}
-          onUnlinkSubCategory={rest.unlinkSubCategory}
-          onUpdateSubCategoryOrder={rest.updateSubCategoryOrder}
+          onSubmit={saveEventCategory}
+          onRemoveImage={removeImage}
+          onLinkSubCategory={linkSubCategory}
+          onUnlinkSubCategory={unlinkSubCategory}
+          onUpdateSubCategoryOrder={updateSubCategoryOrder}
         />
       )}
     </div>
   );
-}
+};
 
 const mapStateToProps = ({
   currentSummitState,
@@ -78,7 +91,6 @@ export default connect(mapStateToProps, {
   getEventCategory,
   resetEventCategoryForm,
   saveEventCategory,
-  uploadImage,
   removeImage,
   linkSubCategory,
   unlinkSubCategory,
