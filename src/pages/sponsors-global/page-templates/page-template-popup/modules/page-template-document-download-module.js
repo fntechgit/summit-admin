@@ -4,9 +4,9 @@ import T from "i18n-react/dist/i18n-react";
 import { useField } from "formik";
 import { Divider, Grid2, InputLabel } from "@mui/material";
 import MuiFormikUpload from "openstack-uicore-foundation/lib/components/mui/formik-inputs/upload";
-import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikRadioGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/radio-group";
 import { PAGE_MODULES_DOWNLOAD } from "../../../../../utils/constants";
-import MuiFormikRadioGroup from "../../../../../components/mui/formik-inputs/mui-formik-radio-group";
 import { getFileUploadAllowedExtensions } from "../../../../../utils/methods";
 
 const DocumentDownloadModule = ({ baseName, index }) => {

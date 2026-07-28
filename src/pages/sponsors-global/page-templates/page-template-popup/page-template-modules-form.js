@@ -14,8 +14,8 @@ import { connect } from "react-redux";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DeleteIcon from "@mui/icons-material/Delete";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
-import DragAndDropList from "../../../../components/mui/dnd-list";
-import showConfirmDialog from "../../../../components/mui/showConfirmDialog";
+import DragAndDropList from "openstack-uicore-foundation/lib/components/mui/dnd-list";
+import showConfirmDialog from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
 import {
   DEBOUNCE_WAIT_150,
   PAGES_MODULE_KINDS
@@ -25,7 +25,11 @@ import DocumentDownloadModule from "./modules/page-template-document-download-mo
 import MediaRequestModule from "./modules/page-template-media-request-module";
 import { getAllMediaFileTypes } from "../../../../actions/media-file-type-actions";
 
-const PageModules = ({ name = "modules", getAllMediaFileTypes }) => {
+const PageModules = ({
+  name = "modules",
+  getAllMediaFileTypes,
+  isGlobal = false
+}) => {
   const { values, setFieldValue, errors, submitCount } = useFormikContext();
   const modules = getIn(values, name) || [];
   const moduleErrors = getIn(errors, name);
@@ -129,7 +133,13 @@ const PageModules = ({ name = "modules", getAllMediaFileTypes }) => {
       case PAGES_MODULE_KINDS.DOCUMENT:
         return <DocumentDownloadModule baseName={name} index={index} />;
       case PAGES_MODULE_KINDS.MEDIA:
-        return <MediaRequestModule baseName={name} index={index} />;
+        return (
+          <MediaRequestModule
+            baseName={name}
+            index={index}
+            showUploadDeadline={!isGlobal}
+          />
+        );
       default:
         return null;
     }
@@ -225,7 +235,9 @@ const PageModules = ({ name = "modules", getAllMediaFileTypes }) => {
 };
 
 PageModules.propTypes = {
-  name: PropTypes.string
+  name: PropTypes.string,
+  isGlobal: PropTypes.bool,
+  getAllMediaFileTypes: PropTypes.func.isRequired
 };
 
 const mapStateToProps = () => ({});
