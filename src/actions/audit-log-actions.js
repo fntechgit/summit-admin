@@ -19,11 +19,7 @@ import {
   authErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
-import {
-  getAccessTokenSafely,
-  isNumericString,
-  parseDateRangeFilter
-} from "../utils/methods";
+import { getAccessTokenSafely, isNumericString } from "../utils/methods";
 import { DEFAULT_CURRENT_PAGE, DEFAULT_ORDER_DIR } from "../utils/constants";
 
 export const CLEAR_LOG_PARAMS = "CLEAR_LOG_PARAMS";
@@ -32,22 +28,8 @@ export const RECEIVE_LOG = "RECEIVE_LOG";
 
 const DEFAULT_PER_PAGE_AUDIT_LOG = 100;
 
-const parseFilters = (filters, term = null) => {
-  const filter = [];
-
-  if (filters.created_date_filter) {
-    parseDateRangeFilter(filter, filters.created_date_filter, "created");
-  }
-
-  if (
-    filters.hasOwnProperty("user_id_filter") &&
-    Array.isArray(filters.user_id_filter) &&
-    filters.user_id_filter.length > 0
-  ) {
-    filter.push(
-      `user_id==${filters.user_id_filter.map((t) => t.id).join("||")}`
-    );
-  }
+const parseFilters = (filters = [], term = null) => {
+  const filter = Array.isArray(filters) ? [...filters] : [];
 
   if (term) {
     const escapedTerm = escapeFilterValue(term);
@@ -73,7 +55,7 @@ export const getAuditLog =
     perPage = DEFAULT_PER_PAGE_AUDIT_LOG,
     order = null,
     orderDir = DEFAULT_ORDER_DIR,
-    filters = {}
+    filters = []
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
