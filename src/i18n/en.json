@@ -306,10 +306,8 @@
   "directory": {
     "select": "Select",
     "summits": "Shows",
-    "shows": "shows",
     "add_summit": "Add Show",
     "remove_warning": "Are you sure you want to delete event",
-    "error_loading": "Error loading directory.",
     "invitation_only": "Invitation Only",
     "id": "ID",
     "summit_name": "Event Name",
