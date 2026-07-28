@@ -6,23 +6,26 @@ import { Provider } from "react-redux";
 import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import "@testing-library/jest-dom";
-import PageModules from "./page-template-modules-form";
-import showConfirmDialog from "../../../../components/mui/showConfirmDialog";
+import showConfirmDialog from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
+import PageModules from "../page-template-modules-form";
 import {
   PAGES_MODULE_KINDS,
   PAGE_MODULES_MEDIA_TYPES
-} from "../../../../utils/constants";
+} from "../../../../../utils/constants";
 
 const mockStore = configureStore([thunk]);
 
 // Mocks
-jest.mock("../../../../components/mui/showConfirmDialog", () => jest.fn());
-jest.mock("../../../../actions/media-file-type-actions", () => ({
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog",
+  () => jest.fn()
+);
+jest.mock("../../../../../actions/media-file-type-actions", () => ({
   getAllMediaFileTypes: jest.fn(() => () => Promise.resolve())
 }));
 
 jest.mock(
-  "../../../../components/inputs/formik-text-editor",
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/texteditor",
   () =>
     function MockFormikTextEditor({ name }) {
       return <textarea data-testid={`text-editor-${name}`} />;
@@ -38,7 +41,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../components/mui/formik-inputs/mui-formik-textfield",
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield",
   () =>
     function MockMuiFormikTextField({ name }) {
       return <input data-testid={`textfield-${name}`} />;
@@ -46,7 +49,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../components/mui/formik-inputs/mui-formik-select",
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/select",
   () =>
     function MockMuiFormikSelect({ name, children }) {
       return <select data-testid={`select-${name}`}>{children}</select>;
@@ -62,25 +65,17 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../components/mui/formik-inputs/mui-formik-radio-group",
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/radio-group",
   () =>
     function MockMuiFormikRadioGroup({ name }) {
       return <div data-testid={`radio-group-${name}`} />;
     }
 );
 
-jest.mock(
-  "../../../../components/mui/formik-inputs/mui-formik-async-select",
-  () =>
-    function MockMuiFormikAsyncSelect({ name }) {
-      return <select data-testid={`async-select-${name}`} />;
-    }
-);
-
 // Mock DragAndDropList to capture onReorder
 let capturedOnReorder = null;
 jest.mock(
-  "../../../../components/mui/dnd-list",
+  "openstack-uicore-foundation/lib/components/mui/dnd-list",
   () =>
     function MockDragAndDropList({ items, renderItem, onReorder }) {
       capturedOnReorder = onReorder;
@@ -97,7 +92,10 @@ jest.mock(
 );
 
 // Helper function to render the component with Formik and Redux
-const renderWithFormik = (initialValues = { modules: [] }) => {
+const renderWithFormik = (
+  initialValues = { modules: [] },
+  isGlobal = false
+) => {
   const store = mockStore({
     mediaUploadState: {
       media_file_types: []
@@ -107,7 +105,7 @@ const renderWithFormik = (initialValues = { modules: [] }) => {
     <Provider store={store}>
       <Formik initialValues={initialValues} onSubmit={jest.fn()}>
         <Form>
-          <PageModules name="modules" />
+          <PageModules name="modules" isGlobal={isGlobal} />
         </Form>
       </Formik>
     </Provider>
@@ -170,6 +168,26 @@ describe("PageModules", () => {
       expect(screen.getByTestId("dnd-item-0")).toBeInTheDocument();
       expect(screen.getByTestId("dnd-item-1")).toBeInTheDocument();
       expect(screen.getByTestId("dnd-item-2")).toBeInTheDocument();
+    });
+  });
+
+  describe("isGlobal", () => {
+    test("shows the upload deadline datepicker for a MEDIA module when isGlobal is false", () => {
+      const modules = [createModule(PAGES_MODULE_KINDS.MEDIA, 0, 1)];
+      renderWithFormik({ modules }, false);
+
+      expect(
+        screen.getByTestId("datepicker-modules[0].upload_deadline")
+      ).toBeInTheDocument();
+    });
+
+    test("hides the upload deadline datepicker for a MEDIA module when isGlobal is true", () => {
+      const modules = [createModule(PAGES_MODULE_KINDS.MEDIA, 0, 1)];
+      renderWithFormik({ modules }, true);
+
+      expect(
+        screen.queryByTestId("datepicker-modules[0].upload_deadline")
+      ).not.toBeInTheDocument();
     });
   });
 

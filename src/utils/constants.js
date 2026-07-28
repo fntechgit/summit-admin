@@ -156,7 +156,11 @@ export const TEN_THOUSAND = 10000;
 
 export const COLUMN_4 = 4;
 
+export const COLUMN_6 = 6;
+
 export const COLUMN_8 = 8;
+
+export const COLUMN_12 = 12;
 
 export const DEFAULT_Z_INDEX = 1;
 

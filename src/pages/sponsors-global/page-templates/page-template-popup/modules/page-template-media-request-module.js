@@ -1,22 +1,39 @@
-import React from "react";
+import React, { useEffect } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
 import { getIn, useFormikContext } from "formik";
 import { Divider, Grid2, InputLabel, MenuItem } from "@mui/material";
 import MuiFormikDatepicker from "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker";
-import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
-import MuiFormikRadioGroup from "../../../../../components/mui/formik-inputs/mui-formik-radio-group";
-import MuiFormikFilesizeField from "../../../../../components/mui/formik-inputs/mui-formik-file-size-field";
-import { PAGE_MODULES_MEDIA_TYPES } from "../../../../../utils/constants";
-import MuiFormikSelect from "../../../../../components/mui/formik-inputs/mui-formik-select";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikRadioGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/radio-group";
+import MuiFormikFilesizeField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/file-size-field";
+import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
+import {
+  COLUMN_6,
+  COLUMN_12,
+  PAGE_MODULES_MEDIA_TYPES
+} from "../../../../../utils/constants";
 
-const MediaRequestModule = ({ baseName, index, mediaFileTypes }) => {
-  const { values } = useFormikContext();
+const MediaRequestModule = ({
+  baseName,
+  index,
+  mediaFileTypes,
+  showUploadDeadline
+}) => {
+  const { values, setFieldValue } = useFormikContext();
   const buildFieldName = (field) => `${baseName}[${index}].${field}`;
 
   const mediaType =
     getIn(values, buildFieldName("type")) || PAGE_MODULES_MEDIA_TYPES.FILE;
+
+  // clears a stale upload_deadline hydrated from a legacy module once the field is hidden;
+  // only needs to run on mount, since showUploadDeadline doesn't change during a module's lifetime
+  useEffect(() => {
+    if (!showUploadDeadline) {
+      setFieldValue(buildFieldName("upload_deadline"), null);
+    }
+  }, []);
 
   const mediaTypeOptions = [
     {
@@ -47,7 +64,7 @@ const MediaRequestModule = ({ baseName, index, mediaFileTypes }) => {
       <Grid2 size={12}>
         <Divider sx={{ mx: -2 }} />
       </Grid2>
-      <Grid2 size={6}>
+      <Grid2 size={showUploadDeadline ? COLUMN_6 : COLUMN_12}>
         <InputLabel htmlFor={buildFieldName("name")}>
           {T.translate("page_template_list.page_crud.name")}
         </InputLabel>
@@ -57,15 +74,17 @@ const MediaRequestModule = ({ baseName, index, mediaFileTypes }) => {
           margin="none"
         />
       </Grid2>
-      <Grid2 size={6}>
-        <InputLabel htmlFor={buildFieldName("upload_deadline")}>
-          {T.translate("page_template_list.page_crud.upload_deadline")}
-        </InputLabel>
-        <MuiFormikDatepicker
-          name={buildFieldName("upload_deadline")}
-          margin="none"
-        />
-      </Grid2>
+      {showUploadDeadline && (
+        <Grid2 size={6}>
+          <InputLabel htmlFor={buildFieldName("upload_deadline")}>
+            {T.translate("page_template_list.page_crud.upload_deadline")}
+          </InputLabel>
+          <MuiFormikDatepicker
+            name={buildFieldName("upload_deadline")}
+            margin="none"
+          />
+        </Grid2>
+      )}
 
       {mediaType === PAGE_MODULES_MEDIA_TYPES.FILE && (
         <>
@@ -129,7 +148,9 @@ const MediaRequestModule = ({ baseName, index, mediaFileTypes }) => {
 
 MediaRequestModule.propTypes = {
   baseName: PropTypes.string.isRequired,
-  index: PropTypes.number.isRequired
+  index: PropTypes.number.isRequired,
+  mediaFileTypes: PropTypes.array.isRequired,
+  showUploadDeadline: PropTypes.bool
 };
 
 const mapStateToProps = ({ mediaUploadState }) => ({

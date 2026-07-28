@@ -46,6 +46,8 @@ export const normalizePageTemplateModules = (modules = [], timeZone = null) =>
         normalizedModule.upload_deadline = timeZone
           ? moment.tz(module.upload_deadline, timeZone).unix()
           : moment.utc(module.upload_deadline).unix();
+      } else {
+        delete normalizedModule.upload_deadline;
       }
 
       if (module.file_type_id) {
@@ -81,4 +83,3 @@ export const normalizePageTemplateModules = (modules = [], timeZone = null) =>
 
     return normalizedModule;
   });
-  
