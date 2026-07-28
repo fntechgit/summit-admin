@@ -83,6 +83,8 @@ jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
   setPurchaseDetailsByItemPaging: jest.fn(() => ({
     type: "SET_PURCHASE_DETAILS_BY_ITEM_PAGING"
   })),
+  // Re-exported constant, not an action — the page passes it as the CSV order.
+  LINES_ORDER_BY_ITEM: "item_code",
   PURCHASE_DETAILS_VALIDATION_CLEAR: "PURCHASE_DETAILS_VALIDATION_CLEAR",
   PURCHASE_DETAILS_READ_ERROR: "PURCHASE_DETAILS_READ_ERROR"
 }));
@@ -492,7 +494,7 @@ describe("PurchaseDetailsReportPage", () => {
     expect(getPurchaseDetailsByItemRows).toHaveBeenCalledWith({});
   });
 
-  it("Export CSV in the By Item view dispatches the LINES csv export with the byitem slice filters", async () => {
+  it("Export CSV in the By Item view exports the per-line manifest ORDERED BY ITEM", async () => {
     const history = createMemoryHistory({ initialEntries: [PAGE_URL] });
     renderWithRedux(
       <Router history={history}>
@@ -509,9 +511,12 @@ describe("PurchaseDetailsReportPage", () => {
     await act(async () => {
       fireEvent.click(screen.getByText("sponsor_reports_page.export_csv"));
     });
-    expect(exportPurchaseDetailsLinesCsv).toHaveBeenCalledWith({
-      status: "Paid"
-    });
+    // Same per-line exporter as the Line Items view, but ordered by item code so
+    // every line for one item groups together (the warehouse pull sheet).
+    expect(exportPurchaseDetailsLinesCsv).toHaveBeenCalledWith(
+      { status: "Paid" },
+      "item_code"
+    );
   });
 
   it("changing rows-per-page in the By Item view dispatches SET paging reset to page 1", async () => {

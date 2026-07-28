@@ -12,14 +12,25 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { DEFAULT_CURRENT_PAGE, DEFAULT_PER_PAGE } from "../../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_ORDER_DIR,
+  DEFAULT_PER_PAGE
+} from "../../utils/constants";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
   REQUEST_PURCHASE_DETAILS_BY_ITEM,
   RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS,
   PURCHASE_DETAILS_BY_ITEM_READ_ERROR,
-  SET_PURCHASE_DETAILS_BY_ITEM_PAGING
+  SET_PURCHASE_DETAILS_BY_ITEM_PAGING,
+  SET_PURCHASE_DETAILS_BY_ITEM_SORT
 } from "../../actions/sponsor-reports-actions";
+
+// Sort column key: a DERIVED item-row field, not an API ordering field. Item
+// Code ascending because both By Item layouts read as a pull sheet and a
+// warehouse scans them by code. (The rollup is still emitted qty-desc, which
+// the view's stable sort preserves underneath as the tiebreak.)
+const DEFAULT_ORDER = "itemCode";
 
 export const DEFAULT_STATE = {
   data: [], // ALL filtered line rows (whole-set fetch; client-side rollup)
@@ -30,6 +41,8 @@ export const DEFAULT_STATE = {
   // recorded on REQUEST like the sibling slices.
   currentPage: DEFAULT_CURRENT_PAGE,
   perPage: DEFAULT_PER_PAGE,
+  order: DEFAULT_ORDER,
+  orderDir: DEFAULT_ORDER_DIR,
   filters: {},
   readError: null
 };
@@ -56,6 +69,10 @@ const reducer = (state = DEFAULT_STATE, action) => {
     case SET_PURCHASE_DETAILS_BY_ITEM_PAGING: {
       const { currentPage, perPage } = payload;
       return { ...state, currentPage, perPage };
+    }
+    case SET_PURCHASE_DETAILS_BY_ITEM_SORT: {
+      const { order, orderDir } = payload;
+      return { ...state, order, orderDir };
     }
     case PURCHASE_DETAILS_BY_ITEM_READ_ERROR:
       return { ...state, readError: payload };
