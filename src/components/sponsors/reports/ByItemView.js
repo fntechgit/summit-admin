@@ -249,10 +249,6 @@ const CONTRIB_HEADERS = [
 const itemKey = (group, item) =>
   JSON.stringify([group.sponsorId ?? null, item.itemCode ?? null]);
 
-// The item table both layouts render: one row per item_code with the purchased
-// aggregates, expanding to the orders that contributed. `showSponsor` adds the
-// Sponsor column to the drill-down for the all-sponsors layout, where the
-// sponsor is no longer carried by a parent accordion.
 // The group container BOTH layouts render: an accordion whose summary carries
 // the title, the items chip and the Σ qty. One component, not two call sites, so
 // the card surface, summary divider and AccordionDetails inset stay identical
@@ -285,6 +281,10 @@ const ItemGroup = ({
   </Accordion>
 );
 
+// The item table both layouts render: one row per item_code with the purchased
+// aggregates, expanding to the orders that contributed. `showSponsor` adds the
+// Sponsor column to the drill-down for the all-sponsors layout, where the
+// sponsor is no longer carried by a parent accordion.
 const ItemTable = ({
   items,
   keyFor,

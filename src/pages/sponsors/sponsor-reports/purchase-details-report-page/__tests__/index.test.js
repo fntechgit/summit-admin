@@ -83,6 +83,9 @@ jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
   setPurchaseDetailsByItemPaging: jest.fn(() => ({
     type: "SET_PURCHASE_DETAILS_BY_ITEM_PAGING"
   })),
+  setPurchaseDetailsByItemSort: jest.fn(() => ({
+    type: "SET_PURCHASE_DETAILS_BY_ITEM_SORT"
+  })),
   // Re-exported constant, not an action — the page passes it as the CSV order.
   LINES_ORDER_BY_ITEM: "item_code",
   PURCHASE_DETAILS_VALIDATION_CLEAR: "PURCHASE_DETAILS_VALIDATION_CLEAR",
@@ -95,7 +98,8 @@ const {
   getPurchaseDetailsLinesReport,
   exportPurchaseDetailsLinesCsv,
   getPurchaseDetailsByItemRows,
-  setPurchaseDetailsByItemPaging
+  setPurchaseDetailsByItemPaging,
+  setPurchaseDetailsByItemSort
 } = require("../../../../../actions/sponsor-reports-actions");
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -202,6 +206,10 @@ function buildState(
       summary: null,
       currentPage: 1,
       perPage: 10,
+      // Mirror the reducer's defaults, or no column renders as active and the
+      // page-level sort wiring goes untested.
+      order: "itemCode",
+      orderDir: 1,
       filters: byItemFilters,
       readError: byItemReadError
     }
@@ -517,6 +525,27 @@ describe("PurchaseDetailsReportPage", () => {
       { status: "Paid" },
       "item_code"
     );
+  });
+
+  it("clicking a By Item sort header dispatches the sort thunk", async () => {
+    const history = createMemoryHistory({ initialEntries: [PAGE_URL] });
+    renderWithRedux(
+      <Router history={history}>
+        <Route path={PAGE_ROUTE} component={PurchaseDetailsReportPage} />
+      </Router>,
+      { initialState: buildState({}, { byItemData: [SAMPLE_LINE] }) }
+    );
+    await act(async () => {});
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.view_by_item"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /col_quantity/ }));
+    });
+    expect(setPurchaseDetailsByItemSort).toHaveBeenCalledWith({
+      order: "qty",
+      orderDir: -1
+    });
   });
 
   it("changing rows-per-page in the By Item view dispatches SET paging reset to page 1", async () => {
