@@ -2516,6 +2516,7 @@
       "items": "Items",
       "managed_forms": "Managed Forms",
       "manage_items": "Manage Items",
+      "override": "Override",
       "none": "None",
       "customize": "Customize",
       "archive": "Archive",
@@ -2523,6 +2524,7 @@
       "add_form_using_template": "Add Form Using Template",
       "add_selected_form_template": "Add Selected Form Template",
       "customized": "CUSTOMIZED",
+      "override_warning": "By overriding this Managed Form, a new Customized Form will be created. Are you sure you want to proceed?",
       "customized_form": {
         "new_form_title": "Create New Form",
         "edit_form_title": "Edit Form",
