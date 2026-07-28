@@ -1,5 +1,11 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import InventoryPopup from "../sponsor-form-add-item-from-inventory-popup";
 
@@ -109,5 +115,96 @@ describe("InventoryPopup", () => {
 
     const textNode2 = screen.getByText("0 items selected");
     expect(textNode2.textContent).toBe("0 items selected");
+  });
+
+  it("keeps the dialog open and re-enables the button when the save rejects", async () => {
+    const onClose = jest.fn();
+    const onSave = jest.fn(() => Promise.reject(new Error("API error")));
+    const getInventoryItems = jest.fn();
+
+    render(
+      <InventoryPopup
+        onClose={onClose}
+        onSave={onSave}
+        getInventoryItems={getInventoryItems}
+        inventoryItems={buildInventoryItems([
+          {
+            id: "123",
+            code: "AAA",
+            name: "My Item",
+            early_bird_rate: "100",
+            standard_rate: "100",
+            onsite_rate: "100",
+            hasImage: false,
+            images: []
+          }
+        ])}
+      />
+    );
+
+    const user = userEvent.setup();
+    const checkboxNode = await screen.findAllByRole("checkbox");
+    await user.click(checkboxNode[0]);
+
+    const saveButton = screen.getByText(
+      "sponsor_form_item_list.add_from_inventory.save"
+    );
+    await user.click(saveButton);
+
+    await waitFor(() => expect(saveButton).not.toBeDisabled());
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("ignores a second submit while the first save is pending", async () => {
+    const onClose = jest.fn();
+    let resolveSave;
+    const onSave = jest.fn(
+      () =>
+        new Promise((resolve) => {
+          resolveSave = resolve;
+        })
+    );
+    const getInventoryItems = jest.fn();
+
+    render(
+      <InventoryPopup
+        onClose={onClose}
+        onSave={onSave}
+        getInventoryItems={getInventoryItems}
+        inventoryItems={buildInventoryItems([
+          {
+            id: "123",
+            code: "AAA",
+            name: "My Item",
+            early_bird_rate: "100",
+            standard_rate: "100",
+            onsite_rate: "100",
+            hasImage: false,
+            images: []
+          }
+        ])}
+      />
+    );
+
+    const user = userEvent.setup();
+    const checkboxNode = await screen.findAllByRole("checkbox");
+    await user.click(checkboxNode[0]);
+
+    const saveButton = screen.getByText(
+      "sponsor_form_item_list.add_from_inventory.save"
+    );
+    await user.click(saveButton);
+
+    await waitFor(() => expect(saveButton).toBeDisabled());
+
+    fireEvent.click(saveButton);
+    expect(onSave).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveSave();
+      await Promise.resolve();
+    });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

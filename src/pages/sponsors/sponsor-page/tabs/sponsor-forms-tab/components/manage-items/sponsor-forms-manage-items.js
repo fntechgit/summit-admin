@@ -134,7 +134,7 @@ const SponsorFormsManageItems = ({
       getSponsorCustomizedFormItems(
         formId,
         term,
-        DEFAULT_CURRENT_PAGE,
+        item.id ? currentPage : DEFAULT_CURRENT_PAGE,
         perPage,
         order,
         orderDir,

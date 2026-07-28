@@ -1,5 +1,5 @@
 import React from "react";
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import SponsorshipDialog from "../sponsorship-dialog";
 
@@ -20,7 +20,7 @@ const EXISTING_ENTITY = {
 };
 
 describe("SponsorshipDialog", () => {
-  const onSave = jest.fn();
+  const onSave = jest.fn(() => Promise.resolve());
   const onClose = jest.fn();
 
   beforeEach(() => {
@@ -117,5 +117,6 @@ describe("SponsorshipDialog", () => {
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({ name: "Bronze" })
     );
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
   });
 });

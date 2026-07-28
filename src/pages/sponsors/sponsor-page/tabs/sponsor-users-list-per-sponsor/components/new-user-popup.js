@@ -60,7 +60,13 @@ const NewUserPopup = ({
   });
 
   return (
-    <Dialog open onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      disableEscapeKeyDown={isSaving}
+    >
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between" }}
         component="div"

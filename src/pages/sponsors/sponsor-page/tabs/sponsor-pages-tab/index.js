@@ -266,7 +266,7 @@ const SponsorPagesTab = ({
       const { perPage, order, orderDir } = customizedPages;
       getSponsorCustomizedPages(
         term,
-        DEFAULT_CURRENT_PAGE,
+        entity.id ? customizedPages.currentPage : DEFAULT_CURRENT_PAGE,
         perPage,
         order,
         orderDir,
@@ -278,7 +278,7 @@ const SponsorPagesTab = ({
     saveSponsorManagedPage(entity).then(() => {
       getSponsorManagedPages(
         term,
-        DEFAULT_CURRENT_PAGE,
+        entity.id ? managedPages.currentPage : DEFAULT_CURRENT_PAGE,
         managedPages.perPage,
         managedPages.order,
         managedPages.orderDir,

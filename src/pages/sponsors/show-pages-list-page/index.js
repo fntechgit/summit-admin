@@ -129,7 +129,7 @@ const ShowPagesListPage = ({
     saveShowPage(entity).then(() =>
       getShowPages(
         term,
-        DEFAULT_CURRENT_PAGE,
+        entity.id ? currentPage : DEFAULT_CURRENT_PAGE,
         perPage,
         order,
         orderDir,

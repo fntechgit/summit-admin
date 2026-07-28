@@ -98,7 +98,7 @@ const SummitSponsorshipListPage = ({
   const handleSaveSummitSponsorship = (sponsorship) =>
     saveSummitSponsorship(sponsorship).then(() =>
       getSummitSponsorships(
-        DEFAULT_CURRENT_PAGE,
+        sponsorship.id ? currentPage : DEFAULT_CURRENT_PAGE,
         perPage,
         order,
         orderDir

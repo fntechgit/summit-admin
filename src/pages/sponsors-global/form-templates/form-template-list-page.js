@@ -221,7 +221,7 @@ const FormTemplateListPage = ({
     saveFormTemplate(values).then(() =>
       getFormTemplates(
         "",
-        DEFAULT_CURRENT_PAGE,
+        values.id ? currentPage : DEFAULT_CURRENT_PAGE,
         perPage,
         order,
         orderDir,

@@ -118,7 +118,7 @@ const PageTemplateListPage = ({
     savePageTemplate(entity).then(() =>
       getPageTemplates(
         term,
-        DEFAULT_CURRENT_PAGE,
+        entity.id ? currentPage : DEFAULT_CURRENT_PAGE,
         perPage,
         order,
         orderDir,
