@@ -217,11 +217,6 @@ const PageTemplatePopup = ({
     });
   };
 
-  const handleClose = () => {
-    if (isSaving) return;
-    onClose();
-  };
-
   return (
     <Dialog
       open
