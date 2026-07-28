@@ -29,6 +29,7 @@ import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-i
 import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
 import { generateInvoicePDF } from "openstack-uicore-foundation/lib/components/order-invoice-pdf";
 import history from "../../../history";
+import { normalizeOrder } from "../sponsor-page/utils";
 import {
   approveSponsorPurchase,
   exportAllSponsorPurchases,
@@ -101,7 +102,7 @@ const ShowPurchaseListPage = ({
     setLoadingPDF(true);
     getSponsorOrder(purchaseOrder.id, purchaseOrder.sponsor_id)
       .then(({ response: fetchedOrder }) =>
-        generateInvoicePDF(fetchedOrder, currentSummit, {
+        generateInvoicePDF(normalizeOrder(fetchedOrder), currentSummit, {
           logoSrc: logoInvoice
         })
       )
