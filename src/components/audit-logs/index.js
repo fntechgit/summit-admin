@@ -74,7 +74,9 @@ const AuditLogs = ({
     {
       columnKey: "action_description",
       header: T.translate("audit_log.action"),
-      sortable: false
+      sortable: false,
+      width: 600,
+      truncateText: true
     },
     {
       columnKey: "event_id",
@@ -175,16 +177,18 @@ const AuditLogs = ({
       <Grid2
         container
         spacing={2}
-        sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}
+        sx={{ justifyContent: "end", alignItems: "center", mb: 2 }}
       >
-        <Grid2 size={4}>
+        <Grid2
+          container
+          size={{ xs: 12, md: 6 }}
+          sx={{ flexWrap: "nowrap", alignItems: "center", gap: 1 }}
+        >
           <SearchInput
             term={searchTerm ?? ""}
             placeholder={T.translate("audit_log.placeholders.search_log")}
             onSearch={handleSearch}
           />
-        </Grid2>
-        <Grid2 sx={{ display: "flex", gap: 1, justifyContent: "end" }}>
           <GridFilter id={FILTER_ID} criterias={getCriterias()} />
         </Grid2>
       </Grid2>
@@ -197,6 +201,7 @@ const AuditLogs = ({
         <MuiTable
           columns={showColumns}
           data={logEntries}
+          tableSx={{ tableLayout: "auto", minWidth: 910 }}
           options={tableOptions}
           perPage={perPage}
           currentPage={currentPage}
