@@ -3791,6 +3791,7 @@
     "event": "Event",
     "order": "Order",
     "apply_filters": "Apply Filters",
+    "timezone_info": "All dates appear in user local timezone {tz}",
     "placeholders": {
       "search_log": "Search By Action / Entity Id / OTEL Span ID / OTEL Trace ID / Ray ID",
       "user_id": "Filter by User",

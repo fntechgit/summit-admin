@@ -11,8 +11,7 @@
  * limitations under the License.
  * */
 
-import moment from "moment-timezone";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   CLEAR_LOG_PARAMS,
@@ -66,9 +65,7 @@ const auditLogReducer = (state = DEFAULT_STATE, action) => {
           user: `${userFullName || e.user.email} ${
             e.user?.id ? `(${e.user.id})` : ""
           }`,
-          created: moment(
-            epochToMomentTimeZone(e.created, state.summitTZ)
-          ).format("MMMM Do YYYY, h:mm a"),
+          created: epochToMoment(e.created).format("MMMM Do YYYY, h:mm a"),
           action: formatAuditLog(logEntryAction)
         };
       });
