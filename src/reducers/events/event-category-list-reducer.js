@@ -63,7 +63,10 @@ const eventCategoryListReducer = (state = DEFAULT_STATE, action) => {
     case EVENT_CATEGORIES_SEEDED: {
       const eventCategoriesAdded = payload.response.data.map((e) => ({
         id: e.id,
-        name: e.name
+        name: e.name,
+        code: e.code,
+        color: e.color,
+        order: e.order
       }));
 
       if (eventCategoriesAdded.length > 0) {
