@@ -136,7 +136,7 @@ const InventoryListPage = ({
     saveInventoryItem(item).then(() =>
       getInventoryItems(
         term,
-        currentPage,
+        item.id ? currentPage : DEFAULT_CURRENT_PAGE,
         perPage,
         order,
         orderDir,
