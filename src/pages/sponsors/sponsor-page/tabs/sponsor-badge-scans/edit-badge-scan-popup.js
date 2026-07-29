@@ -38,7 +38,7 @@ const formatExtraQuestions = (extraQuestions, sponsorQuestions) => {
   return values;
 };
 
-const EditBadgeScanPopup = ({ badgeScan, open, onClose, onSubmit }) => {
+const EditBadgeScanPopup = ({ badgeScan, onClose, onSubmit }) => {
   const formik = useFormik({
     initialValues: {
       id: badgeScan.id,
@@ -111,7 +111,7 @@ const EditBadgeScanPopup = ({ badgeScan, open, onClose, onSubmit }) => {
   }, [formik.values]);
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {T.translate("edit_badge_scan.edit_badge_scan")}
@@ -218,7 +218,6 @@ const EditBadgeScanPopup = ({ badgeScan, open, onClose, onSubmit }) => {
 };
 
 EditBadgeScanPopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired
 };

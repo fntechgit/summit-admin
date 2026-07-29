@@ -66,7 +66,6 @@ describe("CustomizedFormPopup", () => {
     renderWithRedux(
       <CustomizedFormPopup
         formId={null}
-        open
         onClose={jest.fn()}
         sponsor={createSponsor({ sponsorships: [{ id: 42 }, { id: 99 }] })}
         summitId={69}
@@ -88,7 +87,6 @@ describe("CustomizedFormPopup", () => {
     renderWithRedux(
       <CustomizedFormPopup
         formId={null}
-        open
         onClose={onClose}
         onSaved={onSaved}
         sponsor={sponsor}
@@ -121,7 +119,6 @@ describe("CustomizedFormPopup", () => {
     renderWithRedux(
       <CustomizedFormPopup
         formId={null}
-        open
         onClose={onClose}
         sponsor={sponsor}
         summitId={69}

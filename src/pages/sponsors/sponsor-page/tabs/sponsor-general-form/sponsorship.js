@@ -174,7 +174,6 @@ const Sponsorship = ({
         <AddTierPopup
           sponsor={sponsor}
           summitId={summitId}
-          open={showAddTierPopup}
           onClose={handleCloseAddTierPopup}
           onSubmit={handleAddTierToSponsor}
         />
@@ -184,7 +183,6 @@ const Sponsorship = ({
         <ManageTierAddonsPopup
           sponsorship={selectedSponsorship}
           summitId={summitId}
-          open={showManageTierAddonsPopup}
           onSponsorshipAddonRemove={onSponsorshipAddonRemove}
           onClose={handleCloseManageAddonsPopup}
           onSubmit={handleAddSponsorshipAddon}

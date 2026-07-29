@@ -1,72 +1,41 @@
 import React from "react";
-import { screen } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { renderWithRedux } from "../../../../../utils/test-utils";
 import InventoryPopup from "../sponsor-form-add-item-from-inventory-popup";
-
-jest.mock("../../../../../actions/inventory-item-actions", () => ({
-  getInventoryItems: jest.fn(() => ({
-    type: "RECEIVE_INVENTORY_ITEMS",
-    payload: {
-      response: {
-        data: [
-          {
-            id: "123",
-            code: "AAA",
-            name: "My Item",
-            early_bird_rate: 1000,
-            standard_rate: 1000,
-            onsite_rate: 1000,
-            is_archived: false
-          },
-
-          {
-            id: "456",
-            code: "AAAA",
-            name: "My Item 2",
-            early_bird_rate: 1000,
-            standard_rate: 1000,
-            onsite_rate: 1000,
-            is_archived: false
-          }
-        ]
-      },
-      current_page: 1,
-      total: 2,
-      last_page: 1
-    }
-  }))
-}));
 
 jest.mock("openstack-uicore-foundation/lib/utils/money", () => ({
   currencyAmountFromCents: jest.fn()
 }));
 
 describe("InventoryPopup", () => {
+  const buildInventoryItems = (items = []) => ({
+    inventoryItems: items,
+    term: "",
+    order: "",
+    orderDir: "1",
+    currentPage: 1,
+    perPage: 10,
+    totalInventoryItems: items.length
+  });
+
   it("check if title is being rendered", async () => {
-    const formId = "AAA";
-    const open = true;
     const onClose = jest.fn();
+    const onSave = jest.fn();
+    const getInventoryItems = jest.fn();
 
-    const inventoryItems = {
-      inventoryItems: [],
-      term: 1,
-      order: 1,
-      orderDir: "A",
-      currentPage: 1,
-      perPag: 3,
-      totalInventoryItems: 2
-    };
-
-    renderWithRedux(
-      <InventoryPopup formId={formId} open={open} onClose={onClose} />,
-      {
-        initialState: {
-          currentInventoryItemListState: {
-            inventoryItems
-          }
-        }
-      }
+    render(
+      <InventoryPopup
+        onClose={onClose}
+        onSave={onSave}
+        getInventoryItems={getInventoryItems}
+        inventoryItems={buildInventoryItems()}
+      />
     );
 
     const node = screen.getByText(
@@ -78,29 +47,17 @@ describe("InventoryPopup", () => {
   });
 
   it("check if close button calls close callback", async () => {
-    const formId = "AAA";
-    const open = true;
     const onClose = jest.fn();
+    const onSave = jest.fn();
+    const getInventoryItems = jest.fn();
 
-    const inventoryItems = {
-      inventoryItems: [],
-      term: 1,
-      order: 1,
-      orderDir: "A",
-      currentPage: 1,
-      perPag: 3,
-      totalInventoryItems: 2
-    };
-
-    renderWithRedux(
-      <InventoryPopup formId={formId} open={open} onClose={onClose} />,
-      {
-        initialState: {
-          currentInventoryItemListState: {
-            inventoryItems
-          }
-        }
-      }
+    render(
+      <InventoryPopup
+        onClose={onClose}
+        onSave={onSave}
+        getInventoryItems={getInventoryItems}
+        inventoryItems={buildInventoryItems()}
+      />
     );
 
     const user = userEvent.setup();
@@ -111,46 +68,38 @@ describe("InventoryPopup", () => {
   });
 
   it("check if close button clears selected rows", async () => {
-    const formId = "AAA";
-    const open = true;
     const onClose = jest.fn();
+    const onSave = jest.fn();
+    const getInventoryItems = jest.fn();
 
-    renderWithRedux(
-      <InventoryPopup formId={formId} open={open} onClose={onClose} />,
-      {
-        initialState: {
-          currentInventoryItemListState: {
-            inventoryItems: [
-              {
-                id: "123",
-                code: "AAA",
-                name: "My Item",
-                early_bird_rate: "100",
-                standard_rate: "100",
-                onsite_rate: "100",
-                hasImage: false,
-                images: []
-              },
-              {
-                id: "456",
-                code: "AAAA",
-                name: "My Item",
-                early_bird_rate: "100",
-                standard_rate: "100",
-                onsite_rate: "100",
-                hasImage: false,
-                images: []
-              }
-            ],
-            term: "",
-            order: "",
-            orderDir: "1",
-            currentPage: 1,
-            perPage: 10,
-            totalInventoryItems: 2
+    render(
+      <InventoryPopup
+        onClose={onClose}
+        onSave={onSave}
+        getInventoryItems={getInventoryItems}
+        inventoryItems={buildInventoryItems([
+          {
+            id: "123",
+            code: "AAA",
+            name: "My Item",
+            early_bird_rate: "100",
+            standard_rate: "100",
+            onsite_rate: "100",
+            hasImage: false,
+            images: []
+          },
+          {
+            id: "456",
+            code: "AAAA",
+            name: "My Item",
+            early_bird_rate: "100",
+            standard_rate: "100",
+            onsite_rate: "100",
+            hasImage: false,
+            images: []
           }
-        }
-      }
+        ])}
+      />
     );
 
     const user = userEvent.setup();
@@ -166,5 +115,96 @@ describe("InventoryPopup", () => {
 
     const textNode2 = screen.getByText("0 items selected");
     expect(textNode2.textContent).toBe("0 items selected");
+  });
+
+  it("keeps the dialog open and re-enables the button when the save rejects", async () => {
+    const onClose = jest.fn();
+    const onSave = jest.fn(() => Promise.reject(new Error("API error")));
+    const getInventoryItems = jest.fn();
+
+    render(
+      <InventoryPopup
+        onClose={onClose}
+        onSave={onSave}
+        getInventoryItems={getInventoryItems}
+        inventoryItems={buildInventoryItems([
+          {
+            id: "123",
+            code: "AAA",
+            name: "My Item",
+            early_bird_rate: "100",
+            standard_rate: "100",
+            onsite_rate: "100",
+            hasImage: false,
+            images: []
+          }
+        ])}
+      />
+    );
+
+    const user = userEvent.setup();
+    const checkboxNode = await screen.findAllByRole("checkbox");
+    await user.click(checkboxNode[0]);
+
+    const saveButton = screen.getByText(
+      "sponsor_form_item_list.add_from_inventory.save"
+    );
+    await user.click(saveButton);
+
+    await waitFor(() => expect(saveButton).not.toBeDisabled());
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("ignores a second submit while the first save is pending", async () => {
+    const onClose = jest.fn();
+    let resolveSave;
+    const onSave = jest.fn(
+      () =>
+        new Promise((resolve) => {
+          resolveSave = resolve;
+        })
+    );
+    const getInventoryItems = jest.fn();
+
+    render(
+      <InventoryPopup
+        onClose={onClose}
+        onSave={onSave}
+        getInventoryItems={getInventoryItems}
+        inventoryItems={buildInventoryItems([
+          {
+            id: "123",
+            code: "AAA",
+            name: "My Item",
+            early_bird_rate: "100",
+            standard_rate: "100",
+            onsite_rate: "100",
+            hasImage: false,
+            images: []
+          }
+        ])}
+      />
+    );
+
+    const user = userEvent.setup();
+    const checkboxNode = await screen.findAllByRole("checkbox");
+    await user.click(checkboxNode[0]);
+
+    const saveButton = screen.getByText(
+      "sponsor_form_item_list.add_from_inventory.save"
+    );
+    await user.click(saveButton);
+
+    await waitFor(() => expect(saveButton).toBeDisabled());
+
+    fireEvent.click(saveButton);
+    expect(onSave).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveSave();
+      await Promise.resolve();
+    });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

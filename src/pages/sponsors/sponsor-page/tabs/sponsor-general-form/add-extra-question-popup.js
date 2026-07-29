@@ -39,7 +39,6 @@ import { ExtraQuestionsTypeAllowSubQuestion } from "../../../../../utils/constan
 const AddSponsorExtraQuestionPopup = ({
   entity: extraQuestion,
   summit,
-  open,
   onClose,
   onSubmit,
   allClasses,
@@ -296,7 +295,7 @@ const AddSponsorExtraQuestionPopup = ({
       : [];
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {extraQuestion.id
@@ -655,7 +654,6 @@ const mapStateToProps = ({ currentSponsorExtraQuestionState }) => ({
 });
 
 AddSponsorExtraQuestionPopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired
 };

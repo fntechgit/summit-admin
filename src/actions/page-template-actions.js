@@ -177,6 +177,7 @@ export const savePageTemplate = (entity) => async (dispatch) => {
         );
       })
       .catch((err) => {
+        console.error(err);
         throw err;
       })
       .finally(() => {
@@ -201,6 +202,7 @@ export const savePageTemplate = (entity) => async (dispatch) => {
       );
     })
     .catch((err) => {
+      console.error(err);
       throw err;
     })
     .finally(() => {

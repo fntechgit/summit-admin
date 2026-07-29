@@ -49,8 +49,8 @@ jest.mock(
 
 jest.mock("../../../../../../actions/sponsor-pages-actions", () => ({
   ...jest.requireActual("../../../../../../actions/sponsor-pages-actions"),
-  getSponsorManagedPages: jest.fn(() => ({ type: "MOCK_ACTION" })),
-  getSponsorCustomizedPages: jest.fn(() => ({ type: "MOCK_ACTION" })),
+  getSponsorManagedPages: jest.fn(() => () => Promise.resolve()),
+  getSponsorCustomizedPages: jest.fn(() => () => Promise.resolve()),
   getSponsorCustomizedPage: jest.fn(
     () => () => Promise.resolve({ id: 1, name: "Test Page" })
   ),

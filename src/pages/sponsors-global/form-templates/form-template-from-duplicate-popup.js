@@ -22,7 +22,6 @@ import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-i
 import MenuButton from "../../../components/mui/menu-button";
 
 const FormTemplateFromDuplicateDialog = ({
-  open,
   options,
   onClose,
   onDuplicate,
@@ -94,7 +93,7 @@ const FormTemplateFromDuplicateDialog = ({
   ];
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {T.translate("form_template_from_duplicate_dialog.duplicate_form")}
@@ -176,7 +175,6 @@ const FormTemplateFromDuplicateDialog = ({
 };
 
 FormTemplateFromDuplicateDialog.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onDuplicate: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
