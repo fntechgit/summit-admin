@@ -78,7 +78,7 @@ const AuditLogs = ({
       sortable: true
     },
     {
-      columnKey: "action_description",
+      columnKey: "action",
       header: T.translate("audit_log.action"),
       sortable: false,
       width: 600,
