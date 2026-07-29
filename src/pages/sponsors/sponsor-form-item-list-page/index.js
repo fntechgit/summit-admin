@@ -117,11 +117,29 @@ const SponsorFormItemListPage = ({
 
   const handleSaveItem = (values) => {
     const save = values.id ? updateSponsorFormItem : saveSponsorFormItem;
-    return save(formId, values);
+    return save(formId, values).then(() =>
+      getSponsorFormItems(
+        formId,
+        values.id ? currentPage : DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      ).catch(() => {})
+    );
   };
 
   const handleAddFromInventory = (itemIds) =>
-    addInventoryItems(formId, itemIds);
+    addInventoryItems(formId, itemIds).then(() =>
+      getSponsorFormItems(
+        formId,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      ).catch(() => {})
+    );
 
   const handleCellEdit = (rowId, column, value) => {
     // since editable cell is TextField and not PriceField, we need to convert to cents

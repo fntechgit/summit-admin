@@ -1297,7 +1297,6 @@ export const saveSponsorFormItem =
         }
 
         return Promise.all(promises).then(() => {
-          dispatch(getSponsorFormItems(formId));
           dispatch(
             snackbarSuccessHandler({
               title: T.translate("general.success"),
@@ -1346,7 +1345,6 @@ export const updateSponsorFormItem =
         }
 
         return Promise.all(promises).then(() => {
-          dispatch(getSponsorFormItems(formId));
           dispatch(
             snackbarSuccessHandler({
               title: T.translate("general.success"),
@@ -1482,7 +1480,6 @@ export const addInventoryItems =
       snackbarErrorHandler
     )(params)(dispatch)
       .then(() => {
-        dispatch(getSponsorFormItems(formId));
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),
