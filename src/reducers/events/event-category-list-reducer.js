@@ -9,7 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 import {
   RECEIVE_EVENT_CATEGORIES,
@@ -20,7 +22,6 @@ import {
 } from "../../actions/event-category-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
   eventCategories: []
@@ -39,49 +40,42 @@ const eventCategoryListReducer = (state = DEFAULT_STATE, action) => {
     case RECEIVE_EVENT_CATEGORIES: {
       return {
         ...state,
-        eventCategories: payload.response.data.map((e) => {
-          return {
-            id: e.id,
-            name: e.name,
-            code: e.code,
-            color: `<div style="background-color: ${e.color}">&nbsp;</div>`,
-            order: e.order
-          };
-        })
+        eventCategories: payload.response.data.map((e) => ({
+          id: e.id,
+          name: e.name,
+          code: e.code,
+          color: e.color,
+          order: e.order
+        }))
       };
     }
     case EVENT_CATEGORY_ORDER_UPDATED: {
-      const tracks = payload.map((t) => {
-        return {
-          id: t.id,
-          name: t.name,
-          code: t.code,
-          color: t.color,
-          order: parseInt(t.order)
-        };
-      });
+      const tracks = payload.map((t) => ({
+        id: t.id,
+        name: t.name,
+        code: t.code,
+        color: t.color,
+        order: parseInt(t.order)
+      }));
 
       return { ...state, eventCategories: tracks };
     }
     case EVENT_CATEGORIES_SEEDED: {
-      let eventCategoriesAdded = payload.response.data.map((e) => {
-        return {
-          id: e.id,
-          name: e.name
-        };
-      });
+      const eventCategoriesAdded = payload.response.data.map((e) => ({
+        id: e.id,
+        name: e.name
+      }));
 
       if (eventCategoriesAdded.length > 0) {
         return {
           ...state,
           eventCategories: [...state.eventCategories, ...eventCategoriesAdded]
         };
-      } else {
-        return state;
       }
+      return state;
     }
     case EVENT_CATEGORY_DELETED: {
-      let { categoryId } = payload;
+      const { categoryId } = payload;
       return {
         ...state,
         eventCategories: state.eventCategories.filter(

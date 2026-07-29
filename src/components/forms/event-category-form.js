@@ -459,7 +459,7 @@ const EventCategoryForm = ({
               </Grid2>
             </Grid2>
             <MuiTableSortable
-              data={entity.subtracks}
+              data={entity.subtracks || []}
               columns={subtrackColumns}
               getName={(subtrack) => subtrack.name}
               onEdit={handleEditSubtrack}

@@ -57,7 +57,7 @@ const EditEventCategoryPage = ({
           sx={{ float: "right" }}
           onClick={handleAddNew}
         >
-          Add new
+          {T.translate("edit_event_category.add_new")}
         </Button>
       </h3>
       <hr />

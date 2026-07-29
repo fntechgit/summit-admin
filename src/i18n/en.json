@@ -1328,6 +1328,7 @@
   },
   "edit_event_category": {
     "event_category": "Activity Category",
+    "add_new": "Add new",
     "name": "Name",
     "code": "Code",
     "color": "Color",

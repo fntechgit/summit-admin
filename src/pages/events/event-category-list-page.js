@@ -34,7 +34,16 @@ const columns = [
     columnKey: "color",
     header: T.translate("event_category_list.color"),
     render: (row) => (
-      <Box component="div" dangerouslySetInnerHTML={{ __html: row.color }} />
+      <Box
+        sx={{
+          width: 24,
+          height: 24,
+          borderRadius: 0.5,
+          backgroundColor: row.color?.startsWith("#")
+            ? row.color
+            : `#${row.color}`
+        }}
+      />
     )
   }
 ];
@@ -54,7 +63,7 @@ const EventCategoryListPage = ({
     if (currentSummit) getEventCategories();
   }, [currentSummit?.id]);
 
-  if (!currentSummit.id) return null;
+  if (!currentSummit?.id) return null;
 
   const handleEdit = (category) =>
     history.push(
