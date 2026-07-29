@@ -11,7 +11,7 @@
     "entity_not_found": "The entity you are looking for was not found.",
     "maximum_files": "Maximum number of files has been reached",
     "payment_profile_not_found_title": "Payment Profile not found",
-    "payment_profile_not_found": "Missing payment profile for summit {{summitName}}. Please contact support."
+    "payment_profile_not_found": "Missing payment profile for summit {summitName}. Please contact support."
   },
   "general": {
     "summit": "Event",
@@ -3750,6 +3750,7 @@
     "event": "Event",
     "order": "Order",
     "apply_filters": "Apply Filters",
+    "timezone_info": "All dates appear in user local timezone {tz}",
     "placeholders": {
       "search_log": "Search By Action / Entity Id / OTEL Span ID / OTEL Trace ID / Ray ID",
       "user_id": "Filter by User",

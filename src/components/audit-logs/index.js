@@ -8,6 +8,7 @@ import {
   OPERATORS
 } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import { queryMembers } from "openstack-uicore-foundation/lib/utils/query-actions";
+import CustomAlert from "openstack-uicore-foundation/lib/components/mui/custom-alert";
 import T from "i18n-react";
 import { connect } from "react-redux";
 import {
@@ -64,6 +65,11 @@ const AuditLogs = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState(term);
   const { parsedFilter, resetFilters } = useGridFilter(FILTER_ID);
+  const userTimeZone = new Intl.DateTimeFormat(undefined, {
+    timeZoneName: "long"
+  })
+    .formatToParts(new Date())
+    .find((part) => part.type === "timeZoneName").value;
 
   const auditLogColumns = [
     {
@@ -192,6 +198,9 @@ const AuditLogs = ({
           <GridFilter id={FILTER_ID} criterias={getCriterias()} />
         </Grid2>
       </Grid2>
+      <CustomAlert
+        message={T.translate("audit_log.timezone_info", { tz: userTimeZone })}
+      />
 
       {logEntries.length === 0 && (
         <div>{T.translate("audit_log.no_log_entries")}</div>
