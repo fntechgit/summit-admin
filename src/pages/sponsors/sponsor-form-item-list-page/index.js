@@ -133,7 +133,7 @@ const SponsorFormItemListPage = ({
     addInventoryItems(formId, itemIds).then(() =>
       getSponsorFormItems(
         formId,
-        currentPage,
+        DEFAULT_CURRENT_PAGE,
         perPage,
         order,
         orderDir,

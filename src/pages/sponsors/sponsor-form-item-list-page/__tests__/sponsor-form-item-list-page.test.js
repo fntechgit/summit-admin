@@ -7,7 +7,8 @@ import { renderWithRedux } from "../../../../utils/test-utils";
 jest.mock("../../../../actions/sponsor-forms-actions", () => ({
   ...jest.requireActual("../../../../actions/sponsor-forms-actions"),
   getSponsorFormItems: jest.fn(() => () => Promise.resolve()),
-  updateSponsorFormItem: jest.fn(() => () => Promise.resolve())
+  updateSponsorFormItem: jest.fn(() => () => Promise.resolve()),
+  addInventoryItems: jest.fn(() => () => Promise.resolve())
 }));
 
 jest.mock("../../../../actions/inventory-item-actions", () => ({
@@ -15,9 +16,20 @@ jest.mock("../../../../actions/inventory-item-actions", () => ({
   getInventoryItems: jest.fn(() => () => Promise.resolve())
 }));
 
+jest.mock(
+  "../components/sponsor-form-add-item-from-inventory-popup",
+  () =>
+    function MockInventoryPopup({ onSave }) {
+      return (
+        <button onClick={() => onSave([10, 20])}>mock-inventory-save</button>
+      );
+    }
+);
+
 const {
   getSponsorFormItems,
-  updateSponsorFormItem
+  updateSponsorFormItem,
+  addInventoryItems
 } = require("../../../../actions/sponsor-forms-actions");
 
 const buildItem = (id) => ({
@@ -79,6 +91,29 @@ describe("SponsorFormItemListPage inline cell edit", () => {
       expect(getSponsorFormItems).toHaveBeenCalledWith(
         "FORM1",
         3,
+        5,
+        "code",
+        -1,
+        false
+      )
+    );
+  });
+
+  it("refreshes the list at the first page after adding items from inventory", async () => {
+    renderPage();
+
+    const user = userEvent.setup();
+    await user.click(
+      screen.getByText("sponsor_form_item_list.add_item_from_inventory")
+    );
+    await user.click(screen.getByText("mock-inventory-save"));
+
+    expect(addInventoryItems).toHaveBeenCalledWith("FORM1", [10, 20]);
+
+    await waitFor(() =>
+      expect(getSponsorFormItems).toHaveBeenCalledWith(
+        "FORM1",
+        1,
         5,
         "code",
         -1,
