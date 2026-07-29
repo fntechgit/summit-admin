@@ -27,7 +27,6 @@ const CustomizedFormPopup = ({
   summitId,
   summitTZ,
   upgradeManaged,
-  open,
   onClose,
   onSaved,
   getSponsorCustomizedForm,
@@ -84,7 +83,7 @@ const CustomizedFormPopup = ({
 
   return (
     <Dialog
-      open={open}
+      open
       onClose={handleClose}
       disableEscapeKeyDown={isSaving}
       maxWidth="md"
@@ -124,7 +123,6 @@ const CustomizedFormPopup = ({
 };
 
 CustomizedFormPopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSaved: PropTypes.func
 };

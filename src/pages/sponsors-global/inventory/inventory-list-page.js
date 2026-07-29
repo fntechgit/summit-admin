@@ -132,20 +132,17 @@ const InventoryListPage = ({
     setOpen(true);
   };
 
-  const handleInventorySave = (item) => {
-    saveInventoryItem(item)
-      .then(() =>
-        getInventoryItems(
-          term,
-          currentPage,
-          perPage,
-          order,
-          orderDir,
-          showArchived
-        )
-      )
-      .finally(() => setOpen(false));
-  };
+  const handleInventorySave = (item) =>
+    saveInventoryItem(item).then(() =>
+      getInventoryItems(
+        term,
+        item.id ? currentPage : DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      ).catch(() => {})
+    );
 
   const handleArchiveItem = (item) =>
     item.is_archived

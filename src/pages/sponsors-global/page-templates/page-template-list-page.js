@@ -115,16 +115,16 @@ const PageTemplateListPage = ({
   };
 
   const handleSavePageTemplate = (entity) =>
-    savePageTemplate(entity).then(() => {
+    savePageTemplate(entity).then(() =>
       getPageTemplates(
         term,
-        DEFAULT_CURRENT_PAGE,
+        entity.id ? currentPage : DEFAULT_CURRENT_PAGE,
         perPage,
         order,
         orderDir,
         showArchived
-      ).catch(() => {});
-    });
+      ).catch(() => {})
+    );
 
   const handleArchive = (item) =>
     item.is_archived

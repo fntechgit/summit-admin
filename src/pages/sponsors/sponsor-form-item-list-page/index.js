@@ -31,10 +31,14 @@ import {
   deleteSponsorFormItem,
   getSponsorFormItem,
   getSponsorFormItems,
+  saveSponsorFormItem,
   updateSponsorFormItem,
+  addInventoryItems,
+  resetSponsorFormItem,
   archiveSponsorFormItem,
   unarchiveSponsorFormItem
 } from "../../../actions/sponsor-forms-actions";
+import { getInventoryItems } from "../../../actions/inventory-item-actions";
 import SponsorFormItemPopup from "./components/sponsor-form-item-popup";
 import SponsorFormAddItemFromInventoryPopup from "./components/sponsor-form-add-item-from-inventory-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
@@ -44,16 +48,22 @@ import { rateToCents } from "../../../utils/rate-helpers";
 const SponsorFormItemListPage = ({
   match,
   items,
+  currentItem,
   currentPage,
   perPage,
   showArchived,
   order,
   orderDir,
   totalCount,
+  inventoryItems,
+  getInventoryItems,
   getSponsorFormItems,
   getSponsorFormItem,
   deleteSponsorFormItem,
+  saveSponsorFormItem,
   updateSponsorFormItem,
+  addInventoryItems,
+  resetSponsorFormItem,
   archiveSponsorFormItem,
   unarchiveSponsorFormItem
 }) => {
@@ -100,11 +110,53 @@ const SponsorFormItemListPage = ({
     });
   };
 
+  const handleClosePopup = () => {
+    resetSponsorFormItem();
+    setOpenPopup(null);
+  };
+
+  const handleSaveItem = (values) => {
+    const save = values.id ? updateSponsorFormItem : saveSponsorFormItem;
+    return save(formId, values).then(() =>
+      getSponsorFormItems(
+        formId,
+        values.id ? currentPage : DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      ).catch(() => {})
+    );
+  };
+
+  const handleAddFromInventory = (itemIds) =>
+    addInventoryItems(formId, itemIds).then(() =>
+      getSponsorFormItems(
+        formId,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      ).catch(() => {})
+    );
+
   const handleCellEdit = (rowId, column, value) => {
     // since editable cell is TextField and not PriceField, we need to convert to cents
     const valueInCents = rateToCents(value);
     const tmpEntity = { id: rowId, [column]: valueInCents };
-    updateSponsorFormItem(formId, tmpEntity);
+    return updateSponsorFormItem(formId, tmpEntity)
+      .then(() =>
+        getSponsorFormItems(
+          formId,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        )
+      )
+      .catch(() => {});
   };
 
   const handleArchiveItem = (item) =>
@@ -126,6 +178,7 @@ const SponsorFormItemListPage = ({
   };
 
   const handleNewItem = () => {
+    resetSponsorFormItem();
     setOpenPopup("crud");
   };
 
@@ -301,29 +354,42 @@ const SponsorFormItemListPage = ({
           />
         </div>
       )}
-      <SponsorFormItemPopup
-        formId={formId}
-        open={openPopup === "crud"}
-        onClose={() => setOpenPopup(null)}
-      />
-      <SponsorFormAddItemFromInventoryPopup
-        formId={formId}
-        open={openPopup === "inventory"}
-        onClose={() => setOpenPopup(null)}
-      />
+      {openPopup === "crud" && (
+        <SponsorFormItemPopup
+          item={currentItem}
+          onSave={handleSaveItem}
+          onClose={handleClosePopup}
+        />
+      )}
+      {openPopup === "inventory" && (
+        <SponsorFormAddItemFromInventoryPopup
+          inventoryItems={inventoryItems}
+          getInventoryItems={getInventoryItems}
+          onSave={handleAddFromInventory}
+          onClose={() => setOpenPopup(null)}
+        />
+      )}
     </div>
   );
 };
 
-const mapStateToProps = ({ sponsorFormItemsListState }) => ({
-  ...sponsorFormItemsListState
+const mapStateToProps = ({
+  sponsorFormItemsListState,
+  currentInventoryItemListState
+}) => ({
+  ...sponsorFormItemsListState,
+  inventoryItems: currentInventoryItemListState
 });
 
 export default connect(mapStateToProps, {
   getSponsorFormItems,
   deleteSponsorFormItem,
   getSponsorFormItem,
+  saveSponsorFormItem,
   updateSponsorFormItem,
+  addInventoryItems,
+  resetSponsorFormItem,
+  getInventoryItems,
   archiveSponsorFormItem,
   unarchiveSponsorFormItem
 })(SponsorFormItemListPage);

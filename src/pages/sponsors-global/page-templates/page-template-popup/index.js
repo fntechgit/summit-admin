@@ -172,13 +172,9 @@ const PageTemplatePopup = ({
       }));
 
       onSave({ ...values, modules: modulesWithOrder })
-        .then(() => {
-          onClose();
-        })
+        .then(() => onClose())
         .catch(() => {})
-        .finally(() => {
-          setIsSaving(false);
-        });
+        .finally(() => setIsSaving(false));
     }
   });
 

@@ -6,7 +6,7 @@ import { cloneGlobalTemplate } from "../../../../../actions/sponsor-forms-action
 import SelectTemplatesDialog from "./select-templates-dialog";
 import SelectSponsorshipsDialog from "./select-sponsorships-dialog";
 
-const GlobalTemplatePopup = ({ open, onClose, cloneGlobalTemplate }) => {
+const GlobalTemplatePopup = ({ onClose, cloneGlobalTemplate }) => {
   const [stage, setStage] = useState("templates");
   const [selectedTemplates, setSelectedTemplates] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -45,7 +45,7 @@ const GlobalTemplatePopup = ({ open, onClose, cloneGlobalTemplate }) => {
 
   return (
     <Dialog
-      open={open}
+      open
       onClose={handleClose}
       maxWidth={dialogSize}
       fullWidth
@@ -69,7 +69,6 @@ const GlobalTemplatePopup = ({ open, onClose, cloneGlobalTemplate }) => {
 };
 
 GlobalTemplatePopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired
 };
 

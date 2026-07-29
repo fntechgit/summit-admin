@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import { connect } from "react-redux";
 import {
   Dialog,
   DialogTitle,
@@ -10,38 +9,33 @@ import {
   Typography
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import {
-  resetSponsorFormItem,
-  saveSponsorFormItem,
-  updateSponsorFormItem
-} from "../../../../actions/sponsor-forms-actions";
 import SponsorFormItemForm from "./sponsor-form-item-form";
 
-const SponsorFormItemPopup = ({
-  formId,
-  item,
-  open,
-  onClose,
-  resetSponsorFormItem,
-  saveSponsorFormItem,
-  updateSponsorFormItem
-}) => {
+const SponsorFormItemPopup = ({ item, onClose, onSave }) => {
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleClose = () => {
-    // clear form from reducer
-    resetSponsorFormItem();
+    if (isSaving) return;
     onClose();
   };
 
   const handleOnSave = (values) => {
-    const save = values.id ? updateSponsorFormItem : saveSponsorFormItem;
-
-    save(formId, values).finally(() => {
-      handleClose();
-    });
+    if (isSaving) return;
+    setIsSaving(true);
+    onSave(values)
+      .then(() => onClose())
+      .catch(() => {})
+      .finally(() => setIsSaving(false));
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog
+      open
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      disableEscapeKeyDown={isSaving}
+    >
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between" }}
         component="div"
@@ -51,35 +45,29 @@ const SponsorFormItemPopup = ({
             `sponsor_form_item_list.edit_item.${item?.id ? "edit" : "new"}`
           )}
         </Typography>
-        <IconButton size="large" sx={{ p: 0 }} onClick={handleClose}>
+        <IconButton
+          size="large"
+          sx={{ p: 0 }}
+          onClick={handleClose}
+          disabled={isSaving}
+        >
           <CloseIcon fontSize="large" />
         </IconButton>
       </DialogTitle>
       <Divider />
-      <SponsorFormItemForm initialValues={item} onSubmit={handleOnSave} />
+      <SponsorFormItemForm
+        initialValues={item}
+        onSubmit={handleOnSave}
+        isSaving={isSaving}
+      />
     </Dialog>
   );
 };
 
 SponsorFormItemPopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  formId: PropTypes.string.isRequired,
-  resetSponsorFormItem: PropTypes.func.isRequired,
-  saveSponsorFormItem: PropTypes.func.isRequired,
-  updateSponsorFormItem: PropTypes.func.isRequired
+  onSave: PropTypes.func.isRequired,
+  item: PropTypes.object
 };
 
-const mapStateToProps = ({
-  sponsorFormItemsListState,
-  currentSummitState
-}) => ({
-  item: sponsorFormItemsListState.currentItem,
-  summitTZ: currentSummitState.currentSummit.time_zone_id
-});
-
-export default connect(mapStateToProps, {
-  resetSponsorFormItem,
-  saveSponsorFormItem,
-  updateSponsorFormItem
-})(SponsorFormItemPopup);
+export default SponsorFormItemPopup;

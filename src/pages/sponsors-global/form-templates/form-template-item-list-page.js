@@ -174,20 +174,18 @@ const FormTemplateItemListPage = ({
     );
   };
 
-  const handleFormTemplateSave = (item) => {
+  const handleFormTemplateSave = (item) =>
     saveFormTemplateItem(formTemplateId, item).then(() =>
       getFormTemplateItems(
         formTemplateId,
         term,
-        currentPage,
+        item.id ? currentPage : DEFAULT_CURRENT_PAGE,
         perPage,
         order,
         orderDir,
         showArchived
-      )
+      ).catch(() => {})
     );
-    setShowInventoryItemModal(false);
-  };
 
   const columns = [
     {

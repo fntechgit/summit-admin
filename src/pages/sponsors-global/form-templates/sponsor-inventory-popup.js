@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import PropTypes from "prop-types";
 import { FormikProvider, useFormik } from "formik";
@@ -45,6 +45,8 @@ const SponsorItemDialog = ({
   onMetaFieldTypeValueDeleted,
   entity: initialEntity
 }) => {
+  const [isSaving, setIsSaving] = useState(false);
+
   const formik = useFormik({
     initialValues: {
       ...initialEntity,
@@ -65,7 +67,14 @@ const SponsorItemDialog = ({
       quantity_limit_per_show: positiveNumberValidation(),
       meta_fields: formMetafieldsValidation()
     }),
-    onSubmit: (values) => onSave(values)
+    onSubmit: (values) => {
+      if (isSaving) return;
+      setIsSaving(true);
+      onSave(values)
+        .then(() => onClose())
+        .catch(() => {})
+        .finally(() => setIsSaving(false));
+    }
   });
 
   const mediaType = {
@@ -79,6 +88,7 @@ const SponsorItemDialog = ({
   useScrollToError(formik);
 
   const handleClose = () => {
+    if (isSaving) return;
     formik.resetForm();
     onClose();
   };
@@ -92,12 +102,18 @@ const SponsorItemDialog = ({
       disableEnforceFocus
       disableAutoFocus
       disableRestoreFocus
+      disableEscapeKeyDown={isSaving}
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         {initialEntity.id
           ? T.translate("edit_inventory_item.edit_item")
           : T.translate("edit_inventory_item.new_item")}
-        <IconButton size="small" onClick={handleClose} sx={{ mr: 1 }}>
+        <IconButton
+          size="small"
+          onClick={handleClose}
+          sx={{ mr: 1 }}
+          disabled={isSaving}
+        >
           <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
@@ -227,7 +243,12 @@ const SponsorItemDialog = ({
           </DialogContent>
           <Divider />
           <DialogActions>
-            <Button type="submit" fullWidth variant="contained">
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={isSaving}
+            >
               {T.translate("edit_inventory_item.save_changes")}
             </Button>
           </DialogActions>

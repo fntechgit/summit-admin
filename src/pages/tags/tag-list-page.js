@@ -27,7 +27,7 @@ import {
   saveTag,
   resetTagForm
 } from "../../actions/tag-actions";
-import { DEFAULT_PER_PAGE } from "../../utils/constants";
+import { DEFAULT_CURRENT_PAGE, DEFAULT_PER_PAGE } from "../../utils/constants";
 
 const TagListPage = ({
   tags = [],
@@ -75,9 +75,15 @@ const TagListPage = ({
   };
 
   const handleSaveTag = (entity) =>
-    saveTag(entity).then(() => {
-      getTags(search, currentPage, perPage, order, orderDir);
-    });
+    saveTag(entity).then(() =>
+      getTags(
+        search,
+        entity.id ? currentPage : DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir
+      ).catch(() => {})
+    );
 
   const handleDeleteTag = (id) => {
     deleteTag(id)

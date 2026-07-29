@@ -129,21 +129,19 @@ const SponsorFormsManageItems = ({
     );
   };
 
-  const handleItemSave = (item) => {
+  const handleItemSave = (item) =>
     saveSponsorFormManagedItem(formId, item).then(() => {
       getSponsorCustomizedFormItems(
         formId,
         term,
-        DEFAULT_CURRENT_PAGE,
+        item.id ? currentPage : DEFAULT_CURRENT_PAGE,
         perPage,
         order,
         orderDir,
         showArchived
-      );
+      ).catch(() => {});
       resetSponsorFormManagedItem();
-      setOpenPopup(null);
     });
-  };
 
   const handleOpenItemPopup = () => {
     resetSponsorFormManagedItem();

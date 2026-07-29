@@ -24,7 +24,6 @@ import {
 } from "../../../../../../actions/sponsor-users-actions";
 
 const NewUserPopup = ({
-  open,
   onClose,
   sponsorId,
   sendSponsorUserInvite,
@@ -62,7 +61,7 @@ const NewUserPopup = ({
 
   return (
     <Dialog
-      open={open}
+      open
       onClose={handleClose}
       maxWidth="sm"
       fullWidth
@@ -121,7 +120,6 @@ const NewUserPopup = ({
 };
 
 NewUserPopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   sendSponsorUserInvite: PropTypes.func.isRequired
 };
