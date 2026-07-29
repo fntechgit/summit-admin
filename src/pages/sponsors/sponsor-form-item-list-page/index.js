@@ -145,7 +145,18 @@ const SponsorFormItemListPage = ({
     // since editable cell is TextField and not PriceField, we need to convert to cents
     const valueInCents = rateToCents(value);
     const tmpEntity = { id: rowId, [column]: valueInCents };
-    return updateSponsorFormItem(formId, tmpEntity).catch(() => {});
+    return updateSponsorFormItem(formId, tmpEntity)
+      .then(() =>
+        getSponsorFormItems(
+          formId,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          showArchived
+        )
+      )
+      .catch(() => {});
   };
 
   const handleArchiveItem = (item) =>
