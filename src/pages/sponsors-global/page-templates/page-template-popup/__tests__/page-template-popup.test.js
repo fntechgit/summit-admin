@@ -37,10 +37,10 @@ jest.mock("../../../../../actions/sponsor-actions", () => ({
 }));
 
 jest.mock(
-  "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker",
+  "../../../../../components/mui/formik-inputs/mui-formik-datetimepicker",
   () =>
-    function MockMuiFormikDatepicker({ name }) {
-      return <input data-testid={`datepicker-${name}`} type="date" />;
+    function MockMuiFormikDatetimepicker({ name }) {
+      return <input data-testid={`datepicker-${name}`} type="text" />;
     }
 );
 
@@ -74,7 +74,12 @@ const renderPopup = ({
   onSave,
   modules = [baseMediaModule]
 } = {}) => {
-  const store = mockStore({ mediaUploadState: { media_file_types: [] } });
+  const store = mockStore({
+    mediaUploadState: { media_file_types: [] },
+    currentSummitState: {
+      currentSummit: { time_zone_id: "America/Los_Angeles" }
+    }
+  });
   return render(
     <Provider store={store}>
       <PageTemplatePopup
