@@ -5,6 +5,7 @@ import { Formik, Form, useFormikContext } from "formik";
 import { Provider } from "react-redux";
 import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
+import moment from "moment-timezone";
 import "@testing-library/jest-dom";
 import showConfirmDialog from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
 import PageModules from "../page-template-modules-form";
@@ -57,14 +58,6 @@ jest.mock(
 );
 
 jest.mock(
-  "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker",
-  () =>
-    function MockMuiFormikDatepicker({ name }) {
-      return <input data-testid={`datepicker-${name}`} type="date" />;
-    }
-);
-
-jest.mock(
   "openstack-uicore-foundation/lib/components/mui/formik-inputs/radio-group",
   () =>
     function MockMuiFormikRadioGroup({ name }) {
@@ -99,6 +92,9 @@ const renderWithFormik = (
   const store = mockStore({
     mediaUploadState: {
       media_file_types: []
+    },
+    currentSummitState: {
+      currentSummit: { time_zone_id: "America/Los_Angeles" }
     }
   });
   return render(
@@ -172,22 +168,55 @@ describe("PageModules", () => {
   });
 
   describe("isGlobal", () => {
-    test("shows the upload deadline datepicker for a MEDIA module when isGlobal is false", () => {
+    test("shows the upload deadline picker for a MEDIA module when isGlobal is false", () => {
       const modules = [createModule(PAGES_MODULE_KINDS.MEDIA, 0, 1)];
-      renderWithFormik({ modules }, false);
+      const { container } = renderWithFormik({ modules }, false);
 
       expect(
-        screen.getByTestId("datepicker-modules[0].upload_deadline")
+        container.querySelector("input[name='modules[0].upload_deadline']")
       ).toBeInTheDocument();
     });
 
-    test("hides the upload deadline datepicker for a MEDIA module when isGlobal is true", () => {
+    test("hides the upload deadline picker for a MEDIA module when isGlobal is true", () => {
       const modules = [createModule(PAGES_MODULE_KINDS.MEDIA, 0, 1)];
-      renderWithFormik({ modules }, true);
+      const { container } = renderWithFormik({ modules }, true);
 
       expect(
-        screen.queryByTestId("datepicker-modules[0].upload_deadline")
+        container.querySelector("input[name='modules[0].upload_deadline']")
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Upload deadline time entry", () => {
+    test("shows the stored time in the upload deadline field", () => {
+      const modules = [
+        {
+          ...createModule(PAGES_MODULE_KINDS.MEDIA, 0, 1),
+          upload_deadline: moment.tz("2026-08-15 17:30", "America/Los_Angeles")
+        }
+      ];
+      const { container } = renderWithFormik({ modules }, false);
+
+      const input = container.querySelector(
+        "input[name='modules[0].upload_deadline']"
+      );
+      expect(input).toHaveValue("08/15/2026 05:30 PM");
+    });
+
+    test("renders the upload deadline in the summit timezone", () => {
+      const modules = [
+        {
+          ...createModule(PAGES_MODULE_KINDS.MEDIA, 0, 1),
+          upload_deadline: moment.utc("2026-08-15T22:00:00Z")
+        }
+      ];
+      const { container } = renderWithFormik({ modules }, false);
+
+      const input = container.querySelector(
+        "input[name='modules[0].upload_deadline']"
+      );
+      // 22:00 UTC is 15:00 (3:00 PM) in America/Los_Angeles during PDT
+      expect(input).toHaveValue("08/15/2026 03:00 PM");
     });
   });
 
@@ -199,7 +228,7 @@ describe("PageModules", () => {
         createModule(PAGES_MODULE_KINDS.MEDIA, 2, 3)
       ];
 
-      renderWithFormik({ modules });
+      const { container } = renderWithFormik({ modules });
 
       // INFO module has content field
       expect(
@@ -211,7 +240,7 @@ describe("PageModules", () => {
       ).toBeInTheDocument();
       // MEDIA module has upload_deadline field
       expect(
-        screen.getByTestId("datepicker-modules[2].upload_deadline")
+        container.querySelector("input[name='modules[2].upload_deadline']")
       ).toBeInTheDocument();
     });
 

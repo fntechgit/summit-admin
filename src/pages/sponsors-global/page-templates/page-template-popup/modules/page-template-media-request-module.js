@@ -4,11 +4,11 @@ import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
 import { getIn, useFormikContext } from "formik";
 import { Divider, Grid2, InputLabel, MenuItem } from "@mui/material";
-import MuiFormikDatepicker from "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikRadioGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/radio-group";
 import MuiFormikFilesizeField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/file-size-field";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
+import MuiFormikDatetimepicker from "../../../../../components/mui/formik-inputs/mui-formik-datetimepicker";
 import {
   COLUMN_6,
   COLUMN_12,
@@ -19,7 +19,8 @@ const MediaRequestModule = ({
   baseName,
   index,
   mediaFileTypes,
-  showUploadDeadline
+  showUploadDeadline,
+  timezone
 }) => {
   const { values, setFieldValue } = useFormikContext();
   const buildFieldName = (field) => `${baseName}[${index}].${field}`;
@@ -79,9 +80,9 @@ const MediaRequestModule = ({
           <InputLabel htmlFor={buildFieldName("upload_deadline")}>
             {T.translate("page_template_list.page_crud.upload_deadline")}
           </InputLabel>
-          <MuiFormikDatepicker
+          <MuiFormikDatetimepicker
             name={buildFieldName("upload_deadline")}
-            margin="none"
+            timezone={timezone}
           />
         </Grid2>
       )}
@@ -150,11 +151,13 @@ MediaRequestModule.propTypes = {
   baseName: PropTypes.string.isRequired,
   index: PropTypes.number.isRequired,
   mediaFileTypes: PropTypes.array.isRequired,
-  showUploadDeadline: PropTypes.bool
+  showUploadDeadline: PropTypes.bool,
+  timezone: PropTypes.string
 };
 
-const mapStateToProps = ({ mediaUploadState }) => ({
-  mediaFileTypes: mediaUploadState.media_file_types
+const mapStateToProps = ({ mediaUploadState, currentSummitState }) => ({
+  mediaFileTypes: mediaUploadState.media_file_types,
+  timezone: currentSummitState?.currentSummit?.time_zone_id
 });
 
 export default connect(mapStateToProps, {})(MediaRequestModule);
