@@ -1244,10 +1244,6 @@ class EventForm extends React.Component {
                 <DateTimePicker
                   id="start_date"
                   onChange={this.handleTimeChange}
-                  validation={{
-                    after: currentSummit.start_date,
-                    before: currentSummit.end_date
-                  }}
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
                   value={epochToMomentTimeZone(
                     entity.start_date,
@@ -1271,10 +1267,6 @@ class EventForm extends React.Component {
                 <DateTimePicker
                   id="end_date"
                   onChange={this.handleTimeChange}
-                  validation={{
-                    after: currentSummit.start_date,
-                    before: currentSummit.end_date
-                  }}
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
                   value={epochToMomentTimeZone(
                     entity.end_date,
