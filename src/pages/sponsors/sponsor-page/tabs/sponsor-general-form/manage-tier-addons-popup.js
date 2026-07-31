@@ -23,7 +23,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
-import MuiFormikSummitAddonSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/summit-addon-select";
+import MuiFormikAddonTypeSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/addon-type-select";
 import useScrollToError from "../../../../../hooks/useScrollToError";
 
 const ManageTierAddonsPopup = ({
@@ -222,7 +222,7 @@ const ManageTierAddonsPopup = ({
                   </InputLabel>
                   {editingRow === index ? (
                     <Box width="100%">
-                      <MuiFormikSummitAddonSelect
+                      <MuiFormikAddonTypeSelect
                         name={`addons[${index}].type`}
                         placeholder={T.translate(
                           "edit_sponsor.placeholders.select"
@@ -319,7 +319,7 @@ const ManageTierAddonsPopup = ({
                   {T.translate("edit_sponsor.addon_type")}
                 </InputLabel>
                 <Box width="100%">
-                  <MuiFormikSummitAddonSelect
+                  <MuiFormikAddonTypeSelect
                     name="newAddon.type"
                     placeholder={T.translate(
                       "edit_sponsor.placeholders.select"
