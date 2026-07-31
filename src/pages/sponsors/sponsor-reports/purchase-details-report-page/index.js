@@ -31,6 +31,7 @@ import OrdersTable from "../../../../components/sponsors/reports/OrdersTable";
 import LinesManifestView from "../../../../components/sponsors/reports/LinesManifestView";
 import ReportViewToggle from "../../../../components/sponsors/reports/ReportViewToggle";
 import ByItemView, {
+  groupLinesByItem,
   groupLinesBySponsorItem
 } from "../../../../components/sponsors/reports/ByItemView";
 import usePrint from "../../../../hooks/usePrint";
@@ -41,8 +42,10 @@ import {
   clearPurchaseDetailsValidation,
   exportPurchaseDetailsCsv,
   exportPurchaseDetailsLinesCsv,
+  LINES_ORDER_BY_ITEM,
   getPurchaseDetailsByItemRows,
-  setPurchaseDetailsByItemPaging
+  setPurchaseDetailsByItemPaging,
+  setPurchaseDetailsByItemSort
 } from "../../../../actions/sponsor-reports-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 
@@ -106,9 +109,12 @@ const PurchaseDetailsReportPage = ({
   byItemReadError,
   byItemCurrentPage,
   byItemPerPage,
+  byItemOrder,
+  byItemOrderDir,
   byItemFilters,
   getPurchaseDetailsByItemRows: fetchByItemRows,
   setPurchaseDetailsByItemPaging: setByItemPaging,
+  setPurchaseDetailsByItemSort: setByItemSort,
   // From mapDispatchToProps (object form — bound action creators)
   getPurchaseDetailsReport: fetchReport,
   getPurchaseDetailsLinesReport: fetchLinesReport,
@@ -123,6 +129,9 @@ const PurchaseDetailsReportPage = ({
   // "orders" | "lines" | "byitem" — a transient UI toggle (NOT server state), so
   // it stays local. Everything else is sourced from the reducer slices above.
   const [view, setView] = useState("orders");
+  // Which shape the By Item view shows: per-sponsor, or the show-wide pull
+  // sheet. Local like `view` — a display choice, not report state.
+  const [byItemLayout, setByItemLayout] = useState("sponsor");
   const prevViewRef = useRef(view);
 
   // Show a global snackbar toast when the backend returns a 412 validation error,
@@ -262,6 +271,16 @@ const PurchaseDetailsReportPage = ({
     }
   };
   const handleClear = () => handleApply({});
+
+  // Client-side sort of the By Item rollup. Page resets to 1 like the Orders
+  // sort handler below — a re-sort changes which rows land on the first page.
+  const handleByItemSort = (columnKey, dir) => {
+    setByItemSort({ order: columnKey, orderDir: dir });
+    setByItemPaging({
+      currentPage: DEFAULT_CURRENT_PAGE,
+      perPage: byItemPerPage
+    });
+  };
 
   // ── Orders sort/pagination handlers ──────────────────────────────────────────
   const handleSort = (columnKey, dir) => {
@@ -418,6 +437,7 @@ const PurchaseDetailsReportPage = ({
     () => groupLinesBySponsorItem(byItemData),
     [byItemData]
   );
+  const byItemItems = useMemo(() => groupLinesByItem(byItemData), [byItemData]);
 
   return (
     <ReportShell
@@ -438,7 +458,10 @@ const PurchaseDetailsReportPage = ({
               byView(view, {
                 orders: () => exportOrdersCsv(filters, order, orderDir),
                 lines: () => exportLinesCsv(linesFilters),
-                byitem: () => exportLinesCsv(byItemFilters)
+                // Per-LINE manifest ordered by item code, not the on-screen
+                // rollup: the warehouse needs every occurrence of an item with
+                // its sponsor and booth, which is the drill-down flattened.
+                byitem: () => exportLinesCsv(byItemFilters, LINES_ORDER_BY_ITEM)
               })()
             }
           >
@@ -492,6 +515,21 @@ const PurchaseDetailsReportPage = ({
           byitem: (
             <ByItemView
               groups={byItemGroups}
+              items={byItemItems}
+              layout={byItemLayout}
+              onLayoutChange={(next) => {
+                setByItemLayout(next);
+                // The two layouts page over different lists (sponsors vs
+                // items); carrying the page number across would land on an
+                // arbitrary offset.
+                setByItemPaging({
+                  currentPage: DEFAULT_CURRENT_PAGE,
+                  perPage: byItemPerPage
+                });
+              }}
+              order={byItemOrder}
+              orderDir={byItemOrderDir}
+              onSort={handleByItemSort}
               currentPage={byItemCurrentPage}
               perPage={byItemPerPage}
               onPageChange={(page) =>
@@ -529,6 +567,8 @@ const mapStateToProps = ({
   byItemReadError: sponsorReportsPurchaseDetailsByItemState.readError,
   byItemCurrentPage: sponsorReportsPurchaseDetailsByItemState.currentPage,
   byItemPerPage: sponsorReportsPurchaseDetailsByItemState.perPage,
+  byItemOrder: sponsorReportsPurchaseDetailsByItemState.order,
+  byItemOrderDir: sponsorReportsPurchaseDetailsByItemState.orderDir,
   byItemFilters: sponsorReportsPurchaseDetailsByItemState.filters
 });
 
@@ -540,7 +580,8 @@ const mapDispatchToProps = {
   exportPurchaseDetailsCsv,
   exportPurchaseDetailsLinesCsv,
   getPurchaseDetailsByItemRows,
-  setPurchaseDetailsByItemPaging
+  setPurchaseDetailsByItemPaging,
+  setPurchaseDetailsByItemSort
 };
 
 export default withRouter(

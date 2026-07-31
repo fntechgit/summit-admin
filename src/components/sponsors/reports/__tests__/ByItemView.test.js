@@ -1,7 +1,11 @@
 import "@testing-library/jest-dom";
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
-import ByItemView, { groupLinesBySponsorItem } from "../ByItemView";
+import { render, screen, fireEvent, within } from "@testing-library/react";
+import ByItemView, {
+  groupLinesByItem,
+  groupLinesBySponsorItem,
+  sortItems
+} from "../ByItemView";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   translate: (k, opts) => (opts ? `${k}:${Object.values(opts).join(",")}` : k)
@@ -130,6 +134,7 @@ describe("groupLinesBySponsorItem", () => {
     const [group] = groupLinesBySponsorItem(rows);
     const [contrib] = group.items[0].contributors;
     expect(contrib).toEqual({
+      sponsorName: "Acme",
       number: "OCP-1",
       formCode: "AV",
       addOnName: "Meeting Room T",
@@ -218,6 +223,91 @@ describe("groupLinesBySponsorItem", () => {
   });
 });
 
+describe("groupLinesByItem", () => {
+  it("merges an item_code ACROSS sponsors into one row and names each sponsor in the drill-down", () => {
+    const rows = [
+      line({ sponsor: { id: 1, name: "Intel" }, quantity: 10 }),
+      line({
+        sponsor: { id: 2, name: "Nvidia" },
+        purchase: { id: 5002, number: "OCP-2", status: "Paid" },
+        quantity: 3,
+        add_on_name: "Meeting Room T"
+      })
+    ];
+    const items = groupLinesByItem(rows);
+    expect(items).toHaveLength(1);
+    const [av1] = items;
+    expect(av1.itemCode).toBe("AV1");
+    expect(av1.qty).toBe(13);
+    expect(av1.orders).toBe(2);
+    expect(av1.contributors.map((c) => c.sponsorName)).toEqual([
+      "Intel",
+      "Nvidia"
+    ]);
+  });
+
+  it("counts PENDING orders toward the pull total, not just Paid", () => {
+    const rows = [
+      line({ quantity: 4, purchase: { id: 1, number: "A", status: "Paid" } }),
+      line({
+        quantity: 6,
+        purchase: { id: 2, number: "B", status: "Pending Payment" }
+      })
+    ];
+    const [av1] = groupLinesByItem(rows);
+    expect(av1.qty).toBe(10);
+    expect(av1.statusMix).toEqual({ Paid: 1, "Pending Payment": 1 });
+  });
+
+  it("excludes canceled lines from qty but keeps them as contributors (parity with the by-sponsor layout)", () => {
+    const rows = [
+      line({ quantity: 4 }),
+      line({
+        quantity: 9,
+        is_canceled: true,
+        purchase: { id: 2, number: "B", status: "Paid" }
+      })
+    ];
+    const [av1] = groupLinesByItem(rows);
+    expect(av1.qty).toBe(4);
+    expect(av1.orders).toBe(1);
+    expect(av1.contributors).toHaveLength(2);
+  });
+
+  it("reconciles with the by-sponsor layout AND with the raw input total", () => {
+    const rows = [
+      line({ sponsor: { id: 1, name: "Intel" }, quantity: 10 }),
+      line({ sponsor: { id: 2, name: "Nvidia" }, quantity: 3 }),
+      line({
+        sponsor: { id: 2, name: "Nvidia" },
+        item_code: "B1",
+        quantity: 7
+      }),
+      // Pending counts toward the pull total, so it must survive BOTH groupings
+      // and the independent sum below.
+      line({
+        sponsor: { id: 3, name: "Meta" },
+        quantity: 6,
+        purchase: { id: 9, number: "N9", status: "Pending Payment" }
+      }),
+      line({ quantity: 5, is_canceled: true })
+    ];
+    const flatQty = groupLinesByItem(rows).reduce((a, it) => a + it.qty, 0);
+    const nestedQty = groupLinesBySponsorItem(rows).reduce(
+      (a, g) => a + g.totalQty,
+      0
+    );
+    // Computed from the fixture, NOT from the shared accumulator: cross-layout
+    // equality alone would stay green if accumulateRow dropped a whole status.
+    const inputQty = rows
+      .filter((r) => !r.is_canceled)
+      .reduce((a, r) => a + r.quantity, 0);
+    expect(flatQty).toBe(nestedQty);
+    expect(flatQty).toBe(inputQty);
+    expect(flatQty).toBe(26);
+  });
+});
+
 const item = (over = {}) => ({
   itemCode: "AV1",
   label: "Audio mixer",
@@ -228,6 +318,7 @@ const item = (over = {}) => ({
   statusMix: { Paid: 1, "Pending Payment": 1 },
   contributors: [
     {
+      sponsorName: "Intel",
       number: "OCP-1",
       formCode: "AV",
       addOnName: "Meeting Room T",
@@ -239,6 +330,7 @@ const item = (over = {}) => ({
       isCanceled: false
     },
     {
+      sponsorName: "Nvidia",
       number: "OCP-2",
       formCode: "AV",
       addOnName: null,
@@ -373,6 +465,366 @@ describe("ByItemView", () => {
     fireEvent.mouseDown(screen.getByRole("combobox"));
     fireEvent.click(screen.getByRole("option", { name: "20" }));
     expect(onPerPageChange).toHaveBeenCalledWith(20);
+  });
+});
+
+describe("sortItems", () => {
+  const row = (over) => item(over);
+
+  it("sorts by each supported key in both directions", () => {
+    const rows = [
+      row({ itemCode: "B1", label: "Beta", qty: 5, orders: 1 }),
+      row({ itemCode: "A1", label: "Alpha", qty: 9, orders: 3 }),
+      row({ itemCode: "C1", label: "Gamma", qty: 1, orders: 2 })
+    ];
+    const codes = (o, d) => sortItems(rows, o, d).map((r) => r.itemCode);
+    expect(codes("itemCode", 1)).toEqual(["A1", "B1", "C1"]);
+    expect(codes("itemCode", -1)).toEqual(["C1", "B1", "A1"]);
+    expect(codes("label", 1)).toEqual(["A1", "B1", "C1"]);
+    expect(codes("qty", 1)).toEqual(["C1", "B1", "A1"]);
+    expect(codes("qty", -1)).toEqual(["A1", "B1", "C1"]);
+    expect(codes("orders", 1)).toEqual(["B1", "C1", "A1"]);
+  });
+
+  it("is stable, so ties keep the rollup's canonical order", () => {
+    // >10 rows so the engine takes its merge path, not just binary insertion,
+    // and every row ties on the sort key: any reordering here is instability.
+    const canonical = Array.from({ length: 16 }, (_, i) => `T${i}`);
+    const rows = canonical.map((code) => row({ itemCode: code, qty: 4 }));
+    expect(sortItems(rows, "qty", -1).map((r) => r.itemCode)).toEqual(
+      canonical
+    );
+    expect(sortItems(rows, "qty", 1).map((r) => r.itemCode)).toEqual(canonical);
+  });
+
+  it("does not mutate the input and no-ops on an unknown key", () => {
+    const rows = [row({ itemCode: "B1", qty: 1 }), row({ itemCode: "A1" })];
+    const sorted = sortItems(rows, "itemCode", 1);
+    expect(rows.map((r) => r.itemCode)).toEqual(["B1", "A1"]);
+    expect(sorted).not.toBe(rows);
+    expect(sortItems(rows, "nope", 1)).toBe(rows);
+  });
+
+  it("sorts the null item_code bucket as empty rather than throwing", () => {
+    const rows = [row({ itemCode: "A1" }), row({ itemCode: null })];
+    expect(sortItems(rows, "itemCode", 1).map((r) => r.itemCode)).toEqual([
+      null,
+      "A1"
+    ]);
+  });
+});
+
+describe("ByItemView sorting", () => {
+  // The ACTIVE column's accessible name also carries the visually-hidden
+  // direction announcement, so match on a prefix rather than the bare label.
+  const SORTABLE = [
+    /^sponsor_reports_page\.col_item_code/,
+    /^sponsor_reports_page\.col_item_name/,
+    /^sponsor_reports_page\.col_quantity/,
+    /^sponsor_reports_page\.byitem_col_orders/
+  ];
+
+  it("offers a sort control on exactly the four sortable columns", () => {
+    renderView({ order: "qty", orderDir: -1, onSort: jest.fn() });
+    SORTABLE.forEach((name) => {
+      expect(screen.getByRole("button", { name })).toBeInTheDocument();
+    });
+    // The active column announces its direction to screen readers.
+    expect(
+      screen.getByRole("button", {
+        name: /col_quantity mui_table\.sorted_desc/
+      })
+    ).toBeInTheDocument();
+    // Total and Status are not sortable — plain header text, no button.
+    expect(
+      screen.queryByRole("button", {
+        name: "sponsor_reports_page.byitem_col_total"
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  it("flips the direction when the active column is clicked again", () => {
+    const onSort = jest.fn();
+    renderView({ order: "qty", orderDir: -1, onSort });
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /^sponsor_reports_page\.col_quantity/
+      })
+    );
+    expect(onSort).toHaveBeenCalledWith("qty", 1);
+  });
+
+  it("reports the new column with the current direction", () => {
+    const onSort = jest.fn();
+    renderView({ order: "qty", orderDir: -1, onSort });
+    fireEvent.click(
+      screen.getByRole("button", { name: "sponsor_reports_page.col_item_code" })
+    );
+    expect(onSort).toHaveBeenCalledWith("itemCode", 1);
+  });
+
+  it("marks only the active column with a sort direction", () => {
+    renderView({ order: "label", orderDir: 1, onSort: jest.fn() });
+    const active = screen
+      .getByRole("button", { name: /col_item_name/ })
+      .closest("th");
+    expect(active).toHaveAttribute("aria-sort", "ascending");
+    const inactive = screen
+      .getByRole("button", { name: /col_quantity/ })
+      .closest("th");
+    expect(inactive).not.toHaveAttribute("aria-sort");
+  });
+
+  it("sorts BEFORE paging in the all-sponsors layout", () => {
+    // 12 items arriving in DESCENDING qty (the rollup's canonical order), page
+    // size 10. Ascending sort must pull the two smallest onto page 1 — which
+    // only happens if the sort runs before the slice, not within the page.
+    const items = Array.from({ length: 12 }, (_, i) =>
+      item({ itemCode: `SKU${11 - i}`, label: `Item ${11 - i}`, qty: 11 - i })
+    );
+    renderView({
+      layout: "item",
+      items,
+      groups: [],
+      onLayoutChange: jest.fn(),
+      order: "qty",
+      orderDir: 1,
+      onSort: jest.fn()
+    });
+    expect(screen.getByText("SKU0")).toBeInTheDocument();
+    // The two largest fall to page 2.
+    expect(screen.queryByText("SKU11")).not.toBeInTheDocument();
+    expect(screen.queryByText("SKU10")).not.toBeInTheDocument();
+  });
+
+  it("reorders items within a sponsor without reordering the sponsors", () => {
+    const groups = [
+      group({
+        sponsorId: 1,
+        sponsorName: "Big",
+        items: [
+          item({ itemCode: "B1", label: "Beta", qty: 9 }),
+          item({ itemCode: "A1", label: "Alpha", qty: 1 })
+        ]
+      }),
+      group({ sponsorId: 2, sponsorName: "Small", items: [] })
+    ];
+    renderView({ groups, order: "label", orderDir: 1, onSort: jest.fn() });
+    const codes = screen
+      .getAllByText(/^(A1|B1)$/)
+      .map((node) => node.textContent);
+    expect(codes).toEqual(["A1", "B1"]);
+    // Sponsor accordion order is independent of the item sort.
+    const names = screen
+      .getAllByText(/^(Big|Small)$/)
+      .map((node) => node.textContent);
+    expect(names).toEqual(["Big", "Small"]);
+  });
+});
+
+describe("ByItemView expand/collapse all", () => {
+  const clickBtn = (name) =>
+    fireEvent.click(screen.getByRole("button", { name }));
+  // The group accordion exposes its state as aria-expanded on the summary —
+  // assert that rather than MUI's internal Mui-expanded class. Matched on the
+  // Σ-units label, which only a group summary carries: the layout toggle shares
+  // its name with the all-sponsors group title.
+  const groupHeader = () =>
+    screen.getByRole("button", { name: /byitem_sum_qty/ });
+
+  it("expands every item drill-down AND the group, in the by-sponsor layout", () => {
+    renderView({
+      groups: [
+        group({
+          sponsorId: 1,
+          sponsorName: "Intel",
+          items: [item({ itemCode: "A1" }), item({ itemCode: "B1" })]
+        })
+      ]
+    });
+    // Drill-downs start closed: no contributing order visible.
+    expect(screen.queryByText("OCP-1")).not.toBeInTheDocument();
+    clickBtn("sponsor_reports_page.byitem_expand_all");
+    // Both items' contributing orders now render (2 items x 2 contributors).
+    expect(screen.getAllByText("OCP-1")).toHaveLength(2);
+  });
+
+  it("closes the drill-downs but LEAVES the group open — back to the default view", () => {
+    renderView();
+    clickBtn("sponsor_reports_page.byitem_expand_all");
+    expect(screen.getByText("OCP-1")).toBeInTheDocument();
+    clickBtn("sponsor_reports_page.byitem_collapse_all");
+    expect(screen.queryByText("OCP-1")).not.toBeInTheDocument();
+    // Collapsing the group too would leave a wall of headers and no data.
+    expect(groupHeader()).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("AV1")).toBeInTheDocument();
+  });
+
+  it("does not reopen a group the user closed by hand", () => {
+    renderView();
+    fireEvent.click(groupHeader());
+    expect(groupHeader()).toHaveAttribute("aria-expanded", "false");
+    clickBtn("sponsor_reports_page.byitem_collapse_all");
+    expect(groupHeader()).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("works the same in the all-sponsors layout", () => {
+    renderView({
+      layout: "item",
+      items: [item()],
+      groups: [],
+      onLayoutChange: jest.fn()
+    });
+    clickBtn("sponsor_reports_page.byitem_expand_all");
+    expect(screen.getByText("OCP-1")).toBeInTheDocument();
+    clickBtn("sponsor_reports_page.byitem_collapse_all");
+    expect(screen.queryByText("OCP-1")).not.toBeInTheDocument();
+    expect(groupHeader()).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("expands items beyond the current page, so paging keeps the state", () => {
+    // 12 items over a 10-row page: the 11th is not rendered yet, but Expand All
+    // must have keyed it too or it would come back collapsed on page 2.
+    const items = Array.from({ length: 12 }, (_, i) =>
+      item({ itemCode: `SKU${i}`, label: `Item ${i}` })
+    );
+    const { rerender } = renderView({
+      layout: "item",
+      items,
+      groups: [],
+      onLayoutChange: jest.fn()
+    });
+    clickBtn("sponsor_reports_page.byitem_expand_all");
+    rerender(
+      <ByItemView
+        layout="item"
+        items={items}
+        groups={[]}
+        onLayoutChange={jest.fn()}
+        currentPage={2}
+        perPage={10}
+        onPageChange={jest.fn()}
+        onPerPageChange={jest.fn()}
+      />
+    );
+    expect(screen.getByText("SKU10")).toBeInTheDocument();
+    // Page 2's rows arrive already expanded.
+    expect(screen.getAllByText("OCP-1").length).toBeGreaterThan(0);
+  });
+
+  it("re-expands a group the user closed by hand, not just the drill-downs", () => {
+    renderView();
+    fireEvent.click(groupHeader());
+    expect(groupHeader()).toHaveAttribute("aria-expanded", "false");
+    clickBtn("sponsor_reports_page.byitem_expand_all");
+    // The group must come back open — otherwise Expand All strands the user
+    // with an expanded drill-down inside a collapsed accordion.
+    expect(groupHeader()).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("OCP-1")).toBeInTheDocument();
+  });
+
+  it("leaves individual toggles working after a bulk action", () => {
+    renderView();
+    clickBtn("sponsor_reports_page.byitem_expand_all");
+    expect(screen.getByText("OCP-1")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("AV1"));
+    expect(screen.queryByText("OCP-1")).not.toBeInTheDocument();
+  });
+});
+
+describe("ByItemView all-sponsors layout", () => {
+  const renderAll = (props = {}) =>
+    renderView({
+      layout: "item",
+      items: [item()],
+      groups: [],
+      onLayoutChange: jest.fn(),
+      ...props
+    });
+
+  // Styling parity by construction: one shared container => one card surface,
+  // summary divider and details inset, with no sx values to keep in step.
+  // Asserted through the accordion's ACCESSIBLE contract — a collapsible group
+  // header, and the item table living inside that group's region — so a MUI
+  // class rename cannot fail this while behaviour is unchanged.
+  it.each([
+    ["by-sponsor", () => renderView()],
+    ["all-sponsors", () => renderAll()]
+  ])("renders the %s layout in the same group container", (_name, mount) => {
+    mount();
+    const header = screen.getByRole("button", { name: /byitem_sum_qty/ });
+    expect(header).toHaveAttribute("aria-expanded", "true");
+    expect(
+      within(screen.getByRole("region")).getByRole("table")
+    ).toBeInTheDocument();
+  });
+
+  it("drops the sponsor accordions and totals the show in one header", () => {
+    renderAll({ items: [item(), item({ itemCode: "B1", qty: 7 })] });
+    expect(screen.queryByText("Acme")).not.toBeInTheDocument();
+    // 2 items, both purchased; Σ qty over the WHOLE list, not the page.
+    expect(
+      screen.getByText("sponsor_reports_page.byitem_sponsor_items_chip:2,2")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("sponsor_reports_page.byitem_sum_qty:12")
+    ).toBeInTheDocument();
+  });
+
+  it("names the sponsor per contributing order in the drill-down", () => {
+    renderAll();
+    fireEvent.click(screen.getByText("AV1"));
+    expect(screen.getByText("Intel")).toBeInTheDocument();
+    expect(screen.getByText("Nvidia")).toBeInTheDocument();
+    expect(screen.getByText("Meeting Room T")).toBeInTheDocument();
+    expect(
+      screen.getByText("sponsor_reports_page.col_sponsor")
+    ).toBeInTheDocument();
+  });
+
+  it("omits the Sponsor column in the by-sponsor layout", () => {
+    renderView();
+    fireEvent.click(screen.getByText("AV1"));
+    expect(
+      screen.queryByText("sponsor_reports_page.col_sponsor")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Intel")).not.toBeInTheDocument();
+  });
+
+  it("pages over items, not sponsors, and labels the selector accordingly", () => {
+    const onPageChange = jest.fn();
+    renderAll({
+      // perPage stays a real PER_PAGE_OPTIONS value (10) so MUI does not warn.
+      items: Array.from({ length: 12 }, (_, i) =>
+        item({ itemCode: `SKU${i}`, label: `Item ${i}` })
+      ),
+      onPageChange
+    });
+    expect(screen.getByText("1–10 of 12")).toBeInTheDocument();
+    expect(
+      screen.getByText("sponsor_reports_page.byitem_items_per_page")
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /next page/i }));
+    expect(onPageChange).toHaveBeenCalledWith(2);
+  });
+
+  it("reports the picked layout to the parent, ignoring a null deselect", () => {
+    const onLayoutChange = jest.fn();
+    renderAll({ onLayoutChange });
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "sponsor_reports_page.byitem_layout_sponsor"
+      })
+    );
+    expect(onLayoutChange).toHaveBeenCalledWith("sponsor");
+    onLayoutChange.mockClear();
+    // Re-clicking the active button: MUI emits null, no layout change.
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "sponsor_reports_page.byitem_layout_all_sponsors"
+      })
+    );
+    expect(onLayoutChange).not.toHaveBeenCalled();
   });
 });
 

@@ -57,6 +57,12 @@ export const PURCHASE_DETAILS_BY_ITEM_READ_ERROR =
   "PURCHASE_DETAILS_BY_ITEM_READ_ERROR";
 export const SET_PURCHASE_DETAILS_BY_ITEM_PAGING =
   "SET_PURCHASE_DETAILS_BY_ITEM_PAGING";
+export const SET_PURCHASE_DETAILS_BY_ITEM_SORT =
+  "SET_PURCHASE_DETAILS_BY_ITEM_SORT";
+
+// Ordering alias on the lines endpoint (ordering_fields.item_code). Groups every
+// line for one item together — the shape the warehouse pull sheet needs.
+export const LINES_ORDER_BY_ITEM = "item_code";
 
 // Per-thunk sequence-token factory guarding against stale-response commits.
 // Two concurrent invocations of the same thunk (different filters/page/sponsor)
@@ -596,6 +602,16 @@ export const setPurchaseDetailsByItemPaging =
     );
   };
 
+// Client-side sort of the derived item rows — no server ordering exists for this
+// rollup. Same pure-dispatch shape as the paging sibling above.
+export const setPurchaseDetailsByItemSort =
+  ({ order, orderDir }) =>
+  (dispatch) => {
+    dispatch(
+      createAction(SET_PURCHASE_DETAILS_BY_ITEM_SORT)({ order, orderDir })
+    );
+  };
+
 // Orders CSV export — owns URL + params + filename (cf. exportEventRsvpsCSV).
 // Keeps the on-screen sort so the exported rows match what the user sees.
 // No page/perPage → buildPurchaseQuery emits neither; backend exports the full
@@ -618,17 +634,19 @@ export const exportPurchaseDetailsCsv =
     );
   };
 
-// Per-line CSV export — no order param (backend default ordering keeps sponsor
-// groups intact; see lines query comment in the page).
+// Per-line CSV export. `order` is an ordering alias declared by the endpoint
+// (sponsor | order_date | item_code | quantity); omit it to keep the backend
+// default, which groups by sponsor name. The By Item view passes item_code so
+// every line for one item lands together — the warehouse pull sheet.
 export const exportPurchaseDetailsLinesCsv =
-  (filters = {}) =>
+  (filters = {}, order = null) =>
   async (dispatch, getState) => {
     const { currentSummit } = getState().currentSummitState;
     if (!currentSummit?.id) return Promise.resolve();
     const accessToken = await getAccessTokenSafely();
     const params = {
       access_token: accessToken,
-      ...buildPurchaseLinesQuery(filters, {})
+      ...buildPurchaseLinesQuery({ ...filters, order }, {})
     };
     return dispatch(
       getCSV(
