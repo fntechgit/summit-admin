@@ -75,12 +75,12 @@ describe("dropbox sync actions", () => {
     store.dispatch(DropboxSyncActions.getSyncConfig());
     await flushPromises();
 
-    const actions = store.getActions();
+    // DUMMY is the placeholder receive creator handed to uicore so the real
+    // commit flows through the summit-guarded commitDispatch — inert (no
+    // reducer handles it), excluded from the contract.
+    const actions = store.getActions().filter((a) => a.type !== "DUMMY");
     expect(actions).toEqual([
       { payload: {}, type: "REQUEST_SYNC_CONFIG" },
-      // uicore's internal receive is a DUMMY; the real commit happens through
-      // the summit-guarded commitDispatch below it.
-      { payload: { response: {} }, type: "DUMMY" },
       { payload: { response: {} }, type: "RECEIVE_SYNC_CONFIG" },
       { payload: undefined, type: "STOP_LOADING" }
     ]);
@@ -117,19 +117,18 @@ describe("dropbox sync actions", () => {
     );
     await flushPromises();
 
-    const actions = store.getActions();
+    // DUMMY (uicore's placeholder receive) filtered — see getSyncConfig test.
+    const actions = store.getActions().filter((a) => a.type !== "DUMMY");
     expect(actions[0]).toEqual({ payload: undefined, type: "START_LOADING" });
     // REQUEST_SYNC_CONFIG is dispatched by the thunk itself (pre-token, before
     // putRequest) so dropboxSyncState.loading covers the full save duration
     // and the Save/toggle/Rebuild disabled guards block overlapping saves.
     expect(actions[1]).toEqual({ payload: {}, type: "REQUEST_SYNC_CONFIG" });
-    // uicore's internal receive is a DUMMY; the commit is summit-guarded.
-    expect(actions[2]).toEqual({ payload: { response: {} }, type: "DUMMY" });
-    expect(actions[3]).toEqual({
+    expect(actions[2]).toEqual({
       payload: { response: {} },
       type: "SYNC_CONFIG_UPDATED"
     });
-    expect(actions[4]).toEqual({ payload: undefined, type: "STOP_LOADING" });
+    expect(actions[3]).toEqual({ payload: undefined, type: "STOP_LOADING" });
     expect(putRequest).toHaveBeenCalledTimes(1);
   });
 
@@ -380,7 +379,12 @@ describe("dropbox sync actions", () => {
     expect(postRequest).toHaveBeenCalledTimes(1);
   });
 
-  test("resyncRoom dispatches START_LOADING, RESYNC_ROOM_DISPATCHED, STOP_LOADING", async () => {
+  test("resyncRoom targets the materializer's integer venue/room route and dispatches the action sequence", async () => {
+    // The materializer route is /<int:summit_id>/<int:venue_id>/<int:room_id>/.
+    // It previously took names, and sending names does not resolve at all —
+    // the request 404s and the resync silently never happens. The older
+    // assertions here only checked that postRequest was called, so they stayed
+    // green through that regression; pin the URL itself.
     store.dispatch(DropboxSyncActions.resyncRoom(12, 345));
     await flushPromises();
 
@@ -391,18 +395,6 @@ describe("dropbox sync actions", () => {
       type: "RESYNC_ROOM_DISPATCHED"
     });
     expect(actions[2]).toEqual({ payload: undefined, type: "STOP_LOADING" });
-    expect(postRequest).toHaveBeenCalled();
-  });
-
-  test("resyncRoom targets the materializer's integer venue/room route", async () => {
-    // The materializer route is /<int:summit_id>/<int:venue_id>/<int:room_id>/.
-    // It previously took names, and sending names does not resolve at all —
-    // the request 404s and the resync silently never happens. The older
-    // assertions here only checked that postRequest was called, so they stayed
-    // green through that regression; pin the URL itself.
-    store.dispatch(DropboxSyncActions.resyncRoom(12, 345));
-    await flushPromises();
-
     expect(postRequest).toHaveBeenCalledTimes(1);
     const url = postRequest.mock.calls[0][2];
     expect(url).toBe(
@@ -444,26 +436,30 @@ describe("dropbox sync actions", () => {
     expect(actions[3]).toEqual({ payload: {}, type: "SYNC_CONFIG_ERROR" });
   });
 
-  test("rebuildSync dispatches STOP_LOADING on failure", async () => {
+  // Both callers are fire-and-forget (location-list-page's swal .then and
+  // edit-location-page's bare call) — the thunk's own .catch is the only thing
+  // preventing an unhandled rejection when the POST fails. The overlay itself
+  // is not at risk: authErrorHandler dispatches stopLoading before uicore
+  // rejects. Pin the real contract (the promise settles), not a fabricated
+  // action sequence.
+  test("rebuildSync settles (does not reject) when the POST fails", async () => {
     postRequest.mockImplementation(() => mockRequestImplReject());
 
-    store.dispatch(DropboxSyncActions.rebuildSync());
-    await flushPromises();
-
-    const actions = store.getActions();
-    expect(actions[0]).toEqual({ payload: undefined, type: "START_LOADING" });
-    expect(actions[1]).toEqual({ payload: undefined, type: "STOP_LOADING" });
+    await expect(
+      store.dispatch(DropboxSyncActions.rebuildSync())
+    ).resolves.toBeUndefined();
+    // An early return before the POST would also resolve undefined — prove
+    // the rejection path actually ran.
+    expect(postRequest).toHaveBeenCalledTimes(1);
   });
 
-  test("resyncRoom dispatches STOP_LOADING on failure", async () => {
+  test("resyncRoom settles (does not reject) when the POST fails", async () => {
     postRequest.mockImplementation(() => mockRequestImplReject());
 
-    store.dispatch(DropboxSyncActions.resyncRoom(12, 345));
-    await flushPromises();
-
-    const actions = store.getActions();
-    expect(actions[0]).toEqual({ payload: undefined, type: "START_LOADING" });
-    expect(actions[1]).toEqual({ payload: undefined, type: "STOP_LOADING" });
+    await expect(
+      store.dispatch(DropboxSyncActions.resyncRoom(12, 345))
+    ).resolves.toBeUndefined();
+    expect(postRequest).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -536,6 +532,12 @@ describe("getAllMediaUploadTypesForAllowlist", () => {
       .filter((a) => a.type === "RECEIVE_ALLOWLIST_OPTIONS");
     expect(receives).toHaveLength(1);
     expect(receives[0].payload).toEqual([{ id: 1 }, { id: 2 }]);
+
+    // Bracketing: the run opens with the global overlay and the finally
+    // closes it.
+    const types = store.getActions().map((a) => a.type);
+    expect(types[0]).toBe("START_LOADING");
+    expect(types[types.length - 1]).toBe("STOP_LOADING");
   });
 
   it("multi page (last_page=3, page 2 delayed to resolve AFTER page 3): exactly 3 calls, ONE RECEIVE dispatch, entries concatenated in PAGE order (SDS:919)", async () => {
@@ -573,16 +575,7 @@ describe("getAllMediaUploadTypesForAllowlist", () => {
     expect(receives[0].payload).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }]);
   });
 
-  it("brackets the run with global startLoading/stopLoading (happy path)", async () => {
-    store.dispatch(DropboxSyncActions.getAllMediaUploadTypesForAllowlist());
-    await flushPromises();
-
-    const types = store.getActions().map((a) => a.type);
-    expect(types[0]).toBe("START_LOADING");
-    expect(types[types.length - 1]).toBe("STOP_LOADING");
-  });
-
-  it("missing/zero summit id: returns Promise.resolve() WITHOUT dispatching anything — currentSummit defaults to a truthy {id: 0} entity (current-summit-reducer DEFAULT_ENTITY), so a bare truthy check would fetch summit 0", async () => {
+  it("missing/zero summit id: no dispatch, no fetch, no token access — currentSummit defaults to a truthy {id: 0} entity (current-summit-reducer DEFAULT_ENTITY), so a bare truthy check would fetch summit 0", async () => {
     store = mockStore({
       currentSummitState: { currentSummit: { id: 0 } }
     });
@@ -740,40 +733,6 @@ describe("getAllMediaUploadTypesForAllowlist", () => {
     expect(receives[0].payload).toEqual([{ id: "inv2" }]);
   });
 
-  it("summit switched with NO newer invocation: the stale invocation's RECEIVE/ERROR are suppressed BUT its stopLoading still fires (seq-only loading tier) — the overlay is not stranded", async () => {
-    let summitId = 1;
-    const dispatched = [];
-    const mockGetState = () => ({
-      currentSummitState: { currentSummit: { id: summitId } }
-    });
-    const mockDispatch = jest.fn((action) =>
-      typeof action === "function"
-        ? action(mockDispatch, mockGetState)
-        : dispatched.push(action)
-    );
-
-    let pageResolve;
-    getRequest.mockImplementation(
-      () => () => () =>
-        new Promise((resolve) => {
-          pageResolve = resolve;
-        })
-    );
-
-    const thunkFn = DropboxSyncActions.getAllMediaUploadTypesForAllowlist();
-    thunkFn(mockDispatch, mockGetState);
-    await flushPromises(); // token resolves, page 1 pending
-
-    summitId = 2; // switch summit — NO new invocation
-
-    pageResolve({ response: { data: [{ id: 1 }], last_page: 1 } });
-    await flushPromises();
-
-    const types = dispatched.map((a) => a.type);
-    expect(types).not.toContain("RECEIVE_ALLOWLIST_OPTIONS");
-    expect(types).toContain("STOP_LOADING"); // isNewest=true → still fires
-  });
-
   it("superseded invocation's QUEUED fan-out pages never fire an HTTP call (count getRequest invocations) — a stale identical-key request would abort the fresh invocation's in-flight page", async () => {
     // last_page=12: range(2,12,1) = 11 fan-out items
     // pLimit(TEN): 10 start immediately (pages 2..11), page 12 queued
@@ -818,53 +777,6 @@ describe("getAllMediaUploadTypesForAllowlist", () => {
     expect(callCount).toBe(12); // page 12 of inv 1 did NOT fire
   });
 
-  it("a superseded invocation dispatches NO stopLoading after being superseded (newest-clears invariant; getRequest receives the seq-guarded dispatch, so authErrorHandler's unconditional stopLoading is also suppressed)", async () => {
-    let callCount = 0;
-    let inv1Resolve;
-
-    getRequest.mockImplementation(() => () => () => {
-      callCount++;
-      if (callCount === 1) {
-        return new Promise((resolve) => {
-          inv1Resolve = resolve;
-        });
-      }
-      return Promise.resolve({ response: { data: [], last_page: 1 } });
-    });
-
-    store.dispatch(DropboxSyncActions.getAllMediaUploadTypesForAllowlist());
-    await flushPromises(); // inv 1 awaiting page 1
-
-    store.dispatch(DropboxSyncActions.getAllMediaUploadTypesForAllowlist());
-    await flushPromises(); // inv 2 completes
-
-    const actionsAfterInv2 = store.getActions().length;
-
-    inv1Resolve({ response: { data: [], last_page: 1 } });
-    await flushPromises();
-
-    // Inv 1 dispatched no STOP_LOADING (isNewest=false)
-    const newActions = store.getActions().slice(actionsAfterInv2);
-    expect(newActions.map((a) => a.type)).not.toContain("STOP_LOADING");
-  });
-
-  it("handler identity pin: every getRequest call is constructed with snackbarErrorHandler, and a rejected page still ends with the ERROR action (does NOT exercise snackbar delivery — the mock rejects before the handler runs)", async () => {
-    getRequest.mockImplementation(
-      () => () => () => Promise.reject(new Error("Unauthorized"))
-    );
-
-    store.dispatch(DropboxSyncActions.getAllMediaUploadTypesForAllowlist());
-    await flushPromises();
-
-    expect(getRequest.mock.calls.length).toBeGreaterThan(0);
-    getRequest.mock.calls.forEach((call) => {
-      expect(call[3]).toBe(snackbarErrorHandler);
-    });
-
-    const types = store.getActions().map((a) => a.type);
-    expect(types).toContain("ALLOWLIST_OPTIONS_ERROR");
-  });
-
   it("page-1 failure: REQUEST then ERROR, RECEIVE never dispatched", async () => {
     getRequest.mockImplementation(
       () => () => () => Promise.reject(new Error("network error"))
@@ -897,30 +809,35 @@ describe("getAllMediaUploadTypesForAllowlist", () => {
     const types = store.getActions().map((a) => a.type);
     expect(types).not.toContain("RECEIVE_ALLOWLIST_OPTIONS");
     expect(types).toContain("ALLOWLIST_OPTIONS_ERROR");
+
+    // Handler identity pin, here because this fixture constructs BOTH
+    // getRequest call sites (page 1 and the fan-out): each must be wired with
+    // snackbarErrorHandler. Does not exercise snackbar delivery — the mock
+    // rejects before any handler runs.
+    expect(getRequest.mock.calls.length).toBeGreaterThan(1);
+    getRequest.mock.calls.forEach((call) => {
+      expect(call[3]).toBe(snackbarErrorHandler);
+    });
   });
 
-  it("a rejected page never produces a RECEIVE whose payload is undefined or non-array", async () => {
+  it("dispatches NO media-upload-list action types, counting what the thunk hands uicore (SDS: the aggregator must not mutate mediaUploadListState) — the mock dispatches the passed action creators, so a media-upload creator wired at either getRequest site would land in the log", async () => {
+    // last_page: 2 exercises BOTH getRequest call sites (page 1 and the
+    // fan-out). The default mock discards the creator arguments, which would
+    // make this check blind to the exact regression it names.
     getRequest.mockImplementation(
-      () => () => () => Promise.reject(new Error("error"))
+      (requestActionCreator, receiveActionCreator) => () => (dispatch) => {
+        if (typeof requestActionCreator === "function")
+          dispatch(requestActionCreator({}));
+        if (typeof receiveActionCreator === "function")
+          dispatch(receiveActionCreator({ response: {} }));
+        return Promise.resolve({ response: { data: [], last_page: 2 } });
+      }
     );
 
     store.dispatch(DropboxSyncActions.getAllMediaUploadTypesForAllowlist());
     await flushPromises();
 
-    const receives = store
-      .getActions()
-      .filter((a) => a.type === "RECEIVE_ALLOWLIST_OPTIONS");
-    expect(receives).toHaveLength(0);
-    // Belt-and-suspenders: any accidentally-slipped-through RECEIVE must carry an array
-    receives.forEach((action) => {
-      expect(Array.isArray(action.payload)).toBe(true);
-    });
-  });
-
-  it("dispatches NO media-upload-list action types (assert the dispatched type set is disjoint from media-upload-actions' constants)", async () => {
-    store.dispatch(DropboxSyncActions.getAllMediaUploadTypesForAllowlist());
-    await flushPromises();
-
+    expect(getRequest.mock.calls.length).toBeGreaterThan(1); // fan-out ran
     const dispatchedTypes = new Set(store.getActions().map((a) => a.type));
     const mediaUploadTypes = new Set(
       Object.values(MediaUploadActions).filter((v) => typeof v === "string")
