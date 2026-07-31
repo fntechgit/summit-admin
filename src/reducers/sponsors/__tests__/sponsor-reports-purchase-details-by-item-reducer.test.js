@@ -5,10 +5,28 @@ import reducer, {
 import { SET_CURRENT_SUMMIT } from "../../../actions/summit-actions";
 import {
   REQUEST_PURCHASE_DETAILS_BY_ITEM,
-  RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS
+  RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS,
+  SET_PURCHASE_DETAILS_BY_ITEM_SORT
 } from "../../../actions/sponsor-reports-actions";
 
 describe("sponsor-reports-purchase-details-by-item-reducer", () => {
+  it("defaults the rollup sort to Item Code ascending", () => {
+    // Both By Item layouts read as a pull sheet; a warehouse scans by code.
+    expect(DEFAULT_STATE.order).toBe("itemCode");
+    expect(DEFAULT_STATE.orderDir).toBe(1);
+  });
+
+  it("SET_SORT records the column and direction, leaving the rows untouched", () => {
+    const prev = { ...DEFAULT_STATE, data: [{ item_code: "A1" }] };
+    const state = reducer(prev, {
+      type: SET_PURCHASE_DETAILS_BY_ITEM_SORT,
+      payload: { order: "label", orderDir: 1 }
+    });
+    expect(state.order).toBe("label");
+    expect(state.orderDir).toBe(1);
+    expect(state.data).toBe(prev.data);
+  });
+
   it("REQUEST records the active filters and clears readError", () => {
     const prev = { ...DEFAULT_STATE, readError: { status: 403 } };
     const state = reducer(prev, {

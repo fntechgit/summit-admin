@@ -18,6 +18,7 @@ import {
   getSponsorAssetSponsor,
   exportPurchaseDetailsCsv,
   exportPurchaseDetailsLinesCsv,
+  LINES_ORDER_BY_ITEM,
   exportSponsorAssetCsv,
   exportSponsorAssetSectionCsv,
   REQUEST_PURCHASE_DETAILS,
@@ -1020,6 +1021,23 @@ describe("sponsor-reports-actions", () => {
       );
       expect(params).not.toHaveProperty("order");
       expect(filename).toBe("purchase-details-lines-summit-42.csv");
+    });
+
+    it("exportPurchaseDetailsLinesCsv passes an ordering alias through to the query", async () => {
+      await exportPurchaseDetailsLinesCsv(
+        { status: "Paid" },
+        LINES_ORDER_BY_ITEM
+      )(dispatch, getState);
+      const [url, params] = getCSV.mock.calls[0];
+      expect(url).toBe(
+        "http://test-api/api/v1/summits/42/reports/purchase-details/lines/csv"
+      );
+      // item_code is declared in the endpoint's ordering_fields; the warehouse
+      // sheet needs every line for one item grouped together.
+      expect(params.order).toBe("item_code");
+      expect(params["filter[]"]).toEqual(
+        expect.arrayContaining(["status==Paid"])
+      );
     });
   });
 
