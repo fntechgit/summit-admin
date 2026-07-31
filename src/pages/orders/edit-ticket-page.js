@@ -17,7 +17,7 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Swal from "sweetalert2";
-import Table from "openstack-uicore-foundation/lib/components/table"
+import Table from "openstack-uicore-foundation/lib/components/table";
 import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
 import moment from "moment-timezone";
 import { getSummitById } from "../../actions/summit-actions";
@@ -48,7 +48,7 @@ import {
   clearBadgePrints
 } from "../../actions/badge-actions";
 import AuditLogs from "../../components/audit-logs";
-import Notes from "../../components/notes";
+import NotesPanel from "../../components/notes/notes-panel";
 import { deleteTicket } from "../../actions/attendee-actions";
 import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
 
@@ -244,7 +244,7 @@ const EditTicketPage = ({
 
   const toggleSection = (section, ev) => {
     const newShowSection = showSection === section ? "main" : section;
-    ev.preventDefault();
+    ev?.preventDefault();
 
     setShowSection(newShowSection);
   };
@@ -450,13 +450,12 @@ const EditTicketPage = ({
       )}
 
       {entity?.id && entity?.owner?.id && (
-        <Panel
-          show={showSection === "admin_notes"}
-          title={T.translate("edit_ticket.admin_notes")}
-          handleClick={(ev) => toggleSection("admin_notes", ev)}
-        >
-          <Notes attendeeId={entity?.owner?.id} ticketId={entity.id} />
-        </Panel>
+        <NotesPanel
+          attendeeId={entity?.owner?.id}
+          ticketId={entity.id}
+          open={showSection === "admin_notes"}
+          onToggle={(ev) => toggleSection("admin_notes", ev)}
+        />
       )}
       <br />
       <br />
