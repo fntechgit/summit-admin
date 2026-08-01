@@ -1577,12 +1577,9 @@ export const saveSponsorFormManagedItem =
       snackbarErrorHandler,
       entity
     )(params)(dispatch)
-      .then(({ response }) =>
-        saveImages(response.id).then(() => {
-          dispatch(snackbarSuccessHandler(successMessage));
-          return response;
-        })
-      )
+      .then(() => {
+        dispatch(snackbarSuccessHandler(successMessage));
+      })
       .finally(() => {
         dispatch(stopLoading());
       });
