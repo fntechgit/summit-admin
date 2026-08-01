@@ -36,7 +36,8 @@ import {
   addInventoryItems,
   resetSponsorFormItem,
   archiveSponsorFormItem,
-  unarchiveSponsorFormItem
+  unarchiveSponsorFormItem,
+  removeItemFile
 } from "../../../actions/sponsor-forms-actions";
 import { getInventoryItems } from "../../../actions/inventory-item-actions";
 import SponsorFormItemPopup from "./components/sponsor-form-item-popup";
@@ -65,7 +66,8 @@ const SponsorFormItemListPage = ({
   addInventoryItems,
   resetSponsorFormItem,
   archiveSponsorFormItem,
-  unarchiveSponsorFormItem
+  unarchiveSponsorFormItem,
+  removeItemFile
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
   const { form_id: formId } = match.params;
@@ -127,6 +129,10 @@ const SponsorFormItemListPage = ({
         showArchived
       ).catch(() => {})
     );
+  };
+
+  const handleRemoveItemImage = (imageId) => {
+    removeItemFile(formId, currentItem, imageId);
   };
 
   const handleAddFromInventory = (itemIds) =>
@@ -359,6 +365,7 @@ const SponsorFormItemListPage = ({
           item={currentItem}
           onSave={handleSaveItem}
           onClose={handleClosePopup}
+          onRemoveImage={handleRemoveItemImage}
         />
       )}
       {openPopup === "inventory" && (
@@ -391,5 +398,6 @@ export default connect(mapStateToProps, {
   resetSponsorFormItem,
   getInventoryItems,
   archiveSponsorFormItem,
-  unarchiveSponsorFormItem
+  unarchiveSponsorFormItem,
+  removeItemFile
 })(SponsorFormItemListPage);
