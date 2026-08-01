@@ -173,16 +173,18 @@ class BadgeSettingsForm extends React.Component {
 
     this.props
       .onSubmit(settingsToSave)
-      .then(() => {
-        const success_message = {
-          title: T.translate("general.done"),
-          html: T.translate("badge_settings.badge_template_settings_updated"),
-          type: "success"
-        };
+      .then(
+        () => {
+          const success_message = {
+            title: T.translate("general.done"),
+            html: T.translate("badge_settings.badge_template_settings_updated"),
+            type: "success"
+          };
 
-        Swal.fire(success_message);
-      })
-      .catch(() => {})
+          Swal.fire(success_message);
+        },
+        () => {} // only swallows onSubmit's own rejection
+      )
       .finally(() => {
         this.setState({ isSaving: false });
       });
