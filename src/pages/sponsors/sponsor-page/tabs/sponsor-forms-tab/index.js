@@ -272,7 +272,6 @@ const SponsorFormsTab = ({
       columnKey: "name",
       header: name,
       sortable: true,
-      width: 250,
       render: (row) =>
         row.original_show_form_id > 0 ? (
           <>
@@ -335,7 +334,7 @@ const SponsorFormsTab = ({
       columnKey: "override",
       header: "",
       align: "left",
-      width: 130,
+      width: 100,
       render: (row) => (
         <Button
           variant="text"
@@ -351,12 +350,6 @@ const SponsorFormsTab = ({
           {T.translate("edit_sponsor.forms_tab.override")}
         </Button>
       )
-    },
-    {
-      columnKey: "archive",
-      header: "",
-      width: 60,
-      render: () => null
     },
     {
       columnKey: "customize",
@@ -485,6 +478,7 @@ const SponsorFormsTab = ({
             sortDir: customizedForms.orderDir,
             disableProp: "is_archived"
           }}
+          tableSx={{ tableLayout: "auto", minWidth: 910 }}
           perPage={customizedForms.perPage}
           totalRows={customizedForms.totalCount}
           currentPage={customizedForms.currentPage}
@@ -505,6 +499,7 @@ const SponsorFormsTab = ({
             sortCol: managedForms.order,
             sortDir: managedForms.orderDir
           }}
+          tableSx={{ tableLayout: "auto", minWidth: 910 }}
           perPage={managedForms.perPage}
           totalRows={managedForms.totalCount}
           currentPage={managedForms.currentPage}
