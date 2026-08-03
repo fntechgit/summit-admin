@@ -103,7 +103,8 @@ export const getMediaUpload = (mediaUploadId) => async (dispatch, getState) => {
   dispatch(startLoading());
 
   const params = {
-    access_token: accessToken
+    access_token: accessToken,
+    relations: "presentation_types"
   };
 
   return getRequest(

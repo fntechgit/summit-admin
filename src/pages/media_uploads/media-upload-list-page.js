@@ -21,6 +21,7 @@ import Grid2 from "@mui/material/Grid2";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import RawHTML from "openstack-uicore-foundation/lib/components/raw-html";
 import SummitDropdown from "../../components/summit-dropdown";
 import {
   getMediaUploads as getMediaUploadsAction,
@@ -92,7 +93,8 @@ const MediaUploadListPage = ({
     },
     {
       columnKey: "description",
-      header: T.translate("media_upload.description")
+      header: T.translate("media_upload.description"),
+      render: (row) => <RawHTML>{row.description}</RawHTML>
     }
   ];
 
