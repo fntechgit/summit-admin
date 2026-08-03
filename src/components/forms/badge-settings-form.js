@@ -41,6 +41,14 @@ class BadgeSettingsForm extends React.Component {
     this.handleRemoveBadgeTypeFile = this.handleRemoveBadgeTypeFile.bind(this);
   }
 
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
@@ -186,7 +194,7 @@ class BadgeSettingsForm extends React.Component {
         () => {} // only swallows onSubmit's own rejection
       )
       .finally(() => {
-        this.setState({ isSaving: false });
+        if (this._isMounted) this.setState({ isSaving: false });
       });
   }
 

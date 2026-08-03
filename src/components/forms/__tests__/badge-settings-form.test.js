@@ -85,3 +85,25 @@ it("should not let a success-handler error be swallowed by onSubmit's rejection 
   // pre-caught before it would reach onRejected
   expect(onSuccess).toThrow("Swal render error");
 });
+
+it("should show the success message and re-enable Save when onSubmit resolves", async () => {
+  const onSubmit = jest.fn(() => Promise.resolve());
+  const { container } = renderForm(onSubmit);
+
+  fireEvent.change(container.querySelector("#BADGE_TEMPLATE_WIDTH"), {
+    target: { value: "100" }
+  });
+  fireEvent.click(screen.getByRole("button", { name: "general.save" }));
+
+  await waitFor(() =>
+    expect(Swal.fire).toHaveBeenCalledWith(
+      expect.objectContaining({
+        html: "badge_settings.badge_template_settings_updated",
+        type: "success"
+      })
+    )
+  );
+  expect(
+    screen.getByRole("button", { name: "general.save" })
+  ).not.toBeDisabled();
+});
