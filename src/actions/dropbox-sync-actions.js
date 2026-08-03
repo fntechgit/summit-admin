@@ -352,38 +352,38 @@ export const rebuildSync = () => async (dispatch, getState) => {
     });
 };
 
-export const resyncRoom =
-  (venueName, roomName) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const baseUrl = getBaseUrl();
-    const summitId = currentSummitState?.currentSummit?.id;
+// The materializer's per-room route takes integer venue/room ids
+// (/api/v1/sync/materialize/{summitId}/{venueId}/{roomId}/). It previously
+// took names; sending names now does not resolve at all.
+export const resyncRoom = (venueId, roomId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const baseUrl = getBaseUrl();
+  const summitId = currentSummitState?.currentSummit?.id;
 
-    if (!baseUrl || !summitId) return;
+  if (!baseUrl || !summitId) return;
 
-    const accessToken = await getAccessTokenSafely();
+  const accessToken = await getAccessTokenSafely();
 
-    dispatch(startLoading());
+  dispatch(startLoading());
 
-    const params = {
-      access_token: accessToken
-    };
-
-    return postRequest(
-      null,
-      createAction(RESYNC_ROOM_DISPATCHED),
-      `${baseUrl}/api/v1/sync/materialize/${summitId}/${encodeURIComponent(
-        venueName
-      )}/${encodeURIComponent(roomName)}/`,
-      null,
-      authErrorHandler
-    )(params)(dispatch)
-      .then(() => {
-        dispatch(stopLoading());
-        dispatch(
-          showSuccessMessage(T.translate("dropbox_sync.resync_dispatched"))
-        );
-      })
-      .catch(() => {
-        dispatch(stopLoading());
-      });
+  const params = {
+    access_token: accessToken
   };
+
+  return postRequest(
+    null,
+    createAction(RESYNC_ROOM_DISPATCHED),
+    `${baseUrl}/api/v1/sync/materialize/${summitId}/${venueId}/${roomId}/`,
+    null,
+    authErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(stopLoading());
+      dispatch(
+        showSuccessMessage(T.translate("dropbox_sync.resync_dispatched"))
+      );
+    })
+    .catch(() => {
+      dispatch(stopLoading());
+    });
+};

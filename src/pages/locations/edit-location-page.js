@@ -130,8 +130,8 @@ class EditLocationPage extends React.Component {
     });
   }
 
-  handleRoomResync(venueName, roomName) {
-    this.props.resyncRoom(venueName, roomName);
+  handleRoomResync(venueId, roomId) {
+    this.props.resyncRoom(venueId, roomId);
   }
 
   render() {
