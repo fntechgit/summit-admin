@@ -22,8 +22,10 @@ import {
   stopLoading,
   getCSV,
   snackbarErrorHandler,
+  snackbarErrorMsg,
   snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
+import { generateInvoicePDF } from "openstack-uicore-foundation/lib/components/order-invoice-pdf";
 import T from "i18n-react/dist/i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
 import {
@@ -32,6 +34,7 @@ import {
   DUMMY_ACTION,
   PURCHASE_STATUS
 } from "../utils/constants";
+import logoInvoice from "../assets/fn-invoice-header.png";
 
 export const REQUEST_ALL_SPONSOR_PURCHASES = "REQUEST_ALL_SPONSOR_PURCHASES";
 export const RECEIVE_ALL_SPONSOR_PURCHASES = "RECEIVE_ALL_SPONSOR_PURCHASES";
@@ -328,6 +331,30 @@ export const getSponsorOrder =
 export const clearSponsorOrder = () => async (dispatch) => {
   dispatch(createAction(CLEAR_SPONSOR_ORDER)({}));
 };
+
+export const downloadSponsorInvoice =
+  (orderId, sponsorId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+
+    return dispatch(getSponsorOrder(orderId, sponsorId))
+      .then(({ response: fetchedOrder }) =>
+        generateInvoicePDF(fetchedOrder, currentSummit, {
+          logoSrc: logoInvoice
+        })
+      )
+      .catch(() =>
+        dispatch(
+          snackbarErrorMsg({
+            title: T.translate("general.error"),
+            html: T.translate("errors.invoice_generation")
+          })
+        )
+      )
+      .finally(() => {
+        dispatch(clearSponsorOrder());
+      });
+  };
 
 export const updateClientAddress =
   (orderId, address) => async (dispatch, getState) => {

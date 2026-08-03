@@ -56,7 +56,7 @@ const SponsorOrderDetails = ({
     return () => clearSponsorOrder();
   }, [orderId]);
 
-  if (!currentOrder) return null;
+  if (!currentOrder || currentOrder.id !== Number(orderId)) return null;
 
   const { client, address } = currentOrder;
 

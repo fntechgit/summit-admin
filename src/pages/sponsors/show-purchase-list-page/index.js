@@ -18,6 +18,7 @@ import { Breadcrumb } from "react-breadcrumbs";
 import {
   Box,
   Button,
+  CircularProgress,
   Grid2,
   IconButton,
   MenuItem,
@@ -26,15 +27,12 @@ import {
 import DownloadIcon from "@mui/icons-material/Download";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
-import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
-import { generateInvoicePDF } from "openstack-uicore-foundation/lib/components/order-invoice-pdf";
 import history from "../../../history";
-import { normalizeOrder } from "../sponsor-page/utils";
 import {
   approveSponsorPurchase,
+  downloadSponsorInvoice,
   exportAllSponsorPurchases,
   getAllSponsorPurchases,
-  getSponsorOrder,
   rejectSponsorPurchase
 } from "../../../actions/sponsor-purchases-actions";
 import {
@@ -42,7 +40,6 @@ import {
   PURCHASE_METHODS,
   PURCHASE_STATUS
 } from "../../../utils/constants";
-import logoInvoice from "../../../assets/fn-invoice-header.png";
 
 const ShowPurchaseListPage = ({
   match,
@@ -54,17 +51,15 @@ const ShowPurchaseListPage = ({
   perPage,
   totalCount,
   getAllSponsorPurchases,
-  getSponsorOrder,
+  downloadSponsorInvoice,
   exportAllSponsorPurchases,
   approveSponsorPurchase,
-  rejectSponsorPurchase,
-  currentSummit
+  rejectSponsorPurchase
 }) => {
   useEffect(() => {
     getAllSponsorPurchases();
   }, []);
 
-  const { errorMessage } = useSnackbarMessage();
   const [loadingPDF, setLoadingPDF] = useState(false);
 
   const handlePageChange = (page) => {
@@ -100,14 +95,9 @@ const ShowPurchaseListPage = ({
   const handleInvoiceDownload = (purchaseOrder) => {
     if (loadingPDF) return;
     setLoadingPDF(true);
-    getSponsorOrder(purchaseOrder.id, purchaseOrder.sponsor_id)
-      .then(({ response: fetchedOrder }) =>
-        generateInvoicePDF(normalizeOrder(fetchedOrder), currentSummit, {
-          logoSrc: logoInvoice
-        })
-      )
-      .catch(() => errorMessage(T.translate("errors.invoice_generation")))
-      .finally(() => setLoadingPDF(false));
+    downloadSponsorInvoice(purchaseOrder.id, purchaseOrder.sponsor_id).finally(
+      () => setLoadingPDF(false)
+    );
   };
 
   const handleStatusChange = (sponsorId, purchaseId, newStatus) => {
@@ -199,16 +189,19 @@ const ShowPurchaseListPage = ({
       header: "",
       width: 100,
       align: "center",
-      render: (row) => (
-        <IconButton
-          size="large"
-          sx={{ color: "primary.main" }}
-          onClick={() => handleInvoiceDownload(row)}
-          aria-label={T.translate("general.download_invoice")}
-        >
-          <DownloadIcon fontSize="large" />
-        </IconButton>
-      )
+      render: (row) =>
+        loadingPDF ? (
+          <CircularProgress size={24} />
+        ) : (
+          <IconButton
+            size="large"
+            sx={{ color: "primary.main" }}
+            onClick={() => handleInvoiceDownload(row)}
+            aria-label={T.translate("general.download_invoice")}
+          >
+            <DownloadIcon fontSize="large" />
+          </IconButton>
+        )
     }
   ];
 
@@ -268,14 +261,13 @@ const ShowPurchaseListPage = ({
   );
 };
 
-const mapStateToProps = ({ showPurchaseListState, currentSummitState }) => ({
-  ...showPurchaseListState,
-  currentSummit: currentSummitState.currentSummit
+const mapStateToProps = ({ showPurchaseListState }) => ({
+  ...showPurchaseListState
 });
 
 export default connect(mapStateToProps, {
   getAllSponsorPurchases,
-  getSponsorOrder,
+  downloadSponsorInvoice,
   exportAllSponsorPurchases,
   approveSponsorPurchase,
   rejectSponsorPurchase
