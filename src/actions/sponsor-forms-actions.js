@@ -1276,7 +1276,7 @@ export const removeItemFile =
 
     return deleteRequest(
       null,
-      createAction(SPONSOR_FORM_ITEM_FILE_DELETED),
+      createAction(SPONSOR_FORM_ITEM_FILE_DELETED)({ fileId }),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images/${fileId}`,
       null,
       snackbarErrorHandler

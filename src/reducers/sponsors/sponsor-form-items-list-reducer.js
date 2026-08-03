@@ -20,6 +20,7 @@ import {
   RESET_SPONSOR_FORM_ITEM,
   SPONSOR_FORM_ITEM_ARCHIVED,
   SPONSOR_FORM_ITEM_DELETED,
+  SPONSOR_FORM_ITEM_FILE_DELETED,
   SPONSOR_FORM_ITEM_UNARCHIVED
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
@@ -115,6 +116,21 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
       const items = state.items.filter((it) => it.id !== itemId);
 
       return { ...state, items };
+    }
+    case SPONSOR_FORM_ITEM_FILE_DELETED: {
+      const { fileId } = payload;
+      const currentItem = {
+        ...state.currentItem,
+        images: state.currentItem.images.filter((img) => img.id !== fileId)
+      };
+
+      const items = state.items.map((item) =>
+        item.id === currentItem.id
+          ? { ...item, images: item.images?.filter((img) => img.id !== fileId) }
+          : item
+      );
+
+      return { ...state, currentItem, items };
     }
     case SPONSOR_FORM_ITEM_ARCHIVED: {
       const { id: itemId } = payload.response;
