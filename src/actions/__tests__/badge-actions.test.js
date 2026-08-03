@@ -70,8 +70,9 @@ describe("saveBadgeSettings", () => {
   });
 
   it("resolves once every setting request resolves", async () => {
-    saveMarketingSetting.mockImplementation(() => () => Promise.resolve());
-
+    saveMarketingSetting
+      .mockImplementationOnce(() => () => Promise.resolve({ id: "first" }))
+      .mockImplementationOnce(() => () => Promise.resolve({ id: "second" }));
     const store = mockStore({});
     await expect(
       store.dispatch(
@@ -80,6 +81,6 @@ describe("saveBadgeSettings", () => {
           b: { id: 2, type: "TEXT", value: "y", updated: true }
         })
       )
-    ).resolves.toBeDefined();
+    ).resolves.toEqual([{ id: "first" }, { id: "second" }]);
   });
 });
