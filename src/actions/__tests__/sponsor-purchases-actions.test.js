@@ -22,6 +22,7 @@ import { generateInvoicePDF } from "openstack-uicore-foundation/lib/components/o
 import {
   getSponsorOrder,
   downloadSponsorInvoice,
+  RECEIVE_SPONSOR_ORDER,
   CLEAR_SPONSOR_ORDER
 } from "../sponsor-purchases-actions";
 import * as methods from "../../utils/methods";
@@ -65,21 +66,7 @@ describe("getSponsorOrder", () => {
     delete window.PURCHASES_API_URL;
   });
 
-  it("builds the request URL using the explicit sponsorId argument when provided", async () => {
-    const store = mockStore({
-      currentSummitState: { currentSummit: { id: 1 } },
-      currentSponsorState: { entity: { id: 123 } }
-    });
-
-    await store.dispatch(getSponsorOrder(55, 999));
-    await flushPromises();
-
-    expect(capturedUrl).toBe(
-      `${window.PURCHASES_API_URL}/api/v2/summits/1/sponsors/999/purchases/55`
-    );
-  });
-
-  it("falls back to currentSponsorState.entity.id when sponsorId is not provided", async () => {
+  it("builds the request URL using currentSponsorState.entity.id", async () => {
     const store = mockStore({
       currentSummitState: { currentSummit: { id: 1 } },
       currentSponsorState: { entity: { id: 123 } }
@@ -97,9 +84,11 @@ describe("getSponsorOrder", () => {
 describe("downloadSponsorInvoice", () => {
   const middlewares = [thunk];
   const mockStore = configureStore(middlewares);
+  let capturedUrl;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    capturedUrl = null;
     window.PURCHASES_API_URL = "https://purchases.example.com";
     jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
   });
@@ -115,28 +104,35 @@ describe("downloadSponsorInvoice", () => {
       currentSponsorState: { entity: { id: 123 } }
     });
 
-  it("fetches the order, generates the PDF with the raw order and currentSummit, then clears it", async () => {
+  it("fetches the order for the explicit sponsorId, generates the PDF with the raw order and currentSummit, and never touches the shared order-detail state", async () => {
     const fetchedOrder = { id: 7, forms: [] };
-    getRequest.mockImplementation(
-      () => () => () => Promise.resolve({ response: fetchedOrder })
-    );
+    getRequest.mockImplementation((reqAC, recAC, url) => {
+      capturedUrl = url;
+      return () => () => Promise.resolve({ response: fetchedOrder });
+    });
 
     const store = buildStore();
     await store.dispatch(downloadSponsorInvoice(7, 456));
     await flushPromises();
 
+    expect(capturedUrl).toBe(
+      `${window.PURCHASES_API_URL}/api/v2/summits/1/sponsors/456/purchases/7`
+    );
     expect(generateInvoicePDF).toHaveBeenCalledWith(
       fetchedOrder,
       { id: 1 },
       expect.objectContaining({ logoSrc: expect.anything() })
     );
-    expect(store.getActions().map((a) => a.type)).toContain(
-      CLEAR_SPONSOR_ORDER
-    );
     expect(snackbarErrorMsg).not.toHaveBeenCalled();
+    const dispatchedTypes = store.getActions().map((a) => a.type);
+    // This fetch must never write into sponsorPagePurchaseListState —
+    // that's SponsorOrderDetails' state, and clobbering/clearing it here
+    // would blank an unrelated order-detail page open in another view.
+    expect(dispatchedTypes).not.toContain(RECEIVE_SPONSOR_ORDER);
+    expect(dispatchedTypes).not.toContain(CLEAR_SPONSOR_ORDER);
   });
 
-  it("shows an error message and still clears the order when the order fetch rejects", async () => {
+  it("swallows the order-fetch rejection silently since authErrorHandler already surfaced it", async () => {
     getRequest.mockImplementation(
       () => () => () => Promise.reject(new Error("Network error"))
     );
@@ -146,15 +142,11 @@ describe("downloadSponsorInvoice", () => {
     await flushPromises();
 
     expect(generateInvoicePDF).not.toHaveBeenCalled();
-    expect(snackbarErrorMsg).toHaveBeenCalledWith(
-      expect.objectContaining({ html: "errors.invoice_generation" })
-    );
-    expect(store.getActions().map((a) => a.type)).toContain(
-      CLEAR_SPONSOR_ORDER
-    );
+    // No second, stacked error UI on top of authErrorHandler's own message.
+    expect(snackbarErrorMsg).not.toHaveBeenCalled();
   });
 
-  it("shows an error message and still clears the order when PDF generation rejects", async () => {
+  it("shows an error message when PDF generation rejects", async () => {
     getRequest.mockImplementation(
       () => () => () => Promise.resolve({ response: { id: 7, forms: [] } })
     );
@@ -166,9 +158,6 @@ describe("downloadSponsorInvoice", () => {
 
     expect(snackbarErrorMsg).toHaveBeenCalledWith(
       expect.objectContaining({ html: "errors.invoice_generation" })
-    );
-    expect(store.getActions().map((a) => a.type)).toContain(
-      CLEAR_SPONSOR_ORDER
     );
   });
 });

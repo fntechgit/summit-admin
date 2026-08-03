@@ -60,7 +60,7 @@ const ShowPurchaseListPage = ({
     getAllSponsorPurchases();
   }, []);
 
-  const [loadingPDF, setLoadingPDF] = useState(false);
+  const [downloadingOrderId, setDownloadingOrderId] = useState(null);
 
   const handlePageChange = (page) => {
     getAllSponsorPurchases(term, page, perPage, order, orderDir);
@@ -93,10 +93,10 @@ const ShowPurchaseListPage = ({
   };
 
   const handleInvoiceDownload = (purchaseOrder) => {
-    if (loadingPDF) return;
-    setLoadingPDF(true);
+    if (downloadingOrderId !== null) return;
+    setDownloadingOrderId(purchaseOrder.id);
     downloadSponsorInvoice(purchaseOrder.id, purchaseOrder.sponsor_id).finally(
-      () => setLoadingPDF(false)
+      () => setDownloadingOrderId(null)
     );
   };
 
@@ -190,7 +190,7 @@ const ShowPurchaseListPage = ({
       width: 100,
       align: "center",
       render: (row) =>
-        loadingPDF ? (
+        downloadingOrderId === row.id ? (
           <CircularProgress size={24} />
         ) : (
           <IconButton
@@ -198,6 +198,7 @@ const ShowPurchaseListPage = ({
             sx={{ color: "primary.main" }}
             onClick={() => handleInvoiceDownload(row)}
             aria-label={T.translate("general.download_invoice")}
+            disabled={downloadingOrderId !== null}
           >
             <DownloadIcon fontSize="large" />
           </IconButton>

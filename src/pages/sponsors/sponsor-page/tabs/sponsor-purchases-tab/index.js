@@ -57,7 +57,7 @@ const SponsorPurchasesTab = ({
     getSponsorPurchases();
   }, [sponsor?.id]);
 
-  const [loadingPDF, setLoadingPDF] = useState(false);
+  const [downloadingOrderId, setDownloadingOrderId] = useState(null);
 
   const handlePageChange = (page) => {
     getSponsorPurchases(term, page, perPage, order, orderDir);
@@ -86,10 +86,10 @@ const SponsorPurchasesTab = ({
   };
 
   const handleInvoiceDownload = (item) => {
-    if (loadingPDF) return;
-    setLoadingPDF(true);
+    if (downloadingOrderId !== null) return;
+    setDownloadingOrderId(item.id);
     downloadSponsorInvoice(item.id, item.sponsor_id).finally(() =>
-      setLoadingPDF(false)
+      setDownloadingOrderId(null)
     );
   };
 
@@ -173,7 +173,7 @@ const SponsorPurchasesTab = ({
       width: 100,
       align: "center",
       render: (row) =>
-        loadingPDF ? (
+        downloadingOrderId === row.id ? (
           <CircularProgress size={24} />
         ) : (
           <IconButton
@@ -181,6 +181,7 @@ const SponsorPurchasesTab = ({
             sx={{ color: "primary.main" }}
             onClick={() => handleInvoiceDownload(row)}
             aria-label={T.translate("general.download_invoice")}
+            disabled={downloadingOrderId !== null}
           >
             <DownloadIcon fontSize="large" />
           </IconButton>

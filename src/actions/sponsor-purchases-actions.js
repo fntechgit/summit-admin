@@ -300,33 +300,29 @@ export const rejectSponsorPurchase =
       });
   };
 
-export const getSponsorOrder =
-  (orderId, sponsorId = null) =>
-  async (dispatch, getState) => {
-    const { currentSummitState, currentSponsorState } = getState();
-    const { currentSummit } = currentSummitState;
-    const { entity: sponsor } = currentSponsorState;
-    const accessToken = await getAccessTokenSafely();
+export const getSponsorOrder = (orderId) => async (dispatch, getState) => {
+  const { currentSummitState, currentSponsorState } = getState();
+  const { currentSummit } = currentSummitState;
+  const { entity: sponsor } = currentSponsorState;
+  const accessToken = await getAccessTokenSafely();
 
-    const sponsor_id = sponsorId || (sponsor && sponsor.id);
+  dispatch(startLoading());
 
-    dispatch(startLoading());
-
-    const params = {
-      access_token: accessToken,
-      expand:
-        "forms,forms.items,forms.items.meta_fields,forms.items.type,refunds,payments,notes,fees"
-    };
-
-    return getRequest(
-      null,
-      createAction(RECEIVE_SPONSOR_ORDER),
-      `${window.PURCHASES_API_URL}/api/v2/summits/${currentSummit.id}/sponsors/${sponsor_id}/purchases/${orderId}`,
-      authErrorHandler
-    )(params)(dispatch).finally(() => {
-      dispatch(stopLoading());
-    });
+  const params = {
+    access_token: accessToken,
+    expand:
+      "forms,forms.items,forms.items.meta_fields,forms.items.type,refunds,payments,notes,fees"
   };
+
+  return getRequest(
+    null,
+    createAction(RECEIVE_SPONSOR_ORDER),
+    `${window.PURCHASES_API_URL}/api/v2/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases/${orderId}`,
+    authErrorHandler
+  )(params)(dispatch).finally(() => {
+    dispatch(stopLoading());
+  });
+};
 
 export const clearSponsorOrder = () => async (dispatch) => {
   dispatch(createAction(CLEAR_SPONSOR_ORDER)({}));
@@ -336,23 +332,41 @@ export const downloadSponsorInvoice =
   (orderId, sponsorId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
+    const accessToken = await getAccessTokenSafely();
 
-    return dispatch(getSponsorOrder(orderId, sponsorId))
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken,
+      expand:
+        "forms,forms.items,forms.items.meta_fields,forms.items.type,refunds,payments,notes,fees"
+    };
+
+    // Uses a DUMMY_ACTION (not RECEIVE_SPONSOR_ORDER) on purpose: this fetch
+    // is only ever used to build a PDF and must never write into
+    // sponsorPagePurchaseListState.currentOrder, which SponsorOrderDetails
+    // owns and mutates by order id.
+    return getRequest(
+      null,
+      createAction(DUMMY_ACTION),
+      `${window.PURCHASES_API_URL}/api/v2/summits/${currentSummit.id}/sponsors/${sponsorId}/purchases/${orderId}`,
+      authErrorHandler
+    )(params)(dispatch)
       .then(({ response: fetchedOrder }) =>
         generateInvoicePDF(fetchedOrder, currentSummit, {
           logoSrc: logoInvoice
-        })
-      )
-      .catch(() =>
-        dispatch(
-          snackbarErrorMsg({
-            title: T.translate("general.error"),
-            html: T.translate("errors.invoice_generation")
-          })
+        }).catch(() =>
+          dispatch(
+            snackbarErrorMsg({
+              title: T.translate("general.error"),
+              html: T.translate("errors.invoice_generation")
+            })
+          )
         )
       )
+      .catch(() => {}) // authErrorHandler already surfaced the fetch failure
       .finally(() => {
-        dispatch(clearSponsorOrder());
+        dispatch(stopLoading());
       });
   };
 
