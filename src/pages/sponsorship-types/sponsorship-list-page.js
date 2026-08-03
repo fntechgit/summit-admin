@@ -91,7 +91,9 @@ const SponsorshipListPage = ({
     );
 
   const handleDelete = (sponsorshipId) => {
-    deleteSponsorship(sponsorshipId);
+    deleteSponsorship(sponsorshipId).then(() =>
+      getSponsorships(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+    );
   };
 
   const columns = [
