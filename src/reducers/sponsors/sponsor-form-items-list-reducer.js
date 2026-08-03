@@ -41,9 +41,9 @@ const DEFAULT_STATE = {
     early_bird_rate: 0,
     standard_rate: 0,
     onsite_rate: 0,
-    quantity_limit_per_show: "",
-    quantity_limit_per_sponsor: "",
-    default_quantity: "",
+    quantity_limit_per_show: 0,
+    quantity_limit_per_sponsor: 0,
+    default_quantity: 0,
     images: [],
     meta_fields: []
   }
