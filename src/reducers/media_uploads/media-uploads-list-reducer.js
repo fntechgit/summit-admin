@@ -26,7 +26,8 @@ const DEFAULT_STATE = {
   orderDir: 1,
   currentPage: 1,
   lastPage: 1,
-  perPage: 10
+  perPage: 10,
+  totalMediaUploads: 0
 };
 
 const mediaUploadListReducer = (state = DEFAULT_STATE, action = {}) => {
@@ -37,24 +38,29 @@ const mediaUploadListReducer = (state = DEFAULT_STATE, action = {}) => {
       return DEFAULT_STATE;
     }
     case REQUEST_MEDIA_UPLOADS: {
-      const { order, orderDir, term } = payload;
+      const { order, orderDir, term, perPage } = payload;
 
-      return { ...state, order, orderDir, term };
+      return { ...state, order, orderDir, term, perPage };
     }
     case RECEIVE_MEDIA_UPLOADS: {
-      const { last_page: lastPage, current_page: currentPage } =
-        payload.response;
+      const {
+        total,
+        last_page: lastPage,
+        current_page: currentPage
+      } = payload.response;
       const media_uploads = payload.response.data.map((mft) => ({
         id: mft.id,
         name: mft.name,
-        description: mft.description
+        description: mft.description,
+        is_system_defined: mft.type?.is_system_defined
       }));
 
       return {
         ...state,
         media_uploads,
         currentPage,
-        lastPage
+        lastPage,
+        totalMediaUploads: total
       };
     }
     case MEDIA_UPLOAD_DELETED: {

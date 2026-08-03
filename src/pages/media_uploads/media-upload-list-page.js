@@ -13,159 +13,202 @@
 
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
+import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import { Pagination } from "react-bootstrap";
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import Table from "openstack-uicore-foundation/lib/components/table";
-import { getSummitById } from "../../actions/summit-actions";
-import {
-  getMediaUploads,
-  deleteMediaUpload,
-  copyMediaUploads
-} from "../../actions/media-upload-actions";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Grid2 from "@mui/material/Grid2";
+import AddIcon from "@mui/icons-material/Add";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import RawHTML from "openstack-uicore-foundation/lib/components/raw-html";
 import SummitDropdown from "../../components/summit-dropdown";
+import {
+  getMediaUploads as getMediaUploadsAction,
+  deleteMediaUpload as deleteMediaUploadAction,
+  copyMediaUploads as copyMediaUploadsAction
+} from "../../actions/media-upload-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
 const MediaUploadListPage = ({
-  history,
   currentSummit,
   media_uploads,
   term,
+  currentPage,
+  perPage,
   order,
   orderDir,
-  currentPage,
-  lastPage,
-  perPage,
-  ...props
+  totalMediaUploads,
+  history,
+  getMediaUploads,
+  deleteMediaUpload,
+  copyMediaUploads
 }) => {
   useEffect(() => {
-    props.getMediaUploads();
+    getMediaUploads();
   }, []);
 
-  const handleEdit = (media_upload_id) => {
-    history.push(
-      `/app/summits/${currentSummit.id}/media-uploads/${media_upload_id}`
-    );
+  const handleEdit = (row) => {
+    history.push(`/app/summits/${currentSummit.id}/media-uploads/${row.id}`);
   };
 
-  const handlePageChange = (page) => {
-    props.getMediaUploads(term, page, perPage, order, orderDir);
-  };
-
-  const handleSort = (index, key, dir) => {
-    props.getMediaUploads(term, currentPage, perPage, key, dir);
-  };
-
-  const handleSearch = (term) => {
-    props.getMediaUploads(term, currentPage, perPage, order, orderDir);
-  };
-
-  const handleNewMediaUpload = (ev) => {
-    ev.preventDefault();
+  const handleNew = () => {
     history.push(`/app/summits/${currentSummit.id}/media-uploads/new`);
   };
 
   const handleDelete = (mediaUploadId) => {
-    const media_upload = media_uploads.find((t) => t.id === mediaUploadId);
+    deleteMediaUpload(mediaUploadId).then(() =>
+      getMediaUploads(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+    );
+  };
 
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("media_upload.delete_warning")} ${
-        media_upload.name
-      }}`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        props.deleteMediaUpload(mediaUploadId);
-      }
-    });
+  const handleSearch = (searchTerm) => {
+    getMediaUploads(searchTerm, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+  };
+
+  const handlePageChange = (page) => {
+    getMediaUploads(term, page, perPage, order, orderDir);
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    getMediaUploads(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
+  };
+
+  const handleSort = (key, dir) => {
+    getMediaUploads(term, DEFAULT_CURRENT_PAGE, perPage, key, dir);
   };
 
   const handleCopyMediaUploads = (fromSummitId) => {
-    props.copyMediaUploads(fromSummitId);
+    copyMediaUploads(fromSummitId);
   };
 
-  const canEdit = (item) => !item.is_system_defined;
+  const canDeleteMediaUpload = (row) => !row.is_system_defined;
 
   const columns = [
-    { columnKey: "id", value: T.translate("general.id"), sortable: true },
+    { columnKey: "id", header: T.translate("general.id"), sortable: true },
     {
       columnKey: "name",
-      value: T.translate("media_upload.name"),
+      header: T.translate("media_upload.name"),
       sortable: true
     },
     {
       columnKey: "description",
-      value: T.translate("media_upload.description")
+      header: T.translate("media_upload.description"),
+      render: (row) => <RawHTML>{row.description}</RawHTML>
     }
   ];
 
-  const table_options = {
-    sortCol: order,
-    sortDir: orderDir,
-    actions: {
-      edit: { onClick: handleEdit },
-      delete: { onClick: handleDelete, display: canEdit }
-    }
-  };
+  const tableOptions = { sortCol: order, sortDir: orderDir };
+
+  if (!currentSummit.id) return <div />;
 
   return (
     <div className="container">
-      <h3> {T.translate("media_upload.media_upload_list")}</h3>
-      <div className="row">
-        <div className="col-md-6">
-          <FreeTextSearch
-            value={term}
-            placeholder={T.translate("media_upload.placeholders.search")}
-            onSearch={handleSearch}
-          />
-        </div>
-        <div className="col-md-6 text-right">
-          <button
-            className="btn btn-primary right-space"
-            onClick={handleNewMediaUpload}
-          >
-            {T.translate("media_upload.add")}
-          </button>
+      <h3>{T.translate("media_upload.media_upload_list")}</h3>
+      <Grid2
+        container
+        spacing={1}
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+        <Grid2 size={2}>
+          <Box component="span">
+            {totalMediaUploads} {T.translate("media_upload.media_uploads")}
+          </Box>
+        </Grid2>
+        <Grid2
+          container
+          size={10}
+          gap={1}
+          sx={{
+            justifyContent: "flex-end",
+            alignItems: "center"
+          }}
+        >
+          <Grid2 size={4}>
+            <SearchInput term={term} onSearch={handleSearch} />
+          </Grid2>
           <SummitDropdown
             onClick={handleCopyMediaUploads}
             actionLabel={T.translate("media_upload.copy_media_uploads")}
           />
-        </div>
-      </div>
+          <Button
+            variant="contained"
+            onClick={handleNew}
+            startIcon={<AddIcon />}
+            sx={{
+              height: "36px",
+              padding: "6px 16px",
+              fontSize: "1.4rem",
+              lineHeight: "2.4rem",
+              letterSpacing: "0.4px"
+            }}
+          >
+            {T.translate("media_upload.add")}
+          </Button>
+        </Grid2>
+      </Grid2>
+
+      {media_uploads.length > 0 && (
+        <MuiTable
+          columns={columns}
+          data={media_uploads}
+          tableSx={{ tableLayout: "auto" }}
+          options={tableOptions}
+          perPage={perPage}
+          currentPage={currentPage}
+          totalRows={totalMediaUploads}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSort={handleSort}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          canDelete={canDeleteMediaUpload}
+          deleteDialogBody={(name) =>
+            `${T.translate("media_upload.delete_warning")}${name}`
+          }
+          confirmButtonColor="error"
+        />
+      )}
 
       {media_uploads.length === 0 && (
         <div>{T.translate("media_upload.no_results")}</div>
       )}
-
-      {media_uploads.length > 0 && (
-        <div>
-          <Table
-            options={table_options}
-            data={media_uploads}
-            columns={columns}
-            onSort={handleSort}
-          />
-          <Pagination
-            bsSize="medium"
-            prev
-            next
-            first
-            last
-            ellipsis
-            boundaryLinks
-            maxButtons={10}
-            items={lastPage}
-            activePage={currentPage}
-            onSelect={handlePageChange}
-          />
-        </div>
-      )}
     </div>
   );
+};
+
+MediaUploadListPage.propTypes = {
+  currentSummit: PropTypes.shape({ id: PropTypes.number }).isRequired,
+  media_uploads: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number,
+      name: PropTypes.string,
+      description: PropTypes.string
+    })
+  ).isRequired,
+  term: PropTypes.string,
+  currentPage: PropTypes.number,
+  perPage: PropTypes.number,
+  order: PropTypes.string,
+  orderDir: PropTypes.number,
+  totalMediaUploads: PropTypes.number,
+  history: PropTypes.shape({ push: PropTypes.func }).isRequired,
+  getMediaUploads: PropTypes.func.isRequired,
+  deleteMediaUpload: PropTypes.func.isRequired,
+  copyMediaUploads: PropTypes.func.isRequired
+};
+
+MediaUploadListPage.defaultProps = {
+  term: "",
+  currentPage: 1,
+  perPage: 10,
+  order: "id",
+  orderDir: 1,
+  totalMediaUploads: 0
 };
 
 const mapStateToProps = ({ currentSummitState, mediaUploadListState }) => ({
@@ -174,8 +217,7 @@ const mapStateToProps = ({ currentSummitState, mediaUploadListState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  getSummitById,
-  getMediaUploads,
-  deleteMediaUpload,
-  copyMediaUploads
+  getMediaUploads: getMediaUploadsAction,
+  deleteMediaUpload: deleteMediaUploadAction,
+  copyMediaUploads: copyMediaUploadsAction
 })(MediaUploadListPage);

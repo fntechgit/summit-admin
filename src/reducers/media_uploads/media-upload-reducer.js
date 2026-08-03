@@ -79,7 +79,8 @@ const mediaUploadReducer = (state = DEFAULT_STATE, action) => {
       return {
         ...state,
         entity: { ...DEFAULT_ENTITY, ...entity },
-        preview: null
+        preview: null,
+        errors: {}
       };
     }
     case VALIDATE: {

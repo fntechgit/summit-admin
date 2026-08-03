@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,302 +11,351 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
-import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
-import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
+import { FormikProvider, useFormik } from "formik";
+import * as yup from "yup";
+import Autocomplete from "@mui/material/Autocomplete";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import Grid2 from "@mui/material/Grid2";
+import InputAdornment from "@mui/material/InputAdornment";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import TextField from "@mui/material/TextField";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
+import MuiFormikFilesizeField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/file-size-field";
+import useScrollToError from "../../hooks/useScrollToError";
+import MuiFormikSelect from "../mui/formik-inputs/mui-formik-select";
+import FormikTextEditor from "../inputs/formik-text-editor";
+import { positiveNumberValidation } from "../../utils/yup";
 
-class MediaUploadForm extends React.Component {
-  constructor(props) {
-    super(props);
+const NUMERIC_FIELDS = [
+  "max_size",
+  "min_uploads_qty",
+  "max_uploads_qty",
+  "temporary_links_public_storage_ttl"
+];
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors
-    };
+const PRIVATE_STORAGE_DDL = [
+  { value: "None", label: "None" },
+  { value: "DropBox", label: "DropBox" },
+  { value: "Local", label: "Local" }
+];
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+const MediaUploadForm = ({
+  currentSummit,
+  entity,
+  errors,
+  mediaFileTypes,
+  onSubmit
+}) => {
+  const [isSaving, setIsSaving] = useState(false);
 
-  componentDidUpdate(prevProps) {
-    const state = {};
-    scrollToError(this.props.errors);
+  const publicStorageDdl = [
+    { value: "None", label: "None" },
+    { value: "Local", label: "Local" }
+  ];
 
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
+  if (window.PUBLIC_STORAGES.includes("S3"))
+    publicStorageDdl.push({ value: "S3", label: "S3" });
+
+  if (window.PUBLIC_STORAGES.includes("SWIFT"))
+    publicStorageDdl.push({ value: "Swift", label: "Swift" });
+
+  const presentationTypeOptions = currentSummit.event_types
+    .filter((t) => t.class_name === "PresentationType")
+    .map((t) => ({ id: t.id, name: t.name }));
+
+  const mediaFileTypesDdl = mediaFileTypes.map((mft) => ({
+    value: mft.id,
+    label: mft.name
+  }));
+
+  const handleSubmit = (values) => {
+    if (isSaving) return Promise.resolve();
+    const normalizedValues = { ...values };
+    NUMERIC_FIELDS.forEach((field) => {
+      const parsed = parseInt(values[field], 10);
+      // A cleared/non-numeric field must never serialize as NaN.
+      normalizedValues[field] = Number.isNaN(parsed) ? 0 : parsed;
+    });
+
+    setIsSaving(true);
+    return Promise.resolve(onSubmit(normalizedValues)).finally(() =>
+      setIsSaving(false)
+    );
+  };
+
+  const formik = useFormik({
+    initialValues: entity,
+    enableReinitialize: true,
+    validationSchema: yup.object().shape({
+      name: yup.string().required(T.translate("validation.required")),
+      max_size: positiveNumberValidation()
+        .moreThan(0, T.translate("validation.positive"))
+        .required(T.translate("validation.required")),
+      min_uploads_qty: positiveNumberValidation(),
+      max_uploads_qty: positiveNumberValidation(),
+      temporary_links_public_storage_ttl: positiveNumberValidation().when(
+        "use_temporary_links_on_public_storage",
+        {
+          is: true,
+          then: (schema) =>
+            schema
+              .moreThan(0, T.translate("validation.positive"))
+              .required(T.translate("validation.required")),
+          otherwise: (schema) => schema
+        }
+      )
+    }),
+    onSubmit: handleSubmit
+  });
+
+  const { values, setFieldValue } = formik;
+
+  useScrollToError(formik, true);
+
+  useEffect(() => {
+    const errorFields = Object.keys(errors || {});
+    formik.setErrors(errorFields.length > 0 ? errors : {});
+    if (errorFields.length > 0) {
+      formik.setTouched(
+        errorFields.reduce((acc, field) => ({ ...acc, [field]: true }), {})
+      );
     }
+  }, [errors]);
 
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
-    }
+  return (
+    <FormikProvider value={formik}>
+      <Box
+        id="media-upload-form"
+        component="form"
+        onSubmit={formik.handleSubmit}
+      >
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={12}>
+            <InputLabel htmlFor="name">
+              {T.translate("media_upload.name")} *
+            </InputLabel>
+            <MuiFormikTextField name="name" margin="none" fullWidth />
+          </Grid2>
+        </Grid2>
 
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
-    }
-  }
-
-  handleChange(ev) {
-    const entity = { ...this.state.entity };
-    const errors = { ...this.state.errors };
-    let { value, id } = ev.target;
-
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
-
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ entity, errors });
-  }
-
-  handleSubmit(ev) {
-    ev.preventDefault();
-
-    this.props.onSubmit(this.state.entity);
-  }
-
-  hasErrors(field) {
-    const { errors } = this.state;
-    if (field in errors) {
-      return errors[field];
-    }
-
-    return "";
-  }
-
-  render() {
-    const { entity } = this.state;
-    const { currentSummit, mediaFileTypes } = this.props;
-
-    const private_storage_ddl = [
-      { value: "None", label: "None" },
-      { value: "DropBox", label: "DropBox" },
-      { value: "Local", label: "Local" }
-    ];
-
-    const public_storage_ddl = [
-      { value: "None", label: "None" },
-      { value: "Local", label: "Local" }
-    ];
-
-    if (window.PUBLIC_STORAGES.includes("S3"))
-      public_storage_ddl.push({ value: "S3", label: "S3" });
-
-    if (window.PUBLIC_STORAGES.includes("SWIFT"))
-      public_storage_ddl.push({ value: "Swift", label: "Swift" });
-
-    const presentation_types_ddl = currentSummit.event_types
-      .filter((t) => t.class_name === "PresentationType")
-      .map((t) => ({ value: t.id, label: t.name }));
-
-    const mediaFileTypesDDL = mediaFileTypes.map((mft) => ({
-      value: mft.id,
-      label: mft.name
-    }));
-
-    return (
-      <form className="media-upload-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label> {T.translate("media_upload.name")} *</label>
-            <Input
-              id="name"
-              className="form-control"
-              error={this.hasErrors("name")}
-              onChange={this.handleChange}
-              value={entity.name}
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="max_size">
+              {T.translate("media_upload.max_size")} *
+            </InputLabel>
+            <MuiFormikFilesizeField
+              name="max_size"
+              valueUnit="KB"
+              displayUnit="KB"
+              margin="none"
+              fullWidth
             />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("media_upload.max_size")} *</label>
-            <Input
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="min_uploads_qty">
+              {T.translate("media_upload.min_qty")}
+            </InputLabel>
+            <MuiFormikTextField
+              name="min_uploads_qty"
               type="number"
-              id="max_size"
-              className="form-control"
-              error={this.hasErrors("max_size")}
-              onChange={this.handleChange}
-              value={entity.max_size}
+              margin="none"
+              fullWidth
             />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("media_upload.min_qty")} *</label>
-            <Input
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel
+              htmlFor="max_uploads_qty"
+              title={T.translate("media_upload.max_qty_hint")}
+            >
+              {T.translate("media_upload.max_qty")}
+            </InputLabel>
+            <MuiFormikTextField
+              name="max_uploads_qty"
               type="number"
-              id="min_uploads_qty"
-              min="0"
-              className="form-control"
-              error={this.hasErrors("min_uploads_qty")}
-              onChange={this.handleChange}
-              value={entity.min_uploads_qty}
+              margin="none"
+              fullWidth
             />
-          </div>
-          <div className="col-md-4">
-            <label>
-              {T.translate("media_upload.max_qty")}{" "}
-              <i
-                className="fa fa-info-circle"
-                aria-hidden="true"
-                title={T.translate("media_upload.max_qty_hint")}
-              />
-            </label>
-            <Input
-              type="number"
-              id="max_uploads_qty"
-              min="0"
-              className="form-control"
-              error={this.hasErrors("max_uploads_qty")}
-              onChange={this.handleChange}
-              value={entity.max_uploads_qty}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-8">
-            <label> {T.translate("media_upload.description")}</label>
-            <TextEditorV3
-              id="description"
-              value={entity.description}
-              onChange={this.handleChange}
-              error={this.hasErrors("description")}
-              maxLength={5120}
-              license={process.env.JODIT_LICENSE_KEY}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-4 text-left">
-            <label> {T.translate("media_upload.type")}</label>
-            <Dropdown
-              id="type_id"
-              className="right-space"
-              value={entity.type_id}
+          </Grid2>
+        </Grid2>
+
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={12}>
+            <InputLabel htmlFor="description">
+              {T.translate("media_upload.description")}
+            </InputLabel>
+            <FormikTextEditor name="description" maxLength={5120} />
+          </Grid2>
+        </Grid2>
+
+        <Divider sx={{ mb: 2 }} />
+
+        <Grid2 container spacing={2} sx={{ mb: 2, alignItems: "center" }}>
+          <Grid2 size={{ xs: 12, md: 6 }}>
+            <InputLabel htmlFor="type_id">
+              {T.translate("media_upload.type")}
+            </InputLabel>
+            <MuiFormikSelect
+              name="type_id"
               placeholder={T.translate("media_upload.placeholders.select_type")}
-              options={mediaFileTypesDDL}
-              onChange={this.handleChange}
+            >
+              {mediaFileTypesDdl.map((opt) => (
+                <MenuItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </MenuItem>
+              ))}
+            </MuiFormikSelect>
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 6 }} sx={{ mt: "8px" }}>
+            <MuiFormikCheckbox
+              name="is_editable"
+              label={T.translate("media_upload.is_editable")}
             />
-          </div>
-          <div className="col-md-4 checkboxes-div">
-            <div className="form-check abc-checkbox">
-              <input
-                type="checkbox"
-                id="is_editable"
-                checked={entity.is_editable}
-                onChange={this.handleChange}
-                className="form-check-input"
-              />
-              <label className="form-check-label" htmlFor="is_editable">
-                {T.translate("media_upload.is_editable")}
-              </label>
-            </div>
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-3">
-            <label> {T.translate("media_upload.private_storage_type")}</label>
-            <Dropdown
-              id="private_storage_type"
-              className="right-space"
-              value={entity.private_storage_type}
+          </Grid2>
+        </Grid2>
+
+        <Divider sx={{ mb: 2 }} />
+
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="private_storage_type">
+              {T.translate("media_upload.private_storage_type")}
+            </InputLabel>
+            <MuiFormikSelect
+              name="private_storage_type"
               placeholder={T.translate(
                 "media_upload.placeholders.select_private_storage"
               )}
-              options={private_storage_ddl}
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="col-md-3">
-            <label> {T.translate("media_upload.public_storage_type")}</label>
-            <Dropdown
-              id="public_storage_type"
-              className="right-space"
-              value={entity.public_storage_type}
+            >
+              {PRIVATE_STORAGE_DDL.map((opt) => (
+                <MenuItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </MenuItem>
+              ))}
+            </MuiFormikSelect>
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="public_storage_type">
+              {T.translate("media_upload.public_storage_type")}
+            </InputLabel>
+            <MuiFormikSelect
+              name="public_storage_type"
               placeholder={T.translate(
                 "media_upload.placeholders.select_public_storage"
               )}
-              options={public_storage_ddl}
-              onChange={this.handleChange}
+            >
+              {publicStorageDdl.map((opt) => (
+                <MenuItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </MenuItem>
+              ))}
+            </MuiFormikSelect>
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }} sx={{ mt: "8px" }}>
+            <MuiFormikCheckbox
+              name="use_temporary_links_on_public_storage"
+              label={T.translate(
+                "media_upload.use_temporary_links_on_public_storage"
+              )}
             />
-          </div>
-          <div className="col-md-3 checkboxes-div">
-            <div className="form-check abc-checkbox">
-              <input
-                type="checkbox"
-                id="use_temporary_links_on_public_storage"
-                checked={entity.use_temporary_links_on_public_storage}
-                onChange={this.handleChange}
-                className="form-check-input"
-              />
-              <label
-                className="form-check-label"
-                htmlFor="use_temporary_links_on_public_storage"
-              >
+          </Grid2>
+        </Grid2>
+
+        {values.use_temporary_links_on_public_storage && (
+          <Grid2 container spacing={2} sx={{ mb: 2 }}>
+            <Grid2 size={{ xs: 12, md: 4 }}>
+              <InputLabel htmlFor="temporary_links_public_storage_ttl">
                 {T.translate(
-                  "media_upload.use_temporary_links_on_public_storage"
+                  "media_upload.temporary_links_public_storage_ttl_info"
                 )}
-              </label>
-            </div>
-          </div>
-          <div className="col-md-3">
-            <label>
-              {" "}
-              {T.translate(
-                "media_upload.temporary_links_public_storage_ttl_info"
-              )}
-            </label>
-            <div style={{ display: "inline-block" }}>
-              <Input
+              </InputLabel>
+              <MuiFormikTextField
+                name="temporary_links_public_storage_ttl"
                 type="number"
-                id="temporary_links_public_storage_ttl"
-                className="form-control"
-                style={{ width: "100px" }}
-                error={this.hasErrors("temporary_links_public_storage_ttl")}
-                onChange={this.handleChange}
-                placeholder={T.translate(
-                  "media_upload.placeholders.temporary_links_public_storage_ttl"
-                )}
-                value={entity.temporary_links_public_storage_ttl}
+                margin="none"
+                fullWidth
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        {T.translate("media_upload.minutes")}
+                      </InputAdornment>
+                    )
+                  }
+                }}
               />
-            </div>
-            &nbsp;minutes
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-8 text-left">
-            <label> {T.translate("media_upload.presentation_types")}</label>
-            <Dropdown
-              id="presentation_types"
-              className="right-space"
-              value={entity.presentation_types}
-              placeholder={T.translate(
-                "media_upload.placeholders.select_presentation_types"
+            </Grid2>
+          </Grid2>
+        )}
+
+        <Divider sx={{ mb: 2 }} />
+
+        <Grid2 container spacing={2}>
+          <Grid2 size={12}>
+            <Autocomplete
+              multiple
+              size="small"
+              options={presentationTypeOptions}
+              value={presentationTypeOptions.filter((opt) =>
+                values.presentation_types.includes(opt.id)
               )}
-              options={presentation_types_ddl}
-              onChange={this.handleChange}
-              isMulti
+              getOptionLabel={(opt) => opt.name ?? ""}
+              isOptionEqualToValue={(opt, val) => opt.id === val.id}
+              onChange={(_, selected) =>
+                setFieldValue(
+                  "presentation_types",
+                  selected.map((opt) => opt.id)
+                )
+              }
+              renderInput={(params) => (
+                <TextField
+                  // eslint-disable-next-line react/jsx-props-no-spreading
+                  {...params}
+                  label={T.translate("media_upload.presentation_types")}
+                />
+              )}
             />
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
-        </div>
-      </form>
-    );
-  }
-}
+          </Grid2>
+        </Grid2>
+
+        <Divider sx={{ my: 3 }} />
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            type="submit"
+            form="media-upload-form"
+            variant="contained"
+            disabled={isSaving}
+          >
+            {T.translate("general.save")}
+          </Button>
+        </Box>
+      </Box>
+    </FormikProvider>
+  );
+};
+
+MediaUploadForm.propTypes = {
+  currentSummit: PropTypes.shape({
+    event_types: PropTypes.arrayOf(PropTypes.shape({}))
+  }).isRequired,
+  entity: PropTypes.shape({
+    id: PropTypes.number,
+    presentation_types: PropTypes.arrayOf(PropTypes.number)
+  }).isRequired,
+  errors: PropTypes.shape({}),
+  mediaFileTypes: PropTypes.arrayOf(PropTypes.shape({})),
+  onSubmit: PropTypes.func.isRequired
+};
+
+MediaUploadForm.defaultProps = {
+  errors: {},
+  mediaFileTypes: []
+};
 
 export default MediaUploadForm;

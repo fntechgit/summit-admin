@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
@@ -22,66 +22,64 @@ import {
   saveMediaUpload
 } from "../../actions/media-upload-actions";
 import { getAllMediaFileTypes } from "../../actions/media-file-type-actions";
-import AddNewButton from "../../components/buttons/add-new-button";
 
-// import '../../styles/edit-media-upload-page.less';
+const EditMediaUploadPage = ({
+  currentSummit,
+  entity,
+  errors,
+  media_file_types: mediaFileTypes,
+  match,
+  history,
+  getMediaUpload,
+  resetMediaUploadForm,
+  saveMediaUpload,
+  getAllMediaFileTypes
+}) => {
+  const mediaUploadId = match.params.media_upload_id;
 
-class EditMediaUploadPage extends React.Component {
-  constructor(props) {
-    const mediaUploadId = props.match.params.media_upload_id;
-    super(props);
-
-    this.state = {};
-
+  useEffect(() => {
     if (!mediaUploadId) {
-      props.resetMediaUploadForm();
+      resetMediaUploadForm();
     } else {
-      props.getMediaUpload(mediaUploadId);
+      getMediaUpload(mediaUploadId);
     }
+  }, [mediaUploadId]);
 
-    props.getAllMediaFileTypes();
-  }
-
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const oldId = prevProps.match.params.media_upload_id;
-    const newId = this.props.match.params.media_upload_id;
-
-    if (oldId !== newId) {
-      if (!newId) {
-        this.props.resetTemplateForm();
-      } else {
-        this.props.getMediaUpload(newId);
-      }
+  useEffect(() => {
+    if (mediaFileTypes.length === 0) {
+      getAllMediaFileTypes();
     }
-  }
+  }, [mediaFileTypes.length]);
 
-  render() {
-    const { entity, errors, match, currentSummit, media_file_types } =
-      this.props;
-    const title = entity.id
-      ? T.translate("general.edit")
-      : T.translate("general.add");
-    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
+  const handleSubmit = (values) =>
+    saveMediaUpload(values).then(() => {
+      history.push(`/app/summits/${currentSummit.id}/media-uploads`);
+    });
 
-    return (
-      <div className="container edit-media-uploads-page">
-        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-        <h3>
-          {title} {T.translate("media_upload.media_upload")}
-          <AddNewButton entity={entity} />
-        </h3>
-        <hr />
-        <MediaUploadForm
-          entity={entity}
-          errors={errors}
-          currentSummit={currentSummit}
-          mediaFileTypes={media_file_types}
-          onSubmit={this.props.saveMediaUpload}
-        />
-      </div>
-    );
-  }
-}
+  const title = entity.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
+  const breadcrumb = entity.id ? entity.name : T.translate("general.new");
+
+  if (!currentSummit) return <div />;
+
+  return (
+    <div className="container edit-media-uploads-page">
+      <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+      <h3>
+        {title} {T.translate("media_upload.media_upload")}
+      </h3>
+      <hr />
+      <MediaUploadForm
+        entity={entity}
+        errors={errors}
+        currentSummit={currentSummit}
+        mediaFileTypes={mediaFileTypes}
+        onSubmit={handleSubmit}
+      />
+    </div>
+  );
+};
 
 const mapStateToProps = ({ mediaUploadState, currentSummitState }) => ({
   currentSummit: currentSummitState.currentSummit,
