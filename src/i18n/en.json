@@ -2358,7 +2358,7 @@
     "onsite_price_start_date": "On-site ordering starts at",
     "onsite_price_end_date": "On-site ordering closes at",
     "wire_transfer_fee": "Wire Transfer Fee",
-    "wire_transfer_notification_email": "Wire Transfer Notification e-mail",
+    "wire_transfer_notification_email": "Wire Transfer Notification email - (separate by ; for multiples)",
     "is_wire_transfer_enabled": "Enable wire transfer",
     "wire_transfer_detail": "Wire Transfer Detail",
     "cart_checkout_cancel_policy": "Checkout Cancel Policy",
