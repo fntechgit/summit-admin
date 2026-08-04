@@ -123,9 +123,9 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
         state.currentItem.id === itemId
           ? {
               ...state.currentItem,
-              images: state.currentItem.images.filter(
-                (img) => img.id !== fileId
-              )
+              images:
+                state.currentItem.images?.filter((img) => img.id !== fileId) ??
+                []
             }
           : state.currentItem;
 
