@@ -43,7 +43,8 @@ const SponsorItemDialog = ({
   onSave,
   onMetaFieldTypeDeleted,
   onMetaFieldTypeValueDeleted,
-  entity: initialEntity
+  entity: initialEntity,
+  requireDefaultQuantity = false
 }) => {
   const [isSaving, setIsSaving] = useState(false);
 
@@ -62,7 +63,11 @@ const SponsorItemDialog = ({
       early_bird_rate: nullableDecimalValidation(),
       standard_rate: nullableDecimalValidation(),
       onsite_rate: nullableDecimalValidation(),
-      default_quantity: positiveNumberValidation(),
+      default_quantity: requireDefaultQuantity
+        ? positiveNumberValidation().required(
+            T.translate("validation.required")
+          )
+        : positiveNumberValidation(),
       quantity_limit_per_sponsor: positiveNumberValidation(),
       quantity_limit_per_show: positiveNumberValidation(),
       meta_fields: formMetafieldsValidation()
@@ -173,6 +178,7 @@ const SponsorItemDialog = ({
               <Grid2 size={4}>
                 <InputLabel htmlFor="default_quantity">
                   {T.translate("edit_inventory_item.default_quantity")}
+                  {requireDefaultQuantity && " *"}
                 </InputLabel>
                 <MuiFormikQuantityField
                   variant="outlined"
@@ -263,7 +269,8 @@ SponsorItemDialog.propTypes = {
   onSave: PropTypes.func.isRequired,
   onMetaFieldTypeDeleted: PropTypes.func,
   onMetaFieldTypeValueDeleted: PropTypes.func,
-  entity: PropTypes.object
+  entity: PropTypes.object,
+  requireDefaultQuantity: PropTypes.bool
 };
 
 export default SponsorItemDialog;

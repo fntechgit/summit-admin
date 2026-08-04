@@ -1231,37 +1231,6 @@ export const deleteSponsorFormItem =
       });
   };
 
-const saveItemImages =
-  (formId, formItemId, images) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const { currentSummit } = currentSummitState;
-    const accessToken = await getAccessTokenSafely();
-    const params = { access_token: accessToken };
-
-    const promises = images.map((file) => {
-      if (file.id) {
-        return putRequest(
-          null,
-          createAction(SPONSOR_FORM_ITEM_IMAGES_UPDATED),
-          `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images/${file.id}`,
-          file,
-          authErrorHandler,
-          file
-        )(params)(dispatch);
-      }
-      return postRequest(
-        null,
-        createAction(SPONSOR_FORM_ITEM_IMAGES_UPDATED),
-        `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images`,
-        file,
-        authErrorHandler,
-        file
-      )(params)(dispatch);
-    });
-
-    return Promise.all(promises);
-  };
-
 export const saveSponsorFormItem =
   (formId, entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
@@ -1276,6 +1245,30 @@ export const saveSponsorFormItem =
 
     const normalizedEntity = normalizeItem(entity);
 
+    if (entity.id) {
+      return putRequest(
+        null,
+        createAction(SPONSOR_FORM_ITEM_UPDATED),
+        `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${entity.id}`,
+        normalizedEntity,
+        snackbarErrorHandler
+      )(params)(dispatch)
+        .then(() => {
+          dispatch(
+            snackbarSuccessHandler({
+              title: T.translate("general.success"),
+              html: T.translate("sponsor_form_item_list.edit_item.updated")
+            })
+          );
+        })
+        .catch((err) => {
+          throw err;
+        })
+        .finally(() => {
+          dispatch(stopLoading());
+        });
+    }
+
     return postRequest(
       null,
       createAction(SPONSOR_FORM_ITEM_UPDATED),
@@ -1283,78 +1276,13 @@ export const saveSponsorFormItem =
       normalizedEntity,
       snackbarErrorHandler
     )(params)(dispatch)
-      .then(({ response }) => {
-        const promises = [Promise.resolve(0)];
-
-        if (normalizedEntity.images?.length > 0) {
-          const savingImages = saveItemImages(
-            formId,
-            response.id,
-            normalizedEntity.images
-          )(dispatch, getState);
-
-          promises.push(savingImages);
-        }
-
-        return Promise.all(promises).then(() => {
-          dispatch(
-            snackbarSuccessHandler({
-              title: T.translate("general.success"),
-              html: T.translate("sponsor_form_item_list.edit_item.created")
-            })
-          );
-        });
-      })
-      .finally(() => {
-        dispatch(stopLoading());
-      });
-  };
-
-export const updateSponsorFormItem =
-  (formId, entity) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-
-    dispatch(startLoading());
-
-    const params = {
-      access_token: accessToken
-    };
-
-    const normalizedEntity = normalizeItem(entity);
-
-    return putRequest(
-      null,
-      createAction(SPONSOR_FORM_ITEM_UPDATED),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${entity.id}`,
-      normalizedEntity,
-      snackbarErrorHandler
-    )(params)(dispatch)
       .then(() => {
-        const promises = [Promise.resolve(0)];
-
-        if (normalizedEntity.images?.length > 0) {
-          const savingImages = saveItemImages(
-            formId,
-            entity.id,
-            normalizedEntity.images
-          )(dispatch, getState);
-
-          promises.push(savingImages);
-        }
-
-        return Promise.all(promises).then(() => {
-          dispatch(
-            snackbarSuccessHandler({
-              title: T.translate("general.success"),
-              html: T.translate("sponsor_form_item_list.edit_item.updated")
-            })
-          );
-        });
-      })
-      .catch((err) => {
-        throw err;
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("sponsor_form_item_list.edit_item.created")
+          })
+        );
       })
       .finally(() => {
         dispatch(stopLoading());
