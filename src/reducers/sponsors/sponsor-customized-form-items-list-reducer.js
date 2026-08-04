@@ -121,14 +121,18 @@ const sponsorCustomizedFormItemsListReducer = (
       return { ...state, currentItem };
     }
     case SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED: {
-      const { fileId } = payload;
-      const currentItem = {
-        ...state.currentItem,
-        images:
-          state.currentItem.images?.filter((img) => img.id !== fileId) ?? []
-      };
+      const { fileId, itemId } = payload;
+      const currentItem =
+        state.currentItem.id === itemId
+          ? {
+              ...state.currentItem,
+              images:
+                state.currentItem.images?.filter((img) => img.id !== fileId) ??
+                []
+            }
+          : state.currentItem;
       const items = state.items.map((item) =>
-        item.id === currentItem.id
+        item.id === itemId
           ? { ...item, images: item.images?.filter((img) => img.id !== fileId) }
           : item
       );
