@@ -6,13 +6,16 @@ import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
 import {
   getRequest,
-  putRequest
+  putRequest,
+  deleteRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
 import {
   getSponsorForms,
   normalizeFormTemplate,
   normalizeSponsorCustomizedForm,
-  updateFormTemplateTiers
+  updateFormTemplateTiers,
+  removeItemFile,
+  removeSponsorCustomizedFormItemImages
 } from "../sponsor-forms-actions";
 import * as methods from "../../utils/methods";
 
@@ -21,7 +24,8 @@ jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
   postRequest: jest.fn(),
   getRequest: jest.fn(),
-  putRequest: jest.fn()
+  putRequest: jest.fn(),
+  deleteRequest: jest.fn()
 }));
 
 describe("Sponsor Forms Actions", () => {
@@ -286,6 +290,105 @@ describe("Sponsor Forms Actions", () => {
           term: "expo"
         }
       );
+    });
+  });
+
+  describe("removeItemFile", () => {
+    const middlewares = [thunk];
+    const mockStore = configureStore(middlewares);
+
+    beforeEach(() => {
+      jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
+
+      deleteRequest.mockImplementation(
+        (requestActionCreator, receiveAction) => () => (dispatch) => {
+          if (typeof receiveAction === "function") {
+            dispatch(receiveAction({ response: {} }));
+          } else {
+            dispatch(receiveAction);
+          }
+          return Promise.resolve({ response: {} });
+        }
+      );
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("dispatches SPONSOR_FORM_ITEM_FILE_DELETED with fileId and itemId", async () => {
+      const store = mockStore({
+        currentSummitState: { currentSummit: { id: 42 } }
+      });
+
+      store.dispatch(removeItemFile(7, 99, 555));
+      await flushPromises();
+
+      expect(deleteRequest).toHaveBeenCalledWith(
+        null,
+        {
+          type: "SPONSOR_FORM_ITEM_FILE_DELETED",
+          payload: { fileId: 555, itemId: 99 }
+        },
+        `${window.PURCHASES_API_URL}/api/v1/summits/42/show-forms/7/items/99/images/555`,
+        null,
+        expect.any(Function)
+      );
+
+      const dispatched = store
+        .getActions()
+        .find((a) => a.type === "SPONSOR_FORM_ITEM_FILE_DELETED");
+      expect(dispatched.payload).toEqual({ fileId: 555, itemId: 99 });
+    });
+  });
+
+  describe("removeSponsorCustomizedFormItemImages", () => {
+    const middlewares = [thunk];
+    const mockStore = configureStore(middlewares);
+
+    beforeEach(() => {
+      jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
+
+      deleteRequest.mockImplementation(
+        (requestActionCreator, receiveAction) => () => (dispatch) => {
+          if (typeof receiveAction === "function") {
+            dispatch(receiveAction({ response: {} }));
+          } else {
+            dispatch(receiveAction);
+          }
+          return Promise.resolve({ response: {} });
+        }
+      );
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("dispatches SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED with fileId", async () => {
+      const store = mockStore({
+        currentSummitState: { currentSummit: { id: 42 } },
+        currentSponsorState: { entity: { id: 5 } }
+      });
+
+      store.dispatch(removeSponsorCustomizedFormItemImages(7, 99, 555));
+      await flushPromises();
+
+      expect(deleteRequest).toHaveBeenCalledWith(
+        null,
+        {
+          type: "SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED",
+          payload: { fileId: 555 }
+        },
+        `${window.PURCHASES_API_URL}/api/v1/summits/42/sponsors/5/sponsor-forms/7/items/99/images/555`,
+        null,
+        expect.any(Function)
+      );
+
+      const dispatched = store
+        .getActions()
+        .find((a) => a.type === "SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED");
+      expect(dispatched.payload).toEqual({ fileId: 555 });
     });
   });
 });

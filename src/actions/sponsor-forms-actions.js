@@ -1276,7 +1276,10 @@ export const removeItemFile =
 
     return deleteRequest(
       null,
-      createAction(SPONSOR_FORM_ITEM_FILE_DELETED)({ fileId }),
+      createAction(SPONSOR_FORM_ITEM_FILE_DELETED)({
+        fileId,
+        itemId: formItemId
+      }),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images/${fileId}`,
       null,
       snackbarErrorHandler
@@ -1790,7 +1793,7 @@ export const removeSponsorCustomizedFormItemImages =
 
     return deleteRequest(
       null,
-      createAction(SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED),
+      createAction(SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED)({ fileId }),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${formItemId}/images/${fileId}`,
       null,
       snackbarErrorHandler

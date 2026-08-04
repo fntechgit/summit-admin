@@ -22,7 +22,8 @@ import {
   SPONSOR_CUSTOMIZED_FORM_ITEM_UNARCHIVED,
   SPONSOR_FORM_MANAGED_ITEM_UPDATED,
   SPONSOR_CUSTOMIZED_FORM_ITEMS_ADDED,
-  RESET_SPONSOR_FORM_MANAGED_ITEM
+  RESET_SPONSOR_FORM_MANAGED_ITEM,
+  SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { getSafePageAfterRemove } from "../../utils/methods";
@@ -118,6 +119,20 @@ const sponsorCustomizedFormItemsListReducer = (
         meta_fields: (item.meta_fields ?? []).length > 0 ? item.meta_fields : []
       };
       return { ...state, currentItem };
+    }
+    case SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED: {
+      const { fileId } = payload;
+      const currentItem = {
+        ...state.currentItem,
+        images:
+          state.currentItem.images?.filter((img) => img.id !== fileId) ?? []
+      };
+      const items = state.items.map((item) =>
+        item.id === currentItem.id
+          ? { ...item, images: item.images?.filter((img) => img.id !== fileId) }
+          : item
+      );
+      return { ...state, currentItem, items };
     }
     case SPONSOR_CUSTOMIZED_FORM_ITEM_DELETED: {
       const { itemId } = payload;
