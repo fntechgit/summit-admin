@@ -257,7 +257,6 @@ const SponsorFormsManageItems = ({
     {
       columnKey: "images",
       header: "",
-      width: 40,
       align: "center",
       render: (row) =>
         row.images?.length > 0 ? (

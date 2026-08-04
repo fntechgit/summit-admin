@@ -140,7 +140,6 @@ const AddSponsorFormTemplatePopup = ({
     {
       columnKey: "select",
       header: "",
-      width: 30,
       align: "center",
       render: (row) => (
         <FormControlLabel

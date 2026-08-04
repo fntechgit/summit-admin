@@ -117,7 +117,19 @@ const SummitDirectoryPage = ({
     },
     {
       columnKey: "name",
-      header: T.translate("directory.summit_name")
+      header: T.translate("directory.summit_name"),
+      render: (row) => (
+        <>
+          <div>{row.name}</div>
+          {!!row.invite_only_registration && (
+            <Chip
+              size="small"
+              sx={{ mt: "4px" }}
+              label={T.translate("directory.invitation_only")}
+            />
+          )}
+        </>
+      )
     },
     {
       columnKey: "sponsor_qty",
@@ -143,15 +155,6 @@ const SummitDirectoryPage = ({
       columnKey: "end_date",
       header: T.translate("directory.end_date"),
       render: (row) => formatEpoch(row.end_date, "MMMM Do YYYY")
-    },
-    {
-      columnKey: "invite_only_registration",
-      header: "",
-      width: 120,
-      render: (row) =>
-        row.invite_only_registration ? (
-          <Chip label={T.translate("directory.invitation_only")} />
-        ) : null
     }
   ];
 
@@ -214,7 +217,6 @@ const SummitDirectoryPage = ({
       <MuiTable
         columns={columns}
         data={safeSummits}
-        tableSx={{ tableLayout: "auto", minWidth: 910 }}
         totalRows={totalSummits}
         perPage={perPage}
         currentPage={currentPage}
@@ -223,13 +225,9 @@ const SummitDirectoryPage = ({
         onEdit={canEditSummit ? handleEditSummit : undefined}
         onDelete={canDeleteSummits ? (id) => deleteSummit(id) : undefined}
         onSelect={handleSelectSummit}
-        getName={(row) => row.name}
-        deleteDialogTitle={T.translate("general.are_you_sure")}
         deleteDialogBody={(name) =>
           `${T.translate("directory.remove_warning")} ${name}`
         }
-        deleteDialogConfirmText={T.translate("general.yes_delete")}
-        confirmButtonColor="error"
       />
     </Box>
   );

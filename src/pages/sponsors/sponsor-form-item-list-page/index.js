@@ -235,7 +235,6 @@ const SponsorFormItemListPage = ({
     {
       columnKey: "hasImage",
       header: "",
-      width: 40,
       align: "center",
       render: (row) => {
         const img = row.images?.[0];
