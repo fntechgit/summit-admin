@@ -219,12 +219,8 @@ const SponsorFormsListPage = ({
       columnKey: "tiers",
       header: T.translate("sponsor_forms.tiers_column_label"),
       sortable: false,
-      width: 140,
       render: (row) => {
         const cellStyle = {
-          width: 140,
-          maxWidth: 140,
-          minWidth: 140,
           display: "block"
         };
         if (editingTiersId === row.id) {
@@ -280,8 +276,7 @@ const SponsorFormsListPage = ({
                 cursor: "pointer",
                 textDecoration: "underline dotted",
                 display: "block",
-                whiteSpace: "normal",
-                wordBreak: "break-word",
+                whiteSpace: "nowrap",
                 verticalAlign: "middle"
               }}
               title={label}
@@ -297,19 +292,16 @@ const SponsorFormsListPage = ({
       columnKey: "opens_at",
       header: T.translate("edit_sponsor.forms_tab.opens_at"),
       sortable: true,
-      width: 115,
       render: (row) => formatDate(row.opens_at)
     },
     {
       columnKey: "expires_at",
       header: T.translate("edit_sponsor.forms_tab.expires_at"),
       sortable: true,
-      width: 120,
       render: (row) => formatDate(row.expires_at)
     },
     {
       columnKey: "items_qty",
-      width: 90,
       header: T.translate("sponsor_forms.items_column_label"),
       sortable: false
     },

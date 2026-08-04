@@ -156,7 +156,6 @@ const MediaUploadListPage = ({
         <MuiTable
           columns={columns}
           data={media_uploads}
-          tableSx={{ tableLayout: "auto" }}
           options={tableOptions}
           perPage={perPage}
           currentPage={currentPage}
