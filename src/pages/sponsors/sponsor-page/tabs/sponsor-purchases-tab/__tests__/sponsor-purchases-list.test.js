@@ -18,12 +18,14 @@
 import React from "react";
 import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import flushPromises from "flush-promises";
 import { renderWithRedux } from "../../../../../../utils/test-utils";
 import SponsorPurchasesTab from "../index";
 import {
   getSponsorPurchases,
   approveSponsorPurchase,
-  rejectSponsorPurchase
+  rejectSponsorPurchase,
+  downloadSponsorInvoice
 } from "../../../../../../actions/sponsor-purchases-actions";
 import {
   PURCHASE_METHODS,
@@ -34,8 +36,16 @@ jest.mock("../../../../../../actions/sponsor-purchases-actions", () => ({
   ...jest.requireActual("../../../../../../actions/sponsor-purchases-actions"),
   getSponsorPurchases: jest.fn(() => () => Promise.resolve()),
   approveSponsorPurchase: jest.fn(() => () => Promise.resolve()),
-  rejectSponsorPurchase: jest.fn(() => () => Promise.resolve())
+  rejectSponsorPurchase: jest.fn(() => () => Promise.resolve()),
+  downloadSponsorInvoice: jest.fn(() => () => Promise.resolve())
 }));
+
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/snackbar-notification",
+  () => ({
+    useSnackbarMessage: () => ({ errorMessage: jest.fn() })
+  })
+);
 
 /**
  * SearchInput mock: plain <input> that fires onSearch on Enter key,
@@ -87,6 +97,9 @@ const createInitialState = (overrides = {}) => {
     sponsorPagePurchaseListState: state,
     currentSponsorState: {
       entity: { id: 123 }
+    },
+    currentSummitState: {
+      currentSummit: { id: 1 }
     }
   };
 };
@@ -469,6 +482,72 @@ describe("SponsorPurchasesTab", () => {
         "number", // columnKey
         -1 // sortDir (1) * -1
       );
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Invoice download
+  // -----------------------------------------------------------------------
+
+  describe("Invoice download", () => {
+    const DOWNLOAD_LABEL = "general.download_invoice";
+    const getDownloadButton = () =>
+      withinTableBody().getByRole("button", { name: DOWNLOAD_LABEL });
+    const queryDownloadButton = () =>
+      withinTableBody().queryByRole("button", { name: DOWNLOAD_LABEL });
+
+    it("dispatches downloadSponsorInvoice with the row's order id and the current sponsor id", async () => {
+      const purchase = createPurchase({ id: 7 });
+
+      renderWithRedux(<SponsorPurchasesTab />, {
+        initialState: createInitialState({
+          purchases: [purchase],
+          totalCount: 1
+        })
+      });
+
+      await act(async () => {
+        await userEvent.click(getDownloadButton());
+      });
+
+      // currentSponsorState.entity.id from createInitialState, not a row field
+      expect(downloadSponsorInvoice).toHaveBeenCalledWith(purchase.id, 123);
+    });
+
+    it("does not start a second download while one is already pending", async () => {
+      const purchase = createPurchase({ id: 7 });
+      let resolveDownload;
+      downloadSponsorInvoice.mockImplementationOnce(
+        () => () =>
+          new Promise((resolve) => {
+            resolveDownload = resolve;
+          })
+      );
+
+      renderWithRedux(<SponsorPurchasesTab />, {
+        initialState: createInitialState({
+          purchases: [purchase],
+          totalCount: 1
+        })
+      });
+
+      await act(async () => {
+        await userEvent.click(getDownloadButton());
+      });
+
+      // While the download is pending, the icon is swapped for a progress
+      // spinner — there is no button left to click, so a second click can't
+      // happen.
+      expect(downloadSponsorInvoice).toHaveBeenCalledTimes(1);
+      expect(queryDownloadButton()).not.toBeInTheDocument();
+
+      await act(async () => {
+        resolveDownload();
+        await flushPromises();
+      });
+
+      expect(downloadSponsorInvoice).toHaveBeenCalledTimes(1);
+      expect(getDownloadButton()).toBeInTheDocument();
     });
   });
 });

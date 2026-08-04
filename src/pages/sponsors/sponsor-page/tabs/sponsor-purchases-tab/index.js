@@ -11,12 +11,13 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
   Box,
   Button,
+  CircularProgress,
   Grid2,
   IconButton,
   MenuItem,
@@ -28,6 +29,7 @@ import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-i
 import history from "../../../../../history";
 import {
   approveSponsorPurchase,
+  downloadSponsorInvoice,
   getSponsorPurchases,
   rejectSponsorPurchase
 } from "../../../../../actions/sponsor-purchases-actions";
@@ -47,12 +49,15 @@ const SponsorPurchasesTab = ({
   perPage,
   totalCount,
   getSponsorPurchases,
+  downloadSponsorInvoice,
   approveSponsorPurchase,
   rejectSponsorPurchase
 }) => {
   useEffect(() => {
     getSponsorPurchases();
   }, [sponsor?.id]);
+
+  const [downloadingOrderId, setDownloadingOrderId] = useState(null);
 
   const handlePageChange = (page) => {
     getSponsorPurchases(term, page, perPage, order, orderDir);
@@ -80,8 +85,12 @@ const SponsorPurchasesTab = ({
     history.push(`purchases/${item.id}`);
   };
 
-  const handleMenu = (item) => {
-    console.log("MENU : ", item);
+  const handleInvoiceDownload = (item) => {
+    if (downloadingOrderId !== null) return;
+    setDownloadingOrderId(item.id);
+    downloadSponsorInvoice(item.id, sponsor.id).finally(() =>
+      setDownloadingOrderId(null)
+    );
   };
 
   const handleStatusChange = (purchaseId, newStatus) => {
@@ -163,15 +172,20 @@ const SponsorPurchasesTab = ({
       header: "",
       width: 100,
       align: "center",
-      render: (row) => (
-        <IconButton
-          size="large"
-          sx={{ color: "primary.main" }}
-          onClick={() => handleMenu(row)}
-        >
-          <DownloadIcon fontSize="large" />
-        </IconButton>
-      )
+      render: (row) =>
+        downloadingOrderId === row.id ? (
+          <CircularProgress size={24} />
+        ) : (
+          <IconButton
+            size="large"
+            sx={{ color: "primary.main" }}
+            onClick={() => handleInvoiceDownload(row)}
+            aria-label={T.translate("general.download_invoice")}
+            disabled={downloadingOrderId !== null}
+          >
+            <DownloadIcon fontSize="large" />
+          </IconButton>
+        )
     }
   ];
 
@@ -226,6 +240,7 @@ const mapStateToProps = ({
 
 export default connect(mapStateToProps, {
   getSponsorPurchases,
+  downloadSponsorInvoice,
   approveSponsorPurchase,
   rejectSponsorPurchase
 })(SponsorPurchasesTab);

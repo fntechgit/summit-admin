@@ -11,13 +11,14 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import {
   Box,
   Button,
+  CircularProgress,
   Grid2,
   IconButton,
   MenuItem,
@@ -29,6 +30,7 @@ import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-i
 import history from "../../../history";
 import {
   approveSponsorPurchase,
+  downloadSponsorInvoice,
   exportAllSponsorPurchases,
   getAllSponsorPurchases,
   rejectSponsorPurchase
@@ -49,6 +51,7 @@ const ShowPurchaseListPage = ({
   perPage,
   totalCount,
   getAllSponsorPurchases,
+  downloadSponsorInvoice,
   exportAllSponsorPurchases,
   approveSponsorPurchase,
   rejectSponsorPurchase
@@ -56,6 +59,8 @@ const ShowPurchaseListPage = ({
   useEffect(() => {
     getAllSponsorPurchases();
   }, []);
+
+  const [downloadingOrderId, setDownloadingOrderId] = useState(null);
 
   const handlePageChange = (page) => {
     getAllSponsorPurchases(term, page, perPage, order, orderDir);
@@ -87,8 +92,12 @@ const ShowPurchaseListPage = ({
     history.push(`${item.sponsor_id}/purchases/${item.id}`);
   };
 
-  const handleMenu = (item) => {
-    console.log("MENU : ", item);
+  const handleInvoiceDownload = (purchaseOrder) => {
+    if (downloadingOrderId !== null) return;
+    setDownloadingOrderId(purchaseOrder.id);
+    downloadSponsorInvoice(purchaseOrder.id, purchaseOrder.sponsor_id).finally(
+      () => setDownloadingOrderId(null)
+    );
   };
 
   const handleStatusChange = (sponsorId, purchaseId, newStatus) => {
@@ -180,15 +189,20 @@ const ShowPurchaseListPage = ({
       header: "",
       width: 100,
       align: "center",
-      render: (row) => (
-        <IconButton
-          size="large"
-          sx={{ color: "primary.main" }}
-          onClick={() => handleMenu(row)}
-        >
-          <DownloadIcon fontSize="large" />
-        </IconButton>
-      )
+      render: (row) =>
+        downloadingOrderId === row.id ? (
+          <CircularProgress size={24} />
+        ) : (
+          <IconButton
+            size="large"
+            sx={{ color: "primary.main" }}
+            onClick={() => handleInvoiceDownload(row)}
+            aria-label={T.translate("general.download_invoice")}
+            disabled={downloadingOrderId !== null}
+          >
+            <DownloadIcon fontSize="large" />
+          </IconButton>
+        )
     }
   ];
 
@@ -254,6 +268,7 @@ const mapStateToProps = ({ showPurchaseListState }) => ({
 
 export default connect(mapStateToProps, {
   getAllSponsorPurchases,
+  downloadSponsorInvoice,
   exportAllSponsorPurchases,
   approveSponsorPurchase,
   rejectSponsorPurchase

@@ -42,7 +42,7 @@
     "@mui/icons-material": "^6.4.3",
     "@mui/material": "^6.4.3",
     "@mui/x-date-pickers": "^7.26.0",
-    "@react-pdf/renderer": "4.3.0",
+    "@react-pdf/renderer": "^4.4.1",
     "@sentry/react": "^8.32.0",
     "@sentry/webpack-plugin": "^2.22.4",
     "@stripe/react-stripe-js": "^5.4.1",
@@ -93,7 +93,7 @@
     "moment-duration-format": "^2.3.2",
     "moment-timezone": "^0.5.33",
     "mui-color-input": "^9.0.0",
-    "openstack-uicore-foundation": "5.0.43",
+    "openstack-uicore-foundation": "5.0.44",
     "p-limit": "^6.1.0",
     "path-browserify": "^1.0.1",
     "postcss-loader": "^6.2.1",
@@ -180,7 +180,7 @@
       "src/**/*.{js,jsx,mjs}"
     ],
     "moduleNameMapper": {
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js",
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/src/__mocks__/fileMock.js",
       "\\.(css)$": "identity-obj-proxy"
     },
     "transformIgnorePatterns": [

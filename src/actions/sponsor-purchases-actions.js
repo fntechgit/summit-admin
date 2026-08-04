@@ -22,8 +22,10 @@ import {
   stopLoading,
   getCSV,
   snackbarErrorHandler,
+  snackbarErrorMsg,
   snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
+import { generateInvoicePDF } from "openstack-uicore-foundation/lib/components/order-invoice-pdf";
 import T from "i18n-react/dist/i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
 import {
@@ -32,6 +34,7 @@ import {
   DUMMY_ACTION,
   PURCHASE_STATUS
 } from "../utils/constants";
+import logoInvoice from "../assets/fn-invoice-header.png";
 
 export const REQUEST_ALL_SPONSOR_PURCHASES = "REQUEST_ALL_SPONSOR_PURCHASES";
 export const RECEIVE_ALL_SPONSOR_PURCHASES = "RECEIVE_ALL_SPONSOR_PURCHASES";
@@ -43,6 +46,9 @@ export const RECEIVE_SPONSOR_ORDER = "RECEIVE_SPONSOR_ORDER";
 export const CLEAR_SPONSOR_ORDER = "CLEAR_SPONSOR_ORDER";
 export const SPONSOR_CLIENT_ADDRESS_UPDATED = "SPONSOR_CLIENT_ADDRESS_UPDATED";
 export const SPONSOR_CLIENT_UPDATED = "SPONSOR_CLIENT_UPDATED";
+
+const ORDER_DETAIL_EXPAND =
+  "forms,forms.items,forms.items.meta_fields,forms.items.type,refunds,payments,notes,fees";
 
 export const getAllSponsorPurchases =
   (
@@ -307,8 +313,7 @@ export const getSponsorOrder = (orderId) => async (dispatch, getState) => {
 
   const params = {
     access_token: accessToken,
-    expand:
-      "forms,forms.items,forms.items.meta_fields,forms.items.type,refunds,payments,notes,fees"
+    expand: ORDER_DETAIL_EXPAND
   };
 
   return getRequest(
@@ -324,6 +329,47 @@ export const getSponsorOrder = (orderId) => async (dispatch, getState) => {
 export const clearSponsorOrder = () => async (dispatch) => {
   dispatch(createAction(CLEAR_SPONSOR_ORDER)({}));
 };
+
+export const downloadSponsorInvoice =
+  (orderId, sponsorId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken,
+      expand: ORDER_DETAIL_EXPAND
+    };
+
+    // Uses a DUMMY_ACTION (not RECEIVE_SPONSOR_ORDER) on purpose: this fetch
+    // is only ever used to build a PDF and must never write into
+    // sponsorPagePurchaseListState.currentOrder, which SponsorOrderDetails
+    // owns and mutates by order id.
+    return getRequest(
+      null,
+      createAction(DUMMY_ACTION),
+      `${window.PURCHASES_API_URL}/api/v2/summits/${currentSummit.id}/sponsors/${sponsorId}/purchases/${orderId}`,
+      authErrorHandler
+    )(params)(dispatch)
+      .then(({ response: fetchedOrder }) =>
+        generateInvoicePDF(fetchedOrder, currentSummit, {
+          logoSrc: logoInvoice
+        }).catch(() =>
+          dispatch(
+            snackbarErrorMsg({
+              title: T.translate("general.error"),
+              html: T.translate("errors.invoice_generation")
+            })
+          )
+        )
+      )
+      .catch(() => {}) // authErrorHandler already surfaced the fetch failure
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
 
 export const updateClientAddress =
   (orderId, address) => async (dispatch, getState) => {

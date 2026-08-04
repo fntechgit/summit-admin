@@ -6,7 +6,7 @@ import {
 export const normalizeOrder = (data) => ({
   ...data,
   total: data.net_amount || data.amount_due || 0,
-  forms: data.forms.map((form) => ({
+  forms: (data.forms || []).map((form) => ({
     ...form,
     addon_name: form.add_on?.name || "",
     discount: formatDiscount(form.discount_amount, form.discount_type),
