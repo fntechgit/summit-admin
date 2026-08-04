@@ -31,6 +31,7 @@ import {
   getAccessTokenSafely,
   normalizeSelectAllField
 } from "../utils/methods";
+import { deleteFile } from "./inventory-shared-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
@@ -106,8 +107,6 @@ export const RECEIVE_SPONSOR_FORM_ITEM = "RECEIVE_SPONSOR_FORM_ITEM";
 export const SPONSOR_FORM_ITEM_UPDATED = "SPONSOR_FORM_ITEM_UPDATED";
 export const RESET_SPONSOR_FORM_ITEM = "RESET_SPONSOR_FORM_ITEM";
 export const SPONSOR_FORM_ITEM_DELETED = "SPONSOR_FORM_ITEM_DELETED";
-export const SPONSOR_FORM_ITEM_IMAGES_UPDATED =
-  "SPONSOR_FORM_ITEM_IMAGES_UPDATED";
 export const SPONSOR_FORM_ITEM_FILE_DELETED = "SPONSOR_FORM_ITEM_FILE_DELETED";
 export const SPONSOR_FORM_ITEMS_ADDED = "SPONSOR_FORM_ITEMS_ADDED";
 export const SPONSOR_FORM_ITEM_ARCHIVED = "SPONSOR_FORM_ITEM_ARCHIVED";
@@ -1234,58 +1233,19 @@ export const deleteSponsorFormItem =
       });
   };
 
-const saveItemImages =
-  (formId, formItemId, images) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const { currentSummit } = currentSummitState;
-    const accessToken = await getAccessTokenSafely();
-    const params = { access_token: accessToken };
-
-    const promises = images.map((file) => {
-      if (file.id) {
-        return putRequest(
-          null,
-          createAction(SPONSOR_FORM_ITEM_IMAGES_UPDATED),
-          `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images/${file.id}`,
-          file,
-          authErrorHandler,
-          file
-        )(params)(dispatch);
-      }
-      return postRequest(
-        null,
-        createAction(SPONSOR_FORM_ITEM_IMAGES_UPDATED),
-        `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images`,
-        file,
-        authErrorHandler,
-        file
-      )(params)(dispatch);
-    });
-
-    return Promise.all(promises);
-  };
-
 export const removeItemFile =
   (formId, formItemId, fileId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
-    const accessToken = await getAccessTokenSafely();
-    const params = { access_token: accessToken };
 
-    dispatch(startLoading());
+    const settings = {
+      url: `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images`,
+      deletedActionName: SPONSOR_FORM_ITEM_FILE_DELETED,
+      payload: { itemId: formItemId },
+      errorHandler: snackbarErrorHandler
+    };
 
-    return deleteRequest(
-      null,
-      createAction(SPONSOR_FORM_ITEM_FILE_DELETED)({
-        fileId,
-        itemId: formItemId
-      }),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images/${fileId}`,
-      null,
-      snackbarErrorHandler
-    )(params)(dispatch).finally(() => {
-      dispatch(stopLoading());
-    });
+    return deleteFile(fileId, settings)(dispatch);
   };
 
 export const saveSponsorFormItem =
@@ -1309,27 +1269,13 @@ export const saveSponsorFormItem =
       normalizedEntity,
       snackbarErrorHandler
     )(params)(dispatch)
-      .then(({ response }) => {
-        const promises = [Promise.resolve(0)];
-
-        if (normalizedEntity.images?.length > 0) {
-          const savingImages = saveItemImages(
-            formId,
-            response.id,
-            normalizedEntity.images
-          )(dispatch, getState);
-
-          promises.push(savingImages);
-        }
-
-        return Promise.all(promises).then(() => {
-          dispatch(
-            snackbarSuccessHandler({
-              title: T.translate("general.success"),
-              html: T.translate("sponsor_form_item_list.edit_item.created")
-            })
-          );
-        });
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("sponsor_form_item_list.edit_item.created")
+          })
+        );
       })
       .finally(() => {
         dispatch(stopLoading());
@@ -1358,26 +1304,12 @@ export const updateSponsorFormItem =
       snackbarErrorHandler
     )(params)(dispatch)
       .then(() => {
-        const promises = [Promise.resolve(0)];
-
-        if (normalizedEntity.images?.length > 0) {
-          const savingImages = saveItemImages(
-            formId,
-            entity.id,
-            normalizedEntity.images
-          )(dispatch, getState);
-
-          promises.push(savingImages);
-        }
-
-        return Promise.all(promises).then(() => {
-          dispatch(
-            snackbarSuccessHandler({
-              title: T.translate("general.success"),
-              html: T.translate("sponsor_form_item_list.edit_item.updated")
-            })
-          );
-        });
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("sponsor_form_item_list.edit_item.updated")
+          })
+        );
       })
       .catch((err) => {
         throw err;
@@ -1786,18 +1718,13 @@ export const removeSponsorCustomizedFormItemImages =
     const {
       entity: { id: sponsorId }
     } = currentSponsorState;
-    const accessToken = await getAccessTokenSafely();
-    const params = { access_token: accessToken };
 
-    dispatch(startLoading());
+    const settings = {
+      url: `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${formItemId}/images`,
+      deletedActionName: SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED,
+      payload: { itemId: formItemId },
+      errorHandler: snackbarErrorHandler
+    };
 
-    return deleteRequest(
-      null,
-      createAction(SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED)({ fileId }),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${formItemId}/images/${fileId}`,
-      null,
-      snackbarErrorHandler
-    )(params)(dispatch).finally(() => {
-      dispatch(stopLoading());
-    });
+    return deleteFile(fileId, settings)(dispatch);
   };

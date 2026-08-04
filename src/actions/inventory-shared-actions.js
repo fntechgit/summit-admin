@@ -273,13 +273,15 @@ export const deleteFile =
 
     return deleteRequest(
       null,
-      createAction(settings.deletedActionName)({ fileId }),
+      createAction(settings.deletedActionName)({ fileId, ...settings.payload }),
       `${settings.url}/${fileId}`,
       null,
-      snackbarErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+      settings.errorHandler ?? snackbarErrorHandler
+    )(params)(dispatch)
+      .catch(() => {})
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 /* ************************************  ARCHIVE  ************************************ */
