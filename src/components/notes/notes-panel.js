@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import Swal from "sweetalert2";
 import T from "i18n-react";
@@ -22,6 +22,7 @@ const NotesPanel = ({
   ticketId,
   open,
   onToggle,
+  onOpen,
   notes,
   term,
   currentPage,
@@ -37,11 +38,15 @@ const NotesPanel = ({
   clearNotesParams
 }) => {
   const [newNote, setNewNote] = useState("");
+  const hasAutoOpenedRef = useRef(false);
 
   useEffect(() => {
     getNotes(attendeeId, ticketId, term, 1, perPage, order, orderDir).then(
       () => {
-        if (!open) onToggle();
+        if (!hasAutoOpenedRef.current) {
+          hasAutoOpenedRef.current = true;
+          onOpen();
+        }
       }
     );
 

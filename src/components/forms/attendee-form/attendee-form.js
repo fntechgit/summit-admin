@@ -96,6 +96,12 @@ const AttendeeForm = ({
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
+  const handleOpenNotes = () => {
+    setOpenSections((prev) =>
+      prev.admin_notes ? prev : { ...prev, admin_notes: true }
+    );
+  };
+
   const handleChange = (ev) => {
     const updatedEntity = { ...entity };
     let { value, id } = ev.target;
@@ -430,6 +436,7 @@ const AttendeeForm = ({
           attendeeId={entity.id}
           open={openSections.admin_notes}
           onToggle={(ev) => toggleSection("admin_notes", ev)}
+          onOpen={handleOpenNotes}
         />
       )}
       {/* Second Form ( Extra Questions ) */}
