@@ -11,7 +11,8 @@
     "entity_not_found": "The entity you are looking for was not found.",
     "maximum_files": "Maximum number of files has been reached",
     "payment_profile_not_found_title": "Payment Profile not found",
-    "payment_profile_not_found": "Missing payment profile for summit {{summitName}}. Please contact support."
+    "payment_profile_not_found": "Missing payment profile for summit {{summitName}}. Please contact support.",
+    "invoice_generation": "Invoice could not be generated. Please contact support."
   },
   "general": {
     "summit": "Event",
@@ -61,6 +62,7 @@
     "save_and_publish": "Save & Publish",
     "save_and_add_next": "Save & Add Next",
     "export": "Export",
+    "download_invoice": "Download Invoice",
     "are_you_sure": "Are you sure?",
     "yes_delete": "Yes, delete.",
     "yes_remove": "Yes, remove.",
