@@ -88,7 +88,7 @@ const SponsorPurchasesTab = ({
   const handleInvoiceDownload = (item) => {
     if (downloadingOrderId !== null) return;
     setDownloadingOrderId(item.id);
-    downloadSponsorInvoice(item.id, item.sponsor_id).finally(() =>
+    downloadSponsorInvoice(item.id, sponsor.id).finally(() =>
       setDownloadingOrderId(null)
     );
   };

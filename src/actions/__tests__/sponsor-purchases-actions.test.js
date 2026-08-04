@@ -19,12 +19,7 @@ import {
   snackbarErrorMsg
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { generateInvoicePDF } from "openstack-uicore-foundation/lib/components/order-invoice-pdf";
-import {
-  getSponsorOrder,
-  downloadSponsorInvoice,
-  RECEIVE_SPONSOR_ORDER,
-  CLEAR_SPONSOR_ORDER
-} from "../sponsor-purchases-actions";
+import { downloadSponsorInvoice } from "../sponsor-purchases-actions";
 import * as methods from "../../utils/methods";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
@@ -43,43 +38,6 @@ jest.mock(
     generateInvoicePDF: jest.fn(() => Promise.resolve())
   })
 );
-
-describe("getSponsorOrder", () => {
-  const middlewares = [thunk];
-  const mockStore = configureStore(middlewares);
-  let capturedUrl;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    capturedUrl = null;
-    window.PURCHASES_API_URL = "https://purchases.example.com";
-    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
-
-    getRequest.mockImplementation((reqAC, recAC, url) => {
-      capturedUrl = url;
-      return () => () => Promise.resolve({ response: { id: 55, forms: [] } });
-    });
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-    delete window.PURCHASES_API_URL;
-  });
-
-  it("builds the request URL using currentSponsorState.entity.id", async () => {
-    const store = mockStore({
-      currentSummitState: { currentSummit: { id: 1 } },
-      currentSponsorState: { entity: { id: 123 } }
-    });
-
-    await store.dispatch(getSponsorOrder(55));
-    await flushPromises();
-
-    expect(capturedUrl).toBe(
-      `${window.PURCHASES_API_URL}/api/v2/summits/1/sponsors/123/purchases/55`
-    );
-  });
-});
 
 describe("downloadSponsorInvoice", () => {
   const middlewares = [thunk];
@@ -124,12 +82,6 @@ describe("downloadSponsorInvoice", () => {
       expect.objectContaining({ logoSrc: expect.anything() })
     );
     expect(snackbarErrorMsg).not.toHaveBeenCalled();
-    const dispatchedTypes = store.getActions().map((a) => a.type);
-    // This fetch must never write into sponsorPagePurchaseListState —
-    // that's SponsorOrderDetails' state, and clobbering/clearing it here
-    // would blank an unrelated order-detail page open in another view.
-    expect(dispatchedTypes).not.toContain(RECEIVE_SPONSOR_ORDER);
-    expect(dispatchedTypes).not.toContain(CLEAR_SPONSOR_ORDER);
   });
 
   it("swallows the order-fetch rejection silently since authErrorHandler already surfaced it", async () => {

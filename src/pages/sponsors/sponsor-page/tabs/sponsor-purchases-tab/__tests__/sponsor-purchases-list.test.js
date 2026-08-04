@@ -496,8 +496,8 @@ describe("SponsorPurchasesTab", () => {
     const queryDownloadButton = () =>
       withinTableBody().queryByRole("button", { name: DOWNLOAD_LABEL });
 
-    it("dispatches downloadSponsorInvoice with the row's order and sponsor ids", async () => {
-      const purchase = createPurchase({ id: 7, sponsor_id: 456 });
+    it("dispatches downloadSponsorInvoice with the row's order id and the current sponsor id", async () => {
+      const purchase = createPurchase({ id: 7 });
 
       renderWithRedux(<SponsorPurchasesTab />, {
         initialState: createInitialState({
@@ -510,14 +510,12 @@ describe("SponsorPurchasesTab", () => {
         await userEvent.click(getDownloadButton());
       });
 
-      expect(downloadSponsorInvoice).toHaveBeenCalledWith(
-        purchase.id,
-        purchase.sponsor_id
-      );
+      // currentSponsorState.entity.id from createInitialState, not a row field
+      expect(downloadSponsorInvoice).toHaveBeenCalledWith(purchase.id, 123);
     });
 
     it("does not start a second download while one is already pending", async () => {
-      const purchase = createPurchase({ id: 7, sponsor_id: 456 });
+      const purchase = createPurchase({ id: 7 });
       let resolveDownload;
       downloadSponsorInvoice.mockImplementationOnce(
         () => () =>

@@ -47,6 +47,9 @@ export const CLEAR_SPONSOR_ORDER = "CLEAR_SPONSOR_ORDER";
 export const SPONSOR_CLIENT_ADDRESS_UPDATED = "SPONSOR_CLIENT_ADDRESS_UPDATED";
 export const SPONSOR_CLIENT_UPDATED = "SPONSOR_CLIENT_UPDATED";
 
+const ORDER_DETAIL_EXPAND =
+  "forms,forms.items,forms.items.meta_fields,forms.items.type,refunds,payments,notes,fees";
+
 export const getAllSponsorPurchases =
   (
     term = "",
@@ -310,8 +313,7 @@ export const getSponsorOrder = (orderId) => async (dispatch, getState) => {
 
   const params = {
     access_token: accessToken,
-    expand:
-      "forms,forms.items,forms.items.meta_fields,forms.items.type,refunds,payments,notes,fees"
+    expand: ORDER_DETAIL_EXPAND
   };
 
   return getRequest(
@@ -338,8 +340,7 @@ export const downloadSponsorInvoice =
 
     const params = {
       access_token: accessToken,
-      expand:
-        "forms,forms.items,forms.items.meta_fields,forms.items.type,refunds,payments,notes,fees"
+      expand: ORDER_DETAIL_EXPAND
     };
 
     // Uses a DUMMY_ACTION (not RECEIVE_SPONSOR_ORDER) on purpose: this fetch

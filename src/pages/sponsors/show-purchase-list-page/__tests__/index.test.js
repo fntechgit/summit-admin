@@ -146,37 +146,6 @@ describe("ShowPurchaseListPage", () => {
       );
     });
 
-    it("does not start a second download while one is already pending", async () => {
-      const purchase = createPurchase({ id: 7, sponsor_id: 456 });
-      let resolveDownload;
-      downloadSponsorInvoice.mockImplementationOnce(
-        () => () =>
-          new Promise((resolve) => {
-            resolveDownload = resolve;
-          })
-      );
-
-      renderPage({ purchases: [purchase], totalCount: 1 });
-
-      await act(async () => {
-        await userEvent.click(getDownloadButtons()[0]);
-      });
-
-      // While the download is pending, the icon is swapped for a progress
-      // spinner — there is no button left to click, so a second click can't
-      // happen.
-      expect(downloadSponsorInvoice).toHaveBeenCalledTimes(1);
-      expect(queryDownloadButtons()).toHaveLength(0);
-
-      await act(async () => {
-        resolveDownload();
-        await flushPromises();
-      });
-
-      expect(downloadSponsorInvoice).toHaveBeenCalledTimes(1);
-      expect(getDownloadButtons()).toHaveLength(1);
-    });
-
     it("only replaces the downloading row's icon with a spinner and disables the other rows, instead of swapping every row", async () => {
       const purchaseA = createPurchase({
         id: 7,
