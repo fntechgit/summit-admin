@@ -8,6 +8,7 @@ import {
   RESET_SPONSOR_FORM_ITEM,
   SPONSOR_FORM_ITEM_ARCHIVED,
   SPONSOR_FORM_ITEM_DELETED,
+  SPONSOR_FORM_ITEM_FILE_DELETED,
   SPONSOR_FORM_ITEM_UNARCHIVED
 } from "../../../actions/sponsor-forms-actions";
 
@@ -265,6 +266,60 @@ describe("SponsorFormItemsListReducer", () => {
           }
         ]
       });
+    });
+  });
+
+  describe("SPONSOR_FORM_ITEM_FILE_DELETED", () => {
+    it("removes the image from currentItem and its matching list item", () => {
+      const state = {
+        ...initialState,
+        currentItem: {
+          ...initialState.currentItem,
+          id: "A",
+          images: [{ id: "IMG_1" }, { id: "IMG_2" }]
+        },
+        items: [
+          { id: "A", images: [{ id: "IMG_1" }, { id: "IMG_2" }] },
+          { id: "B", images: [{ id: "IMG_3" }] }
+        ]
+      };
+
+      result = SponsorFormItemsListReducer(state, {
+        type: SPONSOR_FORM_ITEM_FILE_DELETED,
+        payload: { fileId: "IMG_1", itemId: "A" }
+      });
+
+      expect(result.currentItem.images).toStrictEqual([{ id: "IMG_2" }]);
+      expect(result.items).toStrictEqual([
+        { id: "A", images: [{ id: "IMG_2" }] },
+        { id: "B", images: [{ id: "IMG_3" }] }
+      ]);
+    });
+
+    it("leaves currentItem untouched when the deleted file belongs to a different item", () => {
+      const state = {
+        ...initialState,
+        currentItem: {
+          ...initialState.currentItem,
+          id: "B",
+          images: [{ id: "IMG_3" }]
+        },
+        items: [
+          { id: "A", images: [{ id: "IMG_1" }] },
+          { id: "B", images: [{ id: "IMG_3" }] }
+        ]
+      };
+
+      result = SponsorFormItemsListReducer(state, {
+        type: SPONSOR_FORM_ITEM_FILE_DELETED,
+        payload: { fileId: "IMG_1", itemId: "A" }
+      });
+
+      expect(result.currentItem).toStrictEqual(state.currentItem);
+      expect(result.items).toStrictEqual([
+        { id: "A", images: [] },
+        { id: "B", images: [{ id: "IMG_3" }] }
+      ]);
     });
   });
 
