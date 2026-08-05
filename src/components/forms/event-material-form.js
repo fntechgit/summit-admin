@@ -53,10 +53,12 @@ const EventMaterialForm = ({ entity, errors, event, onSubmit }) => {
     { label: "Media Upload", value: MATERIAL_TYPE.PRESENTATION_MEDIA_UPLOAD }
   ];
 
-  const mediaUploadsOpts = event.type.allowed_media_upload_types.map((mu) => ({
-    label: mu.name,
-    value: mu.id
-  }));
+  const mediaUploadsOpts = (event?.type?.allowed_media_upload_types || []).map(
+    (mu) => ({
+      label: mu.name,
+      value: mu.id
+    })
+  );
 
   const disableInputs =
     entityState.class_name === MATERIAL_TYPE.PRESENTATION_MEDIA_UPLOAD;
@@ -97,7 +99,7 @@ const EventMaterialForm = ({ entity, errors, event, onSubmit }) => {
   const handleChangeMUType = (ev) => {
     const { value } = ev.target;
 
-    const type = event.type.allowed_media_upload_types.find(
+    const type = (event?.type?.allowed_media_upload_types || []).find(
       (mu) => mu.id === value
     );
 
