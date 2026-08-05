@@ -174,6 +174,10 @@ describe("SponsorFormsTab", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+    // clearAllMocks()/restoreAllMocks() do not reset a plain jest.fn()'s
+    // mockImplementation, so a test that sets one on `deleteRequest` would
+    // otherwise leak it into whichever test runs next in this file.
+    deleteRequest.mockReset();
   });
 
   describe("managed forms delete", () => {
@@ -303,6 +307,51 @@ describe("SponsorFormsTab", () => {
       expect(deleteRequest).not.toHaveBeenCalled();
       expect(getSponsorManagedForms).toHaveBeenCalledTimes(1); // mount only
       expect(screen.getByText("Managed Form 1")).toBeInTheDocument();
+    });
+
+    it("keeps the row and does not refresh the lists when the delete request fails", async () => {
+      deleteRequest.mockImplementation(
+        () => () => () => Promise.reject(new Error("delete failed"))
+      );
+
+      const store = createRealStore([
+        createManagedForm(1, { assignment_type: "Explicit" })
+      ]);
+
+      renderWithConfirmDialog(<SponsorFormsTab sponsor={createSponsor()} />, {
+        store
+      });
+
+      const deleteButton = screen.getByTestId("DeleteIcon").closest("button");
+      await act(async () => {
+        await userEvent.click(deleteButton);
+      });
+
+      expect(
+        await screen.findByText("general.are_you_sure")
+      ).toBeInTheDocument();
+
+      await act(async () => {
+        await userEvent.click(
+          await screen.findByRole("button", {
+            name: /general\.yes_delete|confirm/i
+          })
+        );
+      });
+
+      // Lets the rejected promise chain (deleteSponsorManagedForm's own
+      // .finally() plus handleManagedDelete's .catch()) settle. If the
+      // .catch() were removed, this would surface as an unhandled rejection
+      // and fail the test.
+      await act(async () => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 50);
+        });
+      });
+
+      expect(screen.getByText("Managed Form 1")).toBeInTheDocument();
+      expect(getSponsorManagedForms).toHaveBeenCalledTimes(1); // mount only, no refresh on failure
+      expect(getSponsorCustomizedForms).toHaveBeenCalledTimes(1);
     });
   });
 
