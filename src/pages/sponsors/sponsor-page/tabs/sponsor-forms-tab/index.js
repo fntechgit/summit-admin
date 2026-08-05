@@ -181,24 +181,26 @@ const SponsorFormsTab = ({
   };
 
   const handleManagedDelete = (itemId) => {
-    deleteSponsorManagedForm(itemId).then(() => {
-      getSponsorCustomizedForms(
-        term,
-        DEFAULT_CURRENT_PAGE,
-        customizedForms.perPage,
-        customizedForms.order,
-        customizedForms.orderDir,
-        showArchived
-      );
-      getSponsorManagedForms(
-        term,
-        DEFAULT_CURRENT_PAGE,
-        managedForms.perPage,
-        managedForms.order,
-        managedForms.orderDir,
-        showArchived
-      );
-    });
+    deleteSponsorManagedForm(itemId)
+      .then(() => {
+        getSponsorCustomizedForms(
+          term,
+          DEFAULT_CURRENT_PAGE,
+          customizedForms.perPage,
+          customizedForms.order,
+          customizedForms.orderDir,
+          showArchived
+        );
+        getSponsorManagedForms(
+          term,
+          DEFAULT_CURRENT_PAGE,
+          managedForms.perPage,
+          managedForms.order,
+          managedForms.orderDir,
+          showArchived
+        );
+      })
+      .catch(() => {});
   };
 
   const handleCustomizedDelete = (itemId) => {

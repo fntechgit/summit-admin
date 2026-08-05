@@ -1,14 +1,20 @@
 import React from "react";
+import { createStore, combineReducers, applyMiddleware } from "redux";
+import thunk from "redux-thunk";
 import userEvent from "@testing-library/user-event";
-import { act, screen, waitFor } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import { GlobalConfirmDialog } from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
+import { deleteRequest } from "openstack-uicore-foundation/lib/utils/actions";
 import SponsorFormsTab from "../index";
 import { renderWithRedux } from "../../../../../../utils/test-utils";
-import { DEFAULT_STATE as sponsorFormsDefaultState } from "../../../../../../reducers/sponsors/sponsor-page-forms-list-reducer";
+import * as methods from "../../../../../../utils/methods";
+import sponsorPageFormsListReducer, {
+  DEFAULT_STATE as sponsorFormsDefaultState
+} from "../../../../../../reducers/sponsors/sponsor-page-forms-list-reducer";
 import {
+  RECEIVE_SPONSOR_MANAGED_FORMS,
   getSponsorManagedForms,
   getSponsorCustomizedForms,
-  deleteSponsorManagedForm,
   deleteSponsorCustomizedForm
 } from "../../../../../../actions/sponsor-forms-actions";
 
@@ -41,6 +47,10 @@ jest.mock(
     }
 );
 
+// deleteSponsorManagedForm is intentionally left un-mocked (falls through to
+// jest.requireActual below): the delete-confirm test exercises the real thunk
+// against a real store + reducer, with only the uicore HTTP layer mocked, so
+// the SPONSOR_MANAGED_FORM_DELETED reducer case actually runs.
 jest.mock("../../../../../../actions/sponsor-forms-actions", () => ({
   ...jest.requireActual("../../../../../../actions/sponsor-forms-actions"),
   getSponsorManagedForms: jest.fn(() => () => Promise.resolve()),
@@ -49,8 +59,13 @@ jest.mock("../../../../../../actions/sponsor-forms-actions", () => ({
   overrideSponsorManagedForm: jest.fn(() => () => Promise.resolve()),
   archiveSponsorCustomizedForm: jest.fn(() => () => Promise.resolve()),
   unarchiveSponsorCustomizedForm: jest.fn(() => () => Promise.resolve()),
-  deleteSponsorCustomizedForm: jest.fn(() => () => Promise.resolve()),
-  deleteSponsorManagedForm: jest.fn(() => () => Promise.resolve())
+  deleteSponsorCustomizedForm: jest.fn(() => () => Promise.resolve())
+}));
+
+jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
+  __esModule: true,
+  ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
+  deleteRequest: jest.fn()
 }));
 
 // Helpers
@@ -117,9 +132,48 @@ const renderWithConfirmDialog = (ui, options) =>
     options
   );
 
+// Passthrough reducer for state slices the delete flow doesn't mutate.
+const staticReducer =
+  (initialState) =>
+  (state = initialState) =>
+    state;
+
+// Real store + real reducer, seeded via the actual RECEIVE_SPONSOR_MANAGED_FORMS
+// action, so the SPONSOR_MANAGED_FORM_DELETED case genuinely runs and the table
+// re-renders from real state instead of a static mock.
+const createRealStore = (managedFormsData) => {
+  const store = createStore(
+    combineReducers({
+      sponsorPageFormsListState: sponsorPageFormsListReducer,
+      currentSummitState: staticReducer(defaultState.currentSummitState),
+      currentSponsorState: staticReducer(defaultState.currentSponsorState)
+    }),
+    applyMiddleware(thunk)
+  );
+
+  store.dispatch({
+    type: RECEIVE_SPONSOR_MANAGED_FORMS,
+    payload: {
+      response: {
+        current_page: 1,
+        last_page: 1,
+        total: managedFormsData.length,
+        data: managedFormsData
+      }
+    }
+  });
+
+  return store;
+};
+
 describe("SponsorFormsTab", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe("managed forms delete", () => {
@@ -141,27 +195,43 @@ describe("SponsorFormsTab", () => {
         }
       });
 
-      expect(screen.getAllByTestId("DeleteIcon")).toHaveLength(1);
+      const explicitRow = screen.getByText("Managed Form 1").closest("tr");
+      const implicitRow = screen.getByText("Managed Form 2").closest("tr");
+
+      expect(within(explicitRow).getByTestId("DeleteIcon")).toBeInTheDocument();
+      expect(
+        within(implicitRow).queryByTestId("DeleteIcon")
+      ).not.toBeInTheDocument();
     });
 
-    it("calls deleteSponsorManagedForm and refreshes both lists when delete is confirmed", async () => {
-      renderWithConfirmDialog(<SponsorFormsTab sponsor={createSponsor()} />, {
-        initialState: {
-          ...defaultState,
-          sponsorPageFormsListState: {
-            ...defaultState.sponsorPageFormsListState,
-            managedForms: {
-              ...defaultState.sponsorPageFormsListState.managedForms,
-              forms: [createManagedForm(1, { assignment_type: "Explicit" })],
-              totalCount: 1
-            }
-          }
+    it("calls the delete request with the correct form id and removes the row from the table when confirmed", async () => {
+      deleteRequest.mockImplementation(
+        (requestActionCreator, receiveActionCreator) => () => (dispatch) => {
+          dispatch(
+            typeof receiveActionCreator === "function"
+              ? receiveActionCreator({ response: {} })
+              : receiveActionCreator
+          );
+          return Promise.resolve({ response: {} });
         }
+      );
+
+      const store = createRealStore([
+        createManagedForm(1, { assignment_type: "Explicit" }),
+        createManagedForm(2, { assignment_type: "Explicit" })
+      ]);
+
+      renderWithConfirmDialog(<SponsorFormsTab sponsor={createSponsor()} />, {
+        store
       });
 
-      const deleteButton = screen.getByTestId("DeleteIcon").closest("button");
+      expect(screen.getByText("Managed Form 1")).toBeInTheDocument();
+      expect(screen.getByText("Managed Form 2")).toBeInTheDocument();
+
+      const deleteButtons = screen.getAllByTestId("DeleteIcon");
+      const secondDeleteButton = deleteButtons[1].closest("button");
       await act(async () => {
-        await userEvent.click(deleteButton);
+        await userEvent.click(secondDeleteButton);
       });
 
       expect(
@@ -176,9 +246,23 @@ describe("SponsorFormsTab", () => {
         );
       });
 
+      // Verifies the real thunk was invoked with the id of the row that was
+      // actually clicked (form 2), all the way down to the HTTP boundary.
       await waitFor(() => {
-        expect(deleteSponsorManagedForm).toHaveBeenCalledWith(1);
+        expect(deleteRequest).toHaveBeenCalledWith(
+          null,
+          expect.objectContaining({ payload: { formId: 2 } }),
+          expect.stringContaining("/managed-forms/2"),
+          null,
+          expect.any(Function)
+        );
       });
+
+      // Verifies the real reducer removed the row: form 2 is gone, form 1 stays.
+      await waitFor(() => {
+        expect(screen.queryByText("Managed Form 2")).not.toBeInTheDocument();
+      });
+      expect(screen.getByText("Managed Form 1")).toBeInTheDocument();
 
       await waitFor(() => {
         expect(getSponsorManagedForms).toHaveBeenCalledTimes(2); // mount + after delete
@@ -186,7 +270,7 @@ describe("SponsorFormsTab", () => {
       });
     });
 
-    it("does not call deleteSponsorManagedForm when delete is cancelled", async () => {
+    it("does not call the delete request and keeps the row when delete is cancelled", async () => {
       renderWithConfirmDialog(<SponsorFormsTab sponsor={createSponsor()} />, {
         initialState: {
           ...defaultState,
@@ -216,8 +300,9 @@ describe("SponsorFormsTab", () => {
         );
       });
 
-      expect(deleteSponsorManagedForm).not.toHaveBeenCalled();
-      expect(getSponsorManagedForms).toHaveBeenCalledTimes(1);
+      expect(deleteRequest).not.toHaveBeenCalled();
+      expect(getSponsorManagedForms).toHaveBeenCalledTimes(1); // mount only
+      expect(screen.getByText("Managed Form 1")).toBeInTheDocument();
     });
   });
 
