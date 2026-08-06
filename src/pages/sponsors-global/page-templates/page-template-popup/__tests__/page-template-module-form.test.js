@@ -679,6 +679,50 @@ describe("PageModules", () => {
       expect(window.HTMLElement.prototype.scrollIntoView).toHaveBeenCalled();
     });
 
+    test("clones a Media (type=File) module and propagates its type-specific fields", async () => {
+      const modules = [createModule(PAGES_MODULE_KINDS.MEDIA, 0, 1)];
+
+      const TestWrapper = () => {
+        const { values } = useFormikContext();
+        const clone = values.modules[1];
+        return (
+          <>
+            <PageModules name="modules" />
+            <div data-testid="clone-media-fields">
+              {JSON.stringify({
+                type: clone?.type,
+                max_file_size: clone?.max_file_size,
+                file_type_id: clone?.file_type_id
+              })}
+            </div>
+          </>
+        );
+      };
+
+      const store = mockStore({ mediaUploadState: { media_file_types: [] } });
+      render(
+        <Provider store={store}>
+          <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+            <Form>
+              <TestWrapper />
+            </Form>
+          </Formik>
+        </Provider>
+      );
+
+      await userEvent.click(screen.getByTestId("clone-module-btn"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("clone-media-fields")).toHaveTextContent(
+          JSON.stringify({
+            type: PAGE_MODULES_MEDIA_TYPES.FILE,
+            max_file_size: 100,
+            file_type_id: 1
+          })
+        );
+      });
+    });
+
     test.each([
       ["0", 1],
       ["999", 20]
