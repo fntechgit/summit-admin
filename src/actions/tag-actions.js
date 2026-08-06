@@ -21,6 +21,8 @@ import {
   stopLoading,
   startLoading,
   showMessage,
+  snackbarSuccessHandler,
+  snackbarErrorHandler,
   showSuccessMessage,
   authErrorHandler,
   escapeFilterValue
@@ -95,7 +97,7 @@ export const getTags =
       createAction(REQUEST_TAGS),
       createAction(RECEIVE_TAGS),
       `${window.API_BASE_URL}/api/v1/tags`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { order, orderDir, page, term, perPage }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -115,7 +117,7 @@ export const getTag = (tagId) => async (dispatch) => {
     null,
     createAction(RECEIVE_TAG),
     `${window.API_BASE_URL}/api/v1/tags/${tagId}`,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -135,7 +137,7 @@ export const deleteTag = (tagId) => async (dispatch) => {
     createAction(TAG_DELETED)({ tagId }),
     `${window.API_BASE_URL}/api/v1/tags/${tagId}`,
     null,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -161,11 +163,16 @@ export const saveTag = (entity) => async (dispatch) => {
       createAction(TAG_UPDATED),
       `${window.API_BASE_URL}/api/v1/tags/${entity.id}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch)
       .then(() => {
-        dispatch(showSuccessMessage(T.translate("edit_tag.tag_saved")));
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_tag.tag_saved")
+          })
+        );
       })
       .finally(() => {
         dispatch(stopLoading());
@@ -176,11 +183,16 @@ export const saveTag = (entity) => async (dispatch) => {
     createAction(TAG_ADDED),
     `${window.API_BASE_URL}/api/v1/tags`,
     normalizedEntity,
-    authErrorHandler,
+    snackbarErrorHandler,
     entity
   )(params)(dispatch)
     .then(() => {
-      dispatch(showSuccessMessage(T.translate("edit_tag.tag_created")));
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_tag.tag_created")
+        })
+      );
     })
     .finally(() => {
       dispatch(stopLoading());
