@@ -18,11 +18,13 @@ import DragAndDropList from "openstack-uicore-foundation/lib/components/mui/dnd-
 import showConfirmDialog from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
 import {
   DEBOUNCE_WAIT_150,
-  PAGES_MODULE_KINDS
+  PAGES_MODULE_KINDS,
+  PAGE_MODULES_DOWNLOAD
 } from "../../../../utils/constants";
 import InfoModule from "./modules/page-template-info-module";
 import DocumentDownloadModule from "./modules/page-template-document-download-module";
 import MediaRequestModule from "./modules/page-template-media-request-module";
+import ModuleCloneControl from "./module-clone-control";
 import { getAllMediaFileTypes } from "../../../../actions/media-file-type-actions";
 
 const PageModules = ({
@@ -37,15 +39,25 @@ const PageModules = ({
   const bottomRef = useRef(null);
   const prevModulesLength = useRef(modules.length);
   const moduleRefMap = useRef(new Map());
+  const cloneIdCounter = useRef(0);
+  const cloneScrollTargetRef = useRef(null);
 
   const [collapsedModules, setCollapsedModules] = useState(new Set());
 
   const getModuleId = (module) => module._tempId || module.id;
 
-  // auto-scroll to new module
+  // auto-scroll to new module (or to the last cloned copy, when cloning)
   useEffect(() => {
     if (modules.length > prevModulesLength.current) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      if (cloneScrollTargetRef.current) {
+        const targetId = cloneScrollTargetRef.current;
+        cloneScrollTargetRef.current = null;
+        moduleRefMap.current
+          .get(targetId)
+          ?.scrollIntoView({ behavior: "smooth" });
+      } else {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      }
     }
     prevModulesLength.current = modules.length;
   }, [modules.length]);
@@ -108,6 +120,51 @@ const PageModules = ({
       const updated = modules.filter((_, i) => i !== index);
       setFieldValue(name, updated);
     }
+  };
+
+  // A Document Download module's file field must never be silently carried into a
+  // clone: an already-uploaded file (has id/file_id) would look attached in the UI
+  // but get stripped at save time by normalizePageTemplateModules, while a newly
+  // selected, not-yet-uploaded file is copied as-is.
+  const buildClonedDocumentFile = (module) => {
+    const file = Array.isArray(module.file) ? module.file[0] : null;
+    const isNewFile =
+      file && typeof file === "object" && !file.id && !file.file_id;
+    return isNewFile ? module.file : [];
+  };
+
+  const handleCloneModule = (index, module, count) => {
+    const isDocumentFile =
+      module.kind === PAGES_MODULE_KINDS.DOCUMENT &&
+      module.type === PAGE_MODULES_DOWNLOAD.FILE;
+    const clonedFile = isDocumentFile ? buildClonedDocumentFile(module) : null;
+
+    const sourceData = { ...module };
+    delete sourceData.id;
+
+    const clones = Array.from({ length: count }, () => {
+      cloneIdCounter.current += 1;
+      return {
+        ...sourceData,
+        ...(isDocumentFile ? { file: clonedFile } : {}),
+        _tempId: `temp-clone-${cloneIdCounter.current}`
+      };
+    });
+
+    const updated = [
+      ...modules.slice(0, index + 1),
+      ...clones,
+      ...modules.slice(index + 1)
+    ];
+
+    setCollapsedModules((prev) => {
+      const next = new Set(prev);
+      clones.forEach((clone) => next.add(clone._tempId));
+      return next;
+    });
+
+    cloneScrollTargetRef.current = clones[clones.length - 1]._tempId;
+    setFieldValue(name, updated);
   };
 
   const handleReorderModules = (newModules) => {
@@ -188,6 +245,9 @@ const PageModules = ({
             sx={{ display: "flex", alignItems: "center" }}
             onClick={(e) => e.stopPropagation()}
           >
+            <ModuleCloneControl
+              onClone={(count) => handleCloneModule(index, module, count)}
+            />
             <UnfoldMoreIcon
               sx={{ mr: 1, color: "action.active", cursor: "grab" }}
             />
