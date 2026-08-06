@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Formik, Form, useFormikContext } from "formik";
 import { Provider } from "react-redux";
@@ -11,7 +11,8 @@ import showConfirmDialog from "openstack-uicore-foundation/lib/components/mui/sh
 import PageModules from "../page-template-modules-form";
 import {
   PAGES_MODULE_KINDS,
-  PAGE_MODULES_MEDIA_TYPES
+  PAGE_MODULES_MEDIA_TYPES,
+  PAGE_MODULES_DOWNLOAD
 } from "../../../../../utils/constants";
 
 const mockStore = configureStore([thunk]);
@@ -107,6 +108,12 @@ const renderWithFormik = (
     </Provider>
   );
 };
+
+// jsdom does not implement scrollIntoView; stub it so effects that call it
+// (auto-scroll to a new/cloned module) don't throw in these component tests.
+beforeAll(() => {
+  window.HTMLElement.prototype.scrollIntoView = jest.fn();
+});
 
 describe("PageModules", () => {
   const createModule = (kind, order, id) => ({
@@ -614,6 +621,169 @@ describe("PageModules", () => {
         expect(screen.getByTestId("module-ids")).toHaveTextContent(
           "temp-1,temp-3"
         );
+      });
+    });
+  });
+
+  describe("Cloning modules", () => {
+    const renderModulesWithWrapper = (modules) => {
+      const TestWrapper = () => {
+        const { values } = useFormikContext();
+        return (
+          <>
+            <PageModules name="modules" />
+            <div data-testid="module-ids">
+              {values.modules.map((m) => m._tempId).join(",")}
+            </div>
+            <div data-testid="module-has-id">
+              {values.modules.map((m) => (m.id ? "1" : "0")).join(",")}
+            </div>
+          </>
+        );
+      };
+
+      const store = mockStore({
+        mediaUploadState: { media_file_types: [] }
+      });
+      return render(
+        <Provider store={store}>
+          <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+            <Form>
+              <TestWrapper />
+            </Form>
+          </Formik>
+        </Provider>
+      );
+    };
+
+    test("inserts N copies immediately after the original, each with a fresh temp id and no persisted id, and scrolls to the last one", async () => {
+      const modules = [
+        { ...createModule(PAGES_MODULE_KINDS.INFO, 0, 1), id: 100 },
+        createModule(PAGES_MODULE_KINDS.DOCUMENT, 1, 2),
+        createModule(PAGES_MODULE_KINDS.MEDIA, 2, 3)
+      ];
+      renderModulesWithWrapper(modules);
+
+      const countInput = screen.getAllByTestId("clone-count-input")[0];
+      fireEvent.change(countInput, { target: { value: "3" } });
+      await userEvent.click(screen.getAllByTestId("clone-module-btn")[0]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("module-ids")).toHaveTextContent(
+          /^temp-1,temp-clone-\d+,temp-clone-\d+,temp-clone-\d+,temp-2,temp-3$/
+        );
+      });
+      expect(screen.getByTestId("module-has-id")).toHaveTextContent(
+        "1,0,0,0,0,0"
+      );
+      expect(window.HTMLElement.prototype.scrollIntoView).toHaveBeenCalled();
+    });
+
+    test.each([
+      ["0", 1],
+      ["999", 20]
+    ])("clamps a typed count of %s to %i", (typedValue, expected) => {
+      const modules = [createModule(PAGES_MODULE_KINDS.INFO, 0, 1)];
+      renderModulesWithWrapper(modules);
+
+      const countInput = screen.getByTestId("clone-count-input");
+      fireEvent.change(countInput, { target: { value: typedValue } });
+
+      expect(countInput).toHaveValue(expected);
+    });
+
+    test("collapses new clones, keeps the original expanded, and resets the count field to 1", async () => {
+      const modules = [createModule(PAGES_MODULE_KINDS.INFO, 0, 1)];
+      renderModulesWithWrapper(modules);
+
+      const countInput = screen.getByTestId("clone-count-input");
+      fireEvent.change(countInput, { target: { value: "2" } });
+      await userEvent.click(screen.getByTestId("clone-module-btn"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("module-ids")).toHaveTextContent(
+          /^temp-1,temp-clone-\d+,temp-clone-\d+$/
+        );
+      });
+
+      expect(
+        screen.getByTestId("text-editor-modules[0].content")
+      ).toBeVisible();
+      expect(
+        screen.getByTestId("text-editor-modules[1].content")
+      ).not.toBeVisible();
+      expect(
+        screen.getByTestId("text-editor-modules[2].content")
+      ).not.toBeVisible();
+      expect(countInput).toHaveValue(1);
+    });
+
+    describe("Document Download file handling", () => {
+      const createDocumentModule = (file) => ({
+        _tempId: "temp-doc-1",
+        kind: PAGES_MODULE_KINDS.DOCUMENT,
+        custom_order: 0,
+        name: "Doc",
+        description: "Desc",
+        type: PAGE_MODULES_DOWNLOAD.FILE,
+        external_url: "",
+        file
+      });
+
+      test.each([
+        [
+          "resets an already-uploaded file to empty on each clone",
+          [{ id: 10, file_url: "http://x/file.pdf" }],
+          "[]"
+        ],
+        [
+          "copies a newly selected, not-yet-uploaded file as-is to every clone",
+          [{ name: "new-upload.pdf" }],
+          JSON.stringify([{ name: "new-upload.pdf" }])
+        ]
+      ])("%s", async (_description, sourceFile, expectedFileJson) => {
+        const modules = [createDocumentModule(sourceFile)];
+
+        const TestWrapper = () => {
+          const { values } = useFormikContext();
+          return (
+            <>
+              <PageModules name="modules" />
+              <div data-testid="clone-file-1">
+                {JSON.stringify(values.modules[1]?.file)}
+              </div>
+              <div data-testid="clone-file-2">
+                {JSON.stringify(values.modules[2]?.file)}
+              </div>
+            </>
+          );
+        };
+
+        const store = mockStore({
+          mediaUploadState: { media_file_types: [] }
+        });
+        render(
+          <Provider store={store}>
+            <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+              <Form>
+                <TestWrapper />
+              </Form>
+            </Formik>
+          </Provider>
+        );
+
+        const countInput = screen.getByTestId("clone-count-input");
+        fireEvent.change(countInput, { target: { value: "2" } });
+        await userEvent.click(screen.getByTestId("clone-module-btn"));
+
+        await waitFor(() => {
+          expect(screen.getByTestId("clone-file-1")).toHaveTextContent(
+            expectedFileJson
+          );
+          expect(screen.getByTestId("clone-file-2")).toHaveTextContent(
+            expectedFileJson
+          );
+        });
       });
     });
   });
