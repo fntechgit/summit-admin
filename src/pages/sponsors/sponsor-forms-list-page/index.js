@@ -208,12 +208,14 @@ const SponsorFormsListPage = ({
     {
       columnKey: "code",
       header: T.translate("sponsor_forms.code_column_label"),
-      sortable: true
+      sortable: true,
+      cellSx: { maxWidth: 120 }
     },
     {
       columnKey: "name",
       header: T.translate("sponsor_forms.name_column_label"),
-      sortable: true
+      sortable: true,
+      cellSx: { maxWidth: 120 }
     },
     {
       columnKey: "tiers",
@@ -292,23 +294,26 @@ const SponsorFormsListPage = ({
       columnKey: "opens_at",
       header: T.translate("edit_sponsor.forms_tab.opens_at"),
       sortable: true,
+      headSx: { whiteSpace: "nowrap" },
       render: (row) => formatDate(row.opens_at)
     },
     {
       columnKey: "expires_at",
       header: T.translate("edit_sponsor.forms_tab.expires_at"),
       sortable: true,
+      headSx: { whiteSpace: "nowrap" },
       render: (row) => formatDate(row.expires_at)
     },
     {
       columnKey: "items_qty",
       header: T.translate("sponsor_forms.items_column_label"),
-      sortable: false
+      sortable: false,
+      cellSx: { whiteSpace: "nowrap" }
     },
     {
       columnKey: "manage_items",
       header: "",
-      width: 140,
+      width: 132,
       align: "left",
       render: (row) => (
         <Button
@@ -348,10 +353,10 @@ const SponsorFormsListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={1}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
           <Box component="span">{totalCount} forms</Box>
         </Grid2>
-        <Grid2 size={2} offset={1}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <FormGroup>
             <FormControlLabel
               control={
@@ -370,33 +375,31 @@ const SponsorFormsListPage = ({
             />
           </FormGroup>
         </Grid2>
-        <Grid2 size={2}>
+        <Grid2 size={{ xs: 12, sm: 12, md: 3 }}>
           <SearchInput
             term={term}
             onSearch={handleSearch}
             placeholder={T.translate("sponsor_forms.placeholders.search")}
           />
         </Grid2>
-        <Grid2 size={3}>
+        <Grid2 size={{ xs: 6, sm: 6, md: 2 }}>
           <Button
             variant="contained"
             size="medium"
             fullWidth
             onClick={() => setOpenPopup("clone")}
             startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
           >
             {T.translate("sponsor_forms.using_global")}
           </Button>
         </Grid2>
-        <Grid2 size={3}>
+        <Grid2 size={{ xs: 6, sm: 6, md: 2 }}>
           <Button
             variant="contained"
             size="medium"
             fullWidth
             onClick={() => setOpenPopup("new")}
             startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
           >
             {T.translate("sponsor_forms.add_form")}
           </Button>
