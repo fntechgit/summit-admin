@@ -190,6 +190,42 @@ describe("SponsorFormItemsListReducer", () => {
         }
       });
     });
+
+    it("maps file_url to file_path on each image - mirrors the customized-item reducer's edit-form image fix", () => {
+      const item = {
+        id: "A",
+        code: "A",
+        name: "A",
+        early_bird_rate: 100,
+        standard_rate: 100,
+        onsite_rate: 100,
+        default_quantity: "100",
+        is_archived: true,
+        images: [
+          { id: 10, file_url: "https://cdn/a.png" },
+          { id: 11, file_url: "https://cdn/b.png" }
+        ],
+        meta_fields: []
+      };
+
+      result = SponsorFormItemsListReducer(initialState, {
+        type: RECEIVE_SPONSOR_FORM_ITEM,
+        payload: { response: item }
+      });
+
+      expect(result.currentItem.images).toEqual([
+        {
+          id: 10,
+          file_url: "https://cdn/a.png",
+          file_path: "https://cdn/a.png"
+        },
+        {
+          id: 11,
+          file_url: "https://cdn/b.png",
+          file_path: "https://cdn/b.png"
+        }
+      ]);
+    });
   });
 
   describe("RESET_SPONSOR_FORM_ITEM", () => {
