@@ -304,12 +304,14 @@ const SponsorFormsTab = ({
     {
       columnKey: "opens_at",
       header: T.translate("edit_sponsor.forms_tab.opens_at"),
-      sortable: true
+      sortable: true,
+      width: 115
     },
     {
       columnKey: "expires_at",
       header: T.translate("edit_sponsor.forms_tab.expires_at"),
-      sortable: true
+      sortable: true,
+      width: 120
     },
     {
       columnKey: "items_qty",
