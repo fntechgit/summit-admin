@@ -30,7 +30,7 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
 import pLimit from "p-limit";
-import debounce from "lodash/debounce"
+import debounce from "lodash/debounce";
 import history from "../history";
 import { saveMarketingSetting } from "./marketing-actions";
 import { getAccessTokenSafely } from "../utils/methods";
@@ -150,7 +150,10 @@ export const saveBadgeSettings = (badgeSettings) => async (dispatch) => {
     })
   );
 
-  return Promise.all(input);
+  const results = await Promise.allSettled(input);
+  const failed = results.find((r) => r.status === "rejected");
+  if (failed) throw failed.reason;
+  return results.map((r) => r.value);
 };
 
 /** *********************  BADGE  *********************************************** */
