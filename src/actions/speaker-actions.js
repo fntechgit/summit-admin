@@ -61,6 +61,7 @@ export const UPDATE_SPEAKER = "UPDATE_SPEAKER";
 export const SPEAKER_UPDATED = "SPEAKER_UPDATED";
 export const SPEAKER_ADDED = "SPEAKER_ADDED";
 export const PIC_ATTACHED = "PIC_ATTACHED";
+export const PIC_DELETED = "PIC_DELETED";
 export const BIG_PIC_ATTACHED = "BIG_PIC_ATTACHED";
 export const MERGE_SPEAKERS = "MERGE_SPEAKERS";
 export const SPEAKER_MERGED = "SPEAKER_MERGED";
@@ -141,6 +142,18 @@ const uploadProfilePic = (entity, file) => async (dispatch) => {
   });
 };
 
+const deleteProfilePic = (speakerId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+
+  return deleteRequest(
+    null,
+    createAction(PIC_DELETED),
+    `${window.API_BASE_URL}/api/v1/speakers/${speakerId}/photo?access_token=${accessToken}`,
+    null,
+    authErrorHandler
+  )({})(dispatch);
+};
+
 const uploadBigPic = (entity, file) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
@@ -155,6 +168,18 @@ const uploadBigPic = (entity, file) => async (dispatch) => {
     dispatch(stopLoading());
     history.push(`/app/speakers/${entity.id}`);
   });
+};
+
+const deleteBigPic = (speakerId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+
+  return deleteRequest(
+    null,
+    createAction(PIC_DELETED),
+    `${window.API_BASE_URL}/api/v1/speakers/${speakerId}/big-photo?access_token=${accessToken}`,
+    null,
+    authErrorHandler
+  )({})(dispatch);
 };
 
 export const initSpeakersList = () => async (dispatch) => {
@@ -343,7 +368,12 @@ export const resetSpeakerForm = () => (dispatch) => {
   dispatch(createAction(RESET_SPEAKER_FORM)({}));
 };
 
-export const saveSpeaker = (entity) => async (dispatch) => {
+export const saveSpeaker = (entity) => async (dispatch, getState) => {
+  const { currentSpeakerState } = getState();
+  const { entity: prevSpeaker } = currentSpeakerState;
+  const removeProfilePic = prevSpeaker?.pic && !entity.pic;
+  const removeBigPic = prevSpeaker?.big_pic && !entity.big_pic;
+
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
@@ -358,7 +388,13 @@ export const saveSpeaker = (entity) => async (dispatch) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )({})(dispatch).then(() => {
+    )({})(dispatch).then(async () => {
+      if (removeProfilePic) {
+        await dispatch(deleteProfilePic(entity.id));
+      }
+      if (removeBigPic) {
+        await dispatch(deleteBigPic(entity.id));
+      }
       dispatch(showSuccessMessage(T.translate("edit_speaker.speaker_saved")));
     });
   } else {
