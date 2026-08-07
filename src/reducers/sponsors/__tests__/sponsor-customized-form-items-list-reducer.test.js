@@ -1,6 +1,7 @@
 import sponsorCustomizedFormItemsListReducer from "../sponsor-customized-form-items-list-reducer";
 import {
   RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEM,
+  SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED,
   SPONSOR_FORM_MANAGED_ITEM_UPDATED
 } from "../../../actions/sponsor-forms-actions";
 
@@ -89,6 +90,74 @@ describe("sponsorCustomizedFormItemsListReducer", () => {
       });
 
       expect(result.currentItem.meta_fields).toEqual([]);
+    });
+  });
+
+  describe("SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED", () => {
+    it("removes the image from currentItem and its matching list item", () => {
+      const state = {
+        ...DEFAULT_STATE,
+        currentItem: {
+          ...DEFAULT_STATE.currentItem,
+          id: 1,
+          images: [{ id: 10 }, { id: 11 }]
+        },
+        items: [
+          buildItem({ id: 1, images: [{ id: 10 }, { id: 11 }] }),
+          buildItem({ id: 2, images: [{ id: 12 }] })
+        ]
+      };
+
+      const result = sponsorCustomizedFormItemsListReducer(state, {
+        type: SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED,
+        payload: { fileId: 10, itemId: 1 }
+      });
+
+      expect(result.currentItem.images).toEqual([{ id: 11 }]);
+      expect(result.items[0].images).toEqual([{ id: 11 }]);
+      expect(result.items[1].images).toEqual([{ id: 12 }]);
+    });
+
+    it("handles a currentItem with no images without throwing", () => {
+      const state = {
+        ...DEFAULT_STATE,
+        currentItem: { ...DEFAULT_STATE.currentItem, id: 1, images: undefined },
+        items: [buildItem({ id: 1, images: undefined })]
+      };
+
+      const result = sponsorCustomizedFormItemsListReducer(state, {
+        type: SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED,
+        payload: { fileId: 10, itemId: 1 }
+      });
+
+      expect(result.currentItem.images).toEqual([]);
+    });
+
+    it("leaves currentItem untouched when the deleted file belongs to a different item", () => {
+      // Regression for the race where the delete for item A resolves after
+      // the dialog switched to item B (RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEM
+      // replaced currentItem in between) — only A's row should update.
+      const state = {
+        ...DEFAULT_STATE,
+        currentItem: {
+          ...DEFAULT_STATE.currentItem,
+          id: 2,
+          images: [{ id: 12 }]
+        },
+        items: [
+          buildItem({ id: 1, images: [{ id: 10 }, { id: 11 }] }),
+          buildItem({ id: 2, images: [{ id: 12 }] })
+        ]
+      };
+
+      const result = sponsorCustomizedFormItemsListReducer(state, {
+        type: SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED,
+        payload: { fileId: 10, itemId: 1 }
+      });
+
+      expect(result.currentItem).toEqual(state.currentItem);
+      expect(result.items[0].images).toEqual([{ id: 11 }]);
+      expect(result.items[1].images).toEqual([{ id: 12 }]);
     });
   });
 

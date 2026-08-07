@@ -272,13 +272,15 @@ export const deleteFile =
 
     return deleteRequest(
       null,
-      createAction(settings.deletedActionName)({ fileId }),
+      createAction(settings.deletedActionName)({ fileId, ...settings.payload }),
       `${settings.url}/${fileId}`,
       null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+      settings.errorHandler ?? authErrorHandler
+    )(params)(dispatch)
+      .catch(() => {})
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 /* ************************************  ARCHIVE  ************************************ */

@@ -6,13 +6,19 @@ import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
 import {
   getRequest,
-  putRequest
+  postRequest,
+  putRequest,
+  deleteRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
 import {
   getSponsorForms,
   normalizeFormTemplate,
   normalizeSponsorCustomizedForm,
-  updateFormTemplateTiers
+  updateFormTemplateTiers,
+  removeItemFile,
+  removeSponsorCustomizedFormItemImages,
+  saveSponsorFormItem,
+  updateSponsorFormItem
 } from "../sponsor-forms-actions";
 import * as methods from "../../utils/methods";
 
@@ -21,7 +27,8 @@ jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
   postRequest: jest.fn(),
   getRequest: jest.fn(),
-  putRequest: jest.fn()
+  putRequest: jest.fn(),
+  deleteRequest: jest.fn()
 }));
 
 describe("Sponsor Forms Actions", () => {
@@ -286,6 +293,204 @@ describe("Sponsor Forms Actions", () => {
           term: "expo"
         }
       );
+    });
+  });
+
+  describe("removeItemFile", () => {
+    const middlewares = [thunk];
+    const mockStore = configureStore(middlewares);
+
+    beforeEach(() => {
+      jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
+
+      deleteRequest.mockImplementation(
+        (requestActionCreator, receiveAction) => () => (dispatch) => {
+          if (typeof receiveAction === "function") {
+            dispatch(receiveAction({ response: {} }));
+          } else {
+            dispatch(receiveAction);
+          }
+          return Promise.resolve({ response: {} });
+        }
+      );
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("dispatches SPONSOR_FORM_ITEM_FILE_DELETED with fileId and itemId", async () => {
+      const store = mockStore({
+        currentSummitState: { currentSummit: { id: 42 } }
+      });
+
+      store.dispatch(removeItemFile(7, 99, 555));
+      await flushPromises();
+
+      expect(deleteRequest).toHaveBeenCalledWith(
+        null,
+        {
+          type: "SPONSOR_FORM_ITEM_FILE_DELETED",
+          payload: { fileId: 555, itemId: 99 }
+        },
+        `${window.PURCHASES_API_URL}/api/v1/summits/42/show-forms/7/items/99/images/555`,
+        null,
+        expect.any(Function)
+      );
+
+      const dispatched = store
+        .getActions()
+        .find((a) => a.type === "SPONSOR_FORM_ITEM_FILE_DELETED");
+      expect(dispatched.payload).toEqual({ fileId: 555, itemId: 99 });
+    });
+  });
+
+  describe("removeSponsorCustomizedFormItemImages", () => {
+    const middlewares = [thunk];
+    const mockStore = configureStore(middlewares);
+
+    beforeEach(() => {
+      jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
+
+      deleteRequest.mockImplementation(
+        (requestActionCreator, receiveAction) => () => (dispatch) => {
+          if (typeof receiveAction === "function") {
+            dispatch(receiveAction({ response: {} }));
+          } else {
+            dispatch(receiveAction);
+          }
+          return Promise.resolve({ response: {} });
+        }
+      );
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("dispatches SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED with fileId and itemId", async () => {
+      const store = mockStore({
+        currentSummitState: { currentSummit: { id: 42 } },
+        currentSponsorState: { entity: { id: 5 } }
+      });
+
+      store.dispatch(removeSponsorCustomizedFormItemImages(7, 99, 555));
+      await flushPromises();
+
+      expect(deleteRequest).toHaveBeenCalledWith(
+        null,
+        {
+          type: "SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED",
+          payload: { fileId: 555, itemId: 99 }
+        },
+        `${window.PURCHASES_API_URL}/api/v1/summits/42/sponsors/5/sponsor-forms/7/items/99/images/555`,
+        null,
+        expect.any(Function)
+      );
+
+      const dispatched = store
+        .getActions()
+        .find((a) => a.type === "SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED");
+      expect(dispatched.payload).toEqual({ fileId: 555, itemId: 99 });
+    });
+  });
+
+  describe("saveSponsorFormItem", () => {
+    const middlewares = [thunk];
+    const mockStore = configureStore(middlewares);
+
+    beforeEach(() => {
+      jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
+
+      postRequest.mockImplementation(
+        () => () => () => Promise.resolve({ response: { id: 100 } })
+      );
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("sends the images in the create request body and makes no follow-up image request", async () => {
+      const store = mockStore({
+        currentSummitState: { currentSummit: { id: 42 } }
+      });
+
+      const entity = {
+        name: "Item",
+        images: [{ file_path: "data:image/png;base64,AAA" }],
+        meta_fields: []
+      };
+
+      await store.dispatch(saveSponsorFormItem(7, entity));
+      await flushPromises();
+
+      expect(postRequest).toHaveBeenCalledWith(
+        null,
+        expect.any(Function),
+        `${window.PURCHASES_API_URL}/api/v1/summits/42/show-forms/7/items`,
+        expect.objectContaining({
+          images: [{ file_path: "data:image/png;base64,AAA" }]
+        }),
+        expect.any(Function)
+      );
+
+      // The item-create request itself now saves and associates the
+      // images — a follow-up per-image request would create duplicates.
+      const hitImagesEndpoint = postRequest.mock.calls.some(([, , url]) =>
+        url.includes("/images")
+      );
+      expect(hitImagesEndpoint).toBe(false);
+    });
+  });
+
+  describe("updateSponsorFormItem", () => {
+    const middlewares = [thunk];
+    const mockStore = configureStore(middlewares);
+
+    beforeEach(() => {
+      jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
+
+      putRequest.mockImplementation(
+        () => () => () => Promise.resolve({ response: { id: 100 } })
+      );
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("sends the images in the update request body and makes no follow-up image request", async () => {
+      const store = mockStore({
+        currentSummitState: { currentSummit: { id: 42 } }
+      });
+
+      const entity = {
+        id: 100,
+        name: "Item",
+        images: [{ id: 5, file_path: "https://cdn/a.png" }],
+        meta_fields: []
+      };
+
+      await store.dispatch(updateSponsorFormItem(7, entity));
+      await flushPromises();
+
+      expect(putRequest).toHaveBeenCalledWith(
+        null,
+        expect.any(Function),
+        `${window.PURCHASES_API_URL}/api/v1/summits/42/show-forms/7/items/100`,
+        expect.objectContaining({
+          images: [{ id: 5, file_path: "https://cdn/a.png" }]
+        }),
+        expect.any(Function)
+      );
+
+      // The item-update request itself now saves and associates the
+      // images — a follow-up per-image request would create duplicates.
+      const hitImagesEndpoint = putRequest.mock.calls.some(([, , url]) =>
+        url.includes("/images")
+      );
+      expect(hitImagesEndpoint).toBe(false);
     });
   });
 });
