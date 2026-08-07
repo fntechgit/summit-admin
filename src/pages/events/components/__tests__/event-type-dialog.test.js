@@ -8,6 +8,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import EventTypeDialog from "../event-type-dialog";
+import useScrollToError from "../../../../hooks/useScrollToError";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   translate: jest.fn((key) => key)
@@ -147,6 +148,27 @@ describe("EventTypeDialog", () => {
       screen.getByRole("tab", { name: /schedule_settings/i })
     ).toBeInTheDocument();
     expect(screen.getByTestId("textfield-name")).toBeInTheDocument();
+  });
+
+  it("wires setActiveTab into useScrollToError for tab-aware error scrolling", () => {
+    renderDialog();
+
+    expect(useScrollToError).toHaveBeenCalledWith(
+      expect.anything(),
+      true,
+      expect.any(Function)
+    );
+  });
+
+  it("tags both tabpanels with their owning tab value", () => {
+    renderDialog();
+
+    expect(
+      document.querySelector("[data-tab-value=\"main\"]")
+    ).toBeInTheDocument();
+    expect(
+      document.querySelector("[data-tab-value=\"schedule_settings\"]")
+    ).toBeInTheDocument();
   });
 
   it("disables the class_name select once the entity has an id", () => {
