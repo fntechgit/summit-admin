@@ -77,7 +77,13 @@ jobs:
           publish-dir: ./dist
           github-token: ${{ secrets.GITHUB_TOKEN }}
           deploy-message: "PR #${{ github.event.issue.number }}"
-          alias: pr-${{ github.event.issue.number }}
+          # Deploying to the same fixed production URL every time (rather than a
+          # per-PR alias) means only one PR preview can be live at once. We can
+          # switch back to per-PR aliases (uncomment below) once the IdP allows
+          # wildcards in its redirect URIs / JavaScript origins, so each
+          # pr-<number>--<site>.netlify.app can complete the OAuth callback.
+          # alias: pr-${{ github.event.issue.number }}
+          production-deploy: true
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
