@@ -30,7 +30,6 @@ const ManageTierAddonsPopup = ({
   sponsorship,
   onClose,
   onSubmit,
-  summitId,
   onSponsorshipAddonRemove
 }) => {
   const [editingRow, setEditingRow] = useState(null);
@@ -227,7 +226,6 @@ const ManageTierAddonsPopup = ({
                         placeholder={T.translate(
                           "edit_sponsor.placeholders.select"
                         )}
-                        summitId={summitId}
                         inputProps={{
                           fullWidth: true,
                           margin: "none"
@@ -324,7 +322,6 @@ const ManageTierAddonsPopup = ({
                     placeholder={T.translate(
                       "edit_sponsor.placeholders.select"
                     )}
-                    summitId={summitId}
                     inputProps={{
                       fullWidth: true,
                       margin: "none"
@@ -397,8 +394,7 @@ const ManageTierAddonsPopup = ({
 ManageTierAddonsPopup.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
-  onSponsorshipAddonRemove: PropTypes.func.isRequired,
-  summitId: PropTypes.number.isRequired
+  onSponsorshipAddonRemove: PropTypes.func.isRequired
 };
 
 export default ManageTierAddonsPopup;
