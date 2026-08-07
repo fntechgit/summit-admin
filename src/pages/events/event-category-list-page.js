@@ -11,12 +11,13 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
-import SummitDropdown from "../../components/summit-dropdown";
+import { Box, Button, Grid2 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import MuiTableSortable from "openstack-uicore-foundation/lib/components/mui/sortable-table";
+import SummitsDropdown from "openstack-uicore-foundation/lib/components/mui/summits-dropdown";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getEventCategories,
@@ -25,119 +26,133 @@ import {
   updateEventCategoryOrder
 } from "../../actions/event-category-actions";
 
-class EventCategoryListPage extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.handleEdit = this.handleEdit.bind(this);
-    this.handleCopyCategories = this.handleCopyCategories.bind(this);
-    this.handleNew = this.handleNew.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
-
-    this.state = {};
+const columns = [
+  { columnKey: "id", header: T.translate("general.id") },
+  { columnKey: "name", header: T.translate("event_category_list.name") },
+  { columnKey: "code", header: T.translate("event_category_list.code") },
+  {
+    columnKey: "color",
+    header: T.translate("event_category_list.color"),
+    render: (row) => (
+      <Box
+        sx={{
+          width: 24,
+          height: 24,
+          borderRadius: 0.5,
+          backgroundColor: row.color?.startsWith("#")
+            ? row.color
+            : `#${row.color}`
+        }}
+      />
+    )
   }
+];
 
-  componentDidMount() {
-    const { currentSummit } = this.props;
-    if (currentSummit) {
-      this.props.getEventCategories();
-    }
-  }
+const EventCategoryListPage = ({
+  currentSummit,
+  eventCategories,
+  history,
+  getEventCategories,
+  deleteEventCategory,
+  copyEventCategories,
+  updateEventCategoryOrder
+}) => {
+  const [summitToCopy, setSummitToCopy] = useState(null);
 
-  handleEdit(categoryId) {
-    const { currentSummit, history } = this.props;
+  useEffect(() => {
+    if (currentSummit) getEventCategories();
+  }, [currentSummit?.id]);
+
+  if (!currentSummit?.id) return null;
+
+  const handleEdit = (category) =>
     history.push(
-      `/app/summits/${currentSummit.id}/event-categories/${categoryId}`
+      `/app/summits/${currentSummit.id}/event-categories/${category.id}`
     );
-  }
 
-  handleCopyCategories(fromSummitId) {
-    this.props.copyEventCategories(fromSummitId);
-  }
-
-  handleNew(ev) {
-    const { currentSummit, history } = this.props;
+  const handleNew = () =>
     history.push(`/app/summits/${currentSummit.id}/event-categories/new`);
-  }
 
-  handleDelete(categoryId) {
-    const { deleteEventCategory, eventCategories } = this.props;
-    const category = eventCategories.find((c) => c.id === categoryId);
+  const handleCopyCategories = () => copyEventCategories(summitToCopy);
 
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("event_category_list.delete_warning")} ${
-        category.name
-      }`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteEventCategory(categoryId);
-      }
-    });
-  }
+  return (
+    <div className="container">
+      <h3> {T.translate("event_category_list.event_category_list")} </h3>
+      <Grid2
+        container
+        size={{ xs: 12, m3: 6 }}
+        spacing={1}
+        sx={{
+          justifyContent: "flex-end",
+          alignItems: "stretch",
+          ml: "auto",
+          mb: 2
+        }}
+      >
+        <Grid2>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleNew}
+          >
+            {T.translate("event_category_list.add_category")}
+          </Button>
+        </Grid2>
+      </Grid2>
 
-  render() {
-    const { currentSummit, eventCategories } = this.props;
+      <Grid2
+        container
+        size={{ xs: 12, m3: 6 }}
+        spacing={1}
+        sx={{
+          justifyContent: "flex-end",
+          alignItems: "stretch",
+          ml: "auto",
+          mb: 2
+        }}
+      >
+        <Grid2 size={{ xs: 12, sm: 3 }}>
+          <SummitsDropdown
+            label={T.translate("general.select_summit")}
+            onChange={setSummitToCopy}
+            summits={[]}
+            excludeSummitIds={[currentSummit.id]}
+          />
+        </Grid2>
+        <Grid2>
+          <Button
+            variant="outlined"
+            disabled={!summitToCopy}
+            onClick={handleCopyCategories}
+          >
+            {T.translate("event_category_list.copy_categories")}
+          </Button>
+        </Grid2>
+      </Grid2>
 
-    const columns = [
-      { columnKey: "id", value: T.translate("general.id") },
-      { columnKey: "name", value: T.translate("event_category_list.name") },
-      { columnKey: "code", value: T.translate("event_category_list.code") },
-      { columnKey: "color", value: T.translate("event_category_list.color") }
-    ];
-
-    const table_options = {
-      actions: {
-        edit: { onClick: this.handleEdit },
-        delete: { onClick: this.handleDelete }
-      }
-    };
-
-    if (!currentSummit.id) return null;
-
-    return (
-      <div className="container">
-        <h3> {T.translate("event_category_list.event_category_list")} </h3>
-        <div className="row">
-          <div className="col-md-6 col-md-offset-6 text-right">
-            <button
-              className="btn btn-primary right-space"
-              onClick={this.handleNew}
-            >
-              {T.translate("event_category_list.add_category")}
-            </button>
-            <SummitDropdown
-              onClick={this.handleCopyCategories}
-              actionLabel={T.translate("event_category_list.copy_categories")}
-            />
-          </div>
+      {eventCategories.length === 0 && (
+        <div className="no-items">
+          {T.translate("event_category_list.no_items")}
         </div>
+      )}
 
-        {eventCategories.length === 0 && (
-          <div className="no-items">
-            {T.translate("event_category_list.no_items")}
-          </div>
-        )}
-
-        {eventCategories.length > 0 && (
-          <div>
-            <SortableTable
-              options={table_options}
-              data={eventCategories}
-              columns={columns}
-              dropCallback={this.props.updateEventCategoryOrder}
-              orderField="order"
-            />
-          </div>
-        )}
-      </div>
-    );
-  }
-}
+      {eventCategories.length > 0 && (
+        <MuiTableSortable
+          data={eventCategories}
+          columns={columns}
+          getName={(category) => category.name}
+          onEdit={handleEdit}
+          onDelete={deleteEventCategory}
+          deleteDialogBody={(name) =>
+            `${T.translate("event_category_list.delete_warning")}${name}`
+          }
+          confirmButtonColor="error"
+          onReorder={updateEventCategoryOrder}
+        />
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({
   currentSummitState,
