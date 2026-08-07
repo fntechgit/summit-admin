@@ -104,6 +104,7 @@ export const saveMetaFieldTypes =
 
     return Promise.all(promises).catch((err) => {
       console.error(err);
+      throw err;
     });
   };
 
