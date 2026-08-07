@@ -7,7 +7,7 @@ import { renderWithRedux } from "../../../../utils/test-utils";
 jest.mock("../../../../actions/sponsor-forms-actions", () => ({
   ...jest.requireActual("../../../../actions/sponsor-forms-actions"),
   getSponsorFormItems: jest.fn(() => () => Promise.resolve()),
-  updateSponsorFormItem: jest.fn(() => () => Promise.resolve()),
+  saveSponsorFormItem: jest.fn(() => () => Promise.resolve()),
   addInventoryItems: jest.fn(() => () => Promise.resolve())
 }));
 
@@ -28,7 +28,7 @@ jest.mock(
 
 const {
   getSponsorFormItems,
-  updateSponsorFormItem,
+  saveSponsorFormItem,
   addInventoryItems
 } = require("../../../../actions/sponsor-forms-actions");
 
@@ -82,7 +82,7 @@ describe("SponsorFormItemListPage inline cell edit", () => {
     fireEvent.change(input, { target: { value: "200" } });
     fireEvent.blur(input);
 
-    expect(updateSponsorFormItem).toHaveBeenCalledWith(
+    expect(saveSponsorFormItem).toHaveBeenCalledWith(
       "FORM1",
       expect.objectContaining({ id: 1 })
     );
