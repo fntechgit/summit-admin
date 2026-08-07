@@ -250,8 +250,8 @@ const EventTypeDialog = ({
 
             <div
               role="tabpanel"
+              id="tabpanel-main"
               hidden={activeTab !== "main"}
-              data-tab-value="main"
             >
               <Grid2 container spacing={2} sx={{ mb: 2 }}>
                 <Grid2 size={{ xs: 12, md: 4 }}>
@@ -583,8 +583,8 @@ const EventTypeDialog = ({
 
             <div
               role="tabpanel"
+              id="tabpanel-schedule_settings"
               hidden={activeTab !== "schedule_settings"}
-              data-tab-value="schedule_settings"
             >
               <Grid2 container spacing={2}>
                 <Grid2 size={12} sx={{ mt: "8px" }}>

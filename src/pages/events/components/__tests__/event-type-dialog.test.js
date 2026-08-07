@@ -163,11 +163,9 @@ describe("EventTypeDialog", () => {
   it("tags both tabpanels with their owning tab value", () => {
     renderDialog();
 
+    expect(document.getElementById("tabpanel-main")).toBeInTheDocument();
     expect(
-      document.querySelector("[data-tab-value=\"main\"]")
-    ).toBeInTheDocument();
-    expect(
-      document.querySelector("[data-tab-value=\"schedule_settings\"]")
+      document.getElementById("tabpanel-schedule_settings")
     ).toBeInTheDocument();
   });
 
