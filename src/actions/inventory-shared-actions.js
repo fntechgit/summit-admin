@@ -18,7 +18,7 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  authErrorHandler
+  snackbarErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
 
@@ -68,7 +68,7 @@ export const saveMetaFieldTypes =
           createAction(settings.updatedActionName),
           `${settings.url}/${metaFieldType.id}`,
           normalizedEntity,
-          authErrorHandler,
+          snackbarErrorHandler,
           metaFieldType
         )(params)(dispatch).then(() => {
           if (
@@ -88,7 +88,7 @@ export const saveMetaFieldTypes =
         createAction(settings.addedActionName),
         settings.url,
         normalizedEntity,
-        authErrorHandler,
+        snackbarErrorHandler,
         metaFieldType
       )(params)(dispatch).then(({ response }) => {
         if (
@@ -129,7 +129,7 @@ export const deleteMetaFieldType =
       createAction(settings.deletedActionName)({ metaFieldId }),
       `${settings.url}/${metaFieldId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -168,7 +168,7 @@ export const saveMetaFieldValues =
           createAction(settings.updatedActionName),
           `${settings.url}/${value.id}`,
           normalizedEntity,
-          authErrorHandler,
+          snackbarErrorHandler,
           value
         )(params)(dispatch);
       } else {
@@ -177,7 +177,7 @@ export const saveMetaFieldValues =
           createAction(settings.addedActionName),
           settings.url,
           normalizedEntity,
-          authErrorHandler,
+          snackbarErrorHandler,
           value
         )(params)(dispatch);
       }
@@ -209,7 +209,7 @@ export const deleteMetaFieldTypeValue =
       }),
       `${settings.url}${valueId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -236,7 +236,7 @@ export const saveFiles =
           createAction(settings.updatedActionName),
           `${settings.url}${file.id}/`,
           file,
-          authErrorHandler,
+          snackbarErrorHandler,
           file
         )(params)(dispatch);
       }
@@ -245,7 +245,7 @@ export const saveFiles =
         createAction(settings.addedActionName),
         settings.url,
         file,
-        authErrorHandler,
+        snackbarErrorHandler,
         file
       )(params)(dispatch);
     });
@@ -275,7 +275,7 @@ export const deleteFile =
       createAction(settings.deletedActionName)({ fileId }),
       `${settings.url}/${fileId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -294,7 +294,7 @@ export const archiveItem =
       createAction(settings.updatedActionName),
       `${settings.url}`,
       item,
-      authErrorHandler,
+      snackbarErrorHandler,
       item
     )(params)(dispatch);
   };
@@ -312,7 +312,7 @@ export const unarchiveItem =
       createAction(settings.deletedActionName)(item.id),
       `${settings.url}`,
       null,
-      authErrorHandler,
+      snackbarErrorHandler,
       item
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
