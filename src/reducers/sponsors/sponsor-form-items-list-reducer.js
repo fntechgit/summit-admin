@@ -100,12 +100,14 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
     }
     case RECEIVE_SPONSOR_FORM_ITEM: {
       const item = payload.response;
-
       const currentItem = {
         ...item,
-        meta_fields: item.meta_fields.length > 0 ? item.meta_fields : []
+        images: (item.images || []).map((img) => ({
+          ...img,
+          file_path: img.file_url
+        })),
+        meta_fields: (item.meta_fields ?? []).length > 0 ? item.meta_fields : []
       };
-
       return { ...state, currentItem };
     }
     case RESET_SPONSOR_FORM_ITEM: {
