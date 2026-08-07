@@ -150,6 +150,7 @@ const InventoryListPage = ({
       : archiveInventoryItem(item);
 
   const handleRemoveImage = (imageId) => {
+    if (!currentInventoryItem?.id) return;
     deleteInventoryItemImage(currentInventoryItem.id, imageId);
   };
 
