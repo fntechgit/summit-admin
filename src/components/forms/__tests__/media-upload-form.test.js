@@ -56,7 +56,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../mui/formik-inputs/mui-formik-select",
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/select",
   () =>
     function MockSelect({ name, children }) {
       return <div data-testid={`select-${name}`}>{children}</div>;

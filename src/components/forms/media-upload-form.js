@@ -28,8 +28,8 @@ import TextField from "@mui/material/TextField";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
 import MuiFormikFilesizeField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/file-size-field";
+import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
 import useScrollToError from "../../hooks/useScrollToError";
-import MuiFormikSelect from "../mui/formik-inputs/mui-formik-select";
 import FormikTextEditor from "../inputs/formik-text-editor";
 import { positiveNumberValidation } from "../../utils/yup";
 
