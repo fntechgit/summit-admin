@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from "react";
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import Table from "openstack-uicore-foundation/lib/components/table"
-import TextArea from "openstack-uicore-foundation/lib/components/inputs/textarea-input";
-import T from "i18n-react";
+import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
+import Swal from "sweetalert2";
+import T from "i18n-react";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
+import Table from "openstack-uicore-foundation/lib/components/table";
+import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
+import { Pagination } from "react-bootstrap";
+import TextArea from "openstack-uicore-foundation/lib/components/inputs/textarea-input";
 import {
   clearNotesParams,
   getNotes,
@@ -11,14 +14,15 @@ import {
   saveNote,
   deleteNote
 } from "../../actions/notes-actions";
-import { Pagination } from "react-bootstrap";
-import Swal from "sweetalert2";
 
 import styles from "./index.module.less";
 
-const Notes = ({
+const NotesPanel = ({
   attendeeId,
   ticketId,
+  open,
+  onToggle,
+  onOpen,
   notes,
   term,
   currentPage,
@@ -34,6 +38,22 @@ const Notes = ({
   clearNotesParams
 }) => {
   const [newNote, setNewNote] = useState("");
+  const hasAutoOpenedRef = useRef(false);
+
+  useEffect(() => {
+    getNotes(attendeeId, ticketId, term, 1, perPage, order, orderDir).then(
+      () => {
+        if (!hasAutoOpenedRef.current) {
+          hasAutoOpenedRef.current = true;
+          onOpen();
+        }
+      }
+    );
+
+    return () => {
+      clearNotesParams();
+    };
+  }, []);
 
   const handleSaveNote = () => {
     saveNote(attendeeId, ticketId, newNote).then(() => setNewNote(""));
@@ -42,15 +62,16 @@ const Notes = ({
   const handleDeleteNote = (noteId) => {
     const msg = {
       title: T.translate("general.are_you_sure"),
-      text: `${T.translate("notes.remove_warning")} ${noteId}`,
+      text: `${T.translate("notes_panel.remove_warning")} ${noteId}`,
       type: "warning"
     };
 
-    Swal.fire(msg).then(function () {
+    Swal.fire(msg).then(() => {
       deleteNote(attendeeId, noteId);
     });
   };
-  const handleSort = (index, key, dir, func) => {
+
+  const handleSort = (index, key, dir) => {
     getNotes(attendeeId, ticketId, term, currentPage, perPage, key, dir);
   };
 
@@ -70,19 +91,11 @@ const Notes = ({
     );
   };
 
-  const handleExport = (index, key, dir, func) => {
+  const handleExport = () => {
     exportNotes(attendeeId, ticketId, term, order, orderDir);
   };
 
-  useEffect(() => {
-    getNotes(attendeeId, ticketId, term, 1, perPage, order, orderDir);
-
-    return () => {
-      clearNotesParams();
-    };
-  }, []);
-
-  const table_options = {
+  const tableOptions = {
     className: styles.notesTable,
     sortCol: order,
     sortDir: orderDir,
@@ -91,33 +104,37 @@ const Notes = ({
     }
   };
 
-  const table_columns = [
-    { columnKey: "id", value: T.translate("notes.id"), sortable: true },
+  const tableColumns = [
+    { columnKey: "id", value: T.translate("notes_panel.id"), sortable: true },
     {
       columnKey: "created",
-      value: T.translate("notes.created"),
+      value: T.translate("notes_panel.created"),
       sortable: true
     },
     {
       columnKey: "author_fullname",
-      value: T.translate("notes.author_fullname"),
+      value: T.translate("notes_panel.author_fullname"),
       sortable: true
     },
     {
       columnKey: "author_email",
-      value: T.translate("notes.author_email"),
+      value: T.translate("notes_panel.author_email"),
       sortable: true
     },
-    { columnKey: "ticket_link", value: T.translate("notes.ticket_id") },
-    { columnKey: "content", value: T.translate("notes.content") }
+    { columnKey: "ticket_link", value: T.translate("notes_panel.ticket_id") },
+    { columnKey: "content", value: T.translate("notes_panel.content") }
   ];
 
-  const show_columns = columns
-    ? table_columns.filter((c) => columns.include(c.columnKey))
-    : table_columns;
+  const showColumns = columns
+    ? tableColumns.filter((c) => columns.include(c.columnKey))
+    : tableColumns;
 
   return (
-    <>
+    <Panel
+      show={open}
+      title={T.translate("notes_panel.title")}
+      handleClick={onToggle}
+    >
       <div className="row">
         <div className={`col-md-12 ${styles.addNewNote}`}>
           <div>
@@ -130,7 +147,7 @@ const Notes = ({
               onChange={(ev) => setNewNote(ev.target.value)}
               maxLength={1024}
             />
-            <span className="input-group-btn">
+            <span className="input-group-btn" style={{ verticalAlign: "top" }}>
               <input
                 type="button"
                 className="btn btn-default"
@@ -145,7 +162,7 @@ const Notes = ({
         <div className="col-md-6">
           <FreeTextSearch
             value={term ?? ""}
-            placeholder={T.translate("notes.placeholders.search")}
+            placeholder={T.translate("notes_panel.placeholders.search")}
             onSearch={handleSearch}
           />
         </div>
@@ -159,14 +176,14 @@ const Notes = ({
         </div>
       </div>
 
-      {notes.length === 0 && <div>{T.translate("notes.no_entries")}</div>}
+      {notes.length === 0 && <div>{T.translate("notes_panel.no_entries")}</div>}
 
       {notes.length > 0 && (
         <>
           <Table
-            options={table_options}
+            options={tableOptions}
             data={notes}
-            columns={show_columns}
+            columns={showColumns}
             onSort={handleSort}
           />
           <Pagination
@@ -184,7 +201,7 @@ const Notes = ({
           />
         </>
       )}
-    </>
+    </Panel>
   );
 };
 
@@ -198,4 +215,4 @@ export default connect(mapStateToProps, {
   saveNote,
   deleteNote,
   clearNotesParams
-})(Notes);
+})(NotesPanel);
