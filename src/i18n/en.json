@@ -1382,15 +1382,15 @@
     }
   },
   "event_category_group_list": {
-    "event_category_group_list": "Activity Category Groups",
-    "event_category_groups": "Activity Category Groups",
+    "event_category_group_list": "Activity Category Groups List",
+    "event_category_groups": "Groups",
     "no_items": "No activity category groups found.",
     "add_category_group": "Add Group",
     "name": "Name",
     "type": "Type",
     "categories": "Categories",
     "color": "Color",
-    "delete_warning": "Are you sure you want to delete activity category group "
+    "delete_warning": "Please verify you want to delete activity category group"
   },
   "edit_event_category_group": {
     "event_category_group": "Activity Category Group",
