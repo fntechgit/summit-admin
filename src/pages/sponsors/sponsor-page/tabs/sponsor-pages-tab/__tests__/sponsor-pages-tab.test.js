@@ -396,7 +396,7 @@ describe("SponsorPagesTab", () => {
       }
     );
 
-    const archiveButton = screen.getByText("general.archive");
+    const archiveButton = screen.getByTestId("action-archive");
     await act(async () => {
       await userEvent.click(archiveButton);
     });
@@ -422,7 +422,7 @@ describe("SponsorPagesTab", () => {
       }
     );
 
-    const unarchiveButton = screen.getByText("general.unarchive");
+    const unarchiveButton = screen.getByTestId("action-archive");
     await act(async () => {
       await userEvent.click(unarchiveButton);
     });
