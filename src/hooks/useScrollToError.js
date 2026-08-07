@@ -98,7 +98,9 @@ const useScrollToError = (formik, relative = false, setActiveTab) => {
 
     // Every matched field is hidden: jump to the tab that owns the first
     // errored field, then defer the scroll until it's actually visible.
-    const tabValue = matches[0].closest("[data-tab-value]")?.dataset.tabValue;
+    // Tab panels are identified by the `id="tabpanel-<value>"` convention.
+    const panelId = matches[0].closest("[role=\"tabpanel\"]")?.id;
+    const tabValue = panelId?.match(/^tabpanel-(.+)$/)?.[1];
 
     if (!tabValue) {
       scrollToFirstVisible(); // not inside a tagged tab panel, fall back

@@ -20,7 +20,7 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import { scrollToError } from "../../utils/methods";
+import useScrollToError from "../../hooks/useScrollToError";
 import MainTab from "./selection-plan-form/main-tab";
 import TrackGroupsTab from "./selection-plan-form/track-groups-tab";
 import EventTypesTab from "./selection-plan-form/event-types-tab";
@@ -111,11 +111,12 @@ const SelectionPlanForm = (props) => {
   });
 
   useEffect(() => {
-    scrollToError(propsErrors);
     formik.setErrors(
       propsErrors && Object.keys(propsErrors).length > 0 ? propsErrors : {}
     );
   }, [propsErrors]);
+
+  useScrollToError(formik, true, setActiveTab);
 
   // Sync sub-resource arrays from Redux without resetting user-editable main tab fields
   useEffect(() => {

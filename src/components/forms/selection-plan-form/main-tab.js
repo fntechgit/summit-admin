@@ -40,6 +40,7 @@ const MainTab = ({ hidden, currentSummit }) => {
           <label> {T.translate("edit_selection_plan.name")} *</label>
           <TextField
             id="name"
+            name="name"
             fullWidth
             size="small"
             error={!!hasErrors("name")}
@@ -53,6 +54,7 @@ const MainTab = ({ hidden, currentSummit }) => {
             control={
               <Checkbox
                 id="is_enabled"
+                name="is_enabled"
                 checked={values.is_enabled}
                 onChange={handleChange}
               />
@@ -65,6 +67,7 @@ const MainTab = ({ hidden, currentSummit }) => {
             control={
               <Checkbox
                 id="is_hidden"
+                name="is_hidden"
                 checked={values.is_hidden}
                 onChange={handleChange}
               />
@@ -77,6 +80,7 @@ const MainTab = ({ hidden, currentSummit }) => {
             control={
               <Checkbox
                 id="allow_proposed_schedules"
+                name="allow_proposed_schedules"
                 checked={values.allow_proposed_schedules}
                 onChange={handleChange}
               />
@@ -89,6 +93,7 @@ const MainTab = ({ hidden, currentSummit }) => {
             control={
               <Checkbox
                 id="allow_new_presentations"
+                name="allow_new_presentations"
                 checked={values.allow_new_presentations}
                 onChange={handleChange}
               />
@@ -124,6 +129,7 @@ const MainTab = ({ hidden, currentSummit }) => {
           <label>{T.translate("edit_selection_plan.max_submissions")}</label>
           <TextField
             id="max_submission_allowed_per_user"
+            name="max_submission_allowed_per_user"
             type="number"
             fullWidth
             size="small"
