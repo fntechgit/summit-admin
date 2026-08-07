@@ -52,10 +52,10 @@ const TabbedHarness = ({ onActiveTabChange }) => {
 
   return (
     <form onSubmit={formik.handleSubmit}>
-      <div data-tab-value="a" hidden={activeTab !== "a"}>
+      <div role="tabpanel" id="tabpanel-a" hidden={activeTab !== "a"}>
         <input name="name" onChange={formik.handleChange} />
       </div>
-      <div data-tab-value="b" hidden={activeTab !== "b"} />
+      <div role="tabpanel" id="tabpanel-b" hidden={activeTab !== "b"} />
       <button type="submit">save</button>
     </form>
   );
