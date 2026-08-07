@@ -16,6 +16,7 @@ import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
 import MuiDropdownCheckbox from "openstack-uicore-foundation/lib/components/mui/dropdown-checkbox";
 import MuiFormikDatepicker from "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import {
   addIssAfterDateFieldValidator,
   formMetafieldsValidation,
@@ -23,7 +24,6 @@ import {
   requiredHTMLValidation,
   requiredStringValidation
 } from "../../../../../utils/yup";
-import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
 import useScrollToError from "../../../../../hooks/useScrollToError";
 import FormikTextEditor from "../../../../../components/inputs/formik-text-editor";
 

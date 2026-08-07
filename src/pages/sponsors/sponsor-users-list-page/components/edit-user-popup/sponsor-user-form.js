@@ -10,10 +10,10 @@ import {
 import T from "i18n-react";
 import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
-import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikSwitch from "openstack-uicore-foundation/lib/components/mui/formik-inputs/switch";
 import useScrollToError from "../../../../../hooks/useScrollToError";
 import AccessRightsList from "./access-rights-lists";
-import MuiFormikSwitch from "../../../../../components/mui/formik-inputs/mui-formik-switch";
 
 const buildInitialValues = (data) => {
   const normalized = { ...data };

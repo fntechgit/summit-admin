@@ -20,12 +20,13 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import AdditionalInputList from "openstack-uicore-foundation/lib/components/mui/formik-inputs/additional-input-list";
 import { MuiFormikUpload } from "openstack-uicore-foundation/lib/components";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikQuantityField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/quantity-field";
 import {
   ALLOWED_INVENTORY_IMAGE_FORMATS,
   MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
   MAX_INVENTORY_IMAGES_UPLOAD_QTY
 } from "../../../utils/constants";
-import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
 import useScrollToError from "../../../hooks/useScrollToError";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
 import {
@@ -35,7 +36,6 @@ import {
   formMetafieldsValidation
 } from "../../../utils/yup";
 import ItemPriceTiers from "../../../components/mui/formik-inputs/item-price-tiers";
-import MuiFormikQuantityField from "../../../components/mui/formik-inputs/mui-formik-quantity-field";
 import { getFileUploadAllowedExtensions } from "../../../utils/methods";
 
 const SponsorItemDialog = ({
