@@ -296,7 +296,6 @@ const SponsorFormsTab = ({
       columnKey: "allowed_add_ons",
       header: T.translate("edit_sponsor.forms_tab.add_ons"),
       sortable: true,
-      width: 120,
       render: (row) =>
         row.allowed_add_ons?.length > 0
           ? row.allowed_add_ons.map((a) => `${a.type} ${a.name}`).join(", ")
@@ -318,7 +317,6 @@ const SponsorFormsTab = ({
       columnKey: "items_qty",
       header: T.translate("edit_sponsor.forms_tab.items"),
       sortable: true,
-      width: 90,
       render: (row) =>
         `${row.items_count} ${
           row.items_count === 1
@@ -478,7 +476,6 @@ const SponsorFormsTab = ({
             sortDir: customizedForms.orderDir,
             disableProp: "is_archived"
           }}
-          tableSx={{ tableLayout: "auto", minWidth: 910 }}
           perPage={customizedForms.perPage}
           totalRows={customizedForms.totalCount}
           currentPage={customizedForms.currentPage}
@@ -499,7 +496,6 @@ const SponsorFormsTab = ({
             sortCol: managedForms.order,
             sortDir: managedForms.orderDir
           }}
-          tableSx={{ tableLayout: "auto", minWidth: 910 }}
           perPage={managedForms.perPage}
           totalRows={managedForms.totalCount}
           currentPage={managedForms.currentPage}

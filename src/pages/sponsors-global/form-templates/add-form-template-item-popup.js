@@ -102,7 +102,6 @@ const AddFormTemplateItemDialog = ({
     {
       columnKey: "select",
       header: "",
-      width: 30,
       align: "center",
       render: (row) => (
         <FormControlLabel
@@ -157,7 +156,6 @@ const AddFormTemplateItemDialog = ({
     {
       columnKey: "hasImage",
       header: "",
-      width: 40,
       align: "center",
       render: (row) => {
         const img = row.images?.[0];

@@ -116,7 +116,7 @@ const ShowPurchaseListPage = ({
     {
       columnKey: "purchased",
       header: T.translate("sponsor_show_purchases.purchased"),
-      width: 200,
+      width: 180,
       sortable: true
     },
     {
@@ -171,7 +171,7 @@ const ShowPurchaseListPage = ({
     {
       columnKey: "details",
       header: "",
-      width: 100,
+      width: 80,
       align: "center",
       render: (row) => (
         <Button
@@ -187,7 +187,6 @@ const ShowPurchaseListPage = ({
     {
       columnKey: "menu",
       header: "",
-      width: 100,
       align: "center",
       render: (row) =>
         downloadingOrderId === row.id ? (
