@@ -158,7 +158,7 @@ const EventTypeDialog = ({
 
   const { values, setFieldValue } = formik;
 
-  useScrollToError(formik, true);
+  useScrollToError(formik, true, setActiveTab);
 
   useEffect(() => {
     const errorFields = Object.keys(errors || {});
@@ -248,7 +248,11 @@ const EventTypeDialog = ({
               </Tabs>
             </Box>
 
-            <div role="tabpanel" hidden={activeTab !== "main"}>
+            <div
+              role="tabpanel"
+              hidden={activeTab !== "main"}
+              data-tab-value="main"
+            >
               <Grid2 container spacing={2} sx={{ mb: 2 }}>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <InputLabel htmlFor="class_name">
@@ -577,7 +581,11 @@ const EventTypeDialog = ({
               )}
             </div>
 
-            <div role="tabpanel" hidden={activeTab !== "schedule_settings"}>
+            <div
+              role="tabpanel"
+              hidden={activeTab !== "schedule_settings"}
+              data-tab-value="schedule_settings"
+            >
               <Grid2 container spacing={2}>
                 <Grid2 size={12} sx={{ mt: "8px" }}>
                   <MuiFormikCheckbox
