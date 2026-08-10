@@ -26,6 +26,7 @@ import DocumentDownloadModule from "./modules/page-template-document-download-mo
 import MediaRequestModule from "./modules/page-template-media-request-module";
 import ModuleCloneControl from "./module-clone-control";
 import { getAllMediaFileTypes } from "../../../../actions/media-file-type-actions";
+import { isNewDocumentFile } from "../../../../utils/page-template";
 
 const PageModules = ({
   name = "modules",
@@ -128,9 +129,7 @@ const PageModules = ({
   // selected, not-yet-uploaded file is copied as-is.
   const buildClonedDocumentFile = (module) => {
     const file = Array.isArray(module.file) ? module.file[0] : null;
-    const isNewFile =
-      file && typeof file === "object" && !file.id && !file.file_id;
-    return isNewFile ? module.file : [];
+    return isNewDocumentFile(file) ? module.file : [];
   };
 
   const handleCloneModule = (index, module, count) => {

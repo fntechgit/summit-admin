@@ -679,49 +679,60 @@ describe("PageModules", () => {
       expect(window.HTMLElement.prototype.scrollIntoView).toHaveBeenCalled();
     });
 
-    test("clones a Media (type=File) module and propagates its type-specific fields", async () => {
-      const modules = [createModule(PAGES_MODULE_KINDS.MEDIA, 0, 1)];
+    // Cloning has no MEDIA-type-specific branching (unlike DOCUMENT, see below) —
+    // both variants exercise the same generic-copy code path, so a single
+    // parameterized test documents that max_file_size/file_type_id are carried
+    // over as-is regardless of type (they're only stripped for INPUT later, by
+    // normalizePageTemplateModules at save time, not by cloning).
+    test.each([
+      ["File", PAGE_MODULES_MEDIA_TYPES.FILE],
+      ["Input", PAGE_MODULES_MEDIA_TYPES.INPUT]
+    ])(
+      "clones a Media (type=%s) module and propagates its fields as-is",
+      async (_description, type) => {
+        const modules = [
+          { ...createModule(PAGES_MODULE_KINDS.MEDIA, 0, 1), type }
+        ];
 
-      const TestWrapper = () => {
-        const { values } = useFormikContext();
-        const clone = values.modules[1];
-        return (
-          <>
-            <PageModules name="modules" />
-            <div data-testid="clone-media-fields">
-              {JSON.stringify({
-                type: clone?.type,
-                max_file_size: clone?.max_file_size,
-                file_type_id: clone?.file_type_id
-              })}
-            </div>
-          </>
+        const TestWrapper = () => {
+          const { values } = useFormikContext();
+          const clone = values.modules[1];
+          return (
+            <>
+              <PageModules name="modules" />
+              <div data-testid="clone-media-fields">
+                {JSON.stringify({
+                  type: clone?.type,
+                  max_file_size: clone?.max_file_size,
+                  file_type_id: clone?.file_type_id
+                })}
+              </div>
+            </>
+          );
+        };
+
+        const store = mockStore({
+          mediaUploadState: { media_file_types: [] }
+        });
+        render(
+          <Provider store={store}>
+            <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+              <Form>
+                <TestWrapper />
+              </Form>
+            </Formik>
+          </Provider>
         );
-      };
 
-      const store = mockStore({ mediaUploadState: { media_file_types: [] } });
-      render(
-        <Provider store={store}>
-          <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
-            <Form>
-              <TestWrapper />
-            </Form>
-          </Formik>
-        </Provider>
-      );
+        await userEvent.click(screen.getByTestId("clone-module-btn"));
 
-      await userEvent.click(screen.getByTestId("clone-module-btn"));
-
-      await waitFor(() => {
-        expect(screen.getByTestId("clone-media-fields")).toHaveTextContent(
-          JSON.stringify({
-            type: PAGE_MODULES_MEDIA_TYPES.FILE,
-            max_file_size: 100,
-            file_type_id: 1
-          })
-        );
-      });
-    });
+        await waitFor(() => {
+          expect(screen.getByTestId("clone-media-fields")).toHaveTextContent(
+            JSON.stringify({ type, max_file_size: 100, file_type_id: 1 })
+          );
+        });
+      }
+    );
 
     test.each([
       ["0", 1],
@@ -762,8 +773,8 @@ describe("PageModules", () => {
       expect(countInput).toHaveValue(1);
     });
 
-    describe("Document Download file handling", () => {
-      const createDocumentModule = (file) => ({
+    describe("Document Download clone behavior", () => {
+      const createDocumentModule = (overrides) => ({
         _tempId: "temp-doc-1",
         kind: PAGES_MODULE_KINDS.DOCUMENT,
         custom_order: 0,
@@ -771,28 +782,43 @@ describe("PageModules", () => {
         description: "Desc",
         type: PAGE_MODULES_DOWNLOAD.FILE,
         external_url: "",
-        file
+        file: null,
+        ...overrides
       });
 
       test.each([
         [
-          "resets an already-uploaded file to empty on each clone",
-          [{ id: 10, file_url: "http://x/file.pdf" }],
-          "[]"
+          "type=File, already-uploaded file: resets file to empty on each clone",
+          { file: [{ id: 10, file_url: "http://x/file.pdf" }] },
+          { externalUrl: "", file: "[]" }
         ],
         [
-          "copies a newly selected, not-yet-uploaded file as-is to every clone",
-          [{ name: "new-upload.pdf" }],
-          JSON.stringify([{ name: "new-upload.pdf" }])
+          "type=File, newly selected file: copies file as-is to every clone",
+          { file: [{ name: "new-upload.pdf" }] },
+          {
+            externalUrl: "",
+            file: JSON.stringify([{ name: "new-upload.pdf" }])
+          }
+        ],
+        [
+          "type=Url: copies external_url as-is and leaves file untouched",
+          {
+            type: PAGE_MODULES_DOWNLOAD.URL,
+            external_url: "https://example.com/doc"
+          },
+          { externalUrl: "https://example.com/doc", file: "null" }
         ]
-      ])("%s", async (_description, sourceFile, expectedFileJson) => {
-        const modules = [createDocumentModule(sourceFile)];
+      ])("%s", async (_description, moduleOverrides, expected) => {
+        const modules = [createDocumentModule(moduleOverrides)];
 
         const TestWrapper = () => {
           const { values } = useFormikContext();
           return (
             <>
               <PageModules name="modules" />
+              <div data-testid="clone-external-url-1">
+                {JSON.stringify(values.modules[1]?.external_url)}
+              </div>
               <div data-testid="clone-file-1">
                 {JSON.stringify(values.modules[1]?.file)}
               </div>
@@ -822,12 +848,15 @@ describe("PageModules", () => {
 
         await waitFor(() => {
           expect(screen.getByTestId("clone-file-1")).toHaveTextContent(
-            expectedFileJson
+            expected.file
           );
           expect(screen.getByTestId("clone-file-2")).toHaveTextContent(
-            expectedFileJson
+            expected.file
           );
         });
+        expect(screen.getByTestId("clone-external-url-1")).toHaveTextContent(
+          JSON.stringify(expected.externalUrl)
+        );
       });
     });
   });
