@@ -504,6 +504,15 @@ const parseFilters = (filters) => {
     );
   }
 
+  if (
+    filters.hasOwnProperty("pendingSubmissionsFilter") &&
+    filters.pendingSubmissionsFilter !== null
+  ) {
+    filter.push(
+      `has_pending_presentations==${filters.pendingSubmissionsFilter}`
+    );
+  }
+
   // return checkOrFilter(filters, filter);
   return filter;
 };
