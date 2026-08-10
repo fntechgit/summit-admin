@@ -48,11 +48,13 @@ function SummitDashboardPage({
   totalActiveTickets,
   getRegistrationData: fetchRegistrationData
 }) {
-  useEffect(() => {
-    fetchRegistrationData();
-  }, [currentSummit.id]);
-
   const canEditSummit = new Member(member).canEditSummit();
+
+  useEffect(() => {
+    // registration-stats endpoints are admin-only; a sponsors-only member
+    // would get 403s that log the user out via authErrorHandler
+    if (canEditSummit) fetchRegistrationData();
+  }, [currentSummit.id]);
   const tz = currentSummit.time_zone?.name;
   const venueCount = currentSummit.locations.filter(
     (l) => l.class_name === "SummitVenue"
