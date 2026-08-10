@@ -48,7 +48,7 @@ const removeUnchangedFields = (entity, originalEntity) => {
 
   fields.forEach((f) => {
     if (copyOfEntity[f] === originalEntity[f]) {
-      // field dint change , so remove it from submit
+      // field didn't change, so remove it from submit
       delete copyOfEntity[f];
     }
   });
