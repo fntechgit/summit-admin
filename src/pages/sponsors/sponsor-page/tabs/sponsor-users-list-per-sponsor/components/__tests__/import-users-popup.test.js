@@ -12,9 +12,10 @@ jest.mock(
   "openstack-uicore-foundation/lib/components/mui/summits-dropdown",
   () => ({
     __esModule: true,
-    default: ({ onChange, excludeSummitIds }) => (
+    default: ({ onChange, excludeSummitIds, summits }) => (
       <button
         data-testid="summit-select"
+        data-summits={JSON.stringify(summits)}
         type="button"
         onClick={() => onChange(2)}
       >
@@ -50,8 +51,13 @@ describe("ImportUsersPopup (per-sponsor)", () => {
       screen.getByText("sponsor_users.import_users.title")
     ).toBeInTheDocument();
     expect(screen.getByTestId("summit-select")).toBeInTheDocument();
-    expect(
-      screen.getByText(`Select Summit (excluding: ${mockCurrentSummit.id})`)
-    ).toBeInTheDocument();
+    // Regression guard: SummitsDropdown has no default for `summits` and reads
+    // `.length` on it during render, so a missing prop crashes. Asserting the
+    // exact value passed down catches that regression even though the mock
+    // above doesn't reproduce the real component's crash itself.
+    expect(screen.getByTestId("summit-select")).toHaveAttribute(
+      "data-summits",
+      "[]"
+    );
   });
 });
