@@ -80,8 +80,8 @@ jobs:
           # Until FNid allows wildcards in its redirect URIs / JavaScript origins we
           # can only have 1 deploy url and deploy 1 PR at a time.
           # After that change each pr-<number>--show-admin-preview.netlify.app can complete the OAuth callback.
-          # alias: pr-${{ github.event.issue.number }}
-          alias: pr
+          alias: pr-${{ github.event.issue.number }}
+          #alias: pr
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
