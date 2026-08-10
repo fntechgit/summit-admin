@@ -433,6 +433,7 @@ const AttendeeForm = ({
       </form>
       {entity.id !== 0 && (
         <NotesPanel
+          key={entity.id}
           attendeeId={entity.id}
           open={openSections.admin_notes}
           onToggle={(ev) => toggleSection("admin_notes", ev)}

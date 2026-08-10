@@ -459,6 +459,7 @@ const EditTicketPage = ({
 
       {entity?.id && entity?.owner?.id && (
         <NotesPanel
+          key={`${entity.owner.id}-${entity.id}`}
           attendeeId={entity?.owner?.id}
           ticketId={entity.id}
           open={openSections.admin_notes}
