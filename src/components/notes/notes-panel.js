@@ -126,7 +126,7 @@ const NotesPanel = ({
   ];
 
   const showColumns = columns
-    ? tableColumns.filter((c) => columns.include(c.columnKey))
+    ? tableColumns.filter((c) => columns.includes(c.columnKey))
     : tableColumns;
 
   return (
