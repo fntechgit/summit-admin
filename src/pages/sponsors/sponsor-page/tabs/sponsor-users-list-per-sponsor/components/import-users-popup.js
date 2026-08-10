@@ -100,6 +100,7 @@ const ImportUsersPopup = ({
         <SummitsDropdown
           onChange={setSelectedSummit}
           excludeSummitIds={[currentSummit.id]}
+          summits={[]}
         />
         {selectedSummit && userOptions && (
           <>
