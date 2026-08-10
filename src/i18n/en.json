@@ -3888,7 +3888,7 @@
     "ticket_id": "Ticket Id",
     "content": "Note",
     "no_entries": "No notes found.",
-    "remove_warning": "Are you sure you want to delete note ",
+    "remove_warning": "Are you sure you want to delete note",
     "placeholders": {
       "search": "Search by content or author"
     }
