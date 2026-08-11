@@ -735,6 +735,11 @@ export const upgradeEvent = (entity) => async (dispatch, getState) => {
   });
 };
 
+// Both reopen thunks return the request promise without a terminal .catch, so an
+// API error rejects it and the caller fire-and-forgets. That is deliberate: it is
+// the same shape as saveEvent and every other write thunk here, and the error is
+// already surfaced to the admin by snackbarErrorHandler before the rejection. A
+// local .catch would diverge from the repo's convention to fix nothing visible.
 export const reopenSubmissionPeriod =
   (eventId, hours) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
