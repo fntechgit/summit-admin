@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import moment from "moment-timezone";
 import EventForm from "../event-form";
 import currentSummitMock from "../../../__mocks__/currentSummitMock";
 import showConfirmDialog from "../../mui/showConfirmDialog";
@@ -139,6 +140,109 @@ describe("EventForm", () => {
 
     await waitFor(() => expect(showConfirmDialog).toHaveBeenCalled());
     expect(onReopenSubmission).not.toHaveBeenCalled();
+  });
+
+  describe("with an active reopen grant", () => {
+    // selection_plan_id stays 0 (not the brief's literal 9): baseProps.selectionPlansOpts
+    // is [], and isQuestionAllowed() throws on a truthy selection_plan_id that isn't
+    // found there. The deep-link test asserts against this actual value, not the brief's.
+    const grantedEntity = {
+      ...baseEntity,
+      submission_reopened_until: moment().add(24, "hours").unix(),
+      // submission_reopened_by_id is deliberately absent: One2ManyExpandSerializer
+      // unsets it when it writes the expanded object.
+      submission_reopened_by: {
+        id: 5,
+        first_name: "Ada",
+        last_name: "Lovelace",
+        email: "ada@example.org"
+      }
+    };
+
+    // The grant exists but the payload was not expanded, or the caller lacked the
+    // expand. The reopened block must still render; only attribution is missing.
+    const grantedUnexpandedEntity = {
+      ...baseEntity,
+      submission_reopened_until: moment().add(24, "hours").unix(),
+      submission_reopened_by_id: 5
+    };
+
+    beforeEach(() => {
+      delete window.CFP_APP_BASE_URL;
+    });
+
+    afterEach(() => {
+      delete window.CFP_APP_BASE_URL;
+    });
+
+    it("shows the deadline and granting admin when a grant is active", () => {
+      renderEventForm({ entity: grantedEntity });
+
+      expect(screen.getByText(/edit_event.reopened_until/)).toBeInTheDocument();
+      expect(screen.getByText(/edit_event.reopened_by/)).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "edit_event.reopen_submission" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("still shows the reopened state when the payload was not expanded", () => {
+      renderEventForm({ entity: grantedUnexpandedEntity });
+
+      expect(screen.getByText(/edit_event.reopened_until/)).toBeInTheDocument();
+      expect(
+        screen.queryByText(/edit_event.reopened_by/)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "edit_event.close_submission" })
+      ).toBeInTheDocument();
+    });
+
+    it("treats an expired grant as no grant", () => {
+      renderEventForm({
+        entity: {
+          ...grantedEntity,
+          submission_reopened_until: moment().subtract(1, "hours").unix()
+        }
+      });
+
+      expect(
+        screen.getByRole("button", { name: "edit_event.reopen_submission" })
+      ).toBeInTheDocument();
+    });
+
+    it("calls onCloseSubmission after confirmation", async () => {
+      const onCloseSubmission = jest.fn().mockResolvedValue({});
+      showConfirmDialog.mockResolvedValue(true);
+      renderEventForm({ entity: grantedEntity, onCloseSubmission });
+
+      await userEvent.click(
+        screen.getByRole("button", { name: "edit_event.close_submission" })
+      );
+
+      await waitFor(() => expect(onCloseSubmission).toHaveBeenCalledWith(42));
+    });
+
+    it("renders the speaker deep link when CFP_APP_BASE_URL is set", () => {
+      window.CFP_APP_BASE_URL = "https://cfp.example.org";
+      renderEventForm({ entity: grantedEntity });
+
+      // slug comes from currentSummitMock; selection_plan_id and id from grantedEntity
+      expect(
+        screen.getByText(
+          "https://cfp.example.org/app/2025ocpglo/all-plans/0/presentations/42/summary"
+        )
+      ).toBeInTheDocument();
+    });
+
+    it("degrades without the deep link when CFP_APP_BASE_URL is unset", () => {
+      delete window.CFP_APP_BASE_URL;
+      renderEventForm({ entity: grantedEntity });
+
+      expect(screen.queryByText(/\/summary$/)).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "edit_event.close_submission" })
+      ).toBeInTheDocument();
+    });
   });
 
   // The calendar popup opens on the summit's start month (October 2025) for

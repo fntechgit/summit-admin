@@ -136,6 +136,7 @@ class EventForm extends React.Component {
     this.handleRSVPTypeChange = this.handleRSVPTypeChange.bind(this);
     this.handleSaveIncomplete = this.handleSaveIncomplete.bind(this);
     this.handleReopenSubmission = this.handleReopenSubmission.bind(this);
+    this.handleCloseSubmission = this.handleCloseSubmission.bind(this);
   }
 
   componentDidMount() {
@@ -789,6 +790,20 @@ class EventForm extends React.Component {
     if (confirmed) onReopenSubmission(entity.id, hours);
   }
 
+  async handleCloseSubmission() {
+    const { entity, onCloseSubmission } = this.props;
+
+    const confirmed = await showConfirmDialog({
+      title: T.translate("edit_event.close_submission_confirm_title"),
+      text: T.translate("edit_event.close_submission_confirm_text"),
+      iconType: "warning",
+      confirmButtonText: T.translate("edit_event.close_submission"),
+      confirmButtonColor: "error"
+    });
+
+    if (confirmed) onCloseSubmission(entity.id);
+  }
+
   isNew() {
     const { entity } = this.state;
     return !entity.id;
@@ -1246,6 +1261,51 @@ class EventForm extends React.Component {
                   >
                     {T.translate("edit_event.reopen_submission")}
                   </button>
+                </div>
+              )}
+              {this.isSubmissionReopened() && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    flexWrap: "wrap"
+                  }}
+                >
+                  <span>
+                    {T.translate("edit_event.reopened_until", {
+                      deadline: this.getReopenDeadline().format(
+                        REOPEN_DEADLINE_FORMAT
+                      )
+                    })}
+                  </span>
+                  {entity.submission_reopened_by && (
+                    <span>
+                      {T.translate("edit_event.reopened_by", {
+                        admin: `${entity.submission_reopened_by.first_name} ${entity.submission_reopened_by.last_name}`
+                      })}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={this.handleCloseSubmission}
+                  >
+                    {T.translate("edit_event.close_submission")}
+                  </button>
+                  {window.CFP_APP_BASE_URL && (
+                    <span>
+                      <label>
+                        {T.translate("edit_event.reopen_deep_link_label")}
+                      </label>
+                      &nbsp;
+                      <CopyClipboard
+                        text={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${entity.selection_plan_id}/presentations/${entity.id}/summary`}
+                      />
+                      &nbsp;
+                      {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${entity.selection_plan_id}/presentations/${entity.id}/summary`}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
