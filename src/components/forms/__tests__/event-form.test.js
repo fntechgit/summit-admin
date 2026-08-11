@@ -153,7 +153,7 @@ describe("EventForm", () => {
         "custom"
       );
       fireEvent.change(
-        screen.getByPlaceholderText("edit_event.reopen_custom_hours"),
+        screen.getByLabelText("edit_event.reopen_custom_hours"),
         { target: { value } }
       );
 

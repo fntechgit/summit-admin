@@ -1255,20 +1255,24 @@ class EventForm extends React.Component {
                       </option>
                     </select>
                     {reopenHours === "custom" && (
-                      <input
-                        id="reopen_custom_hours"
-                        type="number"
-                        min="1"
-                        className="form-control"
-                        style={{ width: 120 }}
-                        placeholder={T.translate(
-                          "edit_event.reopen_custom_hours"
-                        )}
-                        value={reopenCustomHours}
-                        onChange={(ev) =>
-                          this.setState({ reopenCustomHours: ev.target.value })
-                        }
-                      />
+                      <>
+                        <label htmlFor="reopen_custom_hours">
+                          {T.translate("edit_event.reopen_custom_hours")}
+                        </label>
+                        <input
+                          id="reopen_custom_hours"
+                          type="number"
+                          min="1"
+                          className="form-control"
+                          style={{ width: 120 }}
+                          value={reopenCustomHours}
+                          onChange={(ev) =>
+                            this.setState({
+                              reopenCustomHours: ev.target.value
+                            })
+                          }
+                        />
+                      </>
                     )}
                     <button
                       type="button"

@@ -25,6 +25,7 @@ import {
   showSuccessMessage,
   authErrorHandler,
   snackbarErrorHandler,
+  snackbarSuccessHandler,
   getCSV,
   getRawCSV,
   downloadFileByContent,
@@ -743,40 +744,54 @@ export const upgradeEvent = (entity) => async (dispatch, getState) => {
 export const reopenSubmissionPeriod =
   (eventId, hours) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
+
+    // Before the token await: a refresh can take seconds, and anything dispatched
+    // after it leaves a window where the UI is neither blocked nor marked in-flight.
+    dispatch(startLoading());
+
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-
-    dispatch(startLoading());
 
     const params = {
       access_token: accessToken,
       expand: "submission_reopened_by"
     };
 
-    return putRequest(
-      null,
-      // Carry the source event id so the reducer can drop a response that lands after
-      // the admin has navigated to a different activity.
-      (payload) =>
-        createAction(SUBMISSION_PERIOD_REOPENED)({ ...payload, eventId }),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/presentations/${eventId}/submission-period/reopen`,
-      { hours },
-      snackbarErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-      dispatch(
-        showSuccessMessage(T.translate("edit_event.reopen_submission_success"))
-      );
-    });
+    return (
+      putRequest(
+        null,
+        // Carry the source event id so the reducer can drop a response that lands after
+        // the admin has navigated to a different activity.
+        (payload) =>
+          createAction(SUBMISSION_PERIOD_REOPENED)({ ...payload, eventId }),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/presentations/${eventId}/submission-period/reopen`,
+        { hours },
+        snackbarErrorHandler
+      )(params)(dispatch)
+        .then(() => {
+          dispatch(
+            snackbarSuccessHandler({
+              title: T.translate("general.success"),
+              html: T.translate("edit_event.reopen_submission_success")
+            })
+          );
+        })
+        // finally, not then: a failed request must still clear the overlay.
+        .finally(() => {
+          dispatch(stopLoading());
+        })
+    );
   };
 
 export const closeSubmissionPeriod =
   (eventId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
+
+    // See reopenSubmissionPeriod: in-flight flag before the token await.
+    dispatch(startLoading());
+
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-
-    dispatch(startLoading());
 
     const params = { access_token: accessToken };
 
@@ -786,12 +801,18 @@ export const closeSubmissionPeriod =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/presentations/${eventId}/submission-period/reopen`,
       null,
       snackbarErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-      dispatch(
-        showSuccessMessage(T.translate("edit_event.close_submission_success"))
-      );
-    });
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_event.close_submission_success")
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 export const cloneEvent = (entity) => async (dispatch, getState) => {
