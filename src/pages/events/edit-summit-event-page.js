@@ -243,7 +243,9 @@ function EditSummitEventPage(props) {
     getEventFeedbackCSV,
     changeFlag,
     cloneEvent,
-    upgradeEvent
+    upgradeEvent,
+    reopenSubmissionPeriod,
+    closeSubmissionPeriod
   } = props;
 
   if (loading) return null;
