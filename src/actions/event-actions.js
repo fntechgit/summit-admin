@@ -735,11 +735,11 @@ export const upgradeEvent = (entity) => async (dispatch, getState) => {
   });
 };
 
-// Both reopen thunks return the request promise without a terminal .catch, so an
-// API error rejects it and the caller fire-and-forgets. That is deliberate: it is
-// the same shape as saveEvent and every other write thunk here, and the error is
-// already surfaced to the admin by snackbarErrorHandler before the rejection. A
-// local .catch would diverge from the repo's convention to fix nothing visible.
+// Both reopen thunks return the request promise without a terminal .catch, matching
+// saveEvent and every other write thunk here. Their callers in event-form.js swallow
+// the rejection instead, because the no-client-cap design makes an over-ceiling 412 an
+// expected outcome rather than a fault: snackbarErrorHandler has already shown the
+// API's message, so letting it also reach Sentry as an unhandled rejection is noise.
 export const reopenSubmissionPeriod =
   (eventId, hours) => async (dispatch, getState) => {
     const { currentSummitState } = getState();

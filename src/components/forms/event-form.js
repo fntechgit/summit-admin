@@ -792,7 +792,10 @@ class EventForm extends React.Component {
       confirmButtonText: T.translate("edit_event.reopen_submission")
     });
 
-    if (confirmed) onReopenSubmission(entity.id, hours);
+    // snackbarErrorHandler has already put the API message in front of the admin, and an
+    // over-ceiling hours value is an expected 412 rather than a fault. Swallow the
+    // rejection so it doesn't reach Sentry as an unhandled one.
+    if (confirmed) onReopenSubmission(entity.id, hours)?.catch(() => {});
   }
 
   async handleCloseSubmission() {
@@ -806,7 +809,9 @@ class EventForm extends React.Component {
       confirmButtonColor: "error"
     });
 
-    if (confirmed) onCloseSubmission(entity.id);
+    // See handleReopenSubmission: the error is already surfaced, so don't let the
+    // rejection escape as an unhandled one.
+    if (confirmed) onCloseSubmission(entity.id)?.catch(() => {});
   }
 
   isNew() {
