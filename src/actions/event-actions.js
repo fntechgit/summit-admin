@@ -755,7 +755,10 @@ export const reopenSubmissionPeriod =
 
     return putRequest(
       null,
-      createAction(SUBMISSION_PERIOD_REOPENED),
+      // Carry the source event id so the reducer can drop a response that lands after
+      // the admin has navigated to a different activity.
+      (payload) =>
+        createAction(SUBMISSION_PERIOD_REOPENED)({ ...payload, eventId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/presentations/${eventId}/submission-period/reopen`,
       { hours },
       snackbarErrorHandler

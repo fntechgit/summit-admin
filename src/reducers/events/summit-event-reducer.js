@@ -193,6 +193,9 @@ const summitEventReducer = (state = DEFAULT_STATE, action) => {
     }
     case SUBMISSION_PERIOD_REOPENED: {
       const { response } = payload;
+      // A response that lands after the admin navigated to another activity would
+      // otherwise merge this grant onto whatever event is now loaded.
+      if (payload.eventId !== state.entity.id) return state;
       return {
         ...state,
         entity: {
@@ -205,6 +208,8 @@ const summitEventReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case SUBMISSION_PERIOD_CLOSED: {
+      // Same guard as the reopen case above.
+      if (payload.eventId !== state.entity.id) return state;
       return {
         ...state,
         entity: {
