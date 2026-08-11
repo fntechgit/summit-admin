@@ -750,8 +750,13 @@ class EventForm extends React.Component {
   // alone lets it announce a deadline the server no longer treats as operative --
   // e.g. an admin grants a reopen, then extends the plan's submission_end_date past
   // it, and the speaker is editing under normal open-window rules again.
+  // entity comes from state, not props, because that is what the render gate reads.
+  // handleChangeSelectionPlan writes selection_plan_id into state without saving, and
+  // componentDidUpdate only syncs the other way, so reading props here would judge
+  // eligibility against the persisted plan while the form displays a different one.
   isReopenApplicable() {
-    const { entity, selectionPlansOpts } = this.props;
+    const { selectionPlansOpts } = this.props;
+    const { entity } = this.state;
     const plan = selectionPlansOpts?.find(
       (sp) => sp.id === entity.selection_plan_id
     );
@@ -767,7 +772,8 @@ class EventForm extends React.Component {
   }
 
   getReopenDeadline() {
-    const { entity, currentSummit } = this.props;
+    const { currentSummit } = this.props;
+    const { entity } = this.state;
     // normalizeEventResponse coerces server nulls to "", so "" means no grant.
     if (!entity.submission_reopened_until) return null;
     return epochToMomentTimeZone(
@@ -788,7 +794,8 @@ class EventForm extends React.Component {
   }
 
   async handleReopenSubmission() {
-    const { entity, currentSummit, onReopenSubmission } = this.props;
+    const { currentSummit, onReopenSubmission } = this.props;
+    const { entity } = this.state;
     const hours = this.getSelectedReopenHours();
     if (!hours) return;
 
@@ -815,7 +822,8 @@ class EventForm extends React.Component {
   }
 
   async handleCloseSubmission() {
-    const { entity, onCloseSubmission } = this.props;
+    const { onCloseSubmission } = this.props;
+    const { entity } = this.state;
 
     const confirmed = await showConfirmDialog({
       title: T.translate("edit_event.close_submission_confirm_title"),
