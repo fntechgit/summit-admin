@@ -9044,7 +9044,7 @@ open@^10.0.3:
 
 openstack-uicore-foundation@5.0.47:
   version "5.0.47"
-  resolved "https://registry.npmjs.org/openstack-uicore-foundation/-/openstack-uicore-foundation-5.0.47.tgz#32500fb4d8392cbf5713e968afa875cea42a67a2"
+  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-5.0.47.tgz#32500fb4d8392cbf5713e968afa875cea42a67a2"
   integrity sha512-E/6uO7Q5MtTfhWExshuNIrwVcxDewDvA76YmGzQz2f5LeZ8Gsv22eqBNbylDakwxuPmyD16r/AQEURr5soALAw==
   dependencies:
     use-sync-external-store "^1.6.0"

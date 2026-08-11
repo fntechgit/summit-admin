@@ -190,7 +190,6 @@ const SponsorGlobalImportUsersPopup = ({
               setUserOptions(null);
               setSelectedUsers([]);
             }}
-            summits={[]}
             excludeSummitIds={[summitId]}
           />
           {selectedSummit && (
