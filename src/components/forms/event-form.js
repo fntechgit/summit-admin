@@ -15,6 +15,7 @@ import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import Swal from "sweetalert2";
+import moment from "moment-timezone";
 import { Tooltip } from "react-tooltip";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
@@ -55,11 +56,14 @@ import AuditLogs from "../audit-logs";
 import {
   DECIMAL_DIGITS,
   DELTA_SECS,
+  DEFAULT_REOPEN_HOURS,
   EVENT_TYPE_FISHBOWL,
   EVENT_TYPE_GROUP_EVENTS,
   EVENT_TYPE_PRESENTATION,
   MILLISECONDS_TO_SECONDS,
   ONE_MINUTE,
+  REOPEN_PRESET_HOURS_48,
+  REOPEN_PRESET_HOURS_72,
   RSVP_TYPE_NONE,
   RSVP_TYPE_PRIVATE,
   RSVP_TYPE_PUBLIC
@@ -67,6 +71,9 @@ import {
 import CopyClipboard from "../buttons/copy-clipboard";
 import EventRsvpList from "../rsvp/event-rsvp-list";
 import EventRsvpInvitationList from "../rsvp/event-rsvp-invitation-list";
+import showConfirmDialog from "../mui/showConfirmDialog";
+
+const REOPEN_DEADLINE_FORMAT = "MMMM DD, YYYY h:mm a";
 
 class EventForm extends React.Component {
   constructor(props) {
@@ -78,7 +85,9 @@ class EventForm extends React.Component {
       showSection: "main",
       errors: props.errors,
       publish: false,
-      commentFilters: { ...props.commentState.filters }
+      commentFilters: { ...props.commentState.filters },
+      reopenHours: DEFAULT_REOPEN_HOURS,
+      reopenCustomHours: ""
     };
 
     this.formRef = React.createRef();
@@ -126,6 +135,7 @@ class EventForm extends React.Component {
     this.handleEventTypeChange = this.handleEventTypeChange.bind(this);
     this.handleRSVPTypeChange = this.handleRSVPTypeChange.bind(this);
     this.handleSaveIncomplete = this.handleSaveIncomplete.bind(this);
+    this.handleReopenSubmission = this.handleReopenSubmission.bind(this);
   }
 
   componentDidMount() {
@@ -734,6 +744,51 @@ class EventForm extends React.Component {
     return entity.class_name === "Presentation";
   }
 
+  isSubmissionReopened() {
+    const deadline = this.getReopenDeadline();
+    return deadline !== null && deadline.isAfter(moment());
+  }
+
+  getReopenDeadline() {
+    const { entity, currentSummit } = this.props;
+    // normalizeEventResponse coerces server nulls to "", so "" means no grant.
+    if (!entity.submission_reopened_until) return null;
+    return epochToMomentTimeZone(
+      entity.submission_reopened_until,
+      currentSummit.time_zone_id
+    );
+  }
+
+  getSelectedReopenHours() {
+    const { reopenHours, reopenCustomHours } = this.state;
+    if (reopenHours !== "custom") return parseInt(reopenHours, 10);
+    return parseInt(reopenCustomHours, 10);
+  }
+
+  async handleReopenSubmission() {
+    const { entity, currentSummit, onReopenSubmission } = this.props;
+    const hours = this.getSelectedReopenHours();
+    if (!hours) return;
+
+    // Deliberately optimistic: the deadline shown here is computed client-side for the
+    // confirm copy only. The server derives the real one. They agree to within the
+    // round trip, and naming it is what stops an admin pasting a link that will
+    // quietly go read-only (the CFP route hard-gates on the live grant).
+    const deadline = epochToMomentTimeZone(
+      moment().add(hours, "hours").unix(),
+      currentSummit.time_zone_id
+    ).format(REOPEN_DEADLINE_FORMAT);
+
+    const confirmed = await showConfirmDialog({
+      title: T.translate("edit_event.reopen_confirm_title"),
+      text: T.translate("edit_event.reopen_confirm_text", { deadline }),
+      iconType: "warning",
+      confirmButtonText: T.translate("edit_event.reopen_submission")
+    });
+
+    if (confirmed) onReopenSubmission(entity.id, hours);
+  }
+
   isNew() {
     const { entity } = this.state;
     return !entity.id;
@@ -911,7 +966,14 @@ class EventForm extends React.Component {
   }
 
   render() {
-    const { entity, showSection, errors, speakerToAdd } = this.state;
+    const {
+      entity,
+      showSection,
+      errors,
+      speakerToAdd,
+      reopenHours,
+      reopenCustomHours
+    } = this.state;
 
     const {
       currentSummit,
@@ -1126,6 +1188,67 @@ class EventForm extends React.Component {
             <p style={{ marginBottom: 0 }}>
               {T.translate("edit_event.draft_state_note")}
             </p>
+          </div>
+        )}
+        {this.isPresentation() && !this.isNew() && (
+          <div className="row form-group">
+            <div className="col-md-12">
+              <label>
+                {T.translate("edit_event.reopen_submission_section")}
+              </label>
+              {!this.isSubmissionReopened() && (
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <label htmlFor="reopen_hours">
+                    {T.translate("edit_event.reopen_duration")}
+                  </label>
+                  <select
+                    id="reopen_hours"
+                    className="form-control"
+                    style={{ width: "auto" }}
+                    value={reopenHours}
+                    onChange={(ev) =>
+                      this.setState({ reopenHours: ev.target.value })
+                    }
+                  >
+                    <option value={DEFAULT_REOPEN_HOURS}>
+                      {T.translate("edit_event.reopen_duration_24")}
+                    </option>
+                    <option value={REOPEN_PRESET_HOURS_48}>
+                      {T.translate("edit_event.reopen_duration_48")}
+                    </option>
+                    <option value={REOPEN_PRESET_HOURS_72}>
+                      {T.translate("edit_event.reopen_duration_72")}
+                    </option>
+                    <option value="custom">
+                      {T.translate("edit_event.reopen_duration_custom")}
+                    </option>
+                  </select>
+                  {reopenHours === "custom" && (
+                    <input
+                      id="reopen_custom_hours"
+                      type="number"
+                      min="1"
+                      className="form-control"
+                      style={{ width: 120 }}
+                      placeholder={T.translate(
+                        "edit_event.reopen_custom_hours"
+                      )}
+                      value={reopenCustomHours}
+                      onChange={(ev) =>
+                        this.setState({ reopenCustomHours: ev.target.value })
+                      }
+                    />
+                  )}
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={this.handleReopenSubmission}
+                  >
+                    {T.translate("edit_event.reopen_submission")}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
         <div className="row form-group">

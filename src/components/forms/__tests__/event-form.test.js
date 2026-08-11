@@ -1,12 +1,18 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import EventForm from "../event-form";
 import currentSummitMock from "../../../__mocks__/currentSummitMock";
+import showConfirmDialog from "../../mui/showConfirmDialog";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   __esModule: true,
   default: { translate: (key) => key }
+}));
+
+jest.mock("../../mui/showConfirmDialog", () => ({
+  __esModule: true,
+  default: jest.fn()
 }));
 
 describe("EventForm", () => {
@@ -64,6 +70,76 @@ describe("EventForm", () => {
     onFlagChange: jest.fn(),
     onClone: jest.fn()
   };
+
+  const renderEventForm = (overrides = {}) =>
+    render(<EventForm {...baseProps} {...overrides} />);
+
+  // Built on baseProps.entity (not the bare object from the task brief) because
+  // several unrelated, pre-existing render paths (TagInput, isEventType,
+  // isQuestionAllowed) dereference entity.tags / typeOpts / selectionPlansOpts
+  // lookups without a null guard, and baseProps.selectionPlansOpts is always [].
+  // type_id 930 is "Presentation" in currentSummitMock; selection_plan_id is
+  // falsy since selectionPlansOpts is []. class_name is required for
+  // isPresentation() to be true. None of this is asserted by the tests below.
+  const baseEntity = {
+    ...baseProps.entity,
+    id: 42,
+    title: "A TALK",
+    class_name: "Presentation",
+    type_id: 930,
+    track_id: 1,
+    selection_plan_id: 0,
+    submission_reopened_until: "",
+    submission_reopened_by_id: 0,
+    submission_reopened_by: null
+  };
+
+  it("offers the reopen control on a presentation with no active grant", () => {
+    renderEventForm({ entity: baseEntity });
+
+    expect(
+      screen.getByRole("button", { name: "edit_event.reopen_submission" })
+    ).toBeInTheDocument();
+  });
+
+  it("does not offer the reopen control on a new presentation", () => {
+    renderEventForm({ entity: { ...baseEntity, id: 0 } });
+
+    expect(
+      screen.queryByRole("button", { name: "edit_event.reopen_submission" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("sends the selected preset hours to onReopenSubmission after confirmation", async () => {
+    const onReopenSubmission = jest.fn().mockResolvedValue({});
+    showConfirmDialog.mockResolvedValue(true);
+    renderEventForm({ entity: baseEntity, onReopenSubmission });
+
+    await userEvent.selectOptions(
+      screen.getByLabelText("edit_event.reopen_duration"),
+      "48"
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "edit_event.reopen_submission" })
+    );
+
+    await waitFor(() =>
+      expect(onReopenSubmission).toHaveBeenCalledWith(42, 48)
+    );
+  });
+
+  it("does not call onReopenSubmission when the admin cancels", async () => {
+    const onReopenSubmission = jest.fn();
+    showConfirmDialog.mockResolvedValue(false);
+    renderEventForm({ entity: baseEntity, onReopenSubmission });
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "edit_event.reopen_submission" })
+    );
+
+    await waitFor(() => expect(showConfirmDialog).toHaveBeenCalled());
+    expect(onReopenSubmission).not.toHaveBeenCalled();
+  });
 
   // The calendar popup opens on the summit's start month (October 2025) for
   // both fields, so day 28 (Sep 28, rendered as "rdtOld") is the day right

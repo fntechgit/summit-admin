@@ -31,7 +31,9 @@ import {
   fetchExtraQuestions,
   fetchExtraQuestionsAnswers,
   cloneEvent,
-  upgradeEvent
+  upgradeEvent,
+  reopenSubmissionPeriod,
+  closeSubmissionPeriod
 } from "../../actions/event-actions";
 import { unPublishEvent } from "../../actions/summit-builder-actions";
 import { deleteEventMaterial } from "../../actions/event-material-actions";
@@ -311,6 +313,8 @@ function EditSummitEventPage(props) {
           getEventFeedbackCSV={getEventFeedbackCSV}
           onFlagChange={changeFlag}
           onClone={cloneEvent}
+          onReopenSubmission={reopenSubmissionPeriod}
+          onCloseSubmission={closeSubmissionPeriod}
         />
       )}
     </div>
@@ -356,5 +360,7 @@ export default connect(mapStateToProps, {
   getEventComments,
   deleteEventComment,
   cloneEvent,
-  upgradeEvent
+  upgradeEvent,
+  reopenSubmissionPeriod,
+  closeSubmissionPeriod
 })(EditSummitEventPage);
