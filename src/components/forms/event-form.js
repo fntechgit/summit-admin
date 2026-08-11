@@ -762,13 +762,13 @@ class EventForm extends React.Component {
 
   getSelectedReopenHours() {
     const { reopenHours, reopenCustomHours } = this.state;
-    const hours = parseInt(
-      reopenHours === "custom" ? reopenCustomHours : reopenHours,
-      10
-    );
-    // parseInt passes "-1" through as a truthy negative, which would confirm a
-    // deadline in the past and then 412. Only a positive count is a valid window.
-    return hours > 0 ? hours : 0;
+    const raw = String(
+      reopenHours === "custom" ? reopenCustomHours : reopenHours
+    ).trim();
+    // Not parseInt: it reads "-1" as a truthy negative, and "1.5"/"1e3" as 1, which
+    // would silently grant an hour instead of what the admin typed. Only a plain
+    // positive integer is a valid window.
+    return /^\d+$/.test(raw) && Number(raw) > 0 ? Number(raw) : 0;
   }
 
   async handleReopenSubmission() {

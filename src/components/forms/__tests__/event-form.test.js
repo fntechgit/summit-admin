@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import moment from "moment-timezone";
 import EventForm from "../event-form";
@@ -138,22 +138,30 @@ describe("EventForm", () => {
     ).toBeDisabled();
   });
 
-  it("keeps the reopen button disabled for a negative custom hours value", async () => {
-    renderEventForm({ entity: baseEntity });
+  // "1.5" and "1e3" are the ones that matter: parseInt reads both as 1, so without a
+  // positive-integer check the admin silently gets a one hour window instead of what
+  // they typed, and "1e3" never reaches the server's 412 for 1000 hours.
+  // Set the value rather than typing it: jsdom normalises a typed "1e3" to "1000",
+  // while a real browser keeps "1e3" in a number input.
+  it.each([["-1"], ["0"], ["1.5"], ["1e3"], ["abc"]])(
+    "keeps the reopen button disabled for the custom hours value %s",
+    async (value) => {
+      renderEventForm({ entity: baseEntity });
 
-    await userEvent.selectOptions(
-      screen.getByLabelText("edit_event.reopen_duration"),
-      "custom"
-    );
-    await userEvent.type(
-      screen.getByPlaceholderText("edit_event.reopen_custom_hours"),
-      "-1"
-    );
+      await userEvent.selectOptions(
+        screen.getByLabelText("edit_event.reopen_duration"),
+        "custom"
+      );
+      fireEvent.change(
+        screen.getByPlaceholderText("edit_event.reopen_custom_hours"),
+        { target: { value } }
+      );
 
-    expect(
-      screen.getByRole("button", { name: "edit_event.reopen_submission" })
-    ).toBeDisabled();
-  });
+      expect(
+        screen.getByRole("button", { name: "edit_event.reopen_submission" })
+      ).toBeDisabled();
+    }
+  );
 
   it("sends the selected preset hours to onReopenSubmission after confirmation", async () => {
     const onReopenSubmission = jest.fn().mockResolvedValue({});
