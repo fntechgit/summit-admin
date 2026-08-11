@@ -138,6 +138,23 @@ describe("EventForm", () => {
     ).toBeDisabled();
   });
 
+  it("keeps the reopen button disabled for a negative custom hours value", async () => {
+    renderEventForm({ entity: baseEntity });
+
+    await userEvent.selectOptions(
+      screen.getByLabelText("edit_event.reopen_duration"),
+      "custom"
+    );
+    await userEvent.type(
+      screen.getByPlaceholderText("edit_event.reopen_custom_hours"),
+      "-1"
+    );
+
+    expect(
+      screen.getByRole("button", { name: "edit_event.reopen_submission" })
+    ).toBeDisabled();
+  });
+
   it("sends the selected preset hours to onReopenSubmission after confirmation", async () => {
     const onReopenSubmission = jest.fn().mockResolvedValue({});
     showConfirmDialog.mockResolvedValue(true);
