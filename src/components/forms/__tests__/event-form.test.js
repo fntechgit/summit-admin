@@ -28,7 +28,9 @@ describe("EventForm", () => {
     trackOpts: currentSummitMock.tracks,
     typeOpts: currentSummitMock.event_types,
     locationOpts: currentSummitMock.locations,
-    selectionPlansOpts: [],
+    selectionPlansOpts: [
+      { id: 99, allowed_presentation_questions: [], track_groups: [] }
+    ],
     rsvpTemplateOpts: [],
     actionTypes: [],
     entity: {
@@ -77,10 +79,14 @@ describe("EventForm", () => {
 
   // Built on baseProps.entity (not the bare object from the task brief) because
   // several unrelated, pre-existing render paths (TagInput, isEventType,
-  // isQuestionAllowed) dereference entity.tags / typeOpts / selectionPlansOpts
-  // lookups without a null guard, and baseProps.selectionPlansOpts is always [].
-  // type_id 930 is "Presentation" in currentSummitMock; selection_plan_id is
-  // falsy since selectionPlansOpts is []. class_name is required for
+  // isQuestionAllowed, the track-scoped selection_plans_ddl filter) dereference
+  // entity.tags / typeOpts / selectionPlansOpts lookups without a null guard.
+  // selection_plan_id (99) matches the single entry in
+  // baseProps.selectionPlansOpts (including its empty track_groups, so the
+  // track_id-based ddl filter doesn't crash) so isQuestionAllowed() doesn't
+  // crash either, and truthy selection_plan_id is required for the reopen
+  // block to render at all now that it gates on it. type_id 930 is
+  // "Presentation" in currentSummitMock. class_name is required for
   // isPresentation() to be true. None of this is asserted by the tests below.
   const baseEntity = {
     ...baseProps.entity,
@@ -89,7 +95,7 @@ describe("EventForm", () => {
     class_name: "Presentation",
     type_id: 930,
     track_id: 1,
-    selection_plan_id: 0,
+    selection_plan_id: 99,
     submission_reopened_until: "",
     submission_reopened_by_id: 0,
     submission_reopened_by: null
@@ -109,6 +115,27 @@ describe("EventForm", () => {
     expect(
       screen.queryByRole("button", { name: "edit_event.reopen_submission" })
     ).not.toBeInTheDocument();
+  });
+
+  it("does not offer the reopen control on a presentation with no selection plan", () => {
+    renderEventForm({ entity: { ...baseEntity, selection_plan_id: null } });
+
+    expect(
+      screen.queryByRole("button", { name: "edit_event.reopen_submission" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("disables the reopen button when no valid hours value is selected", async () => {
+    renderEventForm({ entity: baseEntity });
+
+    await userEvent.selectOptions(
+      screen.getByLabelText("edit_event.reopen_duration"),
+      "custom"
+    );
+
+    expect(
+      screen.getByRole("button", { name: "edit_event.reopen_submission" })
+    ).toBeDisabled();
   });
 
   it("sends the selected preset hours to onReopenSubmission after confirmation", async () => {
@@ -143,9 +170,6 @@ describe("EventForm", () => {
   });
 
   describe("with an active reopen grant", () => {
-    // selection_plan_id stays 0 (not the brief's literal 9): baseProps.selectionPlansOpts
-    // is [], and isQuestionAllowed() throws on a truthy selection_plan_id that isn't
-    // found there. The deep-link test asserts against this actual value, not the brief's.
     const grantedEntity = {
       ...baseEntity,
       submission_reopened_until: moment().add(24, "hours").unix(),
@@ -229,7 +253,7 @@ describe("EventForm", () => {
       // slug comes from currentSummitMock; selection_plan_id and id from grantedEntity
       expect(
         screen.getByText(
-          "https://cfp.example.org/app/2025ocpglo/all-plans/0/presentations/42/summary"
+          "https://cfp.example.org/app/2025ocpglo/all-plans/99/presentations/42/summary"
         )
       ).toBeInTheDocument();
     });

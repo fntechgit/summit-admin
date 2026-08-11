@@ -730,8 +730,7 @@
     "close_submission_success": "Submission window closed.",
     "reopened_until": "Reopened until {deadline}",
     "reopened_by": "by {admin}",
-    "reopen_deep_link_label": "Speaker link",
-    "reopen_deep_link_unavailable": "Speaker link unavailable: CFP_APP_BASE_URL is not configured."
+    "reopen_deep_link_label": "Speaker link"
   },
   "edit_event_material": {
     "material": "Material",
