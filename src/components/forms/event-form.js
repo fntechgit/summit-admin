@@ -1167,6 +1167,8 @@ class EventForm extends React.Component {
         ? []
         : this.getMissingDraftFields();
 
+    const speakerDeepLink = `${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${entity.selection_plan_id}/presentations/${entity.id}/summary`;
+
     return (
       <div>
         <input type="hidden" id="id" value={entity.id} />
@@ -1299,11 +1301,9 @@ class EventForm extends React.Component {
                         {T.translate("edit_event.reopen_deep_link_label")}
                       </label>
                       &nbsp;
-                      <CopyClipboard
-                        text={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${entity.selection_plan_id}/presentations/${entity.id}/summary`}
-                      />
+                      <CopyClipboard text={speakerDeepLink} />
                       &nbsp;
-                      {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${entity.selection_plan_id}/presentations/${entity.id}/summary`}
+                      {speakerDeepLink}
                     </span>
                   )}
                 </div>
