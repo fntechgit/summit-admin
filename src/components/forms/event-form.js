@@ -745,6 +745,22 @@ class EventForm extends React.Component {
     return entity.class_name === "Presentation";
   }
 
+  // The API's isSubmissionReopened() requires three things: the plan enabled, its
+  // submission window actually ended, and a live grant. Keying the UI on the grant
+  // alone lets it announce a deadline the server no longer treats as operative --
+  // e.g. an admin grants a reopen, then extends the plan's submission_end_date past
+  // it, and the speaker is editing under normal open-window rules again.
+  isReopenApplicable() {
+    const { entity, selectionPlansOpts } = this.props;
+    const plan = selectionPlansOpts?.find(
+      (sp) => sp.id === entity.selection_plan_id
+    );
+    if (!plan || plan.is_enabled === false || !plan.submission_end_date) {
+      return false;
+    }
+    return moment().unix() > plan.submission_end_date;
+  }
+
   isSubmissionReopened() {
     const deadline = this.getReopenDeadline();
     return !!deadline?.isAfter(moment());
@@ -1219,7 +1235,8 @@ class EventForm extends React.Component {
         )}
         {this.isPresentation() &&
           !this.isNew() &&
-          entity.selection_plan_id > 0 && (
+          entity.selection_plan_id > 0 &&
+          this.isReopenApplicable() && (
             <div className="row form-group">
               <div className="col-md-12">
                 <label>

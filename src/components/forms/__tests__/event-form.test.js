@@ -28,8 +28,16 @@ describe("EventForm", () => {
     trackOpts: currentSummitMock.tracks,
     typeOpts: currentSummitMock.event_types,
     locationOpts: currentSummitMock.locations,
+    // is_enabled + a submission_end_date in the past are what make the reopen block
+    // applicable at all: the API only grants a reopen once the window has ended.
     selectionPlansOpts: [
-      { id: 99, allowed_presentation_questions: [], track_groups: [] }
+      {
+        id: 99,
+        is_enabled: true,
+        submission_end_date: moment().subtract(7, "days").unix(),
+        allowed_presentation_questions: [],
+        track_groups: []
+      }
     ],
     rsvpTemplateOpts: [],
     actionTypes: [],
@@ -122,6 +130,58 @@ describe("EventForm", () => {
 
     expect(
       screen.queryByRole("button", { name: "edit_event.reopen_submission" })
+    ).not.toBeInTheDocument();
+  });
+
+  // The API only reopens a window that has actually ended on an enabled plan. Keying
+  // the UI on the grant alone would offer a button the server can only 412, and would
+  // announce a deadline that is no longer the operative one.
+  const planWith = (over) => ({
+    ...baseProps.selectionPlansOpts[0],
+    ...over
+  });
+
+  it("does not offer the reopen control while the plan's window is still open", () => {
+    renderEventForm({
+      entity: baseEntity,
+      selectionPlansOpts: [
+        planWith({ submission_end_date: moment().add(7, "days").unix() })
+      ]
+    });
+
+    expect(
+      screen.queryByRole("button", { name: "edit_event.reopen_submission" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("does not offer the reopen control on a disabled plan", () => {
+    renderEventForm({
+      entity: baseEntity,
+      selectionPlansOpts: [planWith({ is_enabled: false })]
+    });
+
+    expect(
+      screen.queryByRole("button", { name: "edit_event.reopen_submission" })
+    ).not.toBeInTheDocument();
+  });
+
+  // The ops case smarcet raised on the call-for-presentations PR: a grant is issued,
+  // then the plan's submission_end_date is extended past it. The speaker now edits
+  // under normal open-window rules, so the grant's deadline is not what constrains
+  // them and must not be presented as if it were.
+  it("does not announce a grant once the plan window has been extended past it", () => {
+    renderEventForm({
+      entity: {
+        ...baseEntity,
+        submission_reopened_until: moment().add(24, "hours").unix()
+      },
+      selectionPlansOpts: [
+        planWith({ submission_end_date: moment().add(7, "days").unix() })
+      ]
+    });
+
+    expect(
+      screen.queryByText(/edit_event.reopened_until/)
     ).not.toBeInTheDocument();
   });
 
