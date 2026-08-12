@@ -139,11 +139,18 @@ const PageModules = ({
   // copies with no file (see buildClonedDocumentFile above) that fail the
   // documentModuleSchema's required file validation and block saving the
   // whole template. Disable Clone for that case instead of letting the user
-  // hit an unsaveable dead end after the fact.
-  const isCloneBlockedByPersistedFile = (module) =>
-    module.kind === PAGES_MODULE_KINDS.DOCUMENT &&
-    module.type === PAGE_MODULES_DOWNLOAD.FILE &&
-    !isNewDocumentFile(getDocumentFile(module));
+  // hit an unsaveable dead end after the fact. A module with no file at all
+  // yet (nothing chosen) is not "persisted" and must stay clonable.
+  const isCloneBlockedByPersistedFile = (module) => {
+    if (
+      module.kind !== PAGES_MODULE_KINDS.DOCUMENT ||
+      module.type !== PAGE_MODULES_DOWNLOAD.FILE
+    ) {
+      return false;
+    }
+    const file = getDocumentFile(module);
+    return Boolean(file) && !isNewDocumentFile(file);
+  };
 
   const handleCloneModule = (index, module, count) => {
     const isDocumentFile =
@@ -304,7 +311,16 @@ const PageModules = ({
         </Typography>
       ) : (
         <DragAndDropList
-          items={modules}
+          // DragAndDropList keys each Draggable by idKey, falling back to the
+          // array index (not module.id) when it's missing — a persisted module
+          // loaded without a _tempId would otherwise get an index-based key
+          // that shifts (forcing a remount) whenever cloning inserts items
+          // before it. Normalize a stable _tempId here so every item's key
+          // tracks the module itself rather than its position.
+          items={modules.map((module) => ({
+            ...module,
+            _tempId: getModuleId(module)
+          }))}
           onReorder={handleReorderModules}
           renderItem={renderModule}
           idKey="_tempId"

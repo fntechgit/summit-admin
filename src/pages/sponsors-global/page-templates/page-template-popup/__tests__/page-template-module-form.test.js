@@ -66,13 +66,15 @@ jest.mock(
     }
 );
 
-// Mock DragAndDropList to capture onReorder
+// Mock DragAndDropList to capture onReorder and the items it receives
 let capturedOnReorder = null;
+let capturedItems = null;
 jest.mock(
   "openstack-uicore-foundation/lib/components/mui/dnd-list",
   () =>
     function MockDragAndDropList({ items, renderItem, onReorder }) {
       capturedOnReorder = onReorder;
+      capturedItems = items;
       return (
         <div data-testid="dnd-list">
           {items.map((item, index) => (
@@ -138,6 +140,7 @@ describe("PageModules", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedOnReorder = null;
+    capturedItems = null;
   });
 
   describe("Rendering", () => {
@@ -679,6 +682,42 @@ describe("PageModules", () => {
       expect(window.HTMLElement.prototype.scrollIntoView).toHaveBeenCalled();
     });
 
+    test("keeps a stable DnD key (derived from id) for a persisted module lacking _tempId, even after a clone shifts its array index", async () => {
+      // a module loaded from the API with no _tempId, as denormalizePageModules
+      // produces it — DragAndDropList's own idKey fallback is index-based, so
+      // without normalization this module's key would change (forcing a
+      // remount) whenever an earlier clone shifts its position.
+      const persistedNoTempId = {
+        id: 200,
+        kind: PAGES_MODULE_KINDS.INFO,
+        custom_order: 1,
+        name: "Persisted module",
+        content: ""
+      };
+      const modules = [
+        createModule(PAGES_MODULE_KINDS.INFO, 0, 1),
+        persistedNoTempId
+      ];
+      renderModulesWithWrapper(modules);
+
+      expect(capturedItems[1]._tempId).toBe(200);
+
+      const countInput = screen.getAllByTestId("clone-count-input")[0];
+      fireEvent.change(countInput, { target: { value: "2" } });
+      await userEvent.click(screen.getAllByTestId("clone-module-btn")[0]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("module-ids")).toHaveTextContent(
+          /^temp-1,temp-clone-\d+,temp-clone-\d+,$/
+        );
+      });
+
+      // now at index 3 instead of 1, but the DnD key tracks the module, not the slot
+      const shiftedIndex = capturedItems.findIndex((m) => m.id === 200);
+      expect(shiftedIndex).toBe(3);
+      expect(capturedItems[shiftedIndex]._tempId).toBe(200);
+    });
+
     // Cloning has no MEDIA-type-specific branching (unlike DOCUMENT, see below) —
     // both variants exercise the same generic-copy code path, so a single
     // parameterized test documents that max_file_size/file_type_id are carried
@@ -843,6 +882,46 @@ describe("PageModules", () => {
 
         expect(screen.getByTestId("module-count")).toHaveTextContent("1");
       });
+
+      test.each([
+        ["file: null (default, nothing chosen yet)", { file: null }],
+        ["file: [] (nothing chosen yet)", { file: [] }]
+      ])(
+        "type=File, no file chosen yet (%s): keeps Clone enabled and clones normally",
+        async (_description, moduleOverrides) => {
+          const modules = [createDocumentModule(moduleOverrides)];
+
+          const TestWrapper = () => {
+            const { values } = useFormikContext();
+            return (
+              <>
+                <PageModules name="modules" />
+                <div data-testid="module-count">{values.modules.length}</div>
+              </>
+            );
+          };
+
+          const store = mockStore({
+            mediaUploadState: { media_file_types: [] }
+          });
+          render(
+            <Provider store={store}>
+              <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+                <Form>
+                  <TestWrapper />
+                </Form>
+              </Formik>
+            </Provider>
+          );
+
+          const cloneButton = screen.getByTestId("clone-module-btn");
+          expect(cloneButton).not.toBeDisabled();
+
+          await userEvent.click(cloneButton);
+
+          expect(screen.getByTestId("module-count")).toHaveTextContent("2");
+        }
+      );
 
       test.each([
         [
