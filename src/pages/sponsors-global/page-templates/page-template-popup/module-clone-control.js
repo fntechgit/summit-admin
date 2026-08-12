@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, InputAdornment, TextField } from "@mui/material";
+import { Box, Button, InputAdornment, TextField, Tooltip } from "@mui/material";
 import {
   MAX_MODULE_CLONE_COUNT,
   MIN_MODULE_CLONE_COUNT
@@ -15,16 +15,24 @@ const clampCloneCount = (value) => {
   );
 };
 
-const ModuleCloneControl = ({ onClone }) => {
-  const [count, setCount] = useState(MIN_MODULE_CLONE_COUNT);
+const ModuleCloneControl = ({
+  onClone,
+  disabled = false,
+  disabledReason = ""
+}) => {
+  const [count, setCount] = useState(String(MIN_MODULE_CLONE_COUNT));
 
   const handleCountChange = (e) => {
-    setCount(clampCloneCount(parseInt(e.target.value, 10)));
+    setCount(e.target.value);
+  };
+
+  const handleCountBlur = () => {
+    setCount(String(clampCloneCount(parseInt(count, 10))));
   };
 
   const handleClone = () => {
-    onClone(count);
-    setCount(MIN_MODULE_CLONE_COUNT);
+    onClone(clampCloneCount(parseInt(count, 10)));
+    setCount(String(MIN_MODULE_CLONE_COUNT));
   };
 
   return (
@@ -38,6 +46,13 @@ const ModuleCloneControl = ({ onClone }) => {
         value={count}
         onChange={handleCountChange}
         sx={{ width: 90 }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handleClone();
+          }
+        }}
+        onBlur={handleCountBlur}
         slotProps={{
           input: {
             startAdornment: <InputAdornment position="start">x</InputAdornment>
@@ -52,23 +67,34 @@ const ModuleCloneControl = ({ onClone }) => {
           }
         }}
       />
-      <span>
-        <Button
-          size="small"
-          variant="contained"
-          aria-label={T.translate("page_template_list.page_crud.clone_module")}
-          data-testid="clone-module-btn"
-          onClick={handleClone}
-        >
-          {T.translate("page_template_list.page_crud.clone_module")}
-        </Button>
-      </span>
+      <Tooltip
+        title={disabled ? disabledReason : ""}
+        arrow
+        componentsProps={{ tooltip: { sx: { fontSize: "1rem" } } }}
+      >
+        <span>
+          <Button
+            size="small"
+            variant="contained"
+            aria-label={T.translate(
+              "page_template_list.page_crud.clone_module"
+            )}
+            data-testid="clone-module-btn"
+            onClick={handleClone}
+            disabled={disabled}
+          >
+            {T.translate("page_template_list.page_crud.clone_module")}
+          </Button>
+        </span>
+      </Tooltip>
     </Box>
   );
 };
 
 ModuleCloneControl.propTypes = {
-  onClone: PropTypes.func.isRequired
+  onClone: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
+  disabledReason: PropTypes.string
 };
 
 export default ModuleCloneControl;

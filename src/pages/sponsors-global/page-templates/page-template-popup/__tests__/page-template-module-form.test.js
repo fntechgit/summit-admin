@@ -737,14 +737,31 @@ describe("PageModules", () => {
     test.each([
       ["0", 1],
       ["999", 20]
-    ])("clamps a typed count of %s to %i", (typedValue, expected) => {
+    ])("clamps a typed count of %s to %i on blur", (typedValue, expected) => {
       const modules = [createModule(PAGES_MODULE_KINDS.INFO, 0, 1)];
       renderModulesWithWrapper(modules);
 
       const countInput = screen.getByTestId("clone-count-input");
       fireEvent.change(countInput, { target: { value: typedValue } });
+      fireEvent.blur(countInput);
 
       expect(countInput).toHaveValue(expected);
+    });
+
+    test("allows freely editing (e.g. backspacing) the count field without clamping mid-edit", () => {
+      const modules = [createModule(PAGES_MODULE_KINDS.INFO, 0, 1)];
+      renderModulesWithWrapper(modules);
+
+      const countInput = screen.getByTestId("clone-count-input");
+      fireEvent.change(countInput, { target: { value: "15" } });
+      expect(countInput).toHaveValue(15);
+
+      // backspace to clear, as a user retyping the value would
+      fireEvent.change(countInput, { target: { value: "" } });
+      expect(countInput).toHaveValue(null);
+
+      fireEvent.change(countInput, { target: { value: "5" } });
+      expect(countInput).toHaveValue(5);
     });
 
     test("collapses new clones, keeps the original expanded, and resets the count field to 1", async () => {
@@ -786,12 +803,48 @@ describe("PageModules", () => {
         ...overrides
       });
 
+      test("type=File, already-uploaded file: disables Clone and does not create copies", () => {
+        const modules = [
+          createDocumentModule({
+            file: [{ id: 10, file_url: "http://x/file.pdf" }]
+          })
+        ];
+
+        const TestWrapper = () => {
+          const { values } = useFormikContext();
+          return (
+            <>
+              <PageModules name="modules" />
+              <div data-testid="module-count">{values.modules.length}</div>
+            </>
+          );
+        };
+
+        const store = mockStore({
+          mediaUploadState: { media_file_types: [] }
+        });
+        render(
+          <Provider store={store}>
+            <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+              <Form>
+                <TestWrapper />
+              </Form>
+            </Formik>
+          </Provider>
+        );
+
+        const cloneButton = screen.getByTestId("clone-module-btn");
+        expect(cloneButton).toBeDisabled();
+
+        // native `disabled` blocks the click outright; use fireEvent since
+        // userEvent additionally refuses to interact with pointer-events:none
+        // elements (which MUI also sets on disabled buttons)
+        fireEvent.click(cloneButton);
+
+        expect(screen.getByTestId("module-count")).toHaveTextContent("1");
+      });
+
       test.each([
-        [
-          "type=File, already-uploaded file: resets file to empty on each clone",
-          { file: [{ id: 10, file_url: "http://x/file.pdf" }] },
-          { externalUrl: "", file: "[]" }
-        ],
         [
           "type=File, newly selected file: copies file as-is to every clone",
           { file: [{ name: "new-upload.pdf" }] },
