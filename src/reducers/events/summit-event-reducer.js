@@ -28,7 +28,9 @@ import {
   RECEIVE_EVENT_FEEDBACK,
   REQUEST_EVENT_COMMENTS,
   REQUEST_EVENT_FEEDBACK,
-  RESET_EVENT_FORM
+  RESET_EVENT_FORM,
+  SUBMISSION_PERIOD_REOPENED,
+  SUBMISSION_PERIOD_CLOSED
 } from "../../actions/event-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { UNPUBLISHED_EVENT } from "../../actions/summit-builder-actions";
@@ -78,7 +80,10 @@ export const DEFAULT_ENTITY = {
   actions: [],
   allowed_ticket_types: [],
   submission_source: "Admin",
-  rsvp_type: "None"
+  rsvp_type: "None",
+  submission_reopened_until: "",
+  submission_reopened_by_id: 0,
+  submission_reopened_by: null
 };
 
 const DEFAULT_STATE_FEEDBACK_STATE = {
@@ -185,6 +190,35 @@ const summitEventReducer = (state = DEFAULT_STATE, action) => {
     case EVENT_UPDATED: {
       const entity = normalizeEventResponse(payload.response);
       return { ...state, entity, errors: {} };
+    }
+    case SUBMISSION_PERIOD_REOPENED: {
+      const { response } = payload;
+      // A response that lands after the admin navigated to another activity would
+      // otherwise merge this grant onto whatever event is now loaded.
+      if (payload.eventId !== state.entity.id) return state;
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          submission_reopened_until: response.submission_reopened_until ?? "",
+          submission_reopened_by_id: response.submission_reopened_by_id ?? 0,
+          submission_reopened_by: response.submission_reopened_by ?? null
+        },
+        errors: {}
+      };
+    }
+    case SUBMISSION_PERIOD_CLOSED: {
+      // Same guard as the reopen case above.
+      if (payload.eventId !== state.entity.id) return state;
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          submission_reopened_until: "",
+          submission_reopened_by_id: 0,
+          submission_reopened_by: null
+        }
+      };
     }
     case EVENT_MATERIAL_DELETED: {
       const { eventMaterialId } = payload;

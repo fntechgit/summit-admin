@@ -24,6 +24,8 @@ import {
   showMessage,
   showSuccessMessage,
   authErrorHandler,
+  snackbarErrorHandler,
+  snackbarSuccessHandler,
   getCSV,
   getRawCSV,
   downloadFileByContent,
@@ -84,6 +86,8 @@ export const FLAG_CHANGED = "FLAG_CHANGED";
 export const REQUEST_EVENT_COMMENTS = "REQUEST_EVENT_COMMENTS";
 export const RECEIVE_EVENT_COMMENTS = "RECEIVE_EVENT_COMMENTS";
 export const CHANGE_SEARCH_TERM = "CHANGE_SEARCH_TERM";
+export const SUBMISSION_PERIOD_REOPENED = "SUBMISSION_PERIOD_REOPENED";
+export const SUBMISSION_PERIOD_CLOSED = "SUBMISSION_PERIOD_CLOSED";
 
 export const ATTENDEES_EXPECTED_LEARNT = "attendees_expected_learnt";
 export const ATTENDING_MEDIA = "attending_media";
@@ -735,7 +739,7 @@ export const getEvent = (eventId) => async (dispatch, getState) => {
   const params = {
     access_token: accessToken,
     expand:
-      "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.extra_questions, selection_plan.extra_questions.values,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,created_by,track_chair_scores_avg.ranking_type,actions,allowed_ticket_types,allowed_badge_features_types",
+      "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.extra_questions, selection_plan.extra_questions.values,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,created_by,track_chair_scores_avg.ranking_type,actions,allowed_ticket_types,allowed_badge_features_types,submission_reopened_by",
     fields: "allowed_ticket_types.id,allowed_ticket_types.name"
   };
 
@@ -836,7 +840,7 @@ export const saveEvent = (entity, publish) => async (dispatch, getState) => {
   const params = {
     access_token: accessToken,
     expand:
-      "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,selection_plan.extra_questions,selection_plan.extra_questions.values,created_by,track_chair_scores_avg.ranking_type,actions,allowed_ticket_types",
+      "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,selection_plan.extra_questions,selection_plan.extra_questions.values,created_by,track_chair_scores_avg.ranking_type,actions,allowed_ticket_types,submission_reopened_by",
     fields: "allowed_ticket_types.id,allowed_ticket_types.name"
   };
 
@@ -927,7 +931,7 @@ export const saveEventAsDraft = (entity) => async (dispatch, getState) => {
   const params = {
     access_token: accessToken,
     expand:
-      "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,selection_plan.extra_questions,selection_plan.extra_questions.values,created_by,track_chair_scores_avg.ranking_type,actions,allowed_ticket_types",
+      "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,selection_plan.extra_questions,selection_plan.extra_questions.values,created_by,track_chair_scores_avg.ranking_type,actions,allowed_ticket_types,submission_reopened_by",
     fields: "allowed_ticket_types.id,allowed_ticket_types.name"
   };
 
@@ -966,7 +970,7 @@ export const saveEventFieldWithoutRefresh =
     const params = {
       access_token: accessToken,
       expand:
-        "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,selection_plan.extra_questions,selection_plan.extra_questions.values,created_by,track_chair_scores_avg.ranking_type,actions,allowed_ticket_types",
+        "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,selection_plan.extra_questions,selection_plan.extra_questions.values,created_by,track_chair_scores_avg.ranking_type,actions,allowed_ticket_types,submission_reopened_by",
       fields: "allowed_ticket_types.id,allowed_ticket_types.name"
     };
 
@@ -1014,6 +1018,85 @@ export const upgradeEvent = (entity) => async (dispatch, getState) => {
     );
   });
 };
+
+// Both reopen thunks return the request promise without a terminal .catch, matching
+// saveEvent and every other write thunk here. Their callers in event-form.js swallow
+// the rejection instead, because the no-client-cap design makes an over-ceiling 412 an
+// expected outcome rather than a fault: snackbarErrorHandler has already shown the
+// API's message, so letting it also reach Sentry as an unhandled rejection is noise.
+export const reopenSubmissionPeriod =
+  (eventId, hours) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+
+    // Before the token await: a refresh can take seconds, and anything dispatched
+    // after it leaves a window where the UI is neither blocked nor marked in-flight.
+    dispatch(startLoading());
+
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    const params = {
+      access_token: accessToken,
+      expand: "submission_reopened_by"
+    };
+
+    return (
+      putRequest(
+        null,
+        // Carry the source event id so the reducer can drop a response that lands after
+        // the admin has navigated to a different activity.
+        (payload) =>
+          createAction(SUBMISSION_PERIOD_REOPENED)({ ...payload, eventId }),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/presentations/${eventId}/submission-period/reopen`,
+        { hours },
+        snackbarErrorHandler
+      )(params)(dispatch)
+        .then(() => {
+          dispatch(
+            snackbarSuccessHandler({
+              title: T.translate("general.success"),
+              html: T.translate("edit_event.reopen_submission_success")
+            })
+          );
+        })
+        // finally, not then: a failed request must still clear the overlay.
+        .finally(() => {
+          dispatch(stopLoading());
+        })
+    );
+  };
+
+export const closeSubmissionPeriod =
+  (eventId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+
+    // See reopenSubmissionPeriod: in-flight flag before the token await.
+    dispatch(startLoading());
+
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    const params = { access_token: accessToken };
+
+    return deleteRequest(
+      null,
+      createAction(SUBMISSION_PERIOD_CLOSED)({ eventId }),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/presentations/${eventId}/submission-period/reopen`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_event.close_submission_success")
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
 
 export const cloneEvent = (entity) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
