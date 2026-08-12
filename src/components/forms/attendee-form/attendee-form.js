@@ -398,16 +398,14 @@ const AttendeeForm = ({
         </div>
 
         <div>
-          {entity.member != null && entity.member.affiliations && (
-            <div className="row form-group">
-              <div className="col-md-12">
-                <legend>{T.translate("edit_attendee.affiliations")}</legend>
-                <AffiliationsTable
-                  ownerId={entity.member.id}
-                  data={entity.member.affiliations}
-                />
-              </div>
-            </div>
+          {entity.id !== 0 && (
+            <NotesPanel
+              key={entity.id}
+              attendeeId={entity.id}
+              open={openSections.admin_notes}
+              onToggle={(ev) => toggleSection("admin_notes", ev)}
+              onOpen={handleOpenNotes}
+            />
           )}
 
           {entity.tickets && entity.tickets.length > 0 && (
@@ -431,15 +429,6 @@ const AttendeeForm = ({
           )}
         </div>
       </form>
-      {entity.id !== 0 && (
-        <NotesPanel
-          key={entity.id}
-          attendeeId={entity.id}
-          open={openSections.admin_notes}
-          onToggle={(ev) => toggleSection("admin_notes", ev)}
-          onOpen={handleOpenNotes}
-        />
-      )}
       {/* Second Form ( Extra Questions ) */}
       {entity.id !== 0 && entity.allowed_extra_questions?.length > 0 && (
         <Panel
@@ -456,6 +445,17 @@ const AttendeeForm = ({
             className="extra-questions"
           />
         </Panel>
+      )}
+      {entity.member != null && entity.member.affiliations && (
+        <div className="row form-group">
+          <div className="col-md-12">
+            <legend>{T.translate("edit_attendee.affiliations")}</legend>
+            <AffiliationsTable
+              ownerId={entity.member.id}
+              data={entity.member.affiliations}
+            />
+          </div>
+        </div>
       )}
       <div className="row">
         <div className="col-md-12 submit-buttons">

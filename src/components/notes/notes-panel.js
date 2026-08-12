@@ -168,6 +168,7 @@ const NotesPanel = ({
         </div>
         <div className="col-md-6">
           <button
+            type="button"
             className="btn btn-default exportButton pull-right"
             onClick={handleExport}
           >
