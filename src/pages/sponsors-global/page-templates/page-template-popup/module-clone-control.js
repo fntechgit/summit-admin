@@ -31,6 +31,7 @@ const ModuleCloneControl = ({
   };
 
   const handleClone = () => {
+    if (disabled) return;
     onClone(clampCloneCount(parseInt(count, 10)));
     setCount(String(MIN_MODULE_CLONE_COUNT));
   };
@@ -46,6 +47,7 @@ const ModuleCloneControl = ({
         value={count}
         onChange={handleCountChange}
         sx={{ width: 90 }}
+        disabled={disabled}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
