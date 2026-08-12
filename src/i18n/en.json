@@ -721,6 +721,7 @@
     "reopen_duration_72": "72 hours",
     "reopen_duration_custom": "Custom",
     "reopen_custom_hours": "Hours",
+    "reopen_custom_hours_capped": "Hours (1-{max})",
     "reopen_confirm_title": "Reopen submission for this activity?",
     "reopen_confirm_text": "This lets the speaker edit this talk until {deadline}.",
     "reopen_submission_success": "Submission reopened.",

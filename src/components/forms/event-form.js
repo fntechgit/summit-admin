@@ -782,6 +782,14 @@ class EventForm extends React.Component {
     );
   }
 
+  // Mirrors the server's CFP_MAX_REOPEN_HOURS so an over-ceiling value is caught
+  // before the confirm dialog rather than by the 412 after it. dotenv values are
+  // strings, hence the coercion. Unset means uncapped: the server's 412 stays the
+  // authoritative ceiling, so a deployment that never sets this behaves as before.
+  getMaxReopenHours() {
+    return Number(window.CFP_MAX_REOPEN_HOURS) || 0;
+  }
+
   getSelectedReopenHours() {
     const { reopenHours, reopenCustomHours } = this.state;
     const raw = String(
@@ -790,7 +798,12 @@ class EventForm extends React.Component {
     // Not parseInt: it reads "-1" as a truthy negative, and "1.5"/"1e3" as 1, which
     // would silently grant an hour instead of what the admin typed. Only a plain
     // positive integer is a valid window.
-    return /^\d+$/.test(raw) && Number(raw) > 0 ? Number(raw) : 0;
+    if (!/^\d+$/.test(raw) || Number(raw) <= 0) return 0;
+    const hours = Number(raw);
+    const max = this.getMaxReopenHours();
+    // Applied to the presets too, not just the custom entry, so a ceiling
+    // configured below 72 can't offer a preset the server would refuse.
+    return max && hours > max ? 0 : hours;
   }
 
   async handleReopenSubmission() {
@@ -1023,6 +1036,8 @@ class EventForm extends React.Component {
       reopenHours,
       reopenCustomHours
     } = this.state;
+
+    const maxReopenHours = this.getMaxReopenHours();
 
     const {
       currentSummit,
@@ -1282,12 +1297,18 @@ class EventForm extends React.Component {
                     {reopenHours === "custom" && (
                       <>
                         <label htmlFor="reopen_custom_hours">
-                          {T.translate("edit_event.reopen_custom_hours")}
+                          {maxReopenHours
+                            ? T.translate(
+                                "edit_event.reopen_custom_hours_capped",
+                                { max: maxReopenHours }
+                              )
+                            : T.translate("edit_event.reopen_custom_hours")}
                         </label>
                         <input
                           id="reopen_custom_hours"
                           type="number"
                           min="1"
+                          max={maxReopenHours || undefined}
                           className="form-control"
                           style={{ width: 120 }}
                           value={reopenCustomHours}

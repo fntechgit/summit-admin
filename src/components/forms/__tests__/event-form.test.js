@@ -223,6 +223,95 @@ describe("EventForm", () => {
     }
   );
 
+  // CFP_MAX_REOPEN_HOURS mirrors the server's ceiling so an over-limit value is
+  // caught before the confirm dialog instead of by the 412 after it.
+  describe("with a configured reopen ceiling", () => {
+    beforeEach(() => {
+      window.CFP_MAX_REOPEN_HOURS = "48";
+    });
+
+    afterEach(() => {
+      delete window.CFP_MAX_REOPEN_HOURS;
+    });
+
+    it("keeps the reopen button disabled for a custom value above the ceiling", async () => {
+      renderEventForm({ entity: baseEntity });
+
+      await userEvent.selectOptions(
+        screen.getByLabelText("edit_event.reopen_duration"),
+        "custom"
+      );
+      fireEvent.change(
+        screen.getByLabelText("edit_event.reopen_custom_hours_capped"),
+        { target: { value: "49" } }
+      );
+
+      expect(
+        screen.getByRole("button", { name: "edit_event.reopen_submission" })
+      ).toBeDisabled();
+    });
+
+    it("still accepts a custom value on the ceiling", async () => {
+      const onReopenSubmission = jest.fn().mockResolvedValue({});
+      showConfirmDialog.mockResolvedValue(true);
+      renderEventForm({ entity: baseEntity, onReopenSubmission });
+
+      await userEvent.selectOptions(
+        screen.getByLabelText("edit_event.reopen_duration"),
+        "custom"
+      );
+      fireEvent.change(
+        screen.getByLabelText("edit_event.reopen_custom_hours_capped"),
+        { target: { value: "48" } }
+      );
+      await userEvent.click(
+        screen.getByRole("button", { name: "edit_event.reopen_submission" })
+      );
+
+      await waitFor(() =>
+        expect(onReopenSubmission).toHaveBeenCalledWith(42, 48)
+      );
+    });
+
+    // The ceiling applies to the presets too, so a deployment that sets it below
+    // 72 can't offer a preset the server would refuse.
+    it("keeps the reopen button disabled for a preset above the ceiling", async () => {
+      renderEventForm({ entity: baseEntity });
+
+      await userEvent.selectOptions(
+        screen.getByLabelText("edit_event.reopen_duration"),
+        "72"
+      );
+
+      expect(
+        screen.getByRole("button", { name: "edit_event.reopen_submission" })
+      ).toBeDisabled();
+    });
+  });
+
+  // Unset means uncapped: the server's 412 stays the only ceiling, so a deployment
+  // that never sets CFP_MAX_REOPEN_HOURS behaves exactly as it did before.
+  it("leaves the custom hours uncapped when CFP_MAX_REOPEN_HOURS is unset", async () => {
+    const onReopenSubmission = jest.fn().mockResolvedValue({});
+    showConfirmDialog.mockResolvedValue(true);
+    renderEventForm({ entity: baseEntity, onReopenSubmission });
+
+    await userEvent.selectOptions(
+      screen.getByLabelText("edit_event.reopen_duration"),
+      "custom"
+    );
+    fireEvent.change(screen.getByLabelText("edit_event.reopen_custom_hours"), {
+      target: { value: "5000" }
+    });
+    await userEvent.click(
+      screen.getByRole("button", { name: "edit_event.reopen_submission" })
+    );
+
+    await waitFor(() =>
+      expect(onReopenSubmission).toHaveBeenCalledWith(42, 5000)
+    );
+  });
+
   it("sends the selected preset hours to onReopenSubmission after confirmation", async () => {
     const onReopenSubmission = jest.fn().mockResolvedValue({});
     showConfirmDialog.mockResolvedValue(true);
