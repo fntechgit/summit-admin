@@ -20,12 +20,10 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  showMessage,
-  showSuccessMessage,
-  authErrorHandler,
+  snackbarSuccessHandler,
+  snackbarErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
-import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
@@ -139,7 +137,7 @@ export const getInventoryItems =
       createAction(REQUEST_INVENTORY_ITEMS),
       createAction(RECEIVE_INVENTORY_ITEMS),
       `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { order, orderDir, page, perPage, term, showArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -160,7 +158,7 @@ export const getInventoryItem = (inventoryItemId) => async (dispatch) => {
     null,
     createAction(RECEIVE_INVENTORY_ITEM),
     `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}`,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -180,7 +178,7 @@ export const deleteInventoryItem = (inventoryItemId) => async (dispatch) => {
     createAction(INVENTORY_ITEM_DELETED)({ inventoryItemId }),
     `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}`,
     null,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -219,7 +217,7 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
       createAction(INVENTORY_ITEM_UPDATED),
       `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${entity.id}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch)
       .then(() => {
@@ -235,9 +233,10 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
 
         return Promise.all(promises).then(() => {
           dispatch(
-            showSuccessMessage(
-              T.translate("edit_inventory_item.inventory_item_saved")
-            )
+            snackbarSuccessHandler({
+              title: T.translate("general.success"),
+              html: T.translate("edit_inventory_item.inventory_item_saved")
+            })
           );
         });
       })
@@ -250,18 +249,12 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
       });
   }
 
-  const success_message = {
-    title: T.translate("general.done"),
-    html: T.translate("edit_inventory_item.inventory_item_created"),
-    type: "success"
-  };
-
   return postRequest(
     createAction(ADD_INVENTORY_ITEM),
     createAction(INVENTORY_ITEM_ADDED),
     `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items`,
     normalizedEntity,
-    authErrorHandler,
+    snackbarErrorHandler,
     entity
   )(params)(dispatch)
     .then(({ response }) => {
@@ -278,8 +271,9 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
 
       return Promise.all(promises).then(() => {
         dispatch(
-          showMessage(success_message, () => {
-            history.push("/app/inventory");
+          snackbarSuccessHandler({
+            title: T.translate("general.done"),
+            html: T.translate("edit_inventory_item.inventory_item_created")
           })
         );
       });
