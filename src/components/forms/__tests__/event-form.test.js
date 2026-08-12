@@ -203,7 +203,9 @@ describe("EventForm", () => {
   // they typed, and "1e3" never reaches the server's 412 for 1000 hours.
   // Set the value rather than typing it: jsdom normalises a typed "1e3" to "1000",
   // while a real browser keeps "1e3" in a number input.
-  it.each([["-1"], ["0"], ["1.5"], ["1e3"], ["abc"]])(
+  // "9999999999" is ten digits and a plain integer but overflows moment, which threw in the
+  // confirm dialog before the admin saw it. Only reachable with no ceiling configured.
+  it.each([["-1"], ["0"], ["1.5"], ["1e3"], ["abc"], ["9999999999"]])(
     "keeps the reopen button disabled for the custom hours value %s",
     async (value) => {
       renderEventForm({ entity: baseEntity });

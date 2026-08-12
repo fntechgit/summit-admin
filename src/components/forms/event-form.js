@@ -800,6 +800,9 @@ class EventForm extends React.Component {
     // positive integer is a valid window.
     if (!/^\d+$/.test(raw) || Number(raw) <= 0) return 0;
     const hours = Number(raw);
+    // Uncapped, a digit-only value can still overflow moment: the deadline comes back NaN,
+    // which epochToMomentTimeZone passes through unwrapped, so the confirm dialog throws.
+    if (!moment().add(hours, "hours").isValid()) return 0;
     const max = this.getMaxReopenHours();
     // Applied to the presets too, not just the custom entry, so a ceiling
     // configured below 72 can't offer a preset the server would refuse.
