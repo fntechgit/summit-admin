@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Formik, Form, useFormikContext } from "formik";
 import { Provider } from "react-redux";
@@ -11,7 +11,8 @@ import showConfirmDialog from "openstack-uicore-foundation/lib/components/mui/sh
 import PageModules from "../page-template-modules-form";
 import {
   PAGES_MODULE_KINDS,
-  PAGE_MODULES_MEDIA_TYPES
+  PAGE_MODULES_MEDIA_TYPES,
+  PAGE_MODULES_DOWNLOAD
 } from "../../../../../utils/constants";
 
 const mockStore = configureStore([thunk]);
@@ -65,13 +66,15 @@ jest.mock(
     }
 );
 
-// Mock DragAndDropList to capture onReorder
+// Mock DragAndDropList to capture onReorder and the items it receives
 let capturedOnReorder = null;
+let capturedItems = null;
 jest.mock(
   "openstack-uicore-foundation/lib/components/mui/dnd-list",
   () =>
     function MockDragAndDropList({ items, renderItem, onReorder }) {
       capturedOnReorder = onReorder;
+      capturedItems = items;
       return (
         <div data-testid="dnd-list">
           {items.map((item, index) => (
@@ -108,6 +111,12 @@ const renderWithFormik = (
   );
 };
 
+// jsdom does not implement scrollIntoView; stub it so effects that call it
+// (auto-scroll to a new/cloned module) don't throw in these component tests.
+beforeAll(() => {
+  window.HTMLElement.prototype.scrollIntoView = jest.fn();
+});
+
 describe("PageModules", () => {
   const createModule = (kind, order, id) => ({
     _tempId: `temp-${id}`,
@@ -131,6 +140,7 @@ describe("PageModules", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedOnReorder = null;
+    capturedItems = null;
   });
 
   describe("Rendering", () => {
@@ -613,6 +623,434 @@ describe("PageModules", () => {
       await waitFor(() => {
         expect(screen.getByTestId("module-ids")).toHaveTextContent(
           "temp-1,temp-3"
+        );
+      });
+    });
+  });
+
+  describe("Cloning modules", () => {
+    const renderModulesWithWrapper = (modules) => {
+      const TestWrapper = () => {
+        const { values } = useFormikContext();
+        return (
+          <>
+            <PageModules name="modules" />
+            <div data-testid="module-ids">
+              {values.modules.map((m) => m._tempId).join(",")}
+            </div>
+            <div data-testid="module-has-id">
+              {values.modules.map((m) => (m.id ? "1" : "0")).join(",")}
+            </div>
+          </>
+        );
+      };
+
+      const store = mockStore({
+        mediaUploadState: { media_file_types: [] }
+      });
+      return render(
+        <Provider store={store}>
+          <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+            <Form>
+              <TestWrapper />
+            </Form>
+          </Formik>
+        </Provider>
+      );
+    };
+
+    test("inserts N copies immediately after the original, each with a fresh temp id and no persisted id, and scrolls to the last one", async () => {
+      const modules = [
+        { ...createModule(PAGES_MODULE_KINDS.INFO, 0, 1), id: 100 },
+        createModule(PAGES_MODULE_KINDS.DOCUMENT, 1, 2),
+        createModule(PAGES_MODULE_KINDS.MEDIA, 2, 3)
+      ];
+      renderModulesWithWrapper(modules);
+
+      const countInput = screen.getAllByTestId("clone-count-input")[0];
+      fireEvent.change(countInput, { target: { value: "3" } });
+      await userEvent.click(screen.getAllByTestId("clone-module-btn")[0]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("module-ids")).toHaveTextContent(
+          /^temp-1,temp-clone-\d+,temp-clone-\d+,temp-clone-\d+,temp-2,temp-3$/
+        );
+      });
+      expect(screen.getByTestId("module-has-id")).toHaveTextContent(
+        "1,0,0,0,0,0"
+      );
+      expect(window.HTMLElement.prototype.scrollIntoView).toHaveBeenCalled();
+    });
+
+    test("keeps a stable DnD key (derived from id) for a persisted module lacking _tempId, even after a clone shifts its array index", async () => {
+      // a module loaded from the API with no _tempId, as denormalizePageModules
+      // produces it — DragAndDropList's own idKey fallback is index-based, so
+      // without normalization this module's key would change (forcing a
+      // remount) whenever an earlier clone shifts its position.
+      const persistedNoTempId = {
+        id: 200,
+        kind: PAGES_MODULE_KINDS.INFO,
+        custom_order: 1,
+        name: "Persisted module",
+        content: ""
+      };
+      const modules = [
+        createModule(PAGES_MODULE_KINDS.INFO, 0, 1),
+        persistedNoTempId
+      ];
+      renderModulesWithWrapper(modules);
+
+      expect(capturedItems[1]._tempId).toBe(200);
+
+      const countInput = screen.getAllByTestId("clone-count-input")[0];
+      fireEvent.change(countInput, { target: { value: "2" } });
+      await userEvent.click(screen.getAllByTestId("clone-module-btn")[0]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("module-ids")).toHaveTextContent(
+          /^temp-1,temp-clone-\d+,temp-clone-\d+,$/
+        );
+      });
+
+      // now at index 3 instead of 1, but the DnD key tracks the module, not the slot
+      const shiftedIndex = capturedItems.findIndex((m) => m.id === 200);
+      expect(shiftedIndex).toBe(3);
+      expect(capturedItems[shiftedIndex]._tempId).toBe(200);
+    });
+
+    // Cloning has no MEDIA-type-specific branching (unlike DOCUMENT, see below) —
+    // both variants exercise the same generic-copy code path, so a single
+    // parameterized test documents that max_file_size/file_type_id are carried
+    // over as-is regardless of type (they're only stripped for INPUT later, by
+    // normalizePageTemplateModules at save time, not by cloning).
+    test.each([
+      ["File", PAGE_MODULES_MEDIA_TYPES.FILE],
+      ["Input", PAGE_MODULES_MEDIA_TYPES.INPUT]
+    ])(
+      "clones a Media (type=%s) module and propagates its fields as-is",
+      async (_description, type) => {
+        const modules = [
+          { ...createModule(PAGES_MODULE_KINDS.MEDIA, 0, 1), type }
+        ];
+
+        const TestWrapper = () => {
+          const { values } = useFormikContext();
+          const clone = values.modules[1];
+          return (
+            <>
+              <PageModules name="modules" />
+              <div data-testid="clone-media-fields">
+                {JSON.stringify({
+                  type: clone?.type,
+                  max_file_size: clone?.max_file_size,
+                  file_type_id: clone?.file_type_id
+                })}
+              </div>
+            </>
+          );
+        };
+
+        const store = mockStore({
+          mediaUploadState: { media_file_types: [] }
+        });
+        render(
+          <Provider store={store}>
+            <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+              <Form>
+                <TestWrapper />
+              </Form>
+            </Formik>
+          </Provider>
+        );
+
+        await userEvent.click(screen.getByTestId("clone-module-btn"));
+
+        await waitFor(() => {
+          expect(screen.getByTestId("clone-media-fields")).toHaveTextContent(
+            JSON.stringify({ type, max_file_size: 100, file_type_id: 1 })
+          );
+        });
+      }
+    );
+
+    test.each([
+      ["0", 1],
+      ["999", 20]
+    ])("clamps a typed count of %s to %i on blur", (typedValue, expected) => {
+      const modules = [createModule(PAGES_MODULE_KINDS.INFO, 0, 1)];
+      renderModulesWithWrapper(modules);
+
+      const countInput = screen.getByTestId("clone-count-input");
+      fireEvent.change(countInput, { target: { value: typedValue } });
+      fireEvent.blur(countInput);
+
+      expect(countInput).toHaveValue(expected);
+    });
+
+    test("allows freely editing (e.g. backspacing) the count field without clamping mid-edit", () => {
+      const modules = [createModule(PAGES_MODULE_KINDS.INFO, 0, 1)];
+      renderModulesWithWrapper(modules);
+
+      const countInput = screen.getByTestId("clone-count-input");
+      fireEvent.change(countInput, { target: { value: "15" } });
+      expect(countInput).toHaveValue(15);
+
+      // backspace to clear, as a user retyping the value would
+      fireEvent.change(countInput, { target: { value: "" } });
+      expect(countInput).toHaveValue(null);
+
+      fireEvent.change(countInput, { target: { value: "5" } });
+      expect(countInput).toHaveValue(5);
+    });
+
+    test("collapses new clones, keeps the original expanded, and resets the count field to 1", async () => {
+      const modules = [createModule(PAGES_MODULE_KINDS.INFO, 0, 1)];
+      renderModulesWithWrapper(modules);
+
+      const countInput = screen.getByTestId("clone-count-input");
+      fireEvent.change(countInput, { target: { value: "2" } });
+      await userEvent.click(screen.getByTestId("clone-module-btn"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("module-ids")).toHaveTextContent(
+          /^temp-1,temp-clone-\d+,temp-clone-\d+$/
+        );
+      });
+
+      expect(
+        screen.getByTestId("text-editor-modules[0].content")
+      ).toBeVisible();
+      expect(
+        screen.getByTestId("text-editor-modules[1].content")
+      ).not.toBeVisible();
+      expect(
+        screen.getByTestId("text-editor-modules[2].content")
+      ).not.toBeVisible();
+      expect(countInput).toHaveValue(1);
+    });
+
+    test("pressing Enter in the count field clones the module and prevents the keydown's default action", async () => {
+      // a `false` return from fireEvent means preventDefault() was called on
+      // the keydown event — this is what stops Enter from implicitly
+      // submitting the popup's enclosing <form>
+      const modules = [createModule(PAGES_MODULE_KINDS.INFO, 0, 1)];
+      renderModulesWithWrapper(modules);
+
+      const countInput = screen.getByTestId("clone-count-input");
+      const dispatchResult = fireEvent.keyDown(countInput, {
+        key: "Enter",
+        code: "Enter"
+      });
+
+      expect(dispatchResult).toBe(false);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("module-ids")).toHaveTextContent(
+          /^temp-1,temp-clone-\d+$/
+        );
+      });
+    });
+
+    describe("Document Download clone behavior", () => {
+      const createDocumentModule = (overrides) => ({
+        _tempId: "temp-doc-1",
+        kind: PAGES_MODULE_KINDS.DOCUMENT,
+        custom_order: 0,
+        name: "Doc",
+        description: "Desc",
+        type: PAGE_MODULES_DOWNLOAD.FILE,
+        external_url: "",
+        file: null,
+        ...overrides
+      });
+
+      test("type=File, already-uploaded file: disables Clone and does not create copies", () => {
+        const modules = [
+          createDocumentModule({
+            file: [{ id: 10, file_url: "http://x/file.pdf" }]
+          })
+        ];
+
+        const TestWrapper = () => {
+          const { values } = useFormikContext();
+          return (
+            <>
+              <PageModules name="modules" />
+              <div data-testid="module-count">{values.modules.length}</div>
+            </>
+          );
+        };
+
+        const store = mockStore({
+          mediaUploadState: { media_file_types: [] }
+        });
+        render(
+          <Provider store={store}>
+            <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+              <Form>
+                <TestWrapper />
+              </Form>
+            </Formik>
+          </Provider>
+        );
+
+        const cloneButton = screen.getByTestId("clone-module-btn");
+        expect(cloneButton).toBeDisabled();
+
+        // native `disabled` blocks the click outright; use fireEvent since
+        // userEvent additionally refuses to interact with pointer-events:none
+        // elements (which MUI also sets on disabled buttons)
+        fireEvent.click(cloneButton);
+
+        expect(screen.getByTestId("module-count")).toHaveTextContent("1");
+      });
+
+      test("type=File, already-uploaded file: pressing Enter while Clone is disabled does not clone", () => {
+        const modules = [
+          createDocumentModule({
+            file: [{ id: 10, file_url: "http://x/file.pdf" }]
+          })
+        ];
+
+        const TestWrapper = () => {
+          const { values } = useFormikContext();
+          return (
+            <>
+              <PageModules name="modules" />
+              <div data-testid="module-count">{values.modules.length}</div>
+            </>
+          );
+        };
+
+        const store = mockStore({
+          mediaUploadState: { media_file_types: [] }
+        });
+        render(
+          <Provider store={store}>
+            <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+              <Form>
+                <TestWrapper />
+              </Form>
+            </Formik>
+          </Provider>
+        );
+
+        const countInput = screen.getByTestId("clone-count-input");
+        expect(countInput).toBeDisabled();
+
+        // fireEvent dispatches the keydown regardless of the native disabled
+        // attribute, exercising the `if (disabled) return;` guard in
+        // handleClone rather than any browser-level event gating
+        fireEvent.keyDown(countInput, { key: "Enter", code: "Enter" });
+
+        expect(screen.getByTestId("module-count")).toHaveTextContent("1");
+      });
+
+      test.each([
+        ["file: null (default, nothing chosen yet)", { file: null }],
+        ["file: [] (nothing chosen yet)", { file: [] }]
+      ])(
+        "type=File, no file chosen yet (%s): keeps Clone enabled and clones normally",
+        async (_description, moduleOverrides) => {
+          const modules = [createDocumentModule(moduleOverrides)];
+
+          const TestWrapper = () => {
+            const { values } = useFormikContext();
+            return (
+              <>
+                <PageModules name="modules" />
+                <div data-testid="module-count">{values.modules.length}</div>
+              </>
+            );
+          };
+
+          const store = mockStore({
+            mediaUploadState: { media_file_types: [] }
+          });
+          render(
+            <Provider store={store}>
+              <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+                <Form>
+                  <TestWrapper />
+                </Form>
+              </Formik>
+            </Provider>
+          );
+
+          const cloneButton = screen.getByTestId("clone-module-btn");
+          expect(cloneButton).not.toBeDisabled();
+
+          await userEvent.click(cloneButton);
+
+          expect(screen.getByTestId("module-count")).toHaveTextContent("2");
+        }
+      );
+
+      test.each([
+        [
+          "type=File, newly selected file: copies file as-is to every clone",
+          { file: [{ name: "new-upload.pdf" }] },
+          {
+            externalUrl: "",
+            file: JSON.stringify([{ name: "new-upload.pdf" }])
+          }
+        ],
+        [
+          "type=Url: copies external_url as-is and clears a non-new file (guards against a type switch bringing back a persisted file)",
+          {
+            type: PAGE_MODULES_DOWNLOAD.URL,
+            external_url: "https://example.com/doc"
+          },
+          { externalUrl: "https://example.com/doc", file: "[]" }
+        ]
+      ])("%s", async (_description, moduleOverrides, expected) => {
+        const modules = [createDocumentModule(moduleOverrides)];
+
+        const TestWrapper = () => {
+          const { values } = useFormikContext();
+          return (
+            <>
+              <PageModules name="modules" />
+              <div data-testid="clone-external-url-1">
+                {JSON.stringify(values.modules[1]?.external_url)}
+              </div>
+              <div data-testid="clone-file-1">
+                {JSON.stringify(values.modules[1]?.file)}
+              </div>
+              <div data-testid="clone-file-2">
+                {JSON.stringify(values.modules[2]?.file)}
+              </div>
+            </>
+          );
+        };
+
+        const store = mockStore({
+          mediaUploadState: { media_file_types: [] }
+        });
+        render(
+          <Provider store={store}>
+            <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+              <Form>
+                <TestWrapper />
+              </Form>
+            </Formik>
+          </Provider>
+        );
+
+        const countInput = screen.getByTestId("clone-count-input");
+        fireEvent.change(countInput, { target: { value: "2" } });
+        await userEvent.click(screen.getByTestId("clone-module-btn"));
+
+        await waitFor(() => {
+          expect(screen.getByTestId("clone-file-1")).toHaveTextContent(
+            expected.file
+          );
+          expect(screen.getByTestId("clone-file-2")).toHaveTextContent(
+            expected.file
+          );
+        });
+        expect(screen.getByTestId("clone-external-url-1")).toHaveTextContent(
+          JSON.stringify(expected.externalUrl)
         );
       });
     });
