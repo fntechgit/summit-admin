@@ -829,6 +829,28 @@ describe("PageModules", () => {
       expect(countInput).toHaveValue(1);
     });
 
+    test("pressing Enter in the count field clones the module and prevents the keydown's default action", async () => {
+      // a `false` return from fireEvent means preventDefault() was called on
+      // the keydown event — this is what stops Enter from implicitly
+      // submitting the popup's enclosing <form>
+      const modules = [createModule(PAGES_MODULE_KINDS.INFO, 0, 1)];
+      renderModulesWithWrapper(modules);
+
+      const countInput = screen.getByTestId("clone-count-input");
+      const dispatchResult = fireEvent.keyDown(countInput, {
+        key: "Enter",
+        code: "Enter"
+      });
+
+      expect(dispatchResult).toBe(false);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("module-ids")).toHaveTextContent(
+          /^temp-1,temp-clone-\d+$/
+        );
+      });
+    });
+
     describe("Document Download clone behavior", () => {
       const createDocumentModule = (overrides) => ({
         _tempId: "temp-doc-1",
@@ -883,6 +905,47 @@ describe("PageModules", () => {
         expect(screen.getByTestId("module-count")).toHaveTextContent("1");
       });
 
+      test("type=File, already-uploaded file: pressing Enter while Clone is disabled does not clone", () => {
+        const modules = [
+          createDocumentModule({
+            file: [{ id: 10, file_url: "http://x/file.pdf" }]
+          })
+        ];
+
+        const TestWrapper = () => {
+          const { values } = useFormikContext();
+          return (
+            <>
+              <PageModules name="modules" />
+              <div data-testid="module-count">{values.modules.length}</div>
+            </>
+          );
+        };
+
+        const store = mockStore({
+          mediaUploadState: { media_file_types: [] }
+        });
+        render(
+          <Provider store={store}>
+            <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+              <Form>
+                <TestWrapper />
+              </Form>
+            </Formik>
+          </Provider>
+        );
+
+        const countInput = screen.getByTestId("clone-count-input");
+        expect(countInput).toBeDisabled();
+
+        // fireEvent dispatches the keydown regardless of the native disabled
+        // attribute, exercising the `if (disabled) return;` guard in
+        // handleClone rather than any browser-level event gating
+        fireEvent.keyDown(countInput, { key: "Enter", code: "Enter" });
+
+        expect(screen.getByTestId("module-count")).toHaveTextContent("1");
+      });
+
       test.each([
         ["file: null (default, nothing chosen yet)", { file: null }],
         ["file: [] (nothing chosen yet)", { file: [] }]
@@ -933,12 +996,12 @@ describe("PageModules", () => {
           }
         ],
         [
-          "type=Url: copies external_url as-is and leaves file untouched",
+          "type=Url: copies external_url as-is and clears a non-new file (guards against a type switch bringing back a persisted file)",
           {
             type: PAGE_MODULES_DOWNLOAD.URL,
             external_url: "https://example.com/doc"
           },
-          { externalUrl: "https://example.com/doc", file: "null" }
+          { externalUrl: "https://example.com/doc", file: "[]" }
         ]
       ])("%s", async (_description, moduleOverrides, expected) => {
         const modules = [createDocumentModule(moduleOverrides)];

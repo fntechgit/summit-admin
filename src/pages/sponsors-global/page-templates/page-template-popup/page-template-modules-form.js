@@ -153,10 +153,8 @@ const PageModules = ({
   };
 
   const handleCloneModule = (index, module, count) => {
-    const isDocumentFile =
-      module.kind === PAGES_MODULE_KINDS.DOCUMENT &&
-      module.type === PAGE_MODULES_DOWNLOAD.FILE;
-    const clonedFile = isDocumentFile ? buildClonedDocumentFile(module) : null;
+    const isDocument = module.kind === PAGES_MODULE_KINDS.DOCUMENT;
+    const clonedFile = isDocument ? buildClonedDocumentFile(module) : null;
 
     const sourceData = { ...module };
     delete sourceData.id;
@@ -165,7 +163,7 @@ const PageModules = ({
       cloneIdCounter.current += 1;
       return {
         ...sourceData,
-        ...(isDocumentFile ? { file: clonedFile } : {}),
+        ...(isDocument ? { file: clonedFile } : {}),
         _tempId: `temp-clone-${cloneIdCounter.current}`
       };
     });
