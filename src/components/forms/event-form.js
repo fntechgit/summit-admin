@@ -15,6 +15,7 @@ import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import Swal from "sweetalert2";
+import moment from "moment-timezone";
 import { Tooltip } from "react-tooltip";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
@@ -55,11 +56,14 @@ import AuditLogs from "../audit-logs";
 import {
   DECIMAL_DIGITS,
   DELTA_SECS,
+  DEFAULT_REOPEN_HOURS,
   EVENT_TYPE_FISHBOWL,
   EVENT_TYPE_GROUP_EVENTS,
   EVENT_TYPE_PRESENTATION,
   MILLISECONDS_TO_SECONDS,
   ONE_MINUTE,
+  REOPEN_PRESET_HOURS_48,
+  REOPEN_PRESET_HOURS_72,
   RSVP_TYPE_NONE,
   RSVP_TYPE_PRIVATE,
   RSVP_TYPE_PUBLIC
@@ -67,6 +71,9 @@ import {
 import CopyClipboard from "../buttons/copy-clipboard";
 import EventRsvpList from "../rsvp/event-rsvp-list";
 import EventRsvpInvitationList from "../rsvp/event-rsvp-invitation-list";
+import showConfirmDialog from "../mui/showConfirmDialog";
+
+const REOPEN_DEADLINE_FORMAT = "MMMM DD, YYYY h:mm a";
 
 class EventForm extends React.Component {
   constructor(props) {
@@ -78,7 +85,9 @@ class EventForm extends React.Component {
       showSection: "main",
       errors: props.errors,
       publish: false,
-      commentFilters: { ...props.commentState.filters }
+      commentFilters: { ...props.commentState.filters },
+      reopenHours: DEFAULT_REOPEN_HOURS,
+      reopenCustomHours: ""
     };
 
     this.formRef = React.createRef();
@@ -126,6 +135,8 @@ class EventForm extends React.Component {
     this.handleEventTypeChange = this.handleEventTypeChange.bind(this);
     this.handleRSVPTypeChange = this.handleRSVPTypeChange.bind(this);
     this.handleSaveIncomplete = this.handleSaveIncomplete.bind(this);
+    this.handleReopenSubmission = this.handleReopenSubmission.bind(this);
+    this.handleCloseSubmission = this.handleCloseSubmission.bind(this);
   }
 
   componentDidMount() {
@@ -734,6 +745,115 @@ class EventForm extends React.Component {
     return entity.class_name === "Presentation";
   }
 
+  // The API's isSubmissionReopened() requires three things: the plan enabled, its
+  // submission window actually ended, and a live grant. Keying the UI on the grant
+  // alone lets it announce a deadline the server no longer treats as operative --
+  // e.g. an admin grants a reopen, then extends the plan's submission_end_date past
+  // it, and the speaker is editing under normal open-window rules again.
+  // entity comes from state, not props, because that is what the render gate reads.
+  // handleChangeSelectionPlan writes selection_plan_id into state without saving, and
+  // componentDidUpdate only syncs the other way, so reading props here would judge
+  // eligibility against the persisted plan while the form displays a different one.
+  isReopenApplicable() {
+    const { selectionPlansOpts } = this.props;
+    const { entity } = this.state;
+    const plan = selectionPlansOpts?.find(
+      (sp) => sp.id === entity.selection_plan_id
+    );
+    if (!plan || plan.is_enabled === false || !plan.submission_end_date) {
+      return false;
+    }
+    return moment().unix() > plan.submission_end_date;
+  }
+
+  isSubmissionReopened() {
+    const deadline = this.getReopenDeadline();
+    return !!deadline?.isAfter(moment());
+  }
+
+  getReopenDeadline() {
+    const { currentSummit } = this.props;
+    const { entity } = this.state;
+    // normalizeEventResponse coerces server nulls to "", so "" means no grant.
+    if (!entity.submission_reopened_until) return null;
+    return epochToMomentTimeZone(
+      entity.submission_reopened_until,
+      currentSummit.time_zone_id
+    );
+  }
+
+  // Mirrors the server's CFP_MAX_REOPEN_HOURS so an over-ceiling value is caught
+  // before the confirm dialog rather than by the 412 after it. dotenv values are
+  // strings, hence the coercion. Unset means uncapped: the server's 412 stays the
+  // authoritative ceiling, so a deployment that never sets this behaves as before.
+  getMaxReopenHours() {
+    return Number(window.CFP_MAX_REOPEN_HOURS) || 0;
+  }
+
+  getSelectedReopenHours() {
+    const { reopenHours, reopenCustomHours } = this.state;
+    const raw = String(
+      reopenHours === "custom" ? reopenCustomHours : reopenHours
+    ).trim();
+    // Not parseInt: it reads "-1" as a truthy negative, and "1.5"/"1e3" as 1, which
+    // would silently grant an hour instead of what the admin typed. Only a plain
+    // positive integer is a valid window.
+    if (!/^\d+$/.test(raw) || Number(raw) <= 0) return 0;
+    const hours = Number(raw);
+    // Uncapped, a digit-only value can still overflow moment: the deadline comes back NaN,
+    // which epochToMomentTimeZone passes through unwrapped, so the confirm dialog throws.
+    if (!moment().add(hours, "hours").isValid()) return 0;
+    const max = this.getMaxReopenHours();
+    // Applied to the presets too, not just the custom entry, so a ceiling
+    // configured below 72 can't offer a preset the server would refuse.
+    return max && hours > max ? 0 : hours;
+  }
+
+  async handleReopenSubmission() {
+    const { currentSummit, onReopenSubmission } = this.props;
+    const { entity } = this.state;
+    const hours = this.getSelectedReopenHours();
+    if (!hours) return;
+
+    // Deliberately optimistic: the deadline shown here is computed client-side for the
+    // confirm copy only. The server derives the real one. They agree to within the
+    // round trip, and naming it is what stops an admin pasting a link that will
+    // quietly go read-only (the CFP route hard-gates on the live grant).
+    const deadline = epochToMomentTimeZone(
+      moment().add(hours, "hours").unix(),
+      currentSummit.time_zone_id
+    ).format(REOPEN_DEADLINE_FORMAT);
+
+    const confirmed = await showConfirmDialog({
+      title: T.translate("edit_event.reopen_confirm_title"),
+      text: T.translate("edit_event.reopen_confirm_text", { deadline }),
+      iconType: "warning",
+      confirmButtonText: T.translate("edit_event.reopen_submission")
+    });
+
+    // snackbarErrorHandler has already put the API message in front of the admin, and an
+    // over-ceiling hours value is an expected 412 rather than a fault. Swallow the
+    // rejection so it doesn't reach Sentry as an unhandled one.
+    if (confirmed) onReopenSubmission(entity.id, hours)?.catch(() => {});
+  }
+
+  async handleCloseSubmission() {
+    const { onCloseSubmission } = this.props;
+    const { entity } = this.state;
+
+    const confirmed = await showConfirmDialog({
+      title: T.translate("edit_event.close_submission_confirm_title"),
+      text: T.translate("edit_event.close_submission_confirm_text"),
+      iconType: "warning",
+      confirmButtonText: T.translate("edit_event.close_submission"),
+      confirmButtonColor: "error"
+    });
+
+    // See handleReopenSubmission: the error is already surfaced, so don't let the
+    // rejection escape as an unhandled one.
+    if (confirmed) onCloseSubmission(entity.id)?.catch(() => {});
+  }
+
   isNew() {
     const { entity } = this.state;
     return !entity.id;
@@ -911,7 +1031,16 @@ class EventForm extends React.Component {
   }
 
   render() {
-    const { entity, showSection, errors, speakerToAdd } = this.state;
+    const {
+      entity,
+      showSection,
+      errors,
+      speakerToAdd,
+      reopenHours,
+      reopenCustomHours
+    } = this.state;
+
+    const maxReopenHours = this.getMaxReopenHours();
 
     const {
       currentSummit,
@@ -1090,6 +1219,8 @@ class EventForm extends React.Component {
         ? []
         : this.getMissingDraftFields();
 
+    const speakerDeepLink = `${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${entity.selection_plan_id}/presentations/${entity.id}/summary`;
+
     return (
       <div>
         <input type="hidden" id="id" value={entity.id} />
@@ -1128,6 +1259,126 @@ class EventForm extends React.Component {
             </p>
           </div>
         )}
+        {this.isPresentation() &&
+          !this.isNew() &&
+          entity.selection_plan_id > 0 &&
+          this.isReopenApplicable() && (
+            <div className="row form-group">
+              <div className="col-md-12">
+                <label>
+                  {T.translate("edit_event.reopen_submission_section")}
+                </label>
+                {!this.isSubmissionReopened() && (
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 10 }}
+                  >
+                    <label htmlFor="reopen_hours">
+                      {T.translate("edit_event.reopen_duration")}
+                    </label>
+                    <select
+                      id="reopen_hours"
+                      className="form-control"
+                      style={{ width: "auto" }}
+                      value={reopenHours}
+                      onChange={(ev) =>
+                        this.setState({ reopenHours: ev.target.value })
+                      }
+                    >
+                      <option value={DEFAULT_REOPEN_HOURS}>
+                        {T.translate("edit_event.reopen_duration_24")}
+                      </option>
+                      <option value={REOPEN_PRESET_HOURS_48}>
+                        {T.translate("edit_event.reopen_duration_48")}
+                      </option>
+                      <option value={REOPEN_PRESET_HOURS_72}>
+                        {T.translate("edit_event.reopen_duration_72")}
+                      </option>
+                      <option value="custom">
+                        {T.translate("edit_event.reopen_duration_custom")}
+                      </option>
+                    </select>
+                    {reopenHours === "custom" && (
+                      <>
+                        <label htmlFor="reopen_custom_hours">
+                          {maxReopenHours
+                            ? T.translate(
+                                "edit_event.reopen_custom_hours_capped",
+                                { max: maxReopenHours }
+                              )
+                            : T.translate("edit_event.reopen_custom_hours")}
+                        </label>
+                        <input
+                          id="reopen_custom_hours"
+                          type="number"
+                          min="1"
+                          max={maxReopenHours || undefined}
+                          className="form-control"
+                          style={{ width: 120 }}
+                          value={reopenCustomHours}
+                          onChange={(ev) =>
+                            this.setState({
+                              reopenCustomHours: ev.target.value
+                            })
+                          }
+                        />
+                      </>
+                    )}
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      disabled={!this.getSelectedReopenHours()}
+                      onClick={this.handleReopenSubmission}
+                    >
+                      {T.translate("edit_event.reopen_submission")}
+                    </button>
+                  </div>
+                )}
+                {this.isSubmissionReopened() && (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      flexWrap: "wrap"
+                    }}
+                  >
+                    <span>
+                      {T.translate("edit_event.reopened_until", {
+                        deadline: this.getReopenDeadline().format(
+                          REOPEN_DEADLINE_FORMAT
+                        )
+                      })}
+                    </span>
+                    {entity.submission_reopened_by && (
+                      <span>
+                        {T.translate("edit_event.reopened_by", {
+                          admin: `${entity.submission_reopened_by.first_name} ${entity.submission_reopened_by.last_name}`
+                        })}
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      className="btn btn-danger"
+                      onClick={this.handleCloseSubmission}
+                    >
+                      {T.translate("edit_event.close_submission")}
+                    </button>
+                    {window.CFP_APP_BASE_URL && (
+                      <span>
+                        <label>
+                          {T.translate("edit_event.reopen_deep_link_label")}
+                        </label>
+                        &nbsp;
+                        <CopyClipboard text={speakerDeepLink} />
+                        &nbsp;
+                        {speakerDeepLink}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         <div className="row form-group">
           <div className="col-md-8">
             <label> {T.translate("edit_event.submitter")} </label> &nbsp;

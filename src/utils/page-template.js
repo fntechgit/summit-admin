@@ -37,6 +37,11 @@ export const denormalizePageModules = (modules = [], timeZone = null) =>
     return tmpModule;
   });
 
+// A file is "new" when it was just selected in the browser and has not been
+// uploaded/persisted yet — persisted files carry an `id` or `file_id`.
+export const isNewDocumentFile = (file) =>
+  Boolean(file && typeof file === "object" && !file.id && !file.file_id);
+
 export const normalizePageTemplateModules = (modules = [], timeZone = null) =>
   modules.map((module) => {
     const normalizedModule = { ...module };
@@ -65,9 +70,7 @@ export const normalizePageTemplateModules = (modules = [], timeZone = null) =>
       if (module.type === PAGE_MODULES_DOWNLOAD.FILE) {
         // Only new files (without id or file_id) are sent in the payload; existing files are omitted to prevent overwriting.
         const file = Array.isArray(module.file) ? module.file[0] : null;
-        const isNewFile =
-          file && typeof file === "object" && !file.id && !file.file_id;
-        if (isNewFile) {
+        if (isNewDocumentFile(file)) {
           normalizedModule.file = file;
         } else {
           delete normalizedModule.file;

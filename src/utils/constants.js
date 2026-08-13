@@ -284,6 +284,9 @@ export const PAGE_MODULES_DOWNLOAD = {
   URL: "Url"
 };
 
+export const MIN_MODULE_CLONE_COUNT = 1;
+export const MAX_MODULE_CLONE_COUNT = 20;
+
 export const PURCHASE_STATUS = {
   PENDING: "Pending",
   PAID: "Paid",
@@ -354,3 +357,7 @@ export const IMPORT_SPONSOR_USERS_STATUS = {
   SUCCESS: "SUCCESS",
   FAILURE: "FAILURE"
 };
+
+export const DEFAULT_REOPEN_HOURS = 24;
+export const REOPEN_PRESET_HOURS_48 = 48;
+export const REOPEN_PRESET_HOURS_72 = 72;

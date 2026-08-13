@@ -712,7 +712,26 @@
     "draft_state_note": "This activity was saved as a draft by the submitter and contains missing required fields. To make partial changes (e.g., re-categorize or assign tags) without filling out missing fields, use the Save as Incomplete button below. This preserves the draft status.",
     "save_as_incomplete": "Save as Incomplete",
     "save_and_mark_complete": "Save & Mark Complete",
-    "event_saved_as_draft": "Activity saved as draft successfully."
+    "event_saved_as_draft": "Activity saved as draft successfully.",
+    "reopen_submission": "Reopen submission",
+    "reopen_submission_section": "CFP submission window",
+    "reopen_duration": "Reopen for",
+    "reopen_duration_24": "24 hours",
+    "reopen_duration_48": "48 hours",
+    "reopen_duration_72": "72 hours",
+    "reopen_duration_custom": "Custom",
+    "reopen_custom_hours": "Hours",
+    "reopen_custom_hours_capped": "Hours (1-{max})",
+    "reopen_confirm_title": "Reopen submission for this activity?",
+    "reopen_confirm_text": "This lets the speaker edit this talk until {deadline}.",
+    "reopen_submission_success": "Submission reopened.",
+    "close_submission": "Close now",
+    "close_submission_confirm_title": "Close the submission window now?",
+    "close_submission_confirm_text": "The speaker will immediately lose the ability to edit this talk.",
+    "close_submission_success": "Submission window closed.",
+    "reopened_until": "Reopened until {deadline}",
+    "reopened_by": "by {admin}",
+    "reopen_deep_link_label": "Speaker link"
   },
   "edit_event_material": {
     "material": "Material",
@@ -4215,7 +4234,10 @@
       "upload_deadline": "Upload Deadline",
       "max_file_size": "Max File Size (MB)",
       "allowed_formats": "Allowed Formats",
-      "module_remove_warning": "Please verify you want to delete this {name}"
+      "module_remove_warning": "Please verify you want to delete this {name}",
+      "clone_module": "Clone",
+      "clone_count_label": "Number of copies to create",
+      "clone_disabled_persisted_file": "This document's file has already been uploaded and can't be copied. Clone is disabled to prevent creating copies without a file, which cannot be saved."
     },
     "clone_success": "Page template cloned successfully."
   },

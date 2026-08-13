@@ -18,12 +18,15 @@ import DragAndDropList from "openstack-uicore-foundation/lib/components/mui/dnd-
 import showConfirmDialog from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
 import {
   DEBOUNCE_WAIT_150,
-  PAGES_MODULE_KINDS
+  PAGES_MODULE_KINDS,
+  PAGE_MODULES_DOWNLOAD
 } from "../../../../utils/constants";
 import InfoModule from "./modules/page-template-info-module";
 import DocumentDownloadModule from "./modules/page-template-document-download-module";
 import MediaRequestModule from "./modules/page-template-media-request-module";
+import ModuleCloneControl from "./module-clone-control";
 import { getAllMediaFileTypes } from "../../../../actions/media-file-type-actions";
+import { isNewDocumentFile } from "../../../../utils/page-template";
 
 const PageModules = ({
   name = "modules",
@@ -37,15 +40,25 @@ const PageModules = ({
   const bottomRef = useRef(null);
   const prevModulesLength = useRef(modules.length);
   const moduleRefMap = useRef(new Map());
+  const cloneIdCounter = useRef(0);
+  const cloneScrollTargetRef = useRef(null);
 
   const [collapsedModules, setCollapsedModules] = useState(new Set());
 
   const getModuleId = (module) => module._tempId || module.id;
 
-  // auto-scroll to new module
+  // auto-scroll to new module (or to the last cloned copy, when cloning)
   useEffect(() => {
     if (modules.length > prevModulesLength.current) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      if (cloneScrollTargetRef.current) {
+        const targetId = cloneScrollTargetRef.current;
+        cloneScrollTargetRef.current = null;
+        moduleRefMap.current
+          .get(targetId)
+          ?.scrollIntoView({ behavior: "smooth" });
+      } else {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      }
     }
     prevModulesLength.current = modules.length;
   }, [modules.length]);
@@ -110,6 +123,67 @@ const PageModules = ({
     }
   };
 
+  const getDocumentFile = (module) =>
+    Array.isArray(module.file) ? module.file[0] : null;
+
+  // A Document Download module's file field must never be silently carried into a
+  // clone: an already-uploaded file (has id/file_id) would look attached in the UI
+  // but get stripped at save time by normalizePageTemplateModules, while a newly
+  // selected, not-yet-uploaded file is copied as-is.
+  const buildClonedDocumentFile = (module) => {
+    const file = getDocumentFile(module);
+    return isNewDocumentFile(file) ? module.file : [];
+  };
+
+  // Cloning a Document module whose file is already persisted would create
+  // copies with no file (see buildClonedDocumentFile above) that fail the
+  // documentModuleSchema's required file validation and block saving the
+  // whole template. Disable Clone for that case instead of letting the user
+  // hit an unsaveable dead end after the fact. A module with no file at all
+  // yet (nothing chosen) is not "persisted" and must stay clonable.
+  const isCloneBlockedByPersistedFile = (module) => {
+    if (
+      module.kind !== PAGES_MODULE_KINDS.DOCUMENT ||
+      module.type !== PAGE_MODULES_DOWNLOAD.FILE
+    ) {
+      return false;
+    }
+    const file = getDocumentFile(module);
+    return Boolean(file) && !isNewDocumentFile(file);
+  };
+
+  const handleCloneModule = (index, module, count) => {
+    const isDocument = module.kind === PAGES_MODULE_KINDS.DOCUMENT;
+    const clonedFile = isDocument ? buildClonedDocumentFile(module) : null;
+
+    const sourceData = { ...module };
+    delete sourceData.id;
+
+    const clones = Array.from({ length: count }, () => {
+      cloneIdCounter.current += 1;
+      return {
+        ...sourceData,
+        ...(isDocument ? { file: clonedFile } : {}),
+        _tempId: `temp-clone-${cloneIdCounter.current}`
+      };
+    });
+
+    const updated = [
+      ...modules.slice(0, index + 1),
+      ...clones,
+      ...modules.slice(index + 1)
+    ];
+
+    setCollapsedModules((prev) => {
+      const next = new Set(prev);
+      clones.forEach((clone) => next.add(clone._tempId));
+      return next;
+    });
+
+    cloneScrollTargetRef.current = clones[clones.length - 1]._tempId;
+    setFieldValue(name, updated);
+  };
+
   const handleReorderModules = (newModules) => {
     setFieldValue(name, newModules);
   };
@@ -145,68 +219,83 @@ const PageModules = ({
     }
   };
 
-  const renderModule = (module, index) => (
-    <Accordion
-      expanded={!collapsedModules.has(getModuleId(module))}
-      onChange={handleToggle(getModuleId(module))}
-      ref={(el) => {
-        moduleRefMap.current.set(getModuleId(module), el);
-      }}
-      sx={{
-        mb: 1,
-        "&:before": { display: "none" },
-        boxShadow: "none",
-        border: "1px solid #e0e0e0",
-        borderRadius: "0 !important",
-        "&:first-of-type": { borderRadius: 0 },
-        "&:last-of-type": { borderRadius: 0 }
-      }}
-      key={module._tempId || `module-${index}`}
-    >
-      <AccordionSummary
-        expandIcon={<ExpandMoreIcon />}
-        sx={{
-          backgroundColor: "#2196F31F",
-          flexDirection: "row-reverse",
-          "& .MuiAccordionSummary-expandIconWrapper": {
-            marginRight: 1,
-            marginLeft: 0
-          }
+  const renderModule = (module, index) => {
+    const cloneDisabled = isCloneBlockedByPersistedFile(module);
+
+    return (
+      <Accordion
+        expanded={!collapsedModules.has(getModuleId(module))}
+        onChange={handleToggle(getModuleId(module))}
+        ref={(el) => {
+          moduleRefMap.current.set(getModuleId(module), el);
         }}
+        sx={{
+          mb: 1,
+          "&:before": { display: "none" },
+          boxShadow: "none",
+          border: "1px solid #e0e0e0",
+          borderRadius: "0 !important",
+          "&:first-of-type": { borderRadius: 0 },
+          "&:last-of-type": { borderRadius: 0 }
+        }}
+        key={module._tempId || `module-${index}`}
       >
-        <Box
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
           sx={{
-            display: "flex",
-            alignItems: "center",
-            width: "100%",
-            justifyContent: "space-between"
+            backgroundColor: "#2196F31F",
+            flexDirection: "row-reverse",
+            "& .MuiAccordionSummary-expandIconWrapper": {
+              marginRight: 1,
+              marginLeft: 0
+            }
           }}
         >
-          <Typography>{getModuleTitle(module.kind)}</Typography>
-
           <Box
-            sx={{ display: "flex", alignItems: "center" }}
-            onClick={(e) => e.stopPropagation()}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              width: "100%",
+              justifyContent: "space-between"
+            }}
           >
-            <UnfoldMoreIcon
-              sx={{ mr: 1, color: "action.active", cursor: "grab" }}
-            />
-            <IconButton
-              size="small"
-              aria-label={T.translate("general.delete")}
-              data-testid="delete-module-btn"
-              onClick={() => handleDeleteModule(index, module)}
+            <Typography>{getModuleTitle(module.kind)}</Typography>
+
+            <Box
+              sx={{ display: "flex", alignItems: "center" }}
+              onClick={(e) => e.stopPropagation()}
             >
-              <DeleteIcon />
-            </IconButton>
+              <ModuleCloneControl
+                onClone={(count) => handleCloneModule(index, module, count)}
+                disabled={cloneDisabled}
+                disabledReason={
+                  cloneDisabled
+                    ? T.translate(
+                        "page_template_list.page_crud.clone_disabled_persisted_file"
+                      )
+                    : ""
+                }
+              />
+              <UnfoldMoreIcon
+                sx={{ mr: 1, color: "action.active", cursor: "grab" }}
+              />
+              <IconButton
+                size="small"
+                aria-label={T.translate("general.delete")}
+                data-testid="delete-module-btn"
+                onClick={() => handleDeleteModule(index, module)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
           </Box>
-        </Box>
-      </AccordionSummary>
-      <AccordionDetails sx={{ p: 2 }}>
-        {renderModuleFields(module, index)}
-      </AccordionDetails>
-    </Accordion>
-  );
+        </AccordionSummary>
+        <AccordionDetails sx={{ p: 2 }}>
+          {renderModuleFields(module, index)}
+        </AccordionDetails>
+      </Accordion>
+    );
+  };
 
   return (
     <Box>
@@ -220,7 +309,16 @@ const PageModules = ({
         </Typography>
       ) : (
         <DragAndDropList
-          items={modules}
+          // DragAndDropList keys each Draggable by idKey, falling back to the
+          // array index (not module.id) when it's missing — a persisted module
+          // loaded without a _tempId would otherwise get an index-based key
+          // that shifts (forcing a remount) whenever cloning inserts items
+          // before it. Normalize a stable _tempId here so every item's key
+          // tracks the module itself rather than its position.
+          items={modules.map((module) => ({
+            ...module,
+            _tempId: getModuleId(module)
+          }))}
           onReorder={handleReorderModules}
           renderItem={renderModule}
           idKey="_tempId"

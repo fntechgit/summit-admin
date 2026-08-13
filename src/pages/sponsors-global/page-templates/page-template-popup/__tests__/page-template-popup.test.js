@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import configureStore from "redux-mock-store";
@@ -59,6 +59,12 @@ jest.mock(
       return <div data-testid={`radio-group-${name}`} />;
     }
 );
+
+// jsdom does not implement scrollIntoView; stub it so effects that call it
+// (auto-scroll to a new/cloned module) don't throw in these component tests.
+beforeAll(() => {
+  window.HTMLElement.prototype.scrollIntoView = jest.fn();
+});
 
 const baseMediaModule = {
   _tempId: "temp-1",
@@ -161,6 +167,60 @@ describe("PageTemplatePopup validation — empty-string normalization", () => {
     });
     const errors = yupToFormErrors.mock.results.at(-1).value;
     expect(errors.modules[0].max_file_size).toBe("validation.required");
+  });
+});
+
+describe("PageTemplatePopup — cloning modules", () => {
+  it("sends cloned modules to save in order, with recomputed custom_order, alongside originals", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    const modules = [
+      {
+        _tempId: "temp-1",
+        id: 11,
+        kind: PAGES_MODULE_KINDS.MEDIA,
+        type: PAGE_MODULES_MEDIA_TYPES.INPUT,
+        custom_order: 0,
+        name: "First module",
+        description: "First description",
+        upload_deadline: null
+      },
+      {
+        _tempId: "temp-2",
+        id: 12,
+        kind: PAGES_MODULE_KINDS.MEDIA,
+        type: PAGE_MODULES_MEDIA_TYPES.INPUT,
+        custom_order: 1,
+        name: "Second module",
+        description: "Second description",
+        upload_deadline: null
+      }
+    ];
+    renderPopup({ isGlobal: true, onSave, modules });
+
+    const countInput = screen.getAllByTestId("clone-count-input")[0];
+    fireEvent.change(countInput, { target: { value: "2" } });
+    await userEvent.click(screen.getAllByTestId("clone-module-btn")[0]);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "page_template_list.page_crud.save" })
+    );
+
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalled();
+    });
+
+    const savedModules = onSave.mock.calls[0][0].modules;
+    expect(savedModules.map((m) => m.name)).toEqual([
+      "First module",
+      "First module",
+      "First module",
+      "Second module"
+    ]);
+    expect(savedModules.map((m) => m.custom_order)).toEqual([0, 1, 2, 3]);
+    expect(savedModules[0].id).toBe(11);
+    expect(savedModules[1].id).toBeUndefined();
+    expect(savedModules[2].id).toBeUndefined();
+    expect(savedModules[3].id).toBe(12);
   });
 });
 
