@@ -32,14 +32,13 @@ import {
   getSponsorFormItem,
   getSponsorFormItems,
   saveSponsorFormItem,
-  updateSponsorFormItem,
   addInventoryItems,
   resetSponsorFormItem,
   archiveSponsorFormItem,
   unarchiveSponsorFormItem
 } from "../../../actions/sponsor-forms-actions";
 import { getInventoryItems } from "../../../actions/inventory-item-actions";
-import SponsorFormItemPopup from "./components/sponsor-form-item-popup";
+import SponsorInventoryDialog from "../../sponsors-global/form-templates/sponsor-inventory-popup";
 import SponsorFormAddItemFromInventoryPopup from "./components/sponsor-form-add-item-from-inventory-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 import { rateCellValidation } from "../../../utils/yup";
@@ -61,7 +60,6 @@ const SponsorFormItemListPage = ({
   getSponsorFormItem,
   deleteSponsorFormItem,
   saveSponsorFormItem,
-  updateSponsorFormItem,
   addInventoryItems,
   resetSponsorFormItem,
   archiveSponsorFormItem,
@@ -115,9 +113,8 @@ const SponsorFormItemListPage = ({
     setOpenPopup(null);
   };
 
-  const handleSaveItem = (values) => {
-    const save = values.id ? updateSponsorFormItem : saveSponsorFormItem;
-    return save(formId, values).then(() =>
+  const handleSaveItem = (values) =>
+    saveSponsorFormItem(formId, values).then(() =>
       getSponsorFormItems(
         formId,
         values.id ? currentPage : DEFAULT_CURRENT_PAGE,
@@ -127,7 +124,6 @@ const SponsorFormItemListPage = ({
         showArchived
       ).catch(() => {})
     );
-  };
 
   const handleAddFromInventory = (itemIds) =>
     addInventoryItems(formId, itemIds).then(() =>
@@ -145,7 +141,7 @@ const SponsorFormItemListPage = ({
     // since editable cell is TextField and not PriceField, we need to convert to cents
     const valueInCents = rateToCents(value);
     const tmpEntity = { id: rowId, [column]: valueInCents };
-    return updateSponsorFormItem(formId, tmpEntity)
+    return saveSponsorFormItem(formId, tmpEntity)
       .then(() =>
         getSponsorFormItems(
           formId,
@@ -355,10 +351,11 @@ const SponsorFormItemListPage = ({
         </div>
       )}
       {openPopup === "crud" && (
-        <SponsorFormItemPopup
-          item={currentItem}
+        <SponsorInventoryDialog
+          entity={currentItem}
           onSave={handleSaveItem}
           onClose={handleClosePopup}
+          requireDefaultQuantity
         />
       )}
       {openPopup === "inventory" && (
@@ -386,7 +383,6 @@ export default connect(mapStateToProps, {
   deleteSponsorFormItem,
   getSponsorFormItem,
   saveSponsorFormItem,
-  updateSponsorFormItem,
   addInventoryItems,
   resetSponsorFormItem,
   getInventoryItems,
