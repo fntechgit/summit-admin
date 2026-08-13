@@ -284,6 +284,9 @@ export const PAGE_MODULES_DOWNLOAD = {
   URL: "Url"
 };
 
+export const MIN_MODULE_CLONE_COUNT = 1;
+export const MAX_MODULE_CLONE_COUNT = 20;
+
 export const PURCHASE_STATUS = {
   PENDING: "Pending",
   PAID: "Paid",
