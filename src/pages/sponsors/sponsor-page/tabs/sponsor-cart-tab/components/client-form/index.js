@@ -17,7 +17,7 @@ import T from "i18n-react/dist/i18n-react";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
 import Box from "@mui/material/Box";
-import { MuiFormikTextField } from "openstack-uicore-foundation/lib/components";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import { DEBOUNCE_WAIT_250 } from "../../../../../../../utils/constants";
 
 const ClientForm = ({ initialValues, onChange }) => {
