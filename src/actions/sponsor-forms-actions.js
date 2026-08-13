@@ -1269,14 +1269,20 @@ export const saveSponsorFormItem =
       normalizedEntity,
       snackbarErrorHandler
     )(params)(dispatch)
-      .then(() => {
-        dispatch(
-          snackbarSuccessHandler({
-            title: T.translate("general.success"),
-            html: T.translate("sponsor_form_item_list.edit_item.created")
-          })
-        );
-      })
+      .then(({ response }) =>
+        saveNewItemImages(
+          formId,
+          response.id,
+          entity.images
+        )(dispatch, getState).then(() => {
+          dispatch(
+            snackbarSuccessHandler({
+              title: T.translate("general.success"),
+              html: T.translate("sponsor_form_item_list.edit_item.created")
+            })
+          );
+        })
+      )
       .finally(() => {
         dispatch(stopLoading());
       });
@@ -1303,14 +1309,20 @@ export const updateSponsorFormItem =
       normalizedEntity,
       snackbarErrorHandler
     )(params)(dispatch)
-      .then(() => {
-        dispatch(
-          snackbarSuccessHandler({
-            title: T.translate("general.success"),
-            html: T.translate("sponsor_form_item_list.edit_item.updated")
-          })
-        );
-      })
+      .then(() =>
+        saveNewItemImages(
+          formId,
+          entity.id,
+          entity.images
+        )(dispatch, getState).then(() => {
+          dispatch(
+            snackbarSuccessHandler({
+              title: T.translate("general.success"),
+              html: T.translate("sponsor_form_item_list.edit_item.updated")
+            })
+          );
+        })
+      )
       .catch((err) => {
         throw err;
       })
@@ -1397,17 +1409,19 @@ const normalizeItem = (entity) => {
     meta_fields,
     quantity_limit_per_show,
     quantity_limit_per_sponsor,
-    default_quantity,
-    images
+    default_quantity
   } = entity;
 
   if (meta_fields) {
     normalizedEntity.meta_fields = meta_fields.filter((mf) => !!mf.name);
   }
 
-  if (images) {
-    normalizedEntity.images = images?.filter((img) => img.file_path);
-  }
+  // Images are never round-tripped inline: the item add/update endpoint's
+  // nested-images path only clones the file name (no S3 copy) and, on
+  // update, replaces the whole collection - wiping cloned-from-inventory
+  // images whose id it can't preserve. New uploads are persisted separately
+  // via saveNewItemImages once the item itself is saved.
+  delete normalizedEntity.images;
 
   if (quantity_limit_per_show === "")
     delete normalizedEntity.quantity_limit_per_show;
@@ -1417,6 +1431,32 @@ const normalizeItem = (entity) => {
 
   return normalizedEntity;
 };
+
+const saveNewItemImages =
+  (formId, formItemId, images = []) =>
+  async (dispatch, getState) => {
+    const newImages = images.filter((img) => !img.id && img.file_path);
+
+    if (newImages.length === 0) return Promise.resolve();
+
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+    const accessToken = await getAccessTokenSafely();
+    const params = { access_token: accessToken };
+
+    const promises = newImages.map((file) =>
+      postRequest(
+        null,
+        createAction(SPONSOR_FORM_ITEM_UPDATED),
+        `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images`,
+        file,
+        snackbarErrorHandler,
+        file
+      )(params)(dispatch)
+    );
+
+    return Promise.all(promises);
+  };
 
 export const addInventoryItems =
   (formId, itemIds) => async (dispatch, getState) => {

@@ -411,7 +411,7 @@ describe("Sponsor Forms Actions", () => {
       jest.restoreAllMocks();
     });
 
-    it("sends the images in the create request body and makes no follow-up image request", async () => {
+    it("omits images from the create request body and POSTs new uploads to the images subresource", async () => {
       const store = mockStore({
         currentSummitState: { currentSummit: { id: 42 } }
       });
@@ -425,22 +425,27 @@ describe("Sponsor Forms Actions", () => {
       await store.dispatch(saveSponsorFormItem(7, entity));
       await flushPromises();
 
-      expect(postRequest).toHaveBeenCalledWith(
+      expect(postRequest).toHaveBeenNthCalledWith(
+        1,
         null,
         expect.any(Function),
         `${window.PURCHASES_API_URL}/api/v1/summits/42/show-forms/7/items`,
-        expect.objectContaining({
-          images: [{ file_path: "data:image/png;base64,AAA" }]
-        }),
+        expect.not.objectContaining({ images: expect.anything() }),
         expect.any(Function)
       );
 
-      // The item-create request itself now saves and associates the
-      // images — a follow-up per-image request would create duplicates.
-      const hitImagesEndpoint = postRequest.mock.calls.some(([, , url]) =>
-        url.includes("/images")
+      // The created item's id (100, from the mocked response) is used to
+      // POST the new upload to the images subresource - the only path that
+      // actually materializes the file server-side.
+      expect(postRequest).toHaveBeenNthCalledWith(
+        2,
+        null,
+        expect.any(Function),
+        `${window.PURCHASES_API_URL}/api/v1/summits/42/show-forms/7/items/100/images`,
+        { file_path: "data:image/png;base64,AAA" },
+        expect.any(Function),
+        { file_path: "data:image/png;base64,AAA" }
       );
-      expect(hitImagesEndpoint).toBe(false);
     });
   });
 
@@ -454,13 +459,19 @@ describe("Sponsor Forms Actions", () => {
       putRequest.mockImplementation(
         () => () => () => Promise.resolve({ response: { id: 100 } })
       );
+      // Clear call history left by the sibling saveSponsorFormItem tests -
+      // this describe's assertions inspect postRequest's call log directly.
+      postRequest.mockClear();
+      postRequest.mockImplementation(
+        () => () => () => Promise.resolve({ response: {} })
+      );
     });
 
     afterEach(() => {
       jest.restoreAllMocks();
     });
 
-    it("sends the images in the update request body and makes no follow-up image request", async () => {
+    it("omits persisted images from the update request body so they are never round-tripped", async () => {
       const store = mockStore({
         currentSummitState: { currentSummit: { id: 42 } }
       });
@@ -479,18 +490,45 @@ describe("Sponsor Forms Actions", () => {
         null,
         expect.any(Function),
         `${window.PURCHASES_API_URL}/api/v1/summits/42/show-forms/7/items/100`,
-        expect.objectContaining({
-          images: [{ id: 5, file_path: "https://cdn/a.png" }]
-        }),
+        expect.not.objectContaining({ images: expect.anything() }),
         expect.any(Function)
       );
 
-      // The item-update request itself now saves and associates the
-      // images — a follow-up per-image request would create duplicates.
-      const hitImagesEndpoint = putRequest.mock.calls.some(([, , url]) =>
-        url.includes("/images")
+      // The image already has an id (persisted) - it must never be resent,
+      // since the backend replaces the whole collection on update and can't
+      // preserve a cloned-from-inventory image's external id.
+      const hitImagesEndpoint = postRequest.mock.calls.some(
+        ([, , url]) => url && url.includes("/images")
       );
       expect(hitImagesEndpoint).toBe(false);
+    });
+
+    it("POSTs new (id-less) uploads to the images subresource after the update succeeds", async () => {
+      const store = mockStore({
+        currentSummitState: { currentSummit: { id: 42 } }
+      });
+
+      const entity = {
+        id: 100,
+        name: "Item",
+        images: [
+          { id: 5, file_path: "https://cdn/a.png" },
+          { file_path: "data:image/png;base64,BBB" }
+        ],
+        meta_fields: []
+      };
+
+      await store.dispatch(updateSponsorFormItem(7, entity));
+      await flushPromises();
+
+      expect(postRequest).toHaveBeenCalledWith(
+        null,
+        expect.any(Function),
+        `${window.PURCHASES_API_URL}/api/v1/summits/42/show-forms/7/items/100/images`,
+        { file_path: "data:image/png;base64,BBB" },
+        expect.any(Function),
+        { file_path: "data:image/png;base64,BBB" }
+      );
     });
   });
 });
