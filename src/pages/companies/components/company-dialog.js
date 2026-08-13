@@ -33,7 +33,7 @@ import {
   Typography
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { UploadInputV3 } from "openstack-uicore-foundation/lib/components";
+import UploadInputV3 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v3";
 import { getCountryList } from "openstack-uicore-foundation/lib/utils/query-actions";
 import Table from "openstack-uicore-foundation/lib/components/mui/table";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";

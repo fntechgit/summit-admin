@@ -14,10 +14,8 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import {
-  Input,
-  SimpleLinkList
-} from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
+import SimpleLinkList from "openstack-uicore-foundation/lib/components/simple-link-list";
 import {
   isEmpty,
   scrollToError,
@@ -47,7 +45,7 @@ class BadgeTypeForm extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 

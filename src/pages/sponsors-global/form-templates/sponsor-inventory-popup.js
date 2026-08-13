@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AdditionalInputList from "openstack-uicore-foundation/lib/components/mui/formik-inputs/additional-input-list";
-import { MuiFormikUpload } from "openstack-uicore-foundation/lib/components";
+import MuiFormikUpload from "openstack-uicore-foundation/lib/components/mui/formik-inputs/upload";
 import {
   ALLOWED_INVENTORY_IMAGE_FORMATS,
   MAX_INVENTORY_IMAGE_UPLOAD_SIZE,

@@ -20,10 +20,9 @@ import { Button, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import moment from "moment-timezone";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import {
-  MuiFormItemTable,
+import MuiFormItemTable, {
   getCurrentApplicableRate
-} from "openstack-uicore-foundation/lib/components";
+} from "openstack-uicore-foundation/lib/components/mui/form-item-table";
 import { DISCOUNT_TYPES } from "../../../../../../../utils/constants";
 import showConfirmDialog from "../../../../../../../components/mui/showConfirmDialog";
 
