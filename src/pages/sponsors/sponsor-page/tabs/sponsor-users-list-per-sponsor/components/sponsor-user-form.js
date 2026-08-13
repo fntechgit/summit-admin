@@ -10,11 +10,11 @@ import {
 } from "@mui/material";
 import T from "i18n-react";
 import { FormikProvider, useFormik } from "formik";
-import MuiFormikTextField from "../../../../../../components/mui/formik-inputs/mui-formik-textfield";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikCheckboxGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox-group";
+import MuiFormikSwitch from "openstack-uicore-foundation/lib/components/mui/formik-inputs/switch";
 import useScrollToError from "../../../../../../hooks/useScrollToError";
-import MuiFormikCheckboxGroup from "../../../../../../components/mui/formik-inputs/mui-formik-checkbox-group";
 import { titleCase } from "../../../../../../utils/methods";
-import MuiFormikSwitch from "../../../../../../components/mui/formik-inputs/mui-formik-switch";
 
 const buildInitialValues = (data) => {
   const normalized = { ...data };

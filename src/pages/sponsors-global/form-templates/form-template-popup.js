@@ -17,7 +17,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useFormik, FormikProvider } from "formik";
 import * as yup from "yup";
 import AdditionalInputList from "openstack-uicore-foundation/lib/components/mui/formik-inputs/additional-input-list";
-import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
 import useScrollToError from "../../../hooks/useScrollToError";
 import {

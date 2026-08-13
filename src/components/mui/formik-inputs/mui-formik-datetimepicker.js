@@ -18,6 +18,8 @@ import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { useField } from "formik";
 
+// Stays local: uicore's datepicker.js wraps MUI's date-only DatePicker, not
+// DateTimePicker. Not a substitute for this date+time field.
 const MuiFormikDatetimepicker = ({
   name,
   label,
