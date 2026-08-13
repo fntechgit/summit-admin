@@ -182,7 +182,7 @@ const Sponsorship = ({
       {showManageTierAddonsPopup && (
         <ManageTierAddonsPopup
           sponsorship={selectedSponsorship}
-          summitId={summitId}
+          open={showManageTierAddonsPopup}
           onSponsorshipAddonRemove={onSponsorshipAddonRemove}
           onClose={handleCloseManageAddonsPopup}
           onSubmit={handleAddSponsorshipAddon}

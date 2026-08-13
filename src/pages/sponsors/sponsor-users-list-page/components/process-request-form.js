@@ -12,15 +12,15 @@ import {
 import T from "i18n-react";
 import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
-import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
-import useScrollToError from "../../../../hooks/useScrollToError";
-import MuiFormikRadioGroup from "../../../../components/mui/formik-inputs/mui-formik-radio-group";
-import MuiFormikCheckboxGroup from "../../../../components/mui/formik-inputs/mui-formik-checkbox-group";
-import CompanyInputMUI from "../../../../components/mui/formik-inputs/company-input-mui";
-import MuiSponsorInput from "../../../../components/mui/formik-inputs/mui-sponsor-input";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikRadioGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/radio-group";
+import MuiFormikCheckboxGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox-group";
+import CompanyInputMUI from "openstack-uicore-foundation/lib/components/mui/formik-inputs/company-input";
+import MuiSponsorInput from "openstack-uicore-foundation/lib/components/mui/formik-inputs/sponsor-input";
+import MuiFormikSwitch from "openstack-uicore-foundation/lib/components/mui/formik-inputs/switch";
+import SponsorshipsBySummitSelectMUI from "openstack-uicore-foundation/lib/components/mui/formik-inputs/sponsorship-summit-select";
 import { titleCase } from "../../../../utils/methods";
-import MuiFormikSwitch from "../../../../components/mui/formik-inputs/mui-formik-switch";
-import SponsorshipsBySummitSelectMUI from "../../../../components/mui/formik-inputs/sponsorship-summit-select-mui";
+import useScrollToError from "../../../../hooks/useScrollToError";
 import { SPONSOR_USER_ASSIGNMENT_TYPE } from "../../../../utils/constants";
 
 const buildInitialValues = (data) => {

@@ -3,9 +3,9 @@ import { Box, IconButton, Typography } from "@mui/material";
 import T from "i18n-react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import MuiFormikCheckboxGroup from "../../../../../components/mui/formik-inputs/mui-formik-checkbox-group";
+import MuiFormikCheckboxGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox-group";
+import MuiSponsorInput from "openstack-uicore-foundation/lib/components/mui/formik-inputs/sponsor-input";
 import { titleCase } from "../../../../../utils/methods";
-import MuiSponsorInput from "../../../../../components/mui/formik-inputs/mui-sponsor-input";
 
 const SponsorSection = ({
   name,
