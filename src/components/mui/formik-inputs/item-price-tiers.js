@@ -9,7 +9,7 @@ import {
   InputLabel,
   TextField
 } from "@mui/material";
-import MuiFormikPriceField from "./mui-formik-pricefield";
+import MuiFormikPriceField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/price-field";
 import { RATE_FIELDS, isRateEnabled } from "../../../utils/rate-helpers";
 
 const TIERS = [

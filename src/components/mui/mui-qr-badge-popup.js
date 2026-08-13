@@ -34,7 +34,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
-import MuiFormikTextField from "./formik-inputs/mui-formik-textfield";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import QrReader from "../qr-reader";
 import { getTypeValue, toSlug } from "../../utils/extra-questions";
 import MuiFormikAsyncAutocomplete from "./formik-inputs/mui-formik-async-select";

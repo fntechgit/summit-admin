@@ -15,17 +15,17 @@ import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
 import AdditionalInputList from "openstack-uicore-foundation/lib/components/mui/formik-inputs/additional-input-list";
 import MuiFormikDatepicker from "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikSelectGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select-group";
 import {
   addIssAfterDateFieldValidator,
   formMetafieldsValidation,
   requiredStringValidation,
   requiredHTMLValidation
 } from "../../../../../../../utils/yup";
-import MuiFormikTextField from "../../../../../../../components/mui/formik-inputs/mui-formik-textfield";
 import useScrollToError from "../../../../../../../hooks/useScrollToError";
 import FormikTextEditor from "../../../../../../../components/inputs/formik-text-editor";
 import { querySponsorAddons } from "../../../../../../../actions/sponsor-actions";
-import MuiFormikSelectGroup from "../../../../../../../components/mui/formik-inputs/mui-formik-select-group";
 
 const buildInitialValues = (data, summitTZ) => {
   const { opens_at, expires_at } = data;

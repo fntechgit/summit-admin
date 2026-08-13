@@ -22,15 +22,14 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikAddonTypeSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/addon-type-select";
 import useScrollToError from "../../../../../hooks/useScrollToError";
-import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
-import MuiFormikSummitAddonSelect from "../../../../../components/mui/formik-inputs/mui-formik-summit-addon-select";
 
 const ManageTierAddonsPopup = ({
   sponsorship,
   onClose,
   onSubmit,
-  summitId,
   onSponsorshipAddonRemove
 }) => {
   const [editingRow, setEditingRow] = useState(null);
@@ -222,12 +221,11 @@ const ManageTierAddonsPopup = ({
                   </InputLabel>
                   {editingRow === index ? (
                     <Box width="100%">
-                      <MuiFormikSummitAddonSelect
+                      <MuiFormikAddonTypeSelect
                         name={`addons[${index}].type`}
                         placeholder={T.translate(
                           "edit_sponsor.placeholders.select"
                         )}
-                        summitId={summitId}
                         inputProps={{
                           fullWidth: true,
                           margin: "none"
@@ -319,12 +317,11 @@ const ManageTierAddonsPopup = ({
                   {T.translate("edit_sponsor.addon_type")}
                 </InputLabel>
                 <Box width="100%">
-                  <MuiFormikSummitAddonSelect
+                  <MuiFormikAddonTypeSelect
                     name="newAddon.type"
                     placeholder={T.translate(
                       "edit_sponsor.placeholders.select"
                     )}
-                    summitId={summitId}
                     inputProps={{
                       fullWidth: true,
                       margin: "none"
@@ -397,8 +394,7 @@ const ManageTierAddonsPopup = ({
 ManageTierAddonsPopup.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
-  onSponsorshipAddonRemove: PropTypes.func.isRequired,
-  summitId: PropTypes.number.isRequired
+  onSponsorshipAddonRemove: PropTypes.func.isRequired
 };
 
 export default ManageTierAddonsPopup;
