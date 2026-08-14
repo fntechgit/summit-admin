@@ -20,7 +20,9 @@ import {
   SPEAKER_UPDATED,
   SPEAKER_ADDED,
   PIC_ATTACHED,
-  BIG_PIC_ATTACHED
+  PIC_DELETED,
+  BIG_PIC_ATTACHED,
+  BIG_PIC_DELETED
 } from "../../actions/speaker-actions";
 import {
   AFFILIATION_ADDED,
@@ -132,9 +134,15 @@ const speakerReducer = (state = DEFAULT_STATE, action) => {
       const pic = `${state.entity.pic}?${new Date().getTime()}`;
       return { ...state, entity: { ...state.entity, pic } };
     }
+    case PIC_DELETED: {
+      return { ...state, entity: { ...state.entity, pic: "" } };
+    }
     case BIG_PIC_ATTACHED: {
       const pic = `${state.entity.big_pic}?${new Date().getTime()}`;
       return { ...state, entity: { ...state.entity, big_pic: pic } };
+    }
+    case BIG_PIC_DELETED: {
+      return { ...state, entity: { ...state.entity, big_pic: "" } };
     }
     case SPEAKER_UPDATED: {
       return state;

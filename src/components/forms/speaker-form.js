@@ -14,9 +14,9 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
-import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input";
+import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import { AffiliationsTable } from "../tables/affiliationstable";
@@ -29,6 +29,7 @@ import {
 } from "../../utils/methods";
 import { mustReplaceSpeakerFieldsWithMemberInfo } from "../../models/app-config";
 import CopyClipboard from "../buttons/copy-clipboard";
+import showConfirmDialog from "../mui/showConfirmDialog";
 
 class SpeakerForm extends React.Component {
   constructor(props) {
@@ -124,11 +125,27 @@ class SpeakerForm extends React.Component {
     this.props.onAttach(this.state.entity, formData, "big");
   }
 
-  handleRemoveFile(picAttr) {
+  async handleRemoveFile(picAttr) {
     const entity = { ...this.state.entity };
 
-    entity[picAttr] = "";
-    this.setState({ entity });
+    // a speaker that was not persisted yet has nothing to delete server side
+    if (!entity.id) {
+      entity[picAttr === "profile" ? "pic" : "big_pic"] = "";
+      this.setState({ entity });
+      return;
+    }
+
+    const confirmed = await showConfirmDialog({
+      title: T.translate("general.are_you_sure"),
+      text: T.translate("edit_speaker.remove_pic_warning"),
+      iconType: "warning",
+      confirmButtonText: T.translate("general.yes_delete"),
+      confirmButtonColor: "error"
+    });
+
+    if (!confirmed) return;
+
+    this.props.onRemoveAttach(entity.id, picAttr);
   }
 
   handleSubmit(publish, ev) {
@@ -430,7 +447,7 @@ class SpeakerForm extends React.Component {
             <UploadInput
               value={entity.pic}
               handleUpload={this.handleUploadPic}
-              handleRemove={() => this.handleRemoveFile("pic")}
+              handleRemove={() => this.handleRemoveFile("profile")}
               className="dropzone col-md-6"
               multiple={false}
               accept="image/*"
@@ -448,7 +465,7 @@ class SpeakerForm extends React.Component {
             <UploadInput
               value={entity.big_pic}
               handleUpload={this.handleUploadBigPic}
-              handleRemove={() => this.handleRemoveFile("big_pic")}
+              handleRemove={() => this.handleRemoveFile("big")}
               className="dropzone col-md-6"
               multiple={false}
               accept="image/*"

@@ -63,6 +63,7 @@ export const SPEAKER_ADDED = "SPEAKER_ADDED";
 export const PIC_ATTACHED = "PIC_ATTACHED";
 export const PIC_DELETED = "PIC_DELETED";
 export const BIG_PIC_ATTACHED = "BIG_PIC_ATTACHED";
+export const BIG_PIC_DELETED = "BIG_PIC_DELETED";
 export const MERGE_SPEAKERS = "MERGE_SPEAKERS";
 export const SPEAKER_MERGED = "SPEAKER_MERGED";
 
@@ -175,7 +176,7 @@ const deleteBigPic = (speakerId) => async (dispatch) => {
 
   return deleteRequest(
     null,
-    createAction(PIC_DELETED),
+    createAction(BIG_PIC_DELETED),
     `${window.API_BASE_URL}/api/v1/speakers/${speakerId}/big-photo?access_token=${accessToken}`,
     null,
     authErrorHandler
@@ -368,12 +369,7 @@ export const resetSpeakerForm = () => (dispatch) => {
   dispatch(createAction(RESET_SPEAKER_FORM)({}));
 };
 
-export const saveSpeaker = (entity) => async (dispatch, getState) => {
-  const { currentSpeakerState } = getState();
-  const { entity: prevSpeaker } = currentSpeakerState;
-  const removeProfilePic = prevSpeaker?.pic && !entity.pic;
-  const removeBigPic = prevSpeaker?.big_pic && !entity.big_pic;
-
+export const saveSpeaker = (entity) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
@@ -388,13 +384,7 @@ export const saveSpeaker = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )({})(dispatch).then(async () => {
-      if (removeProfilePic) {
-        await dispatch(deleteProfilePic(entity.id));
-      }
-      if (removeBigPic) {
-        await dispatch(deleteBigPic(entity.id));
-      }
+    )({})(dispatch).then(() => {
       dispatch(showSuccessMessage(T.translate("edit_speaker.speaker_saved")));
     });
   } else {
@@ -444,6 +434,22 @@ export const attachPicture = (entity, file, picAttr) => async (dispatch) => {
     dispatch(uploadFile(payload.response, file));
   });
 };
+
+export const removeAttachedPicture =
+  (speakerId, picAttr) => async (dispatch) => {
+    const deleteFile = picAttr === "profile" ? deleteProfilePic : deleteBigPic;
+
+    dispatch(startLoading());
+
+    return dispatch(deleteFile(speakerId))
+      .then(() => {
+        dispatch(stopLoading());
+      })
+      .catch(() => {
+        // authErrorHandler already reported the failure and stopped loading;
+        // the reducer is left untouched so the picture stays visible.
+      });
+  };
 
 /** ************************************************************************************************* */
 /* SPEAKER ATTENDANCE */
