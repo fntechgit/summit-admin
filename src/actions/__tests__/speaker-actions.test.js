@@ -110,4 +110,37 @@ describe("saveSpeaker", () => {
 
     expect(deleteRequest).not.toHaveBeenCalled();
   });
+
+  it("resolves only after the update request settles", async () => {
+    let resolveRequest;
+    putRequest.mockImplementation(
+      (requestAction, receiveAction) => () => (dispatch) => {
+        dispatch(requestAction());
+        return new Promise((resolve) => {
+          resolveRequest = () => {
+            dispatch(receiveAction({ response: {} }));
+            resolve({ response: {} });
+          };
+        });
+      }
+    );
+    const store = mockStore({});
+
+    let settled = false;
+    const dispatched = store
+      .dispatch(
+        saveSpeaker({ id: SPEAKER_ID, title: "Dev", pic: "", big_pic: "" })
+      )
+      .then(() => {
+        settled = true;
+      });
+
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(settled).toBe(false);
+
+    resolveRequest();
+    await dispatched;
+    expect(settled).toBe(true);
+  });
 });

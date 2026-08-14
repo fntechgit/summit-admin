@@ -377,7 +377,7 @@ export const saveSpeaker = (entity) => async (dispatch) => {
   const normalizedEntity = normalizeEntity(entity);
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_SPEAKER),
       createAction(SPEAKER_UPDATED),
       `${window.API_BASE_URL}/api/v1/speakers/${entity.id}?access_token=${accessToken}`,
@@ -387,28 +387,28 @@ export const saveSpeaker = (entity) => async (dispatch) => {
     )({})(dispatch).then(() => {
       dispatch(showSuccessMessage(T.translate("edit_speaker.speaker_saved")));
     });
-  } else {
-    const successMessage = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_speaker.speaker_created"),
-      type: "success"
-    };
-
-    postRequest(
-      createAction(UPDATE_SPEAKER),
-      createAction(SPEAKER_ADDED),
-      `${window.API_BASE_URL}/api/v1/speakers?access_token=${accessToken}`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )({})(dispatch).then(() => {
-      dispatch(
-        showMessage(successMessage, () => {
-          history.push("/app/speakers");
-        })
-      );
-    });
   }
+
+  const successMessage = {
+    title: T.translate("general.done"),
+    html: T.translate("edit_speaker.speaker_created"),
+    type: "success"
+  };
+
+  return postRequest(
+    createAction(UPDATE_SPEAKER),
+    createAction(SPEAKER_ADDED),
+    `${window.API_BASE_URL}/api/v1/speakers?access_token=${accessToken}`,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )({})(dispatch).then(() => {
+    dispatch(
+      showMessage(successMessage, () => {
+        history.push("/app/speakers");
+      })
+    );
+  });
 };
 
 export const attachPicture = (entity, file, picAttr) => async (dispatch) => {
