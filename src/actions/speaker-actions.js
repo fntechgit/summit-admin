@@ -61,7 +61,9 @@ export const UPDATE_SPEAKER = "UPDATE_SPEAKER";
 export const SPEAKER_UPDATED = "SPEAKER_UPDATED";
 export const SPEAKER_ADDED = "SPEAKER_ADDED";
 export const PIC_ATTACHED = "PIC_ATTACHED";
+export const PIC_DELETED = "PIC_DELETED";
 export const BIG_PIC_ATTACHED = "BIG_PIC_ATTACHED";
+export const BIG_PIC_DELETED = "BIG_PIC_DELETED";
 export const MERGE_SPEAKERS = "MERGE_SPEAKERS";
 export const SPEAKER_MERGED = "SPEAKER_MERGED";
 
@@ -141,6 +143,18 @@ const uploadProfilePic = (entity, file) => async (dispatch) => {
   });
 };
 
+const deleteProfilePic = (speakerId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+
+  return deleteRequest(
+    null,
+    createAction(PIC_DELETED),
+    `${window.API_BASE_URL}/api/v1/speakers/${speakerId}/photo?access_token=${accessToken}`,
+    null,
+    authErrorHandler
+  )({})(dispatch);
+};
+
 const uploadBigPic = (entity, file) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
@@ -155,6 +169,18 @@ const uploadBigPic = (entity, file) => async (dispatch) => {
     dispatch(stopLoading());
     history.push(`/app/speakers/${entity.id}`);
   });
+};
+
+const deleteBigPic = (speakerId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+
+  return deleteRequest(
+    null,
+    createAction(BIG_PIC_DELETED),
+    `${window.API_BASE_URL}/api/v1/speakers/${speakerId}/big-photo?access_token=${accessToken}`,
+    null,
+    authErrorHandler
+  )({})(dispatch);
 };
 
 export const initSpeakersList = () => async (dispatch) => {
@@ -351,7 +377,7 @@ export const saveSpeaker = (entity) => async (dispatch) => {
   const normalizedEntity = normalizeEntity(entity);
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_SPEAKER),
       createAction(SPEAKER_UPDATED),
       `${window.API_BASE_URL}/api/v1/speakers/${entity.id}?access_token=${accessToken}`,
@@ -361,28 +387,28 @@ export const saveSpeaker = (entity) => async (dispatch) => {
     )({})(dispatch).then(() => {
       dispatch(showSuccessMessage(T.translate("edit_speaker.speaker_saved")));
     });
-  } else {
-    const successMessage = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_speaker.speaker_created"),
-      type: "success"
-    };
-
-    postRequest(
-      createAction(UPDATE_SPEAKER),
-      createAction(SPEAKER_ADDED),
-      `${window.API_BASE_URL}/api/v1/speakers?access_token=${accessToken}`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )({})(dispatch).then(() => {
-      dispatch(
-        showMessage(successMessage, () => {
-          history.push("/app/speakers");
-        })
-      );
-    });
   }
+
+  const successMessage = {
+    title: T.translate("general.done"),
+    html: T.translate("edit_speaker.speaker_created"),
+    type: "success"
+  };
+
+  return postRequest(
+    createAction(UPDATE_SPEAKER),
+    createAction(SPEAKER_ADDED),
+    `${window.API_BASE_URL}/api/v1/speakers?access_token=${accessToken}`,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )({})(dispatch).then(() => {
+    dispatch(
+      showMessage(successMessage, () => {
+        history.push("/app/speakers");
+      })
+    );
+  });
 };
 
 export const attachPicture = (entity, file, picAttr) => async (dispatch) => {
@@ -408,6 +434,22 @@ export const attachPicture = (entity, file, picAttr) => async (dispatch) => {
     dispatch(uploadFile(payload.response, file));
   });
 };
+
+export const removeAttachedPicture =
+  (speakerId, picAttr) => async (dispatch) => {
+    const deleteFile = picAttr === "profile" ? deleteProfilePic : deleteBigPic;
+
+    dispatch(startLoading());
+
+    return dispatch(deleteFile(speakerId))
+      .then(() => {
+        dispatch(stopLoading());
+      })
+      .catch(() => {
+        // authErrorHandler already reported the failure and stopped loading;
+        // the reducer is left untouched so the picture stays visible.
+      });
+  };
 
 /** ************************************************************************************************* */
 /* SPEAKER ATTENDANCE */
