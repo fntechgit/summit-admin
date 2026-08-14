@@ -43,7 +43,7 @@ class EditSummitSpeakerPage extends React.Component {
     }
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const oldId = prevProps.match.params.speaker_id;
     const newId = this.props.match.params.speaker_id;
 
