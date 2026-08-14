@@ -57,7 +57,13 @@ class SpeakerForm extends React.Component {
     scrollToError(this.props.errors);
 
     if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
+      state.entity = this.pictureOnlyUpdate
+        ? {
+            ...this.state.entity,
+            pic: this.props.entity.pic,
+            big_pic: this.props.entity.big_pic
+          }
+        : { ...this.props.entity };
       state.errors = {};
     }
 
@@ -145,7 +151,14 @@ class SpeakerForm extends React.Component {
 
     if (!confirmed) return;
 
-    this.props.onRemoveAttach(entity.id, picAttr);
+    // guards componentDidUpdate against clobbering unsaved edits when the
+    // redux entity update lands (Redux updates pic/big_pic synchronously
+    // during the dispatch below, before this promise ever resolves)
+    this.pictureOnlyUpdate = true;
+
+    this.props.onRemoveAttach(entity.id, picAttr).finally(() => {
+      this.pictureOnlyUpdate = false;
+    });
   }
 
   handleSubmit(publish, ev) {

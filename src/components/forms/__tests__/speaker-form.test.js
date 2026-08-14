@@ -40,10 +40,11 @@ const buildEntity = (overrides = {}) => ({
 });
 
 const renderForm = (props = {}) => {
-  const onRemoveAttach = jest.fn();
-  const { container } = render(
+  const onRemoveAttach = props.onRemoveAttach || jest.fn().mockResolvedValue();
+  const entity = buildEntity(props.entity);
+  const { container, rerender } = render(
     <SpeakerForm
-      entity={buildEntity(props.entity)}
+      entity={entity}
       errors={{}}
       summits={[]}
       history={{ push: jest.fn() }}
@@ -52,7 +53,19 @@ const renderForm = (props = {}) => {
       onRemoveAttach={onRemoveAttach}
     />
   );
-  return { onRemoveAttach, container };
+  const rerenderWithEntity = (nextEntity) =>
+    rerender(
+      <SpeakerForm
+        entity={nextEntity}
+        errors={{}}
+        summits={[]}
+        history={{ push: jest.fn() }}
+        onSubmit={jest.fn()}
+        onAttach={jest.fn()}
+        onRemoveAttach={onRemoveAttach}
+      />
+    );
+  return { onRemoveAttach, container, entity, rerenderWithEntity };
 };
 
 // uicore's UploadInput only renders its `.remove` control while the preview is hovered
@@ -108,5 +121,32 @@ describe("SpeakerForm photo removal", () => {
     await waitFor(() => expect(previews(container)).toHaveLength(1));
     expect(showConfirmDialog).not.toHaveBeenCalled();
     expect(onRemoveAttach).not.toHaveBeenCalled();
+  });
+
+  it("preserves unsaved field edits when the removal updates props.entity", async () => {
+    showConfirmDialog.mockResolvedValue(true);
+    // real removeAttachedPicture resolves only after the PIC_DELETED-driven
+    // redux update has already flowed down as new props - a promise that
+    // never settles during this test reproduces that ordering
+    const onRemoveAttach = jest.fn(() => new Promise(() => {}));
+    const { container, entity, rerenderWithEntity } = renderForm({
+      onRemoveAttach
+    });
+
+    const twitterInput = container.querySelector("#twitter");
+    await userEvent.clear(twitterInput);
+    await userEvent.type(twitterInput, "unsaved-handle");
+    expect(twitterInput.value).toBe("unsaved-handle");
+
+    await clickRemove(container, 0);
+    await waitFor(() =>
+      expect(onRemoveAttach).toHaveBeenCalledWith(42, "profile")
+    );
+
+    // simulates the redux entity coming back down as props after PIC_DELETED,
+    // with only the picture field cleared and every other field unchanged
+    rerenderWithEntity({ ...entity, pic: "" });
+
+    expect(container.querySelector("#twitter").value).toBe("unsaved-handle");
   });
 });
