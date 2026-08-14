@@ -770,6 +770,7 @@
     "big_pic_size": "484 x 986px",
     "big_pic_format": "PNG or JPG",
     "affiliations": "Affiliations",
+    "remove_pic_warning": "This photo will be deleted right away and cannot be recovered.",
     "speaker_saved": "Speaker saved successfully.",
     "speaker_created": "Speaker created successfully.",
     "company": "Company",

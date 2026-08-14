@@ -20,7 +20,8 @@ import {
   getSpeaker,
   resetSpeakerForm,
   saveSpeaker,
-  attachPicture
+  attachPicture,
+  removeAttachedPicture
 } from "../../actions/speaker-actions";
 import { loadSummits } from "../../actions/summit-actions";
 import "../../styles/edit-summit-speaker-page.less";
@@ -43,7 +44,7 @@ class EditSummitSpeakerPage extends React.Component {
     }
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const oldId = prevProps.match.params.speaker_id;
     const newId = this.props.match.params.speaker_id;
 
@@ -64,6 +65,7 @@ class EditSummitSpeakerPage extends React.Component {
       history,
       saveSpeaker,
       attachPicture,
+      removeAttachedPicture,
       match
     } = this.props;
     const title = entity.id
@@ -90,6 +92,7 @@ class EditSummitSpeakerPage extends React.Component {
           errors={errors}
           onSubmit={saveSpeaker}
           onAttach={attachPicture}
+          onRemoveAttach={removeAttachedPicture}
         />
       </div>
     );
@@ -106,5 +109,6 @@ export default connect(mapStateToProps, {
   getSpeaker,
   resetSpeakerForm,
   saveSpeaker,
-  attachPicture
+  attachPicture,
+  removeAttachedPicture
 })(EditSummitSpeakerPage);
