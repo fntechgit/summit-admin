@@ -178,9 +178,13 @@ export const groupLinesBySponsorItem = (rows = []) => {
     };
   });
   // Nothing sorts the sponsor accordions explicitly (the column headers reorder
-  // items WITHIN a group), so they default to alphabetical — same convention as
-  // the pivot tree: unknown bucket last, then label asc case-insensitive. This
-  // also decides which sponsors land on which client-side page.
+  // items WITHIN a group), so they default to alphabetical, unknown bucket last.
+  // That test keys on the NAME, not sponsorId, because the card title renders as
+  // `sponsorName || "Unknown sponsor"` — sorting on what the card displays keeps
+  // every "Unknown sponsor" card together at the end. (The pivot tree keys on
+  // the id instead, which splits them: a blank-named sponsor shows the unknown
+  // label but sorts first.) This also decides which sponsors land on which
+  // client-side page.
   groups.sort((a, b) => {
     if (!a.sponsorName !== !b.sponsorName) return a.sponsorName ? -1 : 1;
     return a.sponsorName
