@@ -106,7 +106,7 @@ describe("groupLinesBySponsorItem", () => {
     expect(group.items.find((i) => i.itemCode === "B").totalCents).toBe(100);
   });
 
-  it("sorts items qty desc then orders desc, sponsors by totalQty desc", () => {
+  it("sorts items qty desc then orders desc", () => {
     const rows = [
       line({ sponsor: { id: 1, name: "Small" }, item_code: "A", quantity: 1 }),
       line({
@@ -124,9 +124,25 @@ describe("groupLinesBySponsorItem", () => {
       })
     ];
     const groups = groupLinesBySponsorItem(rows);
-    expect(groups.map((g) => g.sponsorName)).toEqual(["Big", "Small"]);
+    const big = groups.find((g) => g.sponsorName === "Big");
     // C: qty 9, orders 2 beats B: qty 9, orders 1
-    expect(groups[0].items.map((i) => i.itemCode)).toEqual(["C", "B"]);
+    expect(big.items.map((i) => i.itemCode)).toEqual(["C", "B"]);
+  });
+
+  it("sorts sponsor groups alphabetically, not by qty, with unknown last", () => {
+    const rows = [
+      line({ sponsor: { id: 1, name: "zeta" }, quantity: 1 }),
+      line({ sponsor: null, quantity: 1 }),
+      // Biggest qty by far — it still sorts on name, not units.
+      line({ sponsor: { id: 2, name: "Nokia" }, quantity: 99 }),
+      line({ sponsor: { id: 3, name: "acme" }, quantity: 1 })
+    ];
+    expect(groupLinesBySponsorItem(rows).map((g) => g.sponsorName)).toEqual([
+      "acme",
+      "Nokia",
+      "zeta",
+      ""
+    ]);
   });
 
   it("passes canceled lines through as contributors with isCanceled", () => {
