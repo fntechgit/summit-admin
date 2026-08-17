@@ -516,6 +516,7 @@ const EditTicketPage = ({
       >
         {entity.badge && (
           <AuditLogs
+            filterId={entity.badge.id}
             entityFilter={[
               `event_id==${entity.badge.id}`,
               "class_name==SummitAttendeeBadgeAuditLog"

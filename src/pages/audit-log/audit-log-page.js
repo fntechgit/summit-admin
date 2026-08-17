@@ -21,7 +21,10 @@ const AuditLogPage = ({ totalLogEntries }) => (
     <h3>
       {T.translate("audit_log.log_entries")} ({totalLogEntries})
     </h3>
-    <AuditLogs entityFilter={["class_name==SummitEventAuditLog"]} />
+    <AuditLogs
+      filterId="standalone"
+      entityFilter={["class_name==SummitEventAuditLog"]}
+    />
   </div>
 );
 

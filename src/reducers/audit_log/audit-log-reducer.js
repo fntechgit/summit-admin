@@ -30,9 +30,7 @@ const DEFAULT_STATE = {
   perPage: 10,
   order: "created",
   orderDir: 1,
-  totalLogEntries: 0,
-  summitTZ: "",
-  filters: {}
+  totalLogEntries: 0
 };
 
 // eslint-disable-next-line default-param-last
@@ -45,8 +43,8 @@ const auditLogReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_LOG: {
-      const { term, order, orderDir, summitTZ } = payload;
-      return { ...state, term, order, orderDir, summitTZ };
+      const { term, order, orderDir, perPage } = payload;
+      return { ...state, term, order, orderDir, perPage };
     }
     case RECEIVE_LOG: {
       const { current_page, total, last_page } = payload.response;
