@@ -51,6 +51,7 @@ const getCriterias = () => [
 ];
 
 const AuditLogs = ({
+  filterId,
   entityFilter = [],
   term,
   logEntries,
@@ -64,7 +65,9 @@ const AuditLogs = ({
   clearAuditLogParams
 }) => {
   const [searchTerm, setSearchTerm] = useState(term);
-  const { parsedFilter, resetFilters } = useGridFilter(FILTER_ID);
+  const { parsedFilter, resetFilters } = useGridFilter(
+    `${FILTER_ID}_${filterId}`
+  );
   const userTimeZone = new Intl.DateTimeFormat(undefined, {
     timeZoneName: "long"
   })

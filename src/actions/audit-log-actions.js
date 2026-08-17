@@ -61,7 +61,6 @@ export const getAuditLog =
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const summitTZ = currentSummit.time_zone.name;
     const summitFilter = [`summit_id==${currentSummit.id}`];
 
     dispatch(startLoading());
@@ -92,7 +91,7 @@ export const getAuditLog =
       createAction(RECEIVE_LOG),
       `${window.AUDIT_LOG_API_BASE_URL}/api/v1/audit-logs`,
       authErrorHandler,
-      { page, perPage, order, orderDir, term, summitTZ, filters }
+      { page, perPage, order, orderDir, term, filters }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

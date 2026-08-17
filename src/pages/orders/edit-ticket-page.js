@@ -17,7 +17,7 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Swal from "sweetalert2";
-import Table from "openstack-uicore-foundation/lib/components/table"
+import Table from "openstack-uicore-foundation/lib/components/table";
 import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
 import moment from "moment-timezone";
 import { getSummitById } from "../../actions/summit-actions";
@@ -507,6 +507,7 @@ const EditTicketPage = ({
       >
         {entity.badge && (
           <AuditLogs
+            filterId={entity.badge.id}
             entityFilter={[
               `event_id==${entity.badge.id}`,
               "class_name==SummitAttendeeBadgeAuditLog"
