@@ -24,7 +24,9 @@ import {
   getGeneralMURequests,
   getSponsorMURequests,
   removeFileForSponsorMU,
-  uploadFileForSponsorMU
+  uploadFileForSponsorMU,
+  uploadTextForSponsorMU,
+  removeTextForSponsorMU
 } from "../../../../../actions/sponsor-mu-actions";
 import CustomAlert from "../../../../../components/mui/custom-alert";
 import { SPONSOR_MEDIA_UPLOAD_STATUS } from "../../../../../utils/constants";
@@ -39,7 +41,9 @@ const SponsorMediaUploadTab = ({
   getSponsorMURequests,
   getGeneralMURequests,
   uploadFileForSponsorMU,
-  removeFileForSponsorMU
+  removeFileForSponsorMU,
+  uploadTextForSponsorMU,
+  removeTextForSponsorMU
 }) => {
   const [uploadModule, setUploadModule] = useState(null);
   const [previewModule, setPreviewModule] = useState(null);
@@ -94,6 +98,8 @@ const SponsorMediaUploadTab = ({
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
     });
+
+    console.log("ITEM: ", item);
 
     if (isConfirmed) {
       removeFileForSponsorMU(item.page_id, item.id);
@@ -300,5 +306,7 @@ export default connect(mapStateToProps, {
   getSponsorMURequests,
   getGeneralMURequests,
   uploadFileForSponsorMU,
-  removeFileForSponsorMU
+  removeFileForSponsorMU,
+  uploadTextForSponsorMU,
+  removeTextForSponsorMU
 })(SponsorMediaUploadTab);
