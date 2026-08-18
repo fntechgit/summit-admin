@@ -251,7 +251,7 @@ const normalizeEntity = (entity) => {
   return normalizedEntity;
 };
 
-export const queryTemplates = debounce(async (input, callback) => {
+export const queryTemplates = debounce(async (input, callback, onError) => {
   const accessToken = await getAccessTokenSafely();
 
   const endpoint = URI(`${window.EMAIL_API_BASE_URL}/api/v1/mail-templates`);
@@ -274,7 +274,10 @@ export const queryTemplates = debounce(async (input, callback) => {
 
       callback(options);
     })
-    .catch(fetchErrorHandler);
+    .catch((err) => {
+      fetchErrorHandler(err);
+      if (onError) onError(err);
+    });
 }, DEBOUNCE_WAIT);
 
 /** ********************************************************************************************************* */

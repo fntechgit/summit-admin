@@ -15,21 +15,21 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
+  Autocomplete,
   Box,
   Button,
+  CircularProgress,
   Grid2,
+  TextField,
   ToggleButton,
   ToggleButtonGroup
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { getSentEmails, queryTemplates } from "../../actions/email-actions";
 import ChipMultiSelect from "../../components/mui/chip-multi-select";
-import AsyncSelectInput from "../../components/mui/async-select-input";
 import {
   DATE_FILTER_ARRAY_SIZE,
   DEFAULT_CURRENT_PAGE
@@ -75,6 +75,26 @@ const SentEmailListPage = ({
     ...filters
   });
   const [selectedColumns, setSelectedColumns] = useState([]);
+  const [templateOptions, setTemplateOptions] = useState([]);
+  const [templateLoading, setTemplateLoading] = useState(false);
+
+  const fetchTemplateOptions = (input) => {
+    setTemplateLoading(true);
+    queryTemplates(
+      input,
+      (results) => {
+        setTemplateOptions(
+          results.map((t) => ({ value: t.identifier, label: t.identifier }))
+        );
+        setTemplateLoading(false);
+      },
+      () => setTemplateLoading(false)
+    );
+  };
+
+  useEffect(() => {
+    fetchTemplateOptions("");
+  }, []);
 
   const handlePageChange = (newPage) => {
     getSentEmails(term, newPage, perPage, order, orderDir, emailFilters);
@@ -328,11 +348,12 @@ const SentEmailListPage = ({
           </Grid2>
         )}
         {enabledFilters.includes("sent_date_filter") && (
-          <LocalizationProvider dateAdapter={AdapterMoment}>
+          <>
             <Grid2 size={{ xs: 12, sm: 3 }}>
               <DateTimePicker
                 label={T.translate("email_logs.placeholders.sent_date_from")}
-                format="YYYY-MM-DD HH:mm"
+                format="YYYY-MM-DD hh:mm A"
+                ampm
                 onChange={(value) => handleChangeDateFilter(value, false)}
                 timezone="UTC"
                 value={epochToMomentTimeZone(
@@ -347,7 +368,8 @@ const SentEmailListPage = ({
             <Grid2 size={{ xs: 12, sm: 3 }}>
               <DateTimePicker
                 label={T.translate("email_logs.placeholders.sent_date_to")}
-                format="YYYY-MM-DD HH:mm"
+                format="YYYY-MM-DD hh:mm A"
+                ampm
                 onChange={(value) => handleChangeDateFilter(value, true)}
                 timezone="UTC"
                 value={epochToMomentTimeZone(
@@ -359,20 +381,53 @@ const SentEmailListPage = ({
                 }}
               />
             </Grid2>
-          </LocalizationProvider>
+          </>
         )}
         {enabledFilters.includes("template_filter") && (
           <Grid2 size={{ xs: 12, sm: 6 }}>
-            <AsyncSelectInput
-              id="template_filter"
-              label={T.translate("email_logs.placeholders.template")}
-              value={emailFilters.template_filter}
-              onChange={handleEmailFilterChange}
-              queryFunction={queryTemplates}
-              formatOption={(t) => ({
-                value: t.identifier,
-                label: t.identifier
-              })}
+            <Autocomplete
+              options={templateOptions}
+              value={
+                emailFilters.template_filter
+                  ? {
+                      value: emailFilters.template_filter,
+                      label: emailFilters.template_filter
+                    }
+                  : null
+              }
+              loading={templateLoading}
+              fullWidth
+              getOptionLabel={(option) => option.label || ""}
+              isOptionEqualToValue={(option, val) => option.value === val.value}
+              onInputChange={(ev, newInput) => fetchTemplateOptions(newInput)}
+              onChange={(ev, selected) =>
+                handleEmailFilterChange({
+                  target: {
+                    id: "template_filter",
+                    value: selected?.value ?? ""
+                  }
+                })
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={T.translate("email_logs.placeholders.template")}
+                  size="small"
+                  slotProps={{
+                    input: {
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {templateLoading && (
+                            <CircularProgress color="inherit" size={16} />
+                          )}
+                          {params.InputProps?.endAdornment}
+                        </>
+                      )
+                    }
+                  }}
+                />
+              )}
             />
           </Grid2>
         )}
