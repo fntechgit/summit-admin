@@ -228,7 +228,7 @@ const SentEmailListPage = ({
     });
 
   let columns = [
-    { columnKey: "id", value: T.translate("general.id"), sortable: true },
+    { columnKey: "id", header: T.translate("general.id"), sortable: true },
     {
       columnKey: "template",
       header: T.translate("email_logs.email_templates"),
