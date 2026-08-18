@@ -1,15 +1,8 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Box,
-  Typography,
-  IconButton
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+import { Box, DialogContent, Typography } from "@mui/material";
+import CustomDialog from "openstack-uicore-foundation/lib/components/mui/custom-dialog";
 import BrokenImageOutlinedIcon from "@mui/icons-material/BrokenImageOutlined";
 import { formatDate } from "../../../utils/methods";
 
@@ -35,30 +28,7 @@ const PreviewModal = ({ title, open, onClose, url, filename, uploadDate }) => {
   }, [open]);
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          pb: 1
-        }}
-      >
-        <Typography variant="h6">{title}</Typography>
-      </DialogTitle>
-      <IconButton
-        aria-label="close"
-        onClick={onClose}
-        size="small"
-        sx={(theme) => ({
-          position: "absolute",
-          right: 12,
-          top: 12,
-          color: theme.palette.grey[500]
-        })}
-      >
-        <CloseIcon fontSize="large" />
-      </IconButton>
+    <CustomDialog title={title} open={open} onClose={onClose}>
       <DialogContent sx={{ p: 0 }}>
         <Box
           sx={{
@@ -115,7 +85,7 @@ const PreviewModal = ({ title, open, onClose, url, filename, uploadDate }) => {
           )}
         </Box>
       </DialogContent>
-    </Dialog>
+    </CustomDialog>
   );
 };
 

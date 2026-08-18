@@ -15,21 +15,19 @@ import React, { useState } from "react";
 import {
   Box,
   Button,
-  Dialog,
+  DialogActions,
   DialogContent,
-  DialogTitle,
   Divider,
   IconButton,
   Typography
 } from "@mui/material";
 import PropTypes from "prop-types";
 import UploadInputV3 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v3";
+import CustomDialog from "openstack-uicore-foundation/lib/components/mui/custom-dialog";
 import T from "i18n-react/dist/i18n-react";
-import CloseIcon from "@mui/icons-material/Close";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import DialogActions from "@mui/material/DialogActions";
 
 const MAX_PAGE_MODULE_UPLOAD_QTY = 1;
 
@@ -108,23 +106,11 @@ const UploadDialog = ({
   const canAddMore = () => (value?.length || 0) < maxFiles;
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        {T.translate("edit_sponsor.mu_tab.upload_input.upload_file")}
-      </DialogTitle>
-      <IconButton
-        aria-label="close"
-        onClick={handleClose}
-        sx={(theme) => ({
-          position: "absolute",
-          right: 8,
-          top: 8,
-          color: theme.palette.grey[500]
-        })}
-      >
-        <CloseIcon />
-      </IconButton>
-      <Divider />
+    <CustomDialog
+      title={T.translate("edit_sponsor.mu_tab.upload_input.upload_file")}
+      open={open}
+      onClose={handleClose}
+    >
       <DialogContent>
         <Typography variant="body1" sx={{ mb: 2 }}>
           {fileMeta.name}
@@ -163,7 +149,7 @@ const UploadDialog = ({
           {T.translate("edit_sponsor.mu_tab.upload_input.upload_file")}
         </Button>
       </DialogActions>
-    </Dialog>
+    </CustomDialog>
   );
 };
 

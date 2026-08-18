@@ -196,12 +196,10 @@ export const uploadTextForSponsorMU =
       null,
       createAction("DUMMY_ACTION"),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/available-pages/${pageId}/modules/${moduleId}/text`,
-      {value: text},
+      { value: text },
       snackbarErrorHandler
     )(params)(dispatch)
       .then(({ response }) => {
-        console.log('RESPONSE: ', response);
-
         dispatch(
           createAction(SPONSOR_MEDIA_UPLOAD_FILE_UPLOADED)({
             ...response,

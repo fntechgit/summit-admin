@@ -31,8 +31,10 @@ import {
 import CustomAlert from "../../../../../components/mui/custom-alert";
 import { SPONSOR_MEDIA_UPLOAD_STATUS } from "../../../../../utils/constants";
 import UploadDialog from "../../../../../components/upload-dialog";
+import TextValueDialog from "./components/text-value-dialog";
 import showConfirmDialog from "../../../../../components/mui/showConfirmDialog";
 import PreviewModal from "../../../../../components/mui/PreviewModal";
+import TextPreviewModal from "./components/text-preview-modal";
 
 const SponsorMediaUploadTab = ({
   sponsor,
@@ -75,6 +77,14 @@ const SponsorMediaUploadTab = ({
     );
   };
 
+  const handleUploadText = (text) => {
+    uploadTextForSponsorMU(uploadModule.page_id, uploadModule.id, text).then(
+      () => {
+        setUploadModule(null);
+      }
+    );
+  };
+
   const handleView = (item) => {
     setPreviewModule(item);
   };
@@ -99,10 +109,12 @@ const SponsorMediaUploadTab = ({
       confirmButtonText: T.translate("general.yes_delete")
     });
 
-    console.log("ITEM: ", item);
-
     if (isConfirmed) {
-      removeFileForSponsorMU(item.page_id, item.id);
+      if (item.mu_type === "text") {
+        removeTextForSponsorMU(item.page_id, item.id);
+      } else {
+        removeFileForSponsorMU(item.page_id, item.id);
+      }
     }
   };
 
@@ -142,6 +154,10 @@ const SponsorMediaUploadTab = ({
         sortable: true
       },
       {
+        columnKey: "mu_type",
+        header: T.translate("edit_sponsor.mu_tab.type")
+      },
+      {
         columnKey: "add_on",
         header: T.translate("edit_sponsor.mu_tab.add_on")
       },
@@ -177,10 +193,16 @@ const SponsorMediaUploadTab = ({
         align: "center",
         render: (row) => {
           const isImage = row.media_upload?.file_mimetype?.includes("image");
+          const isTextWithValue =
+            row.mu_type === "text" && !!row.media_upload?.value;
+          const viewDisabled =
+            row.mu_type === "text"
+              ? !isTextWithValue
+              : !row.media_upload || !isImage;
           return (
             <IconButton
               size="large"
-              disabled={!row.media_upload || !isImage}
+              disabled={viewDisabled}
               onClick={() => handleView(row)}
             >
               <VisibilityIcon fontSize="large" />
@@ -196,7 +218,7 @@ const SponsorMediaUploadTab = ({
         render: (row) => (
           <IconButton
             size="large"
-            disabled={!row.media_upload}
+            disabled={row.mu_type === "text" || !row.media_upload}
             onClick={() => handleDownload(row)}
           >
             <DownloadIcon fontSize="large" />
@@ -272,27 +294,47 @@ const SponsorMediaUploadTab = ({
           onSort={handleGeneralSort}
         />
       </div>
-      <UploadDialog
-        name={uploadModule?.name}
-        open={!!uploadModule}
-        onClose={() => setUploadModule(null)}
-        onUpload={handleUploadFile}
-        onRemove={() => handleDelete(uploadModule)}
-        value={uploadModule?.media_upload}
-        fileMeta={{
-          ...(uploadModule?.file_type || {}),
-          max_file_size: uploadModule?.max_file_size
-        }}
-        maxFiles={1}
-      />
-      <PreviewModal
-        open={!!previewModule}
-        onClose={() => setPreviewModule(null)}
-        title={previewModule?.name}
-        filename={previewModule?.media_upload?.file_name}
-        uploadDate={previewModule?.media_upload?.file_created}
-        url={previewModule?.media_upload?.public_url}
-      />
+      {uploadModule?.mu_type === "text" ? (
+        <TextValueDialog
+          name={uploadModule?.name}
+          moduleName={uploadModule?.name}
+          open={!!uploadModule}
+          onClose={() => setUploadModule(null)}
+          onSubmit={handleUploadText}
+          value={uploadModule?.media_upload?.value}
+        />
+      ) : (
+        <UploadDialog
+          name={uploadModule?.name}
+          open={!!uploadModule}
+          onClose={() => setUploadModule(null)}
+          onUpload={handleUploadFile}
+          onRemove={() => handleDelete(uploadModule)}
+          value={uploadModule?.media_upload}
+          fileMeta={{
+            ...(uploadModule?.file_type || {}),
+            max_file_size: uploadModule?.max_file_size
+          }}
+          maxFiles={1}
+        />
+      )}
+      {previewModule?.mu_type === "text" ? (
+        <TextPreviewModal
+          open={!!previewModule}
+          onClose={() => setPreviewModule(null)}
+          title={previewModule?.name}
+          value={previewModule?.media_upload?.value}
+        />
+      ) : (
+        <PreviewModal
+          open={!!previewModule}
+          onClose={() => setPreviewModule(null)}
+          title={previewModule?.name}
+          filename={previewModule?.media_upload?.file_name}
+          uploadDate={previewModule?.media_upload?.file_created}
+          url={previewModule?.media_upload?.public_url}
+        />
+      )}
     </Box>
   );
 };
