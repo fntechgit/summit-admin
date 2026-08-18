@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -19,7 +19,12 @@ import {
   Box,
   Button,
   CircularProgress,
+  FormControl,
   Grid2,
+  InputLabel,
+  MenuItem,
+  OutlinedInput,
+  Select,
   TextField,
   ToggleButton,
   ToggleButtonGroup
@@ -29,7 +34,6 @@ import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { getSentEmails, queryTemplates } from "../../actions/email-actions";
-import ChipMultiSelect from "../../components/mui/chip-multi-select";
 import {
   DATE_FILTER_ARRAY_SIZE,
   DEFAULT_CURRENT_PAGE
@@ -77,18 +81,24 @@ const SentEmailListPage = ({
   const [selectedColumns, setSelectedColumns] = useState([]);
   const [templateOptions, setTemplateOptions] = useState([]);
   const [templateLoading, setTemplateLoading] = useState(false);
+  const templateRequestSeqRef = useRef(0);
 
   const fetchTemplateOptions = (input) => {
+    const seq = ++templateRequestSeqRef.current;
     setTemplateLoading(true);
     queryTemplates(
       input,
       (results) => {
+        if (seq !== templateRequestSeqRef.current) return;
         setTemplateOptions(
           results.map((t) => ({ value: t.identifier, label: t.identifier }))
         );
         setTemplateLoading(false);
       },
-      () => setTemplateLoading(false)
+      () => {
+        if (seq !== templateRequestSeqRef.current) return;
+        setTemplateLoading(false);
+      }
     );
   };
 
@@ -295,13 +305,35 @@ const SentEmailListPage = ({
       </Grid2>
       <Grid2 container spacing={1} sx={{ alignItems: "center", my: 2 }}>
         <Grid2 size={{ xs: 12, sm: 6 }}>
-          <ChipMultiSelect
-            id="enabled_filters"
-            label={T.translate("email_logs.enabled_filters")}
-            value={enabledFilters}
-            onChange={handleFiltersChange}
-            options={handleDDLSortByLabel(filters_ddl)}
-          />
+          <FormControl fullWidth size="small">
+            <InputLabel id="enabled_filters-label">
+              {T.translate("email_logs.enabled_filters")}
+            </InputLabel>
+            <Select
+              labelId="enabled_filters-label"
+              id="enabled_filters"
+              multiple
+              value={enabledFilters}
+              onChange={handleFiltersChange}
+              input={
+                <OutlinedInput
+                  label={T.translate("email_logs.enabled_filters")}
+                />
+              }
+              renderValue={(selected) =>
+                handleDDLSortByLabel(filters_ddl)
+                  .filter((option) => selected.includes(option.value))
+                  .map((option) => option.label)
+                  .join(", ")
+              }
+            >
+              {handleDDLSortByLabel(filters_ddl).map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Grid2>
         <Grid2>
           <Button
@@ -433,13 +465,33 @@ const SentEmailListPage = ({
         )}
       </Grid2>
       <Grid2 sx={{ mb: 2 }}>
-        <ChipMultiSelect
-          id="select_fields"
-          label={T.translate("email_logs.select_fields")}
-          value={selectedColumns}
-          onChange={handleColumnsChange}
-          options={handleDDLSortByLabel(ddl_columns)}
-        />
+        <FormControl fullWidth size="small">
+          <InputLabel id="select_fields-label">
+            {T.translate("email_logs.select_fields")}
+          </InputLabel>
+          <Select
+            labelId="select_fields-label"
+            id="select_fields"
+            multiple
+            value={selectedColumns}
+            onChange={handleColumnsChange}
+            input={
+              <OutlinedInput label={T.translate("email_logs.select_fields")} />
+            }
+            renderValue={(selected) =>
+              handleDDLSortByLabel(ddl_columns)
+                .filter((option) => selected.includes(option.value))
+                .map((option) => option.label)
+                .join(", ")
+            }
+          >
+            {handleDDLSortByLabel(ddl_columns).map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Grid2>
 
       {emails.length === 0 && <div>{T.translate("emails.no_emails")}</div>}
