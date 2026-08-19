@@ -335,6 +335,11 @@ export const SPONSOR_MANAGED_PAGE_ASSIGNMENT = {
   IMPLICIT: "Implicit"
 };
 
+export const MANAGED_FORM_ASSIGNMENT_TYPE = {
+  EXPLICIT: "Explicit",
+  IMPLICIT: "Implicit"
+};
+
 export const ACCESS_ROUTES = {
   ADMIN_SPONSORS: "admin-sponsors",
   SPONSORS: "sponsors"
