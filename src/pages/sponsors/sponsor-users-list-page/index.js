@@ -106,24 +106,30 @@ const SponsorUsersListPage = ({
         }}
       />
       <h3>{T.translate("sponsor_users.users")}</h3>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, sm: 6, lg: 6 }}>
+      <Grid2 container spacing={2} sx={{ mb: 3 }}>
+        <Grid2 size={{ xs: 12, sm: 6, lg: 4 }}>
           <SearchInput term={term} onSearch={handleSearch} />
         </Grid2>
-        <Grid2 size={{ xs: 6, sm: 3 }}>
+        <Grid2
+          size={{ xs: 12, sm: 6, lg: 8 }}
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            flexWrap: { xs: "wrap" },
+            gap: 2
+          }}
+        >
           <Button
             variant="contained"
-            fullWidth
+            sx={{ width: { xs: "100%", sm: "auto" } }}
             onClick={() => setOpenPopup("import")}
             startIcon={<SaveAltIcon />}
           >
             {T.translate("sponsor_users.import_user")}
           </Button>
-        </Grid2>
-        <Grid2 size={{ xs: 6, sm: 3 }}>
           <Button
             variant="contained"
-            fullWidth
+            sx={{ width: { xs: "100%", sm: "auto" } }}
             onClick={() => setOpenPopup("new")}
             startIcon={<AddIcon />}
           >

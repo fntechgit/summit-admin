@@ -203,9 +203,16 @@ const ShowPagesListPage = ({
       </div>
       <h3>{T.translate("show_pages.pages")}</h3>
       <CustomAlert message={T.translate("show_pages.alert_info")} hideIcon />
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, sm: 6, lg: 2 }}>
-          <FormGroup>
+      <Grid2 container spacing={2} sx={{ mb: 3 }}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <SearchInput
+            term={term}
+            onSearch={handleSearch}
+            placeholder={T.translate("show_pages.placeholders.search")}
+          />
+        </Grid2>
+        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <FormGroup sx={{ flexShrink: 0 }}>
             <FormControlLabel
               control={
                 <Checkbox
@@ -217,30 +224,30 @@ const ShowPagesListPage = ({
                 />
               }
               label={T.translate("show_pages.show_archived")}
+              sx={{ whiteSpace: "nowrap" }}
             />
           </FormGroup>
         </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, lg: 4 }}>
-          <SearchInput
-            term={term}
-            onSearch={handleSearch}
-            placeholder={T.translate("show_pages.placeholders.search")}
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
+        <Grid2
+          size={{ xs: 12, md: 6 }}
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            flexWrap: { xs: "wrap", sm: "nowrap" },
+            gap: 2
+          }}
+        >
           <Button
             variant="contained"
-            fullWidth
+            sx={{ width: { xs: "100%", md: "auto" } }}
             onClick={() => setOpenPopup("cloneTemplate")}
             startIcon={<AddIcon />}
           >
             {T.translate("show_pages.using_template")}
           </Button>
-        </Grid2>
-        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
           <Button
             variant="contained"
-            fullWidth
+            sx={{ width: { xs: "100%", md: "auto" } }}
             onClick={handleNewShowPage}
             startIcon={<AddIcon />}
           >
