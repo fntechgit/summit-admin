@@ -191,21 +191,8 @@ const SponsorPurchasesTab = ({
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={2}>
-          <Box component="span">
-            {totalCount} {T.translate("edit_sponsor.purchase_tab.purchases")}
-          </Box>
-        </Grid2>
-        <Grid2 size={2} offset={8}>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} offset={{ md: 9 }}>
           <SearchInput
             term={term}
             onSearch={handleSearch}
@@ -213,6 +200,9 @@ const SponsorPurchasesTab = ({
           />
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>
+        {totalCount} {T.translate("edit_sponsor.purchase_tab.purchases")}
+      </Box>
       <div>
         <MuiTable
           columns={tableColumns}

@@ -403,21 +403,8 @@ const SponsorFormsTab = ({
         message={T.translate("edit_sponsor.forms_tab.alert_info")}
         hideIcon
       />
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={1}>
-          <Box component="span">
-            {managedForms.totalCount + customizedForms.totalCount} forms
-          </Box>
-        </Grid2>
-        <Grid2 size={2} offset={1}>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, sm: 6, lg: 2 }}>
           <FormGroup>
             <FormControlLabel
               control={
@@ -435,38 +422,37 @@ const SponsorFormsTab = ({
             />
           </FormGroup>
         </Grid2>
-        <Grid2 size={2}>
+        <Grid2 size={{ xs: 12, sm: 6, lg: 4 }}>
           <SearchInput
             term={term}
             onSearch={handleSearch}
             placeholder={T.translate("edit_sponsor.placeholders.search")}
           />
         </Grid2>
-        <Grid2 size={3}>
+        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
           <Button
             variant="contained"
-            size="medium"
             fullWidth
             onClick={() => setOpenPopup("template")}
             startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
           >
             {T.translate("edit_sponsor.forms_tab.using_template")}
           </Button>
         </Grid2>
-        <Grid2 size={3}>
+        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
           <Button
             variant="contained"
-            size="medium"
             fullWidth
             onClick={() => setCustomFormEdit("new")}
             startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
           >
             {T.translate("edit_sponsor.forms_tab.new_form")}
           </Button>
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>
+        {managedForms.totalCount + customizedForms.totalCount} forms
+      </Box>
       <div>
         <MuiTable
           columns={customizedFormsColumns}

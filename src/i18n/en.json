@@ -858,8 +858,6 @@
   },
   "tag_list": {
     "tag_list": "Tag List",
-    "item": "item",
-    "items": "items",
     "tags": "Tags",
     "add_tag": "Add Tag",
     "delete_tag_warning": "Are you sure you want to delete tag",
@@ -2922,8 +2920,8 @@
   "sponsor_users": {
     "users": "Users",
     "access_request": "access request",
-    "import_user": "import existing user",
-    "add_user": "add user",
+    "import_user": "import",
+    "add_user": "add",
     "name": "Name",
     "email": "Email",
     "sponsor": "Sponsor",

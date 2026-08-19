@@ -286,19 +286,8 @@ const SponsorFormsManageItems = ({
         )}
         hideIcon
       />
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={2}>
-          <Box component="span">{totalCount} items</Box>
-        </Grid2>
-        <Grid2 size={2} offset={1}>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, sm: 6, lg: 2 }}>
           <FormGroup>
             <FormControlLabel
               control={
@@ -318,33 +307,29 @@ const SponsorFormsManageItems = ({
             />
           </FormGroup>
         </Grid2>
-        <Grid2 size={2}>
+        <Grid2 size={{ xs: 12, sm: 6, lg: 4 }}>
           <SearchInput
             term={term}
             onSearch={handleSearch}
             placeholder={T.translate("edit_sponsor.placeholders.search")}
           />
         </Grid2>
-        <Grid2 size={2}>
+        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
           <Button
             variant="contained"
-            size="medium"
             fullWidth
             onClick={handleOpenItemPopup}
             startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
           >
             {T.translate("edit_sponsor.forms_tab.form_manage_items.add_item")}
           </Button>
         </Grid2>
-        <Grid2 size={3}>
+        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
           <Button
             variant="contained"
-            size="medium"
             fullWidth
             onClick={() => setOpenPopup("add_item_inventory")}
             startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
           >
             {T.translate(
               "edit_sponsor.forms_tab.form_manage_items.add_item_inventory"
@@ -352,6 +337,7 @@ const SponsorFormsManageItems = ({
           </Button>
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>{totalCount} items</Box>
 
       <div>
         <MuiTableEditable

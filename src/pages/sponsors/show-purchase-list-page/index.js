@@ -16,6 +16,7 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import {
+  Box,
   Button,
   CircularProgress,
   Grid2,
@@ -218,20 +219,8 @@ const ShowPurchaseListPage = ({
           }}
         />
       </div>
-      <h3>
-        {T.translate("sponsor_show_purchases.purchases")} ({totalCount})
-      </h3>
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          mb: 2,
-          display: "flex",
-          justifyContent: "space-between",
-          rowGap: 1,
-          gap: 2
-        }}
-      >
+      <h3>{T.translate("sponsor_show_purchases.purchases")}</h3>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
         <Grid2 size={{ xs: 12, sm: 6 }}>
           <SearchInput
             term={term}
@@ -239,12 +228,16 @@ const ShowPurchaseListPage = ({
             placeholder={T.translate("general.placeholders.search")}
           />
         </Grid2>
-        <Grid2 size={{ xs: 12, sm: 3 }}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} offset={{ md: 3 }}>
           <Button fullWidth variant="contained" onClick={handleExport}>
             {T.translate("general.export")}
           </Button>
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>
+        {totalCount}{" "}
+        {T.translate("sponsor_show_purchases.purchases").toLowerCase()}
+      </Box>
       <div>
         <MuiTable
           columns={tableColumns}

@@ -235,57 +235,37 @@ const FormTemplateItemListPage = ({
       >
         {T.translate("form_template_item_list.alert_info")}
       </Alert>
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={6}>
-          <Box component="span">{totalFormTemplateItems} items</Box>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, sm: 6 }}>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={showArchived}
+                  onChange={handleShowArchivedForms}
+                  inputProps={{
+                    "aria-label": T.translate(
+                      "form_template_item_list.show_archived"
+                    )
+                  }}
+                />
+              }
+              label={T.translate("form_template_item_list.show_archived")}
+            />
+          </FormGroup>
         </Grid2>
-        <Grid2
-          container
-          size={6}
-          spacing={1}
-          sx={{
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <Grid2 size={4} offset={4}>
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={showArchived}
-                    onChange={handleShowArchivedForms}
-                    inputProps={{
-                      "aria-label": T.translate(
-                        "form_template_item_list.show_archived"
-                      )
-                    }}
-                  />
-                }
-                label={T.translate("form_template_item_list.show_archived")}
-              />
-            </FormGroup>
-          </Grid2>
-          <Grid2 size={4}>
-            <Button
-              variant="contained"
-              fullWidth
-              onClick={() => handleNewInventoryItem()}
-              startIcon={<AddIcon />}
-            >
-              {T.translate("form_template_item_list.add_item")}
-            </Button>
-          </Grid2>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} offset={{ md: 3 }}>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={() => handleNewInventoryItem()}
+            startIcon={<AddIcon />}
+          >
+            {T.translate("form_template_item_list.add_item")}
+          </Button>
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>{totalFormTemplateItems} items</Box>
 
       {formTemplateItems.length > 0 && (
         <div>
