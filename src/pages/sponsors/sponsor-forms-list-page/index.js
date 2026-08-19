@@ -16,7 +16,6 @@ import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
-  Box,
   Button,
   Checkbox,
   FormControlLabel,
@@ -308,7 +307,7 @@ const SponsorFormsListPage = ({
       columnKey: "items_qty",
       header: T.translate("sponsor_forms.items_column_label"),
       sortable: false,
-      cellSx: { whiteSpace: "nowrap" }
+      cellSx: { textAlign: "center" }
     },
     {
       columnKey: "manage_items",
@@ -342,21 +341,19 @@ const SponsorFormsListPage = ({
 
   return (
     <div className="container">
-      <h1>{T.translate("sponsor_forms.forms")}</h1>
+      <h1>
+        {T.translate("sponsor_forms.forms")} {totalCount}
+      </h1>
       <CustomAlert message={T.translate("sponsor_forms.alert_info")} hideIcon />
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-          <Box component="span">{totalCount} forms</Box>
+      <Grid2 container spacing={2} sx={{ mb: 2, width: "100%" }}>
+        <Grid2 size={{ xs: 12, sm: 6, lg: 4 }}>
+          <SearchInput
+            term={term}
+            onSearch={handleSearch}
+            placeholder={T.translate("sponsor_forms.placeholders.search")}
+          />
         </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid2 size={{ xs: 12, sm: 6, lg: 2 }}>
           <FormGroup>
             <FormControlLabel
               control={
@@ -375,14 +372,8 @@ const SponsorFormsListPage = ({
             />
           </FormGroup>
         </Grid2>
-        <Grid2 size={{ xs: 12, sm: 12, md: 3 }}>
-          <SearchInput
-            term={term}
-            onSearch={handleSearch}
-            placeholder={T.translate("sponsor_forms.placeholders.search")}
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 6, sm: 6, md: 2 }}>
+
+        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
           <Button
             variant="contained"
             size="medium"
@@ -393,7 +384,7 @@ const SponsorFormsListPage = ({
             {T.translate("sponsor_forms.using_global")}
           </Button>
         </Grid2>
-        <Grid2 size={{ xs: 6, sm: 6, md: 2 }}>
+        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
           <Button
             variant="contained"
             size="medium"

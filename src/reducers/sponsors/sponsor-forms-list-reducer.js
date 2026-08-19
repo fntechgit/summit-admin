@@ -12,7 +12,6 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import T from "i18n-react/dist/i18n-react";
 import {
   RECEIVE_GLOBAL_TEMPLATES,
   RECEIVE_SPONSOR_FORM,
@@ -110,11 +109,7 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
           name: a.name,
           opens_at: a.opens_at || "",
           expires_at: a.expires_at || "",
-          items_qty: `${a.items.length} ${
-            a.items.length === 1
-              ? T.translate("sponsor_forms.item_label_singular")
-              : T.translate("sponsor_forms.item_label_plural")
-          }`,
+          items_qty: a.items.length,
           is_archived: a.is_archived,
           sponsorship_types
         };
@@ -209,9 +204,7 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
         id: a.id,
         code: a.code,
         name: a.name,
-        items_qty: `${a.items.length} ${
-          a.items.length === 1 ? "Item" : "Items"
-        }`
+        items_qty: a.items.length
       }));
 
       const items =
