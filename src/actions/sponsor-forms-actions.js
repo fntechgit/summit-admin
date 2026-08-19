@@ -1435,7 +1435,7 @@ const normalizeItem = (entity) => {
 const saveNewItemImages =
   (formId, formItemId, images = []) =>
   async (dispatch, getState) => {
-    const newImages = images.filter((img) => !img.id && img.file_path);
+    const newImages = images.filter((img) => img.file_path);
 
     if (newImages.length === 0) return Promise.resolve();
 

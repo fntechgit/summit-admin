@@ -191,7 +191,7 @@ describe("SponsorFormItemsListReducer", () => {
       });
     });
 
-    it("maps file_url to file_path on each image - mirrors the customized-item reducer's edit-form image fix", () => {
+    it("keeps images in their API shape (id, file_url) without a file_path mapping", () => {
       const item = {
         id: "A",
         code: "A",
@@ -214,16 +214,8 @@ describe("SponsorFormItemsListReducer", () => {
       });
 
       expect(result.currentItem.images).toEqual([
-        {
-          id: 10,
-          file_url: "https://cdn/a.png",
-          file_path: "https://cdn/a.png"
-        },
-        {
-          id: 11,
-          file_url: "https://cdn/b.png",
-          file_path: "https://cdn/b.png"
-        }
+        { id: 10, file_url: "https://cdn/a.png" },
+        { id: 11, file_url: "https://cdn/b.png" }
       ]);
     });
   });

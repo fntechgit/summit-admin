@@ -479,7 +479,7 @@ describe("Sponsor Forms Actions", () => {
       const entity = {
         id: 100,
         name: "Item",
-        images: [{ id: 5, file_path: "https://cdn/a.png" }],
+        images: [{ id: 5, file_url: "https://cdn/a.png" }],
         meta_fields: []
       };
 
@@ -512,7 +512,7 @@ describe("Sponsor Forms Actions", () => {
         id: 100,
         name: "Item",
         images: [
-          { id: 5, file_path: "https://cdn/a.png" },
+          { id: 5, file_url: "https://cdn/a.png" },
           { file_path: "data:image/png;base64,BBB" }
         ],
         meta_fields: []
@@ -521,6 +521,10 @@ describe("Sponsor Forms Actions", () => {
       await store.dispatch(updateSponsorFormItem(7, entity));
       await flushPromises();
 
+      const imagesCalls = postRequest.mock.calls.filter(
+        ([, , url]) => url && url.includes("/images")
+      );
+      expect(imagesCalls).toHaveLength(1);
       expect(postRequest).toHaveBeenCalledWith(
         null,
         expect.any(Function),
