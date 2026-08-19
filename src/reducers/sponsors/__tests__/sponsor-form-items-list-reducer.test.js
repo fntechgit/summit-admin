@@ -218,6 +218,27 @@ describe("SponsorFormItemsListReducer", () => {
         { id: 11, file_url: "https://cdn/b.png" }
       ]);
     });
+
+    it("defaults images to [] when the response omits the field", () => {
+      const item = {
+        id: "A",
+        code: "A",
+        name: "A",
+        early_bird_rate: 100,
+        standard_rate: 100,
+        onsite_rate: 100,
+        default_quantity: "100",
+        is_archived: true,
+        meta_fields: []
+      };
+
+      result = SponsorFormItemsListReducer(initialState, {
+        type: RECEIVE_SPONSOR_FORM_ITEM,
+        payload: { response: item }
+      });
+
+      expect(result.currentItem.images).toEqual([]);
+    });
   });
 
   describe("RESET_SPONSOR_FORM_ITEM", () => {
@@ -348,6 +369,29 @@ describe("SponsorFormItemsListReducer", () => {
         { id: "A", images: [] },
         { id: "B", images: [{ id: "IMG_3" }] }
       ]);
+    });
+
+    it("defaults the matching list item's images to [] when it has none", () => {
+      const state = {
+        ...initialState,
+        currentItem: {
+          ...initialState.currentItem,
+          id: "A",
+          images: undefined
+        },
+        items: [
+          { id: "A", images: undefined },
+          { id: "B", images: [{ id: "IMG_3" }] }
+        ]
+      };
+
+      result = SponsorFormItemsListReducer(state, {
+        type: SPONSOR_FORM_ITEM_FILE_DELETED,
+        payload: { fileId: "IMG_1", itemId: "A" }
+      });
+
+      expect(result.currentItem.images).toStrictEqual([]);
+      expect(result.items[0].images).toStrictEqual([]);
     });
   });
 

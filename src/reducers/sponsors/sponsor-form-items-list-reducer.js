@@ -102,6 +102,7 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
       const item = payload.response;
       const currentItem = {
         ...item,
+        images: item.images ?? [],
         meta_fields: (item.meta_fields ?? []).length > 0 ? item.meta_fields : []
       };
       return { ...state, currentItem };
@@ -129,7 +130,10 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
 
       const items = state.items.map((item) =>
         item.id === itemId
-          ? { ...item, images: item.images?.filter((img) => img.id !== fileId) }
+          ? {
+              ...item,
+              images: item.images?.filter((img) => img.id !== fileId) ?? []
+            }
           : item
       );
 
