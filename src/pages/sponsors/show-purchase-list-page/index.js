@@ -16,7 +16,6 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import {
-  Box,
   Button,
   CircularProgress,
   Grid2,
@@ -116,13 +115,14 @@ const ShowPurchaseListPage = ({
     {
       columnKey: "purchased",
       header: T.translate("sponsor_show_purchases.purchased"),
-      width: 180,
-      sortable: true
+      sortable: true,
+      cellSx: { maxWidth: { md: 120, lg: 180 } }
     },
     {
       columnKey: "sponsor_name",
       header: T.translate("sponsor_show_purchases.sponsor"),
-      sortable: true
+      sortable: true,
+      cellSx: { maxWidth: 200 }
     },
     {
       columnKey: "payment_method",
@@ -171,8 +171,9 @@ const ShowPurchaseListPage = ({
     {
       columnKey: "details",
       header: "",
-      width: 80,
       align: "center",
+      width: 86,
+      cellSx: { p: 0 },
       render: (row) => (
         <Button
           variant="text"
@@ -188,6 +189,8 @@ const ShowPurchaseListPage = ({
       columnKey: "menu",
       header: "",
       align: "center",
+      width: 46,
+      cellSx: { p: 0 },
       render: (row) =>
         downloadingOrderId === row.id ? (
           <CircularProgress size={24} />
@@ -215,31 +218,29 @@ const ShowPurchaseListPage = ({
           }}
         />
       </div>
-      <h3>{T.translate("sponsor_show_purchases.purchases")}</h3>
+      <h3>
+        {T.translate("sponsor_show_purchases.purchases")} ({totalCount})
+      </h3>
       <Grid2
         container
         spacing={2}
         sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
+          mb: 2,
+          display: "flex",
+          justifyContent: "space-between",
+          rowGap: 1,
+          gap: 2
         }}
       >
-        <Grid2 size={2}>
-          <Box component="span">
-            {totalCount}{" "}
-            {T.translate("sponsor_show_purchases.purchases").toLowerCase()}
-          </Box>
-        </Grid2>
-        <Grid2 size={2} offset={6}>
+        <Grid2 size={{ xs: 12, sm: 6 }}>
           <SearchInput
             term={term}
             onSearch={handleSearch}
             placeholder={T.translate("general.placeholders.search")}
           />
         </Grid2>
-        <Grid2 size={2}>
-          <Button variant="contained" onClick={handleExport}>
+        <Grid2 size={{ xs: 12, sm: 3 }}>
+          <Button fullWidth variant="contained" onClick={handleExport}>
             {T.translate("general.export")}
           </Button>
         </Grid2>
