@@ -8,6 +8,7 @@ jest.mock("../../../../actions/sponsor-forms-actions", () => ({
   ...jest.requireActual("../../../../actions/sponsor-forms-actions"),
   getSponsorFormItems: jest.fn(() => () => Promise.resolve()),
   updateSponsorFormItem: jest.fn(() => () => Promise.resolve()),
+  saveSponsorFormItem: jest.fn(() => () => Promise.resolve()),
   addInventoryItems: jest.fn(() => () => Promise.resolve())
 }));
 
@@ -26,9 +27,25 @@ jest.mock(
     }
 );
 
+// the real popup renders a formik form; here we only care about what the page
+// hands to the save action, so the popup is reduced to a button that submits
+// the values a user would have left in the form
+let mockPopupSubmitValues = null;
+
+jest.mock(
+  "../components/sponsor-form-item-popup",
+  () =>
+    function MockItemPopup({ onSave }) {
+      return (
+        <button onClick={() => onSave(mockPopupSubmitValues)}>mock-save</button>
+      );
+    }
+);
+
 const {
   getSponsorFormItems,
   updateSponsorFormItem,
+  saveSponsorFormItem,
   addInventoryItems
 } = require("../../../../actions/sponsor-forms-actions");
 
@@ -44,7 +61,7 @@ const buildItem = (id) => ({
   images: []
 });
 
-const renderPage = () =>
+const renderPage = (currentItem = {}) =>
   renderWithRedux(
     <SponsorFormItemListPage
       match={{ params: { form_id: "FORM1" }, url: "/form-items" }}
@@ -53,7 +70,7 @@ const renderPage = () =>
       initialState: {
         sponsorFormItemsListState: {
           items: [buildItem(1)],
-          currentItem: {},
+          currentItem,
           currentPage: 3,
           perPage: 5,
           order: "code",
@@ -120,5 +137,52 @@ describe("SponsorFormItemListPage inline cell edit", () => {
         false
       )
     );
+  });
+});
+
+describe("SponsorFormItemListPage image removal", () => {
+  const savedImages = [
+    { id: 166, file_url: "https://cdn.example.com/images/a.jpeg" },
+    { id: 167, file_url: "https://cdn.example.com/images/b.jpeg" }
+  ];
+
+  const openPopupAndSave = async (values) => {
+    mockPopupSubmitValues = values;
+    const user = userEvent.setup();
+    await user.click(screen.getByText("sponsor_form_item_list.add_item"));
+    await user.click(screen.getByText("mock-save"));
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockPopupSubmitValues = null;
+  });
+
+  it("tells the save action which saved images the user removed from the form", async () => {
+    renderPage({ ...buildItem(1), images: savedImages });
+
+    const values = { ...buildItem(1), images: [savedImages[1]] };
+    await openPopupAndSave(values);
+
+    expect(updateSponsorFormItem).toHaveBeenCalledWith("FORM1", values, [166]);
+  });
+
+  it("reports no removal when the form still holds every saved image", async () => {
+    renderPage({ ...buildItem(1), images: savedImages });
+
+    const values = { ...buildItem(1), images: savedImages };
+    await openPopupAndSave(values);
+
+    expect(updateSponsorFormItem).toHaveBeenCalledWith("FORM1", values, []);
+  });
+
+  it("creates a brand new item without any removal argument", async () => {
+    renderPage({ ...buildItem(1), images: savedImages });
+
+    const values = { code: "NEW", name: "New item", images: [] };
+    await openPopupAndSave(values);
+
+    expect(saveSponsorFormItem).toHaveBeenCalledWith("FORM1", values);
+    expect(updateSponsorFormItem).not.toHaveBeenCalled();
   });
 });

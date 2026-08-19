@@ -1262,6 +1262,39 @@ const saveItemImages =
     return Promise.all(promises);
   };
 
+const deleteItemImages =
+  (formId, formItemId, imageIds) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+    const accessToken = await getAccessTokenSafely();
+    const params = { access_token: accessToken };
+
+    return Promise.all(
+      imageIds.map((imageId) =>
+        deleteRequest(
+          null,
+          createAction(SPONSOR_FORM_ITEM_IMAGES_UPDATED)({ imageId }),
+          `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images/${imageId}`,
+          null,
+          authErrorHandler
+        )(params)(dispatch)
+      )
+    );
+  };
+
+// only freshly uploaded files carry a file_path; already saved ones come back
+// from the API as { id, file_url } and must not be re-sent
+const getNewImages = (entity) =>
+  entity.images?.filter((img) => img.file_path) ?? [];
+
+// images the user removed from the form but that still exist server side
+export const getRemovedImageIds = (savedImages = [], formImages = []) => {
+  const keptIds = formImages.map((img) => img.id).filter(Boolean);
+  return savedImages
+    .map((img) => img.id)
+    .filter((id) => id && !keptIds.includes(id));
+};
+
 export const saveSponsorFormItem =
   (formId, entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
@@ -1285,12 +1318,13 @@ export const saveSponsorFormItem =
     )(params)(dispatch)
       .then(({ response }) => {
         const promises = [Promise.resolve(0)];
+        const newImages = getNewImages(entity);
 
-        if (normalizedEntity.images?.length > 0) {
+        if (newImages.length > 0) {
           const savingImages = saveItemImages(
             formId,
             response.id,
-            normalizedEntity.images
+            newImages
           )(dispatch, getState);
 
           promises.push(savingImages);
@@ -1311,7 +1345,8 @@ export const saveSponsorFormItem =
   };
 
 export const updateSponsorFormItem =
-  (formId, entity) => async (dispatch, getState) => {
+  (formId, entity, removedImageIds = []) =>
+  async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
@@ -1333,15 +1368,26 @@ export const updateSponsorFormItem =
     )(params)(dispatch)
       .then(() => {
         const promises = [Promise.resolve(0)];
+        const newImages = getNewImages(entity);
 
-        if (normalizedEntity.images?.length > 0) {
+        if (newImages.length > 0) {
           const savingImages = saveItemImages(
             formId,
             entity.id,
-            normalizedEntity.images
+            newImages
           )(dispatch, getState);
 
           promises.push(savingImages);
+        }
+
+        if (removedImageIds.length > 0) {
+          const deletingImages = deleteItemImages(
+            formId,
+            entity.id,
+            removedImageIds
+          )(dispatch, getState);
+
+          promises.push(deletingImages);
         }
 
         return Promise.all(promises).then(() => {
@@ -1439,17 +1485,17 @@ const normalizeItem = (entity) => {
     meta_fields,
     quantity_limit_per_show,
     quantity_limit_per_sponsor,
-    default_quantity,
-    images
+    default_quantity
   } = entity;
 
   if (meta_fields) {
     normalizedEntity.meta_fields = meta_fields.filter((mf) => !!mf.name);
   }
 
-  if (images) {
-    normalizedEntity.images = images?.filter((img) => img.file_path);
-  }
+  // images are persisted through /items/{id}/images. Sending them here would
+  // write them a second time (as rows whose file is never copied to storage),
+  // and sending an empty array would wipe the ones already saved.
+  delete normalizedEntity.images;
 
   if (quantity_limit_per_show === "")
     delete normalizedEntity.quantity_limit_per_show;

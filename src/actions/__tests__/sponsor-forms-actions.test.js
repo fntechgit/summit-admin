@@ -5,14 +5,18 @@ import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
 import {
+  deleteRequest,
   getRequest,
+  postRequest,
   putRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
 import {
+  getRemovedImageIds,
   getSponsorForms,
   normalizeFormTemplate,
   normalizeSponsorCustomizedForm,
-  updateFormTemplateTiers
+  updateFormTemplateTiers,
+  updateSponsorFormItem
 } from "../sponsor-forms-actions";
 import * as methods from "../../utils/methods";
 
@@ -21,7 +25,8 @@ jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
   postRequest: jest.fn(),
   getRequest: jest.fn(),
-  putRequest: jest.fn()
+  putRequest: jest.fn(),
+  deleteRequest: jest.fn()
 }));
 
 describe("Sponsor Forms Actions", () => {
@@ -286,6 +291,171 @@ describe("Sponsor Forms Actions", () => {
           term: "expo"
         }
       );
+    });
+  });
+
+  describe("updateSponsorFormItem images", () => {
+    const middlewares = [thunk];
+    const mockStore = configureStore(middlewares);
+
+    const SUMMIT_ID = 73;
+    const FORM_ID = 28;
+    const ITEM_ID = 217;
+    const IMAGES_URL = `${window.PURCHASES_API_URL}/api/v1/summits/${SUMMIT_ID}/show-forms/${FORM_ID}/items/${ITEM_ID}/images`;
+
+    const savedImage = {
+      id: 166,
+      file_url: "https://cdn.example.com/images/counter.jpeg"
+    };
+
+    const uploadedFile = {
+      file_name: "counter.jpeg",
+      md5: "4c3c1bf3b2975f347f77ce59e97625f8",
+      mime_type: "image/jpeg",
+      bucket: "file-upload-api-production",
+      size: 263859,
+      file_path: "upload/image-jpeg/2026-08-19/counter.jpeg"
+    };
+
+    const baseItem = {
+      id: ITEM_ID,
+      code: "FN-F06",
+      name: "6' White Lockable Counter",
+      early_bird_rate: 86500,
+      standard_rate: 107500,
+      onsite_rate: 130000,
+      meta_fields: []
+    };
+
+    const buildStore = () =>
+      mockStore({
+        currentSummitState: { currentSummit: { id: SUMMIT_ID } }
+      });
+
+    // uicore request helpers are called as request(...)(params)(dispatch)
+    const resolvingRequest =
+      (response = {}) =>
+      () =>
+      () =>
+      () =>
+        Promise.resolve({ response });
+
+    beforeEach(() => {
+      jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
+      putRequest.mockImplementation(resolvingRequest());
+      postRequest.mockImplementation(resolvingRequest());
+      deleteRequest.mockImplementation(resolvingRequest());
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      putRequest.mockReset();
+      postRequest.mockReset();
+      deleteRequest.mockReset();
+    });
+
+    it("does not send images in the item payload, so the API cannot write them twice", async () => {
+      const store = buildStore();
+
+      store.dispatch(
+        updateSponsorFormItem(FORM_ID, {
+          ...baseItem,
+          images: [uploadedFile]
+        })
+      );
+
+      await flushPromises();
+
+      const itemPayload = putRequest.mock.calls[0][3];
+
+      expect(itemPayload).not.toHaveProperty("images");
+      expect(postRequest).toHaveBeenCalledTimes(1);
+      expect(postRequest).toHaveBeenCalledWith(
+        null,
+        expect.any(Function),
+        IMAGES_URL,
+        uploadedFile,
+        expect.any(Function),
+        uploadedFile
+      );
+    });
+
+    it("keeps already saved images untouched when none was uploaded or removed", async () => {
+      const store = buildStore();
+
+      store.dispatch(
+        updateSponsorFormItem(FORM_ID, {
+          ...baseItem,
+          images: [savedImage]
+        })
+      );
+
+      await flushPromises();
+
+      expect(putRequest.mock.calls[0][3]).not.toHaveProperty("images");
+      expect(postRequest).not.toHaveBeenCalled();
+      expect(deleteRequest).not.toHaveBeenCalled();
+    });
+
+    it("deletes the images it is told were removed", async () => {
+      const store = buildStore();
+
+      store.dispatch(
+        updateSponsorFormItem(FORM_ID, { ...baseItem, images: [] }, [
+          savedImage.id
+        ])
+      );
+
+      await flushPromises();
+
+      expect(deleteRequest).toHaveBeenCalledTimes(1);
+      expect(deleteRequest).toHaveBeenCalledWith(
+        null,
+        expect.anything(),
+        `${IMAGES_URL}/${savedImage.id}`,
+        null,
+        expect.any(Function)
+      );
+      expect(postRequest).not.toHaveBeenCalled();
+    });
+
+    it("deletes nothing when no removed id is passed", async () => {
+      const store = buildStore();
+
+      store.dispatch(
+        updateSponsorFormItem(FORM_ID, { ...baseItem, images: [] })
+      );
+
+      await flushPromises();
+
+      expect(deleteRequest).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("getRemovedImageIds", () => {
+    it("returns the saved images missing from the form", () => {
+      expect(
+        getRemovedImageIds(
+          [{ id: 166 }, { id: 167 }, { id: 168 }],
+          [{ id: 167 }, { file_path: "upload/new.jpeg" }]
+        )
+      ).toEqual([166, 168]);
+    });
+
+    it("returns nothing when every saved image is still in the form", () => {
+      expect(getRemovedImageIds([{ id: 166 }], [{ id: 166 }])).toEqual([]);
+    });
+
+    it("treats an empty form list as removing everything", () => {
+      expect(getRemovedImageIds([{ id: 166 }, { id: 167 }], [])).toEqual([
+        166, 167
+      ]);
+    });
+
+    it("returns nothing when the item had no saved images", () => {
+      expect(
+        getRemovedImageIds([], [{ file_path: "upload/new.jpeg" }])
+      ).toEqual([]);
     });
   });
 });

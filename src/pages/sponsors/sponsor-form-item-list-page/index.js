@@ -36,7 +36,8 @@ import {
   addInventoryItems,
   resetSponsorFormItem,
   archiveSponsorFormItem,
-  unarchiveSponsorFormItem
+  unarchiveSponsorFormItem,
+  getRemovedImageIds
 } from "../../../actions/sponsor-forms-actions";
 import { getInventoryItems } from "../../../actions/inventory-item-actions";
 import SponsorFormItemPopup from "./components/sponsor-form-item-popup";
@@ -116,8 +117,15 @@ const SponsorFormItemListPage = ({
   };
 
   const handleSaveItem = (values) => {
-    const save = values.id ? updateSponsorFormItem : saveSponsorFormItem;
-    return save(formId, values).then(() =>
+    const save = values.id
+      ? updateSponsorFormItem(
+          formId,
+          values,
+          getRemovedImageIds(currentItem.images, values.images)
+        )
+      : saveSponsorFormItem(formId, values);
+
+    return save.then(() =>
       getSponsorFormItems(
         formId,
         values.id ? currentPage : DEFAULT_CURRENT_PAGE,
