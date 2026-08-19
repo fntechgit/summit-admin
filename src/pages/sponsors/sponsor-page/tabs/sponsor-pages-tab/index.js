@@ -369,22 +369,8 @@ const SponsorPagesTab = ({
         message={T.translate("edit_sponsor.pages_tab.alert_info")}
         hideIcon
       />
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={1}>
-          <Box component="span">
-            {managedPages.totalItems + customizedPages.totalItems}{" "}
-            {T.translate("edit_sponsor.pages_tab.pages")}
-          </Box>
-        </Grid2>
-        <Grid2 size={2} offset={1}>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, sm: 6, lg: 2 }}>
           <FormGroup>
             <FormControlLabel
               control={
@@ -402,38 +388,38 @@ const SponsorPagesTab = ({
             />
           </FormGroup>
         </Grid2>
-        <Grid2 size={2}>
+        <Grid2 size={{ xs: 12, sm: 6, lg: 4 }}>
           <SearchInput
             term={term}
             onSearch={handleSearch}
             placeholder={T.translate("edit_sponsor.placeholders.search")}
           />
         </Grid2>
-        <Grid2 size={3}>
+        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
           <Button
             variant="contained"
-            size="medium"
             fullWidth
             onClick={handleUsingTemplate}
             startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
           >
             {T.translate("edit_sponsor.pages_tab.using_template")}
           </Button>
         </Grid2>
-        <Grid2 size={3}>
+        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
           <Button
             variant="contained"
-            size="medium"
             fullWidth
             onClick={handleAddPage}
             startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
           >
             {T.translate("edit_sponsor.pages_tab.new_page")}
           </Button>
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>
+        {managedPages.totalItems + customizedPages.totalItems}{" "}
+        {T.translate("edit_sponsor.pages_tab.pages")}
+      </Box>
       <div>
         <MuiTable
           columns={customizedPagesColumns}

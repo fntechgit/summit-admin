@@ -285,26 +285,8 @@ const SponsorFormItemListPage = ({
       >
         {T.translate("sponsor_form_item_list.alert_info")}
       </Alert>
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={4}>
-          <Box component="span">{totalCount} items</Box>
-        </Grid2>
-        <Grid2
-          container
-          size={8}
-          sx={{
-            justifyContent: "flex-end",
-            alignItems: "center"
-          }}
-        >
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, md: 4 }}>
           <FormGroup>
             <FormControlLabel
               control={
@@ -321,15 +303,21 @@ const SponsorFormItemListPage = ({
               label={T.translate("sponsor_form_item_list.show_archived")}
             />
           </FormGroup>
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 4 }}>
           <Button
             variant="contained"
+            fullWidth
             onClick={() => handleNewItem()}
             startIcon={<AddIcon />}
           >
             {T.translate("sponsor_form_item_list.add_item")}
           </Button>
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 4 }}>
           <Button
             variant="contained"
+            fullWidth
             onClick={() => handleNewInventoryItem()}
             startIcon={<AddIcon />}
           >
@@ -337,6 +325,7 @@ const SponsorFormItemListPage = ({
           </Button>
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>{totalCount} items</Box>
 
       {items.length > 0 && (
         <div>

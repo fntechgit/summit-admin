@@ -106,46 +106,26 @@ const SponsorUsersListPage = ({
         }}
       />
       <h3>{T.translate("sponsor_users.users")}</h3>
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={2}>
-          <Box component="span">
-            {requests.totalCount} {T.translate("sponsor_users.access_request")}
-          </Box>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, sm: 6, lg: 6 }}>
+          <SearchInput term={term} onSearch={handleSearch} />
         </Grid2>
-        <Grid2
-          container
-          size={10}
-          sx={{
-            justifyContent: "flex-end",
-            alignItems: "center"
-          }}
-        >
-          <Grid2 size={3}>
-            <SearchInput term={term} onSearch={handleSearch} />
-          </Grid2>
+        <Grid2 size={{ xs: 6, sm: 3 }}>
           <Button
             variant="contained"
-            size="medium"
+            fullWidth
             onClick={() => setOpenPopup("import")}
-            startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
+            startIcon={<SaveAltIcon />}
           >
             {T.translate("sponsor_users.import_user")}
           </Button>
+        </Grid2>
+        <Grid2 size={{ xs: 6, sm: 3 }}>
           <Button
             variant="contained"
-            size="medium"
+            fullWidth
             onClick={() => setOpenPopup("new")}
-            startIcon={<SaveAltIcon />}
-            sx={{ height: "36px" }}
+            startIcon={<AddIcon />}
           >
             {T.translate("sponsor_users.add_user")}
           </Button>
@@ -166,6 +146,10 @@ const SponsorUsersListPage = ({
           {T.translate("sponsor_users.import_users.in_progress")}
         </Box>
       )}
+
+      <Box sx={{ mb: 2 }}>
+        {requests.totalCount} {T.translate("sponsor_users.access_request")}
+      </Box>
 
       <RequestTable
         requests={requests}

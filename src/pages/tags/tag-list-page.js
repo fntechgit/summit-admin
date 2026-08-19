@@ -121,44 +121,21 @@ const TagListPage = ({
     <Box className="container">
       <h3>{T.translate("tag_list.tag_list")}</h3>
 
-      <Grid2
-        container
-        sx={{
-          mb: 2,
-          width: "100%",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap"
-        }}
-      >
-        <Grid2 md={2} sx={{ display: "flex", alignItems: "center" }}>
-          <Box component="span">
-            {totalTags}{" "}
-            {totalTags === 1
-              ? T.translate("tag_list.item")
-              : T.translate("tag_list.items")}
-          </Box>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, sm: 6 }}>
+          <MuiSearchInput
+            term={search}
+            onSearch={handleSearch}
+            placeholder={T.translate("tag_list.placeholders.search_tags")}
+          />
         </Grid2>
-        <Grid2
-          container
-          md={10}
-          spacing={1}
-          gap={1}
-          sx={{ justifyContent: "flex-end", alignItems: "center" }}
-        >
-          <Box sx={{ width: { xs: "100%", sm: 320 } }}>
-            <MuiSearchInput
-              term={search}
-              onSearch={handleSearch}
-              placeholder={T.translate("tag_list.placeholders.search_tags")}
-            />
-          </Box>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} offset={{ md: 3 }}>
           <Button
             variant="contained"
+            fullWidth
             startIcon={<AddIcon />}
             onClick={() => handleNewTag()}
             sx={{
-              height: "36px",
               padding: "6px 16px",
               fontSize: "1.4rem",
               lineHeight: "2.4rem",
@@ -169,6 +146,7 @@ const TagListPage = ({
           </Button>
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>{totalTags}</Box>
 
       <MuiTable
         columns={columns}

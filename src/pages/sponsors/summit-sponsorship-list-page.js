@@ -139,41 +139,19 @@ const SummitSponsorshipListPage = ({
       >
         {T.translate("summit_sponsorship_list.alert_info")}
       </Alert>
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={6}>
-          <Box component="span">{totalSponsorships} summit tiers</Box>
-        </Grid2>
-        <Grid2
-          container
-          size={6}
-          spacing={1}
-          sx={{
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <Grid2 size={{ xs: 0, sm: 4, lg: 6, xl: 7 }} />
-          <Grid2 size={{ xs: 12, sm: 8, lg: 6, xl: 5 }}>
-            <Button
-              variant="contained"
-              fullWidth
-              onClick={handleNewSponsorship}
-              startIcon={<AddIcon />}
-              sx={{ height: "36px" }}
-            >
-              {T.translate("summit_sponsorship_list.add_sponsorship")}
-            </Button>
-          </Grid2>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} offset={{ sm: 6, md: 9 }}>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={handleNewSponsorship}
+            startIcon={<AddIcon />}
+          >
+            {T.translate("summit_sponsorship_list.add_sponsorship")}
+          </Button>
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>{totalSponsorships} summit tiers</Box>
 
       {sponsorships.length === 0 && (
         <div>{T.translate("summit_sponsorship_list.no_sponsorships")}</div>

@@ -190,35 +190,20 @@ const CartView = ({
 
   return (
     <>
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={4}>
-          {cart && (
-            <Box component="span">{cart?.forms.length} forms in Cart</Box>
-          )}
-        </Grid2>
-        <Grid2 size={2} offset={4}>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 2 }} offset={{ md: 8 }}>
           <SearchInput
             term={term}
             onSearch={handleSearch}
             placeholder={T.translate("edit_sponsor.placeholders.search")}
           />
         </Grid2>
-        <Grid2 size={2}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
           <Button
             variant="contained"
-            size="medium"
             fullWidth
             onClick={onAddForm}
             startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
           >
             {T.translate("edit_sponsor.cart_tab.add_form")}
           </Button>
@@ -231,6 +216,7 @@ const CartView = ({
       )}
       {!!cart && (
         <>
+          <Box sx={{ mb: 2 }}>{cart?.forms.length} forms in Cart</Box>
           <Paper elevation={0} sx={{ width: "100%", mb: 2 }}>
             <MuiTable
               columns={tableColumns}

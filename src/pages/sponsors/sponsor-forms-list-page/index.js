@@ -16,6 +16,7 @@ import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
+  Box,
   Button,
   Checkbox,
   FormControlLabel,
@@ -341,11 +342,9 @@ const SponsorFormsListPage = ({
 
   return (
     <div className="container">
-      <h1>
-        {T.translate("sponsor_forms.forms")} {totalCount}
-      </h1>
+      <h3>{T.translate("sponsor_forms.forms")}</h3>
       <CustomAlert message={T.translate("sponsor_forms.alert_info")} hideIcon />
-      <Grid2 container spacing={2} sx={{ mb: 2, width: "100%" }}>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
         <Grid2 size={{ xs: 12, sm: 6, lg: 4 }}>
           <SearchInput
             term={term}
@@ -396,6 +395,7 @@ const SponsorFormsListPage = ({
           </Button>
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>{totalCount} forms</Box>
 
       {sponsorForms.length > 0 && (
         <div>

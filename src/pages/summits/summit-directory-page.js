@@ -160,27 +160,16 @@ const SummitDirectoryPage = ({
 
   return (
     <Box className="container">
-      <h3>
-        {T.translate("directory.summits")} ({totalSummits})
-      </h3>
-      <Grid2 container spacing={2} sx={{ mb: 2, width: "100%" }}>
-        <Grid2 size={{ xs: 12, sm: 4 }}>
+      <h3>{T.translate("directory.summits")}</h3>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, md: 6 }}>
           <MuiSearchInput
             term={searchTerm}
             onSearch={handleSearch}
             placeholder={T.translate("directory.placeholders.search")}
           />
         </Grid2>
-        <Grid2
-          size={{ xs: 12, sm: 8 }}
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            rowGap: 1,
-            gap: 2
-          }}
-        >
+        <Grid2 size={{ xs: 6, md: 3 }}>
           <FormGroup>
             <FormControlLabel
               control={
@@ -195,25 +184,25 @@ const SummitDirectoryPage = ({
               label={T.translate("directory.hide_past_events")}
             />
           </FormGroup>
+        </Grid2>
+        <Grid2 size={{ xs: 6, md: 3 }}>
           {canAddSummits && (
             <Button
               variant="contained"
               color="primary"
+              size="medium"
+              fullWidth
               startIcon={<AddIcon />}
               onClick={handleNewSummit}
-              sx={{
-                height: "36px",
-                padding: "6px 16px",
-                fontSize: "1.4rem",
-                lineHeight: "2.4rem",
-                letterSpacing: "0.4px"
-              }}
             >
               {T.translate("directory.add_summit")}
             </Button>
           )}
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>
+        {totalSummits} {T.translate("directory.summits").toLowerCase()}
+      </Box>
       <MuiTable
         columns={columns}
         data={safeSummits}

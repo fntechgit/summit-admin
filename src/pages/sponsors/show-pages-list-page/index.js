@@ -203,21 +203,8 @@ const ShowPagesListPage = ({
       </div>
       <h3>{T.translate("show_pages.pages")}</h3>
       <CustomAlert message={T.translate("show_pages.alert_info")} hideIcon />
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={1}>
-          <Box component="span">
-            {totalCount} {T.translate("show_pages.pages")}
-          </Box>
-        </Grid2>
-        <Grid2 size={2} offset={1}>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, sm: 6, lg: 2 }}>
           <FormGroup>
             <FormControlLabel
               control={
@@ -233,38 +220,37 @@ const ShowPagesListPage = ({
             />
           </FormGroup>
         </Grid2>
-        <Grid2 size={2}>
+        <Grid2 size={{ xs: 12, sm: 6, lg: 4 }}>
           <SearchInput
             term={term}
             onSearch={handleSearch}
             placeholder={T.translate("show_pages.placeholders.search")}
           />
         </Grid2>
-        <Grid2 size={3}>
+        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
           <Button
             variant="contained"
-            size="medium"
             fullWidth
             onClick={() => setOpenPopup("cloneTemplate")}
             startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
           >
             {T.translate("show_pages.using_template")}
           </Button>
         </Grid2>
-        <Grid2 size={3}>
+        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
           <Button
             variant="contained"
-            size="medium"
             fullWidth
             onClick={handleNewShowPage}
             startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
           >
             {T.translate("show_pages.new_page")}
           </Button>
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>
+        {totalCount} {T.translate("show_pages.pages")}
+      </Box>
 
       {showPages.length === 0 && (
         <div>{T.translate("show_pages.no_sponsors_pages")}</div>

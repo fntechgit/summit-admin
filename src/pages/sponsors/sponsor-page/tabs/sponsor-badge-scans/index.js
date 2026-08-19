@@ -168,36 +168,22 @@ const SponsorBadgeScans = ({
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Grid2
-        container
-        spacing={1}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={3}>
-          <Box component="span">
-            {totalBadgeScans} {T.translate("sponsor_badge_scans.badge_scanned")}
-          </Box>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, sm: 6, lg: 6 }}>
+          <SearchInput
+            onSearch={handleSearch}
+            placeholder={T.translate(
+              "inventory_item_list.placeholders.search_inventory_items"
+            )}
+          />
         </Grid2>
-        <Grid2 size={9} justifyContent="flex-end" gap={1} container>
-          <Grid2 size={4}>
-            <SearchInput
-              onSearch={handleSearch}
-              placeholder={T.translate(
-                "inventory_item_list.placeholders.search_inventory_items"
-              )}
-            />
-          </Grid2>
+        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
           <Button
             variant="contained"
-            size="medium"
+            fullWidth
             onClick={handleNewManualScan}
             startIcon={<AddIcon />}
             sx={{
-              height: "36px",
               padding: "6px 16px",
               fontSize: "1.4rem",
               lineHeight: "2.4rem",
@@ -206,13 +192,14 @@ const SponsorBadgeScans = ({
           >
             {T.translate("sponsor_badge_scans.add_manual_scan")}
           </Button>
+        </Grid2>
+        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
           <Button
             variant="contained"
-            size="medium"
+            fullWidth
             onClick={handleExportBadgeScans}
             startIcon={<DownloadIcon />}
             sx={{
-              height: "36px",
               padding: "6px 16px",
               fontSize: "1.4rem",
               lineHeight: "2.4rem",
@@ -223,6 +210,9 @@ const SponsorBadgeScans = ({
           </Button>
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>
+        {totalBadgeScans} {T.translate("sponsor_badge_scans.badge_scanned")}
+      </Box>
 
       {badgeScans.length > 0 && (
         <div>

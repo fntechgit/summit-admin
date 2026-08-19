@@ -14,13 +14,13 @@
 import React, { useEffect, useState } from "react";
 import {
   Alert,
+  Box,
   Button,
   Checkbox,
   FormControlLabel,
   FormGroup,
   Grid2
 } from "@mui/material";
-import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { connect } from "react-redux";
@@ -209,28 +209,8 @@ const InventoryListPage = ({
       >
         {T.translate("inventory_item_list.alert_info")}
       </Alert>
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={2}>
-          <Box component="span">{totalInventoryItems} items</Box>
-        </Grid2>
-        <Grid2
-          container
-          size={10}
-          spacing={1}
-          gap={1}
-          sx={{
-            justifyContent: "flex-end",
-            alignItems: "center"
-          }}
-        >
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <FormGroup>
             <FormControlLabel
               control={
@@ -247,20 +227,22 @@ const InventoryListPage = ({
               label={T.translate("inventory_item_list.show_archived")}
             />
           </FormGroup>
-          <Grid2 size={3}>
-            <SearchInput
-              onSearch={handleSearch}
-              placeholder={T.translate(
-                "inventory_item_list.placeholders.search_inventory_items"
-              )}
-            />
-          </Grid2>
+        </Grid2>
+        <Grid2 size={{ xs: 12, sm: 6, md: 6 }}>
+          <SearchInput
+            onSearch={handleSearch}
+            placeholder={T.translate(
+              "inventory_item_list.placeholders.search_inventory_items"
+            )}
+          />
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 3 }}>
           <Button
             variant="contained"
+            fullWidth
             onClick={() => handleNewInventoryItem()}
             startIcon={<AddIcon />}
             sx={{
-              height: "36px",
               padding: "6px 16px",
               fontSize: "1.4rem",
               lineHeight: "2.4rem",
@@ -271,6 +253,7 @@ const InventoryListPage = ({
           </Button>
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>{totalInventoryItems} items</Box>
 
       {inventoryItems.length > 0 && (
         <div>

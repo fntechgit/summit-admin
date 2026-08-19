@@ -12,6 +12,7 @@
  * */
 
 import React, { useEffect } from "react";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Grid2 from "@mui/material/Grid2";
 import AddIcon from "@mui/icons-material/Add";
@@ -115,32 +116,21 @@ const EmailTemplateListPage = ({
   return (
     <div className="container">
       <h3>{T.translate("emails.template_list")}</h3>
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={2}>
-          {totalTemplates} {T.translate("emails.templates")}
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, sm: 6 }}>
+          <SearchInput
+            term={term}
+            onSearch={handleSearch}
+            placeholder={T.translate("emails.placeholders.search_templates")}
+          />
         </Grid2>
-        <Grid2 size={10} container spacing={1} sx={{ justifyContent: "end" }}>
-          <Grid2 size={3}>
-            <SearchInput
-              term={term}
-              onSearch={handleSearch}
-              placeholder={T.translate("emails.placeholders.search_templates")}
-            />
-          </Grid2>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} offset={{ md: 3 }}>
           <Button
             variant="contained"
+            fullWidth
             onClick={handleNewEmailTemplate}
             startIcon={<AddIcon />}
             sx={{
-              height: "36px",
               padding: "6px 16px",
               fontSize: "1.4rem",
               lineHeight: "2.4rem",
@@ -151,6 +141,9 @@ const EmailTemplateListPage = ({
           </Button>
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>
+        {totalTemplates} {T.translate("emails.templates")}
+      </Box>
 
       {templates.length === 0 && (
         <div>{T.translate("emails.no_templates")}</div>

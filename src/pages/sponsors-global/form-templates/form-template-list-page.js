@@ -14,13 +14,13 @@
 import React, { useEffect, useState } from "react";
 import {
   Alert,
+  Box,
   Button,
   Checkbox,
   FormControlLabel,
   FormGroup,
   Grid2
 } from "@mui/material";
-import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { connect } from "react-redux";
@@ -231,11 +231,7 @@ const FormTemplateListPage = ({
 
   return (
     <div className="container">
-      <h3>
-        {" "}
-        {T.translate("form_template_list.form_templates")} ({totalFormTemplates}
-        ){" "}
-      </h3>
+      <h3>{T.translate("form_template_list.form_templates")}</h3>
       <Alert
         severity="info"
         sx={{
@@ -247,19 +243,8 @@ const FormTemplateListPage = ({
         {T.translate("form_template_list.alert_info")}
       </Alert>
 
-      <Grid2
-        container
-        spacing={1}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={1}>
-          <Box component="span">{totalFormTemplates} forms</Box>
-        </Grid2>
-        <Grid2 size={11} justifyContent="flex-end" gap={1} container>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, sm: 6, lg: 2 }}>
           <FormGroup>
             <FormControlLabel
               control={
@@ -276,22 +261,22 @@ const FormTemplateListPage = ({
               label={T.translate("form_template_list.show_archived")}
             />
           </FormGroup>
-
-          <Grid2 size={3}>
-            <SearchInput
-              onSearch={handleSearch}
-              placeholder={T.translate(
-                "inventory_item_list.placeholders.search_inventory_items"
-              )}
-            />
-          </Grid2>
+        </Grid2>
+        <Grid2 size={{ xs: 12, sm: 6, lg: 4 }}>
+          <SearchInput
+            onSearch={handleSearch}
+            placeholder={T.translate(
+              "inventory_item_list.placeholders.search_inventory_items"
+            )}
+          />
+        </Grid2>
+        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
           <Button
             variant="contained"
-            size="medium"
+            fullWidth
             onClick={() => handleNewFromDuplicate()}
             startIcon={<AddIcon />}
             sx={{
-              height: "36px",
               padding: "6px 16px",
               fontSize: "1.4rem",
               lineHeight: "2.4rem",
@@ -300,13 +285,14 @@ const FormTemplateListPage = ({
           >
             {T.translate("form_template_list.using_duplicate")}
           </Button>
+        </Grid2>
+        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
           <Button
             variant="contained"
-            size="medium"
+            fullWidth
             onClick={() => handleNewFormTemplate()}
             startIcon={<AddIcon />}
             sx={{
-              height: "36px",
               padding: "6px 16px",
               fontSize: "1.4rem",
               lineHeight: "2.4rem",
@@ -317,6 +303,7 @@ const FormTemplateListPage = ({
           </Button>
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>{totalFormTemplates} forms</Box>
 
       {formTemplates.length > 0 && (
         <div>

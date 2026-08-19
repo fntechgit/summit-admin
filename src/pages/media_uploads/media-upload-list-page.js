@@ -105,42 +105,23 @@ const MediaUploadListPage = ({
   return (
     <div className="container">
       <h3>{T.translate("media_upload.media_upload_list")}</h3>
-      <Grid2
-        container
-        spacing={1}
-        sx={{
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={2}>
-          <Box component="span">
-            {totalMediaUploads} {T.translate("media_upload.media_uploads")}
-          </Box>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, md: 6 }}>
+          <SearchInput term={term} onSearch={handleSearch} />
         </Grid2>
-        <Grid2
-          container
-          size={10}
-          gap={1}
-          sx={{
-            justifyContent: "flex-end",
-            alignItems: "center"
-          }}
-        >
-          <Grid2 size={4}>
-            <SearchInput term={term} onSearch={handleSearch} />
-          </Grid2>
+        <Grid2 size={{ xs: 6, md: 3 }}>
           <SummitDropdown
             onClick={handleCopyMediaUploads}
             actionLabel={T.translate("media_upload.copy_media_uploads")}
           />
+        </Grid2>
+        <Grid2 size={{ xs: 6, md: 3 }}>
           <Button
             variant="contained"
+            fullWidth
             onClick={handleNew}
             startIcon={<AddIcon />}
             sx={{
-              height: "36px",
               padding: "6px 16px",
               fontSize: "1.4rem",
               lineHeight: "2.4rem",
@@ -151,6 +132,9 @@ const MediaUploadListPage = ({
           </Button>
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>
+        {totalMediaUploads} {T.translate("media_upload.media_uploads")}
+      </Box>
 
       {media_uploads.length > 0 && (
         <MuiTable

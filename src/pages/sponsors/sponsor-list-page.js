@@ -197,19 +197,8 @@ const SponsorListPage = ({
 
   return (
     <div className="container">
-      <h3>
-        {" "}
-        {T.translate("sponsor_list.sponsor_list")} ({totalSponsors})
-      </h3>
-      <Grid2
-        container
-        sx={{
-          mb: 2,
-          display: "flex",
-          justifyContent: "space-between",
-          rowGap: 1
-        }}
-      >
+      <h3> {T.translate("sponsor_list.sponsor_list")}</h3>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
         <Grid2 size={{ xs: 12, sm: 6 }}>
           <SearchInput
             onSearch={handleOnSearch}
@@ -220,7 +209,7 @@ const SponsorListPage = ({
             debounced
           />
         </Grid2>
-        <Grid2 size={{ xs: 12, sm: 3 }}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} offset={{ md: 3 }}>
           {canAddSponsors && (
             <Button
               variant="contained"
@@ -233,6 +222,7 @@ const SponsorListPage = ({
           )}
         </Grid2>
       </Grid2>
+      <Box sx={{ mb: 2 }}>{totalSponsors} sponsors</Box>
 
       {sponsors.length === 0 && (
         <div>{T.translate("sponsor_list.no_sponsors")}</div>
