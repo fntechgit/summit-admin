@@ -200,3 +200,17 @@ describe("Destination booth fallback", () => {
     ).toBeInTheDocument();
   });
 });
+
+describe("lines_count copy", () => {
+  it("says the count is of LIVE lines, not all rendered lines", () => {
+    // The chip is fed liveLineCount, but canceled lines still RENDER, so a group
+    // showing two rows reports one. The copy has to say which number it is.
+    // This module's i18n mock renders the chip from the KEY and COUNT only, so
+    // the count assertion above is value-independent: the English could regress
+    // to "{count} lines" and every DOM test would still pass. Pin it in the
+    // catalog by exact equality, mirroring the By Item chip's copy test.
+    // eslint-disable-next-line global-require
+    const en = require("../../../../i18n/en.json");
+    expect(en.sponsor_reports_page.lines_count).toBe("{count} live lines");
+  });
+});
