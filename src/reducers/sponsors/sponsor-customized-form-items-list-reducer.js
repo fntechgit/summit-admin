@@ -21,6 +21,7 @@ import {
   SPONSOR_CUSTOMIZED_FORM_ITEM_DELETED,
   SPONSOR_CUSTOMIZED_FORM_ITEM_UNARCHIVED,
   SPONSOR_FORM_MANAGED_ITEM_UPDATED,
+  SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED,
   SPONSOR_CUSTOMIZED_FORM_ITEMS_ADDED,
   RESET_SPONSOR_FORM_MANAGED_ITEM,
   SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED
@@ -133,6 +134,24 @@ const sponsorCustomizedFormItemsListReducer = (
           ? { ...item, images: item.images?.filter((img) => img.id !== fileId) }
           : item
       );
+      return { ...state, currentItem, items };
+    }
+    case SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED: {
+      const { image, itemId } = payload;
+      const currentItem =
+        state.currentItem.id === itemId
+          ? {
+              ...state.currentItem,
+              images: [...(state.currentItem.images ?? []), image]
+            }
+          : state.currentItem;
+
+      const items = state.items.map((item) =>
+        item.id === itemId
+          ? { ...item, images: [...(item.images ?? []), image] }
+          : item
+      );
+
       return { ...state, currentItem, items };
     }
     case SPONSOR_CUSTOMIZED_FORM_ITEM_DELETED: {

@@ -9,6 +9,7 @@ import {
   SPONSOR_FORM_ITEM_ARCHIVED,
   SPONSOR_FORM_ITEM_DELETED,
   SPONSOR_FORM_ITEM_FILE_DELETED,
+  SPONSOR_FORM_ITEM_IMAGE_ADDED,
   SPONSOR_FORM_ITEM_UNARCHIVED
 } from "../../../actions/sponsor-forms-actions";
 
@@ -392,6 +393,86 @@ describe("SponsorFormItemsListReducer", () => {
 
       expect(result.currentItem.images).toStrictEqual([]);
       expect(result.items[0].images).toStrictEqual([]);
+    });
+  });
+
+  describe("SPONSOR_FORM_ITEM_IMAGE_ADDED", () => {
+    it("appends the new image to currentItem and its matching list item", () => {
+      const state = {
+        ...initialState,
+        currentItem: {
+          ...initialState.currentItem,
+          id: "A",
+          images: [{ id: "IMG_1" }]
+        },
+        items: [
+          { id: "A", images: [{ id: "IMG_1" }] },
+          { id: "B", images: [{ id: "IMG_3" }] }
+        ]
+      };
+
+      result = SponsorFormItemsListReducer(state, {
+        type: SPONSOR_FORM_ITEM_IMAGE_ADDED,
+        payload: { image: { id: "IMG_2" }, itemId: "A" }
+      });
+
+      expect(result.currentItem.images).toStrictEqual([
+        { id: "IMG_1" },
+        { id: "IMG_2" }
+      ]);
+      expect(result.items).toStrictEqual([
+        { id: "A", images: [{ id: "IMG_1" }, { id: "IMG_2" }] },
+        { id: "B", images: [{ id: "IMG_3" }] }
+      ]);
+    });
+
+    it("leaves currentItem untouched when the new image belongs to a different item", () => {
+      const state = {
+        ...initialState,
+        currentItem: {
+          ...initialState.currentItem,
+          id: "B",
+          images: [{ id: "IMG_3" }]
+        },
+        items: [
+          { id: "A", images: [{ id: "IMG_1" }] },
+          { id: "B", images: [{ id: "IMG_3" }] }
+        ]
+      };
+
+      result = SponsorFormItemsListReducer(state, {
+        type: SPONSOR_FORM_ITEM_IMAGE_ADDED,
+        payload: { image: { id: "IMG_2" }, itemId: "A" }
+      });
+
+      expect(result.currentItem).toStrictEqual(state.currentItem);
+      expect(result.items).toStrictEqual([
+        { id: "A", images: [{ id: "IMG_1" }, { id: "IMG_2" }] },
+        { id: "B", images: [{ id: "IMG_3" }] }
+      ]);
+    });
+
+    it("defaults the matching list item's images to [] before appending when it has none", () => {
+      const state = {
+        ...initialState,
+        currentItem: {
+          ...initialState.currentItem,
+          id: "A",
+          images: undefined
+        },
+        items: [
+          { id: "A", images: undefined },
+          { id: "B", images: [{ id: "IMG_3" }] }
+        ]
+      };
+
+      result = SponsorFormItemsListReducer(state, {
+        type: SPONSOR_FORM_ITEM_IMAGE_ADDED,
+        payload: { image: { id: "IMG_1" }, itemId: "A" }
+      });
+
+      expect(result.currentItem.images).toStrictEqual([{ id: "IMG_1" }]);
+      expect(result.items[0].images).toStrictEqual([{ id: "IMG_1" }]);
     });
   });
 

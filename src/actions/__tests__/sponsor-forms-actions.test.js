@@ -18,7 +18,8 @@ import {
   removeItemFile,
   removeSponsorCustomizedFormItemImages,
   saveSponsorFormItem,
-  updateSponsorFormItem
+  updateSponsorFormItem,
+  saveSponsorFormManagedItem
 } from "../sponsor-forms-actions";
 import * as methods from "../../utils/methods";
 
@@ -532,6 +533,145 @@ describe("Sponsor Forms Actions", () => {
         { file_path: "data:image/png;base64,BBB" },
         expect.any(Function),
         { file_path: "data:image/png;base64,BBB" }
+      );
+
+      // The received-action creator must produce SPONSOR_FORM_ITEM_IMAGE_ADDED
+      // carrying {image, itemId} - not the item-shaped SPONSOR_FORM_ITEM_UPDATED,
+      // which a reducer could misread as an item and corrupt an unrelated one.
+      const [, receivedActionCreator] = imagesCalls[0];
+      const uploadedImage = { id: 55, file_url: "https://cdn/new.png" };
+      expect(receivedActionCreator({ response: uploadedImage })).toEqual({
+        type: "SPONSOR_FORM_ITEM_IMAGE_ADDED",
+        payload: { image: uploadedImage, itemId: 100 }
+      });
+    });
+  });
+
+  describe("saveSponsorFormManagedItem", () => {
+    const mockStore = configureStore([thunk]);
+
+    beforeEach(() => {
+      jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
+      putRequest.mockClear();
+      putRequest.mockImplementation(
+        () => () => () => Promise.resolve({ response: {} })
+      );
+      postRequest.mockClear();
+      postRequest.mockImplementation(
+        () => () => () => Promise.resolve({ response: { id: 200 } })
+      );
+    });
+
+    afterEach(() => jest.restoreAllMocks());
+
+    it("omits persisted images from the managed-item update request body", async () => {
+      const store = mockStore({
+        currentSummitState: { currentSummit: { id: 42 } },
+        currentSponsorState: { entity: { id: 7 } }
+      });
+
+      const entity = {
+        id: 100,
+        name: "Item",
+        images: [{ id: 5, file_url: "https://cdn/a.png" }],
+        meta_fields: []
+      };
+
+      await store.dispatch(saveSponsorFormManagedItem(9, entity));
+      await flushPromises();
+
+      expect(putRequest).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.any(Function),
+        `${window.PURCHASES_API_URL}/api/v1/summits/42/sponsors/7/sponsor-forms/9/items/100`,
+        expect.not.objectContaining({ images: expect.anything() }),
+        expect.any(Function),
+        entity
+      );
+
+      // The image already has an id (persisted) - it must never be resent,
+      // since the update endpoint replaces the whole collection.
+      const hitImagesEndpoint = postRequest.mock.calls.some(
+        ([, , url]) => url && url.includes("/images")
+      );
+      expect(hitImagesEndpoint).toBe(false);
+    });
+
+    it("POSTs new (id-less) uploads to the images subresource after the managed-item update succeeds", async () => {
+      const store = mockStore({
+        currentSummitState: { currentSummit: { id: 42 } },
+        currentSponsorState: { entity: { id: 7 } }
+      });
+
+      const entity = {
+        id: 100,
+        name: "Item",
+        images: [
+          { id: 5, file_url: "https://cdn/a.png" },
+          { file_path: "data:image/png;base64,CCC" }
+        ],
+        meta_fields: []
+      };
+
+      await store.dispatch(saveSponsorFormManagedItem(9, entity));
+      await flushPromises();
+
+      expect(postRequest).toHaveBeenCalledWith(
+        null,
+        expect.any(Function),
+        `${window.PURCHASES_API_URL}/api/v1/summits/42/sponsors/7/sponsor-forms/9/items/100/images`,
+        { file_path: "data:image/png;base64,CCC" },
+        expect.any(Function),
+        { file_path: "data:image/png;base64,CCC" }
+      );
+
+      // Must be its own SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED type, not the
+      // item-shaped SPONSOR_FORM_MANAGED_ITEM_UPDATED - that reducer case
+      // reads payload.response as an item and would corrupt whichever
+      // unrelated list item happens to share the uploaded image's id.
+      const [, receivedActionCreator] = postRequest.mock.calls.find(
+        ([, , url]) => url && url.includes("/images")
+      );
+      const uploadedImage = { id: 55, file_url: "https://cdn/new.png" };
+      expect(receivedActionCreator({ response: uploadedImage })).toEqual({
+        type: "SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED",
+        payload: { image: uploadedImage, itemId: 100 }
+      });
+    });
+
+    it("omits images from the managed-item create request body and POSTs new uploads using the created item's id", async () => {
+      const store = mockStore({
+        currentSummitState: { currentSummit: { id: 42 } },
+        currentSponsorState: { entity: { id: 7 } }
+      });
+
+      const entity = {
+        name: "Item",
+        images: [{ file_path: "data:image/png;base64,DDD" }],
+        meta_fields: []
+      };
+
+      await store.dispatch(saveSponsorFormManagedItem(9, entity));
+      await flushPromises();
+
+      expect(postRequest).toHaveBeenNthCalledWith(
+        1,
+        expect.any(Function),
+        expect.any(Function),
+        `${window.PURCHASES_API_URL}/api/v1/summits/42/sponsors/7/sponsor-forms/9/items`,
+        expect.not.objectContaining({ images: expect.anything() }),
+        expect.any(Function),
+        entity
+      );
+
+      expect(postRequest).toHaveBeenNthCalledWith(
+        2,
+        null,
+        expect.any(Function),
+        `${window.PURCHASES_API_URL}/api/v1/summits/42/sponsors/7/sponsor-forms/9/items/200/images`,
+        { file_path: "data:image/png;base64,DDD" },
+        expect.any(Function),
+        { file_path: "data:image/png;base64,DDD" }
       );
     });
   });

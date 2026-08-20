@@ -188,6 +188,7 @@ const FormTemplateItemListPage = ({
     );
 
   const handleRemoveImage = (imageId) => {
+    if (!currentFormTemplateItem?.id) return;
     deleteItemImage(formTemplateId, currentFormTemplateItem.id, imageId);
   };
 

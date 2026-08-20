@@ -2,6 +2,7 @@ import sponsorCustomizedFormItemsListReducer from "../sponsor-customized-form-it
 import {
   RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEM,
   SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED,
+  SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED,
   SPONSOR_FORM_MANAGED_ITEM_UPDATED
 } from "../../../actions/sponsor-forms-actions";
 
@@ -47,7 +48,7 @@ const buildItem = (overrides = {}) => ({
 
 describe("sponsorCustomizedFormItemsListReducer", () => {
   describe("RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEM", () => {
-    it("maps file_url to file_path on each image — the edit-form image fix", () => {
+    it("stores images as received from the API, without a file_path mapping", () => {
       const result = sponsorCustomizedFormItemsListReducer(DEFAULT_STATE, {
         type: RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEM,
         payload: {
@@ -156,6 +157,77 @@ describe("sponsorCustomizedFormItemsListReducer", () => {
       expect(result.currentItem).toEqual(state.currentItem);
       expect(result.items[0].images).toEqual([{ id: 11 }]);
       expect(result.items[1].images).toEqual([{ id: 12 }]);
+    });
+  });
+
+  describe("SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED", () => {
+    it("appends the new image to currentItem and its matching list item", () => {
+      const state = {
+        ...DEFAULT_STATE,
+        currentItem: {
+          ...DEFAULT_STATE.currentItem,
+          id: 1,
+          images: [{ id: 10 }]
+        },
+        items: [
+          buildItem({ id: 1, images: [{ id: 10 }] }),
+          buildItem({ id: 2, images: [{ id: 12 }] })
+        ]
+      };
+
+      const result = sponsorCustomizedFormItemsListReducer(state, {
+        type: SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED,
+        payload: { image: { id: 11 }, itemId: 1 }
+      });
+
+      expect(result.currentItem.images).toEqual([{ id: 10 }, { id: 11 }]);
+      expect(result.items[0].images).toEqual([{ id: 10 }, { id: 11 }]);
+      expect(result.items[1].images).toEqual([{ id: 12 }]);
+    });
+
+    it("leaves currentItem untouched when the new image belongs to a different item", () => {
+      // This is exactly the case that broke before this action got its own
+      // type: an image upload response ({id, file_url}) used to be dispatched
+      // as SPONSOR_FORM_MANAGED_ITEM_UPDATED, which that reducer case reads
+      // as an item - matching state.items by the image's id and clobbering
+      // whichever unrelated item happened to share that numeric id.
+      const state = {
+        ...DEFAULT_STATE,
+        currentItem: {
+          ...DEFAULT_STATE.currentItem,
+          id: 2,
+          images: [{ id: 12 }]
+        },
+        items: [
+          buildItem({ id: 1, images: [{ id: 10 }] }),
+          buildItem({ id: 2, images: [{ id: 12 }] })
+        ]
+      };
+
+      const result = sponsorCustomizedFormItemsListReducer(state, {
+        type: SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED,
+        payload: { image: { id: 11 }, itemId: 1 }
+      });
+
+      expect(result.currentItem).toEqual(state.currentItem);
+      expect(result.items[0].images).toEqual([{ id: 10 }, { id: 11 }]);
+      expect(result.items[1].images).toEqual([{ id: 12 }]);
+    });
+
+    it("defaults the matching list item's images to [] before appending when it has none", () => {
+      const state = {
+        ...DEFAULT_STATE,
+        currentItem: { ...DEFAULT_STATE.currentItem, id: 1, images: undefined },
+        items: [buildItem({ id: 1, images: undefined })]
+      };
+
+      const result = sponsorCustomizedFormItemsListReducer(state, {
+        type: SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED,
+        payload: { image: { id: 10 }, itemId: 1 }
+      });
+
+      expect(result.currentItem.images).toEqual([{ id: 10 }]);
+      expect(result.items[0].images).toEqual([{ id: 10 }]);
     });
   });
 
