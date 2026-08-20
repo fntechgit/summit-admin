@@ -353,8 +353,15 @@ const PurchaseDetailsReportPage = ({
           onChange={(e) => update({ status: e.target.value || undefined })}
         />
         {/* The default excludes canceled orders at BOTH grains and nothing said so,
-            so "Any" silently means paid plus pending. */}
-        <FormHelperText>
+            so "Any" silently means paid plus pending.
+            CustomTheme's global MuiFormHelperText override makes this
+            position: absolute anchored to the nearest positioned ancestor —
+            MuiDropdown's internal FormControl (position: relative), not this
+            Box. Since this FormHelperText is a sibling, not a FormControl
+            child, it has no positioned ancestor and drifts to the initial
+            containing block. Override back to static so it flows in normal
+            layout right under the dropdown, in-flow (no overlap/spill). */}
+        <FormHelperText sx={{ position: "static" }}>
           {T.translate("sponsor_reports_page.filter_status_canceled_note")}
         </FormHelperText>
       </Box>
