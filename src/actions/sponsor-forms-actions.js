@@ -1514,6 +1514,7 @@ export const saveSponsorFormManagedItem =
     dispatch(startLoading());
 
     const params = {
+      expand: "images",
       access_token: accessToken
     };
 

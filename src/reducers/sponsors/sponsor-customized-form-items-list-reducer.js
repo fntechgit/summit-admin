@@ -201,7 +201,7 @@ const sponsorCustomizedFormItemsListReducer = (
               onsite_rate: formatRateFromCents(updatedItem.onsite_rate),
               default_quantity: updatedItem.default_quantity,
               is_archived: updatedItem.is_archived,
-              images: updatedItem.images
+              images: updatedItem.images ?? item.images
             }
           : item
       );
