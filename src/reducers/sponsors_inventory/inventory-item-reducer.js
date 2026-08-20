@@ -185,10 +185,8 @@ const inventoryItemReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case INVENTORY_ITEM_IMAGE_DELETED: {
-      const { imageId } = payload;
-      const images = state.entity.images.filter(
-        (image) => image.id !== imageId
-      );
+      const { fileId } = payload;
+      const images = state.entity.images.filter((image) => image.id !== fileId);
       return {
         ...state,
         entity: {

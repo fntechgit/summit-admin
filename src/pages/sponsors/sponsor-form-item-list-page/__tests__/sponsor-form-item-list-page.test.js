@@ -8,7 +8,8 @@ jest.mock("../../../../actions/sponsor-forms-actions", () => ({
   ...jest.requireActual("../../../../actions/sponsor-forms-actions"),
   getSponsorFormItems: jest.fn(() => () => Promise.resolve()),
   updateSponsorFormItem: jest.fn(() => () => Promise.resolve()),
-  addInventoryItems: jest.fn(() => () => Promise.resolve())
+  addInventoryItems: jest.fn(() => () => Promise.resolve()),
+  removeItemFile: jest.fn(() => () => Promise.resolve())
 }));
 
 jest.mock("../../../../actions/inventory-item-actions", () => ({
@@ -26,10 +27,23 @@ jest.mock(
     }
 );
 
+jest.mock(
+  "../components/sponsor-form-item-popup",
+  () =>
+    function MockSponsorFormItemPopup({ onRemoveImage }) {
+      return (
+        <button onClick={() => onRemoveImage(999)}>
+          mock-remove-item-image
+        </button>
+      );
+    }
+);
+
 const {
   getSponsorFormItems,
   updateSponsorFormItem,
-  addInventoryItems
+  addInventoryItems,
+  removeItemFile
 } = require("../../../../actions/sponsor-forms-actions");
 
 const buildItem = (id) => ({
@@ -44,7 +58,7 @@ const buildItem = (id) => ({
   images: []
 });
 
-const renderPage = () =>
+const renderPage = (currentItem = {}) =>
   renderWithRedux(
     <SponsorFormItemListPage
       match={{ params: { form_id: "FORM1" }, url: "/form-items" }}
@@ -53,7 +67,7 @@ const renderPage = () =>
       initialState: {
         sponsorFormItemsListState: {
           items: [buildItem(1)],
-          currentItem: {},
+          currentItem,
           currentPage: 3,
           perPage: 5,
           order: "code",
@@ -121,4 +135,34 @@ describe("SponsorFormItemListPage inline cell edit", () => {
       )
     );
   });
+});
+
+describe("SponsorFormItemListPage image removal guard", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const openItemPopup = async () => {
+    const user = userEvent.setup();
+    await user.click(screen.getByText("sponsor_form_item_list.add_item"));
+    await user.click(screen.getByText("mock-remove-item-image"));
+  };
+
+  it.each([
+    ["an unsaved entity (no id)", {}, null],
+    ["a persisted item", { id: 42 }, ["FORM1", 42, 999]]
+  ])(
+    "calling removeItemFile for %s",
+    async (_label, currentItem, expectedCall) => {
+      renderPage(currentItem);
+
+      await openItemPopup();
+
+      if (expectedCall) {
+        expect(removeItemFile).toHaveBeenCalledWith(...expectedCall);
+      } else {
+        expect(removeItemFile).not.toHaveBeenCalled();
+      }
+    }
+  );
 });

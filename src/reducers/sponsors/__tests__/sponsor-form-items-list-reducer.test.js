@@ -397,34 +397,47 @@ describe("SponsorFormItemsListReducer", () => {
   });
 
   describe("SPONSOR_FORM_ITEM_IMAGE_ADDED", () => {
-    it("appends the new image to currentItem and its matching list item", () => {
-      const state = {
-        ...initialState,
-        currentItem: {
-          ...initialState.currentItem,
-          id: "A",
-          images: [{ id: "IMG_1" }]
-        },
-        items: [
-          { id: "A", images: [{ id: "IMG_1" }] },
-          { id: "B", images: [{ id: "IMG_3" }] }
-        ]
-      };
-
-      result = SponsorFormItemsListReducer(state, {
-        type: SPONSOR_FORM_ITEM_IMAGE_ADDED,
-        payload: { image: { id: "IMG_2" }, itemId: "A" }
-      });
-
-      expect(result.currentItem.images).toStrictEqual([
+    it.each([
+      [
+        "with existing images",
+        [{ id: "IMG_1" }],
+        { id: "IMG_2" },
+        [{ id: "IMG_1" }, { id: "IMG_2" }]
+      ],
+      [
+        "with no images (undefined)",
+        undefined,
         { id: "IMG_1" },
-        { id: "IMG_2" }
-      ]);
-      expect(result.items).toStrictEqual([
-        { id: "A", images: [{ id: "IMG_1" }, { id: "IMG_2" }] },
-        { id: "B", images: [{ id: "IMG_3" }] }
-      ]);
-    });
+        [{ id: "IMG_1" }]
+      ]
+    ])(
+      "appends the new image to currentItem and its matching list item (%s)",
+      (_label, initialImages, newImage, expectedImages) => {
+        const state = {
+          ...initialState,
+          currentItem: {
+            ...initialState.currentItem,
+            id: "A",
+            images: initialImages
+          },
+          items: [
+            { id: "A", images: initialImages },
+            { id: "B", images: [{ id: "IMG_3" }] }
+          ]
+        };
+
+        result = SponsorFormItemsListReducer(state, {
+          type: SPONSOR_FORM_ITEM_IMAGE_ADDED,
+          payload: { image: newImage, itemId: "A" }
+        });
+
+        expect(result.currentItem.images).toStrictEqual(expectedImages);
+        expect(result.items).toStrictEqual([
+          { id: "A", images: expectedImages },
+          { id: "B", images: [{ id: "IMG_3" }] }
+        ]);
+      }
+    );
 
     it("leaves currentItem untouched when the new image belongs to a different item", () => {
       const state = {
@@ -450,29 +463,6 @@ describe("SponsorFormItemsListReducer", () => {
         { id: "A", images: [{ id: "IMG_1" }, { id: "IMG_2" }] },
         { id: "B", images: [{ id: "IMG_3" }] }
       ]);
-    });
-
-    it("defaults the matching list item's images to [] before appending when it has none", () => {
-      const state = {
-        ...initialState,
-        currentItem: {
-          ...initialState.currentItem,
-          id: "A",
-          images: undefined
-        },
-        items: [
-          { id: "A", images: undefined },
-          { id: "B", images: [{ id: "IMG_3" }] }
-        ]
-      };
-
-      result = SponsorFormItemsListReducer(state, {
-        type: SPONSOR_FORM_ITEM_IMAGE_ADDED,
-        payload: { image: { id: "IMG_1" }, itemId: "A" }
-      });
-
-      expect(result.currentItem.images).toStrictEqual([{ id: "IMG_1" }]);
-      expect(result.items[0].images).toStrictEqual([{ id: "IMG_1" }]);
     });
   });
 
