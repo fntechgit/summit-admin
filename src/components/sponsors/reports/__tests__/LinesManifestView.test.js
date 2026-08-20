@@ -67,15 +67,24 @@ describe("LinesManifestView", () => {
     expect(screen.queryByText("Paid")).not.toBeInTheDocument();
   });
 
-  it("renders both freshness timestamps", () => {
-    // formatCheckoutTime is moment.unix(v).utc().format("YYYY-MM-DD h:mm A")
-    const synced = 1755561600;
+  it("renders both freshness timestamps, in the row's final two cells", () => {
+    // formatCheckoutTime is moment.unix(v).utc().format("YYYY-MM-DD h:mm A").
+    // Distinct values (not the same epoch for both fields) so a swap or a
+    // missing cell can't hide behind a shared string.
+    const synced = 1755561600; // 2025-08-19
+    const sourceUpdated = 1755648000; // 2025-08-20
     renderView({
-      rows: [line({ synced_at: synced, source_updated_at: synced })]
+      rows: [line({ synced_at: synced, source_updated_at: sourceUpdated })]
     });
-    expect(
-      screen.getAllByText(moment.unix(synced).utc().format("YYYY-MM-DD h:mm A"))
-    ).not.toHaveLength(0);
+    const syncedText = moment.unix(synced).utc().format("YYYY-MM-DD h:mm A");
+    const sourceUpdatedText = moment
+      .unix(sourceUpdated)
+      .utc()
+      .format("YYYY-MM-DD h:mm A");
+    const row = screen.getByText("AV1").closest("tr");
+    const cells = within(row).getAllByRole("cell");
+    expect(cells[cells.length - 2]).toHaveTextContent(syncedText);
+    expect(cells[cells.length - 1]).toHaveTextContent(sourceUpdatedText);
   });
 
   it("counts only live lines per sponsor group", () => {
@@ -88,7 +97,10 @@ describe("LinesManifestView", () => {
         line({ is_canceled: true, item_code: "AV2" })
       ]
     });
-    expect(screen.getAllByRole("row").length).toBeGreaterThan(2); // both lines render
+    // header row + the 2 line rows, exactly — proves neither line was dropped.
+    expect(screen.getAllByRole("row")).toHaveLength(3);
+    const canceledRow = screen.getByText("AV2").closest("tr");
+    expect(canceledRow).toHaveAttribute("data-canceled", "true");
     expect(
       screen.getByText("sponsor_reports_page.lines_count:1")
     ).toBeInTheDocument();
