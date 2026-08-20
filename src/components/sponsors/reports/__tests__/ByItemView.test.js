@@ -545,17 +545,16 @@ describe("ByItemView", () => {
 describe("byitem_sponsor_items_chip copy", () => {
   it("does not describe canceled orders as purchased", () => {
     // The chip read "13 of 13 items purchased" over a set of deliberately-filtered
-    // CANCELED orders. Under Jest the chip renders as its i18n key, so the wording
-    // is only checkable in the catalog.
+    // CANCELED orders. Under Jest the chip renders as its i18n key, so the
+    // wording is only checkable in the catalog — and only by exact equality:
+    // the template's own {purchased} interpolation key contains the substring
+    // "purchased", so a substring/regex guard either self-matches the
+    // placeholder or is too loose to pin the actual sentence (e.g. it would
+    // let "{purchased} of {items} purchased" or "...items shipped" through).
     // eslint-disable-next-line global-require
     const en = require("../../../../i18n/en.json");
-    // Not a bare /purchased/: the template's own {purchased} interpolation
-    // key would self-match that. Target the retired descriptive phrase.
-    expect(en.sponsor_reports_page.byitem_sponsor_items_chip).not.toMatch(
-      /items purchased/
-    );
-    expect(en.sponsor_reports_page.byitem_sponsor_items_chip).toContain(
-      "{purchased} of {items}"
+    expect(en.sponsor_reports_page.byitem_sponsor_items_chip).toBe(
+      "{purchased} of {items} items with purchases"
     );
   });
 });
@@ -918,6 +917,31 @@ describe("ByItemView all-sponsors layout", () => {
     );
     expect(onLayoutChange).not.toHaveBeenCalled();
   });
+
+  // A positional last-two-cells check (as used elsewhere for the freshness
+  // columns) only proves a cell isn't missing — it says nothing about the
+  // HEADER row, which is a separate array (CONTRIB_HEADERS, optionally
+  // prepended with col_sponsor). If the two desync by one, every column right
+  // of the break silently misaligns and stays green. Assert exact
+  // header/cell cardinality on the NESTED contributor table specifically —
+  // the outer item table has its own separate ITEM_HEADERS and expansion
+  // colSpan that must not be counted here.
+  it.each([
+    ["by-sponsor", 10, () => renderView()],
+    ["all-sponsors", 11, () => renderAll()]
+  ])(
+    "the %s drill-down has %i headers matching %i cells per row",
+    (_name, count, mount) => {
+      mount();
+      fireEvent.click(screen.getByText("AV1"));
+      const contribTable = screen.getAllByRole("table").at(-1);
+      expect(within(contribTable).getAllByRole("columnheader")).toHaveLength(
+        count
+      );
+      const row = within(contribTable).getByText("OCP-1").closest("tr");
+      expect(within(row).getAllByRole("cell")).toHaveLength(count);
+    }
+  );
 });
 
 describe("Destination booth fallback (By Item drill-down)", () => {
