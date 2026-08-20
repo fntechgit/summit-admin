@@ -132,13 +132,19 @@ describe("buildPurchaseLinesQuery", () => {
     expect(q).not.toHaveProperty("order");
   });
 
-  it("drops payment_method — the lines filter set does not support it", () => {
-    const q = buildPurchaseLinesQuery(
-      { status: "Paid", paymentMethod: "Invoice" },
-      { page: 1, perPage: 10 }
-    );
-    expect(q["filter[]"]).toEqual(["status==Paid"]);
-    expect(q["filter[]"]).not.toContain("payment_method==Invoice");
+  it("carries paymentMethod through to the lines query", () => {
+    const query = buildPurchaseLinesQuery({ paymentMethod: "invoice" });
+    expect(query["filter[]"]).toContain("payment_method==invoice");
+  });
+
+  it("builds the same payment_method clause at both grains", () => {
+    // the regression: applying a filter and switching grain must not change the set
+    const orders = buildPurchaseQuery({ paymentMethod: "invoice" })["filter[]"];
+    const lines = buildPurchaseLinesQuery({ paymentMethod: "invoice" })[
+      "filter[]"
+    ];
+    const clause = (f) => f.find((c) => c.startsWith("payment_method"));
+    expect(clause(lines)).toEqual(clause(orders));
   });
 });
 

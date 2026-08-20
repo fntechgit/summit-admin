@@ -373,6 +373,17 @@ describe("PurchaseDetailsReportPage", () => {
     );
   });
 
+  it("keeps the Payment Method control visible on the line views", async () => {
+    renderPage();
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.view_line_items"));
+    });
+    // aria-label is T.translate(...), which renders as the raw KEY under Jest
+    expect(
+      screen.getByLabelText("sponsor_reports_page.filter_payment_method")
+    ).toBeInTheDocument();
+  });
+
   it("Line Items CSV export passes the lines slice filters to exportPurchaseDetailsLinesCsv", async () => {
     // Export reads the applied filters from the lines slice (recorded on REQUEST
     // in production); seed them directly since the mock store is inert.
@@ -575,7 +586,7 @@ describe("PurchaseDetailsReportPage", () => {
     });
   });
 
-  it("hides the Payment Method filter in the By Item view (lines filter set omits it)", async () => {
+  it("keeps the Payment Method filter visible in the By Item view (lines endpoint honors it via the parent hop)", async () => {
     const history = createMemoryHistory({ initialEntries: [PAGE_URL] });
     renderWithRedux(
       <Router history={history}>
@@ -587,9 +598,10 @@ describe("PurchaseDetailsReportPage", () => {
     await act(async () => {
       fireEvent.click(screen.getByText("sponsor_reports_page.view_by_item"));
     });
+    // aria-label is T.translate(...), which renders as the raw KEY under Jest
     expect(
-      document.querySelector("#pd-filter-payment-method")
-    ).not.toBeInTheDocument();
+      screen.getByLabelText("sponsor_reports_page.filter_payment_method")
+    ).toBeInTheDocument();
   });
 
   describe("validation error — snackbar hook", () => {

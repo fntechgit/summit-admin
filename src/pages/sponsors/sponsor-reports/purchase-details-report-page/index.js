@@ -366,30 +366,28 @@ const PurchaseDetailsReportPage = ({
           onChange={(e) => update({ formCode: e.target.value || undefined })}
         />
       </Box>
-      {/* Payment Method is an order-level attribute; only the orders endpoint
-          filters on it (the lines filter set omits payment_method), so surface
-          it in the orders view only — mirrors search being view-specific. */}
-      {view === "orders" && (
-        <Box sx={{ width: 200 }}>
-          <MuiDropdown
-            id="pd-filter-payment-method"
-            size="small"
-            placeholder={T.translate(
+      {/* Payment Method is an order-level attribute, but the lines endpoint filters
+          on it through the parent hop, so it applies at every grain — the control
+          stays visible and the selection survives a view switch. */}
+      <Box sx={{ width: 200 }}>
+        <MuiDropdown
+          id="pd-filter-payment-method"
+          size="small"
+          placeholder={T.translate(
+            "sponsor_reports_page.filter_payment_method"
+          )}
+          SelectDisplayProps={{
+            "aria-label": T.translate(
               "sponsor_reports_page.filter_payment_method"
-            )}
-            SelectDisplayProps={{
-              "aria-label": T.translate(
-                "sponsor_reports_page.filter_payment_method"
-              )
-            }}
-            value={draft.paymentMethod || ""}
-            options={paymentMethodSelectOptions}
-            onChange={(e) =>
-              update({ paymentMethod: e.target.value || undefined })
-            }
-          />
-        </Box>
-      )}
+            )
+          }}
+          value={draft.paymentMethod || ""}
+          options={paymentMethodSelectOptions}
+          onChange={(e) =>
+            update({ paymentMethod: e.target.value || undefined })
+          }
+        />
+      </Box>
       {/* Date pickers keep draft.dateFrom/dateTo as "YYYY-MM-DD"; buildQuery
           expands them to UTC ISO datetimes. Convert the picker's moment back to
           "YYYY-MM-DD" at the update boundary so the query contract is unchanged. */}

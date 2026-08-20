@@ -259,13 +259,11 @@ export const buildPurchaseQuery = (
 
 // Lines grain: same date expansion, NO order (manifest relies on backend default
 // ordering). Used by the on-screen lines fetch AND exportPurchaseDetailsLinesCsv.
-// The lines endpoint's filter set omits payment_method (it's an order-level
-// attribute), so drop it here rather than emit a clause BaseFilter silently
-// ignores. The UI also hides the Payment Method control in the Line Items view.
-export const buildPurchaseLinesQuery = (
-  { paymentMethod: _paymentMethod, ...filters } = {},
-  { page, perPage } = {}
-) => buildReportQuery({ ...expandDates(filters), page, perPage });
+// payment_method IS supported at line grain (declared on PurchaseLineDetailsFilter
+// via the parent hop). It used to be dropped here, which is why applying it and
+// switching grain silently widened the result set instead of narrowing it.
+export const buildPurchaseLinesQuery = (filters = {}, { page, perPage } = {}) =>
+  buildReportQuery({ ...expandDates(filters), page, perPage });
 
 export const getPurchaseDetailsReport =
   (filters = {}, pagination = {}) =>
