@@ -15,10 +15,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
-import { Box, Button, CircularProgress, Grid2 } from "@mui/material";
+import { Box, Button, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../../components/mui/grid-toolbar";
 import {
   deleteSponsorUser,
   deleteSponsorUserRequest,
@@ -106,37 +106,22 @@ const SponsorUsersListPage = ({
         }}
       />
       <h3>{T.translate("sponsor_users.users")}</h3>
-      <Grid2 container spacing={2} sx={{ mb: 3 }}>
-        <Grid2 size={{ xs: 12, sm: 6, lg: 4 }}>
-          <SearchInput term={term} onSearch={handleSearch} />
-        </Grid2>
-        <Grid2
-          size={{ xs: 12, sm: 6, lg: 8 }}
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            flexWrap: { xs: "wrap" },
-            gap: 2
-          }}
+      <GridToolbar searchProps={{ term, onSearch: handleSearch }}>
+        <Button
+          variant="contained"
+          onClick={() => setOpenPopup("import")}
+          startIcon={<SaveAltIcon />}
         >
-          <Button
-            variant="contained"
-            sx={{ width: { xs: "100%", sm: "auto" } }}
-            onClick={() => setOpenPopup("import")}
-            startIcon={<SaveAltIcon />}
-          >
-            {T.translate("sponsor_users.import_user")}
-          </Button>
-          <Button
-            variant="contained"
-            sx={{ width: { xs: "100%", sm: "auto" } }}
-            onClick={() => setOpenPopup("new")}
-            startIcon={<AddIcon />}
-          >
-            {T.translate("sponsor_users.add_user")}
-          </Button>
-        </Grid2>
-      </Grid2>
+          {T.translate("sponsor_users.import_user")}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => setOpenPopup("new")}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("sponsor_users.add_user")}
+        </Button>
+      </GridToolbar>
 
       {hasImportTasks && (
         <Box

@@ -14,16 +14,16 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   GridFilter,
   useGridFilter
 } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import BulkEditTable from "openstack-uicore-foundation/lib/components/mui/bulk-edit-table";
+import GridToolbar from "../../../components/mui/grid-toolbar";
 import {
   bulkUpdateEvents,
   deleteEvent,
@@ -325,49 +325,39 @@ const SummitEventListPage = ({
       <h3>
         {T.translate("event_list.event_list")} ({totalEvents})
       </h3>
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2
+      <GridToolbar
+        splitAt="lg"
+        searchProps={{
+          term,
+          placeholder: T.translate("event_list.placeholders.search_events"),
+          onSearch: handleSearch
         }}
       >
-        <Grid2 size={4}>
-          <SearchInput
-            term={term}
-            placeholder={T.translate("event_list.placeholders.search_events")}
-            onSearch={handleSearch}
-          />
-        </Grid2>
-        <Grid2 size={8} sx={{ display: "flex", gap: 1, justifyContent: "end" }}>
-          <GridFilter
-            id={FILTER_ID}
-            criterias={getCriterias(currentSummit, mediaUploadTypes)}
-          />
-          <Button
-            variant="contained"
-            onClick={handleNewEvent}
-            startIcon={<AddIcon />}
-          >
-            {T.translate("event_list.add_event")}
-          </Button>
-          <Button variant="outlined" onClick={handleExport}>
-            {T.translate("general.export")}
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={handleMUXImport}
-            sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
-          >
-            {T.translate("event_list.mux_import")}
-          </Button>
-          <Button variant="outlined" onClick={() => setShowImportModal(true)}>
-            {T.translate("event_list.import")}
-          </Button>
-        </Grid2>
-      </Grid2>
+        <GridFilter
+          id={FILTER_ID}
+          criterias={getCriterias(currentSummit, mediaUploadTypes)}
+        />
+        <Button
+          variant="contained"
+          onClick={handleNewEvent}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("event_list.add_event")}
+        </Button>
+        <Button variant="outlined" onClick={handleExport}>
+          {T.translate("general.export")}
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={handleMUXImport}
+          sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
+        >
+          {T.translate("event_list.mux_import")}
+        </Button>
+        <Button variant="outlined" onClick={() => setShowImportModal(true)}>
+          {T.translate("event_list.import")}
+        </Button>
+      </GridToolbar>
       <hr />
       <div>
         <SelectFilterCriteria

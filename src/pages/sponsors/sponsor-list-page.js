@@ -14,11 +14,11 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Badge, Button, Grid2, Tooltip, Typography } from "@mui/material";
+import { Badge, Button, Tooltip, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import {
   getLeadReportSettingsMeta,
   getSummitById,
@@ -198,30 +198,26 @@ const SponsorListPage = ({
   return (
     <div className="container">
       <h3> {T.translate("sponsor_list.sponsor_list")}</h3>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, sm: 6 }}>
-          <SearchInput
-            onSearch={handleOnSearch}
-            term={term}
-            placeholder={T.translate(
-              "inventory_item_list.placeholders.search_inventory_items"
-            )}
-            debounced
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} offset={{ md: 3 }}>
-          {canAddSponsors && (
-            <Button
-              variant="contained"
-              fullWidth
-              onClick={() => handleOpenAddSponsorPopup()}
-              startIcon={<AddIcon />}
-            >
-              {T.translate("sponsor_list.add_sponsor")}
-            </Button>
-          )}
-        </Grid2>
-      </Grid2>
+      <GridToolbar
+        searchProps={{
+          onSearch: handleOnSearch,
+          term,
+          placeholder: T.translate(
+            "inventory_item_list.placeholders.search_inventory_items"
+          ),
+          debounced: true
+        }}
+      >
+        {canAddSponsors && (
+          <Button
+            variant="contained"
+            onClick={() => handleOpenAddSponsorPopup()}
+            startIcon={<AddIcon />}
+          >
+            {T.translate("sponsor_list.add_sponsor")}
+          </Button>
+        )}
+      </GridToolbar>
       <Box sx={{ mb: 2 }}>{totalSponsors} sponsors</Box>
 
       {sponsors.length === 0 && (

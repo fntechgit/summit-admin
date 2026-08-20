@@ -3,9 +3,9 @@ import PropTypes from "prop-types";
 import { Checkbox, FormControlLabel, FormGroup, Grid2 } from "@mui/material";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 
-const GridToolbar = ({ searchProps, checkbox, children }) => {
+const GridToolbar = ({ searchProps, checkboxProps, children, splitAt }) => {
   const hasSearch = !!searchProps;
-  const hasCheckbox = !!checkbox;
+  const hasCheckbox = !!checkboxProps;
 
   let searchSize;
   let checkboxSize;
@@ -16,14 +16,30 @@ const GridToolbar = ({ searchProps, checkbox, children }) => {
     checkboxSize = { xs: 12, sm: 6, md: 2 };
     actionsSize = { xs: 12, md: 6 };
   } else if (hasSearch) {
-    searchSize = { xs: 12, md: 6 };
-    actionsSize = { xs: 12, md: 6 };
+    // has search but no checkbox
+    searchSize = { xs: 12, [splitAt]: 4 };
+    actionsSize = { xs: 12, [splitAt]: 8 };
   } else if (hasCheckbox) {
-    checkboxSize = { xs: 12, md: 2 };
-    actionsSize = { xs: 12, md: 10 };
+    // has checkbox but no search
+    checkboxSize = { xs: 12, [splitAt]: 4 };
+    actionsSize = { xs: 12, [splitAt]: 8 };
   } else {
-    actionsSize = { xs: 12, md: 12 };
+    actionsSize = { xs: 12 };
   }
+
+  // must match the breakpoint where actionsSize itself leaves its xs:12
+  // (own full-width row) value — that's the point flexWrap needs to switch
+  // to nowrap, so children don't get squeezed once actionsSize starts
+  // sharing a row with a sibling
+  const actionsWidthBreakpoint =
+    hasSearch && hasCheckbox ? "md" : hasSearch || hasCheckbox ? splitAt : "xs";
+
+  // children go natural (auto) width starting at actionsWidthBreakpoint,
+  // never earlier than sm; between sm and that point (only a real window
+  // when actionsWidthBreakpoint is md) they fill the row evenly instead
+  const actionsAutoBreakpoint =
+    actionsWidthBreakpoint === "xs" ? "sm" : actionsWidthBreakpoint;
+  const hasFillTier = actionsAutoBreakpoint !== "sm";
 
   return (
     <Grid2 container spacing={2} sx={{ mb: 3 }}>
@@ -38,14 +54,14 @@ const GridToolbar = ({ searchProps, checkbox, children }) => {
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={checkbox.checked}
-                  onChange={checkbox.onChange}
+                  checked={checkboxProps.checked}
+                  onChange={checkboxProps.onChange}
                   inputProps={{
-                    "aria-label": checkbox.ariaLabel ?? checkbox.label
+                    "aria-label": checkboxProps.ariaLabel ?? checkboxProps.label
                   }}
                 />
               }
-              label={checkbox.label}
+              label={checkboxProps.label}
               sx={{ whiteSpace: "nowrap" }}
             />
           </FormGroup>
@@ -56,15 +72,24 @@ const GridToolbar = ({ searchProps, checkbox, children }) => {
         sx={{
           display: "flex",
           justifyContent: "flex-end",
-          flexWrap: { xs: "wrap", sm: "nowrap" },
+          flexWrap: { xs: "wrap", [actionsWidthBreakpoint]: "nowrap" },
           gap: 2
         }}
       >
-        {/* children are expected to be Button-like elements accepting `sx` */}
+        {/* xs: stacked full width. sm through actionsAutoBreakpoint (only a
+            real window when that's md): fill the row evenly via flexGrow.
+            From actionsAutoBreakpoint on: natural/auto width. */}
         {React.Children.map(children, (child) =>
           child
             ? React.cloneElement(child, {
-                sx: { width: { xs: "100%", md: "auto" }, ...child.props.sx }
+                sx: {
+                  width: { xs: "100%", [actionsAutoBreakpoint]: "auto" },
+                  ...(hasFillTier && {
+                    flexGrow: { sm: 1, [actionsAutoBreakpoint]: 0 },
+                    flexBasis: { sm: 0, [actionsAutoBreakpoint]: "auto" }
+                  }),
+                  ...child.props.sx
+                }
               })
             : child
         )}
@@ -80,17 +105,21 @@ GridToolbar.propTypes = {
     placeholder: PropTypes.string,
     debounced: PropTypes.bool
   }),
-  checkbox: PropTypes.shape({
+  checkboxProps: PropTypes.shape({
     checked: PropTypes.bool,
     onChange: PropTypes.func,
     label: PropTypes.node,
     ariaLabel: PropTypes.string
-  })
+  }),
+  // breakpoint where search/checkbox split from the actions row into their
+  // compact ratio — raise it (e.g. "lg") when actions holds a lot of children
+  splitAt: PropTypes.oneOf(["xs", "sm", "md", "lg", "xl"])
 };
 
 GridToolbar.defaultProps = {
   searchProps: null,
-  checkbox: null
+  checkboxProps: null,
+  splitAt: "sm"
 };
 
 export default GridToolbar;

@@ -14,20 +14,13 @@
 import React, { useEffect } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
-import {
-  Box,
-  Button,
-  Grid2,
-  IconButton,
-  Paper,
-  Typography
-} from "@mui/material";
+import { Box, Button, IconButton, Paper, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LockClosedIcon from "@mui/icons-material/Lock";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import { TotalRow } from "openstack-uicore-foundation/lib/components/mui/table/extra-rows";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../../../../../components/mui/grid-toolbar";
 import history from "../../../../../../history";
 import {
   checkoutCart,
@@ -190,25 +183,17 @@ const CartView = ({
 
   return (
     <>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, sm: 6, md: 2 }} offset={{ md: 8 }}>
-          <SearchInput
-            term={term}
-            onSearch={handleSearch}
-            placeholder={T.translate("edit_sponsor.placeholders.search")}
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={onAddForm}
-            startIcon={<AddIcon />}
-          >
-            {T.translate("edit_sponsor.cart_tab.add_form")}
-          </Button>
-        </Grid2>
-      </Grid2>
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate("edit_sponsor.placeholders.search")
+        }}
+      >
+        <Button variant="contained" onClick={onAddForm} startIcon={<AddIcon />}>
+          {T.translate("edit_sponsor.cart_tab.add_form")}
+        </Button>
+      </GridToolbar>
       {!cart && (
         <Typography variant="h6" textAlign="center" sx={{ mb: 2, mt: 4 }}>
           {T.translate("edit_sponsor.cart_tab.no_cart")}
@@ -221,7 +206,7 @@ const CartView = ({
             <MuiTable
               columns={tableColumns}
               data={cartData}
-              options={{}}
+              options={{ responsive: false }}
               onEdit={handleEditForm}
               onDelete={handleDelete}
               deleteDialogBody={(formName) =>

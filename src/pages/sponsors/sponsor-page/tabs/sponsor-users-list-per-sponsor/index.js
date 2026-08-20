@@ -14,10 +14,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, CircularProgress, Grid2 } from "@mui/material";
+import { Box, Button, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../../../../components/mui/grid-toolbar";
 import {
   deleteSponsorUser,
   getSponsorUserRequests,
@@ -92,52 +92,27 @@ const SponsorUsersListPerSponsorPage = ({
         />
       )}
       <CustomAlert message={T.translate("sponsor_users.alert_info")} />
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={2}>
-          <Box component="span">
-            {users.totalCount}{" "}
-            {T.translate("sponsor_users.users").toLowerCase()}
-          </Box>
-        </Grid2>
-        <Grid2
-          container
-          size={10}
-          sx={{
-            justifyContent: "flex-end",
-            alignItems: "center"
-          }}
+      <GridToolbar searchProps={{ term, onSearch: handleSearch }}>
+        <Button
+          variant="contained"
+          size="medium"
+          onClick={() => setOpenPopup("import")}
+          startIcon={<SaveAltIcon />}
         >
-          <Grid2 size={3}>
-            <SearchInput term={term} onSearch={handleSearch} />
-          </Grid2>
-          <Button
-            variant="contained"
-            size="medium"
-            onClick={() => setOpenPopup("import")}
-            startIcon={<SaveAltIcon />}
-            sx={{ height: "36px" }}
-          >
-            {T.translate("sponsor_users.import_user")}
-          </Button>
-          <Button
-            variant="contained"
-            size="medium"
-            onClick={() => setOpenPopup("new_user")}
-            startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
-          >
-            {T.translate("sponsor_users.add_user")}
-          </Button>
-        </Grid2>
-      </Grid2>
+          {T.translate("sponsor_users.import_user")}
+        </Button>
+        <Button
+          variant="contained"
+          size="medium"
+          onClick={() => setOpenPopup("new_user")}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("sponsor_users.add_user")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {users.totalCount} {T.translate("sponsor_users.users").toLowerCase()}
+      </Box>
 
       {hasImportTasks && (
         <Box

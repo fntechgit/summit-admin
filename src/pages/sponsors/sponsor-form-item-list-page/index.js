@@ -15,18 +15,11 @@ import React, { useEffect, useState } from "react";
 import { Breadcrumb } from "react-breadcrumbs";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Alert,
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Grid2
-} from "@mui/material";
+import { Alert, Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTableEditable from "openstack-uicore-foundation/lib/components/mui/editable-table";
 import { ImagePreviewCell } from "../../../components/image-preview-cell";
+import GridToolbar from "../../../components/mui/grid-toolbar";
 import {
   deleteSponsorFormItem,
   getSponsorFormItem,
@@ -285,46 +278,28 @@ const SponsorFormItemListPage = ({
       >
         {T.translate("sponsor_form_item_list.alert_info")}
       </Alert>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={showArchived}
-                  onChange={handleShowArchivedForms}
-                  inputProps={{
-                    "aria-label": T.translate(
-                      "sponsor_form_item_list.show_archived"
-                    )
-                  }}
-                />
-              }
-              label={T.translate("sponsor_form_item_list.show_archived")}
-            />
-          </FormGroup>
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => handleNewItem()}
-            startIcon={<AddIcon />}
-          >
-            {T.translate("sponsor_form_item_list.add_item")}
-          </Button>
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => handleNewInventoryItem()}
-            startIcon={<AddIcon />}
-          >
-            {T.translate("sponsor_form_item_list.add_item_from_inventory")}
-          </Button>
-        </Grid2>
-      </Grid2>
+      <GridToolbar
+        checkboxProps={{
+          checked: showArchived,
+          onChange: handleShowArchivedForms,
+          label: T.translate("sponsor_form_item_list.show_archived")
+        }}
+      >
+        <Button
+          variant="contained"
+          onClick={() => handleNewItem()}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("sponsor_form_item_list.add_item")}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => handleNewInventoryItem()}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("sponsor_form_item_list.add_item_from_inventory")}
+        </Button>
+      </GridToolbar>
       <Box sx={{ mb: 2 }}>{totalCount} items</Box>
 
       {items.length > 0 && (

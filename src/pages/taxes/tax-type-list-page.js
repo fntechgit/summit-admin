@@ -15,12 +15,11 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Grid2 from "@mui/material/Grid2";
-import Typography from "@mui/material/Typography";
 import AddIcon from "@mui/icons-material/Add";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import Restrict from "../../routes/restrict";
 import {
   getTaxTypes,
@@ -141,51 +140,25 @@ const TaxTypeListPage = ({
       <div className="container">
         <h3>{T.translate("tax_type_list.tax_type_list")}</h3>
 
-        <Grid2
-          container
-          spacing={2}
-          sx={{
-            justifyContent: "center",
-            alignItems: "center",
-            mb: 2
+        <GridToolbar
+          searchProps={{
+            onSearch: handleSearch,
+            term,
+            placeholder: T.translate("tax_type_list.name"),
+            debounced: true
           }}
         >
-          <Grid2 size={6}>
-            <Typography>
-              {totalTaxTypes} {T.translate("general.items")}
-            </Typography>
-          </Grid2>
-          <Grid2
-            container
-            size={6}
-            spacing={1}
-            sx={{
-              justifyContent: "center",
-              alignItems: "center"
-            }}
+          <Button
+            variant="contained"
+            onClick={handleOpenNewTaxType}
+            startIcon={<AddIcon />}
           >
-            <Grid2 size={2} />
-            <Grid2 size={6}>
-              <SearchInput
-                onSearch={handleSearch}
-                term={term}
-                placeholder={T.translate("tax_type_list.name")}
-                debounced
-              />
-            </Grid2>
-            <Grid2 size={4}>
-              <Button
-                variant="contained"
-                fullWidth
-                onClick={handleOpenNewTaxType}
-                startIcon={<AddIcon />}
-                sx={{ height: "36px" }}
-              >
-                {T.translate("tax_type_list.add_tax_type")}
-              </Button>
-            </Grid2>
-          </Grid2>
-        </Grid2>
+            {T.translate("tax_type_list.add_tax_type")}
+          </Button>
+        </GridToolbar>
+        <Box sx={{ mb: 2 }}>
+          {totalTaxTypes} {T.translate("general.items")}
+        </Box>
 
         {taxTypes.length === 0 && (
           <div>{T.translate("tax_type_list.no_tax_types")}</div>

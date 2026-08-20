@@ -14,18 +14,11 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Alert,
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Grid2
-} from "@mui/material";
+import { Alert, Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import { ImagePreviewCell } from "../../../components/image-preview-cell";
+import GridToolbar from "../../../components/mui/grid-toolbar";
 import {
   cloneFromInventoryItem,
   getFormTemplateItem,
@@ -243,36 +236,21 @@ const FormTemplateItemListPage = ({
       >
         {T.translate("form_template_item_list.alert_info")}
       </Alert>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, sm: 6 }}>
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={showArchived}
-                  onChange={handleShowArchivedForms}
-                  inputProps={{
-                    "aria-label": T.translate(
-                      "form_template_item_list.show_archived"
-                    )
-                  }}
-                />
-              }
-              label={T.translate("form_template_item_list.show_archived")}
-            />
-          </FormGroup>
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} offset={{ md: 3 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => handleNewInventoryItem()}
-            startIcon={<AddIcon />}
-          >
-            {T.translate("form_template_item_list.add_item")}
-          </Button>
-        </Grid2>
-      </Grid2>
+      <GridToolbar
+        checkboxProps={{
+          checked: showArchived,
+          onChange: handleShowArchivedForms,
+          label: T.translate("form_template_item_list.show_archived")
+        }}
+      >
+        <Button
+          variant="contained"
+          onClick={() => handleNewInventoryItem()}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("form_template_item_list.add_item")}
+        </Button>
+      </GridToolbar>
       <Box sx={{ mb: 2 }}>{totalFormTemplateItems} items</Box>
 
       {formTemplateItems.length > 0 && (

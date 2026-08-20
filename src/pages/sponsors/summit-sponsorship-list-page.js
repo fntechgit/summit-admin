@@ -14,9 +14,10 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Alert, Box, Button, Grid2 } from "@mui/material";
+import { Alert, Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTableSortable from "openstack-uicore-foundation/lib/components/mui/sortable-table";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   deleteSummitSponsorship,
@@ -139,18 +140,15 @@ const SummitSponsorshipListPage = ({
       >
         {T.translate("summit_sponsorship_list.alert_info")}
       </Alert>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} offset={{ sm: 6, md: 9 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={handleNewSponsorship}
-            startIcon={<AddIcon />}
-          >
-            {T.translate("summit_sponsorship_list.add_sponsorship")}
-          </Button>
-        </Grid2>
-      </Grid2>
+      <GridToolbar>
+        <Button
+          variant="contained"
+          onClick={handleNewSponsorship}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("summit_sponsorship_list.add_sponsorship")}
+        </Button>
+      </GridToolbar>
       <Box sx={{ mb: 2 }}>{totalSponsorships} summit tiers</Box>
 
       {sponsorships.length === 0 && (

@@ -14,10 +14,10 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import {
   getMediaFileTypes,
   getMediaFileType,
@@ -125,49 +125,14 @@ const MediaFileTypeListPage = ({
   return (
     <div className="container">
       <h3>{T.translate("media_file_type.media_file_type_list")}</h3>
-      <Grid2
-        container
-        spacing={1}
-        sx={{
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={2}>
-          <Box component="span">
-            {totalMediaFileTypes}{" "}
-            {T.translate("media_file_type.media_file_types")}
-          </Box>
-        </Grid2>
-        <Grid2
-          container
-          size={10}
-          gap={1}
-          sx={{
-            justifyContent: "flex-end",
-            alignItems: "center"
-          }}
-        >
-          <Grid2 size={4}>
-            <SearchInput term={term} onSearch={handleSearch} />
-          </Grid2>
-          <Button
-            variant="contained"
-            onClick={handleNew}
-            startIcon={<AddIcon />}
-            sx={{
-              height: "36px",
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("media_file_type.add")}
-          </Button>
-        </Grid2>
-      </Grid2>
+      <GridToolbar searchProps={{ term, onSearch: handleSearch }}>
+        <Button variant="contained" onClick={handleNew} startIcon={<AddIcon />}>
+          {T.translate("media_file_type.add")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {totalMediaFileTypes} {T.translate("media_file_type.media_file_types")}
+      </Box>
 
       {media_file_types.length > 0 && (
         <MuiTable
