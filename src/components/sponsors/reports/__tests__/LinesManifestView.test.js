@@ -106,6 +106,18 @@ describe("LinesManifestView", () => {
     ).toBeInTheDocument();
   });
 
+  // A positional last-two-cells check (as used above for the freshness
+  // columns) only proves a cell isn't missing — it says nothing about the
+  // HEADER row, which is a separate array (HEADERS). If the two desync by
+  // one, every column right of the break silently misaligns and stays
+  // green. Assert exact header/cell cardinality directly.
+  it("has exactly 13 column headers matching 13 cells per row", () => {
+    renderView();
+    expect(screen.getAllByRole("columnheader")).toHaveLength(13);
+    const row = screen.getByText("AV1").closest("tr");
+    expect(within(row).getAllByRole("cell")).toHaveLength(13);
+  });
+
   // Sponsor bucketing (formerly bucketLinesBySponsor, now a private helper).
   describe("sponsor bucketing", () => {
     it("groups by sponsor.id preserving first-seen order", () => {

@@ -930,7 +930,7 @@ describe("ByItemView all-sponsors layout", () => {
     ["by-sponsor", 10, () => renderView()],
     ["all-sponsors", 11, () => renderAll()]
   ])(
-    "the %s drill-down has %i headers matching %i cells per row",
+    "the %s drill-down has %i headers matching that many cells per row",
     (_name, count, mount) => {
       mount();
       fireEvent.click(screen.getByText("AV1"));

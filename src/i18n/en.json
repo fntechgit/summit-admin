@@ -4374,7 +4374,7 @@
     "view_orders": "Orders",
     "view_line_items": "Line Items",
     "view_by_item": "By Item",
-    "lines_count": "{count} lines",
+    "lines_count": "{count} live lines",
     "destination_booth_fallback": "Booth",
     "col_checkout_time": "Checkout Time",
     "col_invoice_total": "Invoice Total",
