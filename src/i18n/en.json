@@ -4395,6 +4395,7 @@
     "col_invoice_sub_status": "Invoice Status",
     "col_invoice_due_date": "Invoice Due",
     "col_line_total": "Line Total",
+    "col_refunded": "Refunded",
     "col_synced_at": "Synced",
     "col_source_updated": "Source Updated",
     "byitem_col_orders": "Orders",

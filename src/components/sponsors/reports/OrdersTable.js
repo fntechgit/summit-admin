@@ -135,6 +135,29 @@ const columns = [
     header: T.translate("sponsor_reports_page.col_sponsor_note"),
     sortable: false // not a backend ordering field
     // No render — MuiTable fallback reads row["sponsor_note"] directly.
+  },
+  {
+    columnKey: "refunded_amount",
+    header: T.translate("sponsor_reports_page.col_refunded"),
+    sortable: false, // not a backend ordering field
+    // Refunds never touch purchase status — a fully refunded order reads Paid
+    // forever, so this column is the only on-screen signal. The CSV already had it.
+    render: (row) =>
+      row.refunded_amount == null
+        ? "—"
+        : currencyAmountFromCents(row.refunded_amount)
+  },
+  {
+    columnKey: "synced_at",
+    header: T.translate("sponsor_reports_page.col_synced_at"),
+    sortable: false, // not a backend ordering field
+    render: (row) => formatCheckoutTime(row.synced_at)
+  },
+  {
+    columnKey: "source_updated_at",
+    header: T.translate("sponsor_reports_page.col_source_updated"),
+    sortable: false, // not a backend ordering field
+    render: (row) => formatCheckoutTime(row.source_updated_at)
   }
 ];
 
