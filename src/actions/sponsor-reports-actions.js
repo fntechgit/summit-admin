@@ -514,7 +514,7 @@ export const getPurchaseDetailsByItemRows =
     guardedDispatch(
       createAction(REQUEST_PURCHASE_DETAILS_BY_ITEM)({ filters })
     );
-    // Lines-grain query (drops paymentMethod); one arg → no page/per_page emitted.
+    // Lines-grain query (carries paymentMethod through); one arg → no page/per_page emitted.
     const baseQuery = buildPurchaseLinesQuery(filters);
     const url = `${base(currentSummit.id)}/purchase-details/lines`;
     const fetchPage = (page) =>
