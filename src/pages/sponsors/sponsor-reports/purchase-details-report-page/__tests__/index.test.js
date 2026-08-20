@@ -635,11 +635,20 @@ describe("PurchaseDetailsReportPage", () => {
       expect(screen.getByText("$1.00")).toBeInTheDocument();
     });
 
-    it("states the silent canceled default next to the status control", () => {
+    it("states the silent canceled default on the status control's info icon", () => {
+      // Carried as the repo's hover-info idiom rather than helper text under the
+      // control: helper text made this filter twice the height of its siblings,
+      // and the center-aligned filter row then rendered it out of line with
+      // them. jsdom has no layout, so the alignment itself is not assertable —
+      // what IS assertable is that the note is no longer a block under the
+      // control, which is the thing that changed the height.
       renderPage();
-      expect(
-        screen.getByText("sponsor_reports_page.filter_status_canceled_note")
-      ).toBeInTheDocument();
+      const icon = document.querySelector("i.fa-info-circle");
+      expect(icon).toBeInTheDocument();
+      expect(icon).toHaveAttribute(
+        "title",
+        "sponsor_reports_page.filter_status_info"
+      );
     });
 
     it("associates that note with the status control for screen readers", () => {
@@ -654,7 +663,7 @@ describe("PurchaseDetailsReportPage", () => {
       const noteId = control.getAttribute("aria-describedby");
       expect(noteId).toBeTruthy();
       expect(document.getElementById(noteId)).toHaveTextContent(
-        "sponsor_reports_page.filter_status_canceled_note"
+        "sponsor_reports_page.filter_status_info"
       );
     });
   });

@@ -4340,7 +4340,7 @@
     "total_pending": "Total Pending",
     "total_refunded": "Total Refunded",
     "filter_status": "Purchase Status",
-    "filter_status_canceled_note": "Canceled orders are excluded unless you select Canceled",
+    "filter_status_info": "Canceled orders are excluded unless you select Canceled",
     "filter_form": "Type",
     "filter_payment_method": "Payment Method",
     "any": "Any",

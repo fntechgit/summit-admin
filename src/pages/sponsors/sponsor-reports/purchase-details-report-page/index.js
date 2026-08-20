@@ -16,7 +16,8 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import moment from "moment-timezone";
 import T from "i18n-react/dist/i18n-react";
-import { Alert, Box, Button, FormHelperText } from "@mui/material";
+import { Alert, Box, Button } from "@mui/material";
+import { visuallyHidden } from "@mui/utils";
 import PrintIcon from "@mui/icons-material/Print";
 import DownloadIcon from "@mui/icons-material/Download";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
@@ -56,8 +57,8 @@ import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 // backend query contract is untouched.
 const REPORT_DATE_TZ = "UTC";
 const REPORT_DATE_FORMAT = "YYYY-MM-DD";
-// Shared by the Purchase Status helper text and the aria-describedby that points
-// at it, so the two cannot drift apart.
+// Shared by the visually-hidden copy of the Purchase Status note and the
+// aria-describedby that points at it, so the two cannot drift apart.
 const STATUS_NOTE_ID = "pd-filter-status-note";
 // The uicore picker emits moment(0) (epoch) on a CLEAR, not null — treat that
 // sentinel as "no date" so clearing removes the filter instead of sending
@@ -343,7 +344,15 @@ const PurchaseDetailsReportPage = ({
 
   const extraControls = (draft, update) => (
     <>
-      <Box sx={{ width: 200 }}>
+      {/* The default excludes canceled orders at BOTH grains and nothing said so,
+          so "Any" silently means paid plus pending. Carried as the repo's
+          hover-info idiom (fa-info-circle + title) rather than helper text
+          under the control, so this filter stays the same height as its
+          siblings and the row keeps its alignment. The icon is aria-hidden
+          like every other use of it, so the same copy is repeated in a
+          visually-hidden span that the Select points at via aria-describedby;
+          otherwise the note would be sighted-only. */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, width: 200 }}>
         <MuiDropdown
           id="pd-filter-status"
           size="small"
@@ -354,24 +363,16 @@ const PurchaseDetailsReportPage = ({
           value={draft.status || ""}
           options={statusSelectOptions}
           onChange={(e) => update({ status: e.target.value || undefined })}
-          // The note below is a sibling, not a FormControl child, so MUI cannot
-          // wire it up itself. MuiDropdown spreads unrecognised props onto the
-          // Select, so this reaches the rendered control and screen readers
-          // announce the note with it instead of only near it.
           aria-describedby={STATUS_NOTE_ID}
         />
-        {/* The default excludes canceled orders at BOTH grains and nothing said so,
-            so "Any" silently means paid plus pending.
-            CustomTheme's global MuiFormHelperText override makes this
-            position: absolute anchored to the nearest positioned ancestor —
-            MuiDropdown's internal FormControl (position: relative), not this
-            Box. Since this FormHelperText is a sibling, not a FormControl
-            child, it has no positioned ancestor and drifts to the initial
-            containing block. Override back to static so it flows in normal
-            layout right under the dropdown, in-flow (no overlap/spill). */}
-        <FormHelperText id={STATUS_NOTE_ID} sx={{ position: "static" }}>
-          {T.translate("sponsor_reports_page.filter_status_canceled_note")}
-        </FormHelperText>
+        <i
+          className="fa fa-info-circle"
+          aria-hidden="true"
+          title={T.translate("sponsor_reports_page.filter_status_info")}
+        />
+        <Box component="span" id={STATUS_NOTE_ID} sx={visuallyHidden}>
+          {T.translate("sponsor_reports_page.filter_status_info")}
+        </Box>
       </Box>
       <Box sx={{ width: 200 }}>
         <MuiDropdown
