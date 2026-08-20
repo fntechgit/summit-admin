@@ -255,5 +255,31 @@ describe("sponsorCustomizedFormItemsListReducer", () => {
       expect(result.items[0].images).toBe(images);
       expect(result.items[1].name).toBe("Other");
     });
+
+    it("preserves the existing item's images when the response omits them", () => {
+      // Regression for the handleCellEdit path (sponsor-forms-manage-items.js)
+      // which saves via this action with no follow-up refetch - a response
+      // that omits images must not clobber the row's thumbnail.
+      const images = [{ id: 20, file_url: "https://cdn/img.png" }];
+      const state = {
+        ...DEFAULT_STATE,
+        items: [buildItem({ id: 1, name: "Before", images })]
+      };
+
+      const result = sponsorCustomizedFormItemsListReducer(state, {
+        type: SPONSOR_FORM_MANAGED_ITEM_UPDATED,
+        payload: {
+          response: buildItem({
+            id: 1,
+            name: "After",
+            early_bird_rate: 500,
+            images: undefined
+          })
+        }
+      });
+
+      expect(result.items[0].name).toBe("After");
+      expect(result.items[0].images).toBe(images);
+    });
   });
 });
