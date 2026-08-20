@@ -140,6 +140,7 @@ const columns = [
     columnKey: "refunded_amount",
     header: T.translate("sponsor_reports_page.col_refunded"),
     sortable: false, // not a backend ordering field
+    align: "right",
     // Refunds never touch purchase status — a fully refunded order reads Paid
     // forever, so this column is the only on-screen signal. The CSV already had it.
     render: (row) =>

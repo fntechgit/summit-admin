@@ -114,8 +114,20 @@ describe("OrdersTable refund and freshness columns", () => {
     const headers = screen
       .getAllByRole("columnheader")
       .map((h) => h.textContent);
-    expect(headers).toHaveLength(14);
-    expect(headers.slice(-3)).toEqual([
+    // Full 14-key sequence, not just the appended tail — a reorder or swap
+    // among the original 11 (e.g. col_order/col_sponsor) must fail this too.
+    expect(headers).toEqual([
+      "sponsor_reports_page.col_order",
+      "sponsor_reports_page.col_sponsor",
+      "sponsor_reports_page.col_checkout_time",
+      "sponsor_reports_page.col_type",
+      "sponsor_reports_page.col_status",
+      "sponsor_reports_page.col_invoice_total",
+      "sponsor_reports_page.col_payment_method",
+      "sponsor_reports_page.col_invoice_reference",
+      "sponsor_reports_page.col_invoice_sub_status",
+      "sponsor_reports_page.col_invoice_due_date",
+      "sponsor_reports_page.col_sponsor_note",
       "sponsor_reports_page.col_refunded",
       "sponsor_reports_page.col_synced_at",
       "sponsor_reports_page.col_source_updated"
