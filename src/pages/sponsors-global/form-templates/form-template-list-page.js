@@ -12,20 +12,12 @@
  * */
 
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Grid2
-} from "@mui/material";
+import { Alert, Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import GridToolbar from "../../../components/mui/grid-toolbar";
 import {
   archiveFormTemplate,
   deleteFormTemplate,
@@ -243,66 +235,34 @@ const FormTemplateListPage = ({
         {T.translate("form_template_list.alert_info")}
       </Alert>
 
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, sm: 6, lg: 2 }}>
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  onChange={(ev) => handleShowArchivedForms(ev.target.checked)}
-                  checked={showArchived}
-                  inputProps={{
-                    "aria-label": T.translate(
-                      "form_template_list.show_archived"
-                    )
-                  }}
-                />
-              }
-              label={T.translate("form_template_list.show_archived")}
-            />
-          </FormGroup>
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, lg: 4 }}>
-          <SearchInput
-            onSearch={handleSearch}
-            placeholder={T.translate(
-              "inventory_item_list.placeholders.search_inventory_items"
-            )}
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => handleNewFromDuplicate()}
-            startIcon={<AddIcon />}
-            sx={{
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("form_template_list.using_duplicate")}
-          </Button>
-        </Grid2>
-        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => handleNewFormTemplate()}
-            startIcon={<AddIcon />}
-            sx={{
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("form_template_list.add_form_template")}
-          </Button>
-        </Grid2>
-      </Grid2>
+      <GridToolbar
+        searchProps={{
+          onSearch: handleSearch,
+          placeholder: T.translate(
+            "inventory_item_list.placeholders.search_inventory_items"
+          )
+        }}
+        checkboxProps={{
+          checked: showArchived,
+          onChange: (ev) => handleShowArchivedForms(ev.target.checked),
+          label: T.translate("form_template_list.show_archived")
+        }}
+      >
+        <Button
+          variant="contained"
+          onClick={() => handleNewFromDuplicate()}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("form_template_list.using_duplicate")}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => handleNewFormTemplate()}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("form_template_list.add_form_template")}
+        </Button>
+      </GridToolbar>
       <Box sx={{ mb: 2 }}>{totalFormTemplates} forms</Box>
 
       {formTemplates.length > 0 && (

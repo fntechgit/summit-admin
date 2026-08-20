@@ -91,7 +91,7 @@ const theme = createTheme(CustomThemeBase, {
           ...(ownerState.size === "medium" && {
             fontSize: "14px",
             lineHeight: "20px",
-            padding: "10px 20px"
+            padding: "8px 12px"
           }),
           ...(ownerState.size === "large" && {
             fontSize: "16px",

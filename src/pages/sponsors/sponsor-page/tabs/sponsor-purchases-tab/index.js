@@ -18,14 +18,13 @@ import {
   Box,
   Button,
   CircularProgress,
-  Grid2,
   IconButton,
   MenuItem,
   Select
 } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../../../../components/mui/grid-toolbar";
 import history from "../../../../../history";
 import {
   approveSponsorPurchase,
@@ -191,15 +190,13 @@ const SponsorPurchasesTab = ({
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} offset={{ md: 9 }}>
-          <SearchInput
-            term={term}
-            onSearch={handleSearch}
-            placeholder={T.translate("edit_sponsor.placeholders.search")}
-          />
-        </Grid2>
-      </Grid2>
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate("edit_sponsor.placeholders.search")
+        }}
+      />
       <Box sx={{ mb: 2 }}>
         {totalCount} {T.translate("edit_sponsor.purchase_tab.purchases")}
       </Box>

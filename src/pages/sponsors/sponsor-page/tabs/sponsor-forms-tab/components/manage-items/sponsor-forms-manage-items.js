@@ -14,20 +14,11 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Grid2,
-  IconButton,
-  Tooltip
-} from "@mui/material";
+import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ImageIcon from "@mui/icons-material/Image";
 import MuiTableEditable from "openstack-uicore-foundation/lib/components/mui/editable-table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../../../../../../components/mui/grid-toolbar";
 import {
   addSponsorManagedFormItems,
   archiveSponsorCustomizedFormItem,
@@ -286,57 +277,37 @@ const SponsorFormsManageItems = ({
         )}
         hideIcon
       />
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, sm: 6, lg: 2 }}>
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={showArchived}
-                  onChange={handleShowArchivedItems}
-                  inputProps={{
-                    "aria-label": T.translate(
-                      "edit_sponsor.forms_tab.form_manage_items.show_archived"
-                    )
-                  }}
-                />
-              }
-              label={T.translate(
-                "edit_sponsor.forms_tab.form_manage_items.show_archived"
-              )}
-            />
-          </FormGroup>
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, lg: 4 }}>
-          <SearchInput
-            term={term}
-            onSearch={handleSearch}
-            placeholder={T.translate("edit_sponsor.placeholders.search")}
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={handleOpenItemPopup}
-            startIcon={<AddIcon />}
-          >
-            {T.translate("edit_sponsor.forms_tab.form_manage_items.add_item")}
-          </Button>
-        </Grid2>
-        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => setOpenPopup("add_item_inventory")}
-            startIcon={<AddIcon />}
-          >
-            {T.translate(
-              "edit_sponsor.forms_tab.form_manage_items.add_item_inventory"
-            )}
-          </Button>
-        </Grid2>
-      </Grid2>
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate("edit_sponsor.placeholders.search")
+        }}
+        checkboxProps={{
+          checked: showArchived,
+          onChange: handleShowArchivedItems,
+          label: T.translate(
+            "edit_sponsor.forms_tab.form_manage_items.show_archived"
+          )
+        }}
+      >
+        <Button
+          variant="contained"
+          onClick={handleOpenItemPopup}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("edit_sponsor.forms_tab.form_manage_items.add_item")}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => setOpenPopup("add_item_inventory")}
+          startIcon={<AddIcon />}
+        >
+          {T.translate(
+            "edit_sponsor.forms_tab.form_manage_items.add_item_inventory"
+          )}
+        </Button>
+      </GridToolbar>
       <Box sx={{ mb: 2 }}>{totalCount} items</Box>
 
       <div>

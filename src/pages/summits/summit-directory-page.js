@@ -16,15 +16,11 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { formatEpoch } from "openstack-uicore-foundation/lib/utils/methods";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import MuiSearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Checkbox from "@mui/material/Checkbox";
 import Chip from "@mui/material/Chip";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import FormGroup from "@mui/material/FormGroup";
-import Grid2 from "@mui/material/Grid2";
 import AddIcon from "@mui/icons-material/Add";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import {
   clearCurrentSummit,
   deleteSummit,
@@ -161,45 +157,30 @@ const SummitDirectoryPage = ({
   return (
     <Box className="container">
       <h3>{T.translate("directory.summits")}</h3>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 6 }}>
-          <MuiSearchInput
-            term={searchTerm}
-            onSearch={handleSearch}
-            placeholder={T.translate("directory.placeholders.search")}
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 6, md: 3 }}>
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  onChange={handleHidePastEventsChange}
-                  checked={hidePastEvents}
-                  inputProps={{
-                    "aria-label": T.translate("directory.hide_past_events")
-                  }}
-                />
-              }
-              label={T.translate("directory.hide_past_events")}
-            />
-          </FormGroup>
-        </Grid2>
-        <Grid2 size={{ xs: 6, md: 3 }}>
-          {canAddSummits && (
-            <Button
-              variant="contained"
-              color="primary"
-              size="medium"
-              fullWidth
-              startIcon={<AddIcon />}
-              onClick={handleNewSummit}
-            >
-              {T.translate("directory.add_summit")}
-            </Button>
-          )}
-        </Grid2>
-      </Grid2>
+      <GridToolbar
+        searchProps={{
+          term: searchTerm,
+          onSearch: handleSearch,
+          placeholder: T.translate("directory.placeholders.search")
+        }}
+        checkboxProps={{
+          checked: hidePastEvents,
+          onChange: handleHidePastEventsChange,
+          label: T.translate("directory.hide_past_events")
+        }}
+      >
+        {canAddSummits && (
+          <Button
+            variant="contained"
+            color="primary"
+            size="medium"
+            startIcon={<AddIcon />}
+            onClick={handleNewSummit}
+          >
+            {T.translate("directory.add_summit")}
+          </Button>
+        )}
+      </GridToolbar>
       <Box sx={{ mb: 2 }}>
         {totalSummits} {T.translate("directory.summits").toLowerCase()}
       </Box>

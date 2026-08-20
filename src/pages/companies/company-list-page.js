@@ -14,10 +14,10 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import {
   getCompanies,
   getCompany,
@@ -125,54 +125,24 @@ const CompanyListPage = ({
   return (
     <div className="container">
       <h3> {T.translate("company_list.company_list")}</h3>
-      <Grid2
-        container
-        spacing={1}
-        sx={{
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate("company_list.placeholders.search_companies")
         }}
       >
-        <Grid2 size={2}>
-          <Box component="span">
-            {totalCompanies} {T.translate("company_list.companies")}
-          </Box>
-        </Grid2>
-        <Grid2
-          container
-          size={10}
-          gap={1}
-          sx={{
-            justifyContent: "flex-end",
-            alignItems: "center"
-          }}
+        <Button
+          variant="contained"
+          onClick={handleNewCompany}
+          startIcon={<AddIcon />}
         >
-          <Grid2 size={4}>
-            <SearchInput
-              term={term}
-              onSearch={handleSearch}
-              placeholder={T.translate(
-                "company_list.placeholders.search_companies"
-              )}
-            />
-          </Grid2>
-          <Button
-            variant="contained"
-            onClick={handleNewCompany}
-            startIcon={<AddIcon />}
-            sx={{
-              height: "36px",
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("company_list.add_company")}
-          </Button>
-        </Grid2>
-      </Grid2>
+          {T.translate("company_list.add_company")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {totalCompanies} {T.translate("company_list.companies")}
+      </Box>
 
       {companies.length > 0 && (
         <MuiTable

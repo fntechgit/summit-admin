@@ -18,7 +18,6 @@ import {
   Box,
   Button,
   FormControl,
-  Grid2,
   IconButton,
   InputAdornment,
   MenuItem,
@@ -27,7 +26,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import {
   getTrackChairs,
   deleteTrackChair,
@@ -37,14 +36,6 @@ import {
 } from "../../actions/track-chair-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 import TrackChairDialog from "./components/track-chair-dialog";
-
-const buttonSx = {
-  height: "36px",
-  padding: "6px 16px",
-  fontSize: "1.4rem",
-  lineHeight: "2.4rem",
-  letterSpacing: "0.4px"
-};
 
 const TrackChairListPage = ({
   currentSummit,
@@ -175,105 +166,76 @@ const TrackChairListPage = ({
   return (
     <div className="container">
       <h3>{T.translate("track_chairs.list")}</h3>
-      <Grid2
-        container
-        spacing={1}
-        sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}
+      <GridToolbar
+        searchProps={{
+          term,
+          placeholder: T.translate("track_chairs.placeholders.search"),
+          onSearch: handleSearch
+        }}
       >
-        <Grid2 size={2}>
-          <Box component="span">
-            {totalTrackChairs} {T.translate("track_chairs.track_chairs")}
-          </Box>
-        </Grid2>
-        <Grid2
-          container
-          size={10}
-          gap={1}
-          sx={{ justifyContent: "flex-end", alignItems: "center" }}
+        <FormControl
+          sx={{
+            minWidth: 200,
+            "& .MuiOutlinedInput-root": { height: "36px" }
+          }}
         >
-          <Grid2 size={3}>
-            <SearchInput
-              term={term}
-              placeholder={T.translate("track_chairs.placeholders.search")}
-              onSearch={handleSearch}
-            />
-          </Grid2>
-          <Grid2 size={3}>
-            <FormControl
-              fullWidth
-              sx={{ "& .MuiOutlinedInput-root": { height: "36px" } }}
-            >
-              <Select
-                size="small"
-                value={trackId ?? ""}
-                onChange={handleFilterByTrack}
-                displayEmpty
-                renderValue={(selected) =>
-                  selected ? (
-                    tracks_ddl.find((t) => t.value === selected)?.label
-                  ) : (
-                    <span style={{ color: "#aaa" }}>
-                      {T.translate("track_chairs.placeholders.select_track")}
-                    </span>
-                  )
-                }
-                endAdornment={
-                  trackId ? (
-                    <InputAdornment position="end" sx={{ mr: 2 }}>
-                      <IconButton
-                        size="small"
-                        onClick={() =>
-                          getTrackChairs(
-                            null,
-                            term,
-                            DEFAULT_CURRENT_PAGE,
-                            perPage,
-                            order,
-                            orderDir
-                          )
-                        }
-                      >
-                        <ClearIcon fontSize="small" />
-                      </IconButton>
-                    </InputAdornment>
-                  ) : null
-                }
-              >
-                {tracks_ddl.map((t) => (
-                  <MenuItem key={t.value} value={t.value}>
-                    {t.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid2>
-          <Grid2
-            size="auto"
-            gap={1}
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-              alignItems: "center"
-            }}
+          <Select
+            size="small"
+            value={trackId ?? ""}
+            onChange={handleFilterByTrack}
+            displayEmpty
+            renderValue={(selected) =>
+              selected ? (
+                tracks_ddl.find((t) => t.value === selected)?.label
+              ) : (
+                <span style={{ color: "#aaa" }}>
+                  {T.translate("track_chairs.placeholders.select_track")}
+                </span>
+              )
+            }
+            endAdornment={
+              trackId ? (
+                <InputAdornment position="end" sx={{ mr: 2 }}>
+                  <IconButton
+                    size="small"
+                    onClick={() =>
+                      getTrackChairs(
+                        null,
+                        term,
+                        DEFAULT_CURRENT_PAGE,
+                        perPage,
+                        order,
+                        orderDir
+                      )
+                    }
+                  >
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ) : null
+            }
           >
-            <Button
-              variant="outlined"
-              onClick={() => exportTrackChairs()}
-              sx={buttonSx}
-            >
-              {T.translate("general.export")}
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleNewTrackChair}
-              startIcon={<AddIcon />}
-              sx={buttonSx}
-            >
-              {T.translate("track_chairs.add")}
-            </Button>
-          </Grid2>
-        </Grid2>
-      </Grid2>
+            {tracks_ddl.map((t) => (
+              <MenuItem key={t.value} value={t.value}>
+                {t.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Button variant="outlined" onClick={() => exportTrackChairs()}>
+          {T.translate("general.export")}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleNewTrackChair}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("track_chairs.add")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {totalTrackChairs} {T.translate("track_chairs.track_chairs")}
+      </Box>
 
       {trackChairs.length === 0 ? (
         <div>{T.translate("track_chairs.no_items")}</div>

@@ -12,14 +12,13 @@ import {
   DialogTitle,
   Divider,
   FormControlLabel,
-  Grid2,
   IconButton,
   Typography
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../../../../../../components/mui/grid-toolbar";
 import { ImagePreviewCell } from "../../../../../../../components/image-preview-cell";
 import { formatRateFromCents } from "../../../../../../../utils/rate-helpers";
 import {
@@ -187,43 +186,38 @@ const SponsorFormItemFromInventoryPopup = ({
       </DialogTitle>
       <Divider />
       <DialogContent sx={{ p: 0 }}>
-        <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-          <Grid2 container spacing={2} size={4} sx={{ alignItems: "baseline" }}>
-            {selectedRows.length} items selected
-          </Grid2>
-          <Grid2 container spacing={2} size={8}>
-            <Grid2 size={3}>
-              <MenuButton
-                buttonId="sort-button"
-                menuId="sort-menu"
-                menuItems={[
-                  {
-                    label: T.translate(
-                      "edit_sponsor.forms_tab.form_manage_items.sort_asc_label"
-                    ),
-                    onClick: () => handleSort("name", 1)
-                  },
-                  {
-                    label: T.translate(
-                      "edit_sponsor.forms_tab.form_manage_items.sort_desc_label"
-                    ),
-                    onClick: () => handleSort("name", 0)
-                  }
-                ]}
-              >
-                <SwapVertIcon fontSize="large" sx={{ mr: 1 }} />{" "}
-                {T.translate("general.sort_by")}
-              </MenuButton>
-            </Grid2>
-            <Grid2 size={9}>
-              <SearchInput
-                onSearch={handleOnSearch}
-                term={term}
-                placeholder={T.translate("edit_sponsor.placeholders.search")}
-              />
-            </Grid2>
-          </Grid2>
-        </Grid2>
+        <Box sx={{ p: 2 }}>
+          <GridToolbar
+            searchProps={{
+              onSearch: handleOnSearch,
+              term,
+              placeholder: T.translate("edit_sponsor.placeholders.search")
+            }}
+          >
+            <MenuButton
+              buttonId="sort-button"
+              menuId="sort-menu"
+              menuItems={[
+                {
+                  label: T.translate(
+                    "edit_sponsor.forms_tab.form_manage_items.sort_asc_label"
+                  ),
+                  onClick: () => handleSort("name", 1)
+                },
+                {
+                  label: T.translate(
+                    "edit_sponsor.forms_tab.form_manage_items.sort_desc_label"
+                  ),
+                  onClick: () => handleSort("name", 0)
+                }
+              ]}
+            >
+              <SwapVertIcon fontSize="large" sx={{ mr: 1 }} />{" "}
+              {T.translate("general.sort_by")}
+            </MenuButton>
+          </GridToolbar>
+          <Box>{selectedRows.length} items selected</Box>
+        </Box>
 
         {inventoryItems.length > 0 && (
           <Box sx={{ p: 2 }}>

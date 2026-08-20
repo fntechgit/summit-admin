@@ -12,20 +12,12 @@
  * */
 
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Grid2
-} from "@mui/material";
+import { Alert, Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import GridToolbar from "../../../components/mui/grid-toolbar";
 import {
   archiveInventoryItem,
   deleteInventoryItemImage,
@@ -201,50 +193,27 @@ const InventoryListPage = ({
       >
         {T.translate("inventory_item_list.alert_info")}
       </Alert>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  onChange={handleShowArchivedForms}
-                  checked={showArchived}
-                  inputProps={{
-                    "aria-label": T.translate(
-                      "inventory_item_list.show_archived"
-                    )
-                  }}
-                />
-              }
-              label={T.translate("inventory_item_list.show_archived")}
-            />
-          </FormGroup>
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 6 }}>
-          <SearchInput
-            onSearch={handleSearch}
-            placeholder={T.translate(
-              "inventory_item_list.placeholders.search_inventory_items"
-            )}
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 3 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => handleNewInventoryItem()}
-            startIcon={<AddIcon />}
-            sx={{
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("inventory_item_list.add_inventory_item")}
-          </Button>
-        </Grid2>
-      </Grid2>
+      <GridToolbar
+        searchProps={{
+          onSearch: handleSearch,
+          placeholder: T.translate(
+            "inventory_item_list.placeholders.search_inventory_items"
+          )
+        }}
+        checkboxProps={{
+          checked: showArchived,
+          onChange: handleShowArchivedForms,
+          label: T.translate("inventory_item_list.show_archived")
+        }}
+      >
+        <Button
+          variant="contained"
+          onClick={() => handleNewInventoryItem()}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("inventory_item_list.add_inventory_item")}
+        </Button>
+      </GridToolbar>
       <Box sx={{ mb: 2 }}>{totalInventoryItems} items</Box>
 
       {inventoryItems.length > 0 && (

@@ -12,13 +12,13 @@
  * */
 
 import React, { useEffect, useState } from "react";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import GridToolbar from "../../../components/mui/grid-toolbar";
 import Restrict from "../../../routes/restrict";
 import {
   getAddOnTypes,
@@ -125,33 +125,23 @@ const AddOnTypesListPage = ({
         }}
       />
       <h3> {T.translate("add_on_types_list.add_on_types")}</h3>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, sm: 6 }}>
-          <SearchInput
-            term={term}
-            onSearch={handleSearch}
-            placeholder={T.translate(
-              "add_on_types_list.placeholders.search_add_on_types"
-            )}
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} offset={{ md: 3 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => handleNewAddOnType()}
-            startIcon={<AddIcon />}
-            sx={{
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("add_on_types_list.add_add_on_type")}
-          </Button>
-        </Grid2>
-      </Grid2>
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate(
+            "add_on_types_list.placeholders.search_add_on_types"
+          )
+        }}
+      >
+        <Button
+          variant="contained"
+          onClick={() => handleNewAddOnType()}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("add_on_types_list.add_add_on_type")}
+        </Button>
+      </GridToolbar>
       <Box sx={{ mb: 2 }}>
         {totalAddOnTypes} {T.translate("add_on_types_list.add_on_types")}
       </Box>

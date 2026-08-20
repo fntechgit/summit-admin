@@ -17,12 +17,11 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Grid2 from "@mui/material/Grid2";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import RawHTML from "openstack-uicore-foundation/lib/components/raw-html";
 import SummitDropdown from "../../components/summit-dropdown";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import {
   getMediaUploads as getMediaUploadsAction,
   deleteMediaUpload as deleteMediaUploadAction,
@@ -105,33 +104,18 @@ const MediaUploadListPage = ({
   return (
     <div className="container">
       <h3>{T.translate("media_upload.media_upload_list")}</h3>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 6 }}>
-          <SearchInput term={term} onSearch={handleSearch} />
-        </Grid2>
-        <Grid2 size={{ xs: 6, md: 3 }}>
+      <GridToolbar searchProps={{ term, onSearch: handleSearch }}>
+        {/* TODO: remove this wrapper once SummitDropdown is migrated to MUI */}
+        <Box sx={{ flexShrink: 0 }}>
           <SummitDropdown
             onClick={handleCopyMediaUploads}
             actionLabel={T.translate("media_upload.copy_media_uploads")}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 6, md: 3 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={handleNew}
-            startIcon={<AddIcon />}
-            sx={{
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("media_upload.add")}
-          </Button>
-        </Grid2>
-      </Grid2>
+        </Box>
+        <Button variant="contained" onClick={handleNew} startIcon={<AddIcon />}>
+          {T.translate("media_upload.add")}
+        </Button>
+      </GridToolbar>
       <Box sx={{ mb: 2 }}>
         {totalMediaUploads} {T.translate("media_upload.media_uploads")}
       </Box>

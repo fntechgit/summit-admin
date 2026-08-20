@@ -14,11 +14,11 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DownloadIcon from "@mui/icons-material/Download";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../../../../components/mui/grid-toolbar";
 import {
   getSponsor,
   getBadgeScans,
@@ -168,48 +168,41 @@ const SponsorBadgeScans = ({
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, sm: 6, lg: 6 }}>
-          <SearchInput
-            onSearch={handleSearch}
-            placeholder={T.translate(
-              "inventory_item_list.placeholders.search_inventory_items"
-            )}
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={handleNewManualScan}
-            startIcon={<AddIcon />}
-            sx={{
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("sponsor_badge_scans.add_manual_scan")}
-          </Button>
-        </Grid2>
-        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={handleExportBadgeScans}
-            startIcon={<DownloadIcon />}
-            sx={{
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("sponsor_badge_scans.export")}
-          </Button>
-        </Grid2>
-      </Grid2>
+      <GridToolbar
+        searchProps={{
+          onSearch: handleSearch,
+          placeholder: T.translate(
+            "inventory_item_list.placeholders.search_inventory_items"
+          )
+        }}
+      >
+        <Button
+          variant="contained"
+          onClick={handleNewManualScan}
+          startIcon={<AddIcon />}
+          sx={{
+            padding: "6px 16px",
+            fontSize: "1.4rem",
+            lineHeight: "2.4rem",
+            letterSpacing: "0.4px"
+          }}
+        >
+          {T.translate("sponsor_badge_scans.add_manual_scan")}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleExportBadgeScans}
+          startIcon={<DownloadIcon />}
+          sx={{
+            padding: "6px 16px",
+            fontSize: "1.4rem",
+            lineHeight: "2.4rem",
+            letterSpacing: "0.4px"
+          }}
+        >
+          {T.translate("sponsor_badge_scans.export")}
+        </Button>
+      </GridToolbar>
       <Box sx={{ mb: 2 }}>
         {totalBadgeScans} {T.translate("sponsor_badge_scans.badge_scanned")}
       </Box>

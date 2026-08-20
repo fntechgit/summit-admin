@@ -15,18 +15,11 @@ import React, { useEffect, useState, useRef } from "react";
 import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Grid2
-} from "@mui/material";
+import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiDropdownCheckbox from "openstack-uicore-foundation/lib/components/mui/dropdown-checkbox";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../../components/mui/grid-toolbar";
 import history from "../../../history";
 import {
   archiveSponsorForm,
@@ -344,57 +337,35 @@ const SponsorFormsListPage = ({
     <div className="container">
       <h3>{T.translate("sponsor_forms.forms")}</h3>
       <CustomAlert message={T.translate("sponsor_forms.alert_info")} hideIcon />
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, sm: 6, lg: 4 }}>
-          <SearchInput
-            term={term}
-            onSearch={handleSearch}
-            placeholder={T.translate("sponsor_forms.placeholders.search")}
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, lg: 2 }}>
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={showArchived}
-                  onChange={handleShowArchivedForms}
-                  slotProps={{
-                    input: {
-                      "aria-label": T.translate("sponsor_forms.show_archived")
-                    }
-                  }}
-                />
-              }
-              label={T.translate("sponsor_forms.show_archived")}
-              sx={{ whiteSpace: "nowrap", mb: 0 }}
-            />
-          </FormGroup>
-        </Grid2>
-
-        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
-          <Button
-            variant="contained"
-            size="medium"
-            fullWidth
-            onClick={() => setOpenPopup("clone")}
-            startIcon={<AddIcon />}
-          >
-            {T.translate("sponsor_forms.using_global")}
-          </Button>
-        </Grid2>
-        <Grid2 size={{ xs: 6, sm: 6, lg: 3 }}>
-          <Button
-            variant="contained"
-            size="medium"
-            fullWidth
-            onClick={() => setOpenPopup("new")}
-            startIcon={<AddIcon />}
-          >
-            {T.translate("sponsor_forms.add_form")}
-          </Button>
-        </Grid2>
-      </Grid2>
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate("sponsor_forms.placeholders.search")
+        }}
+        checkboxProps={{
+          checked: showArchived,
+          onChange: handleShowArchivedForms,
+          label: T.translate("sponsor_forms.show_archived")
+        }}
+      >
+        <Button
+          variant="contained"
+          size="medium"
+          onClick={() => setOpenPopup("clone")}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("sponsor_forms.using_global")}
+        </Button>
+        <Button
+          variant="contained"
+          size="medium"
+          onClick={() => setOpenPopup("new")}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("sponsor_forms.add_form")}
+        </Button>
+      </GridToolbar>
       <Box sx={{ mb: 2 }}>{totalCount} forms</Box>
 
       {sponsorForms.length > 0 && (

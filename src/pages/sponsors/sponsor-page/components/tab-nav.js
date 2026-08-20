@@ -32,6 +32,7 @@ const TabNav = ({ currentSummit, sponsor, member, history, location }) => {
       value={selectedTab}
       onChange={(ev, val) => handleTabChange(val)}
       sx={{ minHeight: "36px" }}
+      variant="scrollable"
     >
       {tabs
         .filter((t) => memberObj.hasAccess(t.accessRoute))
