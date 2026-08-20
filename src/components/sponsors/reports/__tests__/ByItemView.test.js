@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom";
 import React from "react";
+import moment from "moment-timezone";
 import { render, screen, fireEvent, within } from "@testing-library/react";
 import ByItemView, {
   groupLinesByItem,
@@ -160,8 +161,19 @@ describe("groupLinesBySponsorItem", () => {
       status: "Paid",
       qty: 2,
       lineTotalCents: 100000,
-      isCanceled: true
+      isCanceled: true,
+      syncedAt: null,
+      sourceUpdatedAt: null
     });
+  });
+
+  it("carries line-grain freshness into the contributor", () => {
+    const [g] = groupLinesBySponsorItem([
+      line({ synced_at: 1755561600, source_updated_at: 1755558000 })
+    ]);
+    const [c] = g.items[0].contributors;
+    expect(c.syncedAt).toBe(1755561600);
+    expect(c.sourceUpdatedAt).toBe(1755558000);
   });
 
   it("EXCLUDES canceled lines from qty/money/purchasedCount/Σqty but keeps them as contributors", () => {
@@ -415,6 +427,52 @@ describe("ByItemView", () => {
     expect(screen.queryByText("OCP-1")).not.toBeInTheDocument();
   });
 
+  it("renders the line's own state in the drill-down, not the parent order's", () => {
+    // Distinct epochs (not the same value for both fields) so a swap or a
+    // missing cell can't hide behind a shared string.
+    const synced = 1755561600; // 2025-08-19
+    const sourceUpdated = 1755648000; // 2025-08-20
+    renderView({
+      groups: [
+        group({
+          items: [
+            item({
+              contributors: [
+                {
+                  sponsorName: "FNTECH",
+                  number: "OCP-1",
+                  formCode: "AV",
+                  addOnName: null,
+                  checkoutAt: null,
+                  rateName: "Early",
+                  status: "Paid", // parent order is Paid...
+                  qty: 1,
+                  lineTotalCents: 1000,
+                  isCanceled: true, // ...but THIS line is canceled
+                  syncedAt: synced,
+                  sourceUpdatedAt: sourceUpdated
+                }
+              ]
+            })
+          ]
+        })
+      ]
+    });
+    fireEvent.click(screen.getByText("AV1")); // expand the item
+    expect(
+      screen.getByText("sponsor_reports_page.status_canceled")
+    ).toBeInTheDocument();
+    const syncedText = moment.unix(synced).utc().format("YYYY-MM-DD h:mm A");
+    const sourceUpdatedText = moment
+      .unix(sourceUpdated)
+      .utc()
+      .format("YYYY-MM-DD h:mm A");
+    const row = screen.getByText("OCP-1").closest("tr");
+    const cells = within(row).getAllByRole("cell");
+    expect(cells[cells.length - 2]).toHaveTextContent(syncedText);
+    expect(cells[cells.length - 1]).toHaveTextContent(sourceUpdatedText);
+  });
+
   it("expand button toggles the drill-down and reflects aria-expanded", () => {
     renderView();
     const toggle = screen.getByRole("button", {
@@ -481,6 +539,24 @@ describe("ByItemView", () => {
     fireEvent.mouseDown(screen.getByRole("combobox"));
     fireEvent.click(screen.getByRole("option", { name: "20" }));
     expect(onPerPageChange).toHaveBeenCalledWith(20);
+  });
+});
+
+describe("byitem_sponsor_items_chip copy", () => {
+  it("does not describe canceled orders as purchased", () => {
+    // The chip read "13 of 13 items purchased" over a set of deliberately-filtered
+    // CANCELED orders. Under Jest the chip renders as its i18n key, so the wording
+    // is only checkable in the catalog.
+    // eslint-disable-next-line global-require
+    const en = require("../../../../i18n/en.json");
+    // Not a bare /purchased/: the template's own {purchased} interpolation
+    // key would self-match that. Target the retired descriptive phrase.
+    expect(en.sponsor_reports_page.byitem_sponsor_items_chip).not.toMatch(
+      /items purchased/
+    );
+    expect(en.sponsor_reports_page.byitem_sponsor_items_chip).toContain(
+      "{purchased} of {items}"
+    );
   });
 });
 

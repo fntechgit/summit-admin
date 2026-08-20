@@ -119,7 +119,10 @@ const accumulateRow = (itemMap, row) => {
     status: row.purchase?.status ?? "",
     qty: row.quantity ?? 0,
     lineTotalCents: row.line_total ?? null,
-    isCanceled: Boolean(row.is_canceled)
+    isCanceled: Boolean(row.is_canceled),
+    // line-grain freshness (decision 1): the contributor row IS a line
+    syncedAt: row.synced_at ?? null,
+    sourceUpdatedAt: row.source_updated_at ?? null
   });
 };
 
@@ -250,7 +253,9 @@ const CONTRIB_HEADERS = [
   { key: "col_used_rate" },
   { key: "col_status" },
   { key: "col_quantity", align: "right" },
-  { key: "col_line_total", align: "right" }
+  { key: "col_line_total", align: "right" },
+  { key: "col_synced_at" },
+  { key: "col_source_updated" }
 ];
 
 // One expansion key per (sponsor, item) so the same item code under two
@@ -457,16 +462,33 @@ const ItemTable = ({
                               </TableCell>
                               <TableCell>{c.rateName}</TableCell>
                               <TableCell>
-                                <StatusPill
-                                  status={c.status}
-                                  label={c.status}
-                                />
+                                {/* the line's own state — its parent order can be Paid
+                                    while this specific line is canceled */}
+                                {c.isCanceled ? (
+                                  <StatusPill
+                                    status="Canceled"
+                                    label={T.translate(
+                                      "sponsor_reports_page.status_canceled"
+                                    )}
+                                  />
+                                ) : (
+                                  <StatusPill
+                                    status={c.status}
+                                    label={c.status}
+                                  />
+                                )}
                               </TableCell>
                               <TableCell align="right">{c.qty}</TableCell>
                               <TableCell align="right">
                                 {c.lineTotalCents == null
                                   ? "—"
                                   : currencyAmountFromCents(c.lineTotalCents)}
+                              </TableCell>
+                              <TableCell>
+                                {formatCheckoutTime(c.syncedAt)}
+                              </TableCell>
+                              <TableCell>
+                                {formatCheckoutTime(c.sourceUpdatedAt)}
                               </TableCell>
                             </TableRow>
                           ))}

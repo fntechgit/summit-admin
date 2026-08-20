@@ -4399,7 +4399,7 @@
     "col_source_updated": "Source Updated",
     "byitem_col_orders": "Orders",
     "byitem_col_total": "Total",
-    "byitem_sponsor_items_chip": "{purchased} of {items} items purchased",
+    "byitem_sponsor_items_chip": "{purchased} of {items} items with purchases",
     "byitem_sum_qty": "{qty} units",
     "byitem_contributing_orders": "Contributing orders",
     "byitem_sponsors_per_page": "Sponsors per page:",
