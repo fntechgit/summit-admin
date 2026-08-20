@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom";
 import React from "react";
+import moment from "moment-timezone";
 import { render, screen, within } from "@testing-library/react";
 import LinesManifestView from "../LinesManifestView";
 
@@ -54,6 +55,43 @@ describe("LinesManifestView", () => {
     expect(screen.getByText("AV2")).toBeInTheDocument();
     const row = screen.getByText("AV2").closest("tr");
     expect(row).toHaveAttribute("data-canceled", "true");
+  });
+
+  it("renders the LINE's own state, not the parent order's status", () => {
+    // line() defaults to a Paid parent: the exact trap. A soft-canceled line leaves
+    // its order Paid, so rendering purchase.status printed "Paid" on a dead row.
+    renderView({ rows: [line({ is_canceled: true })] });
+    expect(
+      screen.getByText("sponsor_reports_page.status_canceled")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Paid")).not.toBeInTheDocument();
+  });
+
+  it("renders both freshness timestamps", () => {
+    // formatCheckoutTime is moment.unix(v).utc().format("YYYY-MM-DD h:mm A")
+    const synced = 1755561600;
+    renderView({
+      rows: [line({ synced_at: synced, source_updated_at: synced })]
+    });
+    expect(
+      screen.getAllByText(moment.unix(synced).utc().format("YYYY-MM-DD h:mm A"))
+    ).not.toHaveLength(0);
+  });
+
+  it("counts only live lines per sponsor group", () => {
+    // Canceled lines still RENDER (struck through); the chip means LIVE lines,
+    // matching the By Item units chip on the same screen. The module's local
+    // i18n mock interpolates {count}, so the chip text carries the number.
+    renderView({
+      rows: [
+        line({ is_canceled: false }),
+        line({ is_canceled: true, item_code: "AV2" })
+      ]
+    });
+    expect(screen.getAllByRole("row").length).toBeGreaterThan(2); // both lines render
+    expect(
+      screen.getByText("sponsor_reports_page.lines_count:1")
+    ).toBeInTheDocument();
   });
 
   // Sponsor bucketing (formerly bucketLinesBySponsor, now a private helper).
