@@ -611,4 +611,35 @@ describe("PurchaseDetailsReportPage", () => {
       expect(mockErrorMessage).toHaveBeenCalledWith("Too many filters");
     });
   });
+
+  describe("self-describing chrome — gross Total Paid label + canceled default note", () => {
+    it("labels Total Paid as gross", () => {
+      // Decision 7 keeps the figure gross; the label is the whole fix. Under Jest the
+      // tile renders "sponsor_reports_page.total_paid" (the i18n mock is the identity
+      // function), so the catalog value is the only place this copy is checkable —
+      // and exact equality (not a substring match) is the only assertion that can
+      // both catch a wrong replacement string and notice "Total Paid" going missing.
+      const en = require("../../../../../i18n/en.json");
+      expect(en.sponsor_reports_page.total_paid).toBe(
+        "Total Paid (before refunds)"
+      );
+    });
+
+    it("still renders the gross figure unchanged beside Total Refunded", () => {
+      // currencyAmountFromCents (openstack-uicore-foundation) has no thousands
+      // separator — verified directly against the installed lib, so this is
+      // "$13297.00", not "$13,297.00". Out of scope to change here; decision 7
+      // only requires the gross figure itself stay untouched.
+      renderPage({ total_paid: 1329700, total_refunded: 100 });
+      expect(screen.getByText("$13297.00")).toBeInTheDocument();
+      expect(screen.getByText("$1.00")).toBeInTheDocument();
+    });
+
+    it("states the silent canceled default next to the status control", () => {
+      renderPage();
+      expect(
+        screen.getByText("sponsor_reports_page.filter_status_canceled_note")
+      ).toBeInTheDocument();
+    });
+  });
 });

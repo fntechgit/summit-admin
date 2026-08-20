@@ -16,7 +16,7 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import moment from "moment-timezone";
 import T from "i18n-react/dist/i18n-react";
-import { Alert, Box, Button } from "@mui/material";
+import { Alert, Box, Button, FormHelperText } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import DownloadIcon from "@mui/icons-material/Download";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
@@ -352,6 +352,11 @@ const PurchaseDetailsReportPage = ({
           options={statusSelectOptions}
           onChange={(e) => update({ status: e.target.value || undefined })}
         />
+        {/* The default excludes canceled orders at BOTH grains and nothing said so,
+            so "Any" silently means paid plus pending. */}
+        <FormHelperText>
+          {T.translate("sponsor_reports_page.filter_status_canceled_note")}
+        </FormHelperText>
       </Box>
       <Box sx={{ width: 200 }}>
         <MuiDropdown
