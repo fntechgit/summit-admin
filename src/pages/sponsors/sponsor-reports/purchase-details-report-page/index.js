@@ -56,6 +56,9 @@ import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 // backend query contract is untouched.
 const REPORT_DATE_TZ = "UTC";
 const REPORT_DATE_FORMAT = "YYYY-MM-DD";
+// Shared by the Purchase Status helper text and the aria-describedby that points
+// at it, so the two cannot drift apart.
+const STATUS_NOTE_ID = "pd-filter-status-note";
 // The uicore picker emits moment(0) (epoch) on a CLEAR, not null — treat that
 // sentinel as "no date" so clearing removes the filter instead of sending
 // date>=1970-01-01. This matches the house filter convention (`.unix() || null`
@@ -351,6 +354,11 @@ const PurchaseDetailsReportPage = ({
           value={draft.status || ""}
           options={statusSelectOptions}
           onChange={(e) => update({ status: e.target.value || undefined })}
+          // The note below is a sibling, not a FormControl child, so MUI cannot
+          // wire it up itself. MuiDropdown spreads unrecognised props onto the
+          // Select, so this reaches the rendered control and screen readers
+          // announce the note with it instead of only near it.
+          aria-describedby={STATUS_NOTE_ID}
         />
         {/* The default excludes canceled orders at BOTH grains and nothing said so,
             so "Any" silently means paid plus pending.
@@ -361,7 +369,7 @@ const PurchaseDetailsReportPage = ({
             child, it has no positioned ancestor and drifts to the initial
             containing block. Override back to static so it flows in normal
             layout right under the dropdown, in-flow (no overlap/spill). */}
-        <FormHelperText sx={{ position: "static" }}>
+        <FormHelperText id={STATUS_NOTE_ID} sx={{ position: "static" }}>
           {T.translate("sponsor_reports_page.filter_status_canceled_note")}
         </FormHelperText>
       </Box>

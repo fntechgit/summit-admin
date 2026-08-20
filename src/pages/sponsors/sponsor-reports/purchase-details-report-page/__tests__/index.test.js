@@ -641,5 +641,21 @@ describe("PurchaseDetailsReportPage", () => {
         screen.getByText("sponsor_reports_page.filter_status_canceled_note")
       ).toBeInTheDocument();
     });
+
+    it("associates that note with the status control for screen readers", () => {
+      // Rendering the note NEAR the control is not the same as announcing it
+      // WITH the control. The note is a sibling, not a FormControl child, so
+      // MUI cannot wire this up itself — assert the aria-describedby actually
+      // resolves to the note's id rather than trusting visual adjacency.
+      renderPage();
+      const control = screen.getByLabelText(
+        "sponsor_reports_page.filter_status"
+      );
+      const noteId = control.getAttribute("aria-describedby");
+      expect(noteId).toBeTruthy();
+      expect(document.getElementById(noteId)).toHaveTextContent(
+        "sponsor_reports_page.filter_status_canceled_note"
+      );
+    });
   });
 });
