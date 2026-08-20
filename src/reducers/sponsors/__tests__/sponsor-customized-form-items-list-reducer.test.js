@@ -63,13 +63,11 @@ describe("sponsorCustomizedFormItemsListReducer", () => {
       expect(result.currentItem.images).toEqual([
         {
           id: 10,
-          file_url: "https://cdn/a.png",
-          file_path: "https://cdn/a.png"
+          file_url: "https://cdn/a.png"
         },
         {
           id: 11,
-          file_url: "https://cdn/b.png",
-          file_path: "https://cdn/b.png"
+          file_url: "https://cdn/b.png"
         }
       ]);
     });

@@ -112,6 +112,7 @@ const sponsorCustomizedFormItemsListReducer = (
 
       const currentItem = {
         ...item,
+        images: item.images ?? [],
         meta_fields: (item.meta_fields ?? []).length > 0 ? item.meta_fields : []
       };
       return { ...state, currentItem };
