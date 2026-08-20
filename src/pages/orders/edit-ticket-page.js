@@ -17,7 +17,7 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Swal from "sweetalert2";
-import Table from "openstack-uicore-foundation/lib/components/table"
+import Table from "openstack-uicore-foundation/lib/components/table";
 import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
 import moment from "moment-timezone";
 import { getSummitById } from "../../actions/summit-actions";
@@ -48,7 +48,7 @@ import {
   clearBadgePrints
 } from "../../actions/badge-actions";
 import AuditLogs from "../../components/audit-logs";
-import Notes from "../../components/notes";
+import NotesPanel from "../../components/notes/notes-panel";
 import { deleteTicket } from "../../actions/attendee-actions";
 import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
 
@@ -69,7 +69,11 @@ const EditTicketPage = ({
   const [showRefundRejectModal, setShowRefundRejectModal] = useState(false);
   const [refundRejectNotes, setRefundRejectNotes] = useState("");
   const [printType, setPrintType] = useState(null);
-  const [showSection, setShowSection] = useState("main");
+  const [openSections, setOpenSections] = useState({
+    refund_requests: false,
+    admin_notes: false,
+    audit_log: false
+  });
 
   useEffect(() => {
     props.getBadgeFeatures();
@@ -243,10 +247,14 @@ const EditTicketPage = ({
   };
 
   const toggleSection = (section, ev) => {
-    const newShowSection = showSection === section ? "main" : section;
-    ev.preventDefault();
+    ev?.preventDefault();
+    setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
 
-    setShowSection(newShowSection);
+  const handleOpenNotes = () => {
+    setOpenSections((prev) =>
+      prev.admin_notes ? prev : { ...prev, admin_notes: true }
+    );
   };
 
   const twentychars = -20;
@@ -377,7 +385,7 @@ const EditTicketPage = ({
 
       {entity?.refund_requests?.length > 0 && (
         <Panel
-          show={showSection === "refund_requests"}
+          show={openSections.refund_requests}
           title={T.translate("edit_ticket.refund_requests")}
           handleClick={(ev) => toggleSection("refund_requests", ev)}
         >
@@ -450,13 +458,14 @@ const EditTicketPage = ({
       )}
 
       {entity?.id && entity?.owner?.id && (
-        <Panel
-          show={showSection === "admin_notes"}
-          title={T.translate("edit_ticket.admin_notes")}
-          handleClick={(ev) => toggleSection("admin_notes", ev)}
-        >
-          <Notes attendeeId={entity?.owner?.id} ticketId={entity.id} />
-        </Panel>
+        <NotesPanel
+          key={`${entity.owner.id}-${entity.id}`}
+          attendeeId={entity?.owner?.id}
+          ticketId={entity.id}
+          open={openSections.admin_notes}
+          onToggle={(ev) => toggleSection("admin_notes", ev)}
+          onOpen={handleOpenNotes}
+        />
       )}
       <br />
       <br />
@@ -501,7 +510,7 @@ const EditTicketPage = ({
       )}
       <br />
       <Panel
-        show={showSection === "audit_log"}
+        show={openSections.audit_log}
         title={T.translate("audit_log.title")}
         handleClick={(ev) => toggleSection("audit_log", ev)}
       >
