@@ -82,6 +82,7 @@ const mapMediaObject = (mediaObject) => {
     format: mediaObject.file_type?.allowed_extensions || "N/A",
     deadline,
     status: getStatus(mediaObject),
+    // TODO: type should come from API
     mu_type: mediaObject.file_type ? "file" : "text"
   };
 };

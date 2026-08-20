@@ -12,16 +12,11 @@
  * */
 
 import React, { useEffect, useState } from "react";
-import {
-  Button,
-  DialogActions,
-  DialogContent,
-  TextField,
-  Typography
-} from "@mui/material";
+import { TextField, Typography } from "@mui/material";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import CustomDialog from "openstack-uicore-foundation/lib/components/mui/custom-dialog";
+import { TEXT_MAX_LENGTH_1024 } from "../../../../../../../utils/constants";
 
 const TextValueDialog = ({
   name,
@@ -39,45 +34,31 @@ const TextValueDialog = ({
     }
   }, [open, value]);
 
-  const handleSubmit = () => {
-    onSubmit(text);
-  };
-
-  const handleClose = () => {
-    setText(value || "");
-    onClose();
-  };
-
   return (
     <CustomDialog
       title={T.translate("edit_sponsor.mu_tab.upload_input.enter_text")}
       open={open}
-      onClose={handleClose}
+      onClose={onClose}
+      primaryAction={{
+        label: T.translate("edit_sponsor.mu_tab.upload_input.save_answer"),
+        onClick: () => onSubmit(text).then(() => onClose()),
+        disabled: text === (value || "")
+      }}
     >
-      <DialogContent>
-        <Typography variant="body1" sx={{ mb: 2 }}>
-          {moduleName}
-        </Typography>
-        <TextField
-          id={`media_upload_${name}`}
-          name={name}
-          fullWidth
-          multiline
-          minRows={4}
-          value={text}
-          onChange={(ev) => setText(ev.target.value)}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button
-          onClick={handleSubmit}
-          fullWidth
-          disabled={text === (value || "")}
-          variant="contained"
-        >
-          {T.translate("edit_sponsor.mu_tab.upload_input.save_answer")}
-        </Button>
-      </DialogActions>
+      <Typography variant="body1" sx={{ mb: 2 }}>
+        {moduleName}
+      </Typography>
+      <TextField
+        id={`media_upload_${name}`}
+        name={name}
+        fullWidth
+        multiline
+        minRows={4}
+        value={text}
+        onChange={(ev) => setText(ev.target.value)}
+        inputProps={{ maxLength: TEXT_MAX_LENGTH_1024 }}
+        helperText={`${text.length}/${TEXT_MAX_LENGTH_1024}`}
+      />
     </CustomDialog>
   );
 };
