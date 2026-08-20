@@ -300,7 +300,6 @@ const SponsorMediaUploadTab = ({
           open={!!uploadModule}
           onClose={() => setUploadModule(null)}
           onSubmit={handleUploadText}
-          value={uploadModule?.media_upload?.value}
         />
       ) : (
         <UploadDialog

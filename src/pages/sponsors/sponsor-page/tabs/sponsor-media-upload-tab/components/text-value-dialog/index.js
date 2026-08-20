@@ -11,28 +11,15 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { TextField, Typography } from "@mui/material";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import CustomDialog from "openstack-uicore-foundation/lib/components/mui/custom-dialog";
 import { TEXT_MAX_LENGTH_1024 } from "../../../../../../../utils/constants";
 
-const TextValueDialog = ({
-  name,
-  moduleName,
-  value,
-  open,
-  onClose,
-  onSubmit
-}) => {
-  const [text, setText] = useState(value || "");
-
-  useEffect(() => {
-    if (open) {
-      setText(value || "");
-    }
-  }, [open, value]);
+const TextValueDialog = ({ name, moduleName, open, onClose, onSubmit }) => {
+  const [text, setText] = useState("");
 
   return (
     <CustomDialog
@@ -42,7 +29,7 @@ const TextValueDialog = ({
       primaryAction={{
         label: T.translate("edit_sponsor.mu_tab.upload_input.save_answer"),
         onClick: () => onSubmit(text).then(() => onClose()),
-        disabled: text === (value || "")
+        disabled: text === ""
       }}
     >
       <Typography variant="body1" sx={{ mb: 2 }}>
@@ -67,14 +54,12 @@ TextValueDialog.propTypes = {
   open: PropTypes.bool.isRequired,
   name: PropTypes.string.isRequired,
   moduleName: PropTypes.string,
-  value: PropTypes.string,
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired
 };
 
 TextValueDialog.defaultProps = {
-  moduleName: "",
-  value: null
+  moduleName: ""
 };
 
 export default TextValueDialog;

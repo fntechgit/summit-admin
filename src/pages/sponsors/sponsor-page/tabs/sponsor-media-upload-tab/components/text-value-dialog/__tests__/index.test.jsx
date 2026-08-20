@@ -11,7 +11,7 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 
 describe("TextValueDialog", () => {
   const onClose = jest.fn();
-  const onSubmit = jest.fn();
+  const onSubmit = jest.fn(() => Promise.resolve());
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,35 +57,6 @@ describe("TextValueDialog", () => {
     await userEvent.click(submitButton);
 
     expect(onSubmit).toHaveBeenCalledWith("Hello sponsor");
-  });
-
-  it("pre-fills the text field with the stored value and keeps submit disabled until it changes", async () => {
-    render(
-      <TextValueDialog
-        name="module_1"
-        moduleName="Company Bio"
-        value="Existing answer"
-        open
-        onClose={onClose}
-        onSubmit={onSubmit}
-      />
-    );
-
-    const textbox = screen.getByRole("textbox");
-    const submitButton = screen.getByRole("button", {
-      name: "edit_sponsor.mu_tab.upload_input.save_answer"
-    });
-
-    expect(textbox).toHaveValue("Existing answer");
-    expect(submitButton).toBeDisabled();
-
-    await userEvent.type(textbox, " updated");
-
-    expect(submitButton).toBeEnabled();
-
-    await userEvent.click(submitButton);
-
-    expect(onSubmit).toHaveBeenCalledWith("Existing answer updated");
   });
 
   it("calls onClose when closing", async () => {
