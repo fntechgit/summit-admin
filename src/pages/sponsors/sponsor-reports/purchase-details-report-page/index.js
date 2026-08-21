@@ -352,14 +352,8 @@ const PurchaseDetailsReportPage = ({
 
   const extraControls = (draft, update) => (
     <>
-      {/* The default excludes canceled orders at BOTH grains and nothing said so,
-          so "Any" silently means paid plus pending. Carried as the repo's
-          hover-info idiom (fa-info-circle + title) rather than helper text
-          under the control, so this filter stays the same height as its
-          siblings and the row keeps its alignment. The icon is aria-hidden
-          like every other use of it, so the same copy is repeated in a
-          visually-hidden span that the Select points at via aria-describedby;
-          otherwise the note would be sighted-only. */}
+      {/* Icon is aria-hidden, so the same copy lives in a visually-hidden span
+          the Select points at via aria-describedby. */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, width: 200 }}>
         <MuiDropdown
           id="pd-filter-status"
@@ -382,13 +376,8 @@ const PurchaseDetailsReportPage = ({
           {T.translate(statusNoteKey(view))}
         </Box>
       </Box>
-      {/* The second cancellation axis, which the status dropdown cannot reach:
-          `status==Canceled` resolves to the PARENT order's status at line grain,
-          so it can never surface a canceled line inside a Paid order. Kept on
-          every grain rather than the line views only, so the control does not
-          appear and vanish as the user toggles views (the filter object is
-          carried across the switch, and a hidden control holding a live filter
-          is the silent-filter bug this report just fixed elsewhere). */}
+      {/* Separate axis: status==Canceled resolves to the PARENT order's status at
+          line grain, so it can never reveal a canceled line inside a Paid order. */}
       <FormControlLabel
         control={
           <Checkbox

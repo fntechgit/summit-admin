@@ -116,7 +116,8 @@ const accumulateRow = (itemMap, row) => {
     sponsorBooth: row.sponsor_booth ?? null,
     checkoutAt: row.purchase?.checkout_at ?? null,
     rateName: row.rate_name ?? "",
-    status: row.purchase?.status ?? "",
+    // the line's own state: a soft-canceled line leaves its parent order Paid
+    status: row.is_canceled ? "Canceled" : row.purchase?.status ?? "",
     qty: row.quantity ?? 0,
     lineTotalCents: row.line_total ?? null,
     isCanceled: Boolean(row.is_canceled),
@@ -462,21 +463,10 @@ const ItemTable = ({
                               </TableCell>
                               <TableCell>{c.rateName}</TableCell>
                               <TableCell>
-                                {/* the line's own state — its parent order can be Paid
-                                    while this specific line is canceled */}
-                                {c.isCanceled ? (
-                                  <StatusPill
-                                    status="Canceled"
-                                    label={T.translate(
-                                      "sponsor_reports_page.status_canceled"
-                                    )}
-                                  />
-                                ) : (
-                                  <StatusPill
-                                    status={c.status}
-                                    label={c.status}
-                                  />
-                                )}
+                                <StatusPill
+                                  status={c.status}
+                                  label={c.status}
+                                />
                               </TableCell>
                               <TableCell align="right">{c.qty}</TableCell>
                               <TableCell align="right">

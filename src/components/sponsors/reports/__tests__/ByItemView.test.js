@@ -147,6 +147,8 @@ describe("groupLinesBySponsorItem", () => {
   });
 
   it("passes canceled lines through as contributors with isCanceled", () => {
+    // status carries the LINE's own state, resolved here rather than in the
+    // render: the fixture's parent order is Paid while this line is canceled.
     const rows = [line({ is_canceled: true })];
     const [group] = groupLinesBySponsorItem(rows);
     const [contrib] = group.items[0].contributors;
@@ -158,7 +160,7 @@ describe("groupLinesBySponsorItem", () => {
       sponsorBooth: null,
       checkoutAt: 1735000000,
       rateName: "Early",
-      status: "Paid",
+      status: "Canceled",
       qty: 2,
       lineTotalCents: 100000,
       isCanceled: true,
@@ -427,7 +429,7 @@ describe("ByItemView", () => {
     expect(screen.queryByText("OCP-1")).not.toBeInTheDocument();
   });
 
-  it("renders the line's own state in the drill-down, not the parent order's", () => {
+  it("renders the contributor status it is given", () => {
     // Distinct epochs (not the same value for both fields) so a swap or a
     // missing cell can't hide behind a shared string.
     const synced = 1755561600; // 2025-08-19
@@ -445,10 +447,12 @@ describe("ByItemView", () => {
                   addOnName: null,
                   checkoutAt: null,
                   rateName: "Early",
-                  status: "Paid", // parent order is Paid...
+                  // groupLinesByItem resolves the line's own state before this
+                  // point (covered above), so the cell renders what it is handed.
+                  status: "Canceled",
                   qty: 1,
                   lineTotalCents: 1000,
-                  isCanceled: true, // ...but THIS line is canceled
+                  isCanceled: true,
                   syncedAt: synced,
                   sourceUpdatedAt: sourceUpdated
                 }
@@ -459,9 +463,7 @@ describe("ByItemView", () => {
       ]
     });
     fireEvent.click(screen.getByText("AV1")); // expand the item
-    expect(
-      screen.getByText("sponsor_reports_page.status_canceled")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Canceled")).toBeInTheDocument();
     const syncedText = moment.unix(synced).utc().format("YYYY-MM-DD h:mm A");
     const sourceUpdatedText = moment
       .unix(sourceUpdated)
