@@ -1,15 +1,17 @@
 import React from "react";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import flushPromises from "flush-promises";
 import SponsorFormItemListPage from "../index";
 import { renderWithRedux } from "../../../../utils/test-utils";
 
 jest.mock("../../../../actions/sponsor-forms-actions", () => ({
   ...jest.requireActual("../../../../actions/sponsor-forms-actions"),
   getSponsorFormItems: jest.fn(() => () => Promise.resolve()),
+  getSponsorFormItem: jest.fn(() => () => Promise.resolve()),
   updateSponsorFormItem: jest.fn(() => () => Promise.resolve()),
-  saveSponsorFormItem: jest.fn(() => () => Promise.resolve()),
-  addInventoryItems: jest.fn(() => () => Promise.resolve())
+  addInventoryItems: jest.fn(() => () => Promise.resolve()),
+  removeItemFile: jest.fn(() => () => Promise.resolve(true))
 }));
 
 jest.mock("../../../../actions/inventory-item-actions", () => ({
@@ -27,26 +29,24 @@ jest.mock(
     }
 );
 
-// the real popup renders a formik form; here we only care about what the page
-// hands to the save action, so the popup is reduced to a button that submits
-// the values a user would have left in the form
-let mockPopupSubmitValues = null;
-
 jest.mock(
   "../components/sponsor-form-item-popup",
   () =>
-    function MockItemPopup({ onSave }) {
+    function MockSponsorFormItemPopup({ onRemoveImage }) {
       return (
-        <button onClick={() => onSave(mockPopupSubmitValues)}>mock-save</button>
+        <button onClick={() => onRemoveImage(999)}>
+          mock-remove-item-image
+        </button>
       );
     }
 );
 
 const {
   getSponsorFormItems,
+  getSponsorFormItem,
   updateSponsorFormItem,
-  saveSponsorFormItem,
-  addInventoryItems
+  addInventoryItems,
+  removeItemFile
 } = require("../../../../actions/sponsor-forms-actions");
 
 const buildItem = (id) => ({
@@ -140,49 +140,52 @@ describe("SponsorFormItemListPage inline cell edit", () => {
   });
 });
 
-describe("SponsorFormItemListPage image removal", () => {
-  const savedImages = [
-    { id: 166, file_url: "https://cdn.example.com/images/a.jpeg" },
-    { id: 167, file_url: "https://cdn.example.com/images/b.jpeg" }
-  ];
-
-  const openPopupAndSave = async (values) => {
-    mockPopupSubmitValues = values;
-    const user = userEvent.setup();
-    await user.click(screen.getByText("sponsor_form_item_list.add_item"));
-    await user.click(screen.getByText("mock-save"));
-  };
-
+describe("SponsorFormItemListPage image removal guard", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPopupSubmitValues = null;
   });
 
-  it("tells the save action which saved images the user removed from the form", async () => {
-    renderPage({ ...buildItem(1), images: savedImages });
+  const openItemPopup = async () => {
+    const user = userEvent.setup();
+    await user.click(screen.getByText("sponsor_form_item_list.add_item"));
+    await user.click(screen.getByText("mock-remove-item-image"));
+  };
 
-    const values = { ...buildItem(1), images: [savedImages[1]] };
-    await openPopupAndSave(values);
+  it.each([
+    ["an unsaved entity (no id)", {}, null],
+    ["a persisted item, delete succeeds", { id: 42 }, true],
+    ["a persisted item, delete fails", { id: 42 }, false]
+  ])(
+    "removing an image for %s",
+    async (_label, currentItem, deleteSucceeds) => {
+      if (deleteSucceeds !== null) {
+        removeItemFile.mockImplementation(
+          () => () => Promise.resolve(deleteSucceeds)
+        );
+      }
 
-    expect(updateSponsorFormItem).toHaveBeenCalledWith("FORM1", values, [166]);
-  });
+      renderPage(currentItem);
 
-  it("reports no removal when the form still holds every saved image", async () => {
-    renderPage({ ...buildItem(1), images: savedImages });
+      await openItemPopup();
 
-    const values = { ...buildItem(1), images: savedImages };
-    await openPopupAndSave(values);
+      if (deleteSucceeds === null) {
+        expect(removeItemFile).not.toHaveBeenCalled();
+        return;
+      }
 
-    expect(updateSponsorFormItem).toHaveBeenCalledWith("FORM1", values, []);
-  });
+      expect(removeItemFile).toHaveBeenCalledWith("FORM1", currentItem.id, 999);
 
-  it("creates a brand new item without any removal argument", async () => {
-    renderPage({ ...buildItem(1), images: savedImages });
-
-    const values = { code: "NEW", name: "New item", images: [] };
-    await openPopupAndSave(values);
-
-    expect(saveSponsorFormItem).toHaveBeenCalledWith("FORM1", values);
-    expect(updateSponsorFormItem).not.toHaveBeenCalled();
-  });
+      if (deleteSucceeds) {
+        await flushPromises();
+        expect(getSponsorFormItem).not.toHaveBeenCalled();
+      } else {
+        await waitFor(() =>
+          expect(getSponsorFormItem).toHaveBeenCalledWith(
+            "FORM1",
+            currentItem.id
+          )
+        );
+      }
+    }
+  );
 });

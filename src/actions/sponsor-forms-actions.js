@@ -31,6 +31,7 @@ import {
   getAccessTokenSafely,
   normalizeSelectAllField
 } from "../utils/methods";
+import { saveFiles, deleteFile } from "./inventory-shared-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
@@ -97,7 +98,10 @@ export const SPONSOR_CUSTOMIZED_FORM_ITEMS_ADDED =
   "SPONSOR_CUSTOMIZED_FORM_ITEMS_ADDED";
 export const RESET_SPONSOR_FORM_MANAGED_ITEM =
   "RESET_SPONSOR_FORM_MANAGED_ITEM";
-
+export const SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED =
+  "SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED";
+export const SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED =
+  "SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED";
 // ITEMS
 export const REQUEST_SPONSOR_FORM_ITEMS = "REQUEST_SPONSOR_FORM_ITEMS";
 export const RECEIVE_SPONSOR_FORM_ITEMS = "RECEIVE_SPONSOR_FORM_ITEMS";
@@ -105,8 +109,8 @@ export const RECEIVE_SPONSOR_FORM_ITEM = "RECEIVE_SPONSOR_FORM_ITEM";
 export const SPONSOR_FORM_ITEM_UPDATED = "SPONSOR_FORM_ITEM_UPDATED";
 export const RESET_SPONSOR_FORM_ITEM = "RESET_SPONSOR_FORM_ITEM";
 export const SPONSOR_FORM_ITEM_DELETED = "SPONSOR_FORM_ITEM_DELETED";
-export const SPONSOR_FORM_ITEM_IMAGES_UPDATED =
-  "SPONSOR_FORM_ITEM_IMAGES_UPDATED";
+export const SPONSOR_FORM_ITEM_FILE_DELETED = "SPONSOR_FORM_ITEM_FILE_DELETED";
+export const SPONSOR_FORM_ITEM_IMAGE_ADDED = "SPONSOR_FORM_ITEM_IMAGE_ADDED";
 export const SPONSOR_FORM_ITEMS_ADDED = "SPONSOR_FORM_ITEMS_ADDED";
 export const SPONSOR_FORM_ITEM_ARCHIVED = "SPONSOR_FORM_ITEM_ARCHIVED";
 export const SPONSOR_FORM_ITEM_UNARCHIVED = "SPONSOR_FORM_ITEM_UNARCHIVED";
@@ -849,7 +853,8 @@ export const getSponsorCustomizedFormItems =
     const params = {
       page,
       per_page: perPage,
-      access_token: accessToken
+      access_token: accessToken,
+      expand: "images"
     };
 
     filter.push(`is_archived==${showArchived ? 1 : 0}`);
@@ -1198,7 +1203,7 @@ export const getSponsorFormItem =
       createAction(RECEIVE_SPONSOR_FORM_ITEM),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${itemId}`,
       authErrorHandler
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -1231,69 +1236,20 @@ export const deleteSponsorFormItem =
       });
   };
 
-const saveItemImages =
-  (formId, formItemId, images) => async (dispatch, getState) => {
+export const removeItemFile =
+  (formId, formItemId, fileId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
-    const accessToken = await getAccessTokenSafely();
-    const params = { access_token: accessToken };
 
-    const promises = images.map((file) => {
-      if (file.id) {
-        return putRequest(
-          null,
-          createAction(SPONSOR_FORM_ITEM_IMAGES_UPDATED),
-          `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images/${file.id}`,
-          file,
-          authErrorHandler,
-          file
-        )(params)(dispatch);
-      }
-      return postRequest(
-        null,
-        createAction(SPONSOR_FORM_ITEM_IMAGES_UPDATED),
-        `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images`,
-        file,
-        authErrorHandler,
-        file
-      )(params)(dispatch);
-    });
+    const settings = {
+      url: `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images`,
+      deletedActionName: SPONSOR_FORM_ITEM_FILE_DELETED,
+      payload: { itemId: formItemId },
+      errorHandler: snackbarErrorHandler
+    };
 
-    return Promise.all(promises);
+    return deleteFile(fileId, settings)(dispatch);
   };
-
-const deleteItemImages =
-  (formId, formItemId, imageIds) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const { currentSummit } = currentSummitState;
-    const accessToken = await getAccessTokenSafely();
-    const params = { access_token: accessToken };
-
-    return Promise.all(
-      imageIds.map((imageId) =>
-        deleteRequest(
-          null,
-          createAction(SPONSOR_FORM_ITEM_IMAGES_UPDATED)({ imageId }),
-          `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images/${imageId}`,
-          null,
-          authErrorHandler
-        )(params)(dispatch)
-      )
-    );
-  };
-
-// only freshly uploaded files carry a file_path; already saved ones come back
-// from the API as { id, file_url } and must not be re-sent
-const getNewImages = (entity) =>
-  entity.images?.filter((img) => img.file_path) ?? [];
-
-// images the user removed from the form but that still exist server side
-export const getRemovedImageIds = (savedImages = [], formImages = []) => {
-  const keptIds = formImages.map((img) => img.id).filter(Boolean);
-  return savedImages
-    .map((img) => img.id)
-    .filter((id) => id && !keptIds.includes(id));
-};
 
 export const saveSponsorFormItem =
   (formId, entity) => async (dispatch, getState) => {
@@ -1304,7 +1260,8 @@ export const saveSponsorFormItem =
     dispatch(startLoading());
 
     const params = {
-      access_token: accessToken
+      access_token: accessToken,
+      expand: "images"
     };
 
     const normalizedEntity = normalizeItem(entity);
@@ -1316,37 +1273,27 @@ export const saveSponsorFormItem =
       normalizedEntity,
       snackbarErrorHandler
     )(params)(dispatch)
-      .then(({ response }) => {
-        const promises = [Promise.resolve(0)];
-        const newImages = getNewImages(entity);
-
-        if (newImages.length > 0) {
-          const savingImages = saveItemImages(
-            formId,
-            response.id,
-            newImages
-          )(dispatch, getState);
-
-          promises.push(savingImages);
-        }
-
-        return Promise.all(promises).then(() => {
+      .then(({ response }) =>
+        saveNewItemImages(
+          formId,
+          response.id,
+          entity.images
+        )(dispatch, getState).then(() => {
           dispatch(
             snackbarSuccessHandler({
               title: T.translate("general.success"),
               html: T.translate("sponsor_form_item_list.edit_item.created")
             })
           );
-        });
-      })
+        })
+      )
       .finally(() => {
         dispatch(stopLoading());
       });
   };
 
 export const updateSponsorFormItem =
-  (formId, entity, removedImageIds = []) =>
-  async (dispatch, getState) => {
+  (formId, entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
@@ -1354,7 +1301,8 @@ export const updateSponsorFormItem =
     dispatch(startLoading());
 
     const params = {
-      access_token: accessToken
+      access_token: accessToken,
+      expand: "images"
     };
 
     const normalizedEntity = normalizeItem(entity);
@@ -1366,39 +1314,20 @@ export const updateSponsorFormItem =
       normalizedEntity,
       snackbarErrorHandler
     )(params)(dispatch)
-      .then(() => {
-        const promises = [Promise.resolve(0)];
-        const newImages = getNewImages(entity);
-
-        if (newImages.length > 0) {
-          const savingImages = saveItemImages(
-            formId,
-            entity.id,
-            newImages
-          )(dispatch, getState);
-
-          promises.push(savingImages);
-        }
-
-        if (removedImageIds.length > 0) {
-          const deletingImages = deleteItemImages(
-            formId,
-            entity.id,
-            removedImageIds
-          )(dispatch, getState);
-
-          promises.push(deletingImages);
-        }
-
-        return Promise.all(promises).then(() => {
+      .then(() =>
+        saveNewItemImages(
+          formId,
+          entity.id,
+          entity.images
+        )(dispatch, getState).then(() => {
           dispatch(
             snackbarSuccessHandler({
               title: T.translate("general.success"),
               html: T.translate("sponsor_form_item_list.edit_item.updated")
             })
           );
-        });
-      })
+        })
+      )
       .catch((err) => {
         throw err;
       })
@@ -1492,9 +1421,11 @@ const normalizeItem = (entity) => {
     normalizedEntity.meta_fields = meta_fields.filter((mf) => !!mf.name);
   }
 
-  // images are persisted through /items/{id}/images. Sending them here would
-  // write them a second time (as rows whose file is never copied to storage),
-  // and sending an empty array would wipe the ones already saved.
+  // Images are never round-tripped inline: the item add/update endpoint's
+  // nested-images path only clones the file name (no S3 copy) and, on
+  // update, replaces the whole collection - wiping cloned-from-inventory
+  // images whose id it can't preserve. New uploads are persisted separately
+  // via saveNewItemImages once the item itself is saved.
   delete normalizedEntity.images;
 
   if (quantity_limit_per_show === "")
@@ -1505,6 +1436,26 @@ const normalizeItem = (entity) => {
 
   return normalizedEntity;
 };
+
+const saveNewItemImages =
+  (formId, formItemId, images = []) =>
+  async (dispatch, getState) => {
+    const newImages = images.filter((img) => img.file_path);
+
+    if (newImages.length === 0) return Promise.resolve();
+
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+
+    const settings = {
+      url: `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images`,
+      addedActionName: SPONSOR_FORM_ITEM_IMAGE_ADDED,
+      updatedActionName: SPONSOR_FORM_ITEM_IMAGE_ADDED,
+      payload: { itemId: formItemId }
+    };
+
+    return saveFiles(newImages, settings)(dispatch);
+  };
 
 export const addInventoryItems =
   (formId, itemIds) => async (dispatch, getState) => {
@@ -1555,6 +1506,7 @@ export const saveSponsorFormManagedItem =
     dispatch(startLoading());
 
     const params = {
+      expand: "images",
       access_token: accessToken
     };
 
@@ -1569,16 +1521,22 @@ export const saveSponsorFormManagedItem =
         snackbarErrorHandler,
         entity
       )(params)(dispatch)
-        .then(() => {
-          dispatch(
-            snackbarSuccessHandler({
-              title: T.translate("general.success"),
-              html: T.translate(
-                "edit_sponsor.forms_tab.form_manage_items.item_updated"
-              )
-            })
-          );
-        })
+        .then(() =>
+          saveNewManagedItemImages(
+            formId,
+            entity.id,
+            entity.images
+          )(dispatch, getState).then(() => {
+            dispatch(
+              snackbarSuccessHandler({
+                title: T.translate("general.success"),
+                html: T.translate(
+                  "edit_sponsor.forms_tab.form_manage_items.item_updated"
+                )
+              })
+            );
+          })
+        )
         .finally(() => {
           dispatch(stopLoading());
         });
@@ -1600,9 +1558,15 @@ export const saveSponsorFormManagedItem =
       snackbarErrorHandler,
       entity
     )(params)(dispatch)
-      .then(() => {
-        dispatch(snackbarSuccessHandler(successMessage));
-      })
+      .then(({ response }) =>
+        saveNewManagedItemImages(
+          formId,
+          response.id,
+          entity.images
+        )(dispatch, getState).then(() => {
+          dispatch(snackbarSuccessHandler(successMessage));
+        })
+      )
       .finally(() => {
         dispatch(stopLoading());
       });
@@ -1617,12 +1581,38 @@ const normalizeManagedItem = (entity) => {
   normalizedEntity.meta_fields = normalizedEntity.meta_fields?.filter(
     (mf) => mf.name
   );
-  normalizedEntity.images = normalizedEntity.images?.filter(
-    (img) => img.file_path
-  );
+
+  // Images are never round-tripped inline here either - see normalizeItem's
+  // comment on the sibling (non-customized) save path. New uploads are
+  // persisted separately via saveNewManagedItemImages once the item itself
+  // is saved.
+  delete normalizedEntity.images;
 
   return normalizedEntity;
 };
+
+const saveNewManagedItemImages =
+  (formId, formItemId, images = []) =>
+  async (dispatch, getState) => {
+    const newImages = images.filter((img) => img.file_path);
+
+    if (newImages.length === 0) return Promise.resolve();
+
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+
+    const settings = {
+      url: `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${formItemId}/images`,
+      addedActionName: SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED,
+      updatedActionName: SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED,
+      payload: { itemId: formItemId }
+    };
+
+    return saveFiles(newImages, settings)(dispatch);
+  };
 
 export const deleteSponsorFormManagedItem =
   (formId, itemId) => async (dispatch, getState) => {
@@ -1680,7 +1670,7 @@ export const getSponsorFormManagedItem =
       createAction(RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEM),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${itemId}`,
       authErrorHandler
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -1797,4 +1787,22 @@ export const unarchiveSponsorCustomizedFormItem =
       })
       .catch(() => {})
       .finally(() => dispatch(stopLoading()));
+  };
+
+export const removeSponsorCustomizedFormItemImages =
+  (formId, formItemId, fileId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+
+    const settings = {
+      url: `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${formItemId}/images`,
+      deletedActionName: SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED,
+      payload: { itemId: formItemId },
+      errorHandler: snackbarErrorHandler
+    };
+
+    return deleteFile(fileId, settings)(dispatch);
   };
