@@ -19,7 +19,9 @@ import {
   removeSponsorCustomizedFormItemImages,
   saveSponsorFormItem,
   updateSponsorFormItem,
-  saveSponsorFormManagedItem
+  saveSponsorFormManagedItem,
+  getSponsorFormItem,
+  getSponsorFormManagedItem
 } from "../sponsor-forms-actions";
 import * as methods from "../../utils/methods";
 
@@ -673,6 +675,65 @@ describe("Sponsor Forms Actions", () => {
         expect.any(Function),
         { file_path: "data:image/png;base64,DDD" }
       );
+    });
+  });
+
+  describe("getSponsorFormItem", () => {
+    const middlewares = [thunk];
+    const mockStore = configureStore(middlewares);
+
+    beforeEach(() => {
+      jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("still dispatches STOP_LOADING when the request fails", async () => {
+      getRequest.mockImplementation(
+        () => () => () => Promise.reject(new Error("API error"))
+      );
+
+      const store = mockStore({
+        currentSummitState: { currentSummit: { id: 42 } }
+      });
+
+      await store.dispatch(getSponsorFormItem(7, 100)).catch(() => {});
+      await flushPromises();
+
+      const actionTypes = store.getActions().map((a) => a.type);
+      expect(actionTypes).toContain("STOP_LOADING");
+    });
+  });
+
+  describe("getSponsorFormManagedItem", () => {
+    const middlewares = [thunk];
+    const mockStore = configureStore(middlewares);
+
+    beforeEach(() => {
+      jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("still dispatches STOP_LOADING when the request fails", async () => {
+      getRequest.mockImplementation(
+        () => () => () => Promise.reject(new Error("API error"))
+      );
+
+      const store = mockStore({
+        currentSummitState: { currentSummit: { id: 42 } },
+        currentSponsorState: { entity: { id: 7 } }
+      });
+
+      await store.dispatch(getSponsorFormManagedItem(9, 100)).catch(() => {});
+      await flushPromises();
+
+      const actionTypes = store.getActions().map((a) => a.type);
+      expect(actionTypes).toContain("STOP_LOADING");
     });
   });
 });
