@@ -153,7 +153,7 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
 
     case UPDATE_SPONSOR:
-      return { ...state, entity: { ...payload }, errors: {} };
+      return { ...state, entity: { ...state.entity, ...payload }, errors: {} };
     case SPONSOR_ADDED:
     case RECEIVE_SPONSOR: {
       const entity = { ...payload.response };
@@ -175,8 +175,13 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         entity: { ...state.entity, ...entity }
       };
     }
-    case SPONSOR_UPDATED:
-      return state;
+    case SPONSOR_UPDATED: {
+      const entity = { ...payload.response };
+      return {
+        ...state,
+        entity: { ...state.entity, ...entity }
+      };
+    }
     case MEMBER_ADDED_TO_SPONSOR: {
       const { member } = payload;
       return {

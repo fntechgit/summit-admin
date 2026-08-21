@@ -2433,6 +2433,7 @@
     "general_information": "General Information",
     "sponsor_name": "Sponsor Name",
     "sponsor_address": "Sponsor Address",
+    "published": "Is Published?",
     "add_tier": "Add Tier",
     "add_sponsor": "Add Sponsor",
     "tiers": "Tiers",
