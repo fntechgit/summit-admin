@@ -1,15 +1,17 @@
 import React from "react";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import flushPromises from "flush-promises";
 import SponsorFormItemListPage from "../index";
 import { renderWithRedux } from "../../../../utils/test-utils";
 
 jest.mock("../../../../actions/sponsor-forms-actions", () => ({
   ...jest.requireActual("../../../../actions/sponsor-forms-actions"),
   getSponsorFormItems: jest.fn(() => () => Promise.resolve()),
+  getSponsorFormItem: jest.fn(() => () => Promise.resolve()),
   updateSponsorFormItem: jest.fn(() => () => Promise.resolve()),
   addInventoryItems: jest.fn(() => () => Promise.resolve()),
-  removeItemFile: jest.fn(() => () => Promise.resolve())
+  removeItemFile: jest.fn(() => () => Promise.resolve(true))
 }));
 
 jest.mock("../../../../actions/inventory-item-actions", () => ({
@@ -41,6 +43,7 @@ jest.mock(
 
 const {
   getSponsorFormItems,
+  getSponsorFormItem,
   updateSponsorFormItem,
   addInventoryItems,
   removeItemFile
@@ -150,18 +153,38 @@ describe("SponsorFormItemListPage image removal guard", () => {
 
   it.each([
     ["an unsaved entity (no id)", {}, null],
-    ["a persisted item", { id: 42 }, ["FORM1", 42, 999]]
+    ["a persisted item, delete succeeds", { id: 42 }, true],
+    ["a persisted item, delete fails", { id: 42 }, false]
   ])(
-    "calling removeItemFile for %s",
-    async (_label, currentItem, expectedCall) => {
+    "removing an image for %s",
+    async (_label, currentItem, deleteSucceeds) => {
+      if (deleteSucceeds !== null) {
+        removeItemFile.mockImplementation(
+          () => () => Promise.resolve(deleteSucceeds)
+        );
+      }
+
       renderPage(currentItem);
 
       await openItemPopup();
 
-      if (expectedCall) {
-        expect(removeItemFile).toHaveBeenCalledWith(...expectedCall);
-      } else {
+      if (deleteSucceeds === null) {
         expect(removeItemFile).not.toHaveBeenCalled();
+        return;
+      }
+
+      expect(removeItemFile).toHaveBeenCalledWith("FORM1", currentItem.id, 999);
+
+      if (deleteSucceeds) {
+        await flushPromises();
+        expect(getSponsorFormItem).not.toHaveBeenCalled();
+      } else {
+        await waitFor(() =>
+          expect(getSponsorFormItem).toHaveBeenCalledWith(
+            "FORM1",
+            currentItem.id
+          )
+        );
       }
     }
   );

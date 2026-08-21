@@ -1,6 +1,7 @@
 import React from "react";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import flushPromises from "flush-promises";
 import FormTemplateItemListPage from "../form-template-item-list-page";
 import { renderWithRedux } from "../../../../utils/test-utils";
 import {
@@ -120,10 +121,17 @@ describe("FormTemplateItemListPage", () => {
 
     test.each([
       ["an unsaved entity (no id)", {}, null],
-      ["a persisted item", { id: 55 }, [formTemplateId, 55, 999]]
+      ["a persisted item, delete succeeds", { id: 55 }, true],
+      ["a persisted item, delete fails", { id: 55 }, false]
     ])(
-      "calling deleteItemImage for %s",
-      async (_label, currentFormTemplateItem, expectedCall) => {
+      "removing an image for %s",
+      async (_label, currentFormTemplateItem, deleteSucceeds) => {
+        if (deleteSucceeds !== null) {
+          deleteItemImage.mockImplementation(
+            () => () => Promise.resolve(deleteSucceeds)
+          );
+        }
+
         renderWithRedux(
           <FormTemplateItemListPage formTemplateId={formTemplateId} />,
           {
@@ -136,10 +144,28 @@ describe("FormTemplateItemListPage", () => {
 
         await openItemDialog();
 
-        if (expectedCall) {
-          expect(deleteItemImage).toHaveBeenCalledWith(...expectedCall);
-        } else {
+        if (deleteSucceeds === null) {
           expect(deleteItemImage).not.toHaveBeenCalled();
+          return;
+        }
+
+        expect(deleteItemImage).toHaveBeenCalledWith(
+          formTemplateId,
+          currentFormTemplateItem.id,
+          999
+        );
+
+        if (deleteSucceeds) {
+          await flushPromises();
+          expect(getFormTemplateItem).toHaveBeenCalledTimes(1);
+        } else {
+          await waitFor(() =>
+            expect(getFormTemplateItem).toHaveBeenCalledTimes(2)
+          );
+          expect(getFormTemplateItem).toHaveBeenLastCalledWith(
+            formTemplateId,
+            currentFormTemplateItem.id
+          );
         }
       }
     );

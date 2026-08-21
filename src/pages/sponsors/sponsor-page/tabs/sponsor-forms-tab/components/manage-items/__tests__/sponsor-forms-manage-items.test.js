@@ -1,6 +1,7 @@
 import React from "react";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import flushPromises from "flush-promises";
 import SponsorFormsManageItems from "../sponsor-forms-manage-items";
 import { renderWithRedux } from "../../../../../../../../utils/test-utils";
 import {
@@ -81,10 +82,17 @@ describe("SponsorFormsManageItems image removal guard", () => {
 
   test.each([
     ["an unsaved entity (no id)", {}, null],
-    ["a persisted item", { id: 33 }, ["FORM1", 33, 999]]
+    ["a persisted item, delete succeeds", { id: 33 }, true],
+    ["a persisted item, delete fails", { id: 33 }, false]
   ])(
-    "calling removeSponsorCustomizedFormItemImages for %s",
-    async (_label, currentItem, expectedCall) => {
+    "removing an image for %s",
+    async (_label, currentItem, deleteSucceeds) => {
+      if (deleteSucceeds !== null) {
+        removeSponsorCustomizedFormItemImages.mockImplementation(
+          () => () => Promise.resolve(deleteSucceeds)
+        );
+      }
+
       renderWithRedux(
         <SponsorFormsManageItems match={{ params: { form_id: "FORM1" } }} />,
         {
@@ -97,12 +105,28 @@ describe("SponsorFormsManageItems image removal guard", () => {
 
       await openItemDialog();
 
-      if (expectedCall) {
-        expect(removeSponsorCustomizedFormItemImages).toHaveBeenCalledWith(
-          ...expectedCall
-        );
-      } else {
+      if (deleteSucceeds === null) {
         expect(removeSponsorCustomizedFormItemImages).not.toHaveBeenCalled();
+        return;
+      }
+
+      expect(removeSponsorCustomizedFormItemImages).toHaveBeenCalledWith(
+        "FORM1",
+        currentItem.id,
+        999
+      );
+
+      if (deleteSucceeds) {
+        await flushPromises();
+        expect(getSponsorFormManagedItem).toHaveBeenCalledTimes(1);
+      } else {
+        await waitFor(() =>
+          expect(getSponsorFormManagedItem).toHaveBeenCalledTimes(2)
+        );
+        expect(getSponsorFormManagedItem).toHaveBeenLastCalledWith(
+          "FORM1",
+          currentItem.id
+        );
       }
     }
   );

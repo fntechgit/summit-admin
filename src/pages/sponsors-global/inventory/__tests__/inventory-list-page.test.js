@@ -1,6 +1,7 @@
 import React from "react";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import flushPromises from "flush-promises";
 import InventoryListPage from "../inventory-list-page";
 import { renderWithRedux } from "../../../../utils/test-utils";
 import {
@@ -75,10 +76,17 @@ describe("InventoryListPage image removal guard", () => {
 
   test.each([
     ["an unsaved entity (no id)", {}, null],
-    ["a persisted item", { id: 77 }, [77, 999]]
+    ["a persisted item, delete succeeds", { id: 77 }, true],
+    ["a persisted item, delete fails", { id: 77 }, false]
   ])(
-    "calling deleteInventoryItemImage for %s",
-    async (_label, currentInventoryItem, expectedCall) => {
+    "removing an image for %s",
+    async (_label, currentInventoryItem, deleteSucceeds) => {
+      if (deleteSucceeds !== null) {
+        deleteInventoryItemImage.mockImplementation(
+          () => () => Promise.resolve(deleteSucceeds)
+        );
+      }
+
       renderWithRedux(<InventoryListPage />, {
         initialState: buildInitialState({
           inventoryItems: [{ id: 1, code: "A", name: "Item A" }],
@@ -88,10 +96,24 @@ describe("InventoryListPage image removal guard", () => {
 
       await openItemDialog();
 
-      if (expectedCall) {
-        expect(deleteInventoryItemImage).toHaveBeenCalledWith(...expectedCall);
-      } else {
+      if (deleteSucceeds === null) {
         expect(deleteInventoryItemImage).not.toHaveBeenCalled();
+        return;
+      }
+
+      expect(deleteInventoryItemImage).toHaveBeenCalledWith(
+        currentInventoryItem.id,
+        999
+      );
+
+      if (deleteSucceeds) {
+        await flushPromises();
+        expect(getInventoryItem).toHaveBeenCalledTimes(1);
+      } else {
+        await waitFor(() => expect(getInventoryItem).toHaveBeenCalledTimes(2));
+        expect(getInventoryItem).toHaveBeenLastCalledWith(
+          currentInventoryItem.id
+        );
       }
     }
   );
