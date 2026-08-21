@@ -746,16 +746,21 @@ export const updateSponsorOrder =
 const normalizeSponsor = (entity) => {
   const normalizedEntity = { ...entity };
 
-  normalizedEntity.company_id = normalizedEntity.company?.id || 0;
-  normalizedEntity.sponsorship_id = normalizedEntity.sponsorship?.id || 0;
-  normalizedEntity.featured_event_id =
-    normalizedEntity.featured_event && normalizedEntity.featured_event.id
-      ? normalizedEntity.featured_event.id
-      : 0;
+  if (normalizedEntity.hasOwnProperty("company")) {
+    normalizedEntity.company_id = normalizedEntity.company?.id || 0;
+    delete normalizedEntity.company;
+  }
 
-  delete normalizedEntity.featured_event;
-  delete normalizedEntity.company;
-  delete normalizedEntity.sponsorship;
+  if (normalizedEntity.hasOwnProperty("sponsorship")) {
+    normalizedEntity.sponsorship_id = normalizedEntity.sponsorship?.id || 0;
+    delete normalizedEntity.sponsorship;
+  }
+
+  if (normalizedEntity.hasOwnProperty("featured_event")) {
+    normalizedEntity.featured_event_id =
+      normalizedEntity.featured_event?.id || 0;
+    delete normalizedEntity.featured_event;
+  }
 
   return normalizedEntity;
 };
