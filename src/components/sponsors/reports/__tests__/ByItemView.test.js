@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom";
 import React from "react";
+import moment from "moment-timezone";
 import { render, screen, fireEvent, within } from "@testing-library/react";
 import ByItemView, {
   groupLinesByItem,
@@ -146,6 +147,8 @@ describe("groupLinesBySponsorItem", () => {
   });
 
   it("passes canceled lines through as contributors with isCanceled", () => {
+    // status carries the LINE's own state, resolved here rather than in the
+    // render: the fixture's parent order is Paid while this line is canceled.
     const rows = [line({ is_canceled: true })];
     const [group] = groupLinesBySponsorItem(rows);
     const [contrib] = group.items[0].contributors;
@@ -157,11 +160,22 @@ describe("groupLinesBySponsorItem", () => {
       sponsorBooth: null,
       checkoutAt: 1735000000,
       rateName: "Early",
-      status: "Paid",
+      status: "Canceled",
       qty: 2,
       lineTotalCents: 100000,
-      isCanceled: true
+      isCanceled: true,
+      syncedAt: null,
+      sourceUpdatedAt: null
     });
+  });
+
+  it("carries line-grain freshness into the contributor", () => {
+    const [g] = groupLinesBySponsorItem([
+      line({ synced_at: 1755561600, source_updated_at: 1755558000 })
+    ]);
+    const [c] = g.items[0].contributors;
+    expect(c.syncedAt).toBe(1755561600);
+    expect(c.sourceUpdatedAt).toBe(1755558000);
   });
 
   it("EXCLUDES canceled lines from qty/money/purchasedCount/Σqty but keeps them as contributors", () => {
@@ -415,6 +429,52 @@ describe("ByItemView", () => {
     expect(screen.queryByText("OCP-1")).not.toBeInTheDocument();
   });
 
+  it("renders the contributor status it is given", () => {
+    // Distinct epochs (not the same value for both fields) so a swap or a
+    // missing cell can't hide behind a shared string.
+    const synced = 1755561600; // 2025-08-19
+    const sourceUpdated = 1755648000; // 2025-08-20
+    renderView({
+      groups: [
+        group({
+          items: [
+            item({
+              contributors: [
+                {
+                  sponsorName: "FNTECH",
+                  number: "OCP-1",
+                  formCode: "AV",
+                  addOnName: null,
+                  checkoutAt: null,
+                  rateName: "Early",
+                  // groupLinesByItem resolves the line's own state before this
+                  // point (covered above), so the cell renders what it is handed.
+                  status: "Canceled",
+                  qty: 1,
+                  lineTotalCents: 1000,
+                  isCanceled: true,
+                  syncedAt: synced,
+                  sourceUpdatedAt: sourceUpdated
+                }
+              ]
+            })
+          ]
+        })
+      ]
+    });
+    fireEvent.click(screen.getByText("AV1")); // expand the item
+    expect(screen.getByText("Canceled")).toBeInTheDocument();
+    const syncedText = moment.unix(synced).utc().format("YYYY-MM-DD h:mm A");
+    const sourceUpdatedText = moment
+      .unix(sourceUpdated)
+      .utc()
+      .format("YYYY-MM-DD h:mm A");
+    const row = screen.getByText("OCP-1").closest("tr");
+    const cells = within(row).getAllByRole("cell");
+    expect(cells[cells.length - 2]).toHaveTextContent(syncedText);
+    expect(cells[cells.length - 1]).toHaveTextContent(sourceUpdatedText);
+  });
+
   it("expand button toggles the drill-down and reflects aria-expanded", () => {
     renderView();
     const toggle = screen.getByRole("button", {
@@ -481,6 +541,23 @@ describe("ByItemView", () => {
     fireEvent.mouseDown(screen.getByRole("combobox"));
     fireEvent.click(screen.getByRole("option", { name: "20" }));
     expect(onPerPageChange).toHaveBeenCalledWith(20);
+  });
+});
+
+describe("byitem_sponsor_items_chip copy", () => {
+  it("does not describe canceled orders as purchased", () => {
+    // The chip read "13 of 13 items purchased" over a set of deliberately-filtered
+    // CANCELED orders. Under Jest the chip renders as its i18n key, so the
+    // wording is only checkable in the catalog — and only by exact equality:
+    // the template's own {purchased} interpolation key contains the substring
+    // "purchased", so a substring/regex guard either self-matches the
+    // placeholder or is too loose to pin the actual sentence (e.g. it would
+    // let "{purchased} of {items} purchased" or "...items shipped" through).
+    // eslint-disable-next-line global-require
+    const en = require("../../../../i18n/en.json");
+    expect(en.sponsor_reports_page.byitem_sponsor_items_chip).toBe(
+      "{purchased} of {items} items with purchases"
+    );
   });
 });
 
@@ -842,6 +919,31 @@ describe("ByItemView all-sponsors layout", () => {
     );
     expect(onLayoutChange).not.toHaveBeenCalled();
   });
+
+  // A positional last-two-cells check (as used elsewhere for the freshness
+  // columns) only proves a cell isn't missing — it says nothing about the
+  // HEADER row, which is a separate array (CONTRIB_HEADERS, optionally
+  // prepended with col_sponsor). If the two desync by one, every column right
+  // of the break silently misaligns and stays green. Assert exact
+  // header/cell cardinality on the NESTED contributor table specifically —
+  // the outer item table has its own separate ITEM_HEADERS and expansion
+  // colSpan that must not be counted here.
+  it.each([
+    ["by-sponsor", 10, () => renderView()],
+    ["all-sponsors", 11, () => renderAll()]
+  ])(
+    "the %s drill-down has %i headers matching that many cells per row",
+    (_name, count, mount) => {
+      mount();
+      fireEvent.click(screen.getByText("AV1"));
+      const contribTable = screen.getAllByRole("table").at(-1);
+      expect(within(contribTable).getAllByRole("columnheader")).toHaveLength(
+        count
+      );
+      const row = within(contribTable).getByText("OCP-1").closest("tr");
+      expect(within(row).getAllByRole("cell")).toHaveLength(count);
+    }
+  );
 });
 
 describe("Destination booth fallback (By Item drill-down)", () => {

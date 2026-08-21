@@ -83,10 +83,16 @@ const bucketLinesBySponsor = (rows = []) => {
       groups.push({
         sponsorId: id,
         sponsorName: row.sponsor?.name ?? "",
-        lines: []
+        lines: [],
+        // Canceled lines still RENDER (struck through) but must not be counted —
+        // the chip means live lines, matching the By Item units chip on the same
+        // screen, which already excludes them.
+        liveLineCount: 0
       });
     }
-    groups[indexByKey.get(key)].lines.push(row);
+    const group = groups[indexByKey.get(key)];
+    group.lines.push(row);
+    if (!row.is_canceled) group.liveLineCount += 1;
   });
   return groups;
 };
@@ -102,7 +108,9 @@ const HEADERS = [
   { key: "col_quantity", align: "right" },
   { key: "col_used_rate" },
   { key: "col_status" },
-  { key: "col_line_total", align: "right" }
+  { key: "col_line_total", align: "right" },
+  { key: "col_synced_at" },
+  { key: "col_source_updated" }
 ];
 
 const LinesManifestView = ({
@@ -126,7 +134,7 @@ const LinesManifestView = ({
               size="small"
               sx={{ ml: 1.5 }}
               label={T.translate("sponsor_reports_page.lines_count", {
-                count: group.lines.length
+                count: group.liveLineCount
               })}
             />
           </AccordionSummary>
@@ -178,15 +186,34 @@ const LinesManifestView = ({
                       <TableCell align="right">{line.quantity}</TableCell>
                       <TableCell>{line.rate_name}</TableCell>
                       <TableCell>
-                        <StatusPill
-                          status={line.purchase?.status}
-                          label={line.purchase?.status}
-                        />
+                        {/* The LINE's state, not the parent order's. A soft-canceled
+                            line leaves its order Paid, so rendering purchase.status
+                            printed "Paid" on a dead row — and the strikethrough that
+                            was the only other signal does not survive CSV export. */}
+                        {line.is_canceled ? (
+                          <StatusPill
+                            status="Canceled"
+                            label={T.translate(
+                              "sponsor_reports_page.status_canceled"
+                            )}
+                          />
+                        ) : (
+                          <StatusPill
+                            status={line.purchase?.status}
+                            label={line.purchase?.status}
+                          />
+                        )}
                       </TableCell>
                       <TableCell align="right">
                         {line.line_total == null
                           ? "—"
                           : currencyAmountFromCents(line.line_total)}
+                      </TableCell>
+                      <TableCell>
+                        {formatCheckoutTime(line.synced_at)}
+                      </TableCell>
+                      <TableCell>
+                        {formatCheckoutTime(line.source_updated_at)}
                       </TableCell>
                     </TableRow>
                   ))}

@@ -16,7 +16,8 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import moment from "moment-timezone";
 import T from "i18n-react/dist/i18n-react";
-import { Alert, Box, Button } from "@mui/material";
+import { Alert, Box, Button, Checkbox, FormControlLabel } from "@mui/material";
+import { visuallyHidden } from "@mui/utils";
 import PrintIcon from "@mui/icons-material/Print";
 import DownloadIcon from "@mui/icons-material/Download";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
@@ -56,6 +57,17 @@ import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 // backend query contract is untouched.
 const REPORT_DATE_TZ = "UTC";
 const REPORT_DATE_FORMAT = "YYYY-MM-DD";
+// Shared by the visually-hidden copy of the Purchase Status note and the
+// aria-describedby that points at it, so the two cannot drift apart.
+const STATUS_NOTE_ID = "pd-filter-status-note";
+// The canceled-default note is grain-aware: the order grain hides canceled
+// ORDERS, while the line grains additionally hide individually canceled LINES
+// (a separate axis — a soft-canceled line sits inside a Paid order). One string
+// for both would be wrong on one of them.
+const statusNoteKey = (view) =>
+  view === "orders"
+    ? "sponsor_reports_page.filter_status_info"
+    : "sponsor_reports_page.filter_status_info_lines";
 // The uicore picker emits moment(0) (epoch) on a CLEAR, not null — treat that
 // sentinel as "no date" so clearing removes the filter instead of sending
 // date>=1970-01-01. This matches the house filter convention (`.unix() || null`
@@ -340,7 +352,9 @@ const PurchaseDetailsReportPage = ({
 
   const extraControls = (draft, update) => (
     <>
-      <Box sx={{ width: 200 }}>
+      {/* Icon is aria-hidden, so the same copy lives in a visually-hidden span
+          the Select points at via aria-describedby. */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, width: 200 }}>
         <MuiDropdown
           id="pd-filter-status"
           size="small"
@@ -351,8 +365,32 @@ const PurchaseDetailsReportPage = ({
           value={draft.status || ""}
           options={statusSelectOptions}
           onChange={(e) => update({ status: e.target.value || undefined })}
+          aria-describedby={STATUS_NOTE_ID}
         />
+        <i
+          className="fa fa-info-circle"
+          aria-hidden="true"
+          title={T.translate(statusNoteKey(view))}
+        />
+        <Box component="span" id={STATUS_NOTE_ID} sx={visuallyHidden}>
+          {T.translate(statusNoteKey(view))}
+        </Box>
       </Box>
+      {/* Separate axis: status==Canceled resolves to the PARENT order's status at
+          line grain, so it can never reveal a canceled line inside a Paid order. */}
+      <FormControlLabel
+        control={
+          <Checkbox
+            id="pd-filter-show-canceled"
+            size="small"
+            checked={Boolean(draft.showCanceled)}
+            onChange={(e) =>
+              update({ showCanceled: e.target.checked || undefined })
+            }
+          />
+        }
+        label={T.translate("sponsor_reports_page.filter_show_canceled")}
+      />
       <Box sx={{ width: 200 }}>
         <MuiDropdown
           id="pd-filter-form"
@@ -366,30 +404,28 @@ const PurchaseDetailsReportPage = ({
           onChange={(e) => update({ formCode: e.target.value || undefined })}
         />
       </Box>
-      {/* Payment Method is an order-level attribute; only the orders endpoint
-          filters on it (the lines filter set omits payment_method), so surface
-          it in the orders view only — mirrors search being view-specific. */}
-      {view === "orders" && (
-        <Box sx={{ width: 200 }}>
-          <MuiDropdown
-            id="pd-filter-payment-method"
-            size="small"
-            placeholder={T.translate(
+      {/* Payment Method is an order-level attribute, but the lines endpoint filters
+          on it through the parent hop, so it applies at every grain — the control
+          stays visible and the selection survives a view switch. */}
+      <Box sx={{ width: 200 }}>
+        <MuiDropdown
+          id="pd-filter-payment-method"
+          size="small"
+          placeholder={T.translate(
+            "sponsor_reports_page.filter_payment_method"
+          )}
+          SelectDisplayProps={{
+            "aria-label": T.translate(
               "sponsor_reports_page.filter_payment_method"
-            )}
-            SelectDisplayProps={{
-              "aria-label": T.translate(
-                "sponsor_reports_page.filter_payment_method"
-              )
-            }}
-            value={draft.paymentMethod || ""}
-            options={paymentMethodSelectOptions}
-            onChange={(e) =>
-              update({ paymentMethod: e.target.value || undefined })
-            }
-          />
-        </Box>
-      )}
+            )
+          }}
+          value={draft.paymentMethod || ""}
+          options={paymentMethodSelectOptions}
+          onChange={(e) =>
+            update({ paymentMethod: e.target.value || undefined })
+          }
+        />
+      </Box>
       {/* Date pickers keep draft.dateFrom/dateTo as "YYYY-MM-DD"; buildQuery
           expands them to UTC ISO datetimes. Convert the picker's moment back to
           "YYYY-MM-DD" at the update boundary so the query contract is unchanged. */}

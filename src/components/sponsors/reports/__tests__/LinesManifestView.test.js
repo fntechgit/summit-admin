@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom";
 import React from "react";
+import moment from "moment-timezone";
 import { render, screen, within } from "@testing-library/react";
 import LinesManifestView from "../LinesManifestView";
 
@@ -54,6 +55,67 @@ describe("LinesManifestView", () => {
     expect(screen.getByText("AV2")).toBeInTheDocument();
     const row = screen.getByText("AV2").closest("tr");
     expect(row).toHaveAttribute("data-canceled", "true");
+  });
+
+  it("renders the LINE's own state, not the parent order's status", () => {
+    // line() defaults to a Paid parent: the exact trap. A soft-canceled line leaves
+    // its order Paid, so rendering purchase.status printed "Paid" on a dead row.
+    renderView({ rows: [line({ is_canceled: true })] });
+    expect(
+      screen.getByText("sponsor_reports_page.status_canceled")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Paid")).not.toBeInTheDocument();
+  });
+
+  it("renders both freshness timestamps, in the row's final two cells", () => {
+    // formatCheckoutTime is moment.unix(v).utc().format("YYYY-MM-DD h:mm A").
+    // Distinct values (not the same epoch for both fields) so a swap or a
+    // missing cell can't hide behind a shared string.
+    const synced = 1755561600; // 2025-08-19
+    const sourceUpdated = 1755648000; // 2025-08-20
+    renderView({
+      rows: [line({ synced_at: synced, source_updated_at: sourceUpdated })]
+    });
+    const syncedText = moment.unix(synced).utc().format("YYYY-MM-DD h:mm A");
+    const sourceUpdatedText = moment
+      .unix(sourceUpdated)
+      .utc()
+      .format("YYYY-MM-DD h:mm A");
+    const row = screen.getByText("AV1").closest("tr");
+    const cells = within(row).getAllByRole("cell");
+    expect(cells[cells.length - 2]).toHaveTextContent(syncedText);
+    expect(cells[cells.length - 1]).toHaveTextContent(sourceUpdatedText);
+  });
+
+  it("counts only live lines per sponsor group", () => {
+    // Canceled lines still RENDER (struck through); the chip means LIVE lines,
+    // matching the By Item units chip on the same screen. The module's local
+    // i18n mock interpolates {count}, so the chip text carries the number.
+    renderView({
+      rows: [
+        line({ is_canceled: false }),
+        line({ is_canceled: true, item_code: "AV2" })
+      ]
+    });
+    // header row + the 2 line rows, exactly — proves neither line was dropped.
+    expect(screen.getAllByRole("row")).toHaveLength(3);
+    const canceledRow = screen.getByText("AV2").closest("tr");
+    expect(canceledRow).toHaveAttribute("data-canceled", "true");
+    expect(
+      screen.getByText("sponsor_reports_page.lines_count:1")
+    ).toBeInTheDocument();
+  });
+
+  // A positional last-two-cells check (as used above for the freshness
+  // columns) only proves a cell isn't missing — it says nothing about the
+  // HEADER row, which is a separate array (HEADERS). If the two desync by
+  // one, every column right of the break silently misaligns and stays
+  // green. Assert exact header/cell cardinality directly.
+  it("has exactly 13 column headers matching 13 cells per row", () => {
+    renderView();
+    expect(screen.getAllByRole("columnheader")).toHaveLength(13);
+    const row = screen.getByText("AV1").closest("tr");
+    expect(within(row).getAllByRole("cell")).toHaveLength(13);
   });
 
   // Sponsor bucketing (formerly bucketLinesBySponsor, now a private helper).
@@ -136,5 +198,19 @@ describe("Destination booth fallback", () => {
     expect(
       screen.getByText("sponsor_reports_page.destination_booth_fallback")
     ).toBeInTheDocument();
+  });
+});
+
+describe("lines_count copy", () => {
+  it("says the count is of LIVE lines, not all rendered lines", () => {
+    // The chip is fed liveLineCount, but canceled lines still RENDER, so a group
+    // showing two rows reports one. The copy has to say which number it is.
+    // This module's i18n mock renders the chip from the KEY and COUNT only, so
+    // the count assertion above is value-independent: the English could regress
+    // to "{count} lines" and every DOM test would still pass. Pin it in the
+    // catalog by exact equality, mirroring the By Item chip's copy test.
+    // eslint-disable-next-line global-require
+    const en = require("../../../../i18n/en.json");
+    expect(en.sponsor_reports_page.lines_count).toBe("{count} live lines");
   });
 });

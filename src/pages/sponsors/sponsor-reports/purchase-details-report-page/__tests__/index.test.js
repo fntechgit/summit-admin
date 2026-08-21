@@ -373,6 +373,17 @@ describe("PurchaseDetailsReportPage", () => {
     );
   });
 
+  it("keeps the Payment Method control visible on the line views", async () => {
+    renderPage();
+    await act(async () => {
+      fireEvent.click(screen.getByText("sponsor_reports_page.view_line_items"));
+    });
+    // aria-label is T.translate(...), which renders as the raw KEY under Jest
+    expect(
+      screen.getByLabelText("sponsor_reports_page.filter_payment_method")
+    ).toBeInTheDocument();
+  });
+
   it("Line Items CSV export passes the lines slice filters to exportPurchaseDetailsLinesCsv", async () => {
     // Export reads the applied filters from the lines slice (recorded on REQUEST
     // in production); seed them directly since the mock store is inert.
@@ -575,7 +586,7 @@ describe("PurchaseDetailsReportPage", () => {
     });
   });
 
-  it("hides the Payment Method filter in the By Item view (lines filter set omits it)", async () => {
+  it("keeps the Payment Method filter visible in the By Item view (lines endpoint honors it via the parent hop)", async () => {
     const history = createMemoryHistory({ initialEntries: [PAGE_URL] });
     renderWithRedux(
       <Router history={history}>
@@ -587,9 +598,10 @@ describe("PurchaseDetailsReportPage", () => {
     await act(async () => {
       fireEvent.click(screen.getByText("sponsor_reports_page.view_by_item"));
     });
+    // aria-label is T.translate(...), which renders as the raw KEY under Jest
     expect(
-      document.querySelector("#pd-filter-payment-method")
-    ).not.toBeInTheDocument();
+      screen.getByLabelText("sponsor_reports_page.filter_payment_method")
+    ).toBeInTheDocument();
   });
 
   describe("validation error — snackbar hook", () => {
@@ -597,6 +609,114 @@ describe("PurchaseDetailsReportPage", () => {
       renderPageWithValidationError({ message: "Too many filters" });
       await act(async () => {});
       expect(mockErrorMessage).toHaveBeenCalledWith("Too many filters");
+    });
+  });
+
+  describe("self-describing chrome — gross Total Paid label + canceled default note", () => {
+    it("labels Total Paid as gross", () => {
+      // Decision 7 keeps the figure gross; the label is the whole fix. Under Jest the
+      // tile renders "sponsor_reports_page.total_paid" (the i18n mock is the identity
+      // function), so the catalog value is the only place this copy is checkable —
+      // and exact equality (not a substring match) is the only assertion that can
+      // both catch a wrong replacement string and notice "Total Paid" going missing.
+      const en = require("../../../../../i18n/en.json");
+      expect(en.sponsor_reports_page.total_paid).toBe(
+        "Total Paid (before refunds)"
+      );
+    });
+
+    it("still renders the gross figure unchanged beside Total Refunded", () => {
+      // currencyAmountFromCents (openstack-uicore-foundation) has no thousands
+      // separator — verified directly against the installed lib, so this is
+      // "$13297.00", not "$13,297.00". Out of scope to change here; decision 7
+      // only requires the gross figure itself stay untouched.
+      renderPage({ total_paid: 1329700, total_refunded: 100 });
+      expect(screen.getByText("$13297.00")).toBeInTheDocument();
+      expect(screen.getByText("$1.00")).toBeInTheDocument();
+    });
+
+    it("states the silent canceled default on the status control's info icon", () => {
+      // Carried as the repo's hover-info idiom rather than helper text under the
+      // control: helper text made this filter twice the height of its siblings,
+      // and the center-aligned filter row then rendered it out of line with
+      // them. jsdom has no layout, so the alignment itself is not assertable —
+      // what IS assertable is that the note is no longer a block under the
+      // control, which is the thing that changed the height.
+      renderPage();
+      const icon = document.querySelector("i.fa-info-circle");
+      expect(icon).toBeInTheDocument();
+      expect(icon).toHaveAttribute(
+        "title",
+        "sponsor_reports_page.filter_status_info"
+      );
+    });
+
+    it("offers Show canceled as its own control, not derived from the status", () => {
+      // The status dropdown cannot reach the line-level axis: `status==Canceled`
+      // resolves to the PARENT order's status server-side, so it can never
+      // surface a canceled line inside a Paid order. The checkbox is the only
+      // way to ask for those rows.
+      renderPage();
+      expect(
+        screen.getByLabelText("sponsor_reports_page.filter_show_canceled")
+      ).toBeInTheDocument();
+    });
+
+    it("applies showCanceled with no status selected", async () => {
+      renderPage();
+      await act(async () => {});
+      getPurchaseDetailsReport.mockClear();
+
+      await act(async () => {
+        fireEvent.click(
+          screen.getByLabelText("sponsor_reports_page.filter_show_canceled")
+        );
+      });
+      await act(async () => {
+        fireEvent.click(screen.getByText("sponsor_reports_page.apply"));
+      });
+
+      const [[calledFilters]] = getPurchaseDetailsReport.mock.calls;
+      expect(calledFilters).toMatchObject({ showCanceled: true });
+      // No status clause rides along — that is the whole point of the axis.
+      expect(calledFilters.status).toBeUndefined();
+    });
+
+    it("describes the extra line-level axis on the line views only", async () => {
+      // The order grain hides canceled ORDERS; the line grains additionally hide
+      // individually canceled LINES. One string for both is wrong on one of them.
+      renderPage();
+      await act(async () => {});
+      expect(document.querySelector("i.fa-info-circle")).toHaveAttribute(
+        "title",
+        "sponsor_reports_page.filter_status_info"
+      );
+
+      await act(async () => {
+        fireEvent.click(
+          screen.getByText("sponsor_reports_page.view_line_items")
+        );
+      });
+      expect(document.querySelector("i.fa-info-circle")).toHaveAttribute(
+        "title",
+        "sponsor_reports_page.filter_status_info_lines"
+      );
+    });
+
+    it("associates that note with the status control for screen readers", () => {
+      // Rendering the note NEAR the control is not the same as announcing it
+      // WITH the control. The note is a sibling, not a FormControl child, so
+      // MUI cannot wire this up itself — assert the aria-describedby actually
+      // resolves to the note's id rather than trusting visual adjacency.
+      renderPage();
+      const control = screen.getByLabelText(
+        "sponsor_reports_page.filter_status"
+      );
+      const noteId = control.getAttribute("aria-describedby");
+      expect(noteId).toBeTruthy();
+      expect(document.getElementById(noteId)).toHaveTextContent(
+        "sponsor_reports_page.filter_status_info"
+      );
     });
   });
 });
