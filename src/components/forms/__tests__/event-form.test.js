@@ -414,6 +414,15 @@ describe("EventForm", () => {
     it("announces the deadline on the collapsed Materials panel title", () => {
       renderEventForm({ entity: grantedEntity });
 
+      // renderEventForm leaves the panel open. Collapse it again: the header
+      // reading without expanding is the whole point of it, so asserting while
+      // expanded passes even when the title is gated on showSection. Asserting
+      // the body is unmounted keeps it that way.
+      fireEvent.click(
+        screen.getByText(/^edit_event\.materials/, { selector: ".panel-title" })
+      );
+
+      expect(document.querySelector("#materials .panel-body")).toBeNull();
       expect(
         screen.getByText("edit_event.materials_reopened", {
           selector: ".panel-title"
