@@ -1,13 +1,7 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Box,
-  Button,
-  DialogActions,
-  DialogContent,
-  Typography
-} from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import CustomDialog from "openstack-uicore-foundation/lib/components/mui/custom-dialog";
 import { MILLISECONDS_IN_SECOND } from "../../../../../../../utils/constants";
 
@@ -31,33 +25,31 @@ const TextPreviewModal = ({ title, open, onClose, value }) => {
   };
 
   return (
-    <CustomDialog title={title} open={open} onClose={onClose}>
-      <DialogContent>
-        <Box
+    <CustomDialog
+      title={title}
+      open={open}
+      onClose={onClose}
+      primaryAction={{ label: copyLabel, onClick: handleCopy }}
+    >
+      <Box
+        sx={{
+          minHeight: 200,
+          p: 2,
+          border: "1px solid",
+          borderColor: "grey.300",
+          borderRadius: 1
+        }}
+      >
+        <Typography
+          variant="body2"
           sx={{
-            minHeight: 200,
-            p: 2,
-            border: "1px solid",
-            borderColor: "grey.300",
-            borderRadius: 1
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word"
           }}
         >
-          <Typography
-            variant="body2"
-            sx={{
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word"
-            }}
-          >
-            {value}
-          </Typography>
-        </Box>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleCopy} fullWidth variant="contained">
-          {copyLabel}
-        </Button>
-      </DialogActions>
+          {value}
+        </Typography>
+      </Box>
     </CustomDialog>
   );
 };

@@ -69,13 +69,12 @@ const SponsorMediaUploadTab = ({
     setUploadModule(item);
   };
 
-  const handleUploadFile = (file) => {
+  const handleUploadFile = (file) =>
     uploadFileForSponsorMU(uploadModule.page_id, uploadModule.id, file).then(
       () => {
         setUploadModule(null);
       }
     );
-  };
 
   const handleUploadText = (text) =>
     uploadTextForSponsorMU(uploadModule.page_id, uploadModule.id, text).then(

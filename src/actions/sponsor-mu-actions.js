@@ -231,7 +231,9 @@ export const removeTextForSponsorMU =
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/available-pages/${pageId}/modules/${moduleId}/text`,
       null,
       snackbarErrorHandler
-    )(params)(dispatch).finally(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .catch(() => {})
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
