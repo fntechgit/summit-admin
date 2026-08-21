@@ -178,3 +178,62 @@ export const removeFileForSponsorMU =
       dispatch(stopLoading());
     });
   };
+
+export const uploadTextForSponsorMU =
+  (pageId, moduleId, text) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const { entity: sponsor } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return putRequest(
+      null,
+      createAction("DUMMY_ACTION"),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/available-pages/${pageId}/modules/${moduleId}/text`,
+      { value: text },
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(({ response }) => {
+        dispatch(
+          createAction(SPONSOR_MEDIA_UPLOAD_FILE_UPLOADED)({
+            ...response,
+            moduleId
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+export const removeTextForSponsorMU =
+  (pageId, moduleId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const { entity: sponsor } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return deleteRequest(
+      null,
+      createAction(SPONSOR_MEDIA_UPLOAD_FILE_DELETED)({ moduleId }),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/available-pages/${pageId}/modules/${moduleId}/text`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .catch(() => {})
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };

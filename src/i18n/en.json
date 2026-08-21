@@ -2719,6 +2719,7 @@
       "media_upload": "media upload",
       "sponsor_request": "Sponsor Specific Request",
       "general_request": "General Media Request",
+      "type": "Type",
       "add_on": "Add-on",
       "max_size": "Max Size",
       "format": "Format",
@@ -2726,7 +2727,9 @@
       "status": "Status",
       "upload_input": {
         "complete": "Complete",
-        "upload_file": "Upload file"
+        "upload_file": "Upload file",
+        "enter_text": "Enter text",
+        "save_answer": "Save Answer"
       }
     },
     "placeholders": {
