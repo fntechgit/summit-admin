@@ -12,24 +12,14 @@
  * */
 
 import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  IconButton,
-  Typography
-} from "@mui/material";
+import { Box, Divider, IconButton, Typography } from "@mui/material";
 import PropTypes from "prop-types";
 import UploadInputV3 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v3";
+import CustomDialog from "openstack-uicore-foundation/lib/components/mui/custom-dialog";
 import T from "i18n-react/dist/i18n-react";
-import CloseIcon from "@mui/icons-material/Close";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import DialogActions from "@mui/material/DialogActions";
 
 const MAX_PAGE_MODULE_UPLOAD_QTY = 1;
 
@@ -90,9 +80,7 @@ const UploadDialog = ({
     }
   };
 
-  const handleUpload = () => {
-    onUpload(uploadedFile);
-  };
+  const handleUpload = () => onUpload(uploadedFile);
 
   const handleRemove = () => {
     if (onRemove) {
@@ -108,62 +96,43 @@ const UploadDialog = ({
   const canAddMore = () => (value?.length || 0) < maxFiles;
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        {T.translate("edit_sponsor.mu_tab.upload_input.upload_file")}
-      </DialogTitle>
-      <IconButton
-        aria-label="close"
-        onClick={handleClose}
-        sx={(theme) => ({
-          position: "absolute",
-          right: 8,
-          top: 8,
-          color: theme.palette.grey[500]
-        })}
-      >
-        <CloseIcon />
-      </IconButton>
-      <Divider />
-      <DialogContent>
-        <Typography variant="body1" sx={{ mb: 2 }}>
-          {fileMeta.name}
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 2, color: "text.secondary" }}>
-          {fileMeta.description}
-        </Typography>
-        {value ? (
-          <>
-            <Divider sx={{ marginLeft: -2, marginRight: -2, mb: 2 }} />
-            <CurrentFile file={value} onRemove={handleRemove} />
-          </>
-        ) : (
-          <UploadInputV3
-            id={`media_upload_${name}`}
-            name={name}
-            onUploadComplete={setUploadedFile}
-            value={[]}
-            mediaType={mediaType}
-            onRemove={() => setUploadedFile(null)}
-            postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
-            djsConfig={{ withCredentials: true }}
-            maxFiles={maxFiles}
-            canAdd={canAddMore()}
-            parallelChunkUploads
-          />
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button
-          onClick={handleUpload}
-          fullWidth
-          disabled={!uploadedFile}
-          variant="contained"
-        >
-          {T.translate("edit_sponsor.mu_tab.upload_input.upload_file")}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <CustomDialog
+      title={T.translate("edit_sponsor.mu_tab.upload_input.upload_file")}
+      open={open}
+      onClose={handleClose}
+      primaryAction={{
+        label: T.translate("edit_sponsor.mu_tab.upload_input.upload_file"),
+        onClick: handleUpload,
+        disabled: !uploadedFile
+      }}
+    >
+      <Typography variant="body1" sx={{ mb: 2 }}>
+        {fileMeta.name}
+      </Typography>
+      <Typography variant="body2" sx={{ mb: 2, color: "text.secondary" }}>
+        {fileMeta.description}
+      </Typography>
+      {value ? (
+        <>
+          <Divider sx={{ marginLeft: -2, marginRight: -2, mb: 2 }} />
+          <CurrentFile file={value} onRemove={handleRemove} />
+        </>
+      ) : (
+        <UploadInputV3
+          id={`media_upload_${name}`}
+          name={name}
+          onUploadComplete={setUploadedFile}
+          value={[]}
+          mediaType={mediaType}
+          onRemove={() => setUploadedFile(null)}
+          postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
+          djsConfig={{ withCredentials: true }}
+          maxFiles={maxFiles}
+          canAdd={canAddMore()}
+          parallelChunkUploads
+        />
+      )}
+    </CustomDialog>
   );
 };
 

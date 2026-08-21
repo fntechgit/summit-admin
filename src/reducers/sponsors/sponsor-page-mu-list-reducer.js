@@ -81,7 +81,9 @@ const mapMediaObject = (mediaObject) => {
     max_size: `${bytesToMb(mediaObject.max_file_size)} MB`,
     format: mediaObject.file_type?.allowed_extensions || "N/A",
     deadline,
-    status: getStatus(mediaObject)
+    status: getStatus(mediaObject),
+    // TODO: type should come from API
+    mu_type: mediaObject.file_type ? "file" : "text"
   };
 };
 

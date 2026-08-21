@@ -1,15 +1,8 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Box,
-  Typography,
-  IconButton
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+import { Box, Typography } from "@mui/material";
+import CustomDialog from "openstack-uicore-foundation/lib/components/mui/custom-dialog";
 import BrokenImageOutlinedIcon from "@mui/icons-material/BrokenImageOutlined";
 import { formatDate } from "../../../utils/methods";
 
@@ -35,87 +28,55 @@ const PreviewModal = ({ title, open, onClose, url, filename, uploadDate }) => {
   }, [open]);
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle
+    <CustomDialog title={title} open={open} onClose={onClose}>
+      <Box
         sx={{
+          mx: "-24px",
+          mt: "-20px",
+          mb: 2,
+          bgcolor: "grey.400",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
-          pb: 1
+          justifyContent: "center",
+          minHeight: 200
         }}
       >
-        <Typography variant="h6">{title}</Typography>
-      </DialogTitle>
-      <IconButton
-        aria-label="close"
-        onClick={onClose}
-        size="small"
-        sx={(theme) => ({
-          position: "absolute",
-          right: 12,
-          top: 12,
-          color: theme.palette.grey[500]
-        })}
-      >
-        <CloseIcon fontSize="large" />
-      </IconButton>
-      <DialogContent sx={{ p: 0 }}>
-        <Box
-          sx={{
-            mx: 2,
-            mb: 2,
-            bgcolor: "grey.400",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: 200
-          }}
-        >
-          {!url || imageError ? (
-            <BrokenImage />
-          ) : (
-            <Box
-              component="img"
-              src={url}
-              alt={filename}
-              onError={() => setImageError(true)}
-              sx={{
-                maxWidth: "100%",
-                maxHeight: 400,
-                display: "block",
-                objectFit: "contain"
-              }}
-            />
-          )}
+        {!url || imageError ? (
+          <BrokenImage />
+        ) : (
+          <Box
+            component="img"
+            src={url}
+            alt={filename}
+            onError={() => setImageError(true)}
+            sx={{
+              maxWidth: "100%",
+              maxHeight: 400,
+              display: "block",
+              objectFit: "contain"
+            }}
+          />
+        )}
+      </Box>
+      {filename && (
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, minWidth: 80 }}>
+            {T.translate("preview_modal.file_name")}
+          </Typography>
+          <Typography variant="body2" sx={{ wordBreak: "break-all" }}>
+            {filename}
+          </Typography>
         </Box>
-        <Box sx={{ px: 2, pt: 1.5, pb: 2 }}>
-          {filename && (
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 600, minWidth: 80 }}
-              >
-                {T.translate("preview_modal.file_name")}
-              </Typography>
-              <Typography variant="body2" sx={{ wordBreak: "break-all" }}>
-                {filename}
-              </Typography>
-            </Box>
-          )}
-          {!!uploadDate && (
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 600, minWidth: 80 }}
-              >
-                {T.translate("preview_modal.uploaded")}
-              </Typography>
-              <Typography variant="body2">{formatDate(uploadDate)}</Typography>
-            </Box>
-          )}
+      )}
+      {!!uploadDate && (
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, minWidth: 80 }}>
+            {T.translate("preview_modal.uploaded")}
+          </Typography>
+          <Typography variant="body2">{formatDate(uploadDate)}</Typography>
         </Box>
-      </DialogContent>
-    </Dialog>
+      )}
+    </CustomDialog>
   );
 };
 
