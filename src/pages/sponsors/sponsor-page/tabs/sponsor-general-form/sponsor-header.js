@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import {
   Box,
@@ -24,6 +24,10 @@ import {
 
 const SponsorHeader = ({ sponsor, onSave }) => {
   const [isPublished, setIsPublished] = useState(sponsor.is_published);
+
+  useEffect(() => {
+    setIsPublished(sponsor.is_published);
+  }, [sponsor.id, sponsor.is_published]);
 
   const handlePublishSave = () => {
     const entity = { id: sponsor.id, is_published: isPublished };
@@ -109,6 +113,7 @@ const SponsorHeader = ({ sponsor, onSave }) => {
       >
         <Grid2 size={3}>
           <Typography
+            id="sponsor-is-published-label"
             sx={{
               fontSize: "1.4rem",
               lineHeight: "1.57rem",
@@ -127,6 +132,11 @@ const SponsorHeader = ({ sponsor, onSave }) => {
             sx={{ display: "inline-block" }}
             checked={isPublished}
             onChange={() => setIsPublished(!isPublished)}
+            slotProps={{
+              input: {
+                "aria-labelledby": "sponsor-is-published-label"
+              }
+            }}
           />
           <Button
             variant="contained"
