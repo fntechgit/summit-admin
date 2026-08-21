@@ -24,6 +24,7 @@ import {
 
 const SponsorHeader = ({ sponsor, onSave }) => {
   const [isPublished, setIsPublished] = useState(sponsor.is_published);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setIsPublished(sponsor.is_published);
@@ -31,7 +32,10 @@ const SponsorHeader = ({ sponsor, onSave }) => {
 
   const handlePublishSave = () => {
     const entity = { id: sponsor.id, is_published: isPublished };
-    onSave(entity);
+    setIsSaving(true);
+    Promise.resolve(onSave(entity))
+      .catch(() => {})
+      .finally(() => setIsSaving(false));
   };
 
   return (
@@ -141,6 +145,7 @@ const SponsorHeader = ({ sponsor, onSave }) => {
           <Button
             variant="contained"
             onClick={handlePublishSave}
+            disabled={isSaving}
             sx={{ height: "36px" }}
           >
             {T.translate("general.save")}

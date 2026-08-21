@@ -611,7 +611,11 @@ export const saveSponsor = (entity) => async (dispatch, getState) => {
   const { currentSummit } = currentSummitState;
 
   const params = {
-    access_token: accessToken
+    access_token: accessToken,
+    expand:
+      "company,members,sponsorships,sponsorships.type,sponsorships.type.type,featured_event,extra_questions,extra_questions.values,lead_report_setting",
+    fields:
+      "featured_event.id,featured_event.title,sponsorships.id,sponsorships.type.id,sponsorships.type.type.id,sponsorships.type.type.name"
   };
 
   dispatch(startLoading());
@@ -619,40 +623,38 @@ export const saveSponsor = (entity) => async (dispatch, getState) => {
   const normalizedEntity = normalizeSponsor(entity);
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_SPONSOR),
       createAction(SPONSOR_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${entity.id}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch).then(() => {
-      dispatch(showSuccessMessage(T.translate("edit_sponsor.sponsor_saved")));
-    });
-  } else {
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_sponsor.sponsor_created"),
-      type: "success"
-    };
-
-    postRequest(
-      createAction(UPDATE_SPONSOR),
-      createAction(SPONSOR_ADDED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then((payload) => {
       dispatch(
-        showMessage(success_message, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/sponsors/${payload.response.id}`
-          );
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_sponsor.sponsor_saved")
         })
       );
     });
   }
+
+  return postRequest(
+    createAction(UPDATE_SPONSOR),
+    createAction(SPONSOR_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors`,
+    normalizedEntity,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch).then(() => {
+    dispatch(
+      snackbarSuccessHandler({
+        title: T.translate("general.success"),
+        html: T.translate("edit_sponsor.sponsor_created")
+      })
+    );
+  });
 };
 
 export const addMemberToSponsor =
