@@ -56,7 +56,10 @@ describe("EventForm", () => {
       moderator: null,
       sponsors: [],
       tags: [],
-      extra_questions: []
+      extra_questions: [],
+      // The Materials panel is expanded by renderEventForm, so uicore's Table now
+      // actually mounts and maps over this.
+      materials: []
     },
     errors: {},
     onSubmit: jest.fn(),
@@ -82,8 +85,18 @@ describe("EventForm", () => {
     onClone: jest.fn()
   };
 
-  const renderEventForm = (overrides = {}) =>
-    render(<EventForm {...baseProps} {...overrides} />);
+  // The reopen section lives inside the Materials panel, and uicore's Panel mounts
+  // its children only while expanded, so every assertion here needs it open first.
+  // queryByText, not getByText: the panel itself is gated on a saved presentation,
+  // and the tests that assert the control is absent pass entities that suppress it.
+  const renderEventForm = (overrides = {}) => {
+    const result = render(<EventForm {...baseProps} {...overrides} />);
+    const materialsHeading = screen.queryByText(/^edit_event\.materials/, {
+      selector: ".panel-title"
+    });
+    if (materialsHeading) fireEvent.click(materialsHeading);
+    return result;
+  };
 
   // Built on baseProps.entity (not the bare object from the task brief) because
   // several unrelated, pre-existing render paths (TagInput, isEventType,
@@ -114,6 +127,14 @@ describe("EventForm", () => {
 
     expect(
       screen.getByRole("button", { name: "edit_event.reopen_submission" })
+    ).toBeInTheDocument();
+  });
+
+  it("leaves the Materials panel title plain when there is no grant", () => {
+    renderEventForm({ entity: baseEntity });
+
+    expect(
+      screen.getByText("edit_event.materials", { selector: ".panel-title" })
     ).toBeInTheDocument();
   });
 
@@ -183,6 +204,11 @@ describe("EventForm", () => {
     expect(
       screen.queryByText(/edit_event.reopened_until/)
     ).not.toBeInTheDocument();
+    // The panel title shares the section's gate for exactly this case: keyed on the
+    // grant alone it would announce a deadline the server no longer honours.
+    expect(
+      screen.getByText("edit_event.materials", { selector: ".panel-title" })
+    ).toBeInTheDocument();
   });
 
   it("disables the reopen button when no valid hours value is selected", async () => {
@@ -383,6 +409,16 @@ describe("EventForm", () => {
       expect(
         screen.queryByRole("button", { name: "edit_event.reopen_submission" })
       ).not.toBeInTheDocument();
+    });
+
+    it("announces the deadline on the collapsed Materials panel title", () => {
+      renderEventForm({ entity: grantedEntity });
+
+      expect(
+        screen.getByText("edit_event.materials_reopened", {
+          selector: ".panel-title"
+        })
+      ).toBeInTheDocument();
     });
 
     it("still shows the reopened state when the payload was not expanded", () => {

@@ -766,6 +766,20 @@ class EventForm extends React.Component {
     return moment().unix() > plan.submission_end_date;
   }
 
+  // The panel title and the section body MUST share one gate. Keying the title on
+  // isSubmissionReopened() alone would announce a deadline in exactly the case the
+  // comment on isReopenApplicable describes: a live grant whose plan window was
+  // since extended, which the server no longer treats as operative.
+  isReopenSectionVisible() {
+    const { entity } = this.state;
+    return (
+      this.isPresentation() &&
+      !this.isNew() &&
+      entity.selection_plan_id > 0 &&
+      this.isReopenApplicable()
+    );
+  }
+
   isSubmissionReopened() {
     const deadline = this.getReopenDeadline();
     return !!deadline?.isAfter(moment());
@@ -1259,126 +1273,6 @@ class EventForm extends React.Component {
             </p>
           </div>
         )}
-        {this.isPresentation() &&
-          !this.isNew() &&
-          entity.selection_plan_id > 0 &&
-          this.isReopenApplicable() && (
-            <div className="row form-group">
-              <div className="col-md-12">
-                <label>
-                  {T.translate("edit_event.reopen_submission_section")}
-                </label>
-                {!this.isSubmissionReopened() && (
-                  <div
-                    style={{ display: "flex", alignItems: "center", gap: 10 }}
-                  >
-                    <label htmlFor="reopen_hours">
-                      {T.translate("edit_event.reopen_duration")}
-                    </label>
-                    <select
-                      id="reopen_hours"
-                      className="form-control"
-                      style={{ width: "auto" }}
-                      value={reopenHours}
-                      onChange={(ev) =>
-                        this.setState({ reopenHours: ev.target.value })
-                      }
-                    >
-                      <option value={DEFAULT_REOPEN_HOURS}>
-                        {T.translate("edit_event.reopen_duration_24")}
-                      </option>
-                      <option value={REOPEN_PRESET_HOURS_48}>
-                        {T.translate("edit_event.reopen_duration_48")}
-                      </option>
-                      <option value={REOPEN_PRESET_HOURS_72}>
-                        {T.translate("edit_event.reopen_duration_72")}
-                      </option>
-                      <option value="custom">
-                        {T.translate("edit_event.reopen_duration_custom")}
-                      </option>
-                    </select>
-                    {reopenHours === "custom" && (
-                      <>
-                        <label htmlFor="reopen_custom_hours">
-                          {maxReopenHours
-                            ? T.translate(
-                                "edit_event.reopen_custom_hours_capped",
-                                { max: maxReopenHours }
-                              )
-                            : T.translate("edit_event.reopen_custom_hours")}
-                        </label>
-                        <input
-                          id="reopen_custom_hours"
-                          type="number"
-                          min="1"
-                          max={maxReopenHours || undefined}
-                          className="form-control"
-                          style={{ width: 120 }}
-                          value={reopenCustomHours}
-                          onChange={(ev) =>
-                            this.setState({
-                              reopenCustomHours: ev.target.value
-                            })
-                          }
-                        />
-                      </>
-                    )}
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      disabled={!this.getSelectedReopenHours()}
-                      onClick={this.handleReopenSubmission}
-                    >
-                      {T.translate("edit_event.reopen_submission")}
-                    </button>
-                  </div>
-                )}
-                {this.isSubmissionReopened() && (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      flexWrap: "wrap"
-                    }}
-                  >
-                    <span>
-                      {T.translate("edit_event.reopened_until", {
-                        deadline: this.getReopenDeadline().format(
-                          REOPEN_DEADLINE_FORMAT
-                        )
-                      })}
-                    </span>
-                    {entity.submission_reopened_by && (
-                      <span>
-                        {T.translate("edit_event.reopened_by", {
-                          admin: `${entity.submission_reopened_by.first_name} ${entity.submission_reopened_by.last_name}`
-                        })}
-                      </span>
-                    )}
-                    <button
-                      type="button"
-                      className="btn btn-danger"
-                      onClick={this.handleCloseSubmission}
-                    >
-                      {T.translate("edit_event.close_submission")}
-                    </button>
-                    {window.CFP_APP_BASE_URL && (
-                      <span>
-                        <label>
-                          {T.translate("edit_event.reopen_deep_link_label")}
-                        </label>
-                        &nbsp;
-                        <CopyClipboard text={speakerDeepLink} />
-                        &nbsp;
-                        {speakerDeepLink}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
         <div className="row form-group">
           <div className="col-md-8">
             <label> {T.translate("edit_event.submitter")} </label> &nbsp;
@@ -2073,8 +1967,17 @@ class EventForm extends React.Component {
         </Panel>
         {entity.id != 0 && this.isEventType(EVENT_TYPE_PRESENTATION) && (
           <Panel
+            id="materials"
             show={showSection === "materials"}
-            title={T.translate("edit_event.materials")}
+            title={
+              this.isReopenSectionVisible() && this.isSubmissionReopened()
+                ? T.translate("edit_event.materials_reopened", {
+                    deadline: this.getReopenDeadline().format(
+                      REOPEN_DEADLINE_FORMAT
+                    )
+                  })
+                : T.translate("edit_event.materials")
+            }
             handleClick={this.toggleSection.bind(this, "materials")}
           >
             <button
@@ -2088,6 +1991,120 @@ class EventForm extends React.Component {
               data={entity.materials}
               columns={material_columns}
             />
+            {this.isReopenSectionVisible() && (
+              <div className="row form-group">
+                <div className="col-md-12">
+                  {!this.isSubmissionReopened() && (
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 10 }}
+                    >
+                      <label htmlFor="reopen_hours">
+                        {T.translate("edit_event.reopen_duration")}
+                      </label>
+                      <select
+                        id="reopen_hours"
+                        className="form-control"
+                        style={{ width: "auto" }}
+                        value={reopenHours}
+                        onChange={(ev) =>
+                          this.setState({ reopenHours: ev.target.value })
+                        }
+                      >
+                        <option value={DEFAULT_REOPEN_HOURS}>
+                          {T.translate("edit_event.reopen_duration_24")}
+                        </option>
+                        <option value={REOPEN_PRESET_HOURS_48}>
+                          {T.translate("edit_event.reopen_duration_48")}
+                        </option>
+                        <option value={REOPEN_PRESET_HOURS_72}>
+                          {T.translate("edit_event.reopen_duration_72")}
+                        </option>
+                        <option value="custom">
+                          {T.translate("edit_event.reopen_duration_custom")}
+                        </option>
+                      </select>
+                      {reopenHours === "custom" && (
+                        <>
+                          <label htmlFor="reopen_custom_hours">
+                            {maxReopenHours
+                              ? T.translate(
+                                  "edit_event.reopen_custom_hours_capped",
+                                  { max: maxReopenHours }
+                                )
+                              : T.translate("edit_event.reopen_custom_hours")}
+                          </label>
+                          <input
+                            id="reopen_custom_hours"
+                            type="number"
+                            min="1"
+                            max={maxReopenHours || undefined}
+                            className="form-control"
+                            style={{ width: 120 }}
+                            value={reopenCustomHours}
+                            onChange={(ev) =>
+                              this.setState({
+                                reopenCustomHours: ev.target.value
+                              })
+                            }
+                          />
+                        </>
+                      )}
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        disabled={!this.getSelectedReopenHours()}
+                        onClick={this.handleReopenSubmission}
+                      >
+                        {T.translate("edit_event.reopen_submission")}
+                      </button>
+                    </div>
+                  )}
+                  {this.isSubmissionReopened() && (
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        flexWrap: "wrap"
+                      }}
+                    >
+                      <span>
+                        {T.translate("edit_event.reopened_until", {
+                          deadline: this.getReopenDeadline().format(
+                            REOPEN_DEADLINE_FORMAT
+                          )
+                        })}
+                      </span>
+                      {entity.submission_reopened_by && (
+                        <span>
+                          {T.translate("edit_event.reopened_by", {
+                            admin: `${entity.submission_reopened_by.first_name} ${entity.submission_reopened_by.last_name}`
+                          })}
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        className="btn btn-danger"
+                        onClick={this.handleCloseSubmission}
+                      >
+                        {T.translate("edit_event.close_submission")}
+                      </button>
+                      {window.CFP_APP_BASE_URL && (
+                        <span>
+                          <label>
+                            {T.translate("edit_event.reopen_deep_link_label")}
+                          </label>
+                          &nbsp;
+                          <CopyClipboard text={speakerDeepLink} />
+                          &nbsp;
+                          {speakerDeepLink}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </Panel>
         )}
 
