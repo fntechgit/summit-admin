@@ -15,7 +15,7 @@ jest.mock("../../../../actions/form-template-item-actions", () => ({
   ...jest.requireActual("../../../../actions/form-template-item-actions"),
   getFormTemplateItems: jest.fn(() => () => Promise.resolve()),
   getFormTemplateItem: jest.fn(() => () => Promise.resolve()),
-  deleteItemImage: jest.fn(() => () => Promise.resolve())
+  deleteItemImage: jest.fn(() => () => Promise.resolve(true))
 }));
 
 jest.mock("../../../../actions/form-template-actions", () => ({

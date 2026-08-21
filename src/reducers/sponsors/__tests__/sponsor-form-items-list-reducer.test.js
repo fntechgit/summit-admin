@@ -429,7 +429,7 @@ describe("SponsorFormItemsListReducer", () => {
 
         result = SponsorFormItemsListReducer(state, {
           type: SPONSOR_FORM_ITEM_IMAGE_ADDED,
-          payload: { image: newImage, itemId: "A" }
+          payload: { response: newImage, itemId: "A" }
         });
 
         expect(result.currentItem.images).toStrictEqual(expectedImages);
@@ -456,7 +456,7 @@ describe("SponsorFormItemsListReducer", () => {
 
       result = SponsorFormItemsListReducer(state, {
         type: SPONSOR_FORM_ITEM_IMAGE_ADDED,
-        payload: { image: { id: "IMG_2" }, itemId: "A" }
+        payload: { response: { id: "IMG_2" }, itemId: "A" }
       });
 
       expect(result.currentItem).toStrictEqual(state.currentItem);

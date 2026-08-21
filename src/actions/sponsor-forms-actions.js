@@ -31,7 +31,7 @@ import {
   getAccessTokenSafely,
   normalizeSelectAllField
 } from "../utils/methods";
-import { deleteFile } from "./inventory-shared-actions";
+import { saveFiles, deleteFile } from "./inventory-shared-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
@@ -1260,7 +1260,8 @@ export const saveSponsorFormItem =
     dispatch(startLoading());
 
     const params = {
-      access_token: accessToken
+      access_token: accessToken,
+      expand: "images"
     };
 
     const normalizedEntity = normalizeItem(entity);
@@ -1300,7 +1301,8 @@ export const updateSponsorFormItem =
     dispatch(startLoading());
 
     const params = {
-      access_token: accessToken
+      access_token: accessToken,
+      expand: "images"
     };
 
     const normalizedEntity = normalizeItem(entity);
@@ -1444,25 +1446,15 @@ const saveNewItemImages =
 
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
-    const accessToken = await getAccessTokenSafely();
-    const params = { access_token: accessToken };
 
-    const promises = newImages.map((file) =>
-      postRequest(
-        null,
-        ({ response: image }) =>
-          createAction(SPONSOR_FORM_ITEM_IMAGE_ADDED)({
-            image,
-            itemId: formItemId
-          }),
-        `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images`,
-        file,
-        snackbarErrorHandler,
-        file
-      )(params)(dispatch)
-    );
+    const settings = {
+      url: `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${formItemId}/images`,
+      addedActionName: SPONSOR_FORM_ITEM_IMAGE_ADDED,
+      updatedActionName: SPONSOR_FORM_ITEM_IMAGE_ADDED,
+      payload: { itemId: formItemId }
+    };
 
-    return Promise.all(promises);
+    return saveFiles(newImages, settings)(dispatch);
   };
 
 export const addInventoryItems =
@@ -1611,25 +1603,15 @@ const saveNewManagedItemImages =
     const {
       entity: { id: sponsorId }
     } = currentSponsorState;
-    const accessToken = await getAccessTokenSafely();
-    const params = { access_token: accessToken };
 
-    const promises = newImages.map((file) =>
-      postRequest(
-        null,
-        ({ response: image }) =>
-          createAction(SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED)({
-            image,
-            itemId: formItemId
-          }),
-        `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${formItemId}/images`,
-        file,
-        snackbarErrorHandler,
-        file
-      )(params)(dispatch)
-    );
+    const settings = {
+      url: `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${formItemId}/images`,
+      addedActionName: SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED,
+      updatedActionName: SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED,
+      payload: { itemId: formItemId }
+    };
 
-    return Promise.all(promises);
+    return saveFiles(newImages, settings)(dispatch);
   };
 
 export const deleteSponsorFormManagedItem =

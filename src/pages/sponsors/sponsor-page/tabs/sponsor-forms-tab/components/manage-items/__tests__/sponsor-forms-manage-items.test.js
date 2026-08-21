@@ -14,7 +14,9 @@ jest.mock("../../../../../../../../actions/sponsor-forms-actions", () => ({
   ),
   getSponsorCustomizedFormItems: jest.fn(() => () => Promise.resolve()),
   getSponsorFormManagedItem: jest.fn(() => () => Promise.resolve()),
-  removeSponsorCustomizedFormItemImages: jest.fn(() => () => Promise.resolve())
+  removeSponsorCustomizedFormItemImages: jest.fn(
+    () => () => Promise.resolve(true)
+  )
 }));
 
 jest.mock(

@@ -12,7 +12,7 @@ jest.mock("../../../../actions/inventory-item-actions", () => ({
   ...jest.requireActual("../../../../actions/inventory-item-actions"),
   getInventoryItems: jest.fn(() => () => Promise.resolve()),
   getInventoryItem: jest.fn(() => () => Promise.resolve()),
-  deleteInventoryItemImage: jest.fn(() => () => Promise.resolve())
+  deleteInventoryItemImage: jest.fn(() => () => Promise.resolve(true))
 }));
 
 jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => ({

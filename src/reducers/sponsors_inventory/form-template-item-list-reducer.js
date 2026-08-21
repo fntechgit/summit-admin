@@ -18,7 +18,8 @@ import {
   FORM_TEMPLATE_ITEM_DELETED,
   CHANGE_FORM_TEMPLATE_ITEM_SEARCH_TERM,
   FORM_TEMPLATE_ITEM_ARCHIVED,
-  FORM_TEMPLATE_ITEM_UNARCHIVED
+  FORM_TEMPLATE_ITEM_UNARCHIVED,
+  FORM_TEMPLATE_ITEM_IMAGE_DELETED
 } from "../../actions/form-template-item-actions";
 import { getSafePageAfterRemove } from "../../utils/methods";
 
@@ -142,6 +143,18 @@ const formTemplateItemListReducer = (state = DEFAULT_STATE, action = {}) => {
           currentPage
         )
       };
+    }
+    case FORM_TEMPLATE_ITEM_IMAGE_DELETED: {
+      const { fileId, formTemplateItemId } = payload;
+      const updatedFormTemplateItems = state.formTemplateItems.map((item) =>
+        item.id === formTemplateItemId
+          ? {
+              ...item,
+              images: item.images?.filter((img) => img.id !== fileId) ?? []
+            }
+          : item
+      );
+      return { ...state, formTemplateItems: updatedFormTemplateItems };
     }
     default:
       return state;

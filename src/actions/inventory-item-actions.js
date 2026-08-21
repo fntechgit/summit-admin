@@ -351,7 +351,8 @@ const saveItemImages = (inventoryItem) => {
 export const deleteInventoryItemImage = (inventoryItemId, imageId) => {
   const settings = {
     url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/images`,
-    deletedActionName: INVENTORY_ITEM_IMAGE_DELETED
+    deletedActionName: INVENTORY_ITEM_IMAGE_DELETED,
+    payload: { inventoryItemId }
   };
   return deleteFile(imageId, settings);
 };

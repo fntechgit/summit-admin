@@ -387,7 +387,8 @@ export const deleteItemImage = (
 ) => {
   const settings = {
     url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItemId}/images`,
-    deletedActionName: FORM_TEMPLATE_ITEM_IMAGE_DELETED
+    deletedActionName: FORM_TEMPLATE_ITEM_IMAGE_DELETED,
+    payload: { formTemplateItemId }
   };
   return deleteFile(imageId, settings);
 };

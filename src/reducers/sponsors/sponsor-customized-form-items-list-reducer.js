@@ -137,7 +137,7 @@ const sponsorCustomizedFormItemsListReducer = (
       return { ...state, currentItem, items };
     }
     case SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED: {
-      const { image, itemId } = payload;
+      const { response: image, itemId } = payload;
       const currentItem =
         state.currentItem.id === itemId
           ? {

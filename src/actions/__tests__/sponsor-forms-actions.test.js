@@ -536,13 +536,13 @@ describe("Sponsor Forms Actions", () => {
       );
 
       // The received-action creator must produce SPONSOR_FORM_ITEM_IMAGE_ADDED
-      // carrying {image, itemId} - not the item-shaped SPONSOR_FORM_ITEM_UPDATED,
+      // carrying {response, itemId} - not the item-shaped SPONSOR_FORM_ITEM_UPDATED,
       // which a reducer could misread as an item and corrupt an unrelated one.
       const [, receivedActionCreator] = imagesCalls[0];
       const uploadedImage = { id: 55, file_url: "https://cdn/new.png" };
       expect(receivedActionCreator({ response: uploadedImage })).toEqual({
         type: "SPONSOR_FORM_ITEM_IMAGE_ADDED",
-        payload: { image: uploadedImage, itemId: 100 }
+        payload: { response: uploadedImage, itemId: 100 }
       });
     });
   });
@@ -635,7 +635,7 @@ describe("Sponsor Forms Actions", () => {
       const uploadedImage = { id: 55, file_url: "https://cdn/new.png" };
       expect(receivedActionCreator({ response: uploadedImage })).toEqual({
         type: "SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED",
-        payload: { image: uploadedImage, itemId: 100 }
+        payload: { response: uploadedImage, itemId: 100 }
       });
     });
 

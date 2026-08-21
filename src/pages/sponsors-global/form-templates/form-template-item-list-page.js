@@ -189,7 +189,10 @@ const FormTemplateItemListPage = ({
 
   const handleRemoveImage = (imageId) => {
     if (!currentFormTemplateItem?.id) return;
-    deleteItemImage(formTemplateId, currentFormTemplateItem.id, imageId);
+    const itemId = currentFormTemplateItem.id;
+    deleteItemImage(formTemplateId, itemId, imageId).then((success) => {
+      if (!success) getFormTemplateItem(formTemplateId, itemId);
+    });
   };
 
   const columns = [

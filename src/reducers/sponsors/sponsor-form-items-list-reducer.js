@@ -142,7 +142,7 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, currentItem, items };
     }
     case SPONSOR_FORM_ITEM_IMAGE_ADDED: {
-      const { image, itemId } = payload;
+      const { response: image, itemId } = payload;
       const currentItem =
         state.currentItem.id === itemId
           ? {

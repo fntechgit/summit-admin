@@ -151,7 +151,10 @@ const InventoryListPage = ({
 
   const handleRemoveImage = (imageId) => {
     if (!currentInventoryItem?.id) return;
-    deleteInventoryItemImage(currentInventoryItem.id, imageId);
+    const itemId = currentInventoryItem.id;
+    deleteInventoryItemImage(itemId, imageId).then((success) => {
+      if (!success) getInventoryItem(itemId);
+    });
   };
 
   const columns = [
