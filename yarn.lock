@@ -9042,10 +9042,10 @@ open@^10.0.3:
     is-inside-container "^1.0.0"
     wsl-utils "^0.1.0"
 
-openstack-uicore-foundation@5.0.50-beta.1:
-  version "5.0.50-beta.1"
-  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-5.0.50-beta.1.tgz#78de73c5158379a8f240b7813b42fcfad9e3b6c6"
-  integrity sha512-ecsKFM0haCV2LzKPihR+DeKdA5f3JEXTOgP/aevBoEgL8wOrcPtmmH2gJCcpL7qPvWdFWVN9Kwcg7hBBmpbVOA==
+openstack-uicore-foundation@5.0.50:
+  version "5.0.50"
+  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-5.0.50.tgz#e3212570a768c70e9add8dc717b4344a301c03f9"
+  integrity sha512-OpS73E7MWMeHcRF2qVBby2LmI3kt2bgBh4udXwc7VMv5UbCktla+hWsPVeHBIZLFExPT414pn7nt/DOkE0gYDQ==
   dependencies:
     use-sync-external-store "^1.6.0"
 
