@@ -1203,7 +1203,7 @@ export const getSponsorFormItem =
       createAction(RECEIVE_SPONSOR_FORM_ITEM),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${itemId}`,
       authErrorHandler
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -1670,7 +1670,7 @@ export const getSponsorFormManagedItem =
       createAction(RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEM),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${itemId}`,
       authErrorHandler
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };

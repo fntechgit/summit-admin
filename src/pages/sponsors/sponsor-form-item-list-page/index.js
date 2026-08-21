@@ -134,7 +134,7 @@ const SponsorFormItemListPage = ({
   const handleRemoveItemImage = (imageId) => {
     if (!currentItem?.id) return;
     removeItemFile(formId, currentItem.id, imageId).then((success) => {
-      if (!success) getSponsorFormItem(formId, currentItem.id);
+      if (!success) getSponsorFormItem(formId, currentItem.id).catch(() => {});
     });
   };
 

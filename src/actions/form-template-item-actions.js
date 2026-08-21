@@ -137,7 +137,7 @@ export const getFormTemplateItem =
       createAction(RECEIVE_FORM_TEMPLATE_ITEM),
       `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItemId}`,
       snackbarErrorHandler
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };

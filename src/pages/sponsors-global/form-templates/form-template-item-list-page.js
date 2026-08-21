@@ -191,7 +191,7 @@ const FormTemplateItemListPage = ({
     if (!currentFormTemplateItem?.id) return;
     const itemId = currentFormTemplateItem.id;
     deleteItemImage(formTemplateId, itemId, imageId).then((success) => {
-      if (!success) getFormTemplateItem(formTemplateId, itemId);
+      if (!success) getFormTemplateItem(formTemplateId, itemId).catch(() => {});
     });
   };
 

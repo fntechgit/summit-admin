@@ -159,7 +159,7 @@ export const getInventoryItem = (inventoryItemId) => async (dispatch) => {
     createAction(RECEIVE_INVENTORY_ITEM),
     `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}`,
     snackbarErrorHandler
-  )(params)(dispatch).then(() => {
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };

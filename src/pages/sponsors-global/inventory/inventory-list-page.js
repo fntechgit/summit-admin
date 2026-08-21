@@ -153,7 +153,7 @@ const InventoryListPage = ({
     if (!currentInventoryItem?.id) return;
     const itemId = currentInventoryItem.id;
     deleteInventoryItemImage(itemId, imageId).then((success) => {
-      if (!success) getInventoryItem(itemId);
+      if (!success) getInventoryItem(itemId).catch(() => {});
     });
   };
 

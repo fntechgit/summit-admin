@@ -207,7 +207,7 @@ const SponsorFormsManageItems = ({
     const itemId = currentInventoryItem.id;
     removeSponsorCustomizedFormItemImages(formId, itemId, imageId).then(
       (success) => {
-        if (!success) getSponsorFormManagedItem(formId, itemId);
+        if (!success) getSponsorFormManagedItem(formId, itemId).catch(() => {});
       }
     );
   };
