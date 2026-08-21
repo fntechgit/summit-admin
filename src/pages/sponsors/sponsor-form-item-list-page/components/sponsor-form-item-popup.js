@@ -11,7 +11,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import SponsorFormItemForm from "./sponsor-form-item-form";
 
-const SponsorFormItemPopup = ({ item, onClose, onSave }) => {
+const SponsorFormItemPopup = ({ item, onClose, onSave, onRemoveImage }) => {
   const [isSaving, setIsSaving] = useState(false);
 
   const handleClose = () => {
@@ -24,8 +24,12 @@ const SponsorFormItemPopup = ({ item, onClose, onSave }) => {
     setIsSaving(true);
     onSave(values)
       .then(() => onClose())
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setIsSaving(false));
+  };
+
+  const handleRemoveImage = (imageId) => {
+    onRemoveImage(imageId);
   };
 
   return (
@@ -59,6 +63,7 @@ const SponsorFormItemPopup = ({ item, onClose, onSave }) => {
         initialValues={item}
         onSubmit={handleOnSave}
         isSaving={isSaving}
+        onImageDeleted={handleRemoveImage}
       />
     </Dialog>
   );
@@ -67,6 +72,7 @@ const SponsorFormItemPopup = ({ item, onClose, onSave }) => {
 SponsorFormItemPopup.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
+  onRemoveImage: PropTypes.func.isRequired,
   item: PropTypes.object
 };
 

@@ -1,6 +1,8 @@
 import sponsorCustomizedFormItemsListReducer from "../sponsor-customized-form-items-list-reducer";
 import {
   RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEM,
+  SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED,
+  SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED,
   SPONSOR_FORM_MANAGED_ITEM_UPDATED
 } from "../../../actions/sponsor-forms-actions";
 
@@ -46,7 +48,7 @@ const buildItem = (overrides = {}) => ({
 
 describe("sponsorCustomizedFormItemsListReducer", () => {
   describe("RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEM", () => {
-    it("maps file_url to file_path on each image — the edit-form image fix", () => {
+    it("stores images as received from the API, without a file_path mapping", () => {
       const result = sponsorCustomizedFormItemsListReducer(DEFAULT_STATE, {
         type: RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEM,
         payload: {
@@ -62,13 +64,11 @@ describe("sponsorCustomizedFormItemsListReducer", () => {
       expect(result.currentItem.images).toEqual([
         {
           id: 10,
-          file_url: "https://cdn/a.png",
-          file_path: "https://cdn/a.png"
+          file_url: "https://cdn/a.png"
         },
         {
           id: 11,
-          file_url: "https://cdn/b.png",
-          file_path: "https://cdn/b.png"
+          file_url: "https://cdn/b.png"
         }
       ]);
     });
@@ -89,6 +89,140 @@ describe("sponsorCustomizedFormItemsListReducer", () => {
       });
 
       expect(result.currentItem.meta_fields).toEqual([]);
+    });
+  });
+
+  describe("SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED", () => {
+    it("removes the image from currentItem and its matching list item", () => {
+      const state = {
+        ...DEFAULT_STATE,
+        currentItem: {
+          ...DEFAULT_STATE.currentItem,
+          id: 1,
+          images: [{ id: 10 }, { id: 11 }]
+        },
+        items: [
+          buildItem({ id: 1, images: [{ id: 10 }, { id: 11 }] }),
+          buildItem({ id: 2, images: [{ id: 12 }] })
+        ]
+      };
+
+      const result = sponsorCustomizedFormItemsListReducer(state, {
+        type: SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED,
+        payload: { fileId: 10, itemId: 1 }
+      });
+
+      expect(result.currentItem.images).toEqual([{ id: 11 }]);
+      expect(result.items[0].images).toEqual([{ id: 11 }]);
+      expect(result.items[1].images).toEqual([{ id: 12 }]);
+    });
+
+    it("handles a currentItem with no images without throwing", () => {
+      const state = {
+        ...DEFAULT_STATE,
+        currentItem: { ...DEFAULT_STATE.currentItem, id: 1, images: undefined },
+        items: [buildItem({ id: 1, images: undefined })]
+      };
+
+      const result = sponsorCustomizedFormItemsListReducer(state, {
+        type: SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED,
+        payload: { fileId: 10, itemId: 1 }
+      });
+
+      expect(result.currentItem.images).toEqual([]);
+    });
+
+    it("leaves currentItem untouched when the deleted file belongs to a different item", () => {
+      // Regression for the race where the delete for item A resolves after
+      // the dialog switched to item B (RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEM
+      // replaced currentItem in between) — only A's row should update.
+      const state = {
+        ...DEFAULT_STATE,
+        currentItem: {
+          ...DEFAULT_STATE.currentItem,
+          id: 2,
+          images: [{ id: 12 }]
+        },
+        items: [
+          buildItem({ id: 1, images: [{ id: 10 }, { id: 11 }] }),
+          buildItem({ id: 2, images: [{ id: 12 }] })
+        ]
+      };
+
+      const result = sponsorCustomizedFormItemsListReducer(state, {
+        type: SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED,
+        payload: { fileId: 10, itemId: 1 }
+      });
+
+      expect(result.currentItem).toEqual(state.currentItem);
+      expect(result.items[0].images).toEqual([{ id: 11 }]);
+      expect(result.items[1].images).toEqual([{ id: 12 }]);
+    });
+  });
+
+  describe("SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED", () => {
+    it.each([
+      [
+        "with existing images",
+        [{ id: 10 }],
+        { id: 11 },
+        [{ id: 10 }, { id: 11 }]
+      ],
+      ["with no images (undefined)", undefined, { id: 10 }, [{ id: 10 }]]
+    ])(
+      "appends the new image to currentItem and its matching list item (%s)",
+      (_label, initialImages, newImage, expectedImages) => {
+        const state = {
+          ...DEFAULT_STATE,
+          currentItem: {
+            ...DEFAULT_STATE.currentItem,
+            id: 1,
+            images: initialImages
+          },
+          items: [
+            buildItem({ id: 1, images: initialImages }),
+            buildItem({ id: 2, images: [{ id: 12 }] })
+          ]
+        };
+
+        const result = sponsorCustomizedFormItemsListReducer(state, {
+          type: SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED,
+          payload: { response: newImage, itemId: 1 }
+        });
+
+        expect(result.currentItem.images).toEqual(expectedImages);
+        expect(result.items[0].images).toEqual(expectedImages);
+        expect(result.items[1].images).toEqual([{ id: 12 }]);
+      }
+    );
+
+    it("leaves currentItem untouched when the new image belongs to a different item", () => {
+      // This is exactly the case that broke before this action got its own
+      // type: an image upload response ({id, file_url}) used to be dispatched
+      // as SPONSOR_FORM_MANAGED_ITEM_UPDATED, which that reducer case reads
+      // as an item - matching state.items by the image's id and clobbering
+      // whichever unrelated item happened to share that numeric id.
+      const state = {
+        ...DEFAULT_STATE,
+        currentItem: {
+          ...DEFAULT_STATE.currentItem,
+          id: 2,
+          images: [{ id: 12 }]
+        },
+        items: [
+          buildItem({ id: 1, images: [{ id: 10 }] }),
+          buildItem({ id: 2, images: [{ id: 12 }] })
+        ]
+      };
+
+      const result = sponsorCustomizedFormItemsListReducer(state, {
+        type: SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED,
+        payload: { response: { id: 11 }, itemId: 1 }
+      });
+
+      expect(result.currentItem).toEqual(state.currentItem);
+      expect(result.items[0].images).toEqual([{ id: 10 }, { id: 11 }]);
+      expect(result.items[1].images).toEqual([{ id: 12 }]);
     });
   });
 
@@ -120,6 +254,32 @@ describe("sponsorCustomizedFormItemsListReducer", () => {
       expect(result.items[0].name).toBe("After");
       expect(result.items[0].images).toBe(images);
       expect(result.items[1].name).toBe("Other");
+    });
+
+    it("preserves the existing item's images when the response omits them", () => {
+      // Regression for the handleCellEdit path (sponsor-forms-manage-items.js)
+      // which saves via this action with no follow-up refetch - a response
+      // that omits images must not clobber the row's thumbnail.
+      const images = [{ id: 20, file_url: "https://cdn/img.png" }];
+      const state = {
+        ...DEFAULT_STATE,
+        items: [buildItem({ id: 1, name: "Before", images })]
+      };
+
+      const result = sponsorCustomizedFormItemsListReducer(state, {
+        type: SPONSOR_FORM_MANAGED_ITEM_UPDATED,
+        payload: {
+          response: buildItem({
+            id: 1,
+            name: "After",
+            early_bird_rate: 500,
+            images: undefined
+          })
+        }
+      });
+
+      expect(result.items[0].name).toBe("After");
+      expect(result.items[0].images).toBe(images);
     });
   });
 });

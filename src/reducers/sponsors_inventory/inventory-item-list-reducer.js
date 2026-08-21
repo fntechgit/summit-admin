@@ -23,7 +23,8 @@ import {
   SET_SELECTED_ALL_INVENTORY_ITEMS,
   INVENTORY_ITEM_ARCHIVED,
   INVENTORY_ITEM_UNARCHIVED,
-  INVENTORY_ITEM_IMAGE_SAVED
+  INVENTORY_ITEM_IMAGE_SAVED,
+  INVENTORY_ITEM_IMAGE_DELETED
 } from "../../actions/inventory-item-actions";
 import { getSafePageAfterRemove } from "../../utils/methods";
 
@@ -242,6 +243,18 @@ const inventoryItemListReducer = (state = DEFAULT_STATE, action = {}) => {
       const updatedInventoryItems = state.inventoryItems.map((item) =>
         item.id === newImage.inventory_item_id
           ? { ...item, images: imageArray }
+          : item
+      );
+      return { ...state, inventoryItems: updatedInventoryItems };
+    }
+    case INVENTORY_ITEM_IMAGE_DELETED: {
+      const { fileId, inventoryItemId } = payload;
+      const updatedInventoryItems = state.inventoryItems.map((item) =>
+        item.id === inventoryItemId
+          ? {
+              ...item,
+              images: item.images?.filter((img) => img.id !== fileId) ?? []
+            }
           : item
       );
       return { ...state, inventoryItems: updatedInventoryItems };

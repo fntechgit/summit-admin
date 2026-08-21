@@ -21,8 +21,10 @@ import {
   SPONSOR_CUSTOMIZED_FORM_ITEM_DELETED,
   SPONSOR_CUSTOMIZED_FORM_ITEM_UNARCHIVED,
   SPONSOR_FORM_MANAGED_ITEM_UPDATED,
+  SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED,
   SPONSOR_CUSTOMIZED_FORM_ITEMS_ADDED,
-  RESET_SPONSOR_FORM_MANAGED_ITEM
+  RESET_SPONSOR_FORM_MANAGED_ITEM,
+  SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { getSafePageAfterRemove } from "../../utils/methods";
@@ -111,13 +113,46 @@ const sponsorCustomizedFormItemsListReducer = (
 
       const currentItem = {
         ...item,
-        images: (item.images || []).map((img) => ({
-          ...img,
-          file_path: img.file_url
-        })),
+        images: item.images ?? [],
         meta_fields: (item.meta_fields ?? []).length > 0 ? item.meta_fields : []
       };
       return { ...state, currentItem };
+    }
+    case SPONSOR_CUSTOMIZED_FORM_ITEM_IMAGE_DELETED: {
+      const { fileId, itemId } = payload;
+      const currentItem =
+        state.currentItem.id === itemId
+          ? {
+              ...state.currentItem,
+              images:
+                state.currentItem.images?.filter((img) => img.id !== fileId) ??
+                []
+            }
+          : state.currentItem;
+      const items = state.items.map((item) =>
+        item.id === itemId
+          ? { ...item, images: item.images?.filter((img) => img.id !== fileId) }
+          : item
+      );
+      return { ...state, currentItem, items };
+    }
+    case SPONSOR_FORM_MANAGED_ITEM_IMAGE_ADDED: {
+      const { response: image, itemId } = payload;
+      const currentItem =
+        state.currentItem.id === itemId
+          ? {
+              ...state.currentItem,
+              images: [...(state.currentItem.images ?? []), image]
+            }
+          : state.currentItem;
+
+      const items = state.items.map((item) =>
+        item.id === itemId
+          ? { ...item, images: [...(item.images ?? []), image] }
+          : item
+      );
+
+      return { ...state, currentItem, items };
     }
     case SPONSOR_CUSTOMIZED_FORM_ITEM_DELETED: {
       const { itemId } = payload;
@@ -166,7 +201,7 @@ const sponsorCustomizedFormItemsListReducer = (
               onsite_rate: formatRateFromCents(updatedItem.onsite_rate),
               default_quantity: updatedItem.default_quantity,
               is_archived: updatedItem.is_archived,
-              images: updatedItem.images
+              images: updatedItem.images ?? item.images
             }
           : item
       );

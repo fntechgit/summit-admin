@@ -8,7 +8,10 @@ import {
   RESET_SPONSOR_FORM_ITEM,
   SPONSOR_FORM_ITEM_ARCHIVED,
   SPONSOR_FORM_ITEM_DELETED,
-  SPONSOR_FORM_ITEM_UNARCHIVED
+  SPONSOR_FORM_ITEM_FILE_DELETED,
+  SPONSOR_FORM_ITEM_IMAGE_ADDED,
+  SPONSOR_FORM_ITEM_UNARCHIVED,
+  SPONSOR_FORM_ITEM_UPDATED
 } from "../../../actions/sponsor-forms-actions";
 
 function createDefaultState() {
@@ -189,6 +192,55 @@ describe("SponsorFormItemsListReducer", () => {
         }
       });
     });
+
+    it("keeps images in their API shape (id, file_url) without a file_path mapping", () => {
+      const item = {
+        id: "A",
+        code: "A",
+        name: "A",
+        early_bird_rate: 100,
+        standard_rate: 100,
+        onsite_rate: 100,
+        default_quantity: "100",
+        is_archived: true,
+        images: [
+          { id: 10, file_url: "https://cdn/a.png" },
+          { id: 11, file_url: "https://cdn/b.png" }
+        ],
+        meta_fields: []
+      };
+
+      result = SponsorFormItemsListReducer(initialState, {
+        type: RECEIVE_SPONSOR_FORM_ITEM,
+        payload: { response: item }
+      });
+
+      expect(result.currentItem.images).toEqual([
+        { id: 10, file_url: "https://cdn/a.png" },
+        { id: 11, file_url: "https://cdn/b.png" }
+      ]);
+    });
+
+    it("defaults images to [] when the response omits the field", () => {
+      const item = {
+        id: "A",
+        code: "A",
+        name: "A",
+        early_bird_rate: 100,
+        standard_rate: 100,
+        onsite_rate: 100,
+        default_quantity: "100",
+        is_archived: true,
+        meta_fields: []
+      };
+
+      result = SponsorFormItemsListReducer(initialState, {
+        type: RECEIVE_SPONSOR_FORM_ITEM,
+        payload: { response: item }
+      });
+
+      expect(result.currentItem.images).toEqual([]);
+    });
   });
 
   describe("RESET_SPONSOR_FORM_ITEM", () => {
@@ -265,6 +317,263 @@ describe("SponsorFormItemsListReducer", () => {
           }
         ]
       });
+    });
+  });
+
+  describe("SPONSOR_FORM_ITEM_FILE_DELETED", () => {
+    it("removes the image from currentItem and its matching list item", () => {
+      const state = {
+        ...initialState,
+        currentItem: {
+          ...initialState.currentItem,
+          id: "A",
+          images: [{ id: "IMG_1" }, { id: "IMG_2" }]
+        },
+        items: [
+          { id: "A", images: [{ id: "IMG_1" }, { id: "IMG_2" }] },
+          { id: "B", images: [{ id: "IMG_3" }] }
+        ]
+      };
+
+      result = SponsorFormItemsListReducer(state, {
+        type: SPONSOR_FORM_ITEM_FILE_DELETED,
+        payload: { fileId: "IMG_1", itemId: "A" }
+      });
+
+      expect(result.currentItem.images).toStrictEqual([{ id: "IMG_2" }]);
+      expect(result.items).toStrictEqual([
+        { id: "A", images: [{ id: "IMG_2" }] },
+        { id: "B", images: [{ id: "IMG_3" }] }
+      ]);
+    });
+
+    it("leaves currentItem untouched when the deleted file belongs to a different item", () => {
+      const state = {
+        ...initialState,
+        currentItem: {
+          ...initialState.currentItem,
+          id: "B",
+          images: [{ id: "IMG_3" }]
+        },
+        items: [
+          { id: "A", images: [{ id: "IMG_1" }] },
+          { id: "B", images: [{ id: "IMG_3" }] }
+        ]
+      };
+
+      result = SponsorFormItemsListReducer(state, {
+        type: SPONSOR_FORM_ITEM_FILE_DELETED,
+        payload: { fileId: "IMG_1", itemId: "A" }
+      });
+
+      expect(result.currentItem).toStrictEqual(state.currentItem);
+      expect(result.items).toStrictEqual([
+        { id: "A", images: [] },
+        { id: "B", images: [{ id: "IMG_3" }] }
+      ]);
+    });
+
+    it("defaults the matching list item's images to [] when it has none", () => {
+      const state = {
+        ...initialState,
+        currentItem: {
+          ...initialState.currentItem,
+          id: "A",
+          images: undefined
+        },
+        items: [
+          { id: "A", images: undefined },
+          { id: "B", images: [{ id: "IMG_3" }] }
+        ]
+      };
+
+      result = SponsorFormItemsListReducer(state, {
+        type: SPONSOR_FORM_ITEM_FILE_DELETED,
+        payload: { fileId: "IMG_1", itemId: "A" }
+      });
+
+      expect(result.currentItem.images).toStrictEqual([]);
+      expect(result.items[0].images).toStrictEqual([]);
+    });
+  });
+
+  describe("SPONSOR_FORM_ITEM_IMAGE_ADDED", () => {
+    it.each([
+      [
+        "with existing images",
+        [{ id: "IMG_1" }],
+        { id: "IMG_2" },
+        [{ id: "IMG_1" }, { id: "IMG_2" }]
+      ],
+      [
+        "with no images (undefined)",
+        undefined,
+        { id: "IMG_1" },
+        [{ id: "IMG_1" }]
+      ]
+    ])(
+      "appends the new image to currentItem and its matching list item (%s)",
+      (_label, initialImages, newImage, expectedImages) => {
+        const state = {
+          ...initialState,
+          currentItem: {
+            ...initialState.currentItem,
+            id: "A",
+            images: initialImages
+          },
+          items: [
+            { id: "A", images: initialImages },
+            { id: "B", images: [{ id: "IMG_3" }] }
+          ]
+        };
+
+        result = SponsorFormItemsListReducer(state, {
+          type: SPONSOR_FORM_ITEM_IMAGE_ADDED,
+          payload: { response: newImage, itemId: "A" }
+        });
+
+        expect(result.currentItem.images).toStrictEqual(expectedImages);
+        expect(result.items).toStrictEqual([
+          { id: "A", images: expectedImages },
+          { id: "B", images: [{ id: "IMG_3" }] }
+        ]);
+      }
+    );
+
+    it("leaves currentItem untouched when the new image belongs to a different item", () => {
+      const state = {
+        ...initialState,
+        currentItem: {
+          ...initialState.currentItem,
+          id: "B",
+          images: [{ id: "IMG_3" }]
+        },
+        items: [
+          { id: "A", images: [{ id: "IMG_1" }] },
+          { id: "B", images: [{ id: "IMG_3" }] }
+        ]
+      };
+
+      result = SponsorFormItemsListReducer(state, {
+        type: SPONSOR_FORM_ITEM_IMAGE_ADDED,
+        payload: { response: { id: "IMG_2" }, itemId: "A" }
+      });
+
+      expect(result.currentItem).toStrictEqual(state.currentItem);
+      expect(result.items).toStrictEqual([
+        { id: "A", images: [{ id: "IMG_1" }, { id: "IMG_2" }] },
+        { id: "B", images: [{ id: "IMG_3" }] }
+      ]);
+    });
+  });
+
+  describe("SPONSOR_FORM_ITEM_UPDATED", () => {
+    it("replaces the matching list item's fields from the response", () => {
+      const state = {
+        ...initialState,
+        items: [
+          {
+            id: "A",
+            code: "A",
+            name: "Before",
+            early_bird_rate: "$1.00",
+            standard_rate: "$1.00",
+            onsite_rate: "$1.00",
+            default_quantity: "100",
+            is_archived: false,
+            images: [{ id: "IMG_1" }]
+          },
+          {
+            id: "B",
+            code: "B",
+            name: "B",
+            early_bird_rate: "$1.00",
+            standard_rate: "$1.00",
+            onsite_rate: "$1.00",
+            default_quantity: "100",
+            is_archived: false,
+            images: []
+          }
+        ]
+      };
+
+      result = SponsorFormItemsListReducer(state, {
+        type: SPONSOR_FORM_ITEM_UPDATED,
+        payload: {
+          response: {
+            id: "A",
+            code: "A",
+            name: "After",
+            early_bird_rate: 500,
+            standard_rate: 600,
+            onsite_rate: 700,
+            default_quantity: "200",
+            is_archived: true
+          }
+        }
+      });
+
+      expect(result.items).toStrictEqual([
+        {
+          id: "A",
+          code: "A",
+          name: "After",
+          early_bird_rate: "$5.00",
+          standard_rate: "$6.00",
+          onsite_rate: "$7.00",
+          default_quantity: "200",
+          is_archived: true,
+          images: [{ id: "IMG_1" }]
+        },
+        {
+          id: "B",
+          code: "B",
+          name: "B",
+          early_bird_rate: "$1.00",
+          standard_rate: "$1.00",
+          onsite_rate: "$1.00",
+          default_quantity: "100",
+          is_archived: false,
+          images: []
+        }
+      ]);
+    });
+
+    it("leaves the list unchanged when the updated item isn't in the current page (e.g. a freshly created item)", () => {
+      const state = {
+        ...initialState,
+        items: [
+          {
+            id: "B",
+            code: "B",
+            name: "B",
+            early_bird_rate: "$1.00",
+            standard_rate: "$1.00",
+            onsite_rate: "$1.00",
+            default_quantity: "100",
+            is_archived: false,
+            images: []
+          }
+        ]
+      };
+
+      result = SponsorFormItemsListReducer(state, {
+        type: SPONSOR_FORM_ITEM_UPDATED,
+        payload: {
+          response: {
+            id: "NEW",
+            code: "NEW",
+            name: "New item",
+            early_bird_rate: 100,
+            standard_rate: 100,
+            onsite_rate: 100,
+            default_quantity: "1",
+            is_archived: false
+          }
+        }
+      });
+
+      expect(result.items).toStrictEqual(state.items);
     });
   });
 

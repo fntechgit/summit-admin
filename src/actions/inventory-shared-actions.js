@@ -234,7 +234,11 @@ export const saveFiles =
       if (file.id) {
         return putRequest(
           null,
-          createAction(settings.updatedActionName),
+          ({ response }) =>
+            createAction(settings.updatedActionName)({
+              response,
+              ...settings.payload
+            }),
           `${settings.url}${file.id}/`,
           file,
           snackbarErrorHandler,
@@ -243,7 +247,11 @@ export const saveFiles =
       }
       return postRequest(
         null,
-        createAction(settings.addedActionName),
+        ({ response }) =>
+          createAction(settings.addedActionName)({
+            response,
+            ...settings.payload
+          }),
         settings.url,
         file,
         snackbarErrorHandler,
@@ -261,7 +269,7 @@ export const deleteFile =
 
     if (!settingsValidation.isValid) {
       console.error(settingsValidation.error);
-      return;
+      return false;
     }
     const accessToken = await getAccessTokenSafely();
 
@@ -273,13 +281,16 @@ export const deleteFile =
 
     return deleteRequest(
       null,
-      createAction(settings.deletedActionName)({ fileId }),
+      createAction(settings.deletedActionName)({ fileId, ...settings.payload }),
       `${settings.url}/${fileId}`,
       null,
-      snackbarErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+      settings.errorHandler ?? snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => true)
+      .catch(() => false)
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 /* ************************************  ARCHIVE  ************************************ */

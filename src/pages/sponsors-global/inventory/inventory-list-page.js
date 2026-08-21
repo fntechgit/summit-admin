@@ -149,6 +149,14 @@ const InventoryListPage = ({
       ? unarchiveInventoryItem(item)
       : archiveInventoryItem(item);
 
+  const handleRemoveImage = (imageId) => {
+    if (!currentInventoryItem?.id) return;
+    const itemId = currentInventoryItem.id;
+    deleteInventoryItemImage(itemId, imageId).then((success) => {
+      if (!success) getInventoryItem(itemId).catch(() => {});
+    });
+  };
+
   const columns = [
     {
       columnKey: "code",
@@ -291,7 +299,7 @@ const InventoryListPage = ({
           onClose={handleClose}
           onMetaFieldTypeDeleted={deleteInventoryItemMetaFieldType}
           onMetaFieldTypeValueDeleted={deleteInventoryItemMetaFieldTypeValue}
-          onImageDeleted={deleteInventoryItemImage}
+          onImageDeleted={handleRemoveImage}
         />
       )}
     </div>
@@ -312,7 +320,6 @@ export default connect(mapStateToProps, {
   getInventoryItem,
   resetInventoryItemForm,
   saveInventoryItem,
-
   deleteInventoryItemImage,
   deleteInventoryItemMetaFieldType,
   deleteInventoryItemMetaFieldTypeValue,

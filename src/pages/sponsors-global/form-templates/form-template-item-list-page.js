@@ -187,6 +187,14 @@ const FormTemplateItemListPage = ({
       ).catch(() => {})
     );
 
+  const handleRemoveImage = (imageId) => {
+    if (!currentFormTemplateItem?.id) return;
+    const itemId = currentFormTemplateItem.id;
+    deleteItemImage(formTemplateId, itemId, imageId).then((success) => {
+      if (!success) getFormTemplateItem(formTemplateId, itemId).catch(() => {});
+    });
+  };
+
   const columns = [
     {
       columnKey: "code",
@@ -319,7 +327,7 @@ const FormTemplateItemListPage = ({
           onClose={() => setShowInventoryItemModal(false)}
           onMetaFieldTypeDeleted={deleteItemMetaFieldType}
           onMetaFieldTypeValueDeleted={deleteItemMetaFieldTypeValue}
-          onImageDeleted={deleteItemImage}
+          onImageDeleted={handleRemoveImage}
         />
       )}
     </div>
