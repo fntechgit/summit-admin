@@ -1431,7 +1431,8 @@ export const saveBadgeScan = (entity) => async (dispatch, getState) => {
   dispatch(startLoading());
 
   const params = {
-    access_token: accessToken
+    access_token: accessToken,
+    expand: "extra_questions"
   };
 
   const normalizedEntity = normalizeBadgeScan(entity);
