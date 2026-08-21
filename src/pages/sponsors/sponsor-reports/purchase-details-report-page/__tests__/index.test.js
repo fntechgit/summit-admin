@@ -651,6 +651,58 @@ describe("PurchaseDetailsReportPage", () => {
       );
     });
 
+    it("offers Show canceled as its own control, not derived from the status", () => {
+      // The status dropdown cannot reach the line-level axis: `status==Canceled`
+      // resolves to the PARENT order's status server-side, so it can never
+      // surface a canceled line inside a Paid order. The checkbox is the only
+      // way to ask for those rows.
+      renderPage();
+      expect(
+        screen.getByLabelText("sponsor_reports_page.filter_show_canceled")
+      ).toBeInTheDocument();
+    });
+
+    it("applies showCanceled with no status selected", async () => {
+      renderPage();
+      await act(async () => {});
+      getPurchaseDetailsReport.mockClear();
+
+      await act(async () => {
+        fireEvent.click(
+          screen.getByLabelText("sponsor_reports_page.filter_show_canceled")
+        );
+      });
+      await act(async () => {
+        fireEvent.click(screen.getByText("sponsor_reports_page.apply"));
+      });
+
+      const [[calledFilters]] = getPurchaseDetailsReport.mock.calls;
+      expect(calledFilters).toMatchObject({ showCanceled: true });
+      // No status clause rides along — that is the whole point of the axis.
+      expect(calledFilters.status).toBeUndefined();
+    });
+
+    it("describes the extra line-level axis on the line views only", async () => {
+      // The order grain hides canceled ORDERS; the line grains additionally hide
+      // individually canceled LINES. One string for both is wrong on one of them.
+      renderPage();
+      await act(async () => {});
+      expect(document.querySelector("i.fa-info-circle")).toHaveAttribute(
+        "title",
+        "sponsor_reports_page.filter_status_info"
+      );
+
+      await act(async () => {
+        fireEvent.click(
+          screen.getByText("sponsor_reports_page.view_line_items")
+        );
+      });
+      expect(document.querySelector("i.fa-info-circle")).toHaveAttribute(
+        "title",
+        "sponsor_reports_page.filter_status_info_lines"
+      );
+    });
+
     it("associates that note with the status control for screen readers", () => {
       // Rendering the note NEAR the control is not the same as announcing it
       // WITH the control. The note is a sibling, not a FormControl child, so

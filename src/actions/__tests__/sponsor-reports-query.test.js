@@ -51,6 +51,42 @@ describe("buildReportQuery", () => {
     });
   });
 
+  it("sets include_cancelled from showCanceled with no status clause", () => {
+    // The point of the separate axis: `status==Canceled` resolves to the parent
+    // order's status at line grain, so deriving include_cancelled from the status
+    // value alone can never surface a canceled line inside a Paid order. The
+    // checkbox must open the flag WITHOUT emitting a status filter.
+    expect(buildReportQuery({ showCanceled: true })).toStrictEqual({
+      include_cancelled: "true"
+    });
+  });
+
+  it("keeps the status coupling when only the status is Canceled", () => {
+    // Guard against "fixing" this by replacing the coupling with the checkbox:
+    // the orders endpoint excludes Canceled by default, so a Canceled selection
+    // without the flag returns zero rows and the dropdown option goes dead.
+    expect(buildReportQuery({ status: "Canceled" }).include_cancelled).toBe(
+      "true"
+    );
+  });
+
+  it("emits include_cancelled once when both axes are on", () => {
+    expect(
+      buildReportQuery({ status: "Canceled", showCanceled: true })
+    ).toStrictEqual({
+      "filter[]": ["status==Canceled"],
+      include_cancelled: "true"
+    });
+  });
+
+  it("omits include_cancelled when showCanceled is false", () => {
+    expect(
+      buildReportQuery({ status: "Paid", showCanceled: false })
+    ).toStrictEqual({
+      "filter[]": ["status==Paid"]
+    });
+  });
+
   it("passes through search/order/pagination", () => {
     expect(
       buildReportQuery({

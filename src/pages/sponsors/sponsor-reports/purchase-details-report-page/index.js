@@ -16,7 +16,7 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import moment from "moment-timezone";
 import T from "i18n-react/dist/i18n-react";
-import { Alert, Box, Button } from "@mui/material";
+import { Alert, Box, Button, Checkbox, FormControlLabel } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 import PrintIcon from "@mui/icons-material/Print";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -60,6 +60,14 @@ const REPORT_DATE_FORMAT = "YYYY-MM-DD";
 // Shared by the visually-hidden copy of the Purchase Status note and the
 // aria-describedby that points at it, so the two cannot drift apart.
 const STATUS_NOTE_ID = "pd-filter-status-note";
+// The canceled-default note is grain-aware: the order grain hides canceled
+// ORDERS, while the line grains additionally hide individually canceled LINES
+// (a separate axis — a soft-canceled line sits inside a Paid order). One string
+// for both would be wrong on one of them.
+const statusNoteKey = (view) =>
+  view === "orders"
+    ? "sponsor_reports_page.filter_status_info"
+    : "sponsor_reports_page.filter_status_info_lines";
 // The uicore picker emits moment(0) (epoch) on a CLEAR, not null — treat that
 // sentinel as "no date" so clearing removes the filter instead of sending
 // date>=1970-01-01. This matches the house filter convention (`.unix() || null`
@@ -368,12 +376,32 @@ const PurchaseDetailsReportPage = ({
         <i
           className="fa fa-info-circle"
           aria-hidden="true"
-          title={T.translate("sponsor_reports_page.filter_status_info")}
+          title={T.translate(statusNoteKey(view))}
         />
         <Box component="span" id={STATUS_NOTE_ID} sx={visuallyHidden}>
-          {T.translate("sponsor_reports_page.filter_status_info")}
+          {T.translate(statusNoteKey(view))}
         </Box>
       </Box>
+      {/* The second cancellation axis, which the status dropdown cannot reach:
+          `status==Canceled` resolves to the PARENT order's status at line grain,
+          so it can never surface a canceled line inside a Paid order. Kept on
+          every grain rather than the line views only, so the control does not
+          appear and vanish as the user toggles views (the filter object is
+          carried across the switch, and a hidden control holding a live filter
+          is the silent-filter bug this report just fixed elsewhere). */}
+      <FormControlLabel
+        control={
+          <Checkbox
+            id="pd-filter-show-canceled"
+            size="small"
+            checked={Boolean(draft.showCanceled)}
+            onChange={(e) =>
+              update({ showCanceled: e.target.checked || undefined })
+            }
+          />
+        }
+        label={T.translate("sponsor_reports_page.filter_show_canceled")}
+      />
       <Box sx={{ width: 200 }}>
         <MuiDropdown
           id="pd-filter-form"

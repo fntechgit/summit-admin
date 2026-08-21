@@ -180,6 +180,7 @@ export const buildReportQuery = (filters = {}) => {
     mediaRequestType,
     dateFrom,
     dateTo,
+    showCanceled,
     search,
     order,
     page,
@@ -222,8 +223,14 @@ export const buildReportQuery = (filters = {}) => {
   if (order) query.order = order;
   if (page != null) query.page = page;
   if (perPage != null) query.per_page = perPage;
-  // Canceled is excluded server-side by default.
-  if (status === "Canceled") query.include_cancelled = "true";
+  // Canceled is excluded server-side by default, on TWO independent axes: the
+  // order's status, and a line's own canceled_at (a soft-canceled line leaves its
+  // parent order Paid). Selecting the Canceled status must keep implying this, or
+  // that option would return nothing at order grain -- but it can't be the only
+  // way in, because `status==Canceled` resolves to `purchase__status` at line
+  // grain, which excludes the soft-canceled-line rows it is meant to reveal.
+  // Hence the OR: the checkbox opens the second axis without closing the first.
+  if (status === "Canceled" || showCanceled) query.include_cancelled = "true";
 
   return query;
 };
