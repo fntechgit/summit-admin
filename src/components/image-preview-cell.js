@@ -36,11 +36,11 @@ export const ImagePreviewCell = React.memo(
     return (
       <>
         <IconButton
-          size="small"
+          size="medium"
           aria-label={T.translate("preview_modal.title")}
           onClick={() => setOpen(true)}
         >
-          <ImageIcon fontSize="small" />
+          <ImageIcon fontSize="large" />
         </IconButton>
 
         {open && (
