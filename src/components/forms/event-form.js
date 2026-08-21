@@ -745,15 +745,8 @@ class EventForm extends React.Component {
     return entity.class_name === "Presentation";
   }
 
-  // The API's isSubmissionReopened() requires three things: the plan enabled, its
-  // submission window actually ended, and a live grant. Keying the UI on the grant
-  // alone lets it announce a deadline the server no longer treats as operative --
-  // e.g. an admin grants a reopen, then extends the plan's submission_end_date past
-  // it, and the speaker is editing under normal open-window rules again.
-  // entity comes from state, not props, because that is what the render gate reads.
-  // handleChangeSelectionPlan writes selection_plan_id into state without saving, and
-  // componentDidUpdate only syncs the other way, so reading props here would judge
-  // eligibility against the persisted plan while the form displays a different one.
+  // entity from state, not props: handleChangeSelectionPlan writes the plan into
+  // state without saving, so props would judge a plan the form is not showing.
   isReopenApplicable() {
     const { selectionPlansOpts } = this.props;
     const { entity } = this.state;
@@ -766,10 +759,8 @@ class EventForm extends React.Component {
     return moment().unix() > plan.submission_end_date;
   }
 
-  // The panel title and the section body MUST share one gate. Keying the title on
-  // isSubmissionReopened() alone would announce a deadline in exactly the case the
-  // comment on isReopenApplicable describes: a live grant whose plan window was
-  // since extended, which the server no longer treats as operative.
+  // Title and section body must share this gate: a grant whose plan window was
+  // since extended is no longer the operative deadline.
   isReopenSectionVisible() {
     const { entity } = this.state;
     return (
@@ -794,6 +785,15 @@ class EventForm extends React.Component {
       entity.submission_reopened_until,
       currentSummit.time_zone_id
     );
+  }
+
+  getMaterialsPanelTitle() {
+    if (!this.isReopenSectionVisible() || !this.isSubmissionReopened()) {
+      return T.translate("edit_event.materials");
+    }
+    return T.translate("edit_event.materials_reopened", {
+      deadline: this.getReopenDeadline().format(REOPEN_DEADLINE_FORMAT)
+    });
   }
 
   // Mirrors the server's CFP_MAX_REOPEN_HOURS so an over-ceiling value is caught
@@ -1969,15 +1969,7 @@ class EventForm extends React.Component {
           <Panel
             id="materials"
             show={showSection === "materials"}
-            title={
-              this.isReopenSectionVisible() && this.isSubmissionReopened()
-                ? T.translate("edit_event.materials_reopened", {
-                    deadline: this.getReopenDeadline().format(
-                      REOPEN_DEADLINE_FORMAT
-                    )
-                  })
-                : T.translate("edit_event.materials")
-            }
+            title={this.getMaterialsPanelTitle()}
             handleClick={this.toggleSection.bind(this, "materials")}
           >
             <button

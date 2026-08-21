@@ -57,8 +57,6 @@ describe("EventForm", () => {
       sponsors: [],
       tags: [],
       extra_questions: [],
-      // The Materials panel is expanded by renderEventForm, so uicore's Table now
-      // actually mounts and maps over this.
       materials: []
     },
     errors: {},
@@ -85,10 +83,8 @@ describe("EventForm", () => {
     onClone: jest.fn()
   };
 
-  // The reopen section lives inside the Materials panel, and uicore's Panel mounts
-  // its children only while expanded, so every assertion here needs it open first.
-  // queryByText, not getByText: the panel itself is gated on a saved presentation,
-  // and the tests that assert the control is absent pass entities that suppress it.
+  // Panel mounts children only while expanded. queryByText, not getByText: the
+  // absence tests pass entities that suppress the panel itself.
   const renderEventForm = (overrides = {}) => {
     const result = render(<EventForm {...baseProps} {...overrides} />);
     const materialsHeading = screen.queryByText(/^edit_event\.materials/, {
@@ -414,10 +410,7 @@ describe("EventForm", () => {
     it("announces the deadline on the collapsed Materials panel title", () => {
       renderEventForm({ entity: grantedEntity });
 
-      // renderEventForm leaves the panel open. Collapse it again: the header
-      // reading without expanding is the whole point of it, so asserting while
-      // expanded passes even when the title is gated on showSection. Asserting
-      // the body is unmounted keeps it that way.
+      // Collapsed is the point: expanded passes even if gated on showSection.
       fireEvent.click(
         screen.getByText(/^edit_event\.materials/, { selector: ".panel-title" })
       );
