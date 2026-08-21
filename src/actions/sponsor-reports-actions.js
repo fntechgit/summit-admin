@@ -180,6 +180,7 @@ export const buildReportQuery = (filters = {}) => {
     mediaRequestType,
     dateFrom,
     dateTo,
+    showCanceled,
     search,
     order,
     page,
@@ -222,8 +223,14 @@ export const buildReportQuery = (filters = {}) => {
   if (order) query.order = order;
   if (page != null) query.page = page;
   if (perPage != null) query.per_page = perPage;
-  // Canceled is excluded server-side by default.
-  if (status === "Canceled") query.include_cancelled = "true";
+  // Canceled is excluded server-side by default, on TWO independent axes: the
+  // order's status, and a line's own canceled_at (a soft-canceled line leaves its
+  // parent order Paid). Selecting the Canceled status must keep implying this, or
+  // that option would return nothing at order grain -- but it can't be the only
+  // way in, because `status==Canceled` resolves to `purchase__status` at line
+  // grain, which excludes the soft-canceled-line rows it is meant to reveal.
+  // Hence the OR: the checkbox opens the second axis without closing the first.
+  if (status === "Canceled" || showCanceled) query.include_cancelled = "true";
 
   return query;
 };
@@ -259,13 +266,11 @@ export const buildPurchaseQuery = (
 
 // Lines grain: same date expansion, NO order (manifest relies on backend default
 // ordering). Used by the on-screen lines fetch AND exportPurchaseDetailsLinesCsv.
-// The lines endpoint's filter set omits payment_method (it's an order-level
-// attribute), so drop it here rather than emit a clause BaseFilter silently
-// ignores. The UI also hides the Payment Method control in the Line Items view.
-export const buildPurchaseLinesQuery = (
-  { paymentMethod: _paymentMethod, ...filters } = {},
-  { page, perPage } = {}
-) => buildReportQuery({ ...expandDates(filters), page, perPage });
+// payment_method IS supported at line grain (declared on PurchaseLineDetailsFilter
+// via the parent hop). It used to be dropped here, which is why applying it and
+// switching grain silently widened the result set instead of narrowing it.
+export const buildPurchaseLinesQuery = (filters = {}, { page, perPage } = {}) =>
+  buildReportQuery({ ...expandDates(filters), page, perPage });
 
 export const getPurchaseDetailsReport =
   (filters = {}, pagination = {}) =>
@@ -516,7 +521,7 @@ export const getPurchaseDetailsByItemRows =
     guardedDispatch(
       createAction(REQUEST_PURCHASE_DETAILS_BY_ITEM)({ filters })
     );
-    // Lines-grain query (drops paymentMethod); one arg → no page/per_page emitted.
+    // Lines-grain query (carries paymentMethod through); one arg → no page/per_page emitted.
     const baseQuery = buildPurchaseLinesQuery(filters);
     const url = `${base(currentSummit.id)}/purchase-details/lines`;
     const fetchPage = (page) =>

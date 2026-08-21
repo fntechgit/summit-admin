@@ -1233,7 +1233,7 @@ describe("sponsor-reports-actions", () => {
     const rowC = { item_code: "C1", quantity: 3 };
     const page1Summary = { total_orders: 11 };
 
-    it("records the active filters on REQUEST and hits the lines endpoint without paymentMethod", async () => {
+    it("records the active filters on REQUEST and hits the lines endpoint with paymentMethod", async () => {
       const store = mockStore(MOCK_STATE);
       const filters = { sponsorIds: [17], paymentMethod: "Card" };
       await store.dispatch(getPurchaseDetailsByItemRows(filters));
@@ -1250,11 +1250,12 @@ describe("sponsor-reports-actions", () => {
       expect(capturedUrl).toContain(
         "/summits/42/reports/purchase-details/lines"
       );
-      // buildPurchaseLinesQuery drops paymentMethod (order-level attribute).
+      // buildPurchaseLinesQuery now carries paymentMethod through (declared on
+      // the lines filter set via the parent hop).
       const filterClauses = capturedParams["filter[]"] || [];
       expect(
         filterClauses.some((c) => String(c).includes("payment_method"))
-      ).toBe(false);
+      ).toBe(true);
     });
 
     it("bulk-loads all pages (page 1, then the rest in parallel) into one atomic RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS", async () => {
