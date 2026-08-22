@@ -11,82 +11,144 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Divider, Grid2, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Checkbox,
+  Divider,
+  Grid2,
+  Typography
+} from "@mui/material";
 
-const SponsorHeader = ({ sponsor }) => (
-  <Box sx={{ px: 2, py: 0, backgroundColor: "#FFF" }}>
-    <Grid2 container size={12} sx={{ height: "68px", alignItems: "center" }}>
-      <Grid2 size={12}>
-        <Typography
-          sx={{
-            fontWeight: "500",
-            letterSpacing: "0.15px",
-            fontSize: "2rem",
-            lineHeight: "1.6rem"
-          }}
+const SponsorHeader = ({ sponsor, onSave }) => {
+  const [isPublished, setIsPublished] = useState(sponsor.is_published);
+
+  useEffect(() => {
+    setIsPublished(sponsor.is_published);
+  }, [sponsor.id, sponsor.is_published]);
+
+  const handlePublishSave = () => {
+    const entity = { id: sponsor.id, is_published: isPublished };
+    onSave(entity);
+  };
+
+  return (
+    <Box sx={{ px: 2, py: 0, backgroundColor: "#FFF" }}>
+      <Grid2 container size={12} sx={{ height: "68px", alignItems: "center" }}>
+        <Grid2 size={12}>
+          <Typography
+            sx={{
+              fontWeight: "500",
+              letterSpacing: "0.15px",
+              fontSize: "2rem",
+              lineHeight: "1.6rem"
+            }}
+          >
+            {T.translate("edit_sponsor.general_information")}
+          </Typography>
+        </Grid2>
+      </Grid2>
+      <Divider />
+      <Grid2
+        container
+        size={12}
+        sx={{ height: "75px", gap: "10px", alignItems: "center" }}
+      >
+        <Grid2 size={3}>
+          <Typography
+            sx={{
+              fontSize: "1.4rem",
+              lineHeight: "1.57rem",
+              fontWeight: "500"
+            }}
+          >
+            {T.translate("edit_sponsor.sponsor_name")}
+          </Typography>
+        </Grid2>
+        <Grid2>{sponsor.company?.name}</Grid2>
+      </Grid2>
+      <Divider />
+      <Grid2
+        container
+        size={12}
+        sx={{ height: "75px", gap: "10px", alignItems: "center" }}
+      >
+        <Grid2 size={3}>
+          <Typography
+            sx={{
+              fontSize: "1.4rem",
+              lineHeight: "1.57rem",
+              fontWeight: "500"
+            }}
+          >
+            {T.translate("edit_sponsor.sponsor_address")}
+          </Typography>
+        </Grid2>
+        <Grid2>
+          {[
+            sponsor.company?.city,
+            sponsor.company?.state,
+            sponsor.company?.country
+          ]
+            // filter empty or undefined fields
+            .filter(Boolean)
+            .join(" - ")}
+          {sponsor.company?.contact_email && (
+            <>
+              &nbsp;
+              <a href={`mailto:${sponsor.company.contact_email}`}>
+                {sponsor.company.contact_email}
+              </a>
+            </>
+          )}
+        </Grid2>
+      </Grid2>
+      <Divider />
+      <Grid2
+        container
+        size={12}
+        sx={{ height: "75px", gap: "10px", alignItems: "center" }}
+      >
+        <Grid2 size={3}>
+          <Typography
+            id="sponsor-is-published-label"
+            sx={{
+              fontSize: "1.4rem",
+              lineHeight: "1.57rem",
+              fontWeight: "500"
+            }}
+          >
+            {T.translate("edit_sponsor.is_published")}
+          </Typography>
+        </Grid2>
+        <Grid2
+          container
+          size="grow"
+          sx={{ justifyContent: "space-between", alignItems: "center" }}
         >
-          {T.translate("edit_sponsor.general_information")}
-        </Typography>
+          <Checkbox
+            sx={{ display: "inline-block" }}
+            checked={isPublished}
+            onChange={() => setIsPublished(!isPublished)}
+            slotProps={{
+              input: {
+                "aria-labelledby": "sponsor-is-published-label"
+              }
+            }}
+          />
+          <Button
+            variant="contained"
+            onClick={handlePublishSave}
+            sx={{ height: "36px" }}
+          >
+            {T.translate("general.save")}
+          </Button>
+        </Grid2>
       </Grid2>
-    </Grid2>
-    <Divider />
-    <Grid2
-      container
-      size={12}
-      sx={{ height: "75px", gap: "10px", alignItems: "center" }}
-    >
-      <Grid2 size={3}>
-        <Typography
-          sx={{
-            fontSize: "1.4rem",
-            lineHeight: "1.57rem",
-            fontWeight: "500"
-          }}
-        >
-          {T.translate("edit_sponsor.sponsor_name")}
-        </Typography>
-      </Grid2>
-      <Grid2>{sponsor.company?.name}</Grid2>
-    </Grid2>
-    <Divider />
-    <Grid2
-      container
-      size={12}
-      sx={{ height: "75px", gap: "10px", alignItems: "center" }}
-    >
-      <Grid2 size={3}>
-        <Typography
-          sx={{
-            fontSize: "1.4rem",
-            lineHeight: "1.57rem",
-            fontWeight: "500"
-          }}
-        >
-          {T.translate("edit_sponsor.sponsor_address")}
-        </Typography>
-      </Grid2>
-      <Grid2>
-        {[
-          sponsor.company?.city,
-          sponsor.company?.state,
-          sponsor.company?.country
-        ]
-          // filter empty or undefined fields
-          .filter(Boolean)
-          .join(" - ")}
-        {sponsor.company?.contact_email && (
-          <>
-            &nbsp;
-            <a href={`mailto:${sponsor.company.contact_email}`}>
-              {sponsor.company.contact_email}
-            </a>
-          </>
-        )}
-      </Grid2>
-    </Grid2>
-  </Box>
-);
+    </Box>
+  );
+};
 
 export default SponsorHeader;
