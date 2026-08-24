@@ -898,7 +898,6 @@ class EventForm extends React.Component {
   }
 
   async handleNotifySpeakers() {
-    // Omitting this destructure leaves the button inert with the whole suite green.
     const { onNotifySubmissionReopened } = this.props;
     const { entity, notifyChecked } = this.state;
 

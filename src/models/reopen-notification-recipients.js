@@ -38,7 +38,7 @@ export const ROLE = {
   MODERATOR: "moderator"
 };
 
-export const normalizeEmail = (email) =>
+const normalizeEmail = (email) =>
   typeof email === "string" ? email.trim().toLowerCase() : "";
 
 const displayName = (person) => {

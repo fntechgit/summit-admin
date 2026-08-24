@@ -6,7 +6,6 @@ import EventForm from "../event-form";
 import currentSummitMock from "../../../__mocks__/currentSummitMock";
 import showConfirmDialog from "../../mui/showConfirmDialog";
 import {
-  normalizeEmail,
   buildRecipientRows,
   toNotifyPayload,
   ROLE
@@ -27,18 +26,6 @@ const speaker = (id, first, last, email) => ({
   first_name: first,
   last_name: last,
   email
-});
-
-describe("normalizeEmail", () => {
-  it("trims and lowercases", () => {
-    expect(normalizeEmail("  Ada@Example.COM ")).toBe("ada@example.com");
-  });
-
-  it("returns an empty string for a non-string", () => {
-    expect(normalizeEmail(undefined)).toBe("");
-    expect(normalizeEmail(null)).toBe("");
-    expect(normalizeEmail(42)).toBe("");
-  });
 });
 
 describe("buildRecipientRows", () => {
@@ -192,6 +179,8 @@ describe("buildRecipientRows", () => {
     });
 
     expect(rows[0].name).toBe("Grace@Example.com");
+    // The merge predicate is the trimmed, lowercased address.
+    expect(rows[0].email).toBe("grace@example.com");
   });
 
   it("tolerates a missing speakers array", () => {
