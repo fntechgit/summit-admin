@@ -86,6 +86,10 @@ const ROLE_LABEL = {
   [ROLE.SPEAKER]: "edit_event.notify_role_speaker"
 };
 
+// Row pitch matches the Extra Questions checkbox list (22px row + 7px gap = 29px).
+const NOTIFY_ROW_GAP = 7;
+const NOTIFY_BUTTON_GAP = 12;
+
 class EventForm extends React.Component {
   constructor(props) {
     super(props);
@@ -2205,42 +2209,55 @@ class EventForm extends React.Component {
                         <label>
                           {T.translate("edit_event.notify_recipients_label")}
                         </label>
-                        {recipientRows.map((row) => (
-                          <div
-                            className="form-check abc-checkbox"
-                            key={row.key}
-                          >
-                            <input
-                              type="checkbox"
-                              id={`notify_recipient_${row.key}`}
-                              className="form-check-input"
-                              disabled={row.disabled}
-                              checked={notifyChecked.includes(row.key)}
-                              onChange={() =>
-                                this.toggleNotifyRecipient(row.key)
-                              }
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor={`notify_recipient_${row.key}`}
+                        {/* Column gap rather than per-row margins, matching the
+                            reopen row above and giving the same 29px rhythm as the
+                            Extra Questions checkbox list. */}
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: NOTIFY_ROW_GAP,
+                            marginTop: NOTIFY_ROW_GAP
+                          }}
+                        >
+                          {recipientRows.map((row) => (
+                            <div
+                              className="form-check abc-checkbox"
+                              key={row.key}
                             >
-                              {row.name}
-                              &nbsp;-&nbsp;
-                              {row.roles
-                                .map((role) => T.translate(ROLE_LABEL[role]))
-                                .join(", ")}
-                            </label>
-                            {row.disabled && (
-                              <span>
-                                &nbsp;
-                                {T.translate("edit_event.notify_no_email")}
-                              </span>
-                            )}
-                          </div>
-                        ))}
+                              <input
+                                type="checkbox"
+                                id={`notify_recipient_${row.key}`}
+                                className="form-check-input"
+                                disabled={row.disabled}
+                                checked={notifyChecked.includes(row.key)}
+                                onChange={() =>
+                                  this.toggleNotifyRecipient(row.key)
+                                }
+                              />
+                              <label
+                                className="form-check-label"
+                                htmlFor={`notify_recipient_${row.key}`}
+                              >
+                                {row.name}
+                                &nbsp;-&nbsp;
+                                {row.roles
+                                  .map((role) => T.translate(ROLE_LABEL[role]))
+                                  .join(", ")}
+                              </label>
+                              {row.disabled && (
+                                <span>
+                                  &nbsp;
+                                  {T.translate("edit_event.notify_no_email")}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                         <button
                           type="button"
                           className="btn btn-primary"
+                          style={{ marginTop: NOTIFY_BUTTON_GAP }}
                           disabled={!canNotify}
                           onClick={this.handleNotifySpeakers}
                         >
