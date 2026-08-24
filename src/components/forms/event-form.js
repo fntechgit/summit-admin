@@ -884,8 +884,14 @@ class EventForm extends React.Component {
     if (confirmed) onCloseSubmission(entity.id)?.catch(() => {});
   }
 
+  // Persisted entity, not the editable one: `include_submitter` carries no identity,
+  // so the server resolves it from the SAVED creator. Deriving rows from unsaved form
+  // state would let the list name one person while the send reaches another.
+  // Persisted entity, not the editable one: `include_submitter` carries no identity,
+  // so the server resolves it from the SAVED creator. Deriving rows from unsaved form
+  // state would let the list name one person while the send reaches another.
   getRecipientRows() {
-    const { entity } = this.state;
+    const { entity } = this.props;
     return buildRecipientRows(entity);
   }
 
@@ -907,6 +913,8 @@ class EventForm extends React.Component {
     );
     if (checked.length === 0) return;
 
+    const submitterAtConfirm = this.props.entity?.created_by?.id ?? null;
+
     const confirmed = await showConfirmDialog({
       title: T.translate("edit_event.notify_speakers_confirm_title", {
         count: checked.length
@@ -923,18 +931,31 @@ class EventForm extends React.Component {
 
     // Intersection, not replacement. `intended` is what the admin saw and ticked;
     // `current` is what is still valid after any refresh that landed while the
-    // dialog was open. Sending the intersection can only ever shrink the set:
-    // a row that split away drops out via `current`, and a row that newly merged
-    // in cannot add anyone via `intended`.
+    // dialog was open. Intersecting can only ever shrink the CHANNEL set: a row
+    // that split away drops out via `current`, and a row that newly merged in
+    // cannot add anyone via `intended`.
     const intended = toNotifyPayload(rows, notifyChecked);
     const current = toNotifyPayload(this.getRecipientRows(), notifyChecked);
+    // The submitter channel is a bare boolean, so unlike speakerIds it carries no
+    // identity and cannot be intersected on one. Pin it explicitly: if the persisted
+    // creator changed while the dialog was open, the boolean would silently denote
+    // someone the dialog never named.
+    const submitterUnchanged =
+      (this.props.entity?.created_by?.id ?? null) === submitterAtConfirm;
     const payload = {
       speakerIds: intended.speakerIds.filter((id) =>
         current.speakerIds.includes(id)
       ),
-      includeSubmitter: intended.includeSubmitter && current.includeSubmitter
+      includeSubmitter:
+        intended.includeSubmitter &&
+        current.includeSubmitter &&
+        submitterUnchanged
     };
-    if (payload.speakerIds.length === 0 && !payload.includeSubmitter) return;
+    // Deliberately no local empty-payload bail here: the admin confirmed a send, and
+    // if a mid-dialog change (e.g. the pinned submitter) intersected it down to
+    // nothing, the request still goes out and the server's own 412 ("empty
+    // selection") explains why nothing was queued, matching the no-silent-skip
+    // principle used for a no-email row.
 
     // See handleReopenSubmission: snackbarErrorHandler has already surfaced the
     // API's message and an expired-window 412 is expected, so don't let the

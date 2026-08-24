@@ -21,6 +21,36 @@ jest.mock("../../mui/showConfirmDialog", () => ({
   default: jest.fn()
 }));
 
+// Lets a test drive the real onChange path to diverge state.entity from
+// props.entity (an unsaved form edit), without pulling in the real react-select
+// widget.
+jest.mock(
+  "openstack-uicore-foundation/lib/components/inputs/member-input",
+  () => ({
+    __esModule: true,
+    default: ({ id, onChange }) => (
+      <button
+        type="button"
+        data-testid={`memberinput-${id}`}
+        onClick={() =>
+          onChange({
+            target: {
+              id,
+              type: "text",
+              value: {
+                id: 99,
+                first_name: "Bob",
+                last_name: "Newcomer",
+                email: "bob@example.com"
+              }
+            }
+          })
+        }
+      />
+    )
+  })
+);
+
 const speaker = (id, first, last, email) => ({
   id,
   first_name: first,
@@ -742,6 +772,68 @@ describe("EventForm reopen notification control", () => {
       expect(onNotifySubmissionReopened).toHaveBeenCalledWith(42, {
         speakerIds: [],
         includeSubmitter: true
+      })
+    );
+  });
+
+  it("keeps the recipient row on the persisted submitter after an unsaved change", async () => {
+    const onNotifySubmissionReopened = jest.fn().mockResolvedValue({});
+    renderEventForm({ entity: withPeople, onNotifySubmissionReopened });
+
+    // Swap the submitter in the form without saving. state.entity.created_by is now
+    // Bob; props.entity.created_by is still Ada.
+    await userEvent.click(screen.getByTestId("memberinput-created_by"));
+
+    // The row must still name the PERSISTED submitter, because that is who the
+    // server will resolve include_submitter to.
+    expect(screen.getByLabelText(/Ada Lovelace/)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Bob Newcomer/)).not.toBeInTheDocument();
+  });
+
+  it("drops the submitter channel when the persisted creator changes mid-dialog", async () => {
+    const onNotifySubmissionReopened = jest.fn().mockResolvedValue({});
+    let resolveConfirm;
+    showConfirmDialog.mockReturnValue(
+      new Promise((resolve) => {
+        resolveConfirm = resolve;
+      })
+    );
+
+    const { rerender } = renderEventForm({
+      entity: withPeople,
+      onNotifySubmissionReopened
+    });
+
+    await userEvent.click(screen.getByLabelText(/Ada Lovelace/));
+    await userEvent.click(
+      screen.getByRole("button", { name: "edit_event.notify_speakers" })
+    );
+
+    // The dialog named Ada. A refresh now replaces the persisted creator.
+    rerender(
+      <EventForm
+        {...baseProps}
+        entity={{
+          ...withPeople,
+          created_by: {
+            id: 99,
+            first_name: "Bob",
+            last_name: "Newcomer",
+            email: "bob@example.com"
+          }
+        }}
+        onNotifySubmissionReopened={onNotifySubmissionReopened}
+      />
+    );
+
+    resolveConfirm(true);
+
+    // includeSubmitter must NOT survive: the boolean would now mean Bob. Ada's row
+    // in withPeople carries no speaker id, so the channel set is otherwise empty.
+    await waitFor(() =>
+      expect(onNotifySubmissionReopened).toHaveBeenCalledWith(42, {
+        speakerIds: [],
+        includeSubmitter: false
       })
     );
   });
