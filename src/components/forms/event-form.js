@@ -891,9 +891,6 @@ class EventForm extends React.Component {
   // Persisted entity, not the editable one: `include_submitter` carries no identity,
   // so the server resolves it from the SAVED creator. Deriving rows from unsaved form
   // state would let the list name one person while the send reaches another.
-  // Persisted entity, not the editable one: `include_submitter` carries no identity,
-  // so the server resolves it from the SAVED creator. Deriving rows from unsaved form
-  // state would let the list name one person while the send reaches another.
   getRecipientRows() {
     const { entity } = this.props;
     return buildRecipientRows(entity);
@@ -956,8 +953,8 @@ class EventForm extends React.Component {
         submitterUnchanged
     };
     // No request when the intersection emptied the selection: the client already
-    // knows there is nothing to send, and the endpoint that would reject it does
-    // not exist yet, so relying on its 412 would be relying on an untested contract.
+    // knows there is nothing to send, so asking the server to tell us costs a
+    // round trip on a rate-limited endpoint to learn what we can see locally.
     if (payload.speakerIds.length === 0 && !payload.includeSubmitter) return;
 
     // See handleReopenSubmission: snackbarErrorHandler has already surfaced the

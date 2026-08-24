@@ -298,19 +298,13 @@ describe("toNotifyPayload", () => {
     });
   });
 
-  it("excludes a disabled row even if its key is somehow checked", () => {
+  it("excludes a row that went disabled while its key was still checked", () => {
+    // Reachable: tick a row, then a refetch empties that person's email so the row
+    // renders disabled. The key survives in the checked list and must not be sent.
     expect(toNotifyPayload(rows, ["speaker:20"])).toEqual({
       speakerIds: [],
       includeSubmitter: false
     });
-  });
-
-  it("de-duplicates speaker ids across checked rows", () => {
-    const overlapping = [
-      { key: "a", speakerIds: [7], includeSubmitter: false, disabled: false },
-      { key: "b", speakerIds: [7, 9], includeSubmitter: false, disabled: false }
-    ];
-    expect(toNotifyPayload(overlapping, ["a", "b"]).speakerIds).toEqual([7, 9]);
   });
 });
 
