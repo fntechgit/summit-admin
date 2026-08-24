@@ -123,7 +123,7 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
           items_count: a.items_count,
           allowed_add_ons: a.allowed_add_ons,
           is_archived: a.is_archived,
-          assignment_type: a.assignment_type,
+          assigned_type: a.assigned_type,
           opens_at: opensAt,
           expires_at: expiresAt
         };

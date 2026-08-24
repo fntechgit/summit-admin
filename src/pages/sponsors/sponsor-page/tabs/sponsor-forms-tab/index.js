@@ -536,7 +536,7 @@ const SponsorFormsTab = ({
           onSort={handleManagedSort}
           onDelete={handleManagedDelete}
           canDelete={(row) =>
-            row.assignment_type === MANAGED_FORM_ASSIGNMENT_TYPE.EXPLICIT
+            row.assigned_type === MANAGED_FORM_ASSIGNMENT_TYPE.EXPLICIT
           }
         />
       </div>

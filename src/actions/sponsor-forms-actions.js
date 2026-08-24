@@ -565,7 +565,7 @@ export const getSponsorManagedForms =
     const params = {
       page,
       fields:
-        "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons,assignment_type",
+        "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons,assigned_type",
       expands: "allowed_add_ons",
       per_page: perPage,
       access_token: accessToken

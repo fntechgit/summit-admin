@@ -81,7 +81,7 @@ const createManagedForm = (id, overrides = {}) => ({
   name: `Managed Form ${id}`,
   items_count: 0,
   allowed_add_ons: [],
-  assignment_type: "Explicit",
+  assigned_type: "Explicit",
   ...overrides
 });
 
@@ -190,8 +190,8 @@ describe("SponsorFormsTab", () => {
             managedForms: {
               ...defaultState.sponsorPageFormsListState.managedForms,
               forms: [
-                createManagedForm(1, { assignment_type: "Explicit" }),
-                createManagedForm(2, { assignment_type: "Implicit" })
+                createManagedForm(1, { assigned_type: "Explicit" }),
+                createManagedForm(2, { assigned_type: "Implicit" })
               ],
               totalCount: 2
             }
@@ -221,8 +221,8 @@ describe("SponsorFormsTab", () => {
       );
 
       const store = createRealStore([
-        createManagedForm(1, { assignment_type: "Explicit" }),
-        createManagedForm(2, { assignment_type: "Explicit" })
+        createManagedForm(1, { assigned_type: "Explicit" }),
+        createManagedForm(2, { assigned_type: "Explicit" })
       ]);
 
       renderWithConfirmDialog(<SponsorFormsTab sponsor={createSponsor()} />, {
@@ -282,7 +282,7 @@ describe("SponsorFormsTab", () => {
             ...defaultState.sponsorPageFormsListState,
             managedForms: {
               ...defaultState.sponsorPageFormsListState.managedForms,
-              forms: [createManagedForm(1, { assignment_type: "Explicit" })],
+              forms: [createManagedForm(1, { assigned_type: "Explicit" })],
               totalCount: 1
             }
           }
@@ -315,7 +315,7 @@ describe("SponsorFormsTab", () => {
       );
 
       const store = createRealStore([
-        createManagedForm(1, { assignment_type: "Explicit" })
+        createManagedForm(1, { assigned_type: "Explicit" })
       ]);
 
       renderWithConfirmDialog(<SponsorFormsTab sponsor={createSponsor()} />, {
