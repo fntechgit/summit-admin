@@ -1,12 +1,13 @@
 import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import { putRequest } from "openstack-uicore-foundation/lib/utils/actions";
+import T from "i18n-react/dist/i18n-react";
 import * as methods from "../../utils/methods";
 import { notifySubmissionReopened } from "../event-actions";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   __esModule: true,
-  default: { translate: (key) => key }
+  default: { translate: jest.fn((key) => key) }
 }));
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
@@ -77,10 +78,17 @@ describe("notifySubmissionReopened", () => {
   });
 
   it("reports the recipient count from the response, not a client tally", async () => {
+    // One speaker id goes in, the server says three recipients. Asserting the 3 is
+    // what makes this fail if the count is ever derived from the input instead.
     arrangeRequest(Promise.resolve({ response: { recipients: 3 } }));
 
     await store.dispatch(
       notifySubmissionReopened(42, { speakerIds: [7], includeSubmitter: false })
+    );
+
+    expect(T.translate).toHaveBeenCalledWith(
+      "edit_event.notify_speakers_success",
+      { count: 3 }
     );
 
     const snackbar = store
