@@ -86,7 +86,6 @@ const ROLE_LABEL = {
   [ROLE.SPEAKER]: "edit_event.notify_role_speaker"
 };
 
-// Row pitch matches the Extra Questions checkbox list (22px row + 7px gap = 29px).
 const NOTIFY_ROW_GAP = 7;
 const NOTIFY_BUTTON_GAP = 12;
 
@@ -905,8 +904,8 @@ class EventForm extends React.Component {
   }
 
   async handleNotifySpeakers() {
-    const { onNotifySubmissionReopened } = this.props;
-    const { entity, notifyChecked } = this.state;
+    const { entity, onNotifySubmissionReopened } = this.props;
+    const { notifyChecked } = this.state;
 
     const rows = this.getRecipientRows();
     const checked = rows.filter(
@@ -914,7 +913,7 @@ class EventForm extends React.Component {
     );
     if (checked.length === 0) return;
 
-    const submitterAtConfirm = this.props.entity?.created_by?.id ?? null;
+    const submitterAtConfirm = entity?.created_by?.id ?? null;
 
     const confirmed = await showConfirmDialog({
       title: T.translate("edit_event.notify_speakers_confirm_title", {
@@ -941,8 +940,9 @@ class EventForm extends React.Component {
     // identity and cannot be intersected on one. Pin it explicitly: if the persisted
     // creator changed while the dialog was open, the boolean would silently denote
     // someone the dialog never named.
+    const { entity: entityAfterConfirm } = this.props;
     const submitterUnchanged =
-      (this.props.entity?.created_by?.id ?? null) === submitterAtConfirm;
+      (entityAfterConfirm?.created_by?.id ?? null) === submitterAtConfirm;
     const payload = {
       speakerIds: intended.speakerIds.filter((id) =>
         current.speakerIds.includes(id)
@@ -2206,9 +2206,6 @@ class EventForm extends React.Component {
                         <label>
                           {T.translate("edit_event.notify_recipients_label")}
                         </label>
-                        {/* Column gap rather than per-row margins, matching the
-                            reopen row above and giving the same 29px rhythm as the
-                            Extra Questions checkbox list. */}
                         <div
                           style={{
                             display: "flex",

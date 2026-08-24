@@ -469,9 +469,6 @@ describe("EventForm reopen notification control", () => {
       }
     });
 
-    // Switched from getAllByText to getAllByLabelText: the entity's created_by also
-    // renders as a MemberInput singleValue elsewhere in the form (unrelated to
-    // this control), so a plain text query would double-count the same name.
     expect(screen.getAllByLabelText(/Ada Lovelace/)).toHaveLength(1);
   });
 
@@ -771,8 +768,7 @@ describe("EventForm reopen notification control", () => {
   });
 
   it("keeps the recipient row on the persisted submitter after an unsaved change", async () => {
-    const onNotifySubmissionReopened = jest.fn().mockResolvedValue({});
-    renderEventForm({ entity: withPeople, onNotifySubmissionReopened });
+    renderEventForm({ entity: withPeople });
 
     // Swap the submitter in the form without saving. state.entity.created_by is now
     // Bob; props.entity.created_by is still Ada.
