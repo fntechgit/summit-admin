@@ -922,11 +922,19 @@ class EventForm extends React.Component {
 
     if (!confirmed) return;
 
-    // Re-derived after the await: componentDidUpdate can refresh the entity while
-    // the dialog is open, and a merged row that has since split must not send an
-    // identity whose checkbox now reads unticked.
-    const currentRows = this.getRecipientRows();
-    const payload = toNotifyPayload(currentRows, notifyChecked);
+    // Intersection, not replacement. `intended` is what the admin saw and ticked;
+    // `current` is what is still valid after any refresh that landed while the
+    // dialog was open. Sending the intersection can only ever shrink the set:
+    // a row that split away drops out via `current`, and a row that newly merged
+    // in cannot add anyone via `intended`.
+    const intended = toNotifyPayload(rows, notifyChecked);
+    const current = toNotifyPayload(this.getRecipientRows(), notifyChecked);
+    const payload = {
+      speakerIds: intended.speakerIds.filter((id) =>
+        current.speakerIds.includes(id)
+      ),
+      includeSubmitter: intended.includeSubmitter && current.includeSubmitter
+    };
     if (payload.speakerIds.length === 0 && !payload.includeSubmitter) return;
 
     // See handleReopenSubmission: snackbarErrorHandler has already surfaced the

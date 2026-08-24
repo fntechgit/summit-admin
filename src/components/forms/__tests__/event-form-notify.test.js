@@ -687,4 +687,73 @@ describe("EventForm reopen notification control", () => {
       })
     );
   });
+
+  it("does not send an identity that merged onto a checked row while the dialog was open", async () => {
+    const onNotifySubmissionReopened = jest.fn().mockResolvedValue({});
+    let resolveConfirm;
+    showConfirmDialog.mockReturnValue(
+      new Promise((resolve) => {
+        resolveConfirm = resolve;
+      })
+    );
+
+    const separate = {
+      ...withPeople,
+      created_by: {
+        id: 3,
+        first_name: "Ada",
+        last_name: "Lovelace",
+        email: "ada@example.com"
+      },
+      speakers: [
+        {
+          id: 7,
+          first_name: "Grace",
+          last_name: "Hopper",
+          email: "grace@example.com"
+        }
+      ]
+    };
+
+    const { rerender } = renderEventForm({
+      entity: separate,
+      onNotifySubmissionReopened
+    });
+
+    // Only Ada is ticked. Grace is deliberately left alone.
+    await userEvent.click(screen.getByLabelText(/Ada Lovelace/));
+    await userEvent.click(
+      screen.getByRole("button", { name: "edit_event.notify_speakers" })
+    );
+
+    // While the dialog is open, Grace's record changes to Ada's address, so the
+    // two identities now merge onto the row Ada's key points at.
+    rerender(
+      <EventForm
+        {...baseProps}
+        entity={{
+          ...separate,
+          speakers: [
+            {
+              id: 7,
+              first_name: "Grace",
+              last_name: "Hopper",
+              email: "ada@example.com"
+            }
+          ]
+        }}
+        onNotifySubmissionReopened={onNotifySubmissionReopened}
+      />
+    );
+
+    resolveConfirm(true);
+
+    // Grace was never ticked and the dialog never named her.
+    await waitFor(() =>
+      expect(onNotifySubmissionReopened).toHaveBeenCalledWith(42, {
+        speakerIds: [],
+        includeSubmitter: true
+      })
+    );
+  });
 });
