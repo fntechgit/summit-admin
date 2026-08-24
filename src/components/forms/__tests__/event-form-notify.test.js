@@ -422,7 +422,7 @@ describe("EventForm reopen notification control", () => {
       }
     });
 
-    // getAllByText, scoped by getAllByLabelText: the entity's created_by also
+    // Switched from getAllByText to getAllByLabelText: the entity's created_by also
     // renders as a MemberInput singleValue elsewhere in the form (unrelated to
     // this control), so a plain text query would double-count the same name.
     expect(screen.getAllByLabelText(/Ada Lovelace/)).toHaveLength(1);
@@ -564,5 +564,24 @@ describe("EventForm reopen notification control", () => {
       ).toBeDisabled()
     );
     expect(screen.getByLabelText(/Grace Hopper/)).not.toBeChecked();
+  });
+
+  it("disables send when the only checked recipient leaves the talk", async () => {
+    // componentDidUpdate refreshes the entity but not the checked keys, so a key
+    // can outlive its row. The button must follow what is actually sendable.
+    const { rerender } = renderEventForm({ entity: withPeople });
+
+    await userEvent.click(screen.getByLabelText(/Grace Hopper/));
+    expect(
+      screen.getByRole("button", { name: "edit_event.notify_speakers" })
+    ).toBeEnabled();
+
+    rerender(
+      <EventForm {...baseProps} entity={{ ...withPeople, speakers: [] }} />
+    );
+
+    expect(
+      screen.getByRole("button", { name: "edit_event.notify_speakers" })
+    ).toBeDisabled();
   });
 });

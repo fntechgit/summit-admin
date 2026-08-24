@@ -898,8 +898,7 @@ class EventForm extends React.Component {
   }
 
   async handleNotifySpeakers() {
-    // Edit 3 of 4. Omitting this destructure leaves the button inert with the
-    // whole suite green.
+    // Omitting this destructure leaves the button inert with the whole suite green.
     const { onNotifySubmissionReopened } = this.props;
     const { entity, notifyChecked } = this.state;
 
@@ -1123,6 +1122,14 @@ class EventForm extends React.Component {
     } = this.state;
 
     const maxReopenHours = this.getMaxReopenHours();
+
+    const recipientRows = this.getRecipientRows();
+    const notifySelection = toNotifyPayload(recipientRows, notifyChecked);
+    // The button asks the same function that builds the payload whether there is
+    // anything to send, so a checked key whose row has since disappeared or gone
+    // disabled cannot leave an enabled button that does nothing.
+    const canNotify =
+      notifySelection.speakerIds.length > 0 || notifySelection.includeSubmitter;
 
     const {
       currentSummit,
@@ -2164,7 +2171,7 @@ class EventForm extends React.Component {
                         <label>
                           {T.translate("edit_event.notify_recipients_label")}
                         </label>
-                        {this.getRecipientRows().map((row) => (
+                        {recipientRows.map((row) => (
                           <div
                             className="form-check abc-checkbox"
                             key={row.key}
@@ -2200,7 +2207,7 @@ class EventForm extends React.Component {
                         <button
                           type="button"
                           className="btn btn-primary"
-                          disabled={notifyChecked.length === 0}
+                          disabled={!canNotify}
                           onClick={this.handleNotifySpeakers}
                         >
                           {T.translate("edit_event.notify_speakers")}
