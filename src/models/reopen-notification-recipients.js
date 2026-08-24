@@ -58,6 +58,7 @@ export const buildRecipientRows = (entity) => {
     identities.push({
       key: "submitter",
       name: displayName(submitter),
+      names: [displayName(submitter)],
       roles: [ROLE.SUBMITTER],
       speakerIds: [],
       includeSubmitter: true,
@@ -79,6 +80,7 @@ export const buildRecipientRows = (entity) => {
     const identity = {
       key,
       name: displayName(person),
+      names: [displayName(person)],
       roles: [role],
       speakerIds: [person.id],
       includeSubmitter: false,
@@ -109,6 +111,10 @@ export const buildRecipientRows = (entity) => {
     target.speakerIds = [...target.speakerIds, ...identity.speakerIds];
     target.includeSubmitter =
       target.includeSubmitter || identity.includeSubmitter;
+    identity.names.forEach((n) => {
+      if (n && !target.names.includes(n)) target.names.push(n);
+    });
+    target.name = target.names.join(", ");
   });
 
   return rows;

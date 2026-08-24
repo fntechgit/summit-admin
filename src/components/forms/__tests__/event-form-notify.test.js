@@ -198,6 +198,40 @@ describe("buildRecipientRows", () => {
     expect(buildRecipientRows({})).toEqual([]);
     expect(buildRecipientRows(undefined)).toEqual([]);
   });
+
+  it("names both people on a row merged across a shared mailbox", () => {
+    const rows = buildRecipientRows({
+      created_by: {
+        id: 3,
+        first_name: "Ada",
+        last_name: "Lovelace",
+        email: "shared@example.com"
+      },
+      speakers: [speaker(7, "Grace", "Hopper", "SHARED@example.com")],
+      moderator: ""
+    });
+
+    expect(rows).toHaveLength(1);
+    // Hiding the second identity would be a lie about who the send reaches.
+    expect(rows[0].name).toBe("Ada Lovelace, Grace Hopper");
+    expect(rows[0].speakerIds).toEqual([7]);
+    expect(rows[0].includeSubmitter).toBe(true);
+  });
+
+  it("does not repeat a name when the merged identities share one", () => {
+    const rows = buildRecipientRows({
+      created_by: {
+        id: 3,
+        first_name: "Ada",
+        last_name: "Lovelace",
+        email: "shared@example.com"
+      },
+      speakers: [speaker(7, "Ada", "Lovelace", "shared@example.com")],
+      moderator: ""
+    });
+
+    expect(rows[0].name).toBe("Ada Lovelace");
+  });
 });
 
 describe("toNotifyPayload", () => {
@@ -531,10 +565,12 @@ describe("EventForm reopen notification control", () => {
       onNotifySubmissionReopened
     });
 
-    // One row, not two: they share a mailbox. The payload still has to name both.
-    expect(
-      screen.queryByLabelText(/Katherine Johnson/)
-    ).not.toBeInTheDocument();
+    // One row, not two: they share a mailbox. The payload still has to name both,
+    // and (per the merged-name fix) so does the row's label: both names resolve
+    // to the same single checkbox rather than Katherine's being hidden.
+    expect(screen.getByLabelText(/Katherine Johnson/)).toBe(
+      screen.getByLabelText(/Grace Hopper/)
+    );
 
     await userEvent.click(screen.getByLabelText(/Grace Hopper/));
     await userEvent.click(
@@ -583,5 +619,72 @@ describe("EventForm reopen notification control", () => {
     expect(
       screen.getByRole("button", { name: "edit_event.notify_speakers" })
     ).toBeDisabled();
+  });
+
+  it("does not send an identity whose row split away while the dialog was open", async () => {
+    const onNotifySubmissionReopened = jest.fn().mockResolvedValue({});
+    let resolveConfirm;
+    showConfirmDialog.mockReturnValue(
+      new Promise((resolve) => {
+        resolveConfirm = resolve;
+      })
+    );
+
+    const merged = {
+      ...withPeople,
+      created_by: {
+        id: 3,
+        first_name: "Ada",
+        last_name: "Lovelace",
+        email: "shared@example.com"
+      },
+      speakers: [
+        {
+          id: 7,
+          first_name: "Grace",
+          last_name: "Hopper",
+          email: "shared@example.com"
+        }
+      ]
+    };
+
+    const { rerender } = renderEventForm({
+      entity: merged,
+      onNotifySubmissionReopened
+    });
+
+    await userEvent.click(screen.getByLabelText(/Ada Lovelace/));
+    await userEvent.click(
+      screen.getByRole("button", { name: "edit_event.notify_speakers" })
+    );
+
+    // The dialog is open. The entity refreshes and the merged row splits: Grace
+    // becomes her own, unticked row.
+    rerender(
+      <EventForm
+        {...baseProps}
+        entity={{
+          ...merged,
+          speakers: [
+            {
+              id: 7,
+              first_name: "Grace",
+              last_name: "Hopper",
+              email: "grace@example.com"
+            }
+          ]
+        }}
+        onNotifySubmissionReopened={onNotifySubmissionReopened}
+      />
+    );
+
+    resolveConfirm(true);
+
+    await waitFor(() =>
+      expect(onNotifySubmissionReopened).toHaveBeenCalledWith(42, {
+        speakerIds: [],
+        includeSubmitter: true
+      })
+    );
   });
 });

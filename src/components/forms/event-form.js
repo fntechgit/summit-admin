@@ -922,10 +922,17 @@ class EventForm extends React.Component {
 
     if (!confirmed) return;
 
+    // Re-derived after the await: componentDidUpdate can refresh the entity while
+    // the dialog is open, and a merged row that has since split must not send an
+    // identity whose checkbox now reads unticked.
+    const currentRows = this.getRecipientRows();
+    const payload = toNotifyPayload(currentRows, notifyChecked);
+    if (payload.speakerIds.length === 0 && !payload.includeSubmitter) return;
+
     // See handleReopenSubmission: snackbarErrorHandler has already surfaced the
     // API's message and an expired-window 412 is expected, so don't let the
     // rejection escape as an unhandled one.
-    onNotifySubmissionReopened(entity.id, toNotifyPayload(rows, notifyChecked))
+    onNotifySubmissionReopened(entity.id, payload)
       ?.then(() => {
         // Cleared rather than retained so a second press is a deliberate
         // re-selection, not a repeat of whatever was ticked a moment ago.
