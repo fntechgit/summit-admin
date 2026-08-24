@@ -2225,7 +2225,7 @@ class EventForm extends React.Component {
                               htmlFor={`notify_recipient_${row.key}`}
                             >
                               {row.name}
-                              &nbsp;
+                              &nbsp;-&nbsp;
                               {row.roles
                                 .map((role) => T.translate(ROLE_LABEL[role]))
                                 .join(", ")}
