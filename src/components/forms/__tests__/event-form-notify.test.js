@@ -828,13 +828,10 @@ describe("EventForm reopen notification control", () => {
 
     resolveConfirm(true);
 
-    // includeSubmitter must NOT survive: the boolean would now mean Bob. Ada's row
-    // in withPeople carries no speaker id, so the channel set is otherwise empty.
-    await waitFor(() =>
-      expect(onNotifySubmissionReopened).toHaveBeenCalledWith(42, {
-        speakerIds: [],
-        includeSubmitter: false
-      })
-    );
+    // The pin zeroed the only checked channel, so nothing is sent at all. This still
+    // discriminates: WITHOUT the pin, includeSubmitter would survive and the thunk
+    // would be called with the boolean denoting a person the dialog never named.
+    await waitFor(() => expect(showConfirmDialog).toHaveBeenCalled());
+    expect(onNotifySubmissionReopened).not.toHaveBeenCalled();
   });
 });

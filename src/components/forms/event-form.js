@@ -951,11 +951,10 @@ class EventForm extends React.Component {
         current.includeSubmitter &&
         submitterUnchanged
     };
-    // Deliberately no local empty-payload bail here: the admin confirmed a send, and
-    // if a mid-dialog change (e.g. the pinned submitter) intersected it down to
-    // nothing, the request still goes out and the server's own 412 ("empty
-    // selection") explains why nothing was queued, matching the no-silent-skip
-    // principle used for a no-email row.
+    // No request when the intersection emptied the selection: the client already
+    // knows there is nothing to send, and the endpoint that would reject it does
+    // not exist yet, so relying on its 412 would be relying on an untested contract.
+    if (payload.speakerIds.length === 0 && !payload.includeSubmitter) return;
 
     // See handleReopenSubmission: snackbarErrorHandler has already surfaced the
     // API's message and an expired-window 412 is expected, so don't let the
