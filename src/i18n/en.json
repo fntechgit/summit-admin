@@ -725,6 +725,7 @@
     "reopen_confirm_title": "Reopen submission for this activity?",
     "reopen_confirm_text": "This lets the speaker edit this talk until {deadline}.",
     "reopen_submission_success": "Submission reopened.",
+    "notify_speakers_success": "Notification queued for {count} recipient(s).",
     "close_submission": "Close now",
     "close_submission_confirm_title": "Close the submission window now?",
     "close_submission_confirm_text": "The speaker will immediately lose the ability to edit this talk.",
