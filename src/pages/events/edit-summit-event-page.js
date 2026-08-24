@@ -33,7 +33,8 @@ import {
   cloneEvent,
   upgradeEvent,
   reopenSubmissionPeriod,
-  closeSubmissionPeriod
+  closeSubmissionPeriod,
+  notifySubmissionReopened
 } from "../../actions/event-actions";
 import { unPublishEvent } from "../../actions/summit-builder-actions";
 import { deleteEventMaterial } from "../../actions/event-material-actions";
@@ -245,7 +246,8 @@ function EditSummitEventPage(props) {
     cloneEvent,
     upgradeEvent,
     reopenSubmissionPeriod,
-    closeSubmissionPeriod
+    closeSubmissionPeriod,
+    notifySubmissionReopened
   } = props;
 
   if (loading) return null;
@@ -317,6 +319,7 @@ function EditSummitEventPage(props) {
           onClone={cloneEvent}
           onReopenSubmission={reopenSubmissionPeriod}
           onCloseSubmission={closeSubmissionPeriod}
+          onNotifySubmissionReopened={notifySubmissionReopened}
         />
       )}
     </div>
@@ -364,5 +367,6 @@ export default connect(mapStateToProps, {
   cloneEvent,
   upgradeEvent,
   reopenSubmissionPeriod,
-  closeSubmissionPeriod
+  closeSubmissionPeriod,
+  notifySubmissionReopened
 })(EditSummitEventPage);

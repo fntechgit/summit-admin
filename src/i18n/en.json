@@ -732,7 +732,15 @@
     "close_submission_success": "Submission window closed.",
     "reopened_until": "Reopened until {deadline}",
     "reopened_by": "by {admin}",
-    "reopen_deep_link_label": "Speaker link"
+    "reopen_deep_link_label": "Speaker link",
+    "notify_recipients_label": "Notify about this window",
+    "notify_speakers": "Notify selected",
+    "notify_role_submitter": "submitter",
+    "notify_role_speaker": "speaker",
+    "notify_role_moderator": "moderator",
+    "notify_no_email": "(no email address on file)",
+    "notify_speakers_confirm_title": "Notify {count} people?",
+    "notify_speakers_confirm_text": "An email with the submission link and the deadline ({deadline}) will be queued for: {names}. This can be sent again while the window is open."
   },
   "edit_event_material": {
     "material": "Material",

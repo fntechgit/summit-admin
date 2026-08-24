@@ -72,8 +72,19 @@ import CopyClipboard from "../buttons/copy-clipboard";
 import EventRsvpList from "../rsvp/event-rsvp-list";
 import EventRsvpInvitationList from "../rsvp/event-rsvp-invitation-list";
 import showConfirmDialog from "../mui/showConfirmDialog";
+import {
+  buildRecipientRows,
+  toNotifyPayload,
+  ROLE
+} from "../../models/reopen-notification-recipients";
 
 const REOPEN_DEADLINE_FORMAT = "MMMM DD, YYYY h:mm a";
+
+const ROLE_LABEL = {
+  [ROLE.SUBMITTER]: "edit_event.notify_role_submitter",
+  [ROLE.MODERATOR]: "edit_event.notify_role_moderator",
+  [ROLE.SPEAKER]: "edit_event.notify_role_speaker"
+};
 
 class EventForm extends React.Component {
   constructor(props) {
@@ -87,7 +98,11 @@ class EventForm extends React.Component {
       publish: false,
       commentFilters: { ...props.commentState.filters },
       reopenHours: DEFAULT_REOPEN_HOURS,
-      reopenCustomHours: ""
+      reopenCustomHours: "",
+      // Transient and per-form by design: there is no server-side record of who was
+      // notified last time, so remembering a selection would assert more than the
+      // backend can back up. Empty on mount, emptied again after a successful send.
+      notifyChecked: []
     };
 
     this.formRef = React.createRef();
@@ -137,6 +152,7 @@ class EventForm extends React.Component {
     this.handleSaveIncomplete = this.handleSaveIncomplete.bind(this);
     this.handleReopenSubmission = this.handleReopenSubmission.bind(this);
     this.handleCloseSubmission = this.handleCloseSubmission.bind(this);
+    this.handleNotifySpeakers = this.handleNotifySpeakers.bind(this);
   }
 
   componentDidMount() {
@@ -868,6 +884,57 @@ class EventForm extends React.Component {
     if (confirmed) onCloseSubmission(entity.id)?.catch(() => {});
   }
 
+  getRecipientRows() {
+    const { entity } = this.state;
+    return buildRecipientRows(entity);
+  }
+
+  toggleNotifyRecipient(key) {
+    this.setState((prev) => ({
+      notifyChecked: prev.notifyChecked.includes(key)
+        ? prev.notifyChecked.filter((k) => k !== key)
+        : [...prev.notifyChecked, key]
+    }));
+  }
+
+  async handleNotifySpeakers() {
+    // Edit 3 of 4. Omitting this destructure leaves the button inert with the
+    // whole suite green.
+    const { onNotifySubmissionReopened } = this.props;
+    const { entity, notifyChecked } = this.state;
+
+    const rows = this.getRecipientRows();
+    const checked = rows.filter(
+      (row) => !row.disabled && notifyChecked.includes(row.key)
+    );
+    if (checked.length === 0) return;
+
+    const confirmed = await showConfirmDialog({
+      title: T.translate("edit_event.notify_speakers_confirm_title", {
+        count: checked.length
+      }),
+      text: T.translate("edit_event.notify_speakers_confirm_text", {
+        deadline: this.getReopenDeadline().format(REOPEN_DEADLINE_FORMAT),
+        names: checked.map((row) => row.name).join(", ")
+      }),
+      iconType: "warning",
+      confirmButtonText: T.translate("edit_event.notify_speakers")
+    });
+
+    if (!confirmed) return;
+
+    // See handleReopenSubmission: snackbarErrorHandler has already surfaced the
+    // API's message and an expired-window 412 is expected, so don't let the
+    // rejection escape as an unhandled one.
+    onNotifySubmissionReopened(entity.id, toNotifyPayload(rows, notifyChecked))
+      ?.then(() => {
+        // Cleared rather than retained so a second press is a deliberate
+        // re-selection, not a repeat of whatever was ticked a moment ago.
+        this.setState({ notifyChecked: [] });
+      })
+      ?.catch(() => {});
+  }
+
   isNew() {
     const { entity } = this.state;
     return !entity.id;
@@ -1051,7 +1118,8 @@ class EventForm extends React.Component {
       errors,
       speakerToAdd,
       reopenHours,
-      reopenCustomHours
+      reopenCustomHours,
+      notifyChecked
     } = this.state;
 
     const maxReopenHours = this.getMaxReopenHours();
@@ -2092,6 +2160,52 @@ class EventForm extends React.Component {
                           {speakerDeepLink}
                         </span>
                       )}
+                      <div style={{ flexBasis: "100%" }}>
+                        <label>
+                          {T.translate("edit_event.notify_recipients_label")}
+                        </label>
+                        {this.getRecipientRows().map((row) => (
+                          <div
+                            className="form-check abc-checkbox"
+                            key={row.key}
+                          >
+                            <input
+                              type="checkbox"
+                              id={`notify_recipient_${row.key}`}
+                              className="form-check-input"
+                              disabled={row.disabled}
+                              checked={notifyChecked.includes(row.key)}
+                              onChange={() =>
+                                this.toggleNotifyRecipient(row.key)
+                              }
+                            />
+                            <label
+                              className="form-check-label"
+                              htmlFor={`notify_recipient_${row.key}`}
+                            >
+                              {row.name}
+                              &nbsp;
+                              {row.roles
+                                .map((role) => T.translate(ROLE_LABEL[role]))
+                                .join(", ")}
+                            </label>
+                            {row.disabled && (
+                              <span>
+                                &nbsp;
+                                {T.translate("edit_event.notify_no_email")}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          disabled={notifyChecked.length === 0}
+                          onClick={this.handleNotifySpeakers}
+                        >
+                          {T.translate("edit_event.notify_speakers")}
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
