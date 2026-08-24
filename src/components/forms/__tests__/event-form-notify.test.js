@@ -95,6 +95,21 @@ describe("buildRecipientRows", () => {
     expect(rows[0].roles).toEqual([ROLE.SPEAKER, ROLE.MODERATOR]);
   });
 
+  it("merges the moderator into the speaker row when the ids differ only by type", () => {
+    // A Map keys strictly but the row key string-coerces, so 7 and "7" would
+    // otherwise become two rows sharing the key "speaker:7".
+    const rows = buildRecipientRows({
+      created_by: "",
+      speakers: [speaker(7, "Grace", "Hopper", "grace@example.com")],
+      moderator: speaker("7", "Grace", "Hopper", "grace.new@example.com")
+    });
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0].key).toBe("speaker:7");
+    expect(rows[0].roles).toEqual([ROLE.SPEAKER, ROLE.MODERATOR]);
+    expect(rows[0].speakerIds).toEqual([7]);
+  });
+
   it("adds a moderator who is not in the speakers array as its own row", () => {
     const rows = buildRecipientRows({
       created_by: "",

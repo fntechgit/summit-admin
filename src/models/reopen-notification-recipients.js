@@ -67,20 +67,24 @@ export const buildRecipientRows = (entity) => {
 
   const addSpeaker = (person, role) => {
     if (!person?.id) return;
-    const seen = bySpeakerId.get(person.id);
+    // One expression for both the map key and the row key: a Map compares keys
+    // strictly, so keying it on the raw id would let 7 and "7" miss each other
+    // and produce two rows sharing one key.
+    const key = `speaker:${person.id}`;
+    const seen = bySpeakerId.get(key);
     if (seen) {
       if (!seen.roles.includes(role)) seen.roles.push(role);
       return;
     }
     const identity = {
-      key: `speaker:${person.id}`,
+      key,
       name: displayName(person),
       roles: [role],
       speakerIds: [person.id],
       includeSubmitter: false,
       email: normalizeEmail(person.email)
     };
-    bySpeakerId.set(person.id, identity);
+    bySpeakerId.set(key, identity);
     identities.push(identity);
   };
 
