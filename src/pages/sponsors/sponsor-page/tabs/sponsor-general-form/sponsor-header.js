@@ -135,6 +135,7 @@ const SponsorHeader = ({ sponsor, onSave }) => {
           <Checkbox
             sx={{ display: "inline-block" }}
             checked={isPublished}
+            disabled={isSaving}
             onChange={() => setIsPublished(!isPublished)}
             inputProps={{ "aria-labelledby": "sponsor-is-published-label" }}
           />

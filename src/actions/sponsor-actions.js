@@ -630,14 +630,16 @@ export const saveSponsor = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       snackbarErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(
-        snackbarSuccessHandler({
-          title: T.translate("general.success"),
-          html: T.translate("edit_sponsor.sponsor_saved")
-        })
-      );
-    });
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_sponsor.sponsor_saved")
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
   }
 
   return postRequest(
@@ -647,14 +649,16 @@ export const saveSponsor = (entity) => async (dispatch, getState) => {
     normalizedEntity,
     snackbarErrorHandler,
     entity
-  )(params)(dispatch).then(() => {
-    dispatch(
-      snackbarSuccessHandler({
-        title: T.translate("general.success"),
-        html: T.translate("edit_sponsor.sponsor_created")
-      })
-    );
-  });
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_sponsor.sponsor_created")
+        })
+      );
+    })
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const addMemberToSponsor =

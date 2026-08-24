@@ -155,6 +155,7 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
     case UPDATE_SPONSOR:
       return { ...state, entity: { ...state.entity, ...payload }, errors: {} };
     case SPONSOR_ADDED:
+    case SPONSOR_UPDATED:
     case RECEIVE_SPONSOR: {
       const entity = { ...payload.response };
 
@@ -170,13 +171,6 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
 
       if (!entity.lead_report_setting) entity.lead_report_setting = {};
 
-      return {
-        ...state,
-        entity: { ...state.entity, ...entity }
-      };
-    }
-    case SPONSOR_UPDATED: {
-      const entity = { ...payload.response };
       return {
         ...state,
         entity: { ...state.entity, ...entity }
