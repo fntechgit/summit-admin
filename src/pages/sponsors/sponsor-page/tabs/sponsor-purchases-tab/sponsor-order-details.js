@@ -122,8 +122,8 @@ const SponsorOrderDetails = ({
     updateClientAddress(currentOrder.id, values);
   };
 
-  const handleCancelForm = (item) => {
-    cancelSponsorForm(currentOrder.id, item.id, item.name);
+  const handleCancelForm = (item, quantity, reason) => {
+    cancelSponsorForm(currentOrder.id, item.id, item.name, quantity, reason);
   };
 
   const handleUndoCancelForm = (item) => {

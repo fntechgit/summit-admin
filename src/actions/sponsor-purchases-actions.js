@@ -48,7 +48,7 @@ export const SPONSOR_CLIENT_ADDRESS_UPDATED = "SPONSOR_CLIENT_ADDRESS_UPDATED";
 export const SPONSOR_CLIENT_UPDATED = "SPONSOR_CLIENT_UPDATED";
 
 const ORDER_DETAIL_EXPAND =
-  "forms,forms.items,forms.items.meta_fields,forms.items.type,refunds,payments,notes,fees";
+  "forms,forms.items,forms.items.meta_fields,forms.items.type,forms.items.cancellations,refunds,payments,notes,fees";
 
 export const getAllSponsorPurchases =
   (
@@ -442,7 +442,8 @@ export const updateClientInfo =
   };
 
 export const cancelSponsorForm =
-  (orderId, lineId, lineName) => async (dispatch, getState) => {
+  (orderId, lineId, lineName, quantity, reason) =>
+  async (dispatch, getState) => {
     const { currentSummitState, currentSponsorState } = getState();
     const { currentSummit } = currentSummitState;
     const { entity: sponsor } = currentSponsorState;
@@ -458,7 +459,7 @@ export const cancelSponsorForm =
       null,
       createAction(DUMMY_ACTION),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases/${orderId}/lines/${lineId}/cancel`,
-      null,
+      { quantity, reason },
       snackbarErrorHandler
     )(params)(dispatch)
       .then(() => {
