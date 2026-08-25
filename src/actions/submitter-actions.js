@@ -471,6 +471,10 @@ const parseFilters = (filters) => {
       filter.push("has_rejected_presentations==true");
       filter.push("has_accepted_presentations==false");
       filter.push("has_alternate_presentations==true");
+    } else if (filters.selectionStatusFilter.includes("published")) {
+      filter.push("has_published_presentations==true");
+    } else if (filters.selectionStatusFilter.includes("not_published")) {
+      filter.push("has_published_presentations==false");
     } else {
       filter.push(
         filters.selectionStatusFilter.reduce(

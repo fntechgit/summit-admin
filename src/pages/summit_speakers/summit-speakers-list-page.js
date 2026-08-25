@@ -477,6 +477,10 @@ class SummitSpeakersListPage extends React.Component {
       newSelectionStatusFilter = ["accepted_rejected"];
     } else if (newSelectionStatusFilter.includes("alternate_rejected")) {
       newSelectionStatusFilter = ["alternate_rejected"];
+    } else if (newSelectionStatusFilter.includes("published")) {
+      newSelectionStatusFilter = ["published"];
+    } else if (newSelectionStatusFilter.includes("not_published")) {
+      newSelectionStatusFilter = ["not_published"];
     }
 
     const {
@@ -793,7 +797,9 @@ class SummitSpeakersListPage extends React.Component {
       { label: "Only Alternate", value: "only_alternate" },
       { label: "Accepted/Alternate", value: "accepted_alternate" },
       { label: "Accepted/Rejected", value: "accepted_rejected" },
-      { label: "Alternate/Rejected", value: "alternate_rejected" }
+      { label: "Alternate/Rejected", value: "alternate_rejected" },
+      { label: "Published", value: "published" },
+      { label: "Not Published", value: "not_published" }
     ];
 
     const speakerSubmitterSourceSelectorDDL = [
