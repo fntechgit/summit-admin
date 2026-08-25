@@ -44,15 +44,15 @@ import {
   hasErrors,
   adjustEventDuration,
   isValidUrl
-} from "../../utils/methods";
-import ProgressFlags from "../inputs/ProgressFlags";
+} from "../../../utils/methods";
+import ProgressFlags from "../../inputs/ProgressFlags";
 import {
   ATTENDEES_EXPECTED_LEARNT,
   ATTENDING_MEDIA,
   LEVEL,
   SOCIAL_DESCRIPTION
-} from "../../actions/event-actions";
-import AuditLogs from "../audit-logs";
+} from "../../../actions/event-actions";
+import AuditLogs from "../../audit-logs";
 import {
   DECIMAL_DIGITS,
   DELTA_SECS,
@@ -67,27 +67,15 @@ import {
   RSVP_TYPE_NONE,
   RSVP_TYPE_PRIVATE,
   RSVP_TYPE_PUBLIC
-} from "../../utils/constants";
-import CopyClipboard from "../buttons/copy-clipboard";
-import EventRsvpList from "../rsvp/event-rsvp-list";
-import EventRsvpInvitationList from "../rsvp/event-rsvp-invitation-list";
-import showConfirmDialog from "../mui/showConfirmDialog";
-import {
-  buildRecipientRows,
-  toNotifyPayload,
-  ROLE
-} from "../../models/reopen-notification-recipients";
+} from "../../../utils/constants";
+import CopyClipboard from "../../buttons/copy-clipboard";
+import EventRsvpList from "../../rsvp/event-rsvp-list";
+import EventRsvpInvitationList from "../../rsvp/event-rsvp-invitation-list";
+import showConfirmDialog from "../../mui/showConfirmDialog";
+import ReopenNotifyPanel from "./ReopenNotifyPanel";
+import { buildRecipientRows, toNotifyPayload } from "./utils";
 
 const REOPEN_DEADLINE_FORMAT = "MMMM DD, YYYY h:mm a";
-
-const ROLE_LABEL = {
-  [ROLE.SUBMITTER]: "edit_event.notify_role_submitter",
-  [ROLE.MODERATOR]: "edit_event.notify_role_moderator",
-  [ROLE.SPEAKER]: "edit_event.notify_role_speaker"
-};
-
-const NOTIFY_ROW_GAP = 7;
-const NOTIFY_BUTTON_GAP = 12;
 
 class EventForm extends React.Component {
   constructor(props) {
@@ -102,9 +90,6 @@ class EventForm extends React.Component {
       commentFilters: { ...props.commentState.filters },
       reopenHours: DEFAULT_REOPEN_HOURS,
       reopenCustomHours: "",
-      // Transient and per-form by design: there is no server-side record of who was
-      // notified last time, so remembering a selection would assert more than the
-      // backend can back up. Empty on mount, emptied again after a successful send.
       notifyChecked: []
     };
 
@@ -156,6 +141,7 @@ class EventForm extends React.Component {
     this.handleReopenSubmission = this.handleReopenSubmission.bind(this);
     this.handleCloseSubmission = this.handleCloseSubmission.bind(this);
     this.handleNotifySpeakers = this.handleNotifySpeakers.bind(this);
+    this.toggleNotifyRecipient = this.toggleNotifyRecipient.bind(this);
   }
 
   componentDidMount() {
@@ -887,9 +873,6 @@ class EventForm extends React.Component {
     if (confirmed) onCloseSubmission(entity.id)?.catch(() => {});
   }
 
-  // Persisted entity, not the editable one: `include_submitter` carries no identity,
-  // so the server resolves it from the SAVED creator. Deriving rows from unsaved form
-  // state would let the list name one person while the send reaches another.
   getRecipientRows() {
     const { entity } = this.props;
     return buildRecipientRows(entity);
@@ -913,8 +896,6 @@ class EventForm extends React.Component {
     );
     if (checked.length === 0) return;
 
-    const submitterAtConfirm = entity?.created_by?.id ?? null;
-
     const confirmed = await showConfirmDialog({
       title: T.translate("edit_event.notify_speakers_confirm_title", {
         count: checked.length
@@ -929,41 +910,8 @@ class EventForm extends React.Component {
 
     if (!confirmed) return;
 
-    // Intersection, not replacement. `intended` is what the admin saw and ticked;
-    // `current` is what is still valid after any refresh that landed while the
-    // dialog was open. Intersecting can only ever shrink the CHANNEL set: a row
-    // that split away drops out via `current`, and a row that newly merged in
-    // cannot add anyone via `intended`.
-    const intended = toNotifyPayload(rows, notifyChecked);
-    const current = toNotifyPayload(this.getRecipientRows(), notifyChecked);
-    // The submitter channel is a bare boolean, so unlike speakerIds it carries no
-    // identity and cannot be intersected on one. Pin it explicitly: if the persisted
-    // creator changed while the dialog was open, the boolean would silently denote
-    // someone the dialog never named.
-    const { entity: entityAfterConfirm } = this.props;
-    const submitterUnchanged =
-      (entityAfterConfirm?.created_by?.id ?? null) === submitterAtConfirm;
-    const payload = {
-      speakerIds: intended.speakerIds.filter((id) =>
-        current.speakerIds.includes(id)
-      ),
-      includeSubmitter:
-        intended.includeSubmitter &&
-        current.includeSubmitter &&
-        submitterUnchanged
-    };
-    // No request when the intersection emptied the selection: the client already
-    // knows there is nothing to send, so asking the server to tell us costs a
-    // round trip on a rate-limited endpoint to learn what we can see locally.
-    if (payload.speakerIds.length === 0 && !payload.includeSubmitter) return;
-
-    // See handleReopenSubmission: snackbarErrorHandler has already surfaced the
-    // API's message and an expired-window 412 is expected, so don't let the
-    // rejection escape as an unhandled one.
-    onNotifySubmissionReopened(entity.id, payload)
+    onNotifySubmissionReopened(entity.id, toNotifyPayload(rows, notifyChecked))
       ?.then(() => {
-        // Cleared rather than retained so a second press is a deliberate
-        // re-selection, not a repeat of whatever was ticked a moment ago.
         this.setState({ notifyChecked: [] });
       })
       ?.catch(() => {});
@@ -1160,9 +1108,6 @@ class EventForm extends React.Component {
 
     const recipientRows = this.getRecipientRows();
     const notifySelection = toNotifyPayload(recipientRows, notifyChecked);
-    // The button asks the same function that builds the payload whether there is
-    // anything to send, so a checked key whose row has since disappeared or gone
-    // disabled cannot leave an enabled button that does nothing.
     const canNotify =
       notifySelection.speakerIds.length > 0 || notifySelection.includeSubmitter;
 
@@ -2202,62 +2147,13 @@ class EventForm extends React.Component {
                           {speakerDeepLink}
                         </span>
                       )}
-                      <div style={{ flexBasis: "100%" }}>
-                        <label>
-                          {T.translate("edit_event.notify_recipients_label")}
-                        </label>
-                        <div
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: NOTIFY_ROW_GAP,
-                            marginTop: NOTIFY_ROW_GAP
-                          }}
-                        >
-                          {recipientRows.map((row) => (
-                            <div
-                              className="form-check abc-checkbox"
-                              key={row.key}
-                            >
-                              <input
-                                type="checkbox"
-                                id={`notify_recipient_${row.key}`}
-                                className="form-check-input"
-                                disabled={row.disabled}
-                                checked={notifyChecked.includes(row.key)}
-                                onChange={() =>
-                                  this.toggleNotifyRecipient(row.key)
-                                }
-                              />
-                              <label
-                                className="form-check-label"
-                                htmlFor={`notify_recipient_${row.key}`}
-                              >
-                                {row.name}
-                                &nbsp;-&nbsp;
-                                {row.roles
-                                  .map((role) => T.translate(ROLE_LABEL[role]))
-                                  .join(", ")}
-                              </label>
-                              {row.disabled && (
-                                <span>
-                                  &nbsp;
-                                  {T.translate("edit_event.notify_no_email")}
-                                </span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                        <button
-                          type="button"
-                          className="btn btn-primary"
-                          style={{ marginTop: NOTIFY_BUTTON_GAP }}
-                          disabled={!canNotify}
-                          onClick={this.handleNotifySpeakers}
-                        >
-                          {T.translate("edit_event.notify_speakers")}
-                        </button>
-                      </div>
+                      <ReopenNotifyPanel
+                        rows={recipientRows}
+                        checked={notifyChecked}
+                        onToggle={this.toggleNotifyRecipient}
+                        canNotify={canNotify}
+                        onNotify={this.handleNotifySpeakers}
+                      />
                     </div>
                   )}
                 </div>

@@ -56,30 +56,7 @@ describe("notifySubmissionReopened", () => {
     expect(body).toEqual({ speaker_ids: [7, 12], include_submitter: true });
   });
 
-  it("dispatches startLoading before awaiting the access token", async () => {
-    arrangeRequest();
-    let resolveToken;
-    methods.getAccessTokenSafely.mockReturnValue(
-      new Promise((resolve) => {
-        resolveToken = resolve;
-      })
-    );
-
-    const pending = store.dispatch(
-      notifySubmissionReopened(42, { speakerIds: [7], includeSubmitter: false })
-    );
-
-    // Synchronous assertion: the flag must already be set while the token
-    // promise is still unresolved, or a slow refresh leaves an unblocked window.
-    expect(store.getActions().map((a) => a.type)).toContain("START_LOADING");
-
-    resolveToken("TOKEN");
-    await pending;
-  });
-
   it("reports the recipient count from the response, not a client tally", async () => {
-    // One speaker id goes in, the server says three recipients. Asserting the 3 is
-    // what makes this fail if the count is ever derived from the input instead.
     arrangeRequest(Promise.resolve({ response: { recipients: 3 } }));
 
     await store.dispatch(

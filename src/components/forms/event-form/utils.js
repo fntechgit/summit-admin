@@ -11,27 +11,6 @@
  * limitations under the License.
  * */
 
-/**
- * Recipient rows for the CFP reopen notification (SDS section 7).
- *
- * The UI shows ROWS; the endpoint takes TWO CHANNELS (speaker_ids plus
- * include_submitter). A row is keyed by IDENTITY, never by email: "submitter"
- * for the creator, "speaker:<id>" for each speaker and the moderator. Email is
- * only the MERGE PREDICATE, because two people can legitimately share a mailbox
- * and the payload still has to name both of them.
- *
- * Two passes, in a fixed order (submitter, speakers in array order, moderator):
- *   1. dedupe by speaker id. The moderator is usually also in speakers, and one
- *      id must never yield two rows.
- *   2. merge by normalized email. An empty email is never a merge key, so two
- *      people with no address on file stay two rows.
- *
- * The first identity in that order keeps the row key, which is what makes keys
- * stable across renders and lets the checked set be a plain list of keys. This
- * is also why toggling a merged row clears every channel it spans: the key names
- * the whole row, so there is no way to clear one channel and leave the other live.
- */
-
 export const ROLE = {
   SUBMITTER: "submitter",
   SPEAKER: "speaker",
@@ -51,8 +30,6 @@ export const buildRecipientRows = (entity) => {
   const identities = [];
   const bySpeakerId = new Map();
 
-  // normalizeEventResponse coerces server nulls to "", so an absent submitter or
-  // moderator is the empty string. Guard on the id, not on null.
   const submitter = entity?.created_by;
   if (submitter?.id) {
     identities.push({
@@ -68,9 +45,6 @@ export const buildRecipientRows = (entity) => {
 
   const addSpeaker = (person, role) => {
     if (!person?.id) return;
-    // One expression for both the map key and the row key: a Map compares keys
-    // strictly, so keying it on the raw id would let 7 and "7" miss each other
-    // and produce two rows sharing one key.
     const key = `speaker:${person.id}`;
     const seen = bySpeakerId.get(key);
     if (seen) {
@@ -120,11 +94,6 @@ export const buildRecipientRows = (entity) => {
   return rows;
 };
 
-/**
- * Union of the channels of every checked, enabled row. Disabled rows are filtered
- * again here and not only at toggle time: a row can go disabled between mount and
- * send if the entity is refetched.
- */
 export const toNotifyPayload = (rows, checkedKeys) => {
   const checked = rows.filter(
     (row) => !row.disabled && checkedKeys.includes(row.key)

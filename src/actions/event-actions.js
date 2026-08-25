@@ -83,9 +83,6 @@ export const RECEIVE_EVENT_COMMENTS = "RECEIVE_EVENT_COMMENTS";
 export const CHANGE_SEARCH_TERM = "CHANGE_SEARCH_TERM";
 export const SUBMISSION_PERIOD_REOPENED = "SUBMISSION_PERIOD_REOPENED";
 export const SUBMISSION_PERIOD_CLOSED = "SUBMISSION_PERIOD_CLOSED";
-// Dispatched so uicore's putRequest has a receive action to fire (it dispatches the
-// second argument directly, and dispatch(null) throws). No reducer handles it: the
-// response changes no entity state.
 export const SUBMISSION_REOPEN_NOTIFIED = "SUBMISSION_REOPEN_NOTIFIED";
 
 export const ATTENDEES_EXPECTED_LEARNT = "attendees_expected_learnt";
@@ -824,7 +821,6 @@ export const notifySubmissionReopened =
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
 
-    // See reopenSubmissionPeriod: in-flight flag before the token await.
     dispatch(startLoading());
 
     const accessToken = await getAccessTokenSafely();
@@ -844,8 +840,6 @@ export const notifySubmissionReopened =
           snackbarSuccessHandler({
             title: T.translate("general.success"),
             html: T.translate("edit_event.notify_speakers_success", {
-              // The server's number, not the client's tally: a record can change
-              // between page load and send.
               count: payload?.response?.recipients ?? 0
             })
           })
