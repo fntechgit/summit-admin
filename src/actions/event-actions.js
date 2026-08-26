@@ -83,6 +83,7 @@ export const RECEIVE_EVENT_COMMENTS = "RECEIVE_EVENT_COMMENTS";
 export const CHANGE_SEARCH_TERM = "CHANGE_SEARCH_TERM";
 export const SUBMISSION_PERIOD_REOPENED = "SUBMISSION_PERIOD_REOPENED";
 export const SUBMISSION_PERIOD_CLOSED = "SUBMISSION_PERIOD_CLOSED";
+export const SUBMISSION_REOPEN_NOTIFIED = "SUBMISSION_REOPEN_NOTIFIED";
 
 export const ATTENDEES_EXPECTED_LEARNT = "attendees_expected_learnt";
 export const ATTENDING_MEDIA = "attending_media";
@@ -807,6 +808,40 @@ export const closeSubmissionPeriod =
           snackbarSuccessHandler({
             title: T.translate("general.success"),
             html: T.translate("edit_event.close_submission_success")
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+export const notifySubmissionReopened =
+  (eventId, { speakerIds, includeSubmitter }) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+
+    dispatch(startLoading());
+
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    const params = { access_token: accessToken };
+
+    return putRequest(
+      null,
+      createAction(SUBMISSION_REOPEN_NOTIFIED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/presentations/${eventId}/submission-period/reopen/notify`,
+      { speaker_ids: speakerIds, include_submitter: includeSubmitter },
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then((payload) => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_event.notify_speakers_success", {
+              count: payload?.response?.recipients ?? 0
+            })
           })
         );
       })

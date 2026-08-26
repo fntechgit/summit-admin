@@ -2,16 +2,16 @@ import React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import moment from "moment-timezone";
-import EventForm from "../event-form";
-import currentSummitMock from "../../../__mocks__/currentSummitMock";
-import showConfirmDialog from "../../mui/showConfirmDialog";
+import EventForm from "../index";
+import currentSummitMock from "../../../../__mocks__/currentSummitMock";
+import showConfirmDialog from "../../../mui/showConfirmDialog";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   __esModule: true,
   default: { translate: (key) => key }
 }));
 
-jest.mock("../../mui/showConfirmDialog", () => ({
+jest.mock("../../../mui/showConfirmDialog", () => ({
   __esModule: true,
   default: jest.fn()
 }));
