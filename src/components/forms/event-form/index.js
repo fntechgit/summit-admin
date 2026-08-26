@@ -44,15 +44,15 @@ import {
   hasErrors,
   adjustEventDuration,
   isValidUrl
-} from "../../utils/methods";
-import ProgressFlags from "../inputs/ProgressFlags";
+} from "../../../utils/methods";
+import ProgressFlags from "../../inputs/ProgressFlags";
 import {
   ATTENDEES_EXPECTED_LEARNT,
   ATTENDING_MEDIA,
   LEVEL,
   SOCIAL_DESCRIPTION
-} from "../../actions/event-actions";
-import AuditLogs from "../audit-logs";
+} from "../../../actions/event-actions";
+import AuditLogs from "../../audit-logs";
 import {
   DECIMAL_DIGITS,
   DELTA_SECS,
@@ -67,11 +67,13 @@ import {
   RSVP_TYPE_NONE,
   RSVP_TYPE_PRIVATE,
   RSVP_TYPE_PUBLIC
-} from "../../utils/constants";
-import CopyClipboard from "../buttons/copy-clipboard";
-import EventRsvpList from "../rsvp/event-rsvp-list";
-import EventRsvpInvitationList from "../rsvp/event-rsvp-invitation-list";
-import showConfirmDialog from "../mui/showConfirmDialog";
+} from "../../../utils/constants";
+import CopyClipboard from "../../buttons/copy-clipboard";
+import EventRsvpList from "../../rsvp/event-rsvp-list";
+import EventRsvpInvitationList from "../../rsvp/event-rsvp-invitation-list";
+import showConfirmDialog from "../../mui/showConfirmDialog";
+import ReopenNotifyPanel from "./ReopenNotifyPanel";
+import { buildRecipientRows, toNotifyPayload } from "./utils";
 
 const REOPEN_DEADLINE_FORMAT = "MMMM DD, YYYY h:mm a";
 
@@ -87,7 +89,8 @@ class EventForm extends React.Component {
       publish: false,
       commentFilters: { ...props.commentState.filters },
       reopenHours: DEFAULT_REOPEN_HOURS,
-      reopenCustomHours: ""
+      reopenCustomHours: "",
+      notifyChecked: []
     };
 
     this.formRef = React.createRef();
@@ -137,6 +140,8 @@ class EventForm extends React.Component {
     this.handleSaveIncomplete = this.handleSaveIncomplete.bind(this);
     this.handleReopenSubmission = this.handleReopenSubmission.bind(this);
     this.handleCloseSubmission = this.handleCloseSubmission.bind(this);
+    this.handleNotifySpeakers = this.handleNotifySpeakers.bind(this);
+    this.toggleNotifyRecipient = this.toggleNotifyRecipient.bind(this);
   }
 
   componentDidMount() {
@@ -868,6 +873,50 @@ class EventForm extends React.Component {
     if (confirmed) onCloseSubmission(entity.id)?.catch(() => {});
   }
 
+  getRecipientRows() {
+    const { entity } = this.props;
+    return buildRecipientRows(entity);
+  }
+
+  toggleNotifyRecipient(key) {
+    this.setState((prev) => ({
+      notifyChecked: prev.notifyChecked.includes(key)
+        ? prev.notifyChecked.filter((k) => k !== key)
+        : [...prev.notifyChecked, key]
+    }));
+  }
+
+  async handleNotifySpeakers() {
+    const { entity, onNotifySubmissionReopened } = this.props;
+    const { notifyChecked } = this.state;
+
+    const rows = this.getRecipientRows();
+    const checked = rows.filter(
+      (row) => !row.disabled && notifyChecked.includes(row.key)
+    );
+    if (checked.length === 0) return;
+
+    const confirmed = await showConfirmDialog({
+      title: T.translate("edit_event.notify_speakers_confirm_title", {
+        count: checked.length
+      }),
+      text: T.translate("edit_event.notify_speakers_confirm_text", {
+        deadline: this.getReopenDeadline().format(REOPEN_DEADLINE_FORMAT),
+        names: checked.map((row) => row.name).join(", ")
+      }),
+      iconType: "warning",
+      confirmButtonText: T.translate("edit_event.notify_speakers")
+    });
+
+    if (!confirmed) return;
+
+    onNotifySubmissionReopened(entity.id, toNotifyPayload(rows, notifyChecked))
+      ?.then(() => {
+        this.setState({ notifyChecked: [] });
+      })
+      ?.catch(() => {});
+  }
+
   isNew() {
     const { entity } = this.state;
     return !entity.id;
@@ -1051,10 +1100,16 @@ class EventForm extends React.Component {
       errors,
       speakerToAdd,
       reopenHours,
-      reopenCustomHours
+      reopenCustomHours,
+      notifyChecked
     } = this.state;
 
     const maxReopenHours = this.getMaxReopenHours();
+
+    const recipientRows = this.getRecipientRows();
+    const notifySelection = toNotifyPayload(recipientRows, notifyChecked);
+    const canNotify =
+      notifySelection.speakerIds.length > 0 || notifySelection.includeSubmitter;
 
     const {
       currentSummit,
@@ -2092,6 +2147,13 @@ class EventForm extends React.Component {
                           {speakerDeepLink}
                         </span>
                       )}
+                      <ReopenNotifyPanel
+                        rows={recipientRows}
+                        checked={notifyChecked}
+                        onToggle={this.toggleNotifyRecipient}
+                        canNotify={canNotify}
+                        onNotify={this.handleNotifySpeakers}
+                      />
                     </div>
                   )}
                 </div>
