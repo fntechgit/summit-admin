@@ -473,7 +473,6 @@ export const cancelSponsorForm =
           })
         );
       })
-      .catch(console.log) // need to catch promise reject
       .finally(() => {
         dispatch(stopLoading());
       });

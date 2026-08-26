@@ -122,13 +122,11 @@ const SponsorOrderDetails = ({
     updateClientAddress(currentOrder.id, values);
   };
 
-  const handleCancelForm = (item, quantity, reason) => {
+  const handleCancelForm = (item, quantity, reason) =>
     cancelSponsorForm(currentOrder.id, item.id, item.name, quantity, reason);
-  };
 
-  const handleUndoCancelForm = (item) => {
+  const handleUndoCancelForm = (item) =>
     undoCancelSponsorForm(currentOrder.id, item.id);
-  };
 
   const handleOrderRefund = (values) => {
     refundSponsorOrder(currentOrder.id, values.amount, values.reason);
