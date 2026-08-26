@@ -234,7 +234,7 @@ export const getSponsorFormsForCart =
     return getRequest(
       createAction(REQUEST_CART_AVAILABLE_FORMS),
       createAction(RECEIVE_CART_AVAILABLE_FORMS),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/available-forms`,
+      `${window.PURCHASES_API_URL}/api/v2/summits/${currentSummit.id}/sponsors/${sponsor.id}/available-forms`,
       authErrorHandler,
       { term, order, orderDir, currentPage }
     )(params)(dispatch).then(() => {
