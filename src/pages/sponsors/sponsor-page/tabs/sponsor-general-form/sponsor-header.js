@@ -42,14 +42,7 @@ const SponsorHeader = ({ sponsor, onSave }) => {
     <Box sx={{ px: 2, py: 0, backgroundColor: "#FFF" }}>
       <Grid2 container size={12} sx={{ height: "68px", alignItems: "center" }}>
         <Grid2 size={12}>
-          <Typography
-            sx={{
-              fontWeight: "500",
-              letterSpacing: "0.15px",
-              fontSize: "2rem",
-              lineHeight: "1.6rem"
-            }}
-          >
+          <Typography variant="h6">
             {T.translate("edit_sponsor.general_information")}
           </Typography>
         </Grid2>
@@ -61,13 +54,7 @@ const SponsorHeader = ({ sponsor, onSave }) => {
         sx={{ height: "75px", gap: "10px", alignItems: "center" }}
       >
         <Grid2 size={3}>
-          <Typography
-            sx={{
-              fontSize: "1.4rem",
-              lineHeight: "1.57rem",
-              fontWeight: "500"
-            }}
-          >
+          <Typography variant="body2">
             {T.translate("edit_sponsor.sponsor_name")}
           </Typography>
         </Grid2>
@@ -80,13 +67,7 @@ const SponsorHeader = ({ sponsor, onSave }) => {
         sx={{ height: "75px", gap: "10px", alignItems: "center" }}
       >
         <Grid2 size={3}>
-          <Typography
-            sx={{
-              fontSize: "1.4rem",
-              lineHeight: "1.57rem",
-              fontWeight: "500"
-            }}
-          >
+          <Typography variant="body2">
             {T.translate("edit_sponsor.sponsor_address")}
           </Typography>
         </Grid2>
@@ -116,14 +97,7 @@ const SponsorHeader = ({ sponsor, onSave }) => {
         sx={{ height: "75px", gap: "10px", alignItems: "center" }}
       >
         <Grid2 size={3}>
-          <Typography
-            id="sponsor-is-published-label"
-            sx={{
-              fontSize: "1.4rem",
-              lineHeight: "1.57rem",
-              fontWeight: "500"
-            }}
-          >
+          <Typography id="sponsor-is-published-label" variant="body2">
             {T.translate("edit_sponsor.is_published")}
           </Typography>
         </Grid2>
