@@ -30,7 +30,7 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { UploadInputV3 } from "openstack-uicore-foundation/lib/components";
+import UploadInputV3 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v3";
 import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
 import MuiTableSortable from "openstack-uicore-foundation/lib/components/mui/sortable-table";
 import {
