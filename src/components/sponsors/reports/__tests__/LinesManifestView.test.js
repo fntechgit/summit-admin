@@ -284,6 +284,12 @@ describe("partially cancelled lines", () => {
     expect(screen.getByText("3 / 5")).toBeInTheDocument();
   });
 
+  it("shows live over charged money, so the row does not price cancelled units", () => {
+    renderView({ rows: [partial()], total: 1 });
+    const row = screen.getByText("AV1").closest("tr");
+    expect(within(row).getByText("$600.00 / $1000.00")).toBeInTheDocument();
+  });
+
   it("renders the partially canceled pill, not the order status", () => {
     renderView({ rows: [partial()], total: 1 });
     expect(

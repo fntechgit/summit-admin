@@ -139,6 +139,15 @@ const LABEL_KEY_BY_LINE_STATUS = {
   partially_canceled: "sponsor_reports_page.status_partially_canceled"
 };
 
+// Live over charged, matching the Qty cell. Finance reads this column and this is
+// the only per-line money surface, so netting alone would drop the charged figure.
+const lineTotalLabel = (row) =>
+  row.is_partially_canceled
+    ? `${currencyAmountFromCents(
+        liveAmountCents(row)
+      )} / ${currencyAmountFromCents(row.line_total)}`
+    : currencyAmountFromCents(row.line_total);
+
 // Not redundant with the strikethrough, which no CSV export carries.
 export const LineStatusPill = ({ status }) => {
   const labelKey = LABEL_KEY_BY_LINE_STATUS[status];
@@ -230,9 +239,7 @@ const LinesManifestView = ({
                         <LineStatusPill status={lineStatus(line)} />
                       </TableCell>
                       <TableCell align="right">
-                        {line.line_total == null
-                          ? "—"
-                          : currencyAmountFromCents(line.line_total)}
+                        {line.line_total == null ? "—" : lineTotalLabel(line)}
                       </TableCell>
                       <TableCell>
                         {formatCheckoutTime(line.synced_at)}
