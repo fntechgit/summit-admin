@@ -137,11 +137,14 @@ const HEADERS = [
   { key: "col_source_updated" }
 ];
 
-// The LINE's own state, three-way. A soft-canceled line leaves its parent order Paid,
-// so rendering purchase.status printed "Paid" on a dead row. A partially cancelled line
-// leaves BOTH canceled_at null and the order Paid, so it would print "Paid" too while
-// carrying real cancelled units. is_canceled is checked first: the two flags are
-// mutually exclusive at the API, and this keeps that ordering explicit here.
+// The LINE's own state, three-way. Without this pill, the strikethrough styling is
+// the only other signal that a line was cancelled, and strikethrough does not survive
+// CSV export — so the pill is not redundant with it. A soft-canceled line leaves its
+// parent order Paid, so rendering purchase.status printed "Paid" on a dead row. A
+// partially cancelled line leaves BOTH canceled_at null and the order Paid, so it
+// would print "Paid" too while carrying real cancelled units. is_canceled is checked
+// first: the two flags are mutually exclusive at the API, and this keeps that
+// ordering explicit here.
 const LineStatusPill = ({ line: row }) => {
   if (row.is_canceled) {
     return (

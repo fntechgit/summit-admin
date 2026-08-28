@@ -139,8 +139,10 @@ const accumulateRow = (itemMap, row) => {
     // Live figures apply to the two states that still contribute to the item total.
     qty: row.is_canceled ? row.quantity ?? 0 : liveQuantity(row),
     orderedQty: row.quantity ?? 0,
-    // Live money, matching the item total this row rolls up into. A drill-down whose
-    // rows summed to more than their own header would be its own bug report.
+    // Live money, matching the item total for the two states that contribute to
+    // it (live and partially cancelled). A fully cancelled row is the deliberate
+    // exception above: it shows what was charged, not what's live, so the
+    // drill-down row can sum to more than the header on purpose.
     lineTotalCents: row.is_canceled
       ? row.line_total ?? null
       : liveAmountCents(row),

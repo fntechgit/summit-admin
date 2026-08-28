@@ -577,6 +577,43 @@ describe("ByItemView", () => {
     expect(cells[cells.length - 1]).toHaveTextContent(sourceUpdatedText);
   });
 
+  it("renders a partially cancelled contributor's split quantity and pill (regression: catches the isPartiallyCanceled render branch being dropped)", () => {
+    renderView({
+      groups: [
+        group({
+          items: [
+            item({
+              contributors: [
+                {
+                  sponsorName: "FNTECH",
+                  number: "OCP-1",
+                  formCode: "AV",
+                  addOnName: null,
+                  checkoutAt: null,
+                  rateName: "Early",
+                  status: "partially_canceled",
+                  qty: 3,
+                  orderedQty: 5,
+                  lineTotalCents: 60000,
+                  isCanceled: false,
+                  isPartiallyCanceled: true,
+                  syncedAt: null,
+                  sourceUpdatedAt: null
+                }
+              ]
+            })
+          ]
+        })
+      ]
+    });
+    fireEvent.click(screen.getByText("AV1")); // expand the item
+    expect(
+      screen.getByText("sponsor_reports_page.status_partially_canceled")
+    ).toBeInTheDocument();
+    const row = screen.getByText("OCP-1").closest("tr");
+    expect(within(row).getByText("3 / 5")).toBeInTheDocument();
+  });
+
   it("expand button toggles the drill-down and reflects aria-expanded", () => {
     renderView();
     const toggle = screen.getByRole("button", {
