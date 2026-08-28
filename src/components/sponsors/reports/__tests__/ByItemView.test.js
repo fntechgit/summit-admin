@@ -162,8 +162,10 @@ describe("groupLinesBySponsorItem", () => {
       rateName: "Early",
       status: "Canceled",
       qty: 2,
+      orderedQty: 2,
       lineTotalCents: 100000,
       isCanceled: true,
+      isPartiallyCanceled: false,
       syncedAt: null,
       sourceUpdatedAt: null
     });
@@ -250,6 +252,104 @@ describe("groupLinesBySponsorItem", () => {
     );
     expect(qtySum).toBe(7);
     expect(contribCount).toBe(rows.length);
+  });
+});
+
+describe("partial cancellation", () => {
+  const partial = (over = {}) =>
+    line({
+      quantity: 5,
+      canceled_quantity: 2,
+      canceled_amount: 40000,
+      is_canceled: false,
+      is_partially_canceled: true,
+      canceled_at: null,
+      ...over
+    });
+
+  it("counts only live units toward an item's qty", () => {
+    const [group] = groupLinesBySponsorItem([partial()]);
+    expect(group.items[0].qty).toBe(3);
+  });
+
+  it("keeps a fully cancelled line at zero units", () => {
+    const [group] = groupLinesBySponsorItem([
+      partial({
+        quantity: 5,
+        canceled_quantity: 5,
+        is_canceled: true,
+        is_partially_canceled: false
+      })
+    ]);
+    expect(group.items[0].qty).toBe(0);
+  });
+
+  it("leaves an uncancelled line's units unchanged", () => {
+    const [group] = groupLinesBySponsorItem([line({ quantity: 4 })]);
+    expect(group.items[0].qty).toBe(4);
+  });
+
+  it("never lets a legacy over-cancelled line drive qty negative", () => {
+    const [group] = groupLinesBySponsorItem([
+      partial({ quantity: 0, canceled_quantity: 1 })
+    ]);
+    expect(group.items[0].qty).toBe(0);
+  });
+
+  it("flags the contributor as partially cancelled rather than Paid", () => {
+    const [group] = groupLinesBySponsorItem([partial()]);
+    const [contributor] = group.items[0].contributors;
+    expect(contributor.isPartiallyCanceled).toBe(true);
+    expect(contributor.isCanceled).toBe(false);
+    expect(contributor.status).toBe("partially_canceled");
+    expect(contributor.qty).toBe(3);
+    expect(contributor.orderedQty).toBe(5);
+  });
+
+  it("still counts the parent order as an order for the item", () => {
+    const [group] = groupLinesBySponsorItem([partial()]);
+    expect(group.items[0].orders).toBe(1);
+  });
+
+  it("nets the cancelled money off the item total", () => {
+    const [group] = groupLinesBySponsorItem([
+      partial({ line_total: 100000, canceled_amount: 40000 })
+    ]);
+    expect(group.items[0].totalCents).toBe(60000);
+  });
+
+  it("gives the contributor the same live money as it contributes", () => {
+    const [group] = groupLinesBySponsorItem([
+      partial({ line_total: 100000, canceled_amount: 40000 })
+    ]);
+    expect(group.items[0].contributors[0].lineTotalCents).toBe(60000);
+  });
+
+  it("keeps an all-null-money item at null so it still renders as unknown", () => {
+    const [group] = groupLinesBySponsorItem([
+      partial({ line_total: null, canceled_amount: 0 })
+    ]);
+    expect(group.items[0].totalCents).toBeNull();
+  });
+
+  it("contributes no money from a fully cancelled line", () => {
+    const [group] = groupLinesBySponsorItem([
+      line({
+        line_total: 100000,
+        is_canceled: true,
+        is_partially_canceled: false
+      })
+    ]);
+    expect(group.items[0].totalCents).toBeNull();
+  });
+
+  it("keeps a fully cancelled contributor at its ordered units and charged money", () => {
+    const [group] = groupLinesBySponsorItem([
+      line({ quantity: 5, line_total: 100000, is_canceled: true })
+    ]);
+    const [contributor] = group.items[0].contributors;
+    expect(contributor.qty).toBe(5);
+    expect(contributor.lineTotalCents).toBe(100000);
   });
 });
 
@@ -463,7 +563,9 @@ describe("ByItemView", () => {
       ]
     });
     fireEvent.click(screen.getByText("AV1")); // expand the item
-    expect(screen.getByText("Canceled")).toBeInTheDocument();
+    expect(
+      screen.getByText("sponsor_reports_page.status_canceled")
+    ).toBeInTheDocument();
     const syncedText = moment.unix(synced).utc().format("YYYY-MM-DD h:mm A");
     const sourceUpdatedText = moment
       .unix(sourceUpdated)
