@@ -49,6 +49,30 @@ export const PER_PAGE_OPTIONS = [
   MAX_PER_PAGE
 ];
 
+// Units still purchased on a line. Cancellation is not binary at the source: a line
+// can be cancelled in quantities, and canceled_at is set only by the event that
+// completes it, so a partially cancelled line arrives with is_canceled false and a
+// real cancelled portion. Clamped at 0 because a legacy line can carry quantity 0
+// with canceled_quantity 1 (purchases-api 0022 defaults a missing
+// description['quantity'] to 1, the reports sync defaults it to 0).
+// Shared with ByItemView, which imports from this module (never the reverse).
+export const liveQuantity = (row) => {
+  if (row?.is_canceled) return 0;
+  return Math.max(0, (row?.quantity ?? 0) - (row?.canceled_quantity ?? 0));
+};
+
+// Money still purchased on a line, in cents. canceled_amount is the source's own
+// FROZEN sum of the cancelled event rows, so this subtraction is exact: never
+// line_total prorated by quantity, because the source charges partial events at
+// floor unit price and gives the completing event the exact remainder, so
+// proration drifts by cents. null in, null out, so a caller whose whole item has
+// no money still renders "—" rather than 0.
+export const liveAmountCents = (row) => {
+  if (row?.line_total == null) return null;
+  if (row.is_canceled) return 0;
+  return Math.max(0, row.line_total - (row.canceled_amount ?? 0));
+};
+
 // Destination = the line's add-on (e.g. "Meeting Room T"); when absent, the
 // logistics convention is the sponsor's booth — the API supplies it as
 // `sponsor_booth` (the sponsor's Booth-type add-on name(s)). The muted "Booth"

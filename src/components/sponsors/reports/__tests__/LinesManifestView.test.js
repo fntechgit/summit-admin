@@ -2,7 +2,10 @@ import "@testing-library/jest-dom";
 import React from "react";
 import moment from "moment-timezone";
 import { render, screen, within } from "@testing-library/react";
-import LinesManifestView from "../LinesManifestView";
+import LinesManifestView, {
+  liveQuantity,
+  liveAmountCents
+} from "../LinesManifestView";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   translate: (k, opts) =>
@@ -212,5 +215,84 @@ describe("lines_count copy", () => {
     // eslint-disable-next-line global-require
     const en = require("../../../../i18n/en.json");
     expect(en.sponsor_reports_page.lines_count).toBe("{count} live lines");
+  });
+});
+
+describe("liveQuantity", () => {
+  it("returns the full quantity for an active line", () => {
+    expect(liveQuantity(line({ quantity: 2, canceled_quantity: 0 }))).toBe(2);
+  });
+
+  it("nets the cancelled portion off a partially cancelled line", () => {
+    expect(
+      liveQuantity(
+        line({
+          quantity: 5,
+          canceled_quantity: 2,
+          is_partially_canceled: true
+        })
+      )
+    ).toBe(3);
+  });
+
+  it("returns 0 for a fully cancelled line", () => {
+    expect(
+      liveQuantity(
+        line({ quantity: 5, canceled_quantity: 5, is_canceled: true })
+      )
+    ).toBe(0);
+  });
+
+  it("clamps at 0 when a legacy line cancels more than it ordered", () => {
+    // purchases-api 0022 defaults a missing description['quantity'] to 1 while
+    // the reports sync defaults it to 0, so this shape reaches the client.
+    expect(liveQuantity(line({ quantity: 0, canceled_quantity: 1 }))).toBe(0);
+  });
+
+  it("treats missing fields as zero rather than NaN", () => {
+    expect(liveQuantity({})).toBe(0);
+    expect(liveQuantity(undefined)).toBe(0);
+  });
+});
+
+describe("liveAmountCents", () => {
+  it("returns the full line total for an active line", () => {
+    expect(
+      liveAmountCents(line({ line_total: 100000, canceled_amount: 0 }))
+    ).toBe(100000);
+  });
+
+  it("subtracts the frozen cancelled amount on a partially cancelled line", () => {
+    // 40000 is the source's own sum for the cancelled units, NOT line_total
+    // prorated by quantity, which would give 40000 only by coincidence.
+    expect(
+      liveAmountCents(
+        line({
+          line_total: 100000,
+          canceled_amount: 40000,
+          quantity: 5,
+          canceled_quantity: 2,
+          is_partially_canceled: true
+        })
+      )
+    ).toBe(60000);
+  });
+
+  it("returns 0 for a fully cancelled line", () => {
+    expect(
+      liveAmountCents(
+        line({ line_total: 100000, canceled_amount: 100000, is_canceled: true })
+      )
+    ).toBe(0);
+  });
+
+  it("preserves null so an all-null item still renders as unknown", () => {
+    expect(liveAmountCents(line({ line_total: null }))).toBeNull();
+  });
+
+  it("clamps at 0 when the cancelled amount exceeds the line total", () => {
+    expect(
+      liveAmountCents(line({ line_total: 1000, canceled_amount: 5000 }))
+    ).toBe(0);
   });
 });
