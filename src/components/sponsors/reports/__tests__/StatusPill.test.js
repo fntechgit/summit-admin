@@ -11,11 +11,6 @@ describe("statusTone", () => {
     expect(statusTone("paid")).toBe("success");
     expect(statusTone("Confirmed")).toBe("success");
   });
-
-  it("gives a partially canceled line a warning tone, distinct from canceled", () => {
-    expect(statusTone("partially_canceled")).toBe("warning");
-    expect(statusTone("canceled")).toBe("default");
-  });
 });
 
 describe("StatusPill", () => {

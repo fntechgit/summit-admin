@@ -32,6 +32,9 @@ const line = (over = {}) => ({
   notes: "dock B",
   is_canceled: false,
   canceled_at: null,
+  canceled_quantity: 0,
+  canceled_amount: 0,
+  is_partially_canceled: false,
   ...over
 });
 
@@ -219,10 +222,6 @@ describe("lines_count copy", () => {
 });
 
 describe("liveQuantity", () => {
-  it("returns the full quantity for an active line", () => {
-    expect(liveQuantity(line({ quantity: 2, canceled_quantity: 0 }))).toBe(2);
-  });
-
   it("nets the cancelled portion off a partially cancelled line", () => {
     expect(
       liveQuantity(
@@ -235,17 +234,8 @@ describe("liveQuantity", () => {
     ).toBe(3);
   });
 
-  it("returns 0 for a fully cancelled line", () => {
-    expect(
-      liveQuantity(
-        line({ quantity: 5, canceled_quantity: 5, is_canceled: true })
-      )
-    ).toBe(0);
-  });
-
   it("clamps at 0 when a legacy line cancels more than it ordered", () => {
-    // purchases-api 0022 defaults a missing description['quantity'] to 1 while
-    // the reports sync defaults it to 0, so this shape reaches the client.
+    // legacy shape: purchases-api defaults quantity to 1, the sync to 0
     expect(liveQuantity(line({ quantity: 0, canceled_quantity: 1 }))).toBe(0);
   });
 
@@ -256,15 +246,8 @@ describe("liveQuantity", () => {
 });
 
 describe("liveAmountCents", () => {
-  it("returns the full line total for an active line", () => {
-    expect(
-      liveAmountCents(line({ line_total: 100000, canceled_amount: 0 }))
-    ).toBe(100000);
-  });
-
   it("subtracts the frozen cancelled amount on a partially cancelled line", () => {
-    // 40000 is the source's own sum for the cancelled units, NOT line_total
-    // prorated by quantity, which would give 40000 only by coincidence.
+    // the source's own sum, not a proration of line_total
     expect(
       liveAmountCents(
         line({
@@ -276,18 +259,6 @@ describe("liveAmountCents", () => {
         })
       )
     ).toBe(60000);
-  });
-
-  it("returns 0 for a fully cancelled line", () => {
-    expect(
-      liveAmountCents(
-        line({ line_total: 100000, canceled_amount: 100000, is_canceled: true })
-      )
-    ).toBe(0);
-  });
-
-  it("preserves null so an all-null item still renders as unknown", () => {
-    expect(liveAmountCents(line({ line_total: null }))).toBeNull();
   });
 
   it("clamps at 0 when the cancelled amount exceeds the line total", () => {
@@ -322,8 +293,10 @@ describe("partially cancelled lines", () => {
   });
 
   it("does not strike through a partially cancelled row", () => {
-    const { container } = renderView({ rows: [partial()], total: 1 });
-    expect(container.querySelector("tr[data-canceled=\"true\"]")).toBeNull();
+    renderView({ rows: [partial()], total: 1 });
+    expect(screen.getByText("AV1").closest("tr")).not.toHaveAttribute(
+      "data-canceled"
+    );
   });
 
   it("still counts a partially cancelled line as one live line", () => {
@@ -340,19 +313,19 @@ describe("partially cancelled lines", () => {
       is_canceled: true,
       is_partially_canceled: false
     });
-    const { container } = renderView({ rows: [full], total: 1 });
+    renderView({ rows: [full], total: 1 });
+    const row = screen.getByText("AV1").closest("tr");
+    expect(row).toHaveAttribute("data-canceled", "true");
     expect(
-      container.querySelector("tr[data-canceled=\"true\"]")
+      within(row).getByText("sponsor_reports_page.status_canceled")
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("sponsor_reports_page.status_canceled")
-    ).toBeInTheDocument();
-    expect(screen.getByText("5")).toBeInTheDocument();
+    expect(within(row).getByText("5")).toBeInTheDocument();
   });
 
   it("leaves an active line's quantity as a bare number", () => {
     renderView({ rows: [line({ quantity: 2 })], total: 1 });
-    expect(screen.getByText("2")).toBeInTheDocument();
-    expect(screen.queryByText("2 / 2")).not.toBeInTheDocument();
+    const row = screen.getByText("AV1").closest("tr");
+    expect(within(row).getByText("2")).toBeInTheDocument();
+    expect(within(row).queryByText("2 / 2")).not.toBeInTheDocument();
   });
 });

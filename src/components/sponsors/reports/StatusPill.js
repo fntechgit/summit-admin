@@ -11,8 +11,6 @@ const TONE_BY_STATUS = {
   not_applicable: "default",
   canceled: "default",
   cancelled: "default",
-  // A partially cancelled line is still live and still needs fulfilling, so it
-  // must not share the muted tone that means "ignore this row".
   partially_canceled: "warning"
 };
 

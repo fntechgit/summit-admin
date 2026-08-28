@@ -49,24 +49,14 @@ export const PER_PAGE_OPTIONS = [
   MAX_PER_PAGE
 ];
 
-// Units still purchased on a line. Cancellation is not binary at the source: a line
-// can be cancelled in quantities, and canceled_at is set only by the event that
-// completes it, so a partially cancelled line arrives with is_canceled false and a
-// real cancelled portion. Clamped at 0 because a legacy line can carry quantity 0
-// with canceled_quantity 1 (purchases-api 0022 defaults a missing
-// description['quantity'] to 1, the reports sync defaults it to 0).
-// Shared with ByItemView, which imports from this module (never the reverse).
+// Clamped: legacy lines can have quantity 0, canceled_quantity 1.
+// ByItemView imports from here, never the reverse (cycle).
 export const liveQuantity = (row) => {
   if (row?.is_canceled) return 0;
   return Math.max(0, (row?.quantity ?? 0) - (row?.canceled_quantity ?? 0));
 };
 
-// Money still purchased on a line, in cents. canceled_amount is the source's own
-// FROZEN sum of the cancelled event rows, so this subtraction is exact: never
-// line_total prorated by quantity, because the source charges partial events at
-// floor unit price and gives the completing event the exact remainder, so
-// proration drifts by cents. null in, null out, so a caller whose whole item has
-// no money still renders "—" rather than 0.
+// Never prorate line_total — partial events charge floor unit price.
 export const liveAmountCents = (row) => {
   if (row?.line_total == null) return null;
   if (row.is_canceled) return 0;
@@ -137,33 +127,26 @@ const HEADERS = [
   { key: "col_source_updated" }
 ];
 
-// The LINE's own state, three-way. Without this pill, the strikethrough styling is
-// the only other signal that a line was cancelled, and strikethrough does not survive
-// CSV export — so the pill is not redundant with it. A soft-canceled line leaves its
-// parent order Paid, so rendering purchase.status printed "Paid" on a dead row. A
-// partially cancelled line leaves BOTH canceled_at null and the order Paid, so it
-// would print "Paid" too while carrying real cancelled units. is_canceled is checked
-// first: the two flags are mutually exclusive at the API, and this keeps that
-// ordering explicit here.
-const LineStatusPill = ({ line: row }) => {
-  if (row.is_canceled) {
-    return (
-      <StatusPill
-        status="Canceled"
-        label={T.translate("sponsor_reports_page.status_canceled")}
-      />
-    );
-  }
-  if (row.is_partially_canceled) {
-    return (
-      <StatusPill
-        status="partially_canceled"
-        label={T.translate("sponsor_reports_page.status_partially_canceled")}
-      />
-    );
-  }
+// Both cancellation states leave the parent order Paid, so purchase.status lies.
+export const lineStatus = (row) => {
+  if (row?.is_canceled) return "Canceled";
+  if (row?.is_partially_canceled) return "partially_canceled";
+  return row?.purchase?.status ?? "";
+};
+
+const LABEL_KEY_BY_LINE_STATUS = {
+  Canceled: "sponsor_reports_page.status_canceled",
+  partially_canceled: "sponsor_reports_page.status_partially_canceled"
+};
+
+// Not redundant with the strikethrough, which no CSV export carries.
+export const LineStatusPill = ({ status }) => {
+  const labelKey = LABEL_KEY_BY_LINE_STATUS[status];
   return (
-    <StatusPill status={row.purchase?.status} label={row.purchase?.status} />
+    <StatusPill
+      status={status}
+      label={labelKey ? T.translate(labelKey) : status}
+    />
   );
 };
 
@@ -238,15 +221,13 @@ const LinesManifestView = ({
                       </TableCell>
                       <TableCell>{line.notes}</TableCell>
                       <TableCell align="right">
-                        {/* "3 / 5" only where a portion is cancelled; an active or
-                            fully cancelled line keeps its bare ordered quantity. */}
                         {line.is_partially_canceled
                           ? `${liveQuantity(line)} / ${line.quantity}`
                           : line.quantity}
                       </TableCell>
                       <TableCell>{line.rate_name}</TableCell>
                       <TableCell>
-                        <LineStatusPill line={line} />
+                        <LineStatusPill status={lineStatus(line)} />
                       </TableCell>
                       <TableCell align="right">
                         {line.line_total == null

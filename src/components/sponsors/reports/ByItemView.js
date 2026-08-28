@@ -38,11 +38,12 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import T from "i18n-react/dist/i18n-react";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
-import StatusPill from "./StatusPill";
 import ChipList from "../../mui/chip-list";
 import {
   Destination,
+  LineStatusPill,
   PER_PAGE_OPTIONS,
+  lineStatus,
   liveQuantity,
   liveAmountCents
 } from "./LinesManifestView";
@@ -90,19 +91,8 @@ const accumulateRow = (itemMap, row) => {
     item.label = row.description.trim();
   }
   item.lines += 1;
-  // Fully canceled lines are shown struck-through in the drill-down (as contributors
-  // below) but excluded from ALL "purchased" aggregates: qty, money, orders, and
-  // statusMix. Counting them would let a canceled-only line report an item as
-  // purchased (Qty 0 next to Orders 1 / Paid 1). A PARTIALLY cancelled line is not
-  // excluded: it is still a live purchase, and only its cancelled units come off qty.
-  // A mixed order keeps its count because the live line for the same item still adds
-  // the order id.
   if (!row.is_canceled) {
-    // Units, not lines: a partially cancelled line contributes only its live remainder.
     item.qty += liveQuantity(row);
-    // Null-safe money: all-null stays null (renders "—"); mixed sums non-nulls.
-    // Money nets the same way, and exactly: canceled_amount is the source's own frozen
-    // sum for the cancelled units, never line_total prorated by quantity.
     const liveCents = liveAmountCents(row);
     if (liveCents != null) {
       item.totalCents = (item.totalCents ?? 0) + liveCents;
@@ -127,22 +117,10 @@ const accumulateRow = (itemMap, row) => {
     sponsorBooth: row.sponsor_booth ?? null,
     checkoutAt: row.purchase?.checkout_at ?? null,
     rateName: row.rate_name ?? "",
-    // the line's own state: a soft-canceled line leaves its parent order Paid, and a
-    // partially cancelled line leaves both canceled_at null and the order Paid
-    status: (() => {
-      if (row.is_canceled) return "Canceled";
-      if (row.is_partially_canceled) return "partially_canceled";
-      return row.purchase?.status ?? "";
-    })(),
-    // A fully cancelled contributor keeps what was ORDERED and CHARGED: the row is
-    // struck through, and "0 / $0.00" would erase what the cancellation was for.
-    // Live figures apply to the two states that still contribute to the item total.
+    status: lineStatus(row),
+    // Struck-through rows show what was ordered, not 0.
     qty: row.is_canceled ? row.quantity ?? 0 : liveQuantity(row),
     orderedQty: row.quantity ?? 0,
-    // Live money, matching the item total for the two states that contribute to
-    // it (live and partially cancelled). A fully cancelled row is the deliberate
-    // exception above: it shows what was charged, not what's live, so the
-    // drill-down row can sum to more than the header on purpose.
     lineTotalCents: row.is_canceled
       ? row.line_total ?? null
       : liveAmountCents(row),
@@ -490,34 +468,7 @@ const ItemTable = ({
                               </TableCell>
                               <TableCell>{c.rateName}</TableCell>
                               <TableCell>
-                                {(() => {
-                                  if (c.isCanceled) {
-                                    return (
-                                      <StatusPill
-                                        status="Canceled"
-                                        label={T.translate(
-                                          "sponsor_reports_page.status_canceled"
-                                        )}
-                                      />
-                                    );
-                                  }
-                                  if (c.isPartiallyCanceled) {
-                                    return (
-                                      <StatusPill
-                                        status="partially_canceled"
-                                        label={T.translate(
-                                          "sponsor_reports_page.status_partially_canceled"
-                                        )}
-                                      />
-                                    );
-                                  }
-                                  return (
-                                    <StatusPill
-                                      status={c.status}
-                                      label={c.status}
-                                    />
-                                  );
-                                })()}
+                                <LineStatusPill status={c.status} />
                               </TableCell>
                               <TableCell align="right">
                                 {c.isPartiallyCanceled
