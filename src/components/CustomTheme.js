@@ -1,10 +1,10 @@
 import React from "react";
 import { ThemeProvider } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
-import { CustomThemeBase } from "openstack-uicore-foundation/lib/utils/theme";
+import { MuiBaseCustomTheme } from "openstack-uicore-foundation/lib/utils/theme";
 import PropTypes from "prop-types";
 
-const theme = createTheme(CustomThemeBase, {
+const theme = createTheme(MuiBaseCustomTheme, {
   palette: {
     primary: {
       main: "#2196F3",
