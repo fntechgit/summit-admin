@@ -137,6 +137,33 @@ const HEADERS = [
   { key: "col_source_updated" }
 ];
 
+// The LINE's own state, three-way. A soft-canceled line leaves its parent order Paid,
+// so rendering purchase.status printed "Paid" on a dead row. A partially cancelled line
+// leaves BOTH canceled_at null and the order Paid, so it would print "Paid" too while
+// carrying real cancelled units. is_canceled is checked first: the two flags are
+// mutually exclusive at the API, and this keeps that ordering explicit here.
+const LineStatusPill = ({ line: row }) => {
+  if (row.is_canceled) {
+    return (
+      <StatusPill
+        status="Canceled"
+        label={T.translate("sponsor_reports_page.status_canceled")}
+      />
+    );
+  }
+  if (row.is_partially_canceled) {
+    return (
+      <StatusPill
+        status="partially_canceled"
+        label={T.translate("sponsor_reports_page.status_partially_canceled")}
+      />
+    );
+  }
+  return (
+    <StatusPill status={row.purchase?.status} label={row.purchase?.status} />
+  );
+};
+
 const LinesManifestView = ({
   rows = [],
   total = 0,
@@ -207,26 +234,16 @@ const LinesManifestView = ({
                         {formatCheckoutTime(line.purchase?.checkout_at)}
                       </TableCell>
                       <TableCell>{line.notes}</TableCell>
-                      <TableCell align="right">{line.quantity}</TableCell>
+                      <TableCell align="right">
+                        {/* "3 / 5" only where a portion is cancelled; an active or
+                            fully cancelled line keeps its bare ordered quantity. */}
+                        {line.is_partially_canceled
+                          ? `${liveQuantity(line)} / ${line.quantity}`
+                          : line.quantity}
+                      </TableCell>
                       <TableCell>{line.rate_name}</TableCell>
                       <TableCell>
-                        {/* The LINE's state, not the parent order's. A soft-canceled
-                            line leaves its order Paid, so rendering purchase.status
-                            printed "Paid" on a dead row — and the strikethrough that
-                            was the only other signal does not survive CSV export. */}
-                        {line.is_canceled ? (
-                          <StatusPill
-                            status="Canceled"
-                            label={T.translate(
-                              "sponsor_reports_page.status_canceled"
-                            )}
-                          />
-                        ) : (
-                          <StatusPill
-                            status={line.purchase?.status}
-                            label={line.purchase?.status}
-                          />
-                        )}
+                        <LineStatusPill line={line} />
                       </TableCell>
                       <TableCell align="right">
                         {line.line_total == null

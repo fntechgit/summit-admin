@@ -296,3 +296,63 @@ describe("liveAmountCents", () => {
     ).toBe(0);
   });
 });
+
+describe("partially cancelled lines", () => {
+  const partial = () =>
+    line({
+      quantity: 5,
+      canceled_quantity: 2,
+      canceled_amount: 40000,
+      is_canceled: false,
+      is_partially_canceled: true,
+      canceled_at: null
+    });
+
+  it("shows live units over ordered units in the quantity cell", () => {
+    renderView({ rows: [partial()], total: 1 });
+    expect(screen.getByText("3 / 5")).toBeInTheDocument();
+  });
+
+  it("renders the partially canceled pill, not the order status", () => {
+    renderView({ rows: [partial()], total: 1 });
+    expect(
+      screen.getByText("sponsor_reports_page.status_partially_canceled")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Paid")).not.toBeInTheDocument();
+  });
+
+  it("does not strike through a partially cancelled row", () => {
+    const { container } = renderView({ rows: [partial()], total: 1 });
+    expect(container.querySelector("tr[data-canceled=\"true\"]")).toBeNull();
+  });
+
+  it("still counts a partially cancelled line as one live line", () => {
+    renderView({ rows: [partial()], total: 1 });
+    expect(
+      screen.getByText("sponsor_reports_page.lines_count:1")
+    ).toBeInTheDocument();
+  });
+
+  it("leaves a fully cancelled line struck through with the canceled pill", () => {
+    const full = line({
+      quantity: 5,
+      canceled_quantity: 5,
+      is_canceled: true,
+      is_partially_canceled: false
+    });
+    const { container } = renderView({ rows: [full], total: 1 });
+    expect(
+      container.querySelector("tr[data-canceled=\"true\"]")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("sponsor_reports_page.status_canceled")
+    ).toBeInTheDocument();
+    expect(screen.getByText("5")).toBeInTheDocument();
+  });
+
+  it("leaves an active line's quantity as a bare number", () => {
+    renderView({ rows: [line({ quantity: 2 })], total: 1 });
+    expect(screen.getByText("2")).toBeInTheDocument();
+    expect(screen.queryByText("2 / 2")).not.toBeInTheDocument();
+  });
+});
