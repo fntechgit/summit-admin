@@ -10,7 +10,8 @@ const TONE_BY_STATUS = {
   in_progress: "info",
   not_applicable: "default",
   canceled: "default",
-  cancelled: "default"
+  cancelled: "default",
+  partially_canceled: "warning"
 };
 
 export const statusTone = (status) =>

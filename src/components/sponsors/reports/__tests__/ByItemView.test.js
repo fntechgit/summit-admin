@@ -32,6 +32,9 @@ const line = (over = {}) => ({
   notes: "dock B",
   is_canceled: false,
   canceled_at: null,
+  canceled_quantity: 0,
+  canceled_amount: 0,
+  is_partially_canceled: false,
   ...over
 });
 
@@ -162,8 +165,10 @@ describe("groupLinesBySponsorItem", () => {
       rateName: "Early",
       status: "Canceled",
       qty: 2,
+      orderedQty: 2,
       lineTotalCents: 100000,
       isCanceled: true,
+      isPartiallyCanceled: false,
       syncedAt: null,
       sourceUpdatedAt: null
     });
@@ -250,6 +255,73 @@ describe("groupLinesBySponsorItem", () => {
     );
     expect(qtySum).toBe(7);
     expect(contribCount).toBe(rows.length);
+  });
+});
+
+describe("partial cancellation", () => {
+  const partial = (over = {}) =>
+    line({
+      quantity: 5,
+      canceled_quantity: 2,
+      canceled_amount: 40000,
+      is_canceled: false,
+      is_partially_canceled: true,
+      canceled_at: null,
+      ...over
+    });
+
+  it("keeps a fully cancelled line out of both aggregates", () => {
+    const [group] = groupLinesBySponsorItem([
+      partial({
+        quantity: 5,
+        canceled_quantity: 5,
+        line_total: 100000,
+        is_canceled: true,
+        is_partially_canceled: false
+      })
+    ]);
+    expect(group.items[0].qty).toBe(0);
+    expect(group.items[0].totalCents).toBeNull();
+  });
+
+  it("counts only live units and flags the contributor rather than Paid", () => {
+    const [group] = groupLinesBySponsorItem([partial()]);
+    expect(group.items[0].qty).toBe(3);
+    const [contributor] = group.items[0].contributors;
+    expect(contributor.isPartiallyCanceled).toBe(true);
+    expect(contributor.isCanceled).toBe(false);
+    expect(contributor.status).toBe("partially_canceled");
+    expect(contributor.qty).toBe(3);
+    expect(contributor.orderedQty).toBe(5);
+  });
+
+  it("still counts the parent order as an order for the item", () => {
+    const [group] = groupLinesBySponsorItem([partial()]);
+    expect(group.items[0].orders).toBe(1);
+  });
+
+  it("nets the cancelled money off the item total and its contributor alike", () => {
+    const [group] = groupLinesBySponsorItem([
+      partial({ line_total: 100000, canceled_amount: 40000 })
+    ]);
+    expect(group.items[0].totalCents).toBe(60000);
+    expect(group.items[0].contributors[0].lineTotalCents).toBe(60000);
+  });
+
+  it("keeps an all-null-money item at null so it still renders as unknown", () => {
+    const [group] = groupLinesBySponsorItem([
+      partial({ line_total: null, canceled_amount: 0 })
+    ]);
+    expect(group.items[0].totalCents).toBeNull();
+  });
+
+  it("keeps a fully cancelled contributor at its ordered units and charged money", () => {
+    const [group] = groupLinesBySponsorItem([
+      line({ quantity: 5, line_total: 100000, is_canceled: true })
+    ]);
+    const [contributor] = group.items[0].contributors;
+    expect(contributor.qty).toBe(5);
+    expect(contributor.lineTotalCents).toBe(100000);
   });
 });
 
@@ -356,8 +428,10 @@ const item = (over = {}) => ({
       rateName: "Early",
       status: "Paid",
       qty: 3,
+      orderedQty: 3,
       lineTotalCents: 150000,
-      isCanceled: false
+      isCanceled: false,
+      isPartiallyCanceled: false
     },
     {
       sponsorName: "Nvidia",
@@ -366,10 +440,12 @@ const item = (over = {}) => ({
       addOnName: null,
       checkoutAt: null,
       rateName: "Standard",
-      status: "Pending Payment",
+      status: "Canceled",
       qty: 2,
+      orderedQty: 2,
       lineTotalCents: 100000,
-      isCanceled: true
+      isCanceled: true,
+      isPartiallyCanceled: false
     }
   ],
   ...over
@@ -463,7 +539,9 @@ describe("ByItemView", () => {
       ]
     });
     fireEvent.click(screen.getByText("AV1")); // expand the item
-    expect(screen.getByText("Canceled")).toBeInTheDocument();
+    expect(
+      screen.getByText("sponsor_reports_page.status_canceled")
+    ).toBeInTheDocument();
     const syncedText = moment.unix(synced).utc().format("YYYY-MM-DD h:mm A");
     const sourceUpdatedText = moment
       .unix(sourceUpdated)
@@ -473,6 +551,43 @@ describe("ByItemView", () => {
     const cells = within(row).getAllByRole("cell");
     expect(cells[cells.length - 2]).toHaveTextContent(syncedText);
     expect(cells[cells.length - 1]).toHaveTextContent(sourceUpdatedText);
+  });
+
+  it("renders a partially cancelled contributor's split quantity and pill (regression: catches the isPartiallyCanceled render branch being dropped)", () => {
+    renderView({
+      groups: [
+        group({
+          items: [
+            item({
+              contributors: [
+                {
+                  sponsorName: "FNTECH",
+                  number: "OCP-1",
+                  formCode: "AV",
+                  addOnName: null,
+                  checkoutAt: null,
+                  rateName: "Early",
+                  status: "partially_canceled",
+                  qty: 3,
+                  orderedQty: 5,
+                  lineTotalCents: 60000,
+                  isCanceled: false,
+                  isPartiallyCanceled: true,
+                  syncedAt: null,
+                  sourceUpdatedAt: null
+                }
+              ]
+            })
+          ]
+        })
+      ]
+    });
+    fireEvent.click(screen.getByText("AV1"));
+    expect(
+      screen.getByText("sponsor_reports_page.status_partially_canceled")
+    ).toBeInTheDocument();
+    const row = screen.getByText("OCP-1").closest("tr");
+    expect(within(row).getByText("3 / 5")).toBeInTheDocument();
   });
 
   it("expand button toggles the drill-down and reflects aria-expanded", () => {

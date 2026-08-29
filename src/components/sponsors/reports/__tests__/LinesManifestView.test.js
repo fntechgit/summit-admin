@@ -2,7 +2,10 @@ import "@testing-library/jest-dom";
 import React from "react";
 import moment from "moment-timezone";
 import { render, screen, within } from "@testing-library/react";
-import LinesManifestView from "../LinesManifestView";
+import LinesManifestView, {
+  liveQuantity,
+  liveAmountCents
+} from "../LinesManifestView";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   translate: (k, opts) =>
@@ -29,6 +32,9 @@ const line = (over = {}) => ({
   notes: "dock B",
   is_canceled: false,
   canceled_at: null,
+  canceled_quantity: 0,
+  canceled_amount: 0,
+  is_partially_canceled: false,
   ...over
 });
 
@@ -212,5 +218,120 @@ describe("lines_count copy", () => {
     // eslint-disable-next-line global-require
     const en = require("../../../../i18n/en.json");
     expect(en.sponsor_reports_page.lines_count).toBe("{count} live lines");
+  });
+});
+
+describe("liveQuantity", () => {
+  it("nets the cancelled portion off a partially cancelled line", () => {
+    expect(
+      liveQuantity(
+        line({
+          quantity: 5,
+          canceled_quantity: 2,
+          is_partially_canceled: true
+        })
+      )
+    ).toBe(3);
+  });
+
+  it("clamps at 0 when a legacy line cancels more than it ordered", () => {
+    // legacy shape: purchases-api defaults quantity to 1, the sync to 0
+    expect(liveQuantity(line({ quantity: 0, canceled_quantity: 1 }))).toBe(0);
+  });
+
+  it("treats missing fields as zero rather than NaN", () => {
+    expect(liveQuantity({})).toBe(0);
+    expect(liveQuantity(undefined)).toBe(0);
+  });
+});
+
+describe("liveAmountCents", () => {
+  it("subtracts the frozen cancelled amount on a partially cancelled line", () => {
+    // the source's own sum, not a proration of line_total
+    expect(
+      liveAmountCents(
+        line({
+          line_total: 100000,
+          canceled_amount: 40000,
+          quantity: 5,
+          canceled_quantity: 2,
+          is_partially_canceled: true
+        })
+      )
+    ).toBe(60000);
+  });
+
+  it("clamps at 0 when the cancelled amount exceeds the line total", () => {
+    expect(
+      liveAmountCents(line({ line_total: 1000, canceled_amount: 5000 }))
+    ).toBe(0);
+  });
+});
+
+describe("partially cancelled lines", () => {
+  const partial = () =>
+    line({
+      quantity: 5,
+      canceled_quantity: 2,
+      canceled_amount: 40000,
+      is_canceled: false,
+      is_partially_canceled: true,
+      canceled_at: null
+    });
+
+  it("shows live units over ordered units in the quantity cell", () => {
+    renderView({ rows: [partial()], total: 1 });
+    expect(screen.getByText("3 / 5")).toBeInTheDocument();
+  });
+
+  it("shows live over charged money, so the row does not price cancelled units", () => {
+    renderView({ rows: [partial()], total: 1 });
+    const row = screen.getByText("AV1").closest("tr");
+    expect(within(row).getByText("$600.00 / $1000.00")).toBeInTheDocument();
+  });
+
+  it("renders the partially canceled pill, not the order status", () => {
+    renderView({ rows: [partial()], total: 1 });
+    expect(
+      screen.getByText("sponsor_reports_page.status_partially_canceled")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Paid")).not.toBeInTheDocument();
+  });
+
+  it("does not strike through a partially cancelled row", () => {
+    renderView({ rows: [partial()], total: 1 });
+    expect(screen.getByText("AV1").closest("tr")).not.toHaveAttribute(
+      "data-canceled"
+    );
+  });
+
+  it("still counts a partially cancelled line as one live line", () => {
+    renderView({ rows: [partial()], total: 1 });
+    expect(
+      screen.getByText("sponsor_reports_page.lines_count:1")
+    ).toBeInTheDocument();
+  });
+
+  it("leaves a fully cancelled line struck through with the canceled pill", () => {
+    const full = line({
+      quantity: 5,
+      canceled_quantity: 5,
+      is_canceled: true,
+      is_partially_canceled: false
+    });
+    renderView({ rows: [full], total: 1 });
+    const row = screen.getByText("AV1").closest("tr");
+    expect(row).toHaveAttribute("data-canceled", "true");
+    expect(
+      within(row).getByText("sponsor_reports_page.status_canceled")
+    ).toBeInTheDocument();
+    expect(within(row).getByText("5")).toBeInTheDocument();
+  });
+
+  it("leaves an active line's quantity as a bare number", () => {
+    renderView({ rows: [line({ quantity: 2 })], total: 1 });
+    const row = screen.getByText("AV1").closest("tr");
+    expect(within(row).getByText("2")).toBeInTheDocument();
+    expect(within(row).queryByText("2 / 2")).not.toBeInTheDocument();
   });
 });

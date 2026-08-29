@@ -38,9 +38,15 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import T from "i18n-react/dist/i18n-react";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
-import StatusPill from "./StatusPill";
 import ChipList from "../../mui/chip-list";
-import { Destination, PER_PAGE_OPTIONS } from "./LinesManifestView";
+import {
+  Destination,
+  LineStatusPill,
+  PER_PAGE_OPTIONS,
+  lineStatus,
+  liveQuantity,
+  liveAmountCents
+} from "./LinesManifestView";
 import { formatCheckoutTime } from "./OrdersTable";
 import {
   DEFAULT_CURRENT_PAGE,
@@ -85,16 +91,11 @@ const accumulateRow = (itemMap, row) => {
     item.label = row.description.trim();
   }
   item.lines += 1;
-  // Canceled lines are shown struck-through in the drill-down (as contributors
-  // below) but excluded from ALL "purchased" aggregates: qty, money, orders,
-  // and statusMix. Counting them would let a canceled-only line report an item
-  // as purchased (Qty 0 next to Orders 1 / Paid 1). A mixed order keeps its
-  // count because the live line for the same item still adds the order id.
   if (!row.is_canceled) {
-    item.qty += row.quantity ?? 0;
-    // Null-safe money: all-null stays null (renders "—"); mixed sums non-nulls.
-    if (row.line_total != null) {
-      item.totalCents = (item.totalCents ?? 0) + row.line_total;
+    item.qty += liveQuantity(row);
+    const liveCents = liveAmountCents(row);
+    if (liveCents != null) {
+      item.totalCents = (item.totalCents ?? 0) + liveCents;
     }
     const purchaseId = row.purchase?.id ?? null;
     if (purchaseId != null) {
@@ -116,11 +117,15 @@ const accumulateRow = (itemMap, row) => {
     sponsorBooth: row.sponsor_booth ?? null,
     checkoutAt: row.purchase?.checkout_at ?? null,
     rateName: row.rate_name ?? "",
-    // the line's own state: a soft-canceled line leaves its parent order Paid
-    status: row.is_canceled ? "Canceled" : row.purchase?.status ?? "",
-    qty: row.quantity ?? 0,
-    lineTotalCents: row.line_total ?? null,
+    status: lineStatus(row),
+    // Struck-through rows show what was ordered, not 0.
+    qty: row.is_canceled ? row.quantity ?? 0 : liveQuantity(row),
+    orderedQty: row.quantity ?? 0,
+    lineTotalCents: row.is_canceled
+      ? row.line_total ?? null
+      : liveAmountCents(row),
     isCanceled: Boolean(row.is_canceled),
+    isPartiallyCanceled: Boolean(row.is_partially_canceled),
     // line-grain freshness (decision 1): the contributor row IS a line
     syncedAt: row.synced_at ?? null,
     sourceUpdatedAt: row.source_updated_at ?? null
@@ -463,12 +468,13 @@ const ItemTable = ({
                               </TableCell>
                               <TableCell>{c.rateName}</TableCell>
                               <TableCell>
-                                <StatusPill
-                                  status={c.status}
-                                  label={c.status}
-                                />
+                                <LineStatusPill status={c.status} />
                               </TableCell>
-                              <TableCell align="right">{c.qty}</TableCell>
+                              <TableCell align="right">
+                                {c.isPartiallyCanceled
+                                  ? `${c.qty} / ${c.orderedQty}`
+                                  : c.qty}
+                              </TableCell>
                               <TableCell align="right">
                                 {c.lineTotalCents == null
                                   ? "—"

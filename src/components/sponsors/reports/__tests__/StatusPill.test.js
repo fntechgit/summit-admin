@@ -18,4 +18,11 @@ describe("StatusPill", () => {
     renderWithRedux(<StatusPill status="pending" />);
     expect(screen.getByText("pending")).toBeInTheDocument();
   });
+
+  it("colors a partially canceled pill as a warning, not muted", () => {
+    renderWithRedux(<StatusPill status="partially_canceled" label="Partial" />);
+    expect(screen.getByText("Partial").closest(".MuiChip-root")).toHaveClass(
+      "MuiChip-colorWarning"
+    );
+  });
 });
