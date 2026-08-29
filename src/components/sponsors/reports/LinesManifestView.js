@@ -49,6 +49,20 @@ export const PER_PAGE_OPTIONS = [
   MAX_PER_PAGE
 ];
 
+// Clamped: legacy lines can have quantity 0, canceled_quantity 1.
+// ByItemView imports from here, never the reverse (cycle).
+export const liveQuantity = (row) => {
+  if (row?.is_canceled) return 0;
+  return Math.max(0, (row?.quantity ?? 0) - (row?.canceled_quantity ?? 0));
+};
+
+// Never prorate line_total — partial events charge floor unit price.
+export const liveAmountCents = (row) => {
+  if (row?.line_total == null) return null;
+  if (row.is_canceled) return 0;
+  return Math.max(0, row.line_total - (row.canceled_amount ?? 0));
+};
+
 // Destination = the line's add-on (e.g. "Meeting Room T"); when absent, the
 // logistics convention is the sponsor's booth — the API supplies it as
 // `sponsor_booth` (the sponsor's Booth-type add-on name(s)). The muted "Booth"
@@ -112,6 +126,38 @@ const HEADERS = [
   { key: "col_synced_at" },
   { key: "col_source_updated" }
 ];
+
+// Both cancellation states leave the parent order Paid, so purchase.status lies.
+export const lineStatus = (row) => {
+  if (row?.is_canceled) return "Canceled";
+  if (row?.is_partially_canceled) return "partially_canceled";
+  return row?.purchase?.status ?? "";
+};
+
+const LABEL_KEY_BY_LINE_STATUS = {
+  Canceled: "sponsor_reports_page.status_canceled",
+  partially_canceled: "sponsor_reports_page.status_partially_canceled"
+};
+
+// Live over charged, matching the Qty cell. Finance reads this column and this is
+// the only per-line money surface, so netting alone would drop the charged figure.
+const lineTotalLabel = (row) =>
+  row.is_partially_canceled
+    ? `${currencyAmountFromCents(
+        liveAmountCents(row)
+      )} / ${currencyAmountFromCents(row.line_total)}`
+    : currencyAmountFromCents(row.line_total);
+
+// Not redundant with the strikethrough, which no CSV export carries.
+export const LineStatusPill = ({ status }) => {
+  const labelKey = LABEL_KEY_BY_LINE_STATUS[status];
+  return (
+    <StatusPill
+      status={status}
+      label={labelKey ? T.translate(labelKey) : status}
+    />
+  );
+};
 
 const LinesManifestView = ({
   rows = [],
@@ -183,31 +229,17 @@ const LinesManifestView = ({
                         {formatCheckoutTime(line.purchase?.checkout_at)}
                       </TableCell>
                       <TableCell>{line.notes}</TableCell>
-                      <TableCell align="right">{line.quantity}</TableCell>
+                      <TableCell align="right">
+                        {line.is_partially_canceled
+                          ? `${liveQuantity(line)} / ${line.quantity}`
+                          : line.quantity}
+                      </TableCell>
                       <TableCell>{line.rate_name}</TableCell>
                       <TableCell>
-                        {/* The LINE's state, not the parent order's. A soft-canceled
-                            line leaves its order Paid, so rendering purchase.status
-                            printed "Paid" on a dead row — and the strikethrough that
-                            was the only other signal does not survive CSV export. */}
-                        {line.is_canceled ? (
-                          <StatusPill
-                            status="Canceled"
-                            label={T.translate(
-                              "sponsor_reports_page.status_canceled"
-                            )}
-                          />
-                        ) : (
-                          <StatusPill
-                            status={line.purchase?.status}
-                            label={line.purchase?.status}
-                          />
-                        )}
+                        <LineStatusPill status={lineStatus(line)} />
                       </TableCell>
                       <TableCell align="right">
-                        {line.line_total == null
-                          ? "—"
-                          : currencyAmountFromCents(line.line_total)}
+                        {line.line_total == null ? "—" : lineTotalLabel(line)}
                       </TableCell>
                       <TableCell>
                         {formatCheckoutTime(line.synced_at)}
