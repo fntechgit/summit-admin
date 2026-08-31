@@ -1266,30 +1266,6 @@ export const saveSponsorFormItem =
 
     const normalizedEntity = normalizeItem(entity);
 
-    if (entity.id) {
-      return putRequest(
-        null,
-        createAction(SPONSOR_FORM_ITEM_UPDATED),
-        `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${entity.id}`,
-        normalizedEntity,
-        snackbarErrorHandler
-      )(params)(dispatch)
-        .then(() => {
-          dispatch(
-            snackbarSuccessHandler({
-              title: T.translate("general.success"),
-              html: T.translate("sponsor_form_item_list.edit_item.updated")
-            })
-          );
-        })
-        .catch((err) => {
-          throw err;
-        })
-        .finally(() => {
-          dispatch(stopLoading());
-        });
-    }
-
     return postRequest(
       null,
       createAction(SPONSOR_FORM_ITEM_UPDATED),

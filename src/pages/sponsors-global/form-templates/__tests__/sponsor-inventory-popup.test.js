@@ -13,8 +13,17 @@ jest.mock("../../../../hooks/useScrollToError", () => jest.fn());
 jest.mock(
   "openstack-uicore-foundation/lib/components/mui/formik-inputs/upload",
   () =>
-    function MockMuiFormikUpload({ name }) {
-      return <div data-testid={`upload-${name}`} />;
+    function MockMuiFormikUpload({ name, onDelete }) {
+      return (
+        <div data-testid={`upload-${name}`}>
+          <button type="button" onClick={() => onDelete(5)}>
+            delete-persisted-image
+          </button>
+          <button type="button" onClick={() => onDelete(undefined)}>
+            delete-unsaved-image
+          </button>
+        </div>
+      );
     }
 );
 
@@ -184,6 +193,43 @@ describe("SponsorItemDialog", () => {
       expect(onSave.mock.calls[0][0]).toEqual(
         expect.objectContaining({ default_quantity: 5 })
       );
+    });
+  });
+
+  describe("image deletion", () => {
+    it("calls onImageDeleted only for a persisted image (has an id)", async () => {
+      const user = userEvent.setup();
+      const onImageDeleted = jest.fn();
+      render(
+        <SponsorItemDialog
+          entity={{ ...BASE_ENTITY, id: 42 }}
+          onSave={onSave}
+          onClose={onClose}
+          onImageDeleted={onImageDeleted}
+        />
+      );
+
+      await user.click(screen.getByText("delete-unsaved-image"));
+      expect(onImageDeleted).not.toHaveBeenCalled();
+
+      await user.click(screen.getByText("delete-persisted-image"));
+      expect(onImageDeleted).toHaveBeenCalledWith(5);
+      expect(onImageDeleted).toHaveBeenCalledTimes(1);
+    });
+
+    it("does nothing when onImageDeleted is not provided", async () => {
+      const user = userEvent.setup();
+      render(
+        <SponsorItemDialog
+          entity={{ ...BASE_ENTITY, id: 42 }}
+          onSave={onSave}
+          onClose={onClose}
+        />
+      );
+
+      await expect(
+        user.click(screen.getByText("delete-persisted-image"))
+      ).resolves.not.toThrow();
     });
   });
 });
