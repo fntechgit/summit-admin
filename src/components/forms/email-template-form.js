@@ -368,8 +368,8 @@ const EmailTemplateForm = forwardRef(
               size="small"
               value={stateEntity.identifier}
               onChange={handleChange}
-              error={!!hasErrors("identifier", errors)}
-              helperText={hasErrors("identifier", errors) || undefined}
+              error={!!hasErrors("identifier", stateErrors)}
+              helperText={hasErrors("identifier", stateErrors) || undefined}
             />
           </Grid2>
           <Grid2 size={{ xs: 12, md: 4 }}>
@@ -404,8 +404,8 @@ const EmailTemplateForm = forwardRef(
               size="small"
               value={stateEntity.from_email}
               onChange={handleChange}
-              error={!!hasErrors("from_email", errors)}
-              helperText={hasErrors("from_email", errors) || undefined}
+              error={!!hasErrors("from_email", stateErrors)}
+              helperText={hasErrors("from_email", stateErrors) || undefined}
             />
           </Grid2>
           <Grid2 size={{ xs: 12, md: 4 }}>
@@ -416,8 +416,8 @@ const EmailTemplateForm = forwardRef(
               size="small"
               value={stateEntity.subject}
               onChange={handleChange}
-              error={!!hasErrors("subject", errors)}
-              helperText={hasErrors("subject", errors) || undefined}
+              error={!!hasErrors("subject", stateErrors)}
+              helperText={hasErrors("subject", stateErrors) || undefined}
             />
           </Grid2>
           <Grid2 size={{ xs: 12, md: 4 }}>
@@ -429,8 +429,8 @@ const EmailTemplateForm = forwardRef(
               size="small"
               value={stateEntity.max_retries}
               onChange={handleChange}
-              error={!!hasErrors("max_retries", errors)}
-              helperText={hasErrors("max_retries", errors) || undefined}
+              error={!!hasErrors("max_retries", stateErrors)}
+              helperText={hasErrors("max_retries", stateErrors) || undefined}
             />
           </Grid2>
         </Grid2>
@@ -647,14 +647,16 @@ const EmailTemplateForm = forwardRef(
                           There is an error trying to render the email template:
                           <ul>
                             {renderErrors.map((err) => (
-                              <li>{err}</li>
+                              <li key={err}>{err}</li>
                             ))}
                           </ul>
                         </Box>
                       ) : mjmlRenderError?.message ? (
                         <Box>
                           There is an error trying to render the email template:
-                          <ul>{mjmlRenderError.message}</ul>
+                          <ul>
+                            + <li>{mjmlRenderError.message}</li>+{" "}
+                          </ul>
                         </Box>
                       ) : (
                         previewLoaded && (
