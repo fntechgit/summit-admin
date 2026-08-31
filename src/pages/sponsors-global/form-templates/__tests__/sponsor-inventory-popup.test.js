@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import SponsorItemDialog from "../sponsor-inventory-popup";
@@ -230,6 +230,65 @@ describe("SponsorItemDialog", () => {
       await expect(
         user.click(screen.getByText("delete-persisted-image"))
       ).resolves.not.toThrow();
+    });
+  });
+
+  describe("save guard", () => {
+    const renderPending = (save) =>
+      render(
+        <SponsorItemDialog
+          entity={BASE_ENTITY}
+          onSave={save}
+          onClose={onClose}
+        />
+      );
+
+    it("disables save/close while a save is in flight, ignores a re-entrant click, and closes on success", async () => {
+      const user = userEvent.setup();
+      let resolveSave;
+      const pendingSave = jest.fn(
+        () =>
+          new Promise((resolve) => {
+            resolveSave = resolve;
+          })
+      );
+      renderPending(pendingSave);
+
+      await fillRequiredTextFields(user);
+      const saveButton = screen.getByRole("button", {
+        name: "edit_inventory_item.save_changes"
+      });
+      await user.click(saveButton);
+
+      await waitFor(() => expect(saveButton).toBeDisabled());
+      expect(screen.getByTestId("CloseIcon").closest("button")).toBeDisabled();
+
+      // The button is disabled once isSaving flips, so a real second click
+      // can't reach it - fireEvent bypasses that to exercise the
+      // `if (isSaving) return` guard in handleOnSave itself.
+      fireEvent.click(saveButton);
+      resolveSave();
+
+      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+      expect(pendingSave).toHaveBeenCalledTimes(1);
+    });
+
+    it("keeps the dialog open and re-enables the form when onSave rejects", async () => {
+      const user = userEvent.setup();
+      const rejectingSave = jest.fn(() =>
+        Promise.reject(new Error("save failed"))
+      );
+      renderPending(rejectingSave);
+
+      await fillRequiredTextFields(user);
+      const saveButton = screen.getByRole("button", {
+        name: "edit_inventory_item.save_changes"
+      });
+      await user.click(saveButton);
+
+      await waitFor(() => expect(rejectingSave).toHaveBeenCalled());
+      await waitFor(() => expect(saveButton).not.toBeDisabled());
+      expect(onClose).not.toHaveBeenCalled();
     });
   });
 });
