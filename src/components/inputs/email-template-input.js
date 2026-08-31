@@ -74,7 +74,7 @@ const EmailTemplateInput = ({
   if (value) {
     selectedOption = plainValue
       ? { value, label: value }
-      : { value: value.id.toString(), label: value.identifier };
+      : { value: String(value.id ?? ""), label: value.identifier ?? "" };
   }
 
   // the selected value is a past search result that may not be part of the
