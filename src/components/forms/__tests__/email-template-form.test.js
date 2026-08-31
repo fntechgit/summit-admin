@@ -8,6 +8,7 @@ import {
   afterEach
 } from "@jest/globals";
 import { render, act, fireEvent } from "@testing-library/react";
+import showConfirmDialog from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
 
 import EmailTemplateForm from "../email-template-form";
 
@@ -16,10 +17,13 @@ jest.mock("@uiw/react-codemirror", () => ({
   __esModule: true,
   default: () => null
 }));
-jest.mock("sweetalert2", () => ({
-  __esModule: true,
-  default: { fire: jest.fn(() => Promise.resolve({})) }
-}));
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog",
+  () => ({
+    __esModule: true,
+    default: jest.fn(() => Promise.resolve(true))
+  })
+);
 jest.mock("mjml-browser", () => ({
   __esModule: true,
   default: () => ({ html: "<html></html>" })
@@ -31,7 +35,6 @@ jest.mock("../../inputs/email-template-input", () => ({
 
 const baseProps = (entity) => ({
   entity,
-  match: { params: { template_id: `${entity.id}` } },
   errors: {},
   clients: [],
   preview: null,
@@ -62,7 +65,10 @@ const htmlEntity = {
 };
 
 describe("EmailTemplateForm preview dispatch", () => {
-  beforeEach(() => jest.useFakeTimers());
+  beforeEach(() => {
+    jest.useFakeTimers();
+    showConfirmDialog.mockResolvedValue(true);
+  });
   afterEach(() => {
     jest.runOnlyPendingTimers();
     jest.useRealTimers();
@@ -135,7 +141,7 @@ describe("EmailTemplateForm preview dispatch", () => {
 
   it("re-fires the HTML-mode preview when toggled from MJML to HTML", async () => {
     const props = baseProps(mjmlEntity);
-    const { getByDisplayValue } = render(<EmailTemplateForm {...props} />);
+    const { getByText } = render(<EmailTemplateForm {...props} />);
 
     // initial mount → one MJML-mode request
     await act(async () => {
@@ -152,7 +158,7 @@ describe("EmailTemplateForm preview dispatch", () => {
     // mutates neither content field directly
     // T.translate returns the key string when no i18n config is loaded
     await act(async () => {
-      fireEvent.click(getByDisplayValue("emails.display_html"));
+      fireEvent.click(getByText("emails.display_html"));
     });
     await act(async () => {
       jest.advanceTimersByTime(600);
@@ -165,5 +171,46 @@ describe("EmailTemplateForm preview dispatch", () => {
       expect.any(String),
       false
     );
+  });
+
+  it("warns before switching to MJML on an HTML-only template and keeps the switch on confirm", async () => {
+    showConfirmDialog.mockResolvedValue(true);
+    const props = baseProps(htmlEntity);
+    const { getByText } = render(<EmailTemplateForm {...props} />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    await act(async () => {
+      fireEvent.click(getByText("emails.display_mjml"));
+    });
+
+    expect(showConfirmDialog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: "emails.mjml_warning",
+        iconType: "warning"
+      })
+    );
+
+    // switch is kept — the button now offers to go back to HTML
+    expect(getByText("emails.display_html")).toBeTruthy();
+  });
+
+  it("reverts to HTML mode when the MJML switch warning is cancelled", async () => {
+    showConfirmDialog.mockResolvedValue(false);
+    const props = baseProps(htmlEntity);
+    const { getByText } = render(<EmailTemplateForm {...props} />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    await act(async () => {
+      fireEvent.click(getByText("emails.display_mjml"));
+    });
+
+    // reverted back — the button offers to switch to MJML again
+    expect(getByText("emails.display_mjml")).toBeTruthy();
   });
 });

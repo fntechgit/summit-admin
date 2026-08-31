@@ -19,8 +19,6 @@ import {
 } from "../email-actions";
 import * as methods from "../../utils/methods";
 
-jest.mock("../../history", () => ({ push: jest.fn() }));
-
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   __esModule: true,
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),

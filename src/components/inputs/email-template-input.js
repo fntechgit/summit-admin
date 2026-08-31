@@ -9,89 +9,137 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import React from "react";
-import AsyncSelect from "react-select/lib/Async";
+import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
+import CircularProgress from "@mui/material/CircularProgress";
 import { queryTemplates } from "../../actions/email-actions";
 
-export default class EmailTemplateInput extends React.Component {
-  constructor(props) {
-    super(props);
+const EmailTemplateInput = ({
+  id,
+  value,
+  onChange,
+  ownerId,
+  placeholder,
+  error,
+  plainValue,
+  defaultOptions
+}) => {
+  const [options, setOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-    this.handleChange = this.handleChange.bind(this);
-    this.getTemplates = this.getTemplates.bind(this);
-  }
+  const fetchOptions = (input) => {
+    setLoading(true);
+    queryTemplates(input, (templates) => {
+      const filtered = ownerId
+        ? templates.filter((t) => t.id !== ownerId)
+        : templates;
+      setOptions(
+        filtered.map((t) => ({ value: t.id.toString(), label: t.identifier }))
+      );
+      setLoading(false);
+    });
+  };
 
-  handleChange(value, { action }) {
-    const { plainValue } = this.props;
-    let theValue = null;
+  useEffect(() => {
+    if (defaultOptions) fetchOptions("");
+  }, []);
 
-    if (action === "clear") {
+  const handleInputChange = (ev, input) => {
+    if (!input && !defaultOptions) {
+      setOptions([]);
+      return;
+    }
+    fetchOptions(input);
+  };
+
+  const handleChange = (ev, newValue) => {
+    let theValue;
+
+    if (!newValue) {
       theValue = plainValue ? "" : { id: "", identifier: "" };
     } else {
       theValue = plainValue
-        ? value.label
-        : { id: value.value, identifier: value.label };
+        ? newValue.label
+        : { id: newValue.value, identifier: newValue.label };
     }
 
-    const ev = {
-      target: {
-        id: this.props.id,
-        value: theValue,
-        type: "emailtemplateinput"
+    onChange({ target: { id, value: theValue, type: "emailtemplateinput" } });
+  };
+
+  let selectedOption = null;
+  if (value) {
+    selectedOption = plainValue
+      ? { value, label: value }
+      : { value: value.id.toString(), label: value.identifier };
+  }
+
+  // the selected value is a past search result that may not be part of the
+  // current (freshly fetched) options list -- pin it in so Autocomplete
+  // always finds a match and doesn't warn about an "invalid" controlled value
+  const displayOptions =
+    selectedOption && !options.some((o) => o.value === selectedOption.value)
+      ? [selectedOption, ...options]
+      : options;
+
+  return (
+    <Autocomplete
+      id={id}
+      fullWidth
+      size="small"
+      options={displayOptions}
+      loading={loading}
+      value={selectedOption}
+      isOptionEqualToValue={(option, selected) =>
+        option.value === selected.value
       }
-    };
-
-    this.props.onChange(ev);
-  }
-
-  getTemplates(input, callback) {
-    const { ownerId, defaultOptions } = this.props;
-
-    if (!input && !defaultOptions) {
-      return Promise.resolve({ options: [] });
-    }
-
-    // we need to map into value/label because of a bug in react-select 2
-    // https://github.com/JedWatson/react-select/issues/2998
-
-    const translateOptions = (options) => {
-      const newOptions = (
-        ownerId ? options.filter((t) => t.id !== ownerId) : options
-      ).map((c) => ({ value: c.id.toString(), label: c.identifier }));
-      callback(newOptions);
-    };
-
-    queryTemplates(input, translateOptions);
-  }
-
-  render() {
-    const { error, value, onChange, id, multi, plainValue, ...rest } =
-      this.props;
-    const has_error = this.props.hasOwnProperty("error") && error !== "";
-
-    // we need to map into value/label because of a bug in react-select 2
-    // https://github.com/JedWatson/react-select/issues/2998
-    let theValue = null;
-
-    if (value) {
-      theValue = plainValue
-        ? { value: value, label: value }
-        : { value: value.id.toString(), label: value.identifier };
-    }
-
-    return (
-      <div>
-        <AsyncSelect
-          value={theValue}
-          onChange={this.handleChange}
-          loadOptions={this.getTemplates}
-          isMulti={false}
-          {...rest}
+      getOptionLabel={(option) => option.label || ""}
+      onChange={handleChange}
+      onInputChange={handleInputChange}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          placeholder={placeholder}
+          error={!!error}
+          helperText={error || undefined}
+          slotProps={{
+            input: {
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loading && <CircularProgress color="inherit" size={20} />}
+                  {params.InputProps.endAdornment}
+                </>
+              )
+            }
+          }}
         />
-        {has_error && <p className="error-label">{error}</p>}
-      </div>
-    );
-  }
-}
+      )}
+    />
+  );
+};
+
+EmailTemplateInput.propTypes = {
+  id: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+  onChange: PropTypes.func.isRequired,
+  ownerId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  placeholder: PropTypes.string,
+  error: PropTypes.string,
+  plainValue: PropTypes.bool,
+  defaultOptions: PropTypes.bool
+};
+
+EmailTemplateInput.defaultProps = {
+  value: null,
+  ownerId: null,
+  placeholder: "",
+  error: "",
+  plainValue: false,
+  defaultOptions: false
+};
+
+export default EmailTemplateInput;
