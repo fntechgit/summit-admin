@@ -38,12 +38,12 @@ const EmailLayout = ({ match }) => (
         component={EmailTemplateListPage}
       />
       <Route
-        strict
         exact
         path={`${match.url}/templates/new`}
         component={EditEmailTemplatePage}
       />
       <Route
+        exact
         path={`${match.url}/templates/:template_id`}
         component={EditEmailTemplatePage}
       />
