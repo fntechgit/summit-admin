@@ -9,7 +9,8 @@ import {
   getEmailTemplate,
   resetTemplateForm,
   saveEmailTemplate,
-  getAllClients
+  getAllClients,
+  updateTemplateJsonData
 } from "../../../actions/email-actions";
 
 jest.mock("../../../actions/email-actions", () => ({
@@ -114,6 +115,56 @@ describe("EditEmailTemplatePage", () => {
     expect(screen.getByTestId("email-template-form")).toBeInTheDocument();
   });
 
+  it("ignores a stale fetch when template_id changes before it resolves", async () => {
+    let resolveFirst;
+    let resolveSecond;
+    getEmailTemplate.mockImplementation((templateId) => () => {
+      if (templateId === "1") {
+        return new Promise((resolve) => {
+          resolveFirst = resolve;
+        });
+      }
+      return new Promise((resolve) => {
+        resolveSecond = resolve;
+      });
+    });
+
+    const { rerender } = renderWithRedux(
+      <EditEmailTemplatePage
+        match={{ url: "/app/emails/templates/1", params: { template_id: "1" } }}
+      />,
+      { initialState }
+    );
+
+    // navigate to a different template before the first fetch resolves
+    rerender(
+      <EditEmailTemplatePage
+        match={{ url: "/app/emails/templates/2", params: { template_id: "2" } }}
+      />
+    );
+
+    // the stale request for template 1 resolves late
+    await act(async () => {
+      resolveFirst();
+      await flushPromises();
+    });
+
+    // must stay in the loading state -- the stale response must not flip entityReady
+    expect(screen.getByText("emails.loading_template")).toBeInTheDocument();
+    expect(screen.queryByTestId("email-template-form")).not.toBeInTheDocument();
+
+    // the current request for template 2 resolves
+    await act(async () => {
+      resolveSecond();
+      await flushPromises();
+    });
+
+    expect(
+      screen.queryByText("emails.loading_template")
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("email-template-form")).toBeInTheDocument();
+  });
+
   it("resets the form and fetches clients when there is no template_id", () => {
     renderWithRedux(
       <EditEmailTemplatePage
@@ -183,9 +234,6 @@ describe("EditEmailTemplatePage", () => {
       screen.getByTestId("email-template-json-dialog")
     ).toBeInTheDocument();
 
-    const {
-      updateTemplateJsonData
-    } = require("../../../actions/email-actions");
     updateTemplateJsonData.mockReturnValue(() => Promise.resolve());
 
     await act(async () => {
