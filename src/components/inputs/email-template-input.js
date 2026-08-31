@@ -48,7 +48,13 @@ const EmailTemplateInput = ({
     if (defaultOptions) fetchOptions("");
   }, []);
 
-  const handleInputChange = (ev, input) => {
+  const handleInputChange = (ev, input, reason) => {
+    // "selectOption"/"reset" fire when the input text is set programmatically
+    // (a pick, or the controlled value syncing back in) -- searching again on
+    // those wastes a request. Only a real keystroke ("input") or clearing the
+    // field should touch the options list.
+    if (reason !== "input" && reason !== "clear") return;
+
     if (!input && !defaultOptions) {
       setOptions([]);
       return;
