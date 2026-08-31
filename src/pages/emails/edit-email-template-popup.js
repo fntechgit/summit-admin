@@ -83,7 +83,12 @@ const EditEmailTemplatePopup = ({
   };
 
   const handleJsonModalClose = () => {
-    const parsedJSON = JSON.parse(jsonPreview);
+    let parsedJSON;
+    try {
+      parsedJSON = JSON.parse(jsonPreview);
+    } catch {
+      return;
+    }
     updateTemplateJsonData(parsedJSON).then(() => {
       setShowJsonModal(false);
       setJsonData(parsedJSON);
