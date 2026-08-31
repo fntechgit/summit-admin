@@ -31,11 +31,10 @@ const getCriterias = () => [
         formatOption: (m) => ({
           value: m.id,
           label: `${m.first_name} ${m.last_name} (${m.email})`
-        }),
-        multiple: true
+        })
       }
     },
-    customParser: (f) => [`user_id==${f.value.map((s) => s.value).join("||")}`]
+    customParser: (f) => [`user_id==${f.value.value}`]
   },
   {
     key: "created",
@@ -65,9 +64,8 @@ const AuditLogs = ({
   clearAuditLogParams
 }) => {
   const [searchTerm, setSearchTerm] = useState(term);
-  const { parsedFilter, resetFilters } = useGridFilter(
-    `${FILTER_ID}_${filterId}`
-  );
+  const gridFilterId = `${FILTER_ID}_${filterId}`;
+  const { parsedFilter } = useGridFilter(gridFilterId);
   const userTimeZone = new Intl.DateTimeFormat(undefined, {
     timeZoneName: "long"
   })
@@ -165,16 +163,10 @@ const AuditLogs = ({
   }, [parsedFilter.join(",")]);
 
   // AuditLogs is reused in different contexts (the standalone audit log
-  // page, an event's edit form, a ticket's edit page) sharing one Redux-
-  // backed FILTER_ID, so a filter applied in one context must not leak into
-  // another mount — reset it along with the log params on unmount.
-  useEffect(
-    () => () => {
-      clearAuditLogParams();
-      resetFilters();
-    },
-    []
-  );
+  // page, an event's edit form, a ticket's edit page), each with its own
+  // filterId-scoped Redux entry, so filters don't need to be reset on
+  // unmount — only the log params.
+  useEffect(() => () => clearAuditLogParams(), []);
 
   const tableOptions = {
     sortCol: order,
@@ -198,7 +190,7 @@ const AuditLogs = ({
             placeholder={T.translate("audit_log.placeholders.search_log")}
             onSearch={handleSearch}
           />
-          <GridFilter id={FILTER_ID} criterias={getCriterias()} />
+          <GridFilter id={gridFilterId} criterias={getCriterias()} />
         </Grid2>
       </Grid2>
       <CustomAlert
