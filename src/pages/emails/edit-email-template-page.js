@@ -56,6 +56,7 @@ const EditEmailTemplatePage = ({
   }, []);
 
   useEffect(() => {
+    let active = true;
     setEntityReady(false);
     const templateId = match.params.template_id;
     const loadEntity = templateId
@@ -64,7 +65,13 @@ const EditEmailTemplatePage = ({
 
     Promise.resolve(loadEntity)
       .catch(() => {})
-      .finally(() => setEntityReady(true));
+      .finally(() => {
+        if (active) setEntityReady(true);
+      });
+
+    return () => {
+      active = false;
+    };
   }, [match.params.template_id]);
 
   const title = entity.id
