@@ -21,14 +21,8 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
-import { Modal } from "react-bootstrap";
-import CodeMirror from "@uiw/react-codemirror";
-import { json } from "@codemirror/lang-json";
-import { sublimeInit } from "@uiw/codemirror-theme-sublime";
 import EmailTemplateForm from "../../components/forms/email-template-form";
-import { DECIMAL_DIGITS } from "../../utils/constants";
-
-import "../../styles/edit-email-template-page.less";
+import EmailTemplateJsonDialog from "./email-template-json-dialog";
 
 const EditEmailTemplatePopup = ({
   entity,
@@ -46,9 +40,8 @@ const EditEmailTemplatePopup = ({
   const formRef = useRef(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isInvalid, setIsInvalid] = useState(false);
-  const [showJsonModal, setShowJsonModal] = useState(false);
+  const [showJsonDialog, setShowJsonDialog] = useState(false);
   const [jsonData, setJsonData] = useState(templateJsonData);
-  const [jsonPreview, setJsonPreview] = useState(templateJsonData);
 
   const title = entity.id
     ? T.translate("general.edit")
@@ -73,27 +66,11 @@ const EditEmailTemplatePopup = ({
     formRef.current?.submit();
   };
 
-  const handlePreview = () => {
-    setJsonPreview(JSON.stringify(jsonData, null, DECIMAL_DIGITS));
-    setShowJsonModal(true);
-  };
-
-  const handleJsonChange = (value) => {
-    setJsonPreview(value);
-  };
-
-  const handleJsonModalClose = () => {
-    let parsedJSON;
-    try {
-      parsedJSON = JSON.parse(jsonPreview);
-    } catch {
-      return;
-    }
+  const handleJsonUpdate = (parsedJSON) =>
     updateTemplateJsonData(parsedJSON).then(() => {
-      setShowJsonModal(false);
       setJsonData(parsedJSON);
+      setShowJsonDialog(false);
     });
-  };
 
   return (
     <Dialog
@@ -122,7 +99,7 @@ const EditEmailTemplatePopup = ({
           clients={clients}
           errors={errors}
           onSubmit={handleOnSave}
-          onRender={handlePreview}
+          onRender={() => setShowJsonDialog(true)}
           onValidityChange={setIsInvalid}
           preview={preview}
           renderErrors={renderErrors}
@@ -141,55 +118,13 @@ const EditEmailTemplatePopup = ({
         </Button>
       </DialogActions>
 
-      <Modal
-        className="preview-email-template-modal"
-        show={showJsonModal}
-        onHide={() => setShowJsonModal(false)}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>{T.translate("emails.sample_data")}</Modal.Title>
-          <span>{T.translate("emails.sample_data_legend")}</span>
-        </Modal.Header>
-        <Modal.Body style={{ overflow: "auto", maxHeight: "75vh" }}>
-          {renderErrors?.length > 0 && (
-            <div className="row">
-              <div className="col-md-12 error">{renderErrors}</div>
-            </div>
-          )}
-          <div className="row">
-            <div className="col-md-12">
-              <label>
-                {" "}
-                JSON{" "}
-                <a
-                  href="https://jsonformatter.curiousconcept.com/"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  format
-                </a>
-              </label>
-              <CodeMirror
-                id="json_preview"
-                value={jsonPreview}
-                onChange={(value) => handleJsonChange(value)}
-                theme={sublimeInit({
-                  settings: {
-                    caret: "#c6c6c6",
-                    fontFamily: "monospace"
-                  }
-                })}
-                extensions={[json()]}
-              />
-            </div>
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <button className="btn btn-primary" onClick={handleJsonModalClose}>
-            {T.translate("emails.update")}
-          </button>
-        </Modal.Footer>
-      </Modal>
+      <EmailTemplateJsonDialog
+        open={showJsonDialog}
+        jsonData={jsonData}
+        renderErrors={renderErrors}
+        onUpdate={handleJsonUpdate}
+        onClose={() => setShowJsonDialog(false)}
+      />
     </Dialog>
   );
 };
