@@ -29,6 +29,7 @@ import {
   resetPageTemplateForm
 } from "../../../actions/page-template-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import { countLabel } from "../../../utils/methods";
 import PageTemplatePopup from "./page-template-popup";
 import PageTemplateClonePopup from "./page-template-clone-popup";
 
@@ -225,7 +226,9 @@ const PageTemplateListPage = ({
           {T.translate("page_template_list.add_new")}
         </Button>
       </GridToolbar>
-      <Box sx={{ mb: 2 }}>{totalPageTemplates} pages</Box>
+      <Box sx={{ mb: 2 }}>
+        {countLabel("page_template_list.page", totalPageTemplates)}
+      </Box>
 
       <Box sx={{ mt: 4, mb: 2 }}>
         {pageTemplates.length === 0 && (

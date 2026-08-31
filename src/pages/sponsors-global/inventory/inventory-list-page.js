@@ -32,6 +32,7 @@ import {
 import SponsorInventoryDialog from "../form-templates/sponsor-inventory-popup";
 import { ImagePreviewCell } from "../../../components/image-preview-cell";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import { countLabel } from "../../../utils/methods";
 
 const InventoryListPage = ({
   inventoryItems,
@@ -222,7 +223,9 @@ const InventoryListPage = ({
           {T.translate("inventory_item_list.add_inventory_item")}
         </Button>
       </GridToolbar>
-      <Box sx={{ mb: 2 }}>{totalInventoryItems} items</Box>
+      <Box sx={{ mb: 2 }}>
+        {countLabel("general.item", totalInventoryItems)}
+      </Box>
 
       {inventoryItems.length > 0 && (
         <div>

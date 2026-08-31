@@ -25,6 +25,7 @@ import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_PER_PAGE
 } from "../../../../../../../utils/constants";
+import { countLabel } from "../../../../../../../utils/methods";
 import { getInventoryItems } from "../../../../../../../actions/inventory-item-actions";
 import MenuButton from "../../../../../../../components/mui/menu-button";
 
@@ -216,7 +217,10 @@ const SponsorFormItemFromInventoryPopup = ({
               {T.translate("general.sort_by")}
             </MenuButton>
           </GridToolbar>
-          <Box>{selectedRows.length} items selected</Box>
+          <Box>
+            {countLabel("general.item", selectedRows.length)}{" "}
+            {T.translate("edit_sponsor.forms_tab.form_manage_items.selected")}
+          </Box>
         </Box>
 
         {inventoryItems.length > 0 && (

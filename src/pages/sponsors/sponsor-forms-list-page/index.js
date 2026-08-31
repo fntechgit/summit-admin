@@ -34,6 +34,7 @@ import CustomAlert from "../../../components/mui/custom-alert";
 import GlobalTemplatePopup from "./components/global-template/global-template-popup";
 import FormTemplatePopup from "./components/form-template/form-template-popup";
 import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
+import { countLabel } from "../../../utils/methods";
 import { normalizeTiers, sameTierSet } from "./utils";
 
 const SponsorFormsListPage = ({
@@ -366,7 +367,7 @@ const SponsorFormsListPage = ({
           {T.translate("sponsor_forms.add_form")}
         </Button>
       </GridToolbar>
-      <Box sx={{ mb: 2 }}>{totalCount} forms</Box>
+      <Box sx={{ mb: 2 }}>{countLabel("sponsor_forms.form", totalCount)}</Box>
 
       {sponsorForms.length > 0 && (
         <div>

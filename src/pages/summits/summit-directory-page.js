@@ -28,6 +28,7 @@ import {
 } from "../../actions/summit-actions";
 import Member from "../../models/member";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+import { countLabel } from "../../utils/methods";
 
 const SummitDirectoryPage = ({
   summits,
@@ -181,9 +182,7 @@ const SummitDirectoryPage = ({
           </Button>
         )}
       </GridToolbar>
-      <Box sx={{ mb: 2 }}>
-        {totalSummits} {T.translate("directory.summits").toLowerCase()}
-      </Box>
+      <Box sx={{ mb: 2 }}>{countLabel("directory.summit", totalSummits)}</Box>
       <MuiTable
         columns={columns}
         data={safeSummits}

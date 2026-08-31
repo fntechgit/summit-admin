@@ -35,6 +35,7 @@ import AddFormTemplateItemDialog from "./add-form-template-item-popup";
 import SponsorInventoryDialog from "./sponsor-inventory-popup";
 import { getInventoryItems } from "../../../actions/inventory-item-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import { countLabel } from "../../../utils/methods";
 
 const FormTemplateItemListPage = ({
   formTemplateId,
@@ -251,7 +252,9 @@ const FormTemplateItemListPage = ({
           {T.translate("form_template_item_list.add_item")}
         </Button>
       </GridToolbar>
-      <Box sx={{ mb: 2 }}>{totalFormTemplateItems} items</Box>
+      <Box sx={{ mb: 2 }}>
+        {countLabel("general.item", totalFormTemplateItems)}
+      </Box>
 
       {formTemplateItems.length > 0 && (
         <div>

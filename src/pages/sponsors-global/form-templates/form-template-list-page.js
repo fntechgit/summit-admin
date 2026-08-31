@@ -34,6 +34,7 @@ import FormTemplateDialog from "./form-template-popup";
 import history from "../../../history";
 import FormTemplateFromDuplicateDialog from "./form-template-from-duplicate-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import { countLabel } from "../../../utils/methods";
 
 const FormTemplateListPage = ({
   formTemplates,
@@ -263,7 +264,9 @@ const FormTemplateListPage = ({
           {T.translate("form_template_list.add_form_template")}
         </Button>
       </GridToolbar>
-      <Box sx={{ mb: 2 }}>{totalFormTemplates} forms</Box>
+      <Box sx={{ mb: 2 }}>
+        {countLabel("form_template_list.form", totalFormTemplates)}
+      </Box>
 
       {formTemplates.length > 0 && (
         <div>
