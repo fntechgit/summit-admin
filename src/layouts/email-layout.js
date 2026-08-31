@@ -18,6 +18,7 @@ import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import Restrict from "../routes/restrict";
 import EmailTemplateListPage from "../pages/emails/email-template-list-page";
+import EditEmailTemplatePage from "../pages/emails/edit-email-template-page";
 import EmailLogListPage from "../pages/emails/email-log-list-page";
 
 const EmailLayout = ({ match }) => (
@@ -35,6 +36,16 @@ const EmailLayout = ({ match }) => (
         strict
         path={`${match.url}/templates`}
         component={EmailTemplateListPage}
+      />
+      <Route
+        strict
+        exact
+        path={`${match.url}/templates/new`}
+        component={EditEmailTemplatePage}
+      />
+      <Route
+        path={`${match.url}/templates/:template_id`}
+        component={EditEmailTemplatePage}
       />
       <Route
         exact

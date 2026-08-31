@@ -655,7 +655,7 @@ const EmailTemplateForm = forwardRef(
                         <Box>
                           There is an error trying to render the email template:
                           <ul>
-                            + <li>{mjmlRenderError.message}</li>+{" "}
+                            <li>{mjmlRenderError.message}</li>
                           </ul>
                         </Box>
                       ) : (
