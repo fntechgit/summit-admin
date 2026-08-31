@@ -20,9 +20,16 @@ import T from "i18n-react/dist/i18n-react";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import GridToolbar from "../../components/mui/grid-toolbar";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+import EditEmailTemplatePopup from "./edit-email-template-popup";
 import {
   getEmailTemplates,
-  deleteEmailTemplate
+  deleteEmailTemplate,
+  getEmailTemplate,
+  resetTemplateForm,
+  saveEmailTemplate,
+  getAllClients,
+  renderEmailTemplate,
+  updateTemplateJsonData
 } from "../../actions/email-actions";
 
 const EmailTemplateListPage = ({
@@ -33,16 +40,55 @@ const EmailTemplateListPage = ({
   order,
   orderDir,
   totalTemplates,
-  history,
+  entity,
+  templateLoading,
+  errors,
+  clients,
+  preview,
+  render_errors: renderErrors,
+  json_data: templateJsonData,
   getEmailTemplates: fetchEmailTemplates,
-  deleteEmailTemplate: removeEmailTemplate
+  deleteEmailTemplate: removeEmailTemplate,
+  getEmailTemplate: fetchEmailTemplate,
+  resetTemplateForm: resetForm,
+  saveEmailTemplate: saveTemplate,
+  getAllClients: fetchAllClients,
+  renderEmailTemplate: renderTemplate,
+  updateTemplateJsonData: updateJsonData
 }) => {
+  const [openPopup, setOpenPopup] = useState(null);
+
   useEffect(() => {
     fetchEmailTemplates(term, currentPage, perPage, order, orderDir);
   }, [fetchEmailTemplates]);
 
+  const handleClosePopup = () => {
+    resetForm();
+    setOpenPopup(null);
+  };
+
+  const handleCreate = (values) =>
+    saveTemplate(values).then(() => {
+      fetchEmailTemplates(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir
+      ).catch(() => {});
+    });
+
+  const handleUpdate = (values) =>
+    saveTemplate(values).then(() => {
+      fetchEmailTemplates(term, currentPage, perPage, order, orderDir).catch(
+        () => {}
+      );
+    });
+
   const handleEdit = (row) => {
-    history.push(`/app/emails/templates/${row.id}`);
+    Promise.all([fetchEmailTemplate(row.id), fetchAllClients()]).then(() => {
+      setOpenPopup("edit");
+    });
   };
 
   const handlePageChange = (page) => {
@@ -75,7 +121,9 @@ const EmailTemplateListPage = ({
 
   const handleNewEmailTemplate = (ev) => {
     ev.preventDefault();
-    history.push("/app/emails/templates/new");
+    resetForm();
+    fetchAllClients();
+    setOpenPopup("create");
   };
 
   const handleDeleteEmailTemplate = (row) => {
@@ -160,15 +208,38 @@ const EmailTemplateListPage = ({
           />
         </div>
       )}
+
+      {openPopup && (
+        <EditEmailTemplatePopup
+          entity={entity}
+          templateLoading={templateLoading}
+          errors={errors}
+          clients={clients}
+          preview={preview}
+          renderErrors={renderErrors}
+          templateJsonData={templateJsonData}
+          renderEmailTemplate={renderTemplate}
+          updateTemplateJsonData={updateJsonData}
+          onSave={openPopup === "create" ? handleCreate : handleUpdate}
+          onClose={handleClosePopup}
+        />
+      )}
     </div>
   );
 };
 
-const mapStateToProps = ({ emailTemplateListState }) => ({
-  ...emailTemplateListState
+const mapStateToProps = ({ emailTemplateListState, emailTemplateState }) => ({
+  ...emailTemplateListState,
+  ...emailTemplateState
 });
 
 export default connect(mapStateToProps, {
   getEmailTemplates,
-  deleteEmailTemplate
+  deleteEmailTemplate,
+  getEmailTemplate,
+  resetTemplateForm,
+  saveEmailTemplate,
+  getAllClients,
+  renderEmailTemplate,
+  updateTemplateJsonData
 })(EmailTemplateListPage);

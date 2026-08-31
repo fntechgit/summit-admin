@@ -29,7 +29,6 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
 import debounce from "lodash/debounce";
-import history from "../history";
 import { checkOrFilter, getAccessTokenSafely } from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";
 import {
@@ -160,9 +159,8 @@ export const saveEmailTemplate =
       customErrorHandler,
       entity
     )(params)(dispatch)
-      .then((payload) => {
+      .then(() => {
         dispatch(showSuccessMessage(T.translate("emails.template_created")));
-        history.push(`/app/emails/templates/${payload.response.id}`);
       })
       .finally(() => {
         dispatch(stopLoading());
