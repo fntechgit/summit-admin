@@ -14,7 +14,7 @@ describe("EmailTemplateInput", () => {
     jest.clearAllMocks();
   });
 
-  it("selects an option and emits the object shape by default", async () => {
+  it("selects an option, emits the object shape by default, and does not re-search", async () => {
     queryTemplates.mockImplementation((input, callback) => {
       callback([{ id: 42, identifier: "welcome_email" }]);
     });
@@ -31,6 +31,7 @@ describe("EmailTemplateInput", () => {
     );
 
     const option = await screen.findByText("welcome_email");
+    const callsBeforeSelect = queryTemplates.mock.calls.length;
     await userEvent.click(option);
 
     expect(onChange).toHaveBeenCalledWith({
@@ -40,6 +41,9 @@ describe("EmailTemplateInput", () => {
         type: "emailtemplateinput"
       }
     });
+    // picking an option programmatically fills the input with its label --
+    // that must not trigger a further search
+    expect(queryTemplates).toHaveBeenCalledTimes(callsBeforeSelect);
   });
 
   it("emits the plain identifier when plainValue is set", async () => {
