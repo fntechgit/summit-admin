@@ -243,7 +243,7 @@ describe("SponsorItemDialog", () => {
         />
       );
 
-    it("disables save/close while a save is in flight, ignores a re-entrant click, and closes on success", async () => {
+    it("disables the save and close buttons while a save is in flight, and closes on success", async () => {
       const user = userEvent.setup();
       let resolveSave;
       const pendingSave = jest.fn(
@@ -263,10 +263,42 @@ describe("SponsorItemDialog", () => {
       await waitFor(() => expect(saveButton).toBeDisabled());
       expect(screen.getByTestId("CloseIcon").closest("button")).toBeDisabled();
 
-      // The button is disabled once isSaving flips, so a real second click
-      // can't reach it - fireEvent bypasses that to exercise the
-      // `if (isSaving) return` guard in handleOnSave itself.
+      resolveSave();
+
+      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+      expect(pendingSave).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not call onSave twice when the save button is double-clicked before isSaving commits", async () => {
+      let resolveSave;
+      const pendingSave = jest.fn(
+        () =>
+          new Promise((resolve) => {
+            resolveSave = resolve;
+          })
+      );
+      renderPending(pendingSave);
+
+      fireEvent.change(document.querySelector("input[name=\"code\"]"), {
+        target: { value: "CODE-1" }
+      });
+      fireEvent.change(document.querySelector("input[name=\"name\"]"), {
+        target: { value: "Item 1" }
+      });
+
+      const saveButton = screen.getByRole("button", {
+        name: "edit_inventory_item.save_changes"
+      });
+
+      // Fired back-to-back with no await in between, so both clicks reach
+      // formik's validation before React commits the isSaving state update
+      // that disables the button - this is the actual race `if (isSaving)
+      // return` in handleOnSave guards against (validation is async, so a
+      // real fast double-click can land before the first render commits).
       fireEvent.click(saveButton);
+      fireEvent.click(saveButton);
+
+      await waitFor(() => expect(pendingSave).toHaveBeenCalled());
       resolveSave();
 
       await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
