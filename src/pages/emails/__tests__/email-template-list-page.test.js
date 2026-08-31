@@ -7,12 +7,22 @@ import { renderWithRedux } from "../../../utils/test-utils";
 import EmailTemplateListPage from "../email-template-list-page";
 import {
   getEmailTemplates,
-  deleteEmailTemplate
+  deleteEmailTemplate,
+  getEmailTemplate,
+  resetTemplateForm,
+  saveEmailTemplate,
+  getAllClients
 } from "../../../actions/email-actions";
 
 jest.mock("../../../actions/email-actions", () => ({
   getEmailTemplates: jest.fn(),
-  deleteEmailTemplate: jest.fn()
+  deleteEmailTemplate: jest.fn(),
+  getEmailTemplate: jest.fn(),
+  resetTemplateForm: jest.fn(),
+  saveEmailTemplate: jest.fn(),
+  getAllClients: jest.fn(),
+  renderEmailTemplate: jest.fn(),
+  updateTemplateJsonData: jest.fn()
 }));
 
 jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => ({
@@ -43,12 +53,27 @@ jest.mock(
   })
 );
 
+jest.mock("../edit-email-template-popup", () => ({
+  __esModule: true,
+  default: ({ onSave, onClose }) => (
+    <div data-testid="edit-email-template-popup">
+      <button
+        type="button"
+        onClick={() => onSave({ identifier: "New Template" })}
+      >
+        popup-save
+      </button>
+      <button type="button" onClick={onClose}>
+        popup-close
+      </button>
+    </div>
+  )
+}));
+
 jest.mock("i18n-react/dist/i18n-react", () => ({
   __esModule: true,
   default: { translate: (key) => key }
 }));
-
-const mockHistory = { push: jest.fn() };
 
 const initialState = {
   emailTemplateListState: {
@@ -66,6 +91,15 @@ const initialState = {
     term: "",
     order: "id",
     orderDir: 1
+  },
+  emailTemplateState: {
+    entity: { id: 0, identifier: "" },
+    templateLoading: false,
+    clients: null,
+    preview: null,
+    json_data: {},
+    errors: {},
+    render_errors: []
   }
 };
 
@@ -74,12 +108,14 @@ describe("EmailTemplateListPage", () => {
     jest.clearAllMocks();
     getEmailTemplates.mockReturnValue(() => Promise.resolve());
     deleteEmailTemplate.mockReturnValue(() => Promise.resolve());
+    saveEmailTemplate.mockReturnValue(() => Promise.resolve());
+    getEmailTemplate.mockReturnValue(() => Promise.resolve());
+    resetTemplateForm.mockReturnValue({ type: "RESET_TEMPLATE_FORM" });
+    getAllClients.mockReturnValue(() => Promise.resolve());
   });
 
   it("reloads the list after a successful delete", async () => {
-    renderWithRedux(<EmailTemplateListPage history={mockHistory} />, {
-      initialState
-    });
+    renderWithRedux(<EmailTemplateListPage />, { initialState });
 
     await act(async () => {
       await userEvent.click(screen.getByRole("button", { name: "delete-row" }));
@@ -95,9 +131,7 @@ describe("EmailTemplateListPage", () => {
       Promise.reject(new Error("delete failed"))
     );
 
-    renderWithRedux(<EmailTemplateListPage history={mockHistory} />, {
-      initialState
-    });
+    renderWithRedux(<EmailTemplateListPage />, { initialState });
 
     await act(async () => {
       await userEvent.click(screen.getByRole("button", { name: "delete-row" }));
@@ -106,5 +140,69 @@ describe("EmailTemplateListPage", () => {
 
     // Call 1: useEffect on mount; call 2: handleDeleteEmailTemplate .finally() fires even on rejection
     expect(getEmailTemplates).toHaveBeenCalledTimes(2);
+  });
+
+  it("resets the form and opens the popup when adding a new template", async () => {
+    renderWithRedux(<EmailTemplateListPage />, { initialState });
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "emails.add_template" })
+    );
+
+    expect(resetTemplateForm).toHaveBeenCalled();
+    expect(getAllClients).toHaveBeenCalled();
+    expect(screen.getByTestId("edit-email-template-popup")).toBeInTheDocument();
+  });
+
+  it("reloads the list at the first page after a successful create", async () => {
+    renderWithRedux(<EmailTemplateListPage />, { initialState });
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "emails.add_template" })
+    );
+
+    await act(async () => {
+      await userEvent.click(screen.getByRole("button", { name: "popup-save" }));
+      await flushPromises();
+    });
+
+    expect(saveEmailTemplate).toHaveBeenCalledWith({
+      identifier: "New Template"
+    });
+    // Call 1: useEffect on mount; call 2: handleCreate .then()
+    expect(getEmailTemplates).toHaveBeenCalledTimes(2);
+  });
+
+  it("fetches the entity and opens the popup when clicking edit", async () => {
+    renderWithRedux(<EmailTemplateListPage />, { initialState });
+
+    expect(
+      screen.queryByTestId("edit-email-template-popup")
+    ).not.toBeInTheDocument();
+
+    await act(async () => {
+      await userEvent.click(screen.getByRole("button", { name: "edit-row" }));
+      await flushPromises();
+    });
+
+    expect(getEmailTemplate).toHaveBeenCalledWith(1);
+    expect(getAllClients).toHaveBeenCalled();
+    expect(screen.getByTestId("edit-email-template-popup")).toBeInTheDocument();
+  });
+
+  it("closes the popup and resets the form when the popup calls onClose", async () => {
+    renderWithRedux(<EmailTemplateListPage />, { initialState });
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "emails.add_template" })
+    );
+    expect(screen.getByTestId("edit-email-template-popup")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "popup-close" }));
+
+    expect(
+      screen.queryByTestId("edit-email-template-popup")
+    ).not.toBeInTheDocument();
+    expect(resetTemplateForm).toHaveBeenCalled();
   });
 });
