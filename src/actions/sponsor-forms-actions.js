@@ -148,9 +148,7 @@ export const getSponsorForms =
       expand: "sponsorship_types"
     };
 
-    if (!showArchived) {
-      filter.push("is_archived==0");
-    }
+    filter.push(`is_archived==${showArchived ? 1 : 0}`);
 
     if (sponsorshipTypesId?.length > 0) {
       const formattedSponsorships = sponsorshipTypesId.join("&&");
