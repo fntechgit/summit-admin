@@ -3308,6 +3308,8 @@
     "preview": "Preview",
     "sample_data": "Sample Data",
     "sample_data_legend": "* You could use this data as it is or your could edit it",
+    "invalid_json": "Invalid JSON, please fix it before updating.",
+    "loading_template": "Loading template...",
     "mjml_warning": "Editing an MJML template will overwrite the content from the current HTML content",
     "understand": "I understand",
     "render": "Render",
