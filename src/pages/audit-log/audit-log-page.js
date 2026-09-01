@@ -23,7 +23,7 @@ const AuditLogPage = ({ totalLogEntries }) => (
     </h3>
     <AuditLogs
       filterId="standalone"
-      entityFilter={["class_name==SummitEventAuditLog"]}
+      entityFilter={["class_name==SummitEvent"]}
     />
   </div>
 );

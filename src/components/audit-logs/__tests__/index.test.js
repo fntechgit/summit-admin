@@ -150,18 +150,19 @@ describe("AuditLogs columns", () => {
     jest.clearAllMocks();
   });
 
-  // Guards the master regression where this column was declared as
-  // "action_description" while the reducer emits "action", silently
-  // dropping the Action column on the ticket page (fixed in c0ef613).
-  test("renders the caller's column subset, wired to the reducer's `action` key", () => {
+  // Guards the regression where the column read the raw audit.action verb
+  // (create/update/delete/...) instead of the parsed audit.description
+  // sentence, and where the ticket page's column subset didn't match the
+  // reducer's field name — both must stay in sync as "action_description".
+  test("renders the caller's column subset, wired to the reducer's `action_description` key", () => {
     renderWithAuditLogState(
-      { columns: ["created", "action", "user"] },
+      { columns: ["created", "action_description", "user"] },
       {
         logEntries: [
           {
             id: 1,
             created: "August 17th 2026, 12:00 pm",
-            action: "Updated Event Title",
+            action_description: "Updated Event Title",
             event_id: 55,
             user: "Jane Doe (7)"
           }
@@ -197,7 +198,7 @@ describe("AuditLogs sorting", () => {
           {
             id: 1,
             created: "August 17th 2026, 12:00 pm",
-            action: "Updated Event Title",
+            action_description: "Updated Event Title",
             event_id: 55,
             user: "Jane Doe (7)"
           }
@@ -234,7 +235,7 @@ describe("AuditLogs pagination", () => {
           {
             id: 1,
             created: "August 17th 2026, 12:00 pm",
-            action: "Updated Event Title",
+            action_description: "Updated Event Title",
             event_id: 55,
             user: "Jane Doe (7)"
           }

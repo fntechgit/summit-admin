@@ -50,9 +50,10 @@ const auditLogReducer = (state = DEFAULT_STATE, action) => {
       const { current_page, total, last_page } = payload.response;
 
       const logEntries = payload.response.data.map((e) => {
-        const logEntryAction = e.action.startsWith("Speaker")
-          ? parseSpeakerAuditLog(e.action)
-          : e.action;
+        const rawDescription = e.action_description ?? "";
+        const parsedDescription = rawDescription.startsWith("Speaker")
+          ? parseSpeakerAuditLog(rawDescription)
+          : rawDescription;
         const userFullName = `${e.user?.first_name ?? ""} ${
           e.user?.last_name ?? ""
         }`.trim();
@@ -64,7 +65,7 @@ const auditLogReducer = (state = DEFAULT_STATE, action) => {
             e.user?.id ? `(${e.user.id})` : ""
           }`,
           created: epochToMoment(e.created).format("MMMM Do YYYY, h:mm a"),
-          action: formatAuditLog(logEntryAction)
+          action_description: formatAuditLog(parsedDescription)
         };
       });
 
