@@ -252,15 +252,16 @@ const EmailTemplateForm = forwardRef(
         setSingleTab(false);
       }
       const currentPreviewWidth = previewRef?.current?.offsetWidth;
-      if (mobileView) {
-        if (currentPreviewWidth < MOBILE_PREVIEW_WIDTH) {
-          const newScale = currentPreviewWidth / MOBILE_PREVIEW_WIDTH;
-          setScale(newScale);
-        }
-      } else if (currentPreviewWidth < DESKTOP_PREVIEW_WIDTH) {
-        const newScale = currentPreviewWidth / DESKTOP_PREVIEW_WIDTH;
-        setScale(newScale);
-      }
+      if (!currentPreviewWidth) return;
+      const targetWidth = mobileView
+        ? MOBILE_PREVIEW_WIDTH
+        : DESKTOP_PREVIEW_WIDTH;
+      // always recompute the full ratio -- shrink to fit when the container is
+      // narrower than the target, but also grow back to 1 once there is room
+      // again (a narrow measurement early in the mount sequence must not
+      // permanently lock the preview at a reduced scale)
+      const newScale = Math.min(1, currentPreviewWidth / targetWidth);
+      setScale(newScale);
     };
 
     const handleTabChange = (ev) => {

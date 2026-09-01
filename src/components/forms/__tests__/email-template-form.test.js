@@ -214,3 +214,47 @@ describe("EmailTemplateForm preview dispatch", () => {
     expect(getByText("emails.display_mjml")).toBeTruthy();
   });
 });
+
+describe("EmailTemplateForm responsive preview scale", () => {
+  let offsetWidthSpy;
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    showConfirmDialog.mockResolvedValue(true);
+    offsetWidthSpy = jest
+      .spyOn(HTMLElement.prototype, "offsetWidth", "get")
+      .mockReturnValue(800);
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    jest.clearAllMocks();
+    offsetWidthSpy.mockRestore();
+  });
+
+  it("recovers to full scale once the preview container widens after an early narrow measurement", async () => {
+    // simulate the preview container being measured while still narrow --
+    // e.g. the surrounding page layout hasn't settled yet on first mount
+    offsetWidthSpy.mockReturnValue(400);
+    const props = baseProps(htmlEntity);
+    const { container } = render(<EmailTemplateForm {...props} />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    expect(container.querySelector("iframe").style.transform).toBe(
+      "scale(0.5)"
+    );
+
+    // the container widens (e.g. the rest of the page layout settles)
+    offsetWidthSpy.mockReturnValue(800);
+    await act(async () => {
+      window.dispatchEvent(new Event("resize"));
+    });
+
+    // FIX: scale must recover to 1 -- pre-fix it stays stuck at 0.5 forever
+    expect(container.querySelector("iframe").style.transform).toBe("scale(1)");
+  });
+});
