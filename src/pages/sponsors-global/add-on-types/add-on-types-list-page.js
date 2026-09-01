@@ -12,14 +12,13 @@
  * */
 
 import React, { useEffect, useState } from "react";
-import { Button, Grid2 } from "@mui/material";
-import Box from "@mui/material/Box";
+import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import GridToolbar from "../../../components/mui/grid-toolbar";
 import Restrict from "../../../routes/restrict";
 import {
   getAddOnTypes,
@@ -126,55 +125,26 @@ const AddOnTypesListPage = ({
         }}
       />
       <h3> {T.translate("add_on_types_list.add_on_types")}</h3>
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate(
+            "add_on_types_list.placeholders.search_add_on_types"
+          )
         }}
       >
-        <Grid2 size={2}>
-          <Box component="span">
-            {totalAddOnTypes} {T.translate("add_on_types_list.add_on_types")}
-          </Box>
-        </Grid2>
-        <Grid2
-          container
-          size={10}
-          spacing={1}
-          gap={1}
-          sx={{
-            justifyContent: "flex-end",
-            alignItems: "center"
-          }}
+        <Button
+          variant="contained"
+          onClick={() => handleNewAddOnType()}
+          startIcon={<AddIcon />}
         >
-          <Grid2 size={3}>
-            <SearchInput
-              term={term}
-              onSearch={handleSearch}
-              placeholder={T.translate(
-                "add_on_types_list.placeholders.search_add_on_types"
-              )}
-            />
-          </Grid2>
-          <Button
-            variant="contained"
-            onClick={() => handleNewAddOnType()}
-            startIcon={<AddIcon />}
-            sx={{
-              height: "36px",
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("add_on_types_list.add_add_on_type")}
-          </Button>
-        </Grid2>
-      </Grid2>
+          {T.translate("add_on_types_list.add_add_on_type")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {totalAddOnTypes} {T.translate("add_on_types_list.add_on_types")}
+      </Box>
 
       {addOnTypes.length > 0 && (
         <div>

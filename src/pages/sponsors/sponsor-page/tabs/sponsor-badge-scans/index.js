@@ -14,11 +14,11 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DownloadIcon from "@mui/icons-material/Download";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../../../../components/mui/grid-toolbar";
 import {
   getSponsor,
   getBadgeScans,
@@ -168,61 +168,44 @@ const SponsorBadgeScans = ({
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Grid2
-        container
-        spacing={1}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
+      <GridToolbar
+        searchProps={{
+          onSearch: handleSearch,
+          placeholder: T.translate(
+            "inventory_item_list.placeholders.search_inventory_items"
+          )
         }}
       >
-        <Grid2 size={3}>
-          <Box component="span">
-            {totalBadgeScans} {T.translate("sponsor_badge_scans.badge_scanned")}
-          </Box>
-        </Grid2>
-        <Grid2 size={9} justifyContent="flex-end" gap={1} container>
-          <Grid2 size={4}>
-            <SearchInput
-              onSearch={handleSearch}
-              placeholder={T.translate(
-                "inventory_item_list.placeholders.search_inventory_items"
-              )}
-            />
-          </Grid2>
-          <Button
-            variant="contained"
-            size="medium"
-            onClick={handleNewManualScan}
-            startIcon={<AddIcon />}
-            sx={{
-              height: "36px",
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("sponsor_badge_scans.add_manual_scan")}
-          </Button>
-          <Button
-            variant="contained"
-            size="medium"
-            onClick={handleExportBadgeScans}
-            startIcon={<DownloadIcon />}
-            sx={{
-              height: "36px",
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("sponsor_badge_scans.export")}
-          </Button>
-        </Grid2>
-      </Grid2>
+        <Button
+          variant="contained"
+          onClick={handleNewManualScan}
+          startIcon={<AddIcon />}
+          sx={{
+            padding: "6px 16px",
+            fontSize: "1.4rem",
+            lineHeight: "2.4rem",
+            letterSpacing: "0.4px"
+          }}
+        >
+          {T.translate("sponsor_badge_scans.add_manual_scan")}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleExportBadgeScans}
+          startIcon={<DownloadIcon />}
+          sx={{
+            padding: "6px 16px",
+            fontSize: "1.4rem",
+            lineHeight: "2.4rem",
+            letterSpacing: "0.4px"
+          }}
+        >
+          {T.translate("sponsor_badge_scans.export")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {totalBadgeScans} {T.translate("sponsor_badge_scans.badge_scanned")}
+      </Box>
 
       {badgeScans.length > 0 && (
         <div>

@@ -16,10 +16,9 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Grid2 from "@mui/material/Grid2";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import MuiSearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import {
   getAdminAccesses,
   deleteAdminAccess,
@@ -109,46 +108,24 @@ const AdminAccessListPage = ({
   return (
     <Box className="container">
       <h3>{T.translate("admin_access.admin_access_list")}</h3>
-      <Grid2
-        container
-        spacing={2}
-        sx={{ justifyContent: "center", alignItems: "center", mb: 2 }}
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate("admin_access.placeholders.search")
+        }}
       >
-        <Grid2 size={2}>
-          <Box component="span">
-            {totalAdminAccesses} {T.translate("general.items")}
-          </Box>
-        </Grid2>
-        <Grid2
-          container
-          size={10}
-          spacing={1}
-          gap={1}
-          sx={{ justifyContent: "flex-end", alignItems: "center" }}
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleNewAdminAccess}
         >
-          <Grid2 size={3}>
-            <MuiSearchInput
-              term={term}
-              onSearch={handleSearch}
-              placeholder={T.translate("admin_access.placeholders.search")}
-            />
-          </Grid2>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleNewAdminAccess}
-            sx={{
-              height: "36px",
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("admin_access.add")}
-          </Button>
-        </Grid2>
-      </Grid2>
+          {T.translate("admin_access.add")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {totalAdminAccesses} {T.translate("general.items")}
+      </Box>
 
       {admin_accesses.length === 0 && (
         <div>{T.translate("admin_access.no_results")}</div>

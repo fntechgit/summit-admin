@@ -16,10 +16,9 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Grid2 from "@mui/material/Grid2";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import MuiSearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import AddIcon from "@mui/icons-material/Add";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import TagsDialog from "./tags-popup";
 import {
   getTags,
@@ -121,54 +120,22 @@ const TagListPage = ({
     <Box className="container">
       <h3>{T.translate("tag_list.tag_list")}</h3>
 
-      <Grid2
-        container
-        sx={{
-          mb: 2,
-          width: "100%",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap"
+      <GridToolbar
+        searchProps={{
+          term: search,
+          onSearch: handleSearch,
+          placeholder: T.translate("tag_list.placeholders.search_tags")
         }}
       >
-        <Grid2 md={2} sx={{ display: "flex", alignItems: "center" }}>
-          <Box component="span">
-            {totalTags}{" "}
-            {totalTags === 1
-              ? T.translate("tag_list.item")
-              : T.translate("tag_list.items")}
-          </Box>
-        </Grid2>
-        <Grid2
-          container
-          md={10}
-          spacing={1}
-          gap={1}
-          sx={{ justifyContent: "flex-end", alignItems: "center" }}
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => handleNewTag()}
         >
-          <Box sx={{ width: { xs: "100%", sm: 320 } }}>
-            <MuiSearchInput
-              term={search}
-              onSearch={handleSearch}
-              placeholder={T.translate("tag_list.placeholders.search_tags")}
-            />
-          </Box>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => handleNewTag()}
-            sx={{
-              height: "36px",
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("tag_list.add_tag")}
-          </Button>
-        </Grid2>
-      </Grid2>
+          {T.translate("tag_list.add_tag")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>{totalTags}</Box>
 
       <MuiTable
         columns={columns}

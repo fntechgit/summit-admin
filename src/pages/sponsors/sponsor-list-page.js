@@ -14,20 +14,20 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Button, Grid2, Typography, Badge, Tooltip } from "@mui/material";
+import { Badge, Button, Tooltip, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import {
   getLeadReportSettingsMeta,
   getSummitById,
   upsertLeadReportSettings
 } from "../../actions/summit-actions";
 import {
-  getSponsors,
   addSponsorToSummit,
   deleteSponsor,
+  getSponsors,
   updateSponsorOrder
 } from "../../actions/sponsor-actions";
 import Member from "../../models/member";
@@ -198,54 +198,27 @@ const SponsorListPage = ({
   return (
     <div className="container">
       <h3> {T.translate("sponsor_list.sponsor_list")}</h3>
-
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
+      <GridToolbar
+        searchProps={{
+          onSearch: handleOnSearch,
+          term,
+          placeholder: T.translate(
+            "inventory_item_list.placeholders.search_inventory_items"
+          ),
+          debounced: true
         }}
       >
-        <Grid2 size={6}>
-          <Box component="span">{totalSponsors} sponsors</Box>
-        </Grid2>
-        <Grid2
-          container
-          size={6}
-          spacing={1}
-          sx={{
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <Grid2 size={2} />
-          <Grid2 size={6}>
-            <SearchInput
-              onSearch={handleOnSearch}
-              term={term}
-              placeholder={T.translate(
-                "inventory_item_list.placeholders.search_inventory_items"
-              )}
-              debounced
-            />
-          </Grid2>
-          <Grid2 size={4}>
-            {canAddSponsors && (
-              <Button
-                variant="contained"
-                fullWidth
-                onClick={() => handleOpenAddSponsorPopup()}
-                startIcon={<AddIcon />}
-                sx={{ height: "36px" }}
-              >
-                {T.translate("sponsor_list.add_sponsor")}
-              </Button>
-            )}
-          </Grid2>
-        </Grid2>
-      </Grid2>
+        {canAddSponsors && (
+          <Button
+            variant="contained"
+            onClick={() => handleOpenAddSponsorPopup()}
+            startIcon={<AddIcon />}
+          >
+            {T.translate("sponsor_list.add_sponsor")}
+          </Button>
+        )}
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>{totalSponsors} sponsors</Box>
 
       {sponsors.length === 0 && (
         <div>{T.translate("sponsor_list.no_sponsors")}</div>

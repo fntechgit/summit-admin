@@ -14,18 +14,11 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Grid2
-} from "@mui/material";
+import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../../../../components/mui/grid-toolbar";
 import {
   getSponsorManagedPages,
   getSponsorManagedPage,
@@ -369,71 +362,37 @@ const SponsorPagesTab = ({
         message={T.translate("edit_sponsor.pages_tab.alert_info")}
         hideIcon
       />
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate("edit_sponsor.placeholders.search")
+        }}
+        checkboxProps={{
+          checked: showArchived,
+          onChange: handleShowArchived,
+          label: T.translate("edit_sponsor.pages_tab.show_archived")
         }}
       >
-        <Grid2 size={1}>
-          <Box component="span">
-            {managedPages.totalItems + customizedPages.totalItems}{" "}
-            {T.translate("edit_sponsor.pages_tab.pages")}
-          </Box>
-        </Grid2>
-        <Grid2 size={2} offset={1}>
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={showArchived}
-                  onChange={handleShowArchived}
-                  inputProps={{
-                    "aria-label": T.translate(
-                      "edit_sponsor.pages_tab.show_archived"
-                    )
-                  }}
-                />
-              }
-              label={T.translate("edit_sponsor.pages_tab.show_archived")}
-            />
-          </FormGroup>
-        </Grid2>
-        <Grid2 size={2}>
-          <SearchInput
-            term={term}
-            onSearch={handleSearch}
-            placeholder={T.translate("edit_sponsor.placeholders.search")}
-          />
-        </Grid2>
-        <Grid2 size={3}>
-          <Button
-            variant="contained"
-            size="medium"
-            fullWidth
-            onClick={handleUsingTemplate}
-            startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
-          >
-            {T.translate("edit_sponsor.pages_tab.using_template")}
-          </Button>
-        </Grid2>
-        <Grid2 size={3}>
-          <Button
-            variant="contained"
-            size="medium"
-            fullWidth
-            onClick={handleAddPage}
-            startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
-          >
-            {T.translate("edit_sponsor.pages_tab.new_page")}
-          </Button>
-        </Grid2>
-      </Grid2>
+        <Button
+          variant="contained"
+          onClick={handleUsingTemplate}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("edit_sponsor.pages_tab.using_template")}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleAddPage}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("edit_sponsor.pages_tab.new_page")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {managedPages.totalItems + customizedPages.totalItems}{" "}
+        {T.translate("edit_sponsor.pages_tab.pages")}
+      </Box>
       <div>
         <MuiTable
           columns={customizedPagesColumns}

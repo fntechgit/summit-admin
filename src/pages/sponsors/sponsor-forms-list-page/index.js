@@ -15,18 +15,11 @@ import React, { useEffect, useState, useRef } from "react";
 import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Grid2
-} from "@mui/material";
+import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiDropdownCheckbox from "openstack-uicore-foundation/lib/components/mui/dropdown-checkbox";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../../components/mui/grid-toolbar";
 import history from "../../../history";
 import {
   archiveSponsorForm,
@@ -41,6 +34,7 @@ import CustomAlert from "../../../components/mui/custom-alert";
 import GlobalTemplatePopup from "./components/global-template/global-template-popup";
 import FormTemplatePopup from "./components/form-template/form-template-popup";
 import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
+import { countLabel } from "../../../utils/methods";
 import { normalizeTiers, sameTierSet } from "./utils";
 
 const SponsorFormsListPage = ({
@@ -208,23 +202,21 @@ const SponsorFormsListPage = ({
     {
       columnKey: "code",
       header: T.translate("sponsor_forms.code_column_label"),
-      sortable: true
+      sortable: true,
+      cellSx: { maxWidth: 120 }
     },
     {
       columnKey: "name",
       header: T.translate("sponsor_forms.name_column_label"),
-      sortable: true
+      sortable: true,
+      cellSx: { maxWidth: 120 }
     },
     {
       columnKey: "tiers",
       header: T.translate("sponsor_forms.tiers_column_label"),
       sortable: false,
-      width: 140,
       render: (row) => {
         const cellStyle = {
-          width: 140,
-          maxWidth: 140,
-          minWidth: 140,
           display: "block"
         };
         if (editingTiersId === row.id) {
@@ -280,8 +272,7 @@ const SponsorFormsListPage = ({
                 cursor: "pointer",
                 textDecoration: "underline dotted",
                 display: "block",
-                whiteSpace: "normal",
-                wordBreak: "break-word",
+                whiteSpace: "nowrap",
                 verticalAlign: "middle"
               }}
               title={label}
@@ -297,26 +288,26 @@ const SponsorFormsListPage = ({
       columnKey: "opens_at",
       header: T.translate("edit_sponsor.forms_tab.opens_at"),
       sortable: true,
-      width: 115,
+      headSx: { whiteSpace: "nowrap" },
       render: (row) => formatDate(row.opens_at)
     },
     {
       columnKey: "expires_at",
       header: T.translate("edit_sponsor.forms_tab.expires_at"),
       sortable: true,
-      width: 120,
+      headSx: { whiteSpace: "nowrap" },
       render: (row) => formatDate(row.expires_at)
     },
     {
       columnKey: "items_qty",
-      width: 90,
       header: T.translate("sponsor_forms.items_column_label"),
-      sortable: false
+      sortable: false,
+      cellSx: { textAlign: "center" }
     },
     {
       columnKey: "manage_items",
       header: "",
-      width: 140,
+      width: 132,
       align: "left",
       render: (row) => (
         <Button
@@ -345,71 +336,38 @@ const SponsorFormsListPage = ({
 
   return (
     <div className="container">
-      <h1>{T.translate("sponsor_forms.forms")}</h1>
+      <h3>{T.translate("sponsor_forms.forms")}</h3>
       <CustomAlert message={T.translate("sponsor_forms.alert_info")} hideIcon />
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate("sponsor_forms.placeholders.search")
+        }}
+        checkboxProps={{
+          checked: showArchived,
+          onChange: handleShowArchivedForms,
+          label: T.translate("sponsor_forms.show_archived")
         }}
       >
-        <Grid2 size={1}>
-          <Box component="span">{totalCount} forms</Box>
-        </Grid2>
-        <Grid2 size={2} offset={1}>
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={showArchived}
-                  onChange={handleShowArchivedForms}
-                  slotProps={{
-                    input: {
-                      "aria-label": T.translate("sponsor_forms.show_archived")
-                    }
-                  }}
-                />
-              }
-              label={T.translate("sponsor_forms.show_archived")}
-              sx={{ whiteSpace: "nowrap", mb: 0 }}
-            />
-          </FormGroup>
-        </Grid2>
-        <Grid2 size={2}>
-          <SearchInput
-            term={term}
-            onSearch={handleSearch}
-            placeholder={T.translate("sponsor_forms.placeholders.search")}
-          />
-        </Grid2>
-        <Grid2 size={3}>
-          <Button
-            variant="contained"
-            size="medium"
-            fullWidth
-            onClick={() => setOpenPopup("clone")}
-            startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
-          >
-            {T.translate("sponsor_forms.using_global")}
-          </Button>
-        </Grid2>
-        <Grid2 size={3}>
-          <Button
-            variant="contained"
-            size="medium"
-            fullWidth
-            onClick={() => setOpenPopup("new")}
-            startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
-          >
-            {T.translate("sponsor_forms.add_form")}
-          </Button>
-        </Grid2>
-      </Grid2>
+        <Button
+          variant="contained"
+          size="medium"
+          onClick={() => setOpenPopup("clone")}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("sponsor_forms.using_global")}
+        </Button>
+        <Button
+          variant="contained"
+          size="medium"
+          onClick={() => setOpenPopup("new")}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("sponsor_forms.add_form")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>{countLabel("sponsor_forms.form", totalCount)}</Box>
 
       {sponsorForms.length > 0 && (
         <div>

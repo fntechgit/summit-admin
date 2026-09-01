@@ -14,10 +14,10 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../../components/mui/grid-toolbar";
 import {
   getPaymentProfiles,
   getPaymentProfile,
@@ -141,55 +141,27 @@ const PaymentProfileListPage = ({
   return (
     <div className="container">
       <h3>{T.translate("payment_profiles.payment_profiles_list")}</h3>
-      <Grid2
-        container
-        spacing={1}
-        sx={{
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate(
+            "payment_profiles.placeholders.search_profiles"
+          )
         }}
       >
-        <Grid2 size={2}>
-          <Box component="span">
-            {totalPaymentProfiles}{" "}
-            {T.translate("payment_profiles.payment_profiles")}
-          </Box>
-        </Grid2>
-        <Grid2
-          container
-          size={10}
-          gap={1}
-          sx={{
-            justifyContent: "flex-end",
-            alignItems: "center"
-          }}
+        <Button
+          variant="contained"
+          onClick={handleNewPaymentProfile}
+          startIcon={<AddIcon />}
         >
-          <Grid2 size={4}>
-            <SearchInput
-              term={term}
-              onSearch={handleSearch}
-              placeholder={T.translate(
-                "payment_profiles.placeholders.search_profiles"
-              )}
-            />
-          </Grid2>
-          <Button
-            variant="contained"
-            onClick={handleNewPaymentProfile}
-            startIcon={<AddIcon />}
-            sx={{
-              height: "36px",
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("payment_profiles.add_payment_profile")}
-          </Button>
-        </Grid2>
-      </Grid2>
+          {T.translate("payment_profiles.add_payment_profile")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {totalPaymentProfiles}{" "}
+        {T.translate("payment_profiles.payment_profiles")}
+      </Box>
 
       {paymentProfiles.length === 0 && (
         <div>{T.translate("payment_profiles.no_payment_profiles")}</div>

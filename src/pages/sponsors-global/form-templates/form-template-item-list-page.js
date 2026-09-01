@@ -14,18 +14,11 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Alert,
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Grid2
-} from "@mui/material";
+import { Alert, Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import { ImagePreviewCell } from "../../../components/image-preview-cell";
+import GridToolbar from "../../../components/mui/grid-toolbar";
 import {
   cloneFromInventoryItem,
   getFormTemplateItem,
@@ -42,6 +35,7 @@ import AddFormTemplateItemDialog from "./add-form-template-item-popup";
 import SponsorInventoryDialog from "./sponsor-inventory-popup";
 import { getInventoryItems } from "../../../actions/inventory-item-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import { countLabel } from "../../../utils/methods";
 
 const FormTemplateItemListPage = ({
   formTemplateId,
@@ -209,7 +203,6 @@ const FormTemplateItemListPage = ({
     {
       columnKey: "hasImage",
       header: "",
-      width: 40,
       align: "center",
       render: (row) => {
         const img = row.images?.[0];
@@ -244,57 +237,24 @@ const FormTemplateItemListPage = ({
       >
         {T.translate("form_template_item_list.alert_info")}
       </Alert>
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
+      <GridToolbar
+        checkboxProps={{
+          checked: showArchived,
+          onChange: handleShowArchivedForms,
+          label: T.translate("form_template_item_list.show_archived")
         }}
       >
-        <Grid2 size={6}>
-          <Box component="span">{totalFormTemplateItems} items</Box>
-        </Grid2>
-        <Grid2
-          container
-          size={6}
-          spacing={1}
-          sx={{
-            justifyContent: "center",
-            alignItems: "center"
-          }}
+        <Button
+          variant="contained"
+          onClick={() => handleNewInventoryItem()}
+          startIcon={<AddIcon />}
         >
-          <Grid2 size={4} offset={4}>
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={showArchived}
-                    onChange={handleShowArchivedForms}
-                    inputProps={{
-                      "aria-label": T.translate(
-                        "form_template_item_list.show_archived"
-                      )
-                    }}
-                  />
-                }
-                label={T.translate("form_template_item_list.show_archived")}
-              />
-            </FormGroup>
-          </Grid2>
-          <Grid2 size={4}>
-            <Button
-              variant="contained"
-              fullWidth
-              onClick={() => handleNewInventoryItem()}
-              startIcon={<AddIcon />}
-            >
-              {T.translate("form_template_item_list.add_item")}
-            </Button>
-          </Grid2>
-        </Grid2>
-      </Grid2>
+          {T.translate("form_template_item_list.add_item")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {countLabel("general.item", totalFormTemplateItems)}
+      </Box>
 
       {formTemplateItems.length > 0 && (
         <div>

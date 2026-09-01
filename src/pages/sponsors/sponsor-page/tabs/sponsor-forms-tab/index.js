@@ -14,19 +14,11 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Box,
-  Button,
-  Checkbox,
-  Chip,
-  FormControlLabel,
-  FormGroup,
-  Grid2
-} from "@mui/material";
+import { Box, Button, Chip } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../../../../components/mui/grid-toolbar";
 import {
   archiveSponsorCustomizedForm,
   deleteSponsorCustomizedForm,
@@ -296,7 +288,6 @@ const SponsorFormsTab = ({
       columnKey: "allowed_add_ons",
       header: T.translate("edit_sponsor.forms_tab.add_ons"),
       sortable: true,
-      width: 120,
       render: (row) =>
         row.allowed_add_ons?.length > 0
           ? row.allowed_add_ons.map((a) => `${a.type} ${a.name}`).join(", ")
@@ -318,7 +309,6 @@ const SponsorFormsTab = ({
       columnKey: "items_qty",
       header: T.translate("edit_sponsor.forms_tab.items"),
       sortable: true,
-      width: 90,
       render: (row) =>
         `${row.items_count} ${
           row.items_count === 1
@@ -405,70 +395,36 @@ const SponsorFormsTab = ({
         message={T.translate("edit_sponsor.forms_tab.alert_info")}
         hideIcon
       />
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate("edit_sponsor.placeholders.search")
+        }}
+        checkboxProps={{
+          checked: showArchived,
+          onChange: handleShowArchivedForms,
+          label: T.translate("edit_sponsor.forms_tab.show_archived")
         }}
       >
-        <Grid2 size={1}>
-          <Box component="span">
-            {managedForms.totalCount + customizedForms.totalCount} forms
-          </Box>
-        </Grid2>
-        <Grid2 size={2} offset={1}>
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={showArchived}
-                  onChange={handleShowArchivedForms}
-                  inputProps={{
-                    "aria-label": T.translate(
-                      "edit_sponsor.forms_tab.show_archived"
-                    )
-                  }}
-                />
-              }
-              label={T.translate("edit_sponsor.forms_tab.show_archived")}
-            />
-          </FormGroup>
-        </Grid2>
-        <Grid2 size={2}>
-          <SearchInput
-            term={term}
-            onSearch={handleSearch}
-            placeholder={T.translate("edit_sponsor.placeholders.search")}
-          />
-        </Grid2>
-        <Grid2 size={3}>
-          <Button
-            variant="contained"
-            size="medium"
-            fullWidth
-            onClick={() => setOpenPopup("template")}
-            startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
-          >
-            {T.translate("edit_sponsor.forms_tab.using_template")}
-          </Button>
-        </Grid2>
-        <Grid2 size={3}>
-          <Button
-            variant="contained"
-            size="medium"
-            fullWidth
-            onClick={() => setCustomFormEdit("new")}
-            startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
-          >
-            {T.translate("edit_sponsor.forms_tab.new_form")}
-          </Button>
-        </Grid2>
-      </Grid2>
+        <Button
+          variant="contained"
+          onClick={() => setOpenPopup("template")}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("edit_sponsor.forms_tab.using_template")}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => setCustomFormEdit("new")}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("edit_sponsor.forms_tab.new_form")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {managedForms.totalCount + customizedForms.totalCount} forms
+      </Box>
       <div>
         <MuiTable
           columns={customizedFormsColumns}
@@ -478,7 +434,6 @@ const SponsorFormsTab = ({
             sortDir: customizedForms.orderDir,
             disableProp: "is_archived"
           }}
-          tableSx={{ tableLayout: "auto", minWidth: 910 }}
           perPage={customizedForms.perPage}
           totalRows={customizedForms.totalCount}
           currentPage={customizedForms.currentPage}
@@ -499,7 +454,6 @@ const SponsorFormsTab = ({
             sortCol: managedForms.order,
             sortDir: managedForms.orderDir
           }}
-          tableSx={{ tableLayout: "auto", minWidth: 910 }}
           perPage={managedForms.perPage}
           totalRows={managedForms.totalCount}
           currentPage={managedForms.currentPage}

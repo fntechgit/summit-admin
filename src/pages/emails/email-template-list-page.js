@@ -12,13 +12,13 @@
  * */
 
 import React, { useEffect } from "react";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Grid2 from "@mui/material/Grid2";
 import AddIcon from "@mui/icons-material/Add";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 import {
   getEmailTemplates,
@@ -115,42 +115,24 @@ const EmailTemplateListPage = ({
   return (
     <div className="container">
       <h3>{T.translate("emails.template_list")}</h3>
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate("emails.placeholders.search_templates")
         }}
       >
-        <Grid2 size={2}>
-          {totalTemplates} {T.translate("emails.templates")}
-        </Grid2>
-        <Grid2 size={10} container spacing={1} sx={{ justifyContent: "end" }}>
-          <Grid2 size={3}>
-            <SearchInput
-              term={term}
-              onSearch={handleSearch}
-              placeholder={T.translate("emails.placeholders.search_templates")}
-            />
-          </Grid2>
-          <Button
-            variant="contained"
-            onClick={handleNewEmailTemplate}
-            startIcon={<AddIcon />}
-            sx={{
-              height: "36px",
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("emails.add_template")}
-          </Button>
-        </Grid2>
-      </Grid2>
+        <Button
+          variant="contained"
+          onClick={handleNewEmailTemplate}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("emails.add_template")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {totalTemplates} {T.translate("emails.templates")}
+      </Box>
 
       {templates.length === 0 && (
         <div>{T.translate("emails.no_templates")}</div>

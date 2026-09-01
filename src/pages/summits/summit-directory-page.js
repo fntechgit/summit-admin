@@ -16,15 +16,11 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { formatEpoch } from "openstack-uicore-foundation/lib/utils/methods";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import MuiSearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Checkbox from "@mui/material/Checkbox";
 import Chip from "@mui/material/Chip";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import FormGroup from "@mui/material/FormGroup";
-import Grid2 from "@mui/material/Grid2";
 import AddIcon from "@mui/icons-material/Add";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import {
   clearCurrentSummit,
   deleteSummit,
@@ -32,6 +28,7 @@ import {
 } from "../../actions/summit-actions";
 import Member from "../../models/member";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+import { countLabel } from "../../utils/methods";
 
 const SummitDirectoryPage = ({
   summits,
@@ -117,7 +114,19 @@ const SummitDirectoryPage = ({
     },
     {
       columnKey: "name",
-      header: T.translate("directory.summit_name")
+      header: T.translate("directory.summit_name"),
+      render: (row) => (
+        <>
+          <div>{row.name}</div>
+          {!!row.invite_only_registration && (
+            <Chip
+              size="small"
+              sx={{ mt: "4px" }}
+              label={T.translate("directory.invitation_only")}
+            />
+          )}
+        </>
+      )
     },
     {
       columnKey: "sponsor_qty",
@@ -143,78 +152,40 @@ const SummitDirectoryPage = ({
       columnKey: "end_date",
       header: T.translate("directory.end_date"),
       render: (row) => formatEpoch(row.end_date, "MMMM Do YYYY")
-    },
-    {
-      columnKey: "invite_only_registration",
-      header: "",
-      width: 120,
-      render: (row) =>
-        row.invite_only_registration ? (
-          <Chip label={T.translate("directory.invitation_only")} />
-        ) : null
     }
   ];
 
   return (
     <Box className="container">
-      <h3>
-        {T.translate("directory.summits")} ({totalSummits})
-      </h3>
-      <Grid2 container spacing={2} sx={{ mb: 2, width: "100%" }}>
-        <Grid2 size={{ xs: 12, sm: 4 }}>
-          <MuiSearchInput
-            term={searchTerm}
-            onSearch={handleSearch}
-            placeholder={T.translate("directory.placeholders.search")}
-          />
-        </Grid2>
-        <Grid2
-          size={{ xs: 12, sm: 8 }}
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            rowGap: 1,
-            gap: 2
-          }}
-        >
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  onChange={handleHidePastEventsChange}
-                  checked={hidePastEvents}
-                  inputProps={{
-                    "aria-label": T.translate("directory.hide_past_events")
-                  }}
-                />
-              }
-              label={T.translate("directory.hide_past_events")}
-            />
-          </FormGroup>
-          {canAddSummits && (
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon />}
-              onClick={handleNewSummit}
-              sx={{
-                height: "36px",
-                padding: "6px 16px",
-                fontSize: "1.4rem",
-                lineHeight: "2.4rem",
-                letterSpacing: "0.4px"
-              }}
-            >
-              {T.translate("directory.add_summit")}
-            </Button>
-          )}
-        </Grid2>
-      </Grid2>
+      <h3>{T.translate("directory.summits")}</h3>
+      <GridToolbar
+        searchProps={{
+          term: searchTerm,
+          onSearch: handleSearch,
+          placeholder: T.translate("directory.placeholders.search")
+        }}
+        checkboxProps={{
+          checked: hidePastEvents,
+          onChange: handleHidePastEventsChange,
+          label: T.translate("directory.hide_past_events")
+        }}
+      >
+        {canAddSummits && (
+          <Button
+            variant="contained"
+            color="primary"
+            size="medium"
+            startIcon={<AddIcon />}
+            onClick={handleNewSummit}
+          >
+            {T.translate("directory.add_summit")}
+          </Button>
+        )}
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>{countLabel("directory.summit", totalSummits)}</Box>
       <MuiTable
         columns={columns}
         data={safeSummits}
-        tableSx={{ tableLayout: "auto", minWidth: 910 }}
         totalRows={totalSummits}
         perPage={perPage}
         currentPage={currentPage}
@@ -223,13 +194,9 @@ const SummitDirectoryPage = ({
         onEdit={canEditSummit ? handleEditSummit : undefined}
         onDelete={canDeleteSummits ? (id) => deleteSummit(id) : undefined}
         onSelect={handleSelectSummit}
-        getName={(row) => row.name}
-        deleteDialogTitle={T.translate("general.are_you_sure")}
         deleteDialogBody={(name) =>
           `${T.translate("directory.remove_warning")} ${name}`
         }
-        deleteDialogConfirmText={T.translate("general.yes_delete")}
-        confirmButtonColor="error"
       />
     </Box>
   );

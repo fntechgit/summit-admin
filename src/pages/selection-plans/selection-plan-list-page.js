@@ -14,11 +14,11 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Grid2 from "@mui/material/Grid2";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import {
   deleteSelectionPlan,
   getSelectionPlan,
@@ -171,40 +171,18 @@ const SelectionPlanListPage = ({
     <div className="container">
       <h3>{T.translate("selection_plan_list.selection_plan_list")}</h3>
 
-      <Grid2
-        container
-        spacing={2}
-        sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}
+      <GridToolbar
+        searchProps={{
+          onSearch: handleSearch,
+          term,
+          placeholder: T.translate("selection_plan_list.placeholders.search")
+        }}
       >
-        <Grid2 size={{ xs: 12, md: 2 }}>
-          <span>{totalSelectionPlans} items</span>
-        </Grid2>
-        <Grid2
-          container
-          size={{ xs: 12, md: 10 }}
-          spacing={1}
-          sx={{ justifyContent: "flex-end", alignItems: "center" }}
-        >
-          <Grid2 size={{ xs: 12, md: 4 }}>
-            <SearchInput
-              onSearch={handleSearch}
-              term={term}
-              placeholder={T.translate(
-                "selection_plan_list.placeholders.search"
-              )}
-            />
-          </Grid2>
-          <Grid2>
-            <Button
-              variant="contained"
-              onClick={handleNew}
-              startIcon={<AddIcon />}
-            >
-              {T.translate("selection_plan_list.add_selection_plan")}
-            </Button>
-          </Grid2>
-        </Grid2>
-      </Grid2>
+        <Button variant="contained" onClick={handleNew} startIcon={<AddIcon />}>
+          {T.translate("selection_plan_list.add_selection_plan")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>{totalSelectionPlans} items</Box>
 
       {selectionPlans.length === 0 && (
         <div>{T.translate("selection_plan_list.no_selection_plans")}</div>

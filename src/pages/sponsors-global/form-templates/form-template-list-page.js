@@ -12,20 +12,12 @@
  * */
 
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Grid2
-} from "@mui/material";
-import Box from "@mui/material/Box";
+import { Alert, Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import GridToolbar from "../../../components/mui/grid-toolbar";
 import {
   archiveFormTemplate,
   deleteFormTemplate,
@@ -42,6 +34,7 @@ import FormTemplateDialog from "./form-template-popup";
 import history from "../../../history";
 import FormTemplateFromDuplicateDialog from "./form-template-from-duplicate-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import { countLabel } from "../../../utils/methods";
 
 const FormTemplateListPage = ({
   formTemplates,
@@ -231,11 +224,7 @@ const FormTemplateListPage = ({
 
   return (
     <div className="container">
-      <h3>
-        {" "}
-        {T.translate("form_template_list.form_templates")} ({totalFormTemplates}
-        ){" "}
-      </h3>
+      <h3>{T.translate("form_template_list.form_templates")}</h3>
       <Alert
         severity="info"
         sx={{
@@ -247,76 +236,37 @@ const FormTemplateListPage = ({
         {T.translate("form_template_list.alert_info")}
       </Alert>
 
-      <Grid2
-        container
-        spacing={1}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
+      <GridToolbar
+        searchProps={{
+          onSearch: handleSearch,
+          placeholder: T.translate(
+            "inventory_item_list.placeholders.search_inventory_items"
+          )
+        }}
+        checkboxProps={{
+          checked: showArchived,
+          onChange: (ev) => handleShowArchivedForms(ev.target.checked),
+          label: T.translate("form_template_list.show_archived")
         }}
       >
-        <Grid2 size={1}>
-          <Box component="span">{totalFormTemplates} forms</Box>
-        </Grid2>
-        <Grid2 size={11} justifyContent="flex-end" gap={1} container>
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  onChange={(ev) => handleShowArchivedForms(ev.target.checked)}
-                  checked={showArchived}
-                  inputProps={{
-                    "aria-label": T.translate(
-                      "form_template_list.show_archived"
-                    )
-                  }}
-                />
-              }
-              label={T.translate("form_template_list.show_archived")}
-            />
-          </FormGroup>
-
-          <Grid2 size={3}>
-            <SearchInput
-              onSearch={handleSearch}
-              placeholder={T.translate(
-                "inventory_item_list.placeholders.search_inventory_items"
-              )}
-            />
-          </Grid2>
-          <Button
-            variant="contained"
-            size="medium"
-            onClick={() => handleNewFromDuplicate()}
-            startIcon={<AddIcon />}
-            sx={{
-              height: "36px",
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("form_template_list.using_duplicate")}
-          </Button>
-          <Button
-            variant="contained"
-            size="medium"
-            onClick={() => handleNewFormTemplate()}
-            startIcon={<AddIcon />}
-            sx={{
-              height: "36px",
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("form_template_list.add_form_template")}
-          </Button>
-        </Grid2>
-      </Grid2>
+        <Button
+          variant="contained"
+          onClick={() => handleNewFromDuplicate()}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("form_template_list.using_duplicate")}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => handleNewFormTemplate()}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("form_template_list.add_form_template")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {countLabel("form_template_list.form", totalFormTemplates)}
+      </Box>
 
       {formTemplates.length > 0 && (
         <div>

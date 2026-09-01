@@ -15,17 +15,10 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
-import {
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Grid2
-} from "@mui/material";
+import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../../components/mui/grid-toolbar";
 import {
   archiveShowPage,
   deleteShowPage,
@@ -203,68 +196,36 @@ const ShowPagesListPage = ({
       </div>
       <h3>{T.translate("show_pages.pages")}</h3>
       <CustomAlert message={T.translate("show_pages.alert_info")} hideIcon />
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate("show_pages.placeholders.search")
+        }}
+        checkboxProps={{
+          checked: showArchived,
+          onChange: handleShowArchivedForms,
+          label: T.translate("show_pages.show_archived")
         }}
       >
-        <Grid2 size={1}>
-          <Box component="span">
-            {totalCount} {T.translate("show_pages.pages")}
-          </Box>
-        </Grid2>
-        <Grid2 size={2} offset={1}>
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  onChange={handleShowArchivedForms}
-                  checked={showArchived}
-                  inputProps={{
-                    "aria-label": T.translate("show_pages.show_archived")
-                  }}
-                />
-              }
-              label={T.translate("show_pages.show_archived")}
-            />
-          </FormGroup>
-        </Grid2>
-        <Grid2 size={2}>
-          <SearchInput
-            term={term}
-            onSearch={handleSearch}
-            placeholder={T.translate("show_pages.placeholders.search")}
-          />
-        </Grid2>
-        <Grid2 size={3}>
-          <Button
-            variant="contained"
-            size="medium"
-            fullWidth
-            onClick={() => setOpenPopup("cloneTemplate")}
-            startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
-          >
-            {T.translate("show_pages.using_template")}
-          </Button>
-        </Grid2>
-        <Grid2 size={3}>
-          <Button
-            variant="contained"
-            size="medium"
-            fullWidth
-            onClick={handleNewShowPage}
-            startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
-          >
-            {T.translate("show_pages.new_page")}
-          </Button>
-        </Grid2>
-      </Grid2>
+        <Button
+          variant="contained"
+          onClick={() => setOpenPopup("cloneTemplate")}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("show_pages.using_template")}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleNewShowPage}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("show_pages.new_page")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {totalCount} {T.translate("show_pages.pages")}
+      </Box>
 
       {showPages.length === 0 && (
         <div>{T.translate("show_pages.no_sponsors_pages")}</div>

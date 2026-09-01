@@ -17,10 +17,9 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Grid2 from "@mui/material/Grid2";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import {
   getEventTypes as getEventTypesAction,
   getEventType as getEventTypeAction,
@@ -135,61 +134,17 @@ const EventTypeListPage = ({
   return (
     <div className="container">
       <h3>{T.translate("event_type_list.event_type_list")}</h3>
-      <Grid2
-        container
-        spacing={1}
-        sx={{
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={2}>
-          <Box component="span">
-            {totalEventTypes} {T.translate("event_type_list.event_types")}
-          </Box>
-        </Grid2>
-        <Grid2
-          container
-          size={10}
-          gap={1}
-          sx={{
-            justifyContent: "flex-end",
-            alignItems: "center"
-          }}
-        >
-          <Grid2 size={4}>
-            <SearchInput term={term} onSearch={handleSearch} />
-          </Grid2>
-          <Button
-            variant="outlined"
-            onClick={handleSeed}
-            sx={{
-              height: "36px",
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("event_type_list.seed_event_types")}
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleNew}
-            startIcon={<AddIcon />}
-            sx={{
-              height: "36px",
-              padding: "6px 16px",
-              fontSize: "1.4rem",
-              lineHeight: "2.4rem",
-              letterSpacing: "0.4px"
-            }}
-          >
-            {T.translate("event_type_list.add_event_type")}
-          </Button>
-        </Grid2>
-      </Grid2>
+      <GridToolbar searchProps={{ term, onSearch: handleSearch }}>
+        <Button variant="outlined" onClick={handleSeed}>
+          {T.translate("event_type_list.seed_event_types")}
+        </Button>
+        <Button variant="contained" onClick={handleNew} startIcon={<AddIcon />}>
+          {T.translate("event_type_list.add_event_type")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {totalEventTypes} {T.translate("event_type_list.event_types")}
+      </Box>
 
       {eventTypes.length > 0 && (
         <MuiTable

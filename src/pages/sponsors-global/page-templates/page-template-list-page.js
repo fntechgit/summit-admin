@@ -12,20 +12,13 @@
  * */
 
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Grid2
-} from "@mui/material";
+import { Alert, Button } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../../components/mui/grid-toolbar";
 import {
   archivePageTemplate,
   deletePageTemplate,
@@ -36,6 +29,7 @@ import {
   resetPageTemplateForm
 } from "../../../actions/page-template-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import { countLabel } from "../../../utils/methods";
 import PageTemplatePopup from "./page-template-popup";
 import PageTemplateClonePopup from "./page-template-clone-popup";
 
@@ -203,64 +197,38 @@ const PageTemplateListPage = ({
         {T.translate("page_template_list.alert_info")}
       </Alert>
 
-      <Grid2
-        container
-        spacing={1}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
+      <GridToolbar
+        searchProps={{
+          onSearch: handleSearch,
+          term,
+          placeholder: T.translate("page_template_list.placeholders.search")
+        }}
+        checkboxProps={{
+          checked: showArchived,
+          onChange: handleShowArchived,
+          label: T.translate("page_template_list.show_archived")
         }}
       >
-        <Grid2 size={2}>
-          <Box component="span">{totalPageTemplates} pages</Box>
-        </Grid2>
-        <Grid2
-          container
-          size={10}
-          sx={{
-            justifyContent: "flex-end",
-            alignItems: "center"
-          }}
+        <Button
+          variant="contained"
+          size="medium"
+          onClick={handleClonePageTemplate}
+          startIcon={<AddIcon />}
         >
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={showArchived}
-                  onChange={handleShowArchived}
-                />
-              }
-              label={T.translate("page_template_list.show_archived")}
-            />
-          </FormGroup>
-          <Grid2 size={3}>
-            <SearchInput
-              onSearch={handleSearch}
-              term={term}
-              placeholder={T.translate(
-                "page_template_list.placeholders.search"
-              )}
-            />
-          </Grid2>
-          <Button
-            variant="contained"
-            size="medium"
-            onClick={handleClonePageTemplate}
-            startIcon={<AddIcon />}
-          >
-            {T.translate("page_template_list.add_template")}
-          </Button>
-          <Button
-            variant="contained"
-            size="medium"
-            onClick={handleNewPageTemplate}
-            startIcon={<AddIcon />}
-          >
-            {T.translate("page_template_list.add_new")}
-          </Button>
-        </Grid2>
-      </Grid2>
+          {T.translate("page_template_list.add_template")}
+        </Button>
+        <Button
+          variant="contained"
+          size="medium"
+          onClick={handleNewPageTemplate}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("page_template_list.add_new")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {countLabel("page_template_list.page", totalPageTemplates)}
+      </Box>
 
       <Box sx={{ mt: 4, mb: 2 }}>
         {pageTemplates.length === 0 && (

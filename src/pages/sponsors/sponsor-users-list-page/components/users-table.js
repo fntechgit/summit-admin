@@ -119,27 +119,25 @@ const UsersTable = ({
   });
 
   return (
-    users.items.length > 0 && (
-      <div>
-        <MuiTable
-          columns={usersColumns}
-          data={userData}
-          options={usersTableOptions}
-          perPage={users.perPage}
-          totalRows={users.totalCount}
-          currentPage={users.currentPage}
-          getName={(user) => user.email}
-          onEdit={onEdit}
-          onDelete={handleUserDelete}
-          deleteDialogBody={(user) =>
-            T.translate("edit_sponsor.remove_sponsor_user_warning", { user })
-          }
-          onPageChange={handleUsersPageChange}
-          onPerPageChange={handlePerPageChange}
-          onSort={handleUsersSort}
-        />
-      </div>
-    )
+    <div>
+      <MuiTable
+        columns={usersColumns}
+        data={userData}
+        options={usersTableOptions}
+        perPage={users.perPage}
+        totalRows={users.totalCount}
+        currentPage={users.currentPage}
+        getName={(user) => user.email}
+        onEdit={onEdit}
+        onDelete={handleUserDelete}
+        deleteDialogBody={(user) =>
+          T.translate("edit_sponsor.remove_sponsor_user_warning", { user })
+        }
+        onPageChange={handleUsersPageChange}
+        onPerPageChange={handlePerPageChange}
+        onSort={handleUsersSort}
+      />
+    </div>
   );
 };
 

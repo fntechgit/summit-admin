@@ -76,37 +76,35 @@ const RequestTable = ({ requests, term, getRequests, onRequestDelete }) => {
   };
 
   return (
-    requests.items.length > 0 && (
-      <div>
-        <MuiTable
-          columns={requestsColumns}
-          data={requests.items}
-          options={requestsTableOptions}
-          perPage={requests.perPage}
-          totalRows={requests.totalCount}
-          currentPage={requests.currentPage}
-          onDelete={handleRequestDelete}
-          onPageChange={handleRequestsPageChange}
-          onPerPageChange={handlePerPageChange}
-          onSort={handleRequestsSort}
-          deleteDialogTitle={T.translate(
-            "sponsor_users.process_request.delete_confirmation_title"
-          )}
-          deleteDialogBody={T.translate(
-            "sponsor_users.process_request.delete_confirmation_body"
-          )}
-          deleteDialogConfirmText={T.translate("general.confirm")}
-          confirmButtonColor="primary"
-        />
-
-        {processRequest && (
-          <ProcessRequestPopup
-            request={processRequest}
-            onClose={() => setProcessRequest(null)}
-          />
+    <div>
+      <MuiTable
+        columns={requestsColumns}
+        data={requests.items}
+        options={requestsTableOptions}
+        perPage={requests.perPage}
+        totalRows={requests.totalCount}
+        currentPage={requests.currentPage}
+        onDelete={handleRequestDelete}
+        onPageChange={handleRequestsPageChange}
+        onPerPageChange={handlePerPageChange}
+        onSort={handleRequestsSort}
+        deleteDialogTitle={T.translate(
+          "sponsor_users.process_request.delete_confirmation_title"
         )}
-      </div>
-    )
+        deleteDialogBody={T.translate(
+          "sponsor_users.process_request.delete_confirmation_body"
+        )}
+        deleteDialogConfirmText={T.translate("general.confirm")}
+        confirmButtonColor="primary"
+      />
+
+      {processRequest && (
+        <ProcessRequestPopup
+          request={processRequest}
+          onClose={() => setProcessRequest(null)}
+        />
+      )}
+    </div>
   );
 };
 

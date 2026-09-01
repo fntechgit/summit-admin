@@ -677,3 +677,7 @@ export const formatDuration = (duration) => {
   const formatted = d.format("mm:ss", { trim: false });
   return formatted !== "00:00" ? formatted : "TBD";
 };
+
+// Builds "{count} {noun}" from a singular translation key, appending "s"
+export const countLabel = (translationKey, count) =>
+  `${count} ${T.translate(translationKey)}${count === 1 ? "" : "s"}`;

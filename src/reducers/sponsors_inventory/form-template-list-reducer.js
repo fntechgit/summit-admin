@@ -75,9 +75,7 @@ const formTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
         id: a.id,
         code: a.code,
         name: a.name,
-        items_qty: `${a.items.length} ${
-          a.items.length === 1 ? "Item" : "Items"
-        }`,
+        items_qty: a.items.length,
         is_archived: a.is_archived
       }));
 
