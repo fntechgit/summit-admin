@@ -154,6 +154,9 @@ describe("AuditLogs columns", () => {
   // (create/update/delete/...) instead of the parsed audit.description
   // sentence, and where the ticket page's column subset didn't match the
   // reducer's field name — both must stay in sync as "action_description".
+  // The fixture carries both action and action_description, as real reducer
+  // output always does, so reading the wrong one renders a visibly wrong
+  // value ("update") rather than an absence.
   test("renders the caller's column subset, wired to the reducer's `action_description` key", () => {
     renderWithAuditLogState(
       { columns: ["created", "action_description", "user"] },
@@ -162,7 +165,8 @@ describe("AuditLogs columns", () => {
           {
             id: 1,
             created: "August 17th 2026, 12:00 pm",
-            action_description: "Updated Event Title",
+            action: "update",
+            action_description: "Presentation 'Keynote' (6714) updated: title",
             event_id: 55,
             user: "Jane Doe (7)"
           }
@@ -181,7 +185,9 @@ describe("AuditLogs columns", () => {
     expect(headers[0]).toMatch(/^audit_log\.date/);
     expect(headers[1]).toBe("audit_log.action");
     expect(headers[2]).toBe("audit_log.user");
-    expect(screen.getByText("Updated Event Title")).toBeInTheDocument();
+    expect(
+      screen.getByText("Presentation 'Keynote' (6714) updated: title")
+    ).toBeInTheDocument();
   });
 });
 
@@ -198,7 +204,8 @@ describe("AuditLogs sorting", () => {
           {
             id: 1,
             created: "August 17th 2026, 12:00 pm",
-            action_description: "Updated Event Title",
+            action: "update",
+            action_description: "Presentation 'Keynote' (6714) updated: title",
             event_id: 55,
             user: "Jane Doe (7)"
           }
@@ -235,7 +242,8 @@ describe("AuditLogs pagination", () => {
           {
             id: 1,
             created: "August 17th 2026, 12:00 pm",
-            action_description: "Updated Event Title",
+            action: "update",
+            action_description: "Presentation 'Keynote' (6714) updated: title",
             event_id: 55,
             user: "Jane Doe (7)"
           }
