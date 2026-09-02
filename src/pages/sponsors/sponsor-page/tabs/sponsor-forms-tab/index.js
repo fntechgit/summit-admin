@@ -26,12 +26,16 @@ import {
   getSponsorManagedForms,
   saveSponsorManagedForm,
   overrideSponsorManagedForm,
-  unarchiveSponsorCustomizedForm
+  unarchiveSponsorCustomizedForm,
+  deleteSponsorManagedForm
 } from "../../../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../../../components/mui/custom-alert";
 import AddSponsorFormTemplatePopup from "./components/add-sponsor-form-template-popup";
 import CustomizedFormPopup from "./components/customized-form/customized-form-popup";
-import { DEFAULT_CURRENT_PAGE } from "../../../../../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  MANAGED_FORM_ASSIGNMENT_TYPE
+} from "../../../../../utils/constants";
 import showConfirmDialog from "../../../../../components/mui/showConfirmDialog";
 
 const SponsorFormsTab = ({
@@ -48,7 +52,8 @@ const SponsorFormsTab = ({
   overrideSponsorManagedForm,
   archiveSponsorCustomizedForm,
   unarchiveSponsorCustomizedForm,
-  deleteSponsorCustomizedForm
+  deleteSponsorCustomizedForm,
+  deleteSponsorManagedForm
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
   const [customFormEdit, setCustomFormEdit] = useState(null);
@@ -165,6 +170,29 @@ const SponsorFormsTab = ({
 
   const handleCustomizedEdit = (item) => {
     setCustomFormEdit(item);
+  };
+
+  const handleManagedDelete = (itemId) => {
+    deleteSponsorManagedForm(itemId)
+      .then(() => {
+        getSponsorCustomizedForms(
+          term,
+          DEFAULT_CURRENT_PAGE,
+          customizedForms.perPage,
+          customizedForms.order,
+          customizedForms.orderDir,
+          showArchived
+        );
+        getSponsorManagedForms(
+          term,
+          DEFAULT_CURRENT_PAGE,
+          managedForms.perPage,
+          managedForms.order,
+          managedForms.orderDir,
+          showArchived
+        );
+      })
+      .catch(() => {});
   };
 
   const handleCustomizedDelete = (itemId) => {
@@ -460,6 +488,10 @@ const SponsorFormsTab = ({
           onPageChange={handleManagedPageChange}
           onPerPageChange={handleManagedPerPageChange}
           onSort={handleManagedSort}
+          onDelete={handleManagedDelete}
+          canDelete={(row) =>
+            row.assigned_type === MANAGED_FORM_ASSIGNMENT_TYPE.EXPLICIT
+          }
         />
       </div>
 
@@ -503,5 +535,6 @@ export default connect(mapStateToProps, {
   getSponsorCustomizedForms,
   archiveSponsorCustomizedForm,
   unarchiveSponsorCustomizedForm,
-  deleteSponsorCustomizedForm
+  deleteSponsorCustomizedForm,
+  deleteSponsorManagedForm
 })(SponsorFormsTab);

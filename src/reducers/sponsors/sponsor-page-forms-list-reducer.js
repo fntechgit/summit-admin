@@ -21,7 +21,8 @@ import {
   SPONSOR_CUSTOMIZED_FORM_ADDED,
   SPONSOR_CUSTOMIZED_FORM_DELETED,
   SPONSOR_CUSTOMIZED_FORM_ARCHIVED_CHANGED,
-  SPONSOR_CUSTOMIZED_FORM_UPDATED
+  SPONSOR_CUSTOMIZED_FORM_UPDATED,
+  SPONSOR_MANAGED_FORM_DELETED
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { getSafePageAfterRemove } from "../../utils/methods";
@@ -122,6 +123,7 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
           items_count: a.items_count,
           allowed_add_ons: a.allowed_add_ons,
           is_archived: a.is_archived,
+          assigned_type: a.assigned_type,
           opens_at: opensAt,
           expires_at: expiresAt
         };
@@ -274,6 +276,21 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
           ...state.customizedForms,
           forms,
           totalCount: state.customizedForms.totalCount - 1
+        }
+      };
+    }
+    case SPONSOR_MANAGED_FORM_DELETED: {
+      const { formId } = payload;
+      const forms = state.managedForms.forms.filter(
+        (form) => form.id !== formId
+      );
+
+      return {
+        ...state,
+        managedForms: {
+          ...state.managedForms,
+          forms,
+          totalCount: state.managedForms.totalCount - 1
         }
       };
     }

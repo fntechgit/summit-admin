@@ -55,6 +55,7 @@ export const RECEIVE_SPONSOR_MANAGED_FORMS = "RECEIVE_SPONSOR_MANAGED_FORMS";
 export const REQUEST_SPONSOR_MANAGED_FORM = "REQUEST_SPONSOR_MANAGED_FORM";
 export const RECEIVE_SPONSOR_MANAGED_FORM = "RECEIVE_SPONSOR_MANAGED_FORM";
 export const SPONSOR_MANAGED_FORMS_ADDED = "SPONSOR_MANAGED_FORMS_ADDED";
+export const SPONSOR_MANAGED_FORM_DELETED = "SPONSOR_MANAGED_FORM_DELETED";
 export const SPONSOR_MANAGED_FORMS_UPGRADED = "SPONSOR_MANAGED_FORMS_UPGRADED";
 export const SPONSOR_MANAGED_FORMS_OVERRIDEN =
   "SPONSOR_MANAGED_FORMS_OVERRIDEN";
@@ -568,7 +569,7 @@ export const getSponsorManagedForms =
     const params = {
       page,
       fields:
-        "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons",
+        "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons,assigned_type",
       expands: "allowed_add_ons",
       per_page: perPage,
       access_token: accessToken
@@ -691,6 +692,38 @@ export const upgradeSponsorManagedForm =
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
+  };
+
+export const deleteSponsorManagedForm =
+  (formId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+    const params = { access_token: accessToken };
+
+    dispatch(startLoading());
+
+    return deleteRequest(
+      null,
+      createAction(SPONSOR_MANAGED_FORM_DELETED)({ formId }),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-forms/${formId}`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("sponsor_forms.form_delete_success")
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 const normalizeSponsorManagedForm = (entity) => {
