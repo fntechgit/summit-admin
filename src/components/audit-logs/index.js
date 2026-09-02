@@ -64,6 +64,11 @@ const AuditLogs = ({
   clearAuditLogParams
 }) => {
   const [searchTerm, setSearchTerm] = useState(term);
+  // filterId is a category literal ("standalone"/"activity"/"badge"), not a
+  // per-entity id: the grid filter is shared across all entities in that
+  // category (can leak between them, e.g. a stale date range) rather than
+  // reset per entity, which can't be told apart from applying a filter, or
+  // persisted per entity, which grows unbounded in localStorage.
   const gridFilterId = `${FILTER_ID}_${filterId}`;
   const { parsedFilter } = useGridFilter(gridFilterId);
   const userTimeZone = new Intl.DateTimeFormat(undefined, {
@@ -100,6 +105,23 @@ const AuditLogs = ({
   const showColumns = columns
     ? auditLogColumns.filter((c) => columns.includes(c.columnKey))
     : auditLogColumns;
+
+  useEffect(() => {
+    // we reset pagination and search but keep the filters within a category, see comment above.
+    setSearchTerm("");
+    getAuditLog(
+      entityFilter,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      parsedFilter
+    );
+  }, [parsedFilter.join(","), entityFilter.join(","), filterId]);
+
+  // AuditLogs is reused in different contexts only reset the log params, not filters.
+  useEffect(() => () => clearAuditLogParams(), []);
 
   const handleSort = (key, dir) => {
     getAuditLog(
@@ -149,24 +171,6 @@ const AuditLogs = ({
       parsedFilter
     );
   };
-
-  useEffect(() => {
-    getAuditLog(
-      entityFilter,
-      searchTerm,
-      DEFAULT_CURRENT_PAGE,
-      perPage,
-      order,
-      orderDir,
-      parsedFilter
-    );
-  }, [parsedFilter.join(",")]);
-
-  // AuditLogs is reused in different contexts (the standalone audit log
-  // page, an event's edit form, a ticket's edit page), each with its own
-  // filterId-scoped Redux entry, so filters don't need to be reset on
-  // unmount — only the log params.
-  useEffect(() => () => clearAuditLogParams(), []);
 
   const tableOptions = {
     sortCol: order,

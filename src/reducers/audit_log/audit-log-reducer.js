@@ -21,13 +21,14 @@ import {
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { formatAuditLog, parseSpeakerAuditLog } from "../../utils/methods";
+import { MAX_PER_PAGE } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   term: "",
   logEntries: [],
   currentPage: 1,
   lastPage: 1,
-  perPage: 10,
+  perPage: MAX_PER_PAGE,
   order: "created",
   orderDir: 1,
   totalLogEntries: 0

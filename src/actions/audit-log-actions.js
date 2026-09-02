@@ -20,13 +20,15 @@ import {
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely, isNumericString } from "../utils/methods";
-import { DEFAULT_CURRENT_PAGE, DEFAULT_ORDER_DIR } from "../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_ORDER_DIR,
+  MAX_PER_PAGE
+} from "../utils/constants";
 
 export const CLEAR_LOG_PARAMS = "CLEAR_LOG_PARAMS";
 export const REQUEST_LOG = "REQUEST_LOG";
 export const RECEIVE_LOG = "RECEIVE_LOG";
-
-const DEFAULT_PER_PAGE_AUDIT_LOG = 100;
 
 const parseFilters = (filters = [], term = null) => {
   const filter = Array.isArray(filters) ? [...filters] : [];
@@ -50,10 +52,10 @@ const parseFilters = (filters = [], term = null) => {
 export const getAuditLog =
   (
     entityFilter = [],
-    term = null,
+    term = "",
     page = DEFAULT_CURRENT_PAGE,
-    perPage = DEFAULT_PER_PAGE_AUDIT_LOG,
-    order = null,
+    perPage = MAX_PER_PAGE,
+    order = "created",
     orderDir = DEFAULT_ORDER_DIR,
     filters = []
   ) =>
