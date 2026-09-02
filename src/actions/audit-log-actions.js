@@ -56,7 +56,7 @@ export const getAuditLog =
     page = DEFAULT_CURRENT_PAGE,
     perPage = MAX_PER_PAGE,
     order = "created",
-    orderDir = DEFAULT_ORDER_DIR,
+    orderDir = -1,
     filters = []
   ) =>
   async (dispatch, getState) => {
@@ -82,9 +82,10 @@ export const getAuditLog =
 
     params["filter[]"] = parsedFilters;
 
-    // order
+    // order: audit-logs-api's parse_order reads "+" as desc and "-" as asc,
+    // the opposite of DEFAULT_ORDER_DIR's usual meaning elsewhere in the app.
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "-" : "+";
       params.order = `${orderDirSign}${order}`;
     }
 

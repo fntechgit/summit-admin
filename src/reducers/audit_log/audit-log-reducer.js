@@ -30,7 +30,7 @@ const DEFAULT_STATE = {
   lastPage: 1,
   perPage: MAX_PER_PAGE,
   order: "created",
-  orderDir: 1,
+  orderDir: -1,
   totalLogEntries: 0
 };
 
