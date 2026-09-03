@@ -611,7 +611,11 @@ export const saveSponsor = (entity) => async (dispatch, getState) => {
   const { currentSummit } = currentSummitState;
 
   const params = {
-    access_token: accessToken
+    access_token: accessToken,
+    expand:
+      "company,members,sponsorships,sponsorships.type,sponsorships.type.type,featured_event,extra_questions,extra_questions.values,lead_report_setting",
+    fields:
+      "featured_event.id,featured_event.title,sponsorships.id,sponsorships.type.id,sponsorships.type.type.id,sponsorships.type.type.name"
   };
 
   dispatch(startLoading());
@@ -619,40 +623,42 @@ export const saveSponsor = (entity) => async (dispatch, getState) => {
   const normalizedEntity = normalizeSponsor(entity);
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_SPONSOR),
       createAction(SPONSOR_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${entity.id}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(showSuccessMessage(T.translate("edit_sponsor.sponsor_saved")));
-    });
-  } else {
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_sponsor.sponsor_created"),
-      type: "success"
-    };
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_sponsor.sponsor_saved")
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
+  }
 
-    postRequest(
-      createAction(UPDATE_SPONSOR),
-      createAction(SPONSOR_ADDED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then((payload) => {
+  return postRequest(
+    createAction(UPDATE_SPONSOR),
+    createAction(SPONSOR_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors`,
+    normalizedEntity,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch)
+    .then(() => {
       dispatch(
-        showMessage(success_message, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/sponsors/${payload.response.id}`
-          );
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_sponsor.sponsor_created")
         })
       );
-    });
-  }
+    })
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const addMemberToSponsor =
@@ -746,16 +752,21 @@ export const updateSponsorOrder =
 const normalizeSponsor = (entity) => {
   const normalizedEntity = { ...entity };
 
-  normalizedEntity.company_id = normalizedEntity.company?.id || 0;
-  normalizedEntity.sponsorship_id = normalizedEntity.sponsorship?.id || 0;
-  normalizedEntity.featured_event_id =
-    normalizedEntity.featured_event && normalizedEntity.featured_event.id
-      ? normalizedEntity.featured_event.id
-      : 0;
+  if (normalizedEntity.hasOwnProperty("company")) {
+    normalizedEntity.company_id = normalizedEntity.company?.id || 0;
+    delete normalizedEntity.company;
+  }
 
-  delete normalizedEntity.featured_event;
-  delete normalizedEntity.company;
-  delete normalizedEntity.sponsorship;
+  if (normalizedEntity.hasOwnProperty("sponsorship")) {
+    normalizedEntity.sponsorship_id = normalizedEntity.sponsorship?.id || 0;
+    delete normalizedEntity.sponsorship;
+  }
+
+  if (normalizedEntity.hasOwnProperty("featured_event")) {
+    normalizedEntity.featured_event_id =
+      normalizedEntity.featured_event?.id || 0;
+    delete normalizedEntity.featured_event;
+  }
 
   return normalizedEntity;
 };
