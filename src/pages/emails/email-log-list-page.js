@@ -110,8 +110,8 @@ const SentEmailListPage = ({
     getSentEmails(term, newPage, perPage, order, orderDir, emailFilters);
   };
 
-  const handleSort = (index, key, dir) => {
-    getSentEmails(term, currentPage, perPage, key, dir, emailFilters);
+  const handleSort = (key, dir) => {
+    getSentEmails(term, DEFAULT_CURRENT_PAGE, perPage, key, dir, emailFilters);
   };
 
   const handlePerPageChange = (newPerPage) => {
