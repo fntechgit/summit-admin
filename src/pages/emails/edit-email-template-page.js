@@ -11,18 +11,15 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
-import { Modal } from "react-bootstrap";
-import CodeMirror from "@uiw/react-codemirror";
-import { json } from "@codemirror/lang-json";
-import { sublimeInit } from "@uiw/codemirror-theme-sublime";
-import { getSummitById } from "../../actions/summit-actions";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import EmailTemplateForm from "../../components/forms/email-template-form";
+import EmailTemplateJsonDialog from "./email-template-json-dialog";
 import AddNewButton from "../../components/buttons/add-new-button";
-import { DECIMAL_DIGITS } from "../../utils/constants";
 import {
   getEmailTemplate,
   resetTemplateForm,
@@ -32,187 +29,128 @@ import {
   updateTemplateJsonData
 } from "../../actions/email-actions";
 
-import "../../styles/edit-email-template-page.less";
+const EditEmailTemplatePage = ({
+  match,
+  entity,
+  templateLoading,
+  errors,
+  clients,
+  preview,
+  render_errors: renderErrors,
+  json_data: templateJsonData,
+  getEmailTemplate: fetchEmailTemplate,
+  resetTemplateForm: resetForm,
+  saveEmailTemplate: saveTemplate,
+  getAllClients: fetchAllClients,
+  renderEmailTemplate: renderTemplate,
+  updateTemplateJsonData: updateJsonData
+}) => {
+  const formRef = useRef(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isInvalid, setIsInvalid] = useState(false);
+  const [showJsonDialog, setShowJsonDialog] = useState(false);
+  const [entityReady, setEntityReady] = useState(false);
 
-class EditEmailTemplatePage extends React.Component {
-  constructor(props) {
-    super(props);
+  useEffect(() => {
+    fetchAllClients();
+  }, []);
 
-    const { json_data } = props;
-
-    this.state = {
-      showModal: false,
-      json_data,
-      json_preview: json_data
-    };
-
-    this.handlePreview = this.handlePreview.bind(this);
-    this.handleJsonChange = this.handleJsonChange.bind(this);
-    this.handlePopupClose = this.handlePopupClose.bind(this);
-  }
-
-  componentDidMount() {
-    const { match } = this.props;
+  useEffect(() => {
+    let active = true;
+    setEntityReady(false);
     const templateId = match.params.template_id;
+    const loadEntity = templateId
+      ? fetchEmailTemplate(templateId)
+      : resetForm();
 
-    if (!templateId) {
-      this.props.resetTemplateForm();
-    } else {
-      this.props.getEmailTemplate(templateId);
-    }
+    Promise.resolve(loadEntity)
+      .catch(() => {})
+      .finally(() => {
+        if (active) setEntityReady(true);
+      });
 
-    this.props.getAllClients();
-  }
+    return () => {
+      active = false;
+    };
+  }, [match.params.template_id]);
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const oldId = prevProps.match.params.template_id;
-    const newId = this.props.match.params.template_id;
+  const title = entity.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
+  const breadcrumb = entity.id ? entity.identifier : T.translate("general.new");
 
-    if (oldId !== newId) {
-      if (!newId) {
-        this.props.resetTemplateForm();
-      } else {
-        this.props.getEmailTemplate(newId);
-      }
-    }
-  }
+  const handleSubmit = (values) => {
+    if (isSaving) return;
+    setIsSaving(true);
+    saveTemplate(values)
+      .catch(() => {})
+      .finally(() => setIsSaving(false));
+  };
 
-  handleJsonChange(value, changes) {
-    this.setState({ json_preview: value });
-  }
+  const handleFooterSave = () => {
+    formRef.current?.submit();
+  };
 
-  handlePopupClose() {
-    const { json_preview } = this.state;
-    const parsedJSON = JSON.parse(json_preview);
-    this.props
-      .updateTemplateJsonData(parsedJSON)
-      .then(() =>
-        this.setState({ showModal: false, json_data: parsedJSON, json_preview })
-      );
-  }
+  const handleJsonUpdate = (parsedJSON) =>
+    updateJsonData(parsedJSON).then(() => setShowJsonDialog(false));
 
-  handlePreview() {
-    const { json_data } = this.state;
-    this.setState({
-      ...this.state,
-      showModal: true,
-      json_preview: JSON.stringify(json_data, null, DECIMAL_DIGITS)
-    });
-  }
+  return (
+    <Box
+      className="edit-template-page"
+      sx={{ backgroundColor: "white", padding: "2vh 2vw", margin: "2vh 2vw" }}
+    >
+      <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+      <h3>
+        {title} {T.translate("emails.email_template")}
+        <AddNewButton entity={entity} />
+      </h3>
+      <hr />
+      {entityReady ? (
+        <>
+          <EmailTemplateForm
+            ref={formRef}
+            entity={entity}
+            clients={clients}
+            errors={errors}
+            onSubmit={handleSubmit}
+            onRender={() => setShowJsonDialog(true)}
+            onValidityChange={setIsInvalid}
+            preview={preview}
+            renderErrors={renderErrors}
+            templateLoading={templateLoading}
+            templateJsonData={templateJsonData}
+            renderEmailTemplate={renderTemplate}
+          />
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+            <Button
+              variant="contained"
+              onClick={handleFooterSave}
+              disabled={isSaving || isInvalid}
+            >
+              {T.translate("general.save")}
+            </Button>
+          </Box>
 
-  render() {
-    const {
-      currentSummit,
-      entity,
-      templateLoading,
-      errors,
-      match,
-      clients,
-      preview,
-      render_errors
-    } = this.props;
-    const { showModal, json_preview, json_data } = this.state;
-    const title = entity.id
-      ? T.translate("general.edit")
-      : T.translate("general.add");
-    const breadcrumb = entity.id
-      ? entity.identifier
-      : T.translate("general.new");
+          <EmailTemplateJsonDialog
+            open={showJsonDialog}
+            jsonData={templateJsonData}
+            renderErrors={renderErrors}
+            onUpdate={handleJsonUpdate}
+            onClose={() => setShowJsonDialog(false)}
+          />
+        </>
+      ) : (
+        <div>{T.translate("emails.loading_template")}</div>
+      )}
+    </Box>
+  );
+};
 
-    return (
-      <div
-        className="edit-template-page"
-        style={{
-          backgroundColor: "white",
-          padding: "2vh 2vw",
-          margin: "2vh 2vw"
-        }}
-      >
-        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-        <h3>
-          {title} {T.translate("emails.email_template")}
-          <AddNewButton entity={entity} />
-        </h3>
-        <hr />
-        <EmailTemplateForm
-          match={match}
-          currentSummit={currentSummit}
-          entity={entity}
-          clients={clients}
-          errors={errors}
-          onSubmit={this.props.saveEmailTemplate}
-          onRender={this.handlePreview}
-          preview={preview}
-          renderErrors={render_errors}
-          templateLoading={templateLoading}
-          templateJsonData={json_data}
-          renderEmailTemplate={this.props.renderEmailTemplate}
-        />
-        <Modal
-          className="preview-email-template-modal"
-          show={showModal}
-          onHide={() => {
-            this.setState({ ...this.state, showModal: false });
-          }}
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>{T.translate("emails.sample_data")}</Modal.Title>
-            <span>{T.translate("emails.sample_data_legend")}</span>
-          </Modal.Header>
-          <Modal.Body style={{ overflow: "auto", maxHeight: "75vh" }}>
-            {render_errors?.length > 0 && (
-              <div className="row">
-                <div className="col-md-12 error">{render_errors}</div>
-              </div>
-            )}
-            <div className="row">
-              <div className="col-md-12">
-                <label>
-                  {" "}
-                  JSON{" "}
-                  <a
-                    href="https://jsonformatter.curiousconcept.com/"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    format
-                  </a>
-                </label>
-                <CodeMirror
-                  id="json_preview"
-                  value={json_preview}
-                  onChange={(value, viewUpdate) =>
-                    this.handleJsonChange(value, viewUpdate)
-                  }
-                  theme={sublimeInit({
-                    settings: {
-                      caret: "#c6c6c6",
-                      fontFamily: "monospace"
-                    }
-                  })}
-                  extensions={[json()]}
-                />
-              </div>
-            </div>
-          </Modal.Body>
-          <Modal.Footer>
-            <button className="btn btn-primary" onClick={this.handlePopupClose}>
-              {T.translate("emails.update")}
-            </button>
-          </Modal.Footer>
-        </Modal>
-      </div>
-    );
-  }
-}
-
-const mapStateToProps = ({ currentSummitState, emailTemplateState }) => ({
-  currentSummit: currentSummitState.currentSummit,
+const mapStateToProps = ({ emailTemplateState }) => ({
   ...emailTemplateState
 });
 
 export default connect(mapStateToProps, {
-  getSummitById,
   getEmailTemplate,
   resetTemplateForm,
   saveEmailTemplate,
