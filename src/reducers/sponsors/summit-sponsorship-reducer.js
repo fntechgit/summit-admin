@@ -79,6 +79,7 @@ const summitSponsorshipReducer = (state = DEFAULT_STATE, action) => {
           entity[key] = entity[key] == null ? "" : entity[key];
         }
       }
+      entity.is_public = !!entity.is_public;
 
       return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
     }
