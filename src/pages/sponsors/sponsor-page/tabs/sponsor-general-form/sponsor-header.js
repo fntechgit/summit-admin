@@ -117,7 +117,6 @@ const SponsorHeader = ({ sponsor, onSave }) => {
             variant="contained"
             onClick={handlePublishSave}
             disabled={isSaving}
-            sx={{ height: "36px" }}
           >
             {T.translate("general.save")}
           </Button>
