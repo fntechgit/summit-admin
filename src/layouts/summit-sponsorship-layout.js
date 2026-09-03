@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { Switch, Route, withRouter } from "react-router-dom";
@@ -18,45 +18,26 @@ import { Breadcrumb } from "react-breadcrumbs";
 import Restrict from "../routes/restrict";
 
 import SummitSponsorshipListPage from "../pages/sponsors/summit-sponsorship-list-page";
-import EditSummitSponsorshipPage from "../pages/sponsors/edit-summit-sponsorship-page";
 import NoMatchPage from "../pages/no-match-page";
 
-class SummitSponsorshipLayout extends React.Component {
-  render() {
-    const { match } = this.props;
-    return (
-      <div>
-        <Breadcrumb
-          data={{
-            title: T.translate("sponsorship_list.sponsorships"),
-            pathname: match.url
-          }}
-        />
-
-        <Switch>
-          <Route
-            strict
-            exact
-            path={match.url}
-            component={SummitSponsorshipListPage}
-          />
-          <Route
-            strict
-            exact
-            path={`${match.url}/new`}
-            component={EditSummitSponsorshipPage}
-          />
-          <Route
-            strict
-            exact
-            path={`${match.url}/:sponsorship_type_id(\\d+)`}
-            component={EditSummitSponsorshipPage}
-          />
-          <Route component={NoMatchPage} />
-        </Switch>
-      </div>
-    );
-  }
-}
+const SummitSponsorshipLayout = ({ match }) => (
+  <div>
+    <Breadcrumb
+      data={{
+        title: T.translate("sponsorship_list.sponsorships"),
+        pathname: match.url
+      }}
+    />
+    <Switch>
+      <Route
+        strict
+        exact
+        path={match.url}
+        component={SummitSponsorshipListPage}
+      />
+      <Route component={NoMatchPage} />
+    </Switch>
+  </div>
+);
 
 export default Restrict(withRouter(SummitSponsorshipLayout), "sponsors");
