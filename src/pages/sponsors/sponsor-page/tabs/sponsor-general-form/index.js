@@ -28,6 +28,7 @@ import {
   removeTierFromSponsor,
   resetSponsorExtraQuestionForm,
   saveAddonsToSponsorship,
+  saveSponsor,
   saveSponsorExtraQuestion,
   saveSponsorExtraQuestionValue,
   setSelectedSponsorship,
@@ -52,7 +53,8 @@ const SponsorGeneralForm = ({
   saveSponsorExtraQuestionValue,
   resetSponsorExtraQuestionForm,
   deleteExtraQuestion,
-  updateExtraQuestionOrder
+  updateExtraQuestionOrder,
+  saveSponsor
 }) => {
   const handleSponsorshipPaginate = (page, perPage, order, orderDir) => {
     getSponsorSponsorships(sponsor.id, page, perPage, order, orderDir);
@@ -60,7 +62,7 @@ const SponsorGeneralForm = ({
 
   return (
     <Box sx={{ mt: 2 }}>
-      <SponsorHeader sponsor={sponsor} />
+      <SponsorHeader sponsor={sponsor} onSave={saveSponsor} />
       <Sponsorship
         sponsor={sponsor}
         summitId={currentSummit.id}
@@ -117,5 +119,6 @@ export default connect(mapStateToProps, {
   saveSponsorExtraQuestionValue,
   resetSponsorExtraQuestionForm,
   deleteExtraQuestion,
-  updateExtraQuestionOrder
+  updateExtraQuestionOrder,
+  saveSponsor
 })(SponsorGeneralForm);

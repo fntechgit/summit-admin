@@ -91,7 +91,8 @@ const theme = createTheme(MuiBaseCustomTheme, {
           ...(ownerState.size === "medium" && {
             fontSize: "14px",
             lineHeight: "20px",
-            padding: "8px 12px"
+            padding: "8px 12px",
+            height: "36px"
           }),
           ...(ownerState.size === "large" && {
             fontSize: "16px",
