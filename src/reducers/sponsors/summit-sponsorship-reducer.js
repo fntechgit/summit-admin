@@ -43,6 +43,7 @@ export const DEFAULT_ENTITY = {
   sponsor_page_use_banner_widget: false,
   should_display_on_expo_hall_page: false,
   should_display_on_lobby_page: false,
+  is_public: true,
   type: null,
   badge_image: "",
   badge_image_alt_text: ""

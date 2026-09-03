@@ -68,7 +68,8 @@ const EditTierDialog = ({
       sponsor_page_use_live_event_widget: yup.bool(
         T.translate("validation.boolean")
       ),
-      should_display_on_lobby_page: yup.bool(T.translate("validation.boolean"))
+      should_display_on_lobby_page: yup.bool(T.translate("validation.boolean")),
+      is_public: yup.bool(T.translate("validation.boolean"))
     }),
     onSubmit: (values) => {
       if (isSaving) return;
@@ -483,6 +484,26 @@ const EditTierDialog = ({
                     label={T.translate(
                       "edit_summit_sponsorship.should_display_on_lobby_page"
                     )}
+                    formik={formik}
+                  />
+                </Grid2>
+              </Grid2>
+              <Grid2
+                container
+                spacing={2}
+                mb={1}
+                size={12}
+                sx={{ alignItems: "baseline" }}
+              >
+                <Grid2
+                  container
+                  spacing={0}
+                  size={4}
+                  sx={{ alignItems: "baseline" }}
+                >
+                  <MuiFormikCheckbox
+                    name="is_public"
+                    label={T.translate("edit_summit_sponsorship.is_public")}
                     formik={formik}
                   />
                 </Grid2>
