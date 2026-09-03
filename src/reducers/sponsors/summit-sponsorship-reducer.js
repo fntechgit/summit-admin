@@ -80,9 +80,6 @@ const summitSponsorshipReducer = (state = DEFAULT_STATE, action) => {
         }
       }
 
-      // keep is_public as true when is missing
-      entity.is_public = entity.is_public === "" ? true : !!entity.is_public;
-
       return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
     }
     case SUMMIT_SPONSORSHIP_UPDATED:
