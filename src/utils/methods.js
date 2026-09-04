@@ -11,6 +11,13 @@
  * limitations under the License.
  */
 
+/*
+ * *******************************  IMPORTANT  **********************************
+ * This utils file should hold only methods used globally across files/components,
+ * not methods used for one specific purpose/file
+ * ******************************************************************************
+ * */
+
 import moment from "moment-timezone";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
@@ -309,57 +316,6 @@ export const validateAllowedEmailDomainEntry = (entry) => {
     ALLOWED_DOMAIN_RE.test(trimmed) ||
     ALLOWED_TLD_RE.test(trimmed) ||
     ALLOWED_EMAIL_RE.test(trimmed)
-  );
-};
-
-export const parseSpeakerAuditLog = (logString) => {
-  const logEntries = logString.split("|");
-  const userChanges = {};
-  const emailRegExp =
-    /(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/;
-  // eslint-disable-next-line
-  for (const entry of logEntries) {
-    const emailMatch = entry.match(emailRegExp);
-    if (!emailMatch) continue;
-    const email = emailMatch[0];
-    if (entry.includes("added")) {
-      // eslint-disable-next-line no-magic-numbers
-      userChanges[email] = (userChanges[email] || 0) + 1;
-    } else if (entry.includes("removed")) {
-      // eslint-disable-next-line no-magic-numbers
-      userChanges[email] = (userChanges[email] || 0) - 1;
-    }
-  }
-
-  const relevantChanges = [];
-  // eslint-disable-next-line
-  for (const [email, changeCount] of Object.entries(userChanges)) {
-    if (changeCount !== 0) {
-      relevantChanges.push(
-        `Speaker ${email} ${
-          changeCount > 0
-            ? "was added to the collection"
-            : "was removed from the collection"
-        }`
-      );
-    }
-  }
-
-  return relevantChanges.length > 0 ? relevantChanges.join("|") : logString;
-};
-
-export const formatAuditLog = (logString) => {
-  const timeZone = moment.tz.guess();
-  const dateTimeRegExp = /\d{4}([.\-/ ])\d{2}\1\d{2} \d{1,2}:\d{2}:\d{2}/g;
-  const dateTimeMatch = logString.match(dateTimeRegExp);
-  if (!dateTimeMatch) return logString;
-  const dt = moment.utc(dateTimeMatch[0], "YYYY-MM-DD HH:mm:ss");
-  if (!moment.isMoment(dt)) return logString;
-  const userDt = epochToMomentTimeZone(dt.unix(), timeZone);
-  if (!moment.isMoment(userDt)) return logString;
-  return logString.replace(
-    dateTimeMatch[0],
-    userDt.format("YYYY-MM-DD HH:mm:ss")
   );
 };
 

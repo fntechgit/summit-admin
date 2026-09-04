@@ -9,26 +9,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import AuditLogs from "../../components/audit-logs";
-import { Breadcrumb } from "react-breadcrumbs";
 
-const AuditLogPage = ({ totalLogEntries, match }) => {
-  return (
-    <div className="container">
-      <Breadcrumb data={{ title: "Audit Logs", pathname: match.url }} />
-      <h3>
-        {" "}
-        {T.translate("audit_log.log_entries")} ({totalLogEntries})
-      </h3>
-      <AuditLogs entityFilter={[`class_name==SummitEventAuditLog`]} />
-    </div>
-  );
-};
+const AuditLogPage = ({ totalLogEntries }) => (
+  <div className="container">
+    <h3>
+      {T.translate("audit_log.log_entries")} ({totalLogEntries})
+    </h3>
+    <AuditLogs
+      filterId="standalone"
+      entityFilter={["class_name==SummitEvent"]}
+    />
+  </div>
+);
 
 const mapStateToProps = ({ auditLogState }) => ({
   ...auditLogState

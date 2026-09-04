@@ -2240,10 +2240,8 @@ class EventForm extends React.Component {
           handleClick={this.toggleSection.bind(this, "audit_log")}
         >
           <AuditLogs
-            entityFilter={[
-              `event_id==${entity.id}`,
-              "class_name==SummitEventAuditLog"
-            ]}
+            filterId="activity"
+            entityFilter={[`event_id==${entity.id}`, "class_name==SummitEvent"]}
           />
         </Panel>
         {entity.id !== 0 && (

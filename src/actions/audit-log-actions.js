@@ -19,35 +19,19 @@ import {
   authErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
+import { getAccessTokenSafely, isNumericString } from "../utils/methods";
 import {
-  getAccessTokenSafely,
-  isNumericString,
-  parseDateRangeFilter
-} from "../utils/methods";
-import { DEFAULT_CURRENT_PAGE, DEFAULT_ORDER_DIR } from "../utils/constants";
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_ORDER_DIR,
+  MAX_PER_PAGE
+} from "../utils/constants";
 
 export const CLEAR_LOG_PARAMS = "CLEAR_LOG_PARAMS";
 export const REQUEST_LOG = "REQUEST_LOG";
 export const RECEIVE_LOG = "RECEIVE_LOG";
 
-const DEFAULT_PER_PAGE_AUDIT_LOG = 100;
-
-const parseFilters = (filters, term = null) => {
-  const filter = [];
-
-  if (filters.created_date_filter) {
-    parseDateRangeFilter(filter, filters.created_date_filter, "created");
-  }
-
-  if (
-    filters.hasOwnProperty("user_id_filter") &&
-    Array.isArray(filters.user_id_filter) &&
-    filters.user_id_filter.length > 0
-  ) {
-    filter.push(
-      `user_id==${filters.user_id_filter.map((t) => t.id).join("||")}`
-    );
-  }
+const parseFilters = (filters = [], term = null) => {
+  const filter = Array.isArray(filters) ? [...filters] : [];
 
   if (term) {
     const escapedTerm = escapeFilterValue(term);
@@ -68,18 +52,17 @@ const parseFilters = (filters, term = null) => {
 export const getAuditLog =
   (
     entityFilter = [],
-    term = null,
+    term = "",
     page = DEFAULT_CURRENT_PAGE,
-    perPage = DEFAULT_PER_PAGE_AUDIT_LOG,
-    order = null,
-    orderDir = DEFAULT_ORDER_DIR,
-    filters = {}
+    perPage = MAX_PER_PAGE,
+    order = "created",
+    orderDir = 1,
+    filters = []
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const summitTZ = currentSummit.time_zone.name;
     const summitFilter = [`summit_id==${currentSummit.id}`];
 
     dispatch(startLoading());
@@ -99,7 +82,6 @@ export const getAuditLog =
 
     params["filter[]"] = parsedFilters;
 
-    // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
       params.order = `${orderDirSign}${order}`;
@@ -110,7 +92,7 @@ export const getAuditLog =
       createAction(RECEIVE_LOG),
       `${window.AUDIT_LOG_API_BASE_URL}/api/v1/audit-logs`,
       authErrorHandler,
-      { page, perPage, order, orderDir, term, summitTZ, filters }
+      { page, perPage, order, orderDir, term, filters }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

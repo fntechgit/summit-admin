@@ -516,11 +516,12 @@ const EditTicketPage = ({
       >
         {entity.badge && (
           <AuditLogs
+            filterId="badge"
             entityFilter={[
               `event_id==${entity.badge.id}`,
-              "class_name==SummitAttendeeBadgeAuditLog"
+              "class_name==SummitAttendeeBadge"
             ]}
-            columns={["created", "action", "user"]}
+            columns={["created", "action_description", "user"]}
           />
         )}
       </Panel>
