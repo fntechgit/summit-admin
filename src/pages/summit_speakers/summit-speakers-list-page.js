@@ -375,11 +375,13 @@ class SummitSpeakersListPage extends React.Component {
     ev.preventDefault();
     const { currentPromocodeSpecification } = this.props;
     const { promoCodeStrategy, testRecipient, source } = this.state;
+    const { term } = this.getSubjectProps();
     const isSpeakerMode = source === sources.speakers;
     const excerptRecipient = this.ingestEmailRef.value;
     const shouldSendCopy2Submitter =
       isSpeakerMode && this.shouldSendCopy2SubmitterRef.checked;
-    const { term } = this.getSubjectProps();
+    const shouldResendSpeakers =
+      isSpeakerMode && this.shouldResendSpeakersRef.checked;    
 
     this.props.validateSpecs(
       promoCodeStrategy,
@@ -403,6 +405,7 @@ class SummitSpeakersListPage extends React.Component {
           testRecipient,
           excerptRecipient,
           shouldSendCopy2Submitter,
+          shouldResendSpeakers,
           source,
           promoCodeStrategy,
           currentPromocodeSpecification.entity
@@ -972,29 +975,55 @@ class SummitSpeakersListPage extends React.Component {
                     />
                   </div>
                   {this.state.source === sources.speakers && (
-                    <div
-                      className="col-md-12 ticket-ingest-email-wrapper"
-                      style={{ paddingTop: "3px" }}
-                    >
-                      <div className="form-check abc-checkbox">
-                        <input
-                          id="should_send_copy_2_submitter"
-                          className="form-check-input"
-                          type="checkbox"
-                          ref={(node) => {
-                            this.shouldSendCopy2SubmitterRef = node;
-                          }}
-                        />
-                        <label
-                          className="form-check-label"
-                          htmlFor="should_send_copy_2_submitter"
-                        >
-                          {T.translate(
-                            "summit_speakers_list.should_send_copy_2_submitter"
-                          )}
-                        </label>
+                    <>
+                      <div
+                        className="col-md-12 ticket-ingest-email-wrapper"
+                        style={{ paddingTop: "3px" }}
+                      >
+                        <div className="form-check abc-checkbox">
+                          <input
+                            id="should_send_copy_2_submitter"
+                            className="form-check-input"
+                            type="checkbox"
+                            ref={(node) => {
+                              this.shouldSendCopy2SubmitterRef = node;
+                            }}
+                          />
+                          <label
+                            className="form-check-label"
+                            htmlFor="should_send_copy_2_submitter"
+                          >
+                            {T.translate(
+                              "summit_speakers_list.should_send_copy_2_submitter"
+                            )}
+                          </label>
+                        </div>
                       </div>
-                    </div>
+                      <div
+                        className="col-md-12 ticket-ingest-email-wrapper"
+                        style={{ paddingTop: "3px" }}
+                      >
+                        <div className="form-check abc-checkbox">
+                          <input
+                            id="should_resend_speakers"
+                            className="form-check-input"
+                            type="checkbox"
+                            ref={(node) => {
+                              this.shouldResendSpeakersRef = node;
+                            }}
+                            defaultChecked
+                          />
+                          <label
+                            className="form-check-label"
+                            htmlFor="should_resend_speakers"
+                          >
+                            {T.translate(
+                              "summit_speakers_list.should_resend_speakers"
+                            )}
+                          </label>
+                        </div>
+                      </div>
+                    </>
                   )}
                 </div>
               </Modal.Body>
