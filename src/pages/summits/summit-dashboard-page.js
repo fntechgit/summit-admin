@@ -134,7 +134,7 @@ function SummitDashboardPage({
                 rows={[
                   [
                     {
-                      title: T.translate("general.speakers"),
+                      title: T.translate("dashboard.published_speakers"),
                       stat: currentSummit.speakers_count
                     },
                     {
