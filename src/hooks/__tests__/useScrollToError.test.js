@@ -78,6 +78,71 @@ const VisibleHarness = () => {
   );
 };
 
+const MixedVisibilityHarness = ({ onActiveTabChange }) => {
+  const [activeTab, setActiveTab] = useState("b");
+  const formik = useFormik({
+    initialValues: { hiddenField: "", visibleField: "" },
+    validate: (values) => {
+      const errors = {};
+      if (!values.hiddenField) errors.hiddenField = "required";
+      if (!values.visibleField) errors.visibleField = "required";
+      return errors;
+    },
+    onSubmit: () => {}
+  });
+
+  useScrollToError(formik, true, (value) => {
+    setActiveTab(value);
+    onActiveTabChange?.(value);
+  });
+
+  return (
+    <form onSubmit={formik.handleSubmit}>
+      <div role="tabpanel" id="tabpanel-a" hidden={activeTab !== "a"}>
+        <input name="hiddenField" onChange={formik.handleChange} />
+      </div>
+      <div role="tabpanel" id="tabpanel-b" hidden={activeTab !== "b"}>
+        <input name="visibleField" onChange={formik.handleChange} />
+      </div>
+      <button type="submit">save</button>
+    </form>
+  );
+};
+
+const ExternalErrorHarness = ({ serverErrors, onActiveTabChange }) => {
+  const [activeTab, setActiveTab] = useState("b");
+  const formik = useFormik({
+    initialValues: { name: "ok" },
+    validate: () => ({}),
+    onSubmit: () => Promise.resolve()
+  });
+
+  // Mirrors how consumers sync server-side errors into Formik independently
+  // of the submit lifecycle (e.g. event-type-dialog.js syncing Redux errors).
+  React.useEffect(() => {
+    if (serverErrors) formik.setErrors(serverErrors);
+  }, [serverErrors]);
+
+  useScrollToError(formik, true, (value) => {
+    setActiveTab(value);
+    onActiveTabChange?.(value);
+  });
+
+  return (
+    <form onSubmit={formik.handleSubmit}>
+      <div role="tabpanel" id="tabpanel-a" hidden={activeTab !== "a"}>
+        <input
+          name="name"
+          value={formik.values.name}
+          onChange={formik.handleChange}
+        />
+      </div>
+      <div role="tabpanel" id="tabpanel-b" hidden={activeTab !== "b"} />
+      <button type="submit">save</button>
+    </form>
+  );
+};
+
 const UntaggedHarness = () => {
   const formik = useFormik({
     initialValues: { name: "" },
@@ -116,6 +181,51 @@ describe("useScrollToError (tab-aware)", () => {
       screen.getByText("save").click();
     });
 
+    expect(window.HTMLElement.prototype.scrollIntoView).toHaveBeenCalled();
+  });
+
+  it("scrolls to the visible field without activating the hidden field's tab when errors span both", async () => {
+    const onActiveTabChange = jest.fn();
+    render(<MixedVisibilityHarness onActiveTabChange={onActiveTabChange} />);
+
+    await act(async () => {
+      screen.getByText("save").click();
+    });
+
+    const visibleInput = document.querySelector("[name='visibleField']");
+
+    expect(onActiveTabChange).not.toHaveBeenCalled();
+    expect(window.HTMLElement.prototype.scrollIntoView).toHaveBeenCalled();
+    expect(window.HTMLElement.prototype.scrollIntoView.mock.instances[0]).toBe(
+      visibleInput
+    );
+  });
+
+  it("scrolls to errors injected after submission settles, even into an inactive panel", async () => {
+    const onActiveTabChange = jest.fn();
+    const { rerender } = render(
+      <ExternalErrorHarness
+        serverErrors={null}
+        onActiveTabChange={onActiveTabChange}
+      />
+    );
+
+    await act(async () => {
+      screen.getByText("save").click();
+    });
+    expect(window.HTMLElement.prototype.scrollIntoView).not.toHaveBeenCalled();
+
+    await act(async () => {
+      rerender(
+        <ExternalErrorHarness
+          serverErrors={{ name: "server says no" }}
+          onActiveTabChange={onActiveTabChange}
+        />
+      );
+    });
+    await flushDoubleRaf();
+
+    expect(onActiveTabChange).toHaveBeenCalledWith("a");
     expect(window.HTMLElement.prototype.scrollIntoView).toHaveBeenCalled();
   });
 
