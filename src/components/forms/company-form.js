@@ -223,7 +223,7 @@ const CompanyForm = ({
         <MuiFormikTextField name="state" margin="none" fullWidth />
       </Grid2>
       <Grid2 size={4}>
-        <InputLabel htmlFor="state">
+        <InputLabel htmlFor="country">
           {T.translate("edit_company.country")}
         </InputLabel>
         <MuiFormikAsyncAutocomplete
@@ -348,8 +348,7 @@ const CompanyForm = ({
           </Grid2>
         </Grid2>
       )}
-
-      {initialEntity.project_sponsorships?.length > 0 &&
+      {initialEntity?.project_sponsorships?.length > 0 &&
         window.APP_CLIENT_NAME == "openstack" && (
           <Grid2 size={12} mb={2}>
             <Table
@@ -408,7 +407,7 @@ const CompanyForm = ({
 };
 
 CompanyForm.propTypes = {
-  initialEntity: PropTypes.object.isRequired,
+  initialEntity: PropTypes.object,
   sponsoredProjects: PropTypes.array,
   onAttach: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
