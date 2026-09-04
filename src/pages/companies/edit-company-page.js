@@ -11,137 +11,165 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
-import Swal from "sweetalert2";
+import { FormikProvider, useFormik } from "formik";
+import * as yup from "yup";
+import { Box, Button, Grid2 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import CompanyForm from "../../components/forms/company-form";
 import {
   getCompany,
   resetCompanyForm,
   saveCompany,
-  attachLogo
+  attachLogo,
+  removeLogo
 } from "../../actions/company-actions";
 import {
   getSponsoredProjects,
   saveSupportingCompany,
   deleteSupportingCompany
 } from "../../actions/sponsored-project-actions";
-import "../../styles/edit-company-page.less";
-import AddNewButton from "../../components/buttons/add-new-button";
+import { MAX_PER_PAGE } from "../../utils/constants";
+import { hexColorValidation } from "../../utils/yup";
 
-class EditCompanyPage extends React.Component {
-  constructor(props) {
-    const companyId = props.match.params.company_id;
-    const perPage = 100;
-    super(props);
+const EditCompanyPage = ({
+  entity: initialEntity,
+  sponsoredProjects,
+  match,
+  history,
+  getCompany,
+  resetCompanyForm,
+  saveCompany,
+  attachLogo,
+  removeLogo,
+  getSponsoredProjects,
+  saveSupportingCompany,
+  deleteSupportingCompany
+}) => {
+  const companyId = match.params.company_id;
+  const [isSaving, setIsSaving] = useState(false);
 
+  useEffect(() => {
     if (!companyId) {
-      props.resetCompanyForm();
+      resetCompanyForm();
     } else {
-      props.getCompany(companyId);
+      getCompany(companyId);
     }
-    if (window.APP_CLIENT_NAME == "openstack")
-      props.getSponsoredProjects("", 1, perPage);
-  }
+  }, [companyId]);
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const oldId = prevProps.match.params.company_id;
-    const newId = this.props.match.params.company_id;
+  useEffect(() => {
+    if (window.APP_CLIENT_NAME === "openstack")
+      getSponsoredProjects("", 1, MAX_PER_PAGE);
+  }, []);
 
-    if (oldId !== newId) {
-      if (!newId) {
-        this.props.resetCompanyForm();
-      } else {
-        this.props.getCompany(newId);
-      }
+  const formik = useFormik({
+    initialValues: {
+      id: initialEntity?.id ?? 0,
+      name: initialEntity?.name ?? "",
+      url: initialEntity?.url ?? "",
+      contact_email: initialEntity?.contact_email ?? "",
+      member_level: initialEntity?.member_level ?? "",
+      color: initialEntity?.color ?? "",
+      admin_email: initialEntity?.admin_email ?? "",
+      city: initialEntity?.city ?? "",
+      state: initialEntity?.state ?? "",
+      country: initialEntity?.country ?? "",
+      industry: initialEntity?.industry ?? "",
+      products: initialEntity?.products ?? "",
+      contributions: initialEntity?.contributions ?? "",
+      description: initialEntity?.description ?? "",
+      overview: initialEntity?.overview ?? "",
+      commitment: initialEntity?.commitment ?? "",
+      logo: initialEntity?.logo ?? "",
+      big_logo: initialEntity?.big_logo ?? ""
+    },
+    enableReinitialize: true,
+    validationSchema: yup.object().shape({
+      name: yup.string().required(T.translate("validation.required")),
+      color: hexColorValidation()
+    }),
+    onSubmit: (values) => {
+      if (isSaving) return;
+      const valuesToSave = {
+        ...values,
+        country:
+          typeof values.country === "object"
+            ? values.country?.value
+            : values.country
+      };
+      setIsSaving(true);
+      saveCompany(valuesToSave)
+        .then(() => history.push("/app/companies"))
+        .catch(() => {})
+        .finally(() => setIsSaving(false));
     }
-  }
+  });
 
-  render() {
-    const {
-      entity,
-      errors,
-      summits,
-      history,
-      saveCompany,
-      attachLogo,
-      match,
-      sponsoredProjects,
-      deleteSupportingCompany,
-      saveSupportingCompany
-    } = this.props;
+  const title = initialEntity?.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
+  const breadcrumb = initialEntity?.id
+    ? initialEntity.name
+    : T.translate("general.new");
 
-    const title = entity.id
-      ? T.translate("general.edit")
-      : T.translate("general.add");
-    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
-
-    return (
-      <div className="container">
-        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-        <h3>
-          {title} {T.translate("edit_company.company")}
-          <AddNewButton entity={entity} />
-        </h3>
-        <hr />
-        <CompanyForm
-          summits={summits}
-          history={history}
-          entity={entity}
-          errors={errors}
-          onSubmit={saveCompany}
-          onAttach={attachLogo}
-          sponsoredProjects={sponsoredProjects}
-          onDeleteSponsorship={(id) => {
-            const sponsorship = entity.project_sponsorships.find(
-              (ps) => ps.id == id
-            );
-            if (!sponsorship) return;
-            const supportingCompany = sponsorship.supporting_companies.find(
-              (sc) => sc.company_id == entity.id
-            );
-            if (!supportingCompany) return;
-
-            Swal.fire({
-              title: T.translate("general.are_you_sure"),
-              text: T.translate(
-                "edit_company.delete_supporting_company_warning"
-              ),
-              type: "warning",
-              showCancelButton: true,
-              confirmButtonColor: "#DD6B55",
-              confirmButtonText: T.translate("general.yes_delete")
-            }).then((result) => {
-              if (result.value) {
-                deleteSupportingCompany(
-                  sponsorship.sponsored_project.id,
-                  id,
-                  supportingCompany.id
-                );
-              }
-            });
-          }}
-          addSponsoreProjectSponsorship={(
-            companyId,
-            selectedSponsoredProject,
-            selectedSponsorShipType
-          ) => {
-            saveSupportingCompany(
-              selectedSponsoredProject,
-              selectedSponsorShipType,
-              {
-                id: 0,
-                company: { id: companyId }
-              }
-            );
-          }}
-        />
-      </div>
-    );
-  }
-}
+  return (
+    <div className="container">
+      <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+      <Grid2
+        container
+        sx={{ justifyContent: "space-between", alignItems: "center" }}
+      >
+        <Grid2>
+          <h3>
+            {title} {T.translate("edit_company.company")}
+          </h3>
+        </Grid2>
+        {initialEntity?.id > 0 && (
+          <Grid2>
+            <Button
+              variant="contained"
+              onClick={() => history.push("/app/companies/new")}
+              startIcon={<AddIcon />}
+            >
+              {T.translate("general.add_new")}
+            </Button>
+          </Grid2>
+        )}
+      </Grid2>
+      <hr />
+      <FormikProvider value={formik}>
+        <Box
+          component="form"
+          onSubmit={formik.handleSubmit}
+          noValidate
+          autoComplete="off"
+        >
+          <CompanyForm
+            initialEntity={initialEntity}
+            sponsoredProjects={sponsoredProjects}
+            onAttach={attachLogo}
+            onRemove={removeLogo}
+            onAddSponsorship={saveSupportingCompany}
+            onDeleteSponsorship={deleteSupportingCompany}
+            isSaving={isSaving}
+            setIsSaving={setIsSaving}
+          />
+          <Grid2
+            size={12}
+            sx={{ p: 3, pt: 0, display: "flex", justifyContent: "flex-end" }}
+          >
+            <Button type="submit" variant="contained" disabled={isSaving}>
+              {T.translate("general.save")}
+            </Button>
+          </Grid2>
+        </Box>
+      </FormikProvider>
+    </div>
+  );
+};
 
 const mapStateToProps = ({
   currentCompanyState,
@@ -156,6 +184,7 @@ export default connect(mapStateToProps, {
   resetCompanyForm,
   saveCompany,
   attachLogo,
+  removeLogo,
   getSponsoredProjects,
   saveSupportingCompany,
   deleteSupportingCompany
