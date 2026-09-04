@@ -115,7 +115,12 @@ const CompanyForm = ({
   };
 
   const handleAddSponsorshipType = () => {
-    if (!selectedSponsoredProject || !selectedSponsorShipType || isSaving)
+    if (
+      !onAddSponsorship ||
+      !selectedSponsoredProject ||
+      !selectedSponsorShipType ||
+      isSaving
+    )
       return;
     setIsSaving(true);
     onAddSponsorship(selectedSponsoredProject, selectedSponsorShipType, {
@@ -349,7 +354,7 @@ const CompanyForm = ({
         </Grid2>
       )}
       {initialEntity?.project_sponsorships?.length > 0 &&
-        window.APP_CLIENT_NAME == "openstack" && (
+        window.APP_CLIENT_NAME === "openstack" && (
           <Grid2 size={12} mb={2}>
             <Table
               data={initialEntity.project_sponsorships.map((sp) => ({
