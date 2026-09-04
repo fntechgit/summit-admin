@@ -448,7 +448,6 @@ const PaymentProfileDialog = ({
                           onClick={handleNewFeeType}
                           startIcon={<AddIcon />}
                           sx={{
-                            fontSize: "1.4rem",
                             lineHeight: "2.4rem",
                             letterSpacing: "0.4px"
                           }}
@@ -639,7 +638,6 @@ const PaymentProfileDialog = ({
                             variant="outlined"
                             onClick={handleCancelFeeType}
                             sx={{
-                              fontSize: "1.4rem",
                               lineHeight: "2.4rem",
                               letterSpacing: "0.4px"
                             }}
@@ -651,7 +649,6 @@ const PaymentProfileDialog = ({
                             onClick={feeTypeFormik.handleSubmit}
                             disabled={isSaving}
                             sx={{
-                              fontSize: "1.4rem",
                               lineHeight: "2.4rem",
                               letterSpacing: "0.4px"
                             }}
