@@ -162,7 +162,6 @@ const Sponsorship = ({
                 variant="contained"
                 onClick={handleOpenAddTierPopup}
                 startIcon={<AddIcon />}
-                sx={{ height: "36px" }}
               >
                 {T.translate("edit_sponsor.add_tier")}
               </Button>
