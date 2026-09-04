@@ -1,5 +1,5 @@
-/*
- * Copyright 2017 OpenStack Foundation
+/**
+ * Copyright 2024 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,416 +11,411 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useState } from "react";
+import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
-import CountryDropdown from "openstack-uicore-foundation/lib/components/inputs/country-dropdown"
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import Table from "openstack-uicore-foundation/lib/components/table";
-import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
-import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
+import { useFormikContext } from "formik";
+import {
+  Button,
+  FormControl,
+  Grid2,
+  InputLabel,
+  MenuItem,
+  Select
+} from "@mui/material";
+import UploadInputV3 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v3";
+import { getCountryList } from "openstack-uicore-foundation/lib/utils/query-actions";
+import Table from "openstack-uicore-foundation/lib/components/mui/table";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
+import useScrollToError from "../../hooks/useScrollToError";
+import FormikTextEditor from "../inputs/formik-text-editor";
+import MuiFormikAsyncAutocomplete from "../mui/formik-inputs/mui-formik-async-select";
+import MuiFormikColorField from "../mui/formik-inputs/mui-formik-color-field";
+import showConfirmDialog from "../mui/showConfirmDialog";
 
-class CompanyForm extends React.Component {
-  constructor(props) {
-    super(props);
+const MEMBER_LEVELS = [
+  { label: "Platinum", value: "Platinum" },
+  { label: "Gold", value: "Gold" },
+  { label: "StartUp", value: "StartUp" },
+  { label: "Corporate", value: "Corporate" },
+  { label: "Mention", value: "Mention" },
+  { label: "None", value: "None" }
+];
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors,
-      selectedSponsoredProject: null,
-      selectedSponsorShipType: null,
-      sponsorShipTypes: []
+const getLogoValue = (value) => {
+  if (!value) return [];
+  if (typeof value === "string") return [{ filename: value, file_url: value }];
+  return [{ filename: value.filename, file_url: value.filepath }];
+};
+
+const CompanyForm = ({
+  initialEntity,
+  sponsoredProjects = [],
+  onAttach,
+  onRemove,
+  onAddSponsorship,
+  onDeleteSponsorship,
+  isSaving,
+  setIsSaving
+}) => {
+  const formik = useFormikContext();
+  const [selectedSponsoredProject, setSelectedSponsoredProject] =
+    useState(null);
+  const [selectedSponsorShipType, setSelectedSponsorShipType] = useState(null);
+  const [sponsorShipTypes, setSponsorShipTypes] = useState([]);
+
+  useScrollToError(formik, true);
+
+  const handleLogoUploadComplete = (field) => (response) => {
+    const path =
+      response.path && response.name
+        ? `${response.path}${response.name}`
+        : response.file_url ?? response.path ?? "";
+    const uploadLogo = {
+      ...response,
+      filepath: path,
+      filename: response.name
     };
-
-    this.handleChange = this.handleChange.bind(this);
-    this.handleUploadLogo = this.handleUploadLogo.bind(this);
-    this.handleUploadBigLogo = this.handleUploadBigLogo.bind(this);
-    this.handleRemoveFile = this.handleRemoveFile.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleSelectedSponsoredProject =
-      this.handleSelectedSponsoredProject.bind(this);
-    this.handleSelectedSponsorshipType =
-      this.handleSelectedSponsorshipType.bind(this);
-    this.onAddSponsorshipType = this.onAddSponsorshipType.bind(this);
-  }
-
-  componentDidUpdate(prevProps) {
-    const state = {};
-    scrollToError(this.props.errors);
-
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
+    delete uploadLogo.path;
+    delete uploadLogo.name;
+    const prevValue = formik.values[field];
+    formik.setFieldValue(field, uploadLogo);
+    if (initialEntity?.id) {
+      setIsSaving(true);
+      onAttach(initialEntity, uploadLogo, field)
+        .catch(() => formik.setFieldValue(field, prevValue))
+        .finally(() => setIsSaving(false));
+    } else {
+      setIsSaving(false);
     }
+  };
 
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
+  const handleLogoRemove = (field) => () => {
+    formik.setFieldValue(field, "");
+    if (initialEntity?.id) {
+      setIsSaving(true);
+      const prevValue = formik.values[field];
+      onRemove(initialEntity, field)
+        .catch(() => formik.setFieldValue(field, prevValue))
+        .finally(() => setIsSaving(false));
     }
+  };
 
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
-    }
-  }
-
-  handleChange(ev) {
-    const entity = { ...this.state.entity };
-    const errors = { ...this.state.errors };
-    let { value, id } = ev.target;
-
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
-
-    if (ev.target.type === "memberinput") {
-      entity.email = "";
-    }
-
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ entity, errors });
-  }
-
-  handleUploadLogo(file) {
-    const formData = new FormData();
-    formData.append("file", file);
-    this.props.onAttach(this.state.entity, formData, "logo");
-  }
-
-  handleUploadBigLogo(file) {
-    const formData = new FormData();
-    formData.append("file", file);
-    this.props.onAttach(this.state.entity, formData, "big");
-  }
-
-  handleRemoveFile(picAttr) {
-    const entity = { ...this.state.entity };
-    entity[picAttr] = "";
-    this.setState({ entity });
-  }
-
-  handleSubmit(publish, ev) {
-    ev.preventDefault();
-    this.props.onSubmit(this.state.entity);
-  }
-
-  handleSelectedSponsoredProject(ev) {
-    const { sponsoredProjects } = this.props;
+  const handleSelectedSponsoredProject = (ev) => {
     const { value } = ev.target;
-
-    const project = sponsoredProjects.find((e) => e.id == value);
-
-    this.setState({
-      ...this.state,
-      selectedSponsoredProject: value,
-      sponsorShipTypes: project
+    const project = sponsoredProjects.find((p) => p.id == value);
+    setSelectedSponsoredProject(value);
+    setSponsorShipTypes(
+      project
         ? project.sponsorship_types.map((s) => ({ label: s.name, value: s.id }))
-        : [],
-      selectedSponsorShipType: null
+        : []
+    );
+    setSelectedSponsorShipType(null);
+  };
+
+  const handleAddSponsorshipType = () => {
+    if (!selectedSponsoredProject || !selectedSponsorShipType || isSaving)
+      return;
+    setIsSaving(true);
+    onAddSponsorship(selectedSponsoredProject, selectedSponsorShipType, {
+      id: 0,
+      company: { id: formik.values.id }
+    }).finally(() => setIsSaving(false));
+  };
+
+  const handleDeleteSponsorship = async (sponsorshipId) => {
+    const sponsorship = initialEntity?.project_sponsorships?.find(
+      (ps) => ps.id === sponsorshipId
+    );
+    if (!sponsorship) return;
+    const supportingCompany = sponsorship.supporting_companies?.find(
+      (sc) => sc.company_id === formik.values.id
+    );
+    if (!supportingCompany) return;
+
+    const confirmed = await showConfirmDialog({
+      title: T.translate("general.are_you_sure"),
+      text: T.translate("edit_company.delete_supporting_company_warning")
     });
-  }
 
-  handleSelectedSponsorshipType(ev) {
-    const { value } = ev.target;
-    this.setState({ ...this.state, selectedSponsorShipType: value });
-  }
+    if (confirmed) {
+      if (isSaving) return;
+      setIsSaving(true);
+      onDeleteSponsorship(
+        sponsorship.sponsored_project.id,
+        sponsorshipId,
+        supportingCompany.id
+      ).finally(() => setIsSaving(false));
+    }
+  };
 
-  onAddSponsorshipType(ev) {
-    ev.preventDefault();
-    const { selectedSponsoredProject, selectedSponsorShipType, entity } =
-      this.state;
-    if (!selectedSponsoredProject) return;
-    if (!selectedSponsorShipType) return;
-    this.props.addSponsoreProjectSponsorship(
-      entity.id,
-      selectedSponsoredProject,
-      selectedSponsorShipType
-    );
-  }
+  const sponsored_project_columns = [
+    {
+      columnKey: "project_name",
+      header: T.translate("edit_company.project_name")
+    },
+    { columnKey: "name", header: T.translate("edit_company.sponsorship_type") }
+  ];
 
-  render() {
-    const { entity } = this.state;
-    const { sponsoredProjects } = this.props;
+  const sponsored_projects_ddl = sponsoredProjects.map((sp) => ({
+    label: sp.name,
+    value: sp.id
+  }));
 
-    const member_levels_ddl = [
-      { label: "Platinum", value: "Platinum" },
-      { label: "Gold", value: "Gold" },
-      { label: "StartUp", value: "StartUp" },
-      { label: "Corporate", value: "Corporate" },
-      { label: "Mention", value: "Mention" },
-      { label: "None", value: "None" }
-    ];
+  const showOpenStackSection =
+    formik.values.id > 0 && window.APP_CLIENT_NAME === "openstack";
 
-    const sponsored_projects_ddl =
-      sponsoredProjects && Array.isArray(sponsoredProjects)
-        ? sponsoredProjects.map((sp) => ({
-            label: sp.name,
-            value: sp.id
-          }))
-        : [];
+  return (
+    <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
+      <Grid2 size={4}>
+        <InputLabel htmlFor="name">
+          {T.translate("edit_company.name")} *
+        </InputLabel>
+        <MuiFormikTextField name="name" margin="none" fullWidth />
+      </Grid2>
+      <Grid2 size={4}>
+        <InputLabel htmlFor="url">{T.translate("edit_company.url")}</InputLabel>
+        <MuiFormikTextField name="url" margin="none" fullWidth />
+      </Grid2>
+      <Grid2 size={4}>
+        <InputLabel htmlFor="contact_email">
+          {T.translate("edit_company.contact_email")}
+        </InputLabel>
+        <MuiFormikTextField name="contact_email" margin="none" fullWidth />
+      </Grid2>
 
-    const columns = [
-      {
-        columnKey: "project_name",
-        value: T.translate("edit_company.project_name")
-      },
-      { columnKey: "name", value: T.translate("edit_company.sponsorship_type") }
-    ];
+      <Grid2 size={4}>
+        <InputLabel htmlFor="member_level">
+          {T.translate("edit_company.member_level")}
+        </InputLabel>
+        <MuiFormikSelect name="member_level" isClearable>
+          {MEMBER_LEVELS.map((lvl) => (
+            <MenuItem key={lvl.value} value={lvl.value}>
+              {lvl.label}
+            </MenuItem>
+          ))}
+        </MuiFormikSelect>
+      </Grid2>
+      <Grid2 size={4}>
+        <InputLabel htmlFor="color">
+          {T.translate("edit_company.color")}
+        </InputLabel>
+        <MuiFormikColorField name="color" />
+      </Grid2>
+      <Grid2 size={4}>
+        <InputLabel htmlFor="admin_email">
+          {T.translate("edit_company.admin_email")}
+        </InputLabel>
+        <MuiFormikTextField name="admin_email" margin="none" fullWidth />
+      </Grid2>
 
-    const table_options = {
-      actions: {
-        delete: { onClick: this.props.onDeleteSponsorship }
-      }
-    };
+      <Grid2 size={4}>
+        <InputLabel htmlFor="city">
+          {T.translate("edit_company.city")}
+        </InputLabel>
+        <MuiFormikTextField name="city" margin="none" fullWidth />
+      </Grid2>
+      <Grid2 size={4}>
+        <InputLabel htmlFor="state">
+          {T.translate("edit_company.state")}
+        </InputLabel>
+        <MuiFormikTextField name="state" margin="none" fullWidth />
+      </Grid2>
+      <Grid2 size={4}>
+        <InputLabel htmlFor="state">
+          {T.translate("edit_company.country")}
+        </InputLabel>
+        <MuiFormikAsyncAutocomplete
+          name="country"
+          fullWidth
+          margin="none"
+          queryFunction={(_input, callback) => getCountryList(callback)}
+          formatOption={(country) => ({
+            value: country.iso_code,
+            label: country.name
+          })}
+          defaultOptions
+        />
+      </Grid2>
+      <Grid2 size={4}>
+        <InputLabel htmlFor="industry">
+          {T.translate("edit_company.industry")}
+        </InputLabel>
+        <MuiFormikTextField name="industry" margin="none" fullWidth />
+      </Grid2>
+      <Grid2 size={4}>
+        <InputLabel htmlFor="products">
+          {T.translate("edit_company.products")}
+        </InputLabel>
+        <MuiFormikTextField name="products" margin="none" fullWidth />
+      </Grid2>
+      <Grid2 size={4}>
+        <InputLabel htmlFor="contributions">
+          {T.translate("edit_company.contributions")}
+        </InputLabel>
+        <MuiFormikTextField name="contributions" margin="none" fullWidth />
+      </Grid2>
 
-    return (
-      <form className="company-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("edit_company.name")} </label>
-            <Input
-              className="form-control"
-              id="name"
-              value={entity.name}
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_company.url")} </label>
-            <Input
-              className="form-control"
-              id="url"
-              value={entity.url}
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_company.contact_email")} </label>
-            <Input
-              className="form-control"
-              id="contact_email"
-              value={entity.contact_email}
-              onChange={this.handleChange}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("edit_company.member_level")} </label>
-            <Dropdown
-              id="member_level"
-              value={entity.member_level}
-              placeholder={T.translate(
-                "edit_company.placeholders.member_level"
-              )}
-              options={member_levels_ddl}
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_company.color")} </label>
-            <Input
-              className="form-control"
-              type="color"
-              id="color"
-              value={entity.color}
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_company.admin_email")} </label>
-            <Input
-              className="form-control"
-              id="admin_email"
-              value={entity.admin_email}
-              onChange={this.handleChange}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("edit_company.city")} </label>
-            <Input
-              className="form-control"
-              id="city"
-              value={entity.city}
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_company.state")} </label>
-            <Input
-              className="form-control"
-              id="state"
-              value={entity.state}
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_company.country")} </label>
-            <CountryDropdown
-              id="country"
-              value={entity.country}
-              onChange={this.handleChange}
-              placeholder={T.translate(
-                "edit_company.placeholders.select_country"
-              )}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("edit_company.industry")} </label>
-            <Input
-              className="form-control"
-              id="industry"
-              value={entity.industry}
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_company.products")} </label>
-            <Input
-              className="form-control"
-              id="products"
-              value={entity.products}
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_company.contributions")} </label>
-            <Input
-              className="form-control"
-              id="contributions"
-              value={entity.contributions}
-              onChange={this.handleChange}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label> {T.translate("edit_company.description")} </label>
-            <TextEditorV3
-              id="description"
-              value={entity.description}
-              onChange={this.handleChange}
-              license={process.env.JODIT_LICENSE_KEY}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label> {T.translate("edit_company.overview")} </label>
-            <TextEditorV3
-              id="overview"
-              value={entity.overview}
-              onChange={this.handleChange}
-              license={process.env.JODIT_LICENSE_KEY}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label> {T.translate("edit_company.commitment")} </label>
-            <TextEditorV3
-              id="commitment"
-              value={entity.commitment}
-              onChange={this.handleChange}
-              license={process.env.JODIT_LICENSE_KEY}
-            />
-          </div>
-        </div>
-        {entity.id > 0 && window.APP_CLIENT_NAME == "openstack" && (
-          <div className="row form-group">
-            <div className="col-md-4">
-              <Dropdown
+      <Grid2 size={12}>
+        <InputLabel htmlFor="description">
+          {T.translate("edit_company.description")}
+        </InputLabel>
+        <FormikTextEditor name="description" />
+      </Grid2>
+      <Grid2 size={12}>
+        <InputLabel htmlFor="overview">
+          {T.translate("edit_company.overview")}
+        </InputLabel>
+        <FormikTextEditor name="overview" />
+      </Grid2>
+      <Grid2 size={12}>
+        <InputLabel htmlFor="commitment">
+          {T.translate("edit_company.commitment")}
+        </InputLabel>
+        <FormikTextEditor name="commitment" />
+      </Grid2>
+
+      {showOpenStackSection && (
+        <Grid2 container size={12} mt={2} mb={2} alignItems="end">
+          <Grid2 size={4}>
+            <InputLabel htmlFor="sponsored_project">
+              {T.translate("edit_company.project_name")}
+            </InputLabel>
+            <FormControl fullWidth>
+              <Select
                 id="sponsored_project"
-                options={sponsored_projects_ddl}
-                clearable
-                value={this.state.selectedSponsoredProject}
-                onChange={this.handleSelectedSponsoredProject}
-                placeholder={T.translate(
-                  "edit_company.placeholders.sponsored_project"
-                )}
-              />
-            </div>
-            <div className="col-md-4">
-              <Dropdown
-                id="sponsorship_type"
-                clearable
-                value={this.state.selectedSponsorShipType}
-                options={this.state.sponsorShipTypes}
-                onChange={this.handleSelectedSponsorshipType}
-                placeholder={T.translate(
-                  "edit_company.placeholders.sponsorship_type"
-                )}
-              />
-            </div>
-            <div className="col-md-4">
-              <button
-                className="btn btn-primary right-space"
-                onClick={this.onAddSponsorshipType}
+                value={selectedSponsoredProject ?? ""}
+                onChange={handleSelectedSponsoredProject}
+                displayEmpty
+                renderValue={(selected) =>
+                  selected ? (
+                    sponsored_projects_ddl.find((sp) => sp.value === selected)
+                      ?.label
+                  ) : (
+                    <span style={{ color: "#aaa" }}>
+                      {T.translate(
+                        "edit_company.placeholders.sponsored_project"
+                      )}
+                    </span>
+                  )
+                }
               >
-                {T.translate("edit_company.add_project_sponsorship")}
-              </button>
-            </div>
-          </div>
-        )}
-        {entity.project_sponsorships.length > 0 &&
-          window.APP_CLIENT_NAME == "openstack" && (
-            <div className="row form-group">
-              <div className="col-md-12">
-                <Table
-                  options={table_options}
-                  data={entity.project_sponsorships.map((sp) => ({
-                    ...sp,
-                    project_name: sp.sponsored_project.name
-                  }))}
-                  columns={columns}
-                />
-              </div>
-            </div>
-          )}
-        <div className="row form-group">
-          <div className="col-md-6">
-            <label> {T.translate("edit_company.logo")} </label>
-            <UploadInput
-              value={entity.logo}
-              handleUpload={this.handleUploadLogo}
-              handleRemove={() => this.handleRemoveFile("logo")}
-              className="dropzone col-md-6"
-              multiple={false}
-              accept="image/*"
-            />
-          </div>
-          <div className="col-md-6">
-            <label> {T.translate("edit_company.big_logo")} </label>
-            <UploadInput
-              value={entity.big_logo}
-              handleUpload={this.handleUploadBigLogo}
-              handleRemove={() => this.handleRemoveFile("big_logo")}
-              className="dropzone col-md-6"
-              multiple={false}
-              accept="image/*"
-            />
-          </div>
-        </div>
+                {sponsored_projects_ddl.map((sp) => (
+                  <MenuItem key={sp.value} value={sp.value}>
+                    {sp.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid2>
 
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit.bind(this, false)}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
+          <Grid2 size={4}>
+            <InputLabel htmlFor="sponsorship_type">
+              {T.translate("edit_company.sponsorship_type")}
+            </InputLabel>
+            <FormControl fullWidth>
+              <Select
+                id="sponsorship_type"
+                value={selectedSponsorShipType ?? ""}
+                onChange={(ev) => setSelectedSponsorShipType(ev.target.value)}
+                displayEmpty
+              >
+                {sponsorShipTypes.length === 0 ? (
+                  <MenuItem value="" disabled>
+                    {T.translate("edit_company.placeholders.no_options")}
+                  </MenuItem>
+                ) : (
+                  sponsorShipTypes.map((st) => (
+                    <MenuItem key={st.value} value={st.value}>
+                      {st.label}
+                    </MenuItem>
+                  ))
+                )}
+              </Select>
+            </FormControl>
+          </Grid2>
+          <Grid2 size={4}>
+            <InputLabel sx={{ visibility: "hidden" }}>&nbsp;</InputLabel>
+            <Button
+              variant="contained"
+              onClick={handleAddSponsorshipType}
+              fullWidth
+              sx={{ height: "56px" }}
+            >
+              {T.translate("edit_company.add_project_sponsorship")}
+            </Button>
+          </Grid2>
+        </Grid2>
+      )}
+
+      {initialEntity.project_sponsorships?.length > 0 &&
+        window.APP_CLIENT_NAME == "openstack" && (
+          <Grid2 size={12} mb={2}>
+            <Table
+              data={initialEntity.project_sponsorships.map((sp) => ({
+                ...sp,
+                project_name: sp.sponsored_project.name
+              }))}
+              columns={sponsored_project_columns}
+              onDelete={handleDeleteSponsorship}
             />
-          </div>
-        </div>
-      </form>
-    );
-  }
-}
+          </Grid2>
+        )}
+
+      <Grid2 container size={12} mt={2} mb={2}>
+        <Grid2 size={6}>
+          <InputLabel>{T.translate("edit_company.logo")}</InputLabel>
+          <UploadInputV3
+            id="logo"
+            name="logo"
+            value={getLogoValue(formik.values.logo)}
+            onUploadComplete={handleLogoUploadComplete("logo")}
+            onUploadStart={() => setIsSaving(true)}
+            onError={() => setIsSaving(false)}
+            onRemove={handleLogoRemove("logo")}
+            postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
+            djsConfig={{ withCredentials: true }}
+            maxFiles={1}
+            canAdd={!formik.values.logo}
+            mediaType={{
+              type: { allowed_extensions: ["jpg", "jpeg", "png", "gif", "svg"] }
+            }}
+          />
+        </Grid2>
+        <Grid2 size={6}>
+          <InputLabel>{T.translate("edit_company.big_logo")}</InputLabel>
+          <UploadInputV3
+            id="big_logo"
+            name="big_logo"
+            value={getLogoValue(formik.values.big_logo)}
+            onUploadComplete={handleLogoUploadComplete("big_logo")}
+            onUploadStart={() => setIsSaving(true)}
+            onError={() => setIsSaving(false)}
+            onRemove={handleLogoRemove("big_logo")}
+            postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
+            djsConfig={{ withCredentials: true }}
+            maxFiles={1}
+            canAdd={!formik.values.big_logo}
+            mediaType={{
+              type: { allowed_extensions: ["jpg", "jpeg", "png", "gif", "svg"] }
+            }}
+          />
+        </Grid2>
+      </Grid2>
+    </Grid2>
+  );
+};
+
+CompanyForm.propTypes = {
+  initialEntity: PropTypes.object.isRequired,
+  sponsoredProjects: PropTypes.array,
+  onAttach: PropTypes.func.isRequired,
+  onRemove: PropTypes.func.isRequired,
+  onAddSponsorship: PropTypes.func,
+  onDeleteSponsorship: PropTypes.func,
+  isSaving: PropTypes.bool,
+  setIsSaving: PropTypes.func.isRequired
+};
 
 export default CompanyForm;

@@ -93,6 +93,7 @@
     "n_a": "N/A",
     "to": "To",
     "from": "From",
+    "add_new": "Add new",
     "placeholders": {
       "search": "Search...",
       "search_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id",

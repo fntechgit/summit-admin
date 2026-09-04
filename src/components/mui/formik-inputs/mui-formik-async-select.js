@@ -9,7 +9,7 @@ import { useField } from "formik";
 import { DEBOUNCE_WAIT_250 } from "../../../utils/constants";
 
 // Stays local: uicore's async-select.js lacks defaultOptions, filterOptions,
-// and the plain-value-sync effect this component has. company-dialog.js
+// and the plain-value-sync effect this component has. company-form.js
 // depends on defaultOptions specifically. Deferred as a follow-up rather
 // than migrated blindly in this pass.
 const MuiFormikAsyncAutocomplete = ({
