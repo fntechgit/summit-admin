@@ -44,6 +44,7 @@ const TrackChairSettingsTab = ({
           control={
             <Checkbox
               id="allow_track_change_requests"
+              name="allow_track_change_requests"
               checked={values.allow_track_change_requests}
               onChange={handleChange}
             />
