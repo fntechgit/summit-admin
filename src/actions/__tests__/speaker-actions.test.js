@@ -5,16 +5,23 @@ import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import {
   deleteRequest,
-  putRequest
+  putRequest,
+  getRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { removeAttachedPicture, saveSpeaker } from "../speaker-actions";
+import {
+  removeAttachedPicture,
+  saveSpeaker,
+  getSpeakersBySummit,
+  sendSpeakerEmails
+} from "../speaker-actions";
 import * as methods from "../../utils/methods";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   __esModule: true,
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
   deleteRequest: jest.fn(),
-  putRequest: jest.fn()
+  putRequest: jest.fn(),
+  getRequest: jest.fn()
 }));
 
 const SPEAKER_ID = 42;
@@ -142,5 +149,152 @@ describe("saveSpeaker", () => {
     resolveRequest();
     await dispatched;
     expect(settled).toBe(true);
+  });
+});
+
+describe("getSpeakersBySummit - published filter", () => {
+  const mockStore = configureStore([thunk]);
+  const SUMMIT_ID = 1;
+  let capturedRequests;
+
+  const stateWithSummit = {
+    currentSummitState: {
+      currentSummit: { id: SUMMIT_ID, name: "Test Summit" }
+    }
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    window.API_BASE_URL = "https://api.test";
+    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
+    capturedRequests = [];
+    getRequest.mockImplementation(
+      (_requestAction, receiveAction, url) => (params) => (dispatch) => {
+        capturedRequests.push({ url, params });
+        dispatch(receiveAction({ response: {} }));
+        return Promise.resolve({ response: {} });
+      }
+    );
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    delete window.API_BASE_URL;
+  });
+
+  const listRequestFor = () =>
+    capturedRequests.find((r) => r.url.endsWith("/speakers"));
+  const countRequestFor = () =>
+    capturedRequests.find((r) => r.url.endsWith("/speakers/all/events/count"));
+
+  it.each([
+    ["published", "true"],
+    ["not_published", "false"]
+  ])(
+    "maps the '%s' filter to has_published_presentations==%s on both the list and count request",
+    async (selectionValue, expectedFlag) => {
+      const store = mockStore(stateWithSummit);
+
+      await store.dispatch(
+        getSpeakersBySummit(null, 1, 10, "full_name", 1, {
+          selectionStatusFilter: [selectionValue]
+        })
+      );
+
+      const expected = `has_published_presentations==${expectedFlag}`;
+      expect(listRequestFor().params["filter[]"]).toContain(expected);
+      expect(countRequestFor().params["filter[]"]).toContain(expected);
+    }
+  );
+
+  it("does not regress the existing only_accepted combination", async () => {
+    const store = mockStore(stateWithSummit);
+
+    await store.dispatch(
+      getSpeakersBySummit(null, 1, 10, "full_name", 1, {
+        selectionStatusFilter: ["only_accepted"]
+      })
+    );
+
+    const filter = listRequestFor().params["filter[]"];
+    expect(filter).toEqual(
+      expect.arrayContaining([
+        "has_rejected_presentations==false",
+        "has_accepted_presentations==true",
+        "has_alternate_presentations==false"
+      ])
+    );
+    expect(filter.join(",")).not.toContain("has_published_presentations");
+  });
+});
+
+describe("sendSpeakerEmails - published filter", () => {
+  const mockStore = configureStore([thunk]);
+  const SUMMIT_ID = 1;
+  let capturedRequests;
+
+  const baseState = {
+    currentSummitState: {
+      currentSummit: { id: SUMMIT_ID, name: "Test Summit" }
+    },
+    currentSummitSpeakersListState: {
+      selectedAll: true,
+      selectedItems: [],
+      excludedItems: [],
+      currentFlowEvent: "SPEAKER_FLOW_EVENT"
+    }
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    window.API_BASE_URL = "https://api.test";
+    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
+    capturedRequests = [];
+    putRequest.mockImplementation(
+      (_requestAction, receiveAction, url, payload) =>
+        (params) =>
+        (dispatch) => {
+          capturedRequests.push({ url, params, payload });
+          dispatch(receiveAction({ response: {} }));
+          return Promise.resolve({ response: {} });
+        }
+    );
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    delete window.API_BASE_URL;
+  });
+
+  it("forwards the selected Published/Not Published filter unchanged into the bulk-email request", async () => {
+    const store = mockStore(baseState);
+
+    await store.dispatch(
+      sendSpeakerEmails(null, { selectionStatusFilter: ["published"] })
+    );
+
+    expect(capturedRequests[0].params["filter[]"]).toContain(
+      "has_published_presentations==true"
+    );
+  });
+
+  it("forwards the Published filter through original_filter when specific speakers are selected", async () => {
+    const store = mockStore({
+      ...baseState,
+      currentSummitSpeakersListState: {
+        selectedAll: false,
+        selectedItems: [101, 202],
+        excludedItems: [],
+        currentFlowEvent: "SPEAKER_FLOW_EVENT"
+      }
+    });
+
+    await store.dispatch(
+      sendSpeakerEmails(null, { selectionStatusFilter: ["published"] })
+    );
+
+    expect(capturedRequests[0].payload.original_filter).toContain(
+      "has_published_presentations==true"
+    );
   });
 });
