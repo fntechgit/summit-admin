@@ -261,6 +261,7 @@ export const exportSummitSubmitters =
  * @param testRecipient
  * @param excerptRecipient
  * @param shouldSendCopy2Submitter
+ * @param shouldResendSpeakers
  * @param source
  * @param promoCodeStrategy
  * @param promocodeSpecification
@@ -275,6 +276,8 @@ export const sendSubmitterEmails =
     excerptRecipient = "",
     // not used only left to keep the signature
     shouldSendCopy2Submitter = false,
+    // not used only left to keep the signature
+    shouldResendSpeakers = false,
     source = null,
     promoCodeStrategy = null,
     promocodeSpecification = null
