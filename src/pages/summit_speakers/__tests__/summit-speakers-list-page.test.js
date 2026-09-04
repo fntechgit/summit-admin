@@ -57,17 +57,42 @@ describe("SummitSpeakersListPage.handleChangeSelectionStatusFilter", () => {
     }
   );
 
+  it("leaves non-exclusive multi-select combinations unchanged", () => {
+    const getSpeakersBySummit = jest.fn();
+    const instance = buildInstance({ getSpeakersBySummit });
+
+    instance.handleChangeSelectionStatusFilter({
+      target: { value: ["accepted", "rejected"] }
+    });
+
+    const filtersArg = getSpeakersBySummit.mock.calls[0][5];
+    expect(filtersArg.selectionStatusFilter).toEqual(["accepted", "rejected"]);
+  });
+
+  // The underlying isMulti dropdown (openstack-uicore-foundation Dropdown) always reports
+  // the cumulative selection (previous + newly clicked value), never just the delta - see
+  // its handleChange, which maps over the full react-select value array. So switching
+  // between any two exclusive values without clearing first arrives here with BOTH
+  // present. Resolution must be based on which one was already active (the previous
+  // selection), not a fixed priority order - a fixed order would always favor the same
+  // value regardless of which one was just clicked. This applies uniformly to every
+  // exclusive pair, not just Published/Not Published.
   it.each([
-    [["only_accepted", "only_rejected"], ["only_rejected"]],
-    [
-      ["accepted", "rejected"],
-      ["accepted", "rejected"]
-    ]
+    [["published"], ["published", "not_published"], ["not_published"]],
+    [["not_published"], ["not_published", "published"], ["published"]],
+    [["only_rejected"], ["only_rejected", "only_accepted"], ["only_accepted"]],
+    [["only_accepted"], ["only_accepted", "published"], ["published"]]
   ])(
-    "leaves pre-existing selection-status combinations unchanged: %j -> %j",
-    (selectedValues, expected) => {
+    "resolves to the newly picked value: previously %j, dropdown reports %j -> %j",
+    (previousSelectionStatusFilter, selectedValues, expected) => {
       const getSpeakersBySummit = jest.fn();
-      const instance = buildInstance({ getSpeakersBySummit });
+      const instance = buildInstance({
+        getSpeakersBySummit,
+        speakersProps: {
+          ...buildSubjectProps(),
+          selectionStatusFilter: previousSelectionStatusFilter
+        }
+      });
 
       instance.handleChangeSelectionStatusFilter({
         target: { value: selectedValues }

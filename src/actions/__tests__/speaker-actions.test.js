@@ -251,11 +251,13 @@ describe("sendSpeakerEmails - published filter", () => {
     jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
     capturedRequests = [];
     putRequest.mockImplementation(
-      (_requestAction, receiveAction, url) => (params) => (dispatch) => {
-        capturedRequests.push({ url, params });
-        dispatch(receiveAction({ response: {} }));
-        return Promise.resolve({ response: {} });
-      }
+      (_requestAction, receiveAction, url, payload) =>
+        (params) =>
+        (dispatch) => {
+          capturedRequests.push({ url, params, payload });
+          dispatch(receiveAction({ response: {} }));
+          return Promise.resolve({ response: {} });
+        }
     );
   });
 
@@ -272,6 +274,26 @@ describe("sendSpeakerEmails - published filter", () => {
     );
 
     expect(capturedRequests[0].params["filter[]"]).toContain(
+      "has_published_presentations==true"
+    );
+  });
+
+  it("forwards the Published filter through original_filter when specific speakers are selected", async () => {
+    const store = mockStore({
+      ...baseState,
+      currentSummitSpeakersListState: {
+        selectedAll: false,
+        selectedItems: [101, 202],
+        excludedItems: [],
+        currentFlowEvent: "SPEAKER_FLOW_EVENT"
+      }
+    });
+
+    await store.dispatch(
+      sendSpeakerEmails(null, { selectionStatusFilter: ["published"] })
+    );
+
+    expect(capturedRequests[0].payload.original_filter).toContain(
       "has_published_presentations==true"
     );
   });

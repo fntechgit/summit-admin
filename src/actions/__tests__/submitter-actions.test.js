@@ -121,11 +121,13 @@ describe("sendSubmitterEmails - published filter", () => {
     jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
     capturedRequests = [];
     putRequest.mockImplementation(
-      (_requestAction, receiveAction, url) => (params) => (dispatch) => {
-        capturedRequests.push({ url, params });
-        dispatch(receiveAction({ response: {} }));
-        return Promise.resolve({ response: {} });
-      }
+      (_requestAction, receiveAction, url, payload) =>
+        (params) =>
+        (dispatch) => {
+          capturedRequests.push({ url, params, payload });
+          dispatch(receiveAction({ response: {} }));
+          return Promise.resolve({ response: {} });
+        }
     );
   });
 
@@ -142,6 +144,26 @@ describe("sendSubmitterEmails - published filter", () => {
     );
 
     expect(capturedRequests[0].params["filter[]"]).toContain(
+      "has_published_presentations==true"
+    );
+  });
+
+  it("forwards the Published filter through original_filter when specific submitters are selected", async () => {
+    const store = mockStore({
+      ...baseState,
+      currentSummitSubmittersListState: {
+        selectedAll: false,
+        selectedItems: [101, 202],
+        excludedItems: [],
+        currentFlowEvent: "SUBMITTER_FLOW_EVENT"
+      }
+    });
+
+    await store.dispatch(
+      sendSubmitterEmails(null, { selectionStatusFilter: ["published"] })
+    );
+
+    expect(capturedRequests[0].payload.original_filter).toContain(
       "has_published_presentations==true"
     );
   });
