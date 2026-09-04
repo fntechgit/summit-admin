@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 // Smooth scroll for window
 function smoothScrollTo(targetScrollTop, duration) {
@@ -39,14 +39,27 @@ const useScrollToError = (formik, relative = false, setActiveTab) => {
   const errorArray = Object.keys(errors);
   const errorCount = errorArray.length;
 
+  // Prior state, so we can tell "errors just appeared" from "still correcting the same ones".
+  const prevIsSubmittingRef = useRef(isSubmitting);
+  const prevHadErrorsRef = useRef(errorCount > 0);
+
   useEffect(() => {
+    const prevIsSubmitting = prevIsSubmittingRef.current;
+    const prevHadErrors = prevHadErrorsRef.current;
+    prevIsSubmittingRef.current = isSubmitting;
+    prevHadErrorsRef.current = errorCount > 0;
+
     if (isValid || errorCount === 0) return;
+
+    const submitJustSettled = prevIsSubmitting && !isSubmitting;
+    const errorsJustAppeared = !isSubmitting && !prevHadErrors;
+    if (!submitJustSettled && !errorsJustAppeared) return;
 
     const scrollToFirstVisible = () => {
       const elementsSorted = errorArray
         .reduce((result, error) => {
           const element = document.querySelector(`[name='${error}']`);
-          if (!element) return result;
+          if (!element || element.offsetParent === null) return result;
 
           const rect = element.getBoundingClientRect();
           const absoluteTop = rect.top + window.pageYOffset;
@@ -109,7 +122,7 @@ const useScrollToError = (formik, relative = false, setActiveTab) => {
 
     setActiveTab(tabValue);
     afterNextLayout(scrollToFirstVisible);
-  }, [isSubmitting]);
+  }, [isSubmitting, errorCount]);
 };
 
 export default useScrollToError;

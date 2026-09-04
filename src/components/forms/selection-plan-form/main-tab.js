@@ -206,6 +206,7 @@ const MainTab = ({ hidden, currentSummit }) => {
           </label>
           <TextEditorV3
             id="submission_period_disclaimer"
+            name="submission_period_disclaimer"
             value={values.submission_period_disclaimer}
             onChange={handleChange}
             error={hasErrors("submission_period_disclaimer")}
