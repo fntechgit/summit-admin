@@ -90,6 +90,37 @@ const EXCLUSIVE_SELECTION_STATUS_VALUES = SELECTION_STATUS_OPTIONS.map(
   (option) => option.value
 ).filter((value) => !NON_EXCLUSIVE_SELECTION_STATUS_VALUES.includes(value));
 
+// The isMulti dropdown reports the full selection (previous values + the one
+// just clicked, or previous values minus the one just removed) - not just the
+// delta. Diff against `previousSelection` to find what was actually just
+// clicked, then branch on its type:
+//  - a newly added exclusive value collapses the selection down to just itself
+//  - a newly added non-exclusive value drops any leftover exclusive value
+//  - nothing added (a chip was removed) - the reported selection is already correct
+const resolveExclusiveSelectionStatusFilter = (
+  selection,
+  previousSelection
+) => {
+  const addedValues = selection.filter(
+    (value) => !previousSelection.includes(value)
+  );
+
+  const addedExclusiveValue = addedValues.find((value) =>
+    EXCLUSIVE_SELECTION_STATUS_VALUES.includes(value)
+  );
+  if (addedExclusiveValue) {
+    return [addedExclusiveValue];
+  }
+
+  if (addedValues.length > 0) {
+    return selection.filter((value) =>
+      NON_EXCLUSIVE_SELECTION_STATUS_VALUES.includes(value)
+    );
+  }
+
+  return selection;
+};
+
 class SummitSpeakersListPage extends React.Component {
   constructor(props) {
     super(props);
@@ -506,22 +537,10 @@ class SummitSpeakersListPage extends React.Component {
       mediaUploadTypeFilter
     } = this.getSubjectProps();
 
-    // the isMulti dropdown reports the full selection (previous values + the
-    // one just clicked), not just the delta, so more than one exclusive value
-    // can be present here. Prefer whichever wasn't already selected - that's
-    // the one just picked - falling back to the first if none/more than one
-    // is new.
-    const selectedExclusiveValues = rawSelectionStatusFilter.filter((value) =>
-      EXCLUSIVE_SELECTION_STATUS_VALUES.includes(value)
+    const newSelectionStatusFilter = resolveExclusiveSelectionStatusFilter(
+      rawSelectionStatusFilter,
+      previousSelectionStatusFilter
     );
-    const newSelectionStatusFilter =
-      selectedExclusiveValues.length > 0
-        ? [
-            selectedExclusiveValues.find(
-              (value) => !previousSelectionStatusFilter.includes(value)
-            ) ?? selectedExclusiveValues[0]
-          ]
-        : rawSelectionStatusFilter;
 
     const {
       speakerFilters: { orAndFilter }

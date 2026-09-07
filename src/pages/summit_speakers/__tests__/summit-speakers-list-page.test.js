@@ -102,4 +102,32 @@ describe("SummitSpeakersListPage.handleChangeSelectionStatusFilter", () => {
       expect(filtersArg.selectionStatusFilter).toEqual(expected);
     }
   );
+
+  // A newly picked non-exclusive value must drop a leftover exclusive one just
+  // as reliably as a newly picked exclusive value drops a leftover non-exclusive
+  // one (covered above) - otherwise the plain click is silently swallowed.
+  it.each([
+    [["published"], ["published", "accepted"], ["accepted"]],
+    [["not_published"], ["not_published", "alternate"], ["alternate"]],
+    [["published"], ["published", "rejected"], ["rejected"]]
+  ])(
+    "switches from an exclusive status to a plain status: previously %j, dropdown reports %j -> %j",
+    (previousSelectionStatusFilter, selectedValues, expected) => {
+      const getSpeakersBySummit = jest.fn();
+      const instance = buildInstance({
+        getSpeakersBySummit,
+        speakersProps: {
+          ...buildSubjectProps(),
+          selectionStatusFilter: previousSelectionStatusFilter
+        }
+      });
+
+      instance.handleChangeSelectionStatusFilter({
+        target: { value: selectedValues }
+      });
+
+      const filtersArg = getSpeakersBySummit.mock.calls[0][5];
+      expect(filtersArg.selectionStatusFilter).toEqual(expected);
+    }
+  );
 });
