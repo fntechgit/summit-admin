@@ -25,6 +25,7 @@ import MuiFormItemTable, {
 } from "openstack-uicore-foundation/lib/components/mui/form-item-table";
 import { DISCOUNT_TYPES } from "../../../../../../../utils/constants";
 import showConfirmDialog from "../../../../../../../components/mui/showConfirmDialog";
+import { buildGlobalQuantitySchema } from "./quantity-schema";
 
 const parseValue = (item, timeZone) => {
   switch (item.type) {
@@ -146,8 +147,10 @@ const buildInitialValues = (form, timeZone) => {
     // add notes
     acc[`i-${item.form_item_id}-c-global-f-notes`] = item.notes || "";
     // if no quantity inputs we add the global quantity input
-    acc[`i-${item.form_item_id}-c-global-f-quantity`] =
-      item.quantity || item.default_quantity || 0;
+    const hasStock = !item.is_sold_out && item.remaining_quantity_sponsor !== 0;
+    acc[`i-${item.form_item_id}-c-global-f-quantity`] = hasStock
+      ? item.quantity || item.default_quantity || 0
+      : item.quantity || 0;
     // custom rate
     acc[`i-${item.form_item_id}-c-global-f-custom_rate`] =
       item.custom_rate || item.rates.custom || 0;
@@ -168,16 +171,7 @@ const buildValidationSchema = (items) => {
     // notes
     acc[`i-${item.form_item_id}-c-global-f-notes`] = yup.string();
     // validation for the global quantity input
-    let globalQtySchema = yup.number().min(0, " ");
-
-    if (item.quantity_limit_per_sponsor > 0) {
-      globalQtySchema = globalQtySchema.max(
-        item.quantity_limit_per_sponsor,
-        " "
-      );
-    }
-    globalQtySchema = globalQtySchema.required(" ");
-    acc[quantityKey] = globalQtySchema;
+    acc[quantityKey] = buildGlobalQuantitySchema(item);
     // custom rate
     acc[`i-${item.form_item_id}-c-global-f-custom_rate`] = yup.number();
 
