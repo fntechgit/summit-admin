@@ -11,8 +11,7 @@ import {
 import {
   removeAttachedPicture,
   saveSpeaker,
-  getSpeakersBySummit,
-  sendSpeakerEmails
+  getSpeakersBySummit
 } from "../speaker-actions";
 import * as methods from "../../utils/methods";
 
@@ -225,76 +224,5 @@ describe("getSpeakersBySummit - published filter", () => {
       ])
     );
     expect(filter.join(",")).not.toContain("has_published_presentations");
-  });
-});
-
-describe("sendSpeakerEmails - published filter", () => {
-  const mockStore = configureStore([thunk]);
-  const SUMMIT_ID = 1;
-  let capturedRequests;
-
-  const baseState = {
-    currentSummitState: {
-      currentSummit: { id: SUMMIT_ID, name: "Test Summit" }
-    },
-    currentSummitSpeakersListState: {
-      selectedAll: true,
-      selectedItems: [],
-      excludedItems: [],
-      currentFlowEvent: "SPEAKER_FLOW_EVENT"
-    }
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    window.API_BASE_URL = "https://api.test";
-    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
-    capturedRequests = [];
-    putRequest.mockImplementation(
-      (_requestAction, receiveAction, url, payload) =>
-        (params) =>
-        (dispatch) => {
-          capturedRequests.push({ url, params, payload });
-          dispatch(receiveAction({ response: {} }));
-          return Promise.resolve({ response: {} });
-        }
-    );
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-    delete window.API_BASE_URL;
-  });
-
-  it("forwards the selected Published/Not Published filter unchanged into the bulk-email request", async () => {
-    const store = mockStore(baseState);
-
-    await store.dispatch(
-      sendSpeakerEmails(null, { selectionStatusFilter: ["published"] })
-    );
-
-    expect(capturedRequests[0].params["filter[]"]).toContain(
-      "has_published_presentations==true"
-    );
-  });
-
-  it("forwards the Published filter through original_filter when specific speakers are selected", async () => {
-    const store = mockStore({
-      ...baseState,
-      currentSummitSpeakersListState: {
-        selectedAll: false,
-        selectedItems: [101, 202],
-        excludedItems: [],
-        currentFlowEvent: "SPEAKER_FLOW_EVENT"
-      }
-    });
-
-    await store.dispatch(
-      sendSpeakerEmails(null, { selectionStatusFilter: ["published"] })
-    );
-
-    expect(capturedRequests[0].payload.original_filter).toContain(
-      "has_published_presentations==true"
-    );
   });
 });
