@@ -35,25 +35,24 @@ function afterNextLayout(callback) {
 }
 
 const useScrollToError = (formik, relative = false, setActiveTab) => {
-  const { errors, isValid, isSubmitting } = formik;
+  const { errors, isValid, submitCount } = formik;
   const errorArray = Object.keys(errors);
   const errorCount = errorArray.length;
 
-  // Prior state, so we can tell "errors just appeared" from "still correcting the same ones".
-  const prevIsSubmittingRef = useRef(isSubmitting);
-  const prevHadErrorsRef = useRef(errorCount > 0);
+  // submitCount change marks "the user tried to save"
+  // armedRef stays true across renders until the first render with errors
+  const prevSubmitCountRef = useRef(submitCount);
+  const armedRef = useRef(false);
 
   useEffect(() => {
-    const prevIsSubmitting = prevIsSubmittingRef.current;
-    const prevHadErrors = prevHadErrorsRef.current;
-    prevIsSubmittingRef.current = isSubmitting;
-    prevHadErrorsRef.current = errorCount > 0;
+    if (submitCount !== prevSubmitCountRef.current) {
+      prevSubmitCountRef.current = submitCount;
+      armedRef.current = true;
+    }
 
     if (isValid || errorCount === 0) return;
-
-    const submitJustSettled = prevIsSubmitting && !isSubmitting;
-    const errorsJustAppeared = !isSubmitting && !prevHadErrors;
-    if (!submitJustSettled && !errorsJustAppeared) return;
+    if (!armedRef.current) return;
+    armedRef.current = false;
 
     const scrollToFirstVisible = () => {
       const elementsSorted = errorArray
@@ -122,7 +121,7 @@ const useScrollToError = (formik, relative = false, setActiveTab) => {
 
     setActiveTab(tabValue);
     afterNextLayout(scrollToFirstVisible);
-  }, [isSubmitting, errorCount]);
+  }, [submitCount, errorCount]);
 };
 
 export default useScrollToError;

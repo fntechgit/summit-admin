@@ -2,7 +2,7 @@
 // lightweight component wrapper instead.
 import "@testing-library/jest-dom";
 import React, { useState } from "react";
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useFormik } from "formik";
 import useScrollToError from "../useScrollToError";
 
@@ -227,6 +227,25 @@ describe("useScrollToError (tab-aware)", () => {
 
     expect(onActiveTabChange).toHaveBeenCalledWith("a");
     expect(window.HTMLElement.prototype.scrollIntoView).toHaveBeenCalled();
+  });
+
+  it("does not scroll when errors appear from validateOnChange without a submit", async () => {
+    render(<VisibleHarness />);
+
+    const input = document.querySelector("[name='name']");
+
+    // Clear the required error, then let validateOnChange reintroduce it —
+    // mirrors typing/blur reviving errors on other fields mid-edit, with no
+    // click of "save" ever happening.
+    await act(async () => {
+      fireEvent.change(input, { target: { value: "a" } });
+    });
+    await act(async () => {
+      fireEvent.change(input, { target: { value: "" } });
+    });
+    await flushDoubleRaf();
+
+    expect(window.HTMLElement.prototype.scrollIntoView).not.toHaveBeenCalled();
   });
 
   it("behaves as before when setActiveTab is not passed", async () => {
