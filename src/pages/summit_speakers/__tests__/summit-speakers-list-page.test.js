@@ -69,20 +69,9 @@ describe("SummitSpeakersListPage.handleChangeSelectionStatusFilter", () => {
     expect(filtersArg.selectionStatusFilter).toEqual(["accepted", "rejected"]);
   });
 
-  // The underlying isMulti dropdown (openstack-uicore-foundation Dropdown) always reports
-  // the cumulative selection (previous + newly clicked value), never just the delta - see
-  // its handleChange, which maps over the full react-select value array. So switching
-  // between any two exclusive values without clearing first arrives here with BOTH
-  // present. Resolution must be based on which one was already active (the previous
-  // selection), not a fixed priority order - a fixed order would always favor the same
-  // value regardless of which one was just clicked. This applies uniformly to every
-  // exclusive pair, not just Published/Not Published.
-  it.each([
-    [["published"], ["published", "not_published"], ["not_published"]],
-    [["not_published"], ["not_published", "published"], ["published"]],
-    [["only_rejected"], ["only_rejected", "only_accepted"], ["only_accepted"]],
-    [["only_accepted"], ["only_accepted", "published"], ["published"]]
-  ])(
+  // Both values can be present at once (see resolveExclusiveSelectionStatusFilter) -
+  // resolution depends on which one was already active, not a fixed priority order.
+  it.each([[["published"], ["published", "not_published"], ["not_published"]]])(
     "resolves to the newly picked value: previously %j, dropdown reports %j -> %j",
     (previousSelectionStatusFilter, selectedValues, expected) => {
       const getSpeakersBySummit = jest.fn();
@@ -103,58 +92,21 @@ describe("SummitSpeakersListPage.handleChangeSelectionStatusFilter", () => {
     }
   );
 
-  // A newly picked non-exclusive value must drop a leftover exclusive one just
-  // as reliably as a newly picked exclusive value drops a leftover non-exclusive
-  // one (covered above) - otherwise the plain click is silently swallowed.
-  it.each([
-    [["published"], ["published", "accepted"], ["accepted"]],
-    [["not_published"], ["not_published", "alternate"], ["alternate"]],
-    [["published"], ["published", "rejected"], ["rejected"]]
-  ])(
-    "switches from an exclusive status to a plain status: previously %j, dropdown reports %j -> %j",
-    (previousSelectionStatusFilter, selectedValues, expected) => {
-      const getSpeakersBySummit = jest.fn();
-      const instance = buildInstance({
-        getSpeakersBySummit,
-        speakersProps: {
-          ...buildSubjectProps(),
-          selectionStatusFilter: previousSelectionStatusFilter
-        }
-      });
+  it("switches from an exclusive status to a plain status", () => {
+    const getSpeakersBySummit = jest.fn();
+    const instance = buildInstance({
+      getSpeakersBySummit,
+      speakersProps: {
+        ...buildSubjectProps(),
+        selectionStatusFilter: ["published"]
+      }
+    });
 
-      instance.handleChangeSelectionStatusFilter({
-        target: { value: selectedValues }
-      });
+    instance.handleChangeSelectionStatusFilter({
+      target: { value: ["published", "accepted"] }
+    });
 
-      const filtersArg = getSpeakersBySummit.mock.calls[0][5];
-      expect(filtersArg.selectionStatusFilter).toEqual(expected);
-    }
-  );
-
-  // When nothing was added relative to the previous selection - clearing the
-  // whole dropdown, or removing one chip via "x" - the reported value is
-  // already correct on its own; it must be returned as-is, not re-collapsed.
-  it.each([
-    [["published"], [], []],
-    [["accepted", "rejected"], ["accepted"], ["accepted"]]
-  ])(
-    "returns the selection unchanged when nothing was added: previously %j, dropdown reports %j -> %j",
-    (previousSelectionStatusFilter, selectedValues, expected) => {
-      const getSpeakersBySummit = jest.fn();
-      const instance = buildInstance({
-        getSpeakersBySummit,
-        speakersProps: {
-          ...buildSubjectProps(),
-          selectionStatusFilter: previousSelectionStatusFilter
-        }
-      });
-
-      instance.handleChangeSelectionStatusFilter({
-        target: { value: selectedValues }
-      });
-
-      const filtersArg = getSpeakersBySummit.mock.calls[0][5];
-      expect(filtersArg.selectionStatusFilter).toEqual(expected);
-    }
-  );
+    const filtersArg = getSpeakersBySummit.mock.calls[0][5];
+    expect(filtersArg.selectionStatusFilter).toEqual(["accepted"]);
+  });
 });

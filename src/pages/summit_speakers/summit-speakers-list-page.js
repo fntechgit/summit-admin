@@ -62,8 +62,6 @@ import MediaTypeFilter from "../../components/filters/media-type-filter";
 
 import "../../styles/speakers-list-page.less";
 
-// Static - not dependent on props/state - so it's declared once here instead of
-// being rebuilt on every render.
 const SELECTION_STATUS_OPTIONS = [
   { label: "Accepted", value: "accepted" },
   { label: "Alternate", value: "alternate" },
@@ -79,8 +77,7 @@ const SELECTION_STATUS_OPTIONS = [
 ];
 
 // "accepted"/"alternate"/"rejected" combine freely (see parseFilters); every
-// other selection-status value is mutually exclusive with the rest - picking
-// one collapses the selection down to just that value.
+// other value is mutually exclusive with the rest.
 const NON_EXCLUSIVE_SELECTION_STATUS_VALUES = [
   "accepted",
   "alternate",
@@ -90,13 +87,8 @@ const EXCLUSIVE_SELECTION_STATUS_VALUES = SELECTION_STATUS_OPTIONS.map(
   (option) => option.value
 ).filter((value) => !NON_EXCLUSIVE_SELECTION_STATUS_VALUES.includes(value));
 
-// The isMulti dropdown reports the full selection (previous values + the one
-// just clicked, or previous values minus the one just removed) - not just the
-// delta. Diff against `previousSelection` to find what was actually just
-// clicked, then branch on its type:
-//  - a newly added exclusive value collapses the selection down to just itself
-//  - a newly added non-exclusive value drops any leftover exclusive value
-//  - nothing added (a chip was removed) - the reported selection is already correct
+// The isMulti dropdown reports the full selection, not just what changed, so
+// we diff against the previous selection to find what was actually clicked.
 const resolveExclusiveSelectionStatusFilter = (
   selection,
   previousSelection
