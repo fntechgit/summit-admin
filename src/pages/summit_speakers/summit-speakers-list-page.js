@@ -62,6 +62,57 @@ import MediaTypeFilter from "../../components/filters/media-type-filter";
 
 import "../../styles/speakers-list-page.less";
 
+const SELECTION_STATUS_OPTIONS = [
+  { label: "Accepted", value: "accepted" },
+  { label: "Alternate", value: "alternate" },
+  { label: "Rejected", value: "rejected" },
+  { label: "Only Rejected", value: "only_rejected" },
+  { label: "Only Accepted", value: "only_accepted" },
+  { label: "Only Alternate", value: "only_alternate" },
+  { label: "Accepted/Alternate", value: "accepted_alternate" },
+  { label: "Accepted/Rejected", value: "accepted_rejected" },
+  { label: "Alternate/Rejected", value: "alternate_rejected" },
+  { label: "Published", value: "published" },
+  { label: "Not Published", value: "not_published" }
+];
+
+// "accepted"/"alternate"/"rejected" combine freely (see parseFilters); every
+// other value is mutually exclusive with the rest.
+const NON_EXCLUSIVE_SELECTION_STATUS_VALUES = [
+  "accepted",
+  "alternate",
+  "rejected"
+];
+const EXCLUSIVE_SELECTION_STATUS_VALUES = SELECTION_STATUS_OPTIONS.map(
+  (option) => option.value
+).filter((value) => !NON_EXCLUSIVE_SELECTION_STATUS_VALUES.includes(value));
+
+// The isMulti dropdown reports the full selection, not just what changed, so
+// we diff against the previous selection to find what was actually clicked.
+const resolveExclusiveSelectionStatusFilter = (
+  selection,
+  previousSelection
+) => {
+  const addedValues = selection.filter(
+    (value) => !previousSelection.includes(value)
+  );
+
+  const addedExclusiveValue = addedValues.find((value) =>
+    EXCLUSIVE_SELECTION_STATUS_VALUES.includes(value)
+  );
+  if (addedExclusiveValue) {
+    return [addedExclusiveValue];
+  }
+
+  if (addedValues.length > 0) {
+    return selection.filter((value) =>
+      NON_EXCLUSIVE_SELECTION_STATUS_VALUES.includes(value)
+    );
+  }
+
+  return selection;
+};
+
 class SummitSpeakersListPage extends React.Component {
   constructor(props) {
     super(props);
@@ -463,22 +514,7 @@ class SummitSpeakersListPage extends React.Component {
   }
 
   handleChangeSelectionStatusFilter(ev) {
-    let { value: newSelectionStatusFilter } = ev.target;
-    // exclusive filters tests ....
-    if (newSelectionStatusFilter.includes("only_rejected")) {
-      newSelectionStatusFilter = ["only_rejected"];
-    } else if (newSelectionStatusFilter.includes("only_alternate")) {
-      newSelectionStatusFilter = ["only_alternate"];
-    } else if (newSelectionStatusFilter.includes("only_accepted")) {
-      newSelectionStatusFilter = ["only_accepted"];
-    } else if (newSelectionStatusFilter.includes("accepted_alternate")) {
-      newSelectionStatusFilter = ["accepted_alternate"];
-    } else if (newSelectionStatusFilter.includes("accepted_rejected")) {
-      newSelectionStatusFilter = ["accepted_rejected"];
-    } else if (newSelectionStatusFilter.includes("alternate_rejected")) {
-      newSelectionStatusFilter = ["alternate_rejected"];
-    }
-
+    const { value: rawSelectionStatusFilter } = ev.target;
     const {
       term,
       order,
@@ -489,8 +525,15 @@ class SummitSpeakersListPage extends React.Component {
       trackFilter,
       trackGroupFilter,
       activityTypeFilter,
+      selectionStatusFilter: previousSelectionStatusFilter,
       mediaUploadTypeFilter
     } = this.getSubjectProps();
+
+    const newSelectionStatusFilter = resolveExclusiveSelectionStatusFilter(
+      rawSelectionStatusFilter,
+      previousSelectionStatusFilter
+    );
+
     const {
       speakerFilters: { orAndFilter }
     } = this.state;
@@ -784,17 +827,7 @@ class SummitSpeakersListPage extends React.Component {
       value: type.id
     }));
 
-    const selectionStatusDDL = [
-      { label: "Accepted", value: "accepted" },
-      { label: "Alternate", value: "alternate" },
-      { label: "Rejected", value: "rejected" },
-      { label: "Only Rejected", value: "only_rejected" },
-      { label: "Only Accepted", value: "only_accepted" },
-      { label: "Only Alternate", value: "only_alternate" },
-      { label: "Accepted/Alternate", value: "accepted_alternate" },
-      { label: "Accepted/Rejected", value: "accepted_rejected" },
-      { label: "Alternate/Rejected", value: "alternate_rejected" }
-    ];
+    const selectionStatusDDL = SELECTION_STATUS_OPTIONS;
 
     const speakerSubmitterSourceSelectorDDL = [
       {
