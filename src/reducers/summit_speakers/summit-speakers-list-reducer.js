@@ -54,6 +54,7 @@ const DEFAULT_STATE = {
   activityTypeFilter: [],
   selectionStatusFilter: [],
   mediaUploadTypeFilter: { operator: null, value: [] },
+  pendingSubmissionsFilter: null,
   currentFlowEvent: "",
   currentSummitId: null
 };
