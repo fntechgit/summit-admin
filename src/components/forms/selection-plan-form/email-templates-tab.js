@@ -37,6 +37,7 @@ const EmailTemplatesTab = ({ hidden }) => {
             </label>
             <EmailTemplateInput
               id="presentation_creator_notification_email_template"
+              name="presentation_creator_notification_email_template"
               value={values.presentation_creator_notification_email_template}
               placeholder={T.translate(
                 "edit_selection_plan.placeholders.creator_notification_email_select_template"
@@ -55,6 +56,7 @@ const EmailTemplatesTab = ({ hidden }) => {
             </label>
             <EmailTemplateInput
               id="presentation_moderator_notification_email_template"
+              name="presentation_moderator_notification_email_template"
               value={values.presentation_moderator_notification_email_template}
               placeholder={T.translate(
                 "edit_selection_plan.placeholders.moderator_notification_email_select_template"
@@ -73,6 +75,7 @@ const EmailTemplatesTab = ({ hidden }) => {
             </label>
             <EmailTemplateInput
               id="presentation_speaker_notification_email_template"
+              name="presentation_speaker_notification_email_template"
               value={values.presentation_speaker_notification_email_template}
               placeholder={T.translate(
                 "edit_selection_plan.placeholders.speaker_notification_email_select_template"

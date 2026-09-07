@@ -61,6 +61,8 @@ jest.mock("openstack-uicore-foundation/lib/utils/query-actions", () => ({
   queryEventTypes: jest.fn()
 }));
 
+jest.mock("../../../hooks/useScrollToError", () => jest.fn());
+
 jest.mock("../../mui/formik-inputs/mui-formik-datetimepicker", () => ({
   __esModule: true,
   default: ({ name }) => <div data-testid={name} />
