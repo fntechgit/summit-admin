@@ -21,7 +21,11 @@ import ExtraQuestionsMUI from "openstack-uicore-foundation/lib/components/extra-
 
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import useScrollToError from "../../../../../hooks/useScrollToError";
-import { getTypeValue, toSlug } from "../../../../../utils/extra-questions";
+import {
+  getTypeValue,
+  toSlug,
+  formatAnswerForSubmit
+} from "../../../../../utils/extra-questions";
 
 const formatExtraQuestions = (extraQuestions, sponsorQuestions) => {
   const values = {};
@@ -67,17 +71,17 @@ const EditBadgeScanPopup = ({ badgeScan, onClose, onSubmit }) => {
       // formatting extra questions before submit, and omit empty answers
       const extra_questions = Object.entries(extraValues)
         .map(([slug, value]) => {
-          const parts = slug.split("_").pop();
-          const question_id = parseInt(parts);
+          const question_id = parseInt(slug.split("_").pop());
+          const question = badgeScan.sponsor_extra_questions.find(
+            (q) => q.id === question_id
+          );
 
           return {
             question_id,
-            answer: Array.isArray(value)
-              ? value.filter((v) => v !== "").join(",")
-              : value
+            answer: formatAnswerForSubmit(value, question?.type)
           };
         })
-        .filter((q) => q.answer);
+        .filter((q) => q.answer !== "");
 
       onSubmit({
         id,
