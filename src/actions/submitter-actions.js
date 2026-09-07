@@ -261,7 +261,7 @@ export const exportSummitSubmitters =
  * @param testRecipient
  * @param excerptRecipient
  * @param shouldSendCopy2Submitter
- * @param shouldResendSpeakers
+ * @param shouldResend
  * @param source
  * @param promoCodeStrategy
  * @param promocodeSpecification
@@ -276,8 +276,7 @@ export const sendSubmitterEmails =
     excerptRecipient = "",
     // not used only left to keep the signature
     shouldSendCopy2Submitter = false,
-    // not used only left to keep the signature
-    shouldResendSpeakers = false,
+    shouldResend = false,
     source = null,
     promoCodeStrategy = null,
     promocodeSpecification = null
@@ -296,7 +295,8 @@ export const sendSubmitterEmails =
     };
 
     const payload = {
-      email_flow_event: currentFlowEvent
+      email_flow_event: currentFlowEvent,
+      should_resend: shouldResend
     };
 
     if (!selectedAll && selectedItems.length > 0) {

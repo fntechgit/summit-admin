@@ -1141,7 +1141,7 @@ export const exportSummitSpeakers =
  * @param testRecipient
  * @param excerptRecipient
  * @param shouldSendCopy2Submitter
- * @param shouldResendSpeakers
+ * @param shouldResend
  * @param source
  * @param promoCodeStrategy
  * @param promocodeSpecification
@@ -1154,7 +1154,7 @@ export const sendSpeakerEmails =
     testRecipient = "",
     excerptRecipient = "",
     shouldSendCopy2Submitter = false,
-    shouldResendSpeakers = false,
+    shouldResend = false,
     // eslint-disable-next-line no-unused-vars
     source = null,
     promoCodeStrategy = null,
@@ -1175,7 +1175,7 @@ export const sendSpeakerEmails =
     const payload = {
       email_flow_event: currentFlowEvent,
       should_send_copy_2_submitter: shouldSendCopy2Submitter,
-      should_resend: shouldResendSpeakers
+      should_resend: shouldResend
     };
 
     if (!selectedAll && selectedItems.length > 0) {
