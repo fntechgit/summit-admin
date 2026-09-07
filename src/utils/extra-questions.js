@@ -28,3 +28,11 @@ export const getTypeValue = (ans, type) => {
       return ans;
   }
 };
+
+// reverse of getTypeValue: formats a typed form value back into the string
+// the API expects for extra_questions[].answer
+export const formatAnswerForSubmit = (value, type) => {
+  if (Array.isArray(value)) return value.filter((v) => v !== "").join(",");
+  if (type === QuestionType_Checkbox) return value ? "true" : "false";
+  return value === null || value === undefined ? "" : `${value}`;
+};

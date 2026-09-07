@@ -55,10 +55,35 @@ jest.mock("../formik-inputs/mui-formik-async-select", () => {
 
 jest.mock(
   "openstack-uicore-foundation/lib/components/extra-questions-mui",
-  () => ({
-    __esModule: true,
-    default: () => <div data-testid="extra-questions" />
-  })
+  () => {
+    const React = require("react");
+    const { toSlug } = require("../../../utils/extra-questions");
+    return {
+      __esModule: true,
+      default: ({ extraQuestions, formik }) => (
+        <div data-testid="extra-questions">
+          {extraQuestions
+            .filter((q) => q.type === "CheckBox")
+            .map((q) => {
+              const slug = toSlug(q.name, q.id);
+              return (
+                <label key={slug} htmlFor={slug}>
+                  {q.name}
+                  <input
+                    id={slug}
+                    type="checkbox"
+                    checked={!!formik.values[slug]}
+                    onChange={(e) =>
+                      formik.setFieldValue(slug, e.target.checked)
+                    }
+                  />
+                </label>
+              );
+            })}
+        </div>
+      )
+    };
+  }
 );
 
 const mockErrorMessage = jest.fn();
@@ -359,6 +384,37 @@ describe("MuiQrBadgePopup", () => {
       renderComponent({ isAdmin: true, extraQuestions: [] });
 
       expect(screen.queryByTestId("extra-questions")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Extra questions submission", () => {
+    const checkboxQuestion = { id: 5, name: "Opted In", type: "CheckBox" };
+
+    it("should submit an unchecked CheckBox answer as the string 'false' instead of dropping it", async () => {
+      const onSave = jest.fn();
+      renderComponent({
+        isAdmin: true,
+        extraQuestions: [checkboxQuestion],
+        onSave
+      });
+
+      await userEvent.click(
+        screen.getByRole("radio", {
+          name: "sponsor_badge_scans.scan_popup.scan_qr"
+        })
+      );
+      await userEvent.click(screen.getByText("Simulate Scan"));
+      await userEvent.click(
+        screen.getByRole("button", { name: "general.save" })
+      );
+
+      await waitFor(() => {
+        expect(onSave).toHaveBeenCalledWith(
+          expect.objectContaining({
+            extra_questions: [{ question_id: 5, answer: "false" }]
+          })
+        );
+      });
     });
   });
 });

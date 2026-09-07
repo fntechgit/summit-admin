@@ -36,7 +36,11 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import QrReader from "../qr-reader";
-import { getTypeValue, toSlug } from "../../utils/extra-questions";
+import {
+  getTypeValue,
+  toSlug,
+  formatAnswerForSubmit
+} from "../../utils/extra-questions";
 import MuiFormikAsyncAutocomplete from "./formik-inputs/mui-formik-async-select";
 import { queryAttendeesWithTickets } from "../../actions/attendee-actions";
 
@@ -68,13 +72,15 @@ const MuiQrBadgePopup = ({
       const { attendee_email, notes, ...extraValues } = values;
 
       const extra_questions = Object.entries(extraValues)
-        .map(([slug, value]) => ({
-          question_id: parseInt(slug.split("_").pop()),
-          answer: Array.isArray(value)
-            ? value.filter((v) => v !== "").join(",")
-            : value
-        }))
-        .filter((q) => q.answer);
+        .map(([slug, value]) => {
+          const question_id = parseInt(slug.split("_").pop());
+          const question = extraQuestions.find((q) => q.id === question_id);
+          return {
+            question_id,
+            answer: formatAnswerForSubmit(value, question?.type)
+          };
+        })
+        .filter((q) => q.answer !== "");
 
       const entity = {
         ...(scanMode === BADGE_SCAN_MODE_QR
