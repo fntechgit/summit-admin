@@ -34,9 +34,17 @@ const emailLogListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_EMAILS: {
-      const { order, orderDir, term, filters } = payload;
+      const { order, orderDir, term, page, perPage, filters } = payload;
 
-      return { ...state, order, orderDir, term, filters };
+      return {
+        ...state,
+        order,
+        orderDir,
+        term,
+        currentPage: page,
+        perPage,
+        filters
+      };
     }
     case RECEIVE_EMAILS: {
       let { total, last_page, current_page, data } = payload.response;

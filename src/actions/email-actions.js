@@ -251,7 +251,7 @@ const normalizeEntity = (entity) => {
   return normalizedEntity;
 };
 
-export const queryTemplates = debounce(async (input, callback, onError) => {
+export const queryTemplates = debounce(async (input, callback) => {
   const accessToken = await getAccessTokenSafely();
 
   const endpoint = URI(`${window.EMAIL_API_BASE_URL}/api/v1/mail-templates`);
@@ -274,10 +274,7 @@ export const queryTemplates = debounce(async (input, callback, onError) => {
 
       callback(options);
     })
-    .catch((err) => {
-      fetchErrorHandler(err);
-      if (onError) onError(err);
-    });
+    .catch(fetchErrorHandler);
 }, DEBOUNCE_WAIT);
 
 /** ********************************************************************************************************* */
@@ -355,7 +352,7 @@ export const getSentEmails =
       createAction(RECEIVE_EMAILS),
       `${window.EMAIL_API_BASE_URL}/api/v1/mails`,
       authErrorHandler,
-      { order, orderDir, term, filters }
+      { order, orderDir, term, page, perPage, filters }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

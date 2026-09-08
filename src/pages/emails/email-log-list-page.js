@@ -104,7 +104,8 @@ const SentEmailListPage = ({
     {
       columnKey: "payload",
       header: "payload",
-      render: (row, data) => <Box sx={{ maxWidth: 300 }}>{data}</Box>
+      width: 300,
+      render: (row) => row.payload
     }
   ];
 
@@ -121,6 +122,8 @@ const SentEmailListPage = ({
 
       if (f2.hasOwnProperty("render")) c = { ...c, render: f2.render };
 
+      if (f2.hasOwnProperty("width")) c = { ...c, width: f2.width };
+
       return c;
     });
 
@@ -129,15 +132,13 @@ const SentEmailListPage = ({
     {
       columnKey: "template",
       header: T.translate("email_logs.email_templates"),
-      styles: { wordBreak: "break-all" },
       sortable: true
     },
     { columnKey: "subject", header: T.translate("email_logs.subject") },
     { columnKey: "from_email", header: T.translate("email_logs.from_email") },
     {
       columnKey: "to_email",
-      header: T.translate("email_logs.to_email"),
-      styles: { wordBreak: "break-word" }
+      header: T.translate("email_logs.to_email")
     },
     {
       columnKey: "sent_date",
