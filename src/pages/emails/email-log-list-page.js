@@ -195,7 +195,11 @@ const SentEmailListPage = ({
               placeholder={T.translate("emails.placeholders.search_emails")}
             />
           </Grid2>
-          <GridFilter id={FILTER_ID} criterias={getCriterias()} />
+          <GridFilter
+            id={FILTER_ID}
+            criterias={getCriterias()}
+            hideJoinOperators
+          />
         </Grid2>
       </Grid2>
       <Grid2 sx={{ mb: 2 }}>
