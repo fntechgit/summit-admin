@@ -276,7 +276,7 @@ export const sendSubmitterEmails =
     excerptRecipient = "",
     // not used only left to keep the signature
     shouldSendCopy2Submitter = false,
-    shouldResend = false,
+    shouldResend = true,
     source = null,
     promoCodeStrategy = null,
     promocodeSpecification = null

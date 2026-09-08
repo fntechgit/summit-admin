@@ -1154,7 +1154,7 @@ export const sendSpeakerEmails =
     testRecipient = "",
     excerptRecipient = "",
     shouldSendCopy2Submitter = false,
-    shouldResend = false,
+    shouldResend = true,
     // eslint-disable-next-line no-unused-vars
     source = null,
     promoCodeStrategy = null,
