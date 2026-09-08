@@ -11,12 +11,11 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import EmailTemplateForm from "../../components/forms/email-template-form";
 import EmailTemplateJsonDialog from "./email-template-json-dialog";
 import AddNewButton from "../../components/buttons/add-new-button";
@@ -45,9 +44,6 @@ const EditEmailTemplatePage = ({
   renderEmailTemplate: renderTemplate,
   updateTemplateJsonData: updateJsonData
 }) => {
-  const formRef = useRef(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isInvalid, setIsInvalid] = useState(false);
   const [showJsonDialog, setShowJsonDialog] = useState(false);
   const [entityReady, setEntityReady] = useState(false);
 
@@ -79,18 +75,6 @@ const EditEmailTemplatePage = ({
     : T.translate("general.add");
   const breadcrumb = entity.id ? entity.identifier : T.translate("general.new");
 
-  const handleSubmit = (values) => {
-    if (isSaving) return;
-    setIsSaving(true);
-    saveTemplate(values)
-      .catch(() => {})
-      .finally(() => setIsSaving(false));
-  };
-
-  const handleFooterSave = () => {
-    formRef.current?.submit();
-  };
-
   const handleJsonUpdate = (parsedJSON) =>
     updateJsonData(parsedJSON).then(() => setShowJsonDialog(false));
 
@@ -108,28 +92,17 @@ const EditEmailTemplatePage = ({
       {entityReady ? (
         <>
           <EmailTemplateForm
-            ref={formRef}
             entity={entity}
             clients={clients}
             errors={errors}
-            onSubmit={handleSubmit}
+            onSubmit={saveTemplate}
             onRender={() => setShowJsonDialog(true)}
-            onValidityChange={setIsInvalid}
             preview={preview}
             renderErrors={renderErrors}
             templateLoading={templateLoading}
             templateJsonData={templateJsonData}
             renderEmailTemplate={renderTemplate}
           />
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-            <Button
-              variant="contained"
-              onClick={handleFooterSave}
-              disabled={isSaving || isInvalid}
-            >
-              {T.translate("general.save")}
-            </Button>
-          </Box>
 
           <EmailTemplateJsonDialog
             open={showJsonDialog}

@@ -215,6 +215,69 @@ describe("EmailTemplateForm preview dispatch", () => {
   });
 });
 
+describe("EmailTemplateForm submit", () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    showConfirmDialog.mockResolvedValue(true);
+  });
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    jest.clearAllMocks();
+  });
+
+  it("submits the current entity and disables the Save button while saving, blocking a double submit", async () => {
+    let resolveSave;
+    const onSubmit = jest.fn(
+      () =>
+        new Promise((resolve) => {
+          resolveSave = resolve;
+        })
+    );
+    const props = { ...baseProps(htmlEntity), onSubmit };
+    const { getByRole } = render(<EmailTemplateForm {...props} />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    const saveButton = getByRole("button", { name: "general.save" });
+    fireEvent.click(saveButton);
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ id: htmlEntity.id })
+    );
+    expect(saveButton).toBeDisabled();
+
+    // clicking again while disabled must not call onSubmit a second time
+    fireEvent.click(saveButton);
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveSave();
+    });
+  });
+
+  it("re-enables the Save button after a rejected save", async () => {
+    const onSubmit = jest.fn(() => Promise.reject(new Error("save failed")));
+    const props = { ...baseProps(htmlEntity), onSubmit };
+    const { getByRole } = render(<EmailTemplateForm {...props} />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    const saveButton = getByRole("button", { name: "general.save" });
+
+    await act(async () => {
+      fireEvent.click(saveButton);
+    });
+
+    expect(saveButton).not.toBeDisabled();
+  });
+});
+
 describe("EmailTemplateForm responsive preview scale", () => {
   let offsetWidthSpy;
 
