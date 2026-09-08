@@ -49,10 +49,8 @@ const EmailTemplateInput = ({
   }, []);
 
   const handleInputChange = (ev, input, reason) => {
-    // "selectOption"/"reset" fire when the input text is set programmatically
-    // (a pick, or the controlled value syncing back in) -- searching again on
-    // those wastes a request. Only a real keystroke ("input") or clearing the
-    // field should touch the options list.
+    // Autocomplete also fires this for "selectOption"/"reset" (the input text
+    // set programmatically) -- only a real keystroke or a clear should re-search.
     if (reason !== "input" && reason !== "clear") return;
 
     if (!input && !defaultOptions) {
@@ -83,9 +81,8 @@ const EmailTemplateInput = ({
       : { value: String(value.id ?? ""), label: value.identifier ?? "" };
   }
 
-  // the selected value is a past search result that may not be part of the
-  // current (freshly fetched) options list -- pin it in so Autocomplete
-  // always finds a match and doesn't warn about an "invalid" controlled value
+  // the selected value may not be in the freshly-fetched options list --
+  // pin it in so Autocomplete doesn't warn about an "invalid" controlled value
   const displayOptions =
     selectedOption && !options.some((o) => o.value === selectedOption.value)
       ? [selectedOption, ...options]

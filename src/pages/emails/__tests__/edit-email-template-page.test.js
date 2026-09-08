@@ -134,14 +134,12 @@ describe("EditEmailTemplatePage", () => {
       { initialState }
     );
 
-    // navigate to a different template before the first fetch resolves
     rerender(
       <EditEmailTemplatePage
         match={{ url: "/app/emails/templates/2", params: { template_id: "2" } }}
       />
     );
 
-    // the stale request for template 1 resolves late
     await act(async () => {
       resolveFirst();
       await flushPromises();
@@ -151,7 +149,6 @@ describe("EditEmailTemplatePage", () => {
     expect(screen.getByText("emails.loading_template")).toBeInTheDocument();
     expect(screen.queryByTestId("email-template-form")).not.toBeInTheDocument();
 
-    // the current request for template 2 resolves
     await act(async () => {
       resolveSecond();
       await flushPromises();
