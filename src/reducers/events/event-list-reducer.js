@@ -50,13 +50,21 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_EVENTS: {
-      const { order, orderDir, term, summitTZ, filters, extraColumns } =
-        payload;
+      const {
+        order,
+        orderDir,
+        perPage,
+        term,
+        summitTZ,
+        filters,
+        extraColumns
+      } = payload;
 
       return {
         ...state,
         order,
         orderDir,
+        perPage,
         term,
         summitTZ,
         filters,

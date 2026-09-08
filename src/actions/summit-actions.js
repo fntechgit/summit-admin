@@ -179,7 +179,8 @@ export const loadSummits =
       createAction(REQUEST_SUMMITS),
       createAction(RECEIVE_SUMMITS),
       `${window.API_BASE_URL}/api/v1/summits/all`,
-      authErrorHandler
+      authErrorHandler,
+      { page, per_page: perPage }
     )(params)(dispatch, getState).then(() => {
       dispatch(stopLoading());
     });
