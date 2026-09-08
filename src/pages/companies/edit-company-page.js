@@ -65,28 +65,29 @@ const EditCompanyPage = ({
       getSponsoredProjects("", 1, MAX_PER_PAGE);
   }, []);
 
+  const buildValues = (e) => ({
+    id: e?.id ?? 0,
+    name: e?.name ?? "",
+    url: e?.url ?? "",
+    contact_email: e?.contact_email ?? "",
+    member_level: e?.member_level ?? "",
+    color: e?.color ?? "",
+    admin_email: e?.admin_email ?? "",
+    city: e?.city ?? "",
+    state: e?.state ?? "",
+    country: e?.country ?? "",
+    industry: e?.industry ?? "",
+    products: e?.products ?? "",
+    contributions: e?.contributions ?? "",
+    description: e?.description ?? "",
+    overview: e?.overview ?? "",
+    commitment: e?.commitment ?? "",
+    logo: e?.logo ?? "",
+    big_logo: e?.big_logo ?? ""
+  });
+
   const formik = useFormik({
-    initialValues: {
-      id: initialEntity?.id ?? 0,
-      name: initialEntity?.name ?? "",
-      url: initialEntity?.url ?? "",
-      contact_email: initialEntity?.contact_email ?? "",
-      member_level: initialEntity?.member_level ?? "",
-      color: initialEntity?.color ?? "",
-      admin_email: initialEntity?.admin_email ?? "",
-      city: initialEntity?.city ?? "",
-      state: initialEntity?.state ?? "",
-      country: initialEntity?.country ?? "",
-      industry: initialEntity?.industry ?? "",
-      products: initialEntity?.products ?? "",
-      contributions: initialEntity?.contributions ?? "",
-      description: initialEntity?.description ?? "",
-      overview: initialEntity?.overview ?? "",
-      commitment: initialEntity?.commitment ?? "",
-      logo: initialEntity?.logo ?? "",
-      big_logo: initialEntity?.big_logo ?? ""
-    },
-    enableReinitialize: true,
+    initialValues: buildValues(initialEntity),
     validationSchema: yup.object().shape({
       name: yup.string().required(T.translate("validation.required")),
       color: hexColorValidation()
@@ -107,6 +108,10 @@ const EditCompanyPage = ({
         .finally(() => setIsSaving(false));
     }
   });
+
+  useEffect(() => {
+    formik.resetForm({ values: buildValues(initialEntity) });
+  }, [initialEntity?.id]);
 
   const title = initialEntity?.id
     ? T.translate("general.edit")

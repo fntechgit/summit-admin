@@ -42,7 +42,7 @@ const MuiFormikAsyncAutocomplete = ({
       return;
     const match = options.find((o) => o.value === String(field.value));
     if (match) helpers.setValue(match);
-  }, [options]);
+  }, [options, field.value]);
 
   const error = meta.touched && meta.error;
 
