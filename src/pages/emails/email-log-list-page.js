@@ -31,10 +31,7 @@ import {
 } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import { getSentEmails } from "../../actions/email-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
-import {
-  buildEmailFiltersFromGridFilter,
-  getCriterias
-} from "./email-log-list-page.helpers";
+import { buildEmailFilters, getCriterias } from "./email-log-list-page.helpers";
 
 const FILTER_ID = "email_log_list";
 
@@ -49,7 +46,7 @@ const SentEmailListPage = ({
   getSentEmails
 }) => {
   const { parsedFilter, filterValues } = useGridFilter(FILTER_ID);
-  const emailFilters = buildEmailFiltersFromGridFilter(filterValues);
+  const emailFilters = buildEmailFilters(filterValues);
 
   useEffect(() => {
     getSentEmails(

@@ -18,7 +18,7 @@ import { DATE_FILTER_ARRAY_SIZE } from "../../utils/constants";
 
 export const getCriterias = () => [
   {
-    key: "is_sent",
+    key: "is_sent_filter",
     label: T.translate("email_logs.is_sent_filter"),
     operators: [OPERATORS.IS],
     values: {
@@ -32,7 +32,7 @@ export const getCriterias = () => [
     }
   },
   {
-    key: "sent_date",
+    key: "sent_date_filter",
     label: T.translate("email_logs.sent_date"),
     operators: [OPERATORS.BEFORE, OPERATORS.AFTER],
     values: {
@@ -41,7 +41,7 @@ export const getCriterias = () => [
     }
   },
   {
-    key: "template",
+    key: "template_filter",
     label: T.translate("email_logs.template_filter"),
     operators: [OPERATORS.IS],
     values: {
@@ -52,22 +52,23 @@ export const getCriterias = () => [
         multiple: false
       }
     },
-    customParser: (f) => {
-      const value = f.value?.value ?? f.value;
-      return value ? [`${f.criteria}${f.operator}${value}`] : undefined;
-    }
+    customParser: (f) => [`template_filter==${f.value.value}`]
   }
 ];
 
-export const buildEmailFiltersFromGridFilter = (filterValues) => {
-  const isSentEntry = filterValues.find((f) => f.criteria === "is_sent");
+export const buildEmailFilters = (filterValues) => {
+  const isSentEntry = filterValues.find((f) => f.criteria === "is_sent_filter");
   const afterEntry = filterValues.find(
-    (f) => f.criteria === "sent_date" && f.operator === OPERATORS.AFTER.value
+    (f) =>
+      f.criteria === "sent_date_filter" && f.operator === OPERATORS.AFTER.value
   );
   const beforeEntry = filterValues.find(
-    (f) => f.criteria === "sent_date" && f.operator === OPERATORS.BEFORE.value
+    (f) =>
+      f.criteria === "sent_date_filter" && f.operator === OPERATORS.BEFORE.value
   );
-  const templateEntry = filterValues.find((f) => f.criteria === "template");
+  const templateEntry = filterValues.find(
+    (f) => f.criteria === "template_filter"
+  );
 
   const sentDateFilter = Array(DATE_FILTER_ARRAY_SIZE).fill(null);
   sentDateFilter[0] = afterEntry?.value ?? null;
