@@ -73,7 +73,8 @@ const EmailTemplateListPage = ({
     );
   };
 
-  const handleNewEmailTemplate = () => {
+  const handleNewEmailTemplate = (ev) => {
+    ev.preventDefault();
     history.push("/app/emails/templates/new");
   };
 
