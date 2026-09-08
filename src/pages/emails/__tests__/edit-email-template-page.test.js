@@ -22,24 +22,22 @@ jest.mock("../../../actions/email-actions", () => ({
   updateTemplateJsonData: jest.fn()
 }));
 
-jest.mock("../../../components/forms/email-template-form", () => {
-  const { forwardRef, useImperativeHandle } = require("react");
-  return {
-    __esModule: true,
-    default: forwardRef(({ onSubmit, onRender }, ref) => {
-      useImperativeHandle(ref, () => ({
-        submit: () => onSubmit({ identifier: "Edited Template" })
-      }));
-      return (
-        <div data-testid="email-template-form">
-          <button type="button" onClick={onRender}>
-            open-json
-          </button>
-        </div>
-      );
-    })
-  };
-});
+jest.mock("../../../components/forms/email-template-form", () => ({
+  __esModule: true,
+  default: ({ onSubmit, onRender }) => (
+    <div data-testid="email-template-form">
+      <button
+        type="button"
+        onClick={() => onSubmit({ identifier: "Edited Template" })}
+      >
+        general.save
+      </button>
+      <button type="button" onClick={onRender}>
+        open-json
+      </button>
+    </div>
+  )
+}));
 
 jest.mock("../email-template-json-dialog", () => ({
   __esModule: true,
@@ -193,7 +191,7 @@ describe("EditEmailTemplatePage", () => {
     expect(resetTemplateForm).not.toHaveBeenCalled();
   });
 
-  it("submits the form through the imperative ref when Save is clicked", async () => {
+  it("saves the entity submitted by the form", async () => {
     renderWithRedux(
       <EditEmailTemplatePage
         match={{

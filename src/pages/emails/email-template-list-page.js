@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
@@ -20,16 +20,9 @@ import T from "i18n-react/dist/i18n-react";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import GridToolbar from "../../components/mui/grid-toolbar";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
-import EditEmailTemplatePopup from "./edit-email-template-popup";
 import {
   getEmailTemplates,
-  deleteEmailTemplate,
-  getEmailTemplate,
-  resetTemplateForm,
-  saveEmailTemplate,
-  getAllClients,
-  renderEmailTemplate,
-  updateTemplateJsonData
+  deleteEmailTemplate
 } from "../../actions/email-actions";
 
 const EmailTemplateListPage = ({
@@ -40,55 +33,16 @@ const EmailTemplateListPage = ({
   order,
   orderDir,
   totalTemplates,
-  entity,
-  templateLoading,
-  errors,
-  clients,
-  preview,
-  render_errors: renderErrors,
-  json_data: templateJsonData,
+  history,
   getEmailTemplates: fetchEmailTemplates,
-  deleteEmailTemplate: removeEmailTemplate,
-  getEmailTemplate: fetchEmailTemplate,
-  resetTemplateForm: resetForm,
-  saveEmailTemplate: saveTemplate,
-  getAllClients: fetchAllClients,
-  renderEmailTemplate: renderTemplate,
-  updateTemplateJsonData: updateJsonData
+  deleteEmailTemplate: removeEmailTemplate
 }) => {
-  const [openPopup, setOpenPopup] = useState(null);
-
   useEffect(() => {
     fetchEmailTemplates(term, currentPage, perPage, order, orderDir);
   }, [fetchEmailTemplates]);
 
-  const handleClosePopup = () => {
-    resetForm();
-    setOpenPopup(null);
-  };
-
-  const handleCreate = (values) =>
-    saveTemplate(values).then(() => {
-      fetchEmailTemplates(
-        term,
-        DEFAULT_CURRENT_PAGE,
-        perPage,
-        order,
-        orderDir
-      ).catch(() => {});
-    });
-
-  const handleUpdate = (values) =>
-    saveTemplate(values).then(() => {
-      fetchEmailTemplates(term, currentPage, perPage, order, orderDir).catch(
-        () => {}
-      );
-    });
-
   const handleEdit = (row) => {
-    Promise.all([fetchEmailTemplate(row.id), fetchAllClients()]).then(() => {
-      setOpenPopup("edit");
-    });
+    history.push(`/app/emails/templates/${row.id}`);
   };
 
   const handlePageChange = (page) => {
@@ -119,11 +73,8 @@ const EmailTemplateListPage = ({
     );
   };
 
-  const handleNewEmailTemplate = (ev) => {
-    ev.preventDefault();
-    resetForm();
-    fetchAllClients();
-    setOpenPopup("create");
+  const handleNewEmailTemplate = () => {
+    history.push("/app/emails/templates/new");
   };
 
   const handleDeleteEmailTemplate = (row) => {
@@ -208,38 +159,15 @@ const EmailTemplateListPage = ({
           />
         </div>
       )}
-
-      {openPopup && (
-        <EditEmailTemplatePopup
-          entity={entity}
-          templateLoading={templateLoading}
-          errors={errors}
-          clients={clients}
-          preview={preview}
-          renderErrors={renderErrors}
-          templateJsonData={templateJsonData}
-          renderEmailTemplate={renderTemplate}
-          updateTemplateJsonData={updateJsonData}
-          onSave={openPopup === "create" ? handleCreate : handleUpdate}
-          onClose={handleClosePopup}
-        />
-      )}
     </div>
   );
 };
 
-const mapStateToProps = ({ emailTemplateListState, emailTemplateState }) => ({
-  ...emailTemplateListState,
-  ...emailTemplateState
+const mapStateToProps = ({ emailTemplateListState }) => ({
+  ...emailTemplateListState
 });
 
 export default connect(mapStateToProps, {
   getEmailTemplates,
-  deleteEmailTemplate,
-  getEmailTemplate,
-  resetTemplateForm,
-  saveEmailTemplate,
-  getAllClients,
-  renderEmailTemplate,
-  updateTemplateJsonData
+  deleteEmailTemplate
 })(EmailTemplateListPage);
