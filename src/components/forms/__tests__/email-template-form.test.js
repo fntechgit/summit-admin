@@ -9,6 +9,7 @@ import {
 } from "@jest/globals";
 import { render, act, fireEvent } from "@testing-library/react";
 import showConfirmDialog from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
+import mjml2html from "mjml-browser";
 
 import EmailTemplateForm from "../email-template-form";
 
@@ -26,7 +27,7 @@ jest.mock(
 );
 jest.mock("mjml-browser", () => ({
   __esModule: true,
-  default: () => ({ html: "<html></html>" })
+  default: jest.fn(() => ({ html: "<html></html>" }))
 }));
 jest.mock("../../inputs/email-template-input", () => ({
   __esModule: true,
@@ -212,6 +213,55 @@ describe("EmailTemplateForm preview dispatch", () => {
 
     // reverted back — the button offers to switch to MJML again
     expect(getByText("emails.display_mjml")).toBeTruthy();
+  });
+
+  it("does not preview or compile the empty mjml_content while the switch warning is still pending", async () => {
+    let resolveConfirm;
+    showConfirmDialog.mockReturnValue(
+      new Promise((resolve) => {
+        resolveConfirm = resolve;
+      })
+    );
+    const props = baseProps(htmlEntity);
+    const { getByText } = render(<EmailTemplateForm {...props} />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    props.renderEmailTemplate.mockClear();
+
+    fireEvent.click(getByText("emails.display_mjml"));
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    // the dialog hasn't resolved yet -- mode must still be HTML, so no
+    // preview request went out for the (empty) mjml_content
+    expect(props.renderEmailTemplate).not.toHaveBeenCalled();
+    expect(getByText("emails.display_mjml")).toBeTruthy();
+
+    await act(async () => {
+      resolveConfirm(true);
+    });
+  });
+
+  it("does not attempt to compile mjml on a bare mode switch with unchanged (empty) content", async () => {
+    const props = baseProps(htmlEntity);
+    const { getByText } = render(<EmailTemplateForm {...props} />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    mjml2html.mockClear();
+
+    await act(async () => {
+      fireEvent.click(getByText("emails.display_mjml"));
+    });
+
+    // switching modes alone must not attempt a compile of the unchanged,
+    // still-empty mjml_content -- doing so would leave a stale
+    // mjmlRenderError behind after switching back to HTML
+    expect(mjml2html).not.toHaveBeenCalled();
   });
 });
 
