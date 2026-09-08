@@ -18,6 +18,7 @@ import {
   normalizeRenderErrors
 } from "../email-actions";
 import * as methods from "../../utils/methods";
+import history from "../../history";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   __esModule: true,
@@ -30,6 +31,11 @@ jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
 
 jest.mock("../marketing-actions", () => ({
   saveMarketingSetting: jest.fn()
+}));
+
+jest.mock("../../history", () => ({
+  __esModule: true,
+  default: { push: jest.fn() }
 }));
 
 const requestMock =
@@ -83,6 +89,7 @@ describe("saveEmailTemplate", () => {
     jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
     postRequest.mockImplementation(requestMock);
     putRequest.mockImplementation(requestMock);
+    history.push.mockClear();
   });
 
   afterEach(() => {
@@ -111,6 +118,14 @@ describe("saveEmailTemplate", () => {
         actionTypes.indexOf("TEMPLATE_ADDED")
       );
     });
+
+    it("navigates to the new template's edit route using the server-assigned id", async () => {
+      const store = mockStore({});
+      store.dispatch(saveEmailTemplate({ identifier: "test-template" }));
+      await flushPromises();
+
+      expect(history.push).toHaveBeenCalledWith("/app/emails/templates/1");
+    });
   });
 
   describe("update path (entity has id)", () => {
@@ -134,6 +149,14 @@ describe("saveEmailTemplate", () => {
       expect(actionTypes.indexOf("STOP_LOADING")).toBeGreaterThan(
         actionTypes.indexOf("TEMPLATE_UPDATED")
       );
+    });
+
+    it("does not navigate away", async () => {
+      const store = mockStore({});
+      store.dispatch(saveEmailTemplate({ id: 1, identifier: "test-template" }));
+      await flushPromises();
+
+      expect(history.push).not.toHaveBeenCalled();
     });
   });
 });
