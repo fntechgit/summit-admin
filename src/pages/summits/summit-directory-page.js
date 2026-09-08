@@ -191,7 +191,6 @@ const SummitDirectoryPage = ({
         currentPage={currentPage}
         onPageChange={handlePageChange}
         onPerPageChange={handlePerPageChange}
-        showPageJump
         onEdit={canEditSummit ? handleEditSummit : undefined}
         onDelete={canDeleteSummits ? (id) => deleteSummit(id) : undefined}
         onSelect={handleSelectSummit}

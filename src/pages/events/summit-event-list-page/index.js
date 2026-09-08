@@ -407,6 +407,7 @@ const SummitEventListPage = ({
             deleteDialogBody={(name) =>
               `${T.translate("event_list.delete_event_warning")} ${name}`
             }
+            showPageJump
           />
         </div>
       )}
