@@ -19,7 +19,7 @@ const DEFAULT_STATE = {
   emails: [],
   term: "",
   order: "id",
-  orderDir: 0,
+  orderDir: 1,
   currentPage: 1,
   lastPage: 1,
   perPage: 10,
