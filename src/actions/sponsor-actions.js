@@ -388,7 +388,7 @@ export const getSponsorSponsorships =
       createAction(RECEIVE_SPONSOR_SPONSORSHIPS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsorships`,
       authErrorHandler,
-      { order, orderDir }
+      { order, orderDir, perPage }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
