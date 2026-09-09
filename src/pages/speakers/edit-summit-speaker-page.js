@@ -85,6 +85,11 @@ class EditSummitSpeakerPage extends React.Component {
           <AddNewButton entity={entity} />
         </h3>
         <hr />
+        <div className="alert alert-info">
+          <i className="fa fa-info-circle" />
+          &nbsp;&nbsp;
+          {T.translate("edit_speaker.disclaimer")}
+        </div>
         <SpeakerForm
           summits={summits}
           history={history}
