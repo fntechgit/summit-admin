@@ -62,6 +62,7 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
 
       return {
         ...state,
+        events: [],
         order,
         orderDir,
         perPage,
