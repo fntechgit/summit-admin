@@ -48,8 +48,6 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
   default: { translate: (key) => key }
 }));
 
-const mockHistory = { push: jest.fn() };
-
 const initialState = {
   emailTemplateListState: {
     templates: [
@@ -70,14 +68,17 @@ const initialState = {
 };
 
 describe("EmailTemplateListPage", () => {
+  let history;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    history = { push: jest.fn() };
     getEmailTemplates.mockReturnValue(() => Promise.resolve());
     deleteEmailTemplate.mockReturnValue(() => Promise.resolve());
   });
 
   it("reloads the list after a successful delete", async () => {
-    renderWithRedux(<EmailTemplateListPage history={mockHistory} />, {
+    renderWithRedux(<EmailTemplateListPage history={history} />, {
       initialState
     });
 
@@ -95,7 +96,7 @@ describe("EmailTemplateListPage", () => {
       Promise.reject(new Error("delete failed"))
     );
 
-    renderWithRedux(<EmailTemplateListPage history={mockHistory} />, {
+    renderWithRedux(<EmailTemplateListPage history={history} />, {
       initialState
     });
 
@@ -106,5 +107,27 @@ describe("EmailTemplateListPage", () => {
 
     // Call 1: useEffect on mount; call 2: handleDeleteEmailTemplate .finally() fires even on rejection
     expect(getEmailTemplates).toHaveBeenCalledTimes(2);
+  });
+
+  it("navigates to the new template route when adding a template", async () => {
+    renderWithRedux(<EmailTemplateListPage history={history} />, {
+      initialState
+    });
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "emails.add_template" })
+    );
+
+    expect(history.push).toHaveBeenCalledWith("/app/emails/templates/new");
+  });
+
+  it("navigates to the template edit route when clicking edit", async () => {
+    renderWithRedux(<EmailTemplateListPage history={history} />, {
+      initialState
+    });
+
+    await userEvent.click(screen.getByRole("button", { name: "edit-row" }));
+
+    expect(history.push).toHaveBeenCalledWith("/app/emails/templates/1");
   });
 });
