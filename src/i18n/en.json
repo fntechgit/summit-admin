@@ -806,7 +806,8 @@
     "speaker_created": "Speaker created successfully.",
     "company": "Company",
     "phone_number": "Phone #",
-    "copy_email": "Copy Email"
+    "copy_email": "Copy Email",
+    "disclaimer": "All information on this page — bio, photos, affiliations, company, title, social links, etc. — except email and phone number — are considered public information and may be published or displayed by any show on the platform."
   },
   "merge_speakers": {
     "merge_speakers": "Merge Speakers",
