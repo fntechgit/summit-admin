@@ -7,25 +7,12 @@ import { renderWithRedux } from "../../../utils/test-utils";
 import SelectionPlanListPage from "../selection-plan-list-page";
 import {
   getSelectionPlans,
-  getSelectionPlan,
-  deleteSelectionPlan,
-  resetSelectionPlanForm,
-  saveSelectionPlan,
-  saveSelectionPlanSettings
+  deleteSelectionPlan
 } from "../../../actions/selection-plan-actions";
-import { getMarketingSettingsBySelectionPlan } from "../../../actions/marketing-actions";
 
 jest.mock("../../../actions/selection-plan-actions", () => ({
   getSelectionPlans: jest.fn(),
-  getSelectionPlan: jest.fn(),
-  deleteSelectionPlan: jest.fn(),
-  resetSelectionPlanForm: jest.fn(),
-  saveSelectionPlan: jest.fn(),
-  saveSelectionPlanSettings: jest.fn()
-}));
-
-jest.mock("../../../actions/marketing-actions", () => ({
-  getMarketingSettingsBySelectionPlan: jest.fn()
+  deleteSelectionPlan: jest.fn()
 }));
 
 jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => ({
@@ -50,23 +37,12 @@ jest.mock(
   })
 );
 
-jest.mock("../edit-selection-plan-page", () => ({
-  __esModule: true,
-  default: ({ onSave }) => (
-    <div data-testid="edit-selection-plan">
-      <button type="button" onClick={() => onSave({ marketing_settings: {} })}>
-        popup-save
-      </button>
-    </div>
-  )
-}));
-
 jest.mock("i18n-react/dist/i18n-react", () => ({
   __esModule: true,
   default: { translate: (key) => key }
 }));
 
-const mockHistory = { replace: jest.fn() };
+const mockHistory = { push: jest.fn(), replace: jest.fn() };
 const mockMatch = { params: {} };
 
 const initialState = {
@@ -83,10 +59,6 @@ const initialState = {
     term: "",
     order: "id",
     orderDir: 1
-  },
-  currentSelectionPlanState: {
-    entity: { id: 0, name: "" },
-    errors: {}
   }
 };
 
@@ -94,39 +66,37 @@ describe("SelectionPlanListPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getSelectionPlans.mockReturnValue(() => Promise.resolve());
-    getSelectionPlan.mockReturnValue(() => Promise.resolve());
     deleteSelectionPlan.mockReturnValue(() => Promise.resolve());
-    resetSelectionPlanForm.mockReturnValue({
-      type: "RESET_SELECTION_PLAN_FORM"
-    });
-    getMarketingSettingsBySelectionPlan.mockReturnValue(() =>
-      Promise.resolve()
-    );
-    saveSelectionPlan.mockReturnValue(() => Promise.resolve({ id: 1 }));
-    saveSelectionPlanSettings.mockReturnValue(() => Promise.resolve());
   });
 
-  it("reloads the list after a successful save", async () => {
+  it("navigates to the new selection plan route", async () => {
     renderWithRedux(
       <SelectionPlanListPage history={mockHistory} match={mockMatch} />,
       { initialState }
     );
 
-    // Open dialog
     await userEvent.click(
       screen.getByRole("button", {
         name: "selection_plan_list.add_selection_plan"
       })
     );
-    expect(screen.getByTestId("edit-selection-plan")).toBeInTheDocument();
 
-    await act(async () => {
-      await userEvent.click(screen.getByRole("button", { name: "popup-save" }));
-      await flushPromises();
-    });
+    expect(mockHistory.push).toHaveBeenCalledWith(
+      "/app/summits/1/selection-plans/new"
+    );
+  });
 
-    // Call 1: useEffect on mount; call 2: handleSave → refreshSelectionPlans
-    expect(getSelectionPlans).toHaveBeenCalledTimes(2);
+  it("navigates to the selection plan edit route", async () => {
+    renderWithRedux(
+      <SelectionPlanListPage history={mockHistory} match={mockMatch} />,
+      { initialState }
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "edit-row" }));
+
+    expect(mockHistory.push).toHaveBeenCalledWith(
+      "/app/summits/1/selection-plans/1"
+    );
   });
 
   it("reloads the list after a successful delete", async () => {

@@ -11,6 +11,9 @@ import {
 import { getMarketingSettingsBySelectionPlan } from "../actions/marketing-actions";
 import { MAX_PER_PAGE } from "../utils/constants";
 
+const EditSelectionPlanPage = React.lazy(() =>
+  import("../pages/selection-plans/edit-selection-plan-page")
+);
 const SelectionPlanExtraQuestionsLayout = React.lazy(() =>
   import("./selection-plan-extra-questions-layout")
 );
@@ -54,6 +57,12 @@ const SelectionPlanIdLayout = ({
       <Suspense fallback={<AjaxLoader show relative size={120} />}>
         <Switch>
           <Route
+            strict
+            exact
+            path={`${match.url}`}
+            component={EditSelectionPlanPage}
+          />
+          <Route
             path={`${match.url}/extra-questions`}
             component={SelectionPlanExtraQuestionsLayout}
           />
@@ -61,7 +70,9 @@ const SelectionPlanIdLayout = ({
             path={`${match.url}/rating-types`}
             component={SelectionPlanRatingTypesLayout}
           />
-          <Redirect to={`/app/summits/${currentSummit.id}/selection-plans`} />
+          <Redirect
+            to={`/app/summits/${currentSummit.id}/selection-plans/${selectionPlanId}`}
+          />
         </Switch>
       </Suspense>
     </div>
