@@ -253,7 +253,7 @@ describe("AuditLogs pagination", () => {
     );
     getAuditLog.mockClear();
 
-    await userEvent.click(screen.getByRole("combobox"));
+    await userEvent.click(screen.getAllByRole("combobox")[0]);
     await userEvent.click(await screen.findByRole("option", { name: "20" }));
 
     await waitFor(() => {

@@ -416,10 +416,10 @@ describe("SponsorPurchasesTab", () => {
         initialState: createInitialState({ currentPage: 1, totalCount: 25 })
       });
 
-      // MUI TablePagination renders an "Go to next page" / "next page" button
+      // pagination now renders top and bottom, so take the first match
       await act(async () => {
         await userEvent.click(
-          screen.getByRole("button", { name: /next page/i })
+          screen.getAllByRole("button", { name: "mui_table.next_page" })[0]
         );
       });
 
@@ -438,8 +438,8 @@ describe("SponsorPurchasesTab", () => {
         initialState: createInitialState({ currentPage: 3, totalCount: 0 })
       });
 
-      // MUI TablePagination labels the rows-per-page Select with labelRowsPerPage
-      const rowsPerPageSelect = screen.getByRole("combobox", {
+      // pagination now renders top and bottom, so take the first match
+      const [rowsPerPageSelect] = screen.getAllByRole("combobox", {
         name: "mui_table.rows_per_page"
       });
 
