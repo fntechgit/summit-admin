@@ -50,7 +50,8 @@ const SelectionPlanIdLayout = ({
             MAX_PER_PAGE
           )
         )
-        .then(() => setHasLoaded(true));
+        .then(() => setHasLoaded(true))
+        .catch(() => {});
     }
   }, [selectionPlanId]);
 
