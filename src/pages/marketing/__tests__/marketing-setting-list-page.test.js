@@ -133,7 +133,7 @@ describe("MarketingSettingListPage", () => {
       wordBreak: "break-word",
       overflowWrap: "anywhere"
     });
-    expect(container).toHaveTextContent(longValue);
+    expect(container).toHaveTextContent(longValue.trim());
   });
 
   it("deletes the setting by id (confirm is handled inside MuiTable)", async () => {
