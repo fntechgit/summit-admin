@@ -78,13 +78,15 @@ const EditSelectionPlanPage = ({
         return saveSelectionPlanSettings(
           values.marketing_settings ?? {},
           savedEntity.id
-        ).then(() => {
-          if (!values.id) {
-            history.push(
-              `/app/summits/${currentSummit.id}/selection-plans/${savedEntity.id}`
-            );
-          }
-        });
+        )
+          .catch(() => {})
+          .then(() => {
+            if (!values.id) {
+              history.push(
+                `/app/summits/${currentSummit.id}/selection-plans/${savedEntity.id}`
+              );
+            }
+          });
       })
       .catch(() => {})
       .finally(() => setIsSaving(false));
