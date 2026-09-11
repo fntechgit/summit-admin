@@ -11,208 +11,181 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import { Pagination } from "react-bootstrap";
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import Table from "openstack-uicore-foundation/lib/components/table";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import AddIcon from "@mui/icons-material/Add";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import SummitDropdown from "../../components/summit-dropdown";
+import showConfirmDialog from "../../components/mui/showConfirmDialog";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getMarketingSettings,
   deleteSetting,
   cloneMarketingSettings
 } from "../../actions/marketing-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
-import "../../styles/table.less";
+const wrapLongText = (value) => (
+  <div style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+    {value}
+  </div>
+);
 
-class MarketingSettingListPage extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.handleEdit = this.handleEdit.bind(this);
-    this.handlePageChange = this.handlePageChange.bind(this);
-    this.handleSort = this.handleSort.bind(this);
-    this.handleSearch = this.handleSearch.bind(this);
-    this.handleNewSetting = this.handleNewSetting.bind(this);
-    this.handleDeleteSetting = this.handleDeleteSetting.bind(this);
-    this.handleCloneSettings = this.handleCloneSettings.bind(this);
-
-    this.state = {};
-  }
-
-  componentDidMount() {
-    const { currentSummit } = this.props;
+const MarketingSettingListPage = ({
+  currentSummit,
+  settings,
+  currentPage,
+  perPage,
+  term,
+  order,
+  orderDir,
+  totalSettings,
+  history,
+  getMarketingSettings,
+  deleteSetting,
+  cloneMarketingSettings
+}) => {
+  useEffect(() => {
     if (currentSummit) {
-      this.props.getMarketingSettings();
+      getMarketingSettings(term, currentPage, perPage, order, orderDir);
     }
-  }
+  }, [currentSummit]);
 
-  handleEdit(setting_id) {
-    const { currentSummit, history } = this.props;
-    history.push(`/app/summits/${currentSummit.id}/marketing/${setting_id}`);
-  }
+  const handleEdit = (row) => {
+    history.push(`/app/summits/${currentSummit.id}/marketing/${row.id}`);
+  };
 
-  handlePageChange(page) {
-    const { term, order, orderDir, perPage } = this.props;
-    this.props.getMarketingSettings(term, page, perPage, order, orderDir);
-  }
+  const handlePageChange = (page) => {
+    getMarketingSettings(term, page, perPage, order, orderDir);
+  };
 
-  handleSort(index, key, dir, func) {
-    const { term, page, perPage } = this.props;
-    this.props.getMarketingSettings(term, page, perPage, key, dir);
-  }
+  const handlePerPageChange = (newPerPage) => {
+    getMarketingSettings(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir
+    );
+  };
 
-  handleSearch(term) {
-    const { order, orderDir, page, perPage } = this.props;
-    this.props.getMarketingSettings(term, page, perPage, order, orderDir);
-  }
+  const handleSort = (key, dir) => {
+    getMarketingSettings(term, currentPage, perPage, key, dir);
+  };
 
-  handleNewSetting(ev) {
-    const { currentSummit, history } = this.props;
+  const handleSearch = (newTerm) => {
+    getMarketingSettings(
+      newTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir
+    );
+  };
+
+  const handleNewSetting = (ev) => {
+    ev.preventDefault();
     history.push(`/app/summits/${currentSummit.id}/marketing/new`);
-  }
+  };
 
-  handleDeleteSetting(settingId) {
-    const { deleteSetting, settings } = this.props;
-    const setting = settings.find((s) => s.id === settingId);
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("marketing.delete_setting_warning")} ${setting.key}`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteSetting(settingId);
-      }
-    });
-  }
-
-  handleCloneSettings(summitId) {
-    const { cloneMarketingSettings } = this.props;
-
-    Swal.fire({
+  const handleCloneSettings = async (summitId) => {
+    const confirmed = await showConfirmDialog({
       title: T.translate("general.are_you_sure"),
       text: T.translate("marketing.clone_settings_warning"),
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("marketing.yes_clone")
-    }).then((result) => {
-      if (result.value) {
-        cloneMarketingSettings(summitId);
-      }
+      iconType: "warning",
+      confirmButtonText: T.translate("marketing.yes_clone"),
+      confirmButtonColor: "error"
     });
-  }
 
-  render() {
-    const {
-      currentSummit,
-      settings,
-      lastPage,
-      currentPage,
-      term,
-      order,
-      orderDir,
-      totalSettings
-    } = this.props;
+    if (confirmed) cloneMarketingSettings(summitId);
+  };
 
-    const columns = [
-      { columnKey: "id", value: T.translate("general.id"), sortable: true },
-      { columnKey: "key", value: T.translate("marketing.key"), sortable: true },
-      { columnKey: "type", value: T.translate("marketing.type") },
-      {
-        columnKey: "value",
-        value: T.translate("marketing.value"),
-        title: true
-      },
-      {
-        columnKey: "selection_plan_id",
-        value: T.translate("marketing.selection_plan"),
-        title: true
-      }
-    ];
+  const columns = [
+    { columnKey: "id", header: T.translate("general.id"), sortable: true },
+    {
+      columnKey: "key",
+      header: T.translate("marketing.key"),
+      sortable: true
+    },
+    { columnKey: "type", header: T.translate("marketing.type") },
+    {
+      columnKey: "value",
+      header: T.translate("marketing.value"),
+      width: 450,
+      render: (row) => wrapLongText(row.value)
+    },
+    {
+      columnKey: "selection_plan_id",
+      header: T.translate("marketing.selection_plan"),
+      render: (row) => wrapLongText(row.selection_plan_id)
+    }
+  ];
 
-    const table_options = {
-      sortCol: order,
-      sortDir: orderDir,
-      className: "marketing-table",
-      actions: {
-        edit: { onClick: this.handleEdit },
-        delete: { onClick: this.handleDeleteSetting }
-      }
-    };
+  const tableOptions = { sortCol: order, sortDir: orderDir };
 
-    if (!currentSummit.id) return <div />;
+  if (!currentSummit.id) return <div />;
 
-    return (
-      <div className="container">
-        <h3>
-          {" "}
-          {T.translate("marketing.setting_list")} ({totalSettings})
-        </h3>
-        <div className="row">
-          <div className="col-md-6">
-            <FreeTextSearch
-              value={term}
-              placeholder={T.translate(
-                "marketing.placeholders.search_settings"
-              )}
-              onSearch={this.handleSearch}
-            />
-          </div>
-          <div className="col-md-2 text-right">
-            <button
-              className="btn btn-primary right-space"
-              onClick={this.handleNewSetting}
-            >
-              {T.translate("marketing.add_setting")}
-            </button>
-          </div>
-          <div className="col-md-4 text-right">
-            <SummitDropdown
-              onClick={this.handleCloneSettings}
-              actionLabel={T.translate("marketing.clone_settings")}
-            />
-          </div>
+  return (
+    <div className="container">
+      <h3>
+        {" "}
+        {T.translate("marketing.setting_list")} ({totalSettings})
+      </h3>
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate("marketing.placeholders.search_settings")
+        }}
+      >
+        <Button
+          variant="contained"
+          onClick={handleNewSetting}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("marketing.add_setting")}
+        </Button>
+        <Box>
+          <SummitDropdown
+            onClick={handleCloneSettings}
+            actionLabel={T.translate("marketing.clone_settings")}
+          />
+        </Box>
+      </GridToolbar>
+
+      {settings.length === 0 && (
+        <div>{T.translate("marketing.no_settings")}</div>
+      )}
+
+      {settings.length > 0 && (
+        <div>
+          <MuiTable
+            options={tableOptions}
+            data={settings}
+            columns={columns}
+            perPage={perPage}
+            currentPage={currentPage}
+            totalRows={totalSettings}
+            onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
+            onSort={handleSort}
+            onEdit={handleEdit}
+            onDelete={deleteSetting}
+            getName={(row) => row.key}
+            deleteDialogBody={(name) =>
+              `${T.translate("marketing.delete_setting_warning")} ${name}`
+            }
+            confirmButtonColor="error"
+          />
         </div>
-
-        {settings.length === 0 && (
-          <div>{T.translate("marketing.no_settings")}</div>
-        )}
-
-        {settings.length > 0 && (
-          <div>
-            <Table
-              options={table_options}
-              data={settings}
-              columns={columns}
-              onSort={this.handleSort}
-            />
-            <Pagination
-              bsSize="medium"
-              prev
-              next
-              first
-              last
-              ellipsis
-              boundaryLinks
-              maxButtons={10}
-              items={lastPage}
-              activePage={currentPage}
-              onSelect={this.handlePageChange}
-            />
-          </div>
-        )}
-      </div>
-    );
-  }
-}
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({
   currentSummitState,
