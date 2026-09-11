@@ -10,10 +10,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * */
-import React from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
+import { Button, Grid2 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import SelectionPlanForm from "../../components/forms/selection-plan-form";
 import {
   addAllowedMemberToSelectionPlan,
@@ -28,6 +30,8 @@ import {
   importAllowedMembersCSV,
   removeAllowedMemberFromSelectionPlan,
   removeTrackGroupFromSelectionPlan,
+  saveSelectionPlan,
+  saveSelectionPlanSettings,
   unassignProgressFlagFromSelectionPlan,
   updateProgressFlagOrder,
   updateRatingTypeOrder,
@@ -39,10 +43,11 @@ const EditSelectionPlanPage = ({
   entity,
   allowedMembers,
   errors,
-  onSave,
   history,
   extraQuestionsOrder,
   extraQuestionsOrderDir,
+  saveSelectionPlan,
+  saveSelectionPlanSettings,
   updateSelectionPlanExtraQuestionOrder,
   unassignProgressFlagFromSelectionPlan,
   deleteSelectionPlanExtraQuestion,
@@ -60,6 +65,31 @@ const EditSelectionPlanPage = ({
   importAllowedMembersCSV,
   removeAllowedMemberFromSelectionPlan
 }) => {
+  const [isSaving, setIsSaving] = useState(false);
+
+  const onSave = (values) => {
+    if (isSaving) return Promise.resolve();
+    setIsSaving(true);
+    return saveSelectionPlan(values)
+      .then((savedEntity) => {
+        if (!savedEntity?.id) return null;
+        return saveSelectionPlanSettings(
+          values.marketing_settings ?? {},
+          savedEntity.id
+        )
+          .catch(() => {})
+          .then(() => {
+            if (!values.id) {
+              history.push(
+                `/app/summits/${currentSummit.id}/selection-plans/${savedEntity.id}`
+              );
+            }
+          });
+      })
+      .catch(() => {})
+      .finally(() => setIsSaving(false));
+  };
+
   const onDeleteExtraQuestion = (questionId) => {
     const extraQuestion = entity.extra_questions.find(
       (t) => t.id === questionId
@@ -175,38 +205,83 @@ const EditSelectionPlanPage = ({
     });
   };
 
+  const title = entity?.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
+
   return (
-    <SelectionPlanForm
-      entity={entity}
-      allowedMembers={allowedMembers}
-      currentSummit={currentSummit}
-      errors={errors}
-      onSave={onSave}
-      extraQuestionsOrder={extraQuestionsOrder}
-      extraQuestionsOrderDir={extraQuestionsOrderDir}
-      onTrackGroupLink={addTrackGroupToSelectionPlan}
-      onTrackGroupUnLink={removeTrackGroupFromSelectionPlan}
-      updateExtraQuestionOrder={onUpdateExtraQuestionOrder}
-      onAddNewExtraQuestion={onAddNewExtraQuestion}
-      onDeleteExtraQuestion={onDeleteExtraQuestion}
-      onAddEventType={addEventTypeSelectionPlan}
-      onDeleteEventType={deleteEventTypeSelectionPlan}
-      onEditExtraQuestion={onEditExtraQuestion}
-      onAddRatingType={onAddRatingType}
-      onEditRatingType={onEditRatingType}
-      onUpdateRatingTypeOrder={onUpdateRatingTypeOrder}
-      onDeleteRatingType={onDeleteRatingType}
-      onAssignExtraQuestion2SelectionPlan={assignExtraQuestion2SelectionPlan}
-      onAddProgressFlag={onAddProgressFlag}
-      onEditProgressFlag={onEditProgressFlag}
-      onAssignProgressFlag2SelectionPlan={assignProgressFlag2SelectionPlan}
-      onUnassignProgressFlag={onUnassignProgressFlag}
-      onUpdateProgressFlagOrder={onUpdateProgressFlagOrder}
-      onAllowedMemberAdd={addAllowedMemberToSelectionPlan}
-      onAllowedMemberDelete={removeAllowedMemberFromSelectionPlan}
-      onAllowedMembersPageChange={getAllowedMembers}
-      onImportAllowedMembers={importAllowedMembersCSV}
-    />
+    <div className="container">
+      <Grid2
+        container
+        sx={{ justifyContent: "space-between", alignItems: "center" }}
+      >
+        <Grid2>
+          <h3>
+            {title} {T.translate("edit_selection_plan.selection_plan")}
+          </h3>
+        </Grid2>
+        {entity?.id > 0 && (
+          <Grid2>
+            <Button
+              variant="contained"
+              onClick={() =>
+                history.push(
+                  `/app/summits/${currentSummit.id}/selection-plans/new`
+                )
+              }
+              startIcon={<AddIcon />}
+            >
+              {T.translate("general.add_new")}
+            </Button>
+          </Grid2>
+        )}
+      </Grid2>
+      <hr />
+      <SelectionPlanForm
+        entity={entity}
+        allowedMembers={allowedMembers}
+        currentSummit={currentSummit}
+        errors={errors}
+        onSave={onSave}
+        extraQuestionsOrder={extraQuestionsOrder}
+        extraQuestionsOrderDir={extraQuestionsOrderDir}
+        onTrackGroupLink={addTrackGroupToSelectionPlan}
+        onTrackGroupUnLink={removeTrackGroupFromSelectionPlan}
+        updateExtraQuestionOrder={onUpdateExtraQuestionOrder}
+        onAddNewExtraQuestion={onAddNewExtraQuestion}
+        onDeleteExtraQuestion={onDeleteExtraQuestion}
+        onAddEventType={addEventTypeSelectionPlan}
+        onDeleteEventType={deleteEventTypeSelectionPlan}
+        onEditExtraQuestion={onEditExtraQuestion}
+        onAddRatingType={onAddRatingType}
+        onEditRatingType={onEditRatingType}
+        onUpdateRatingTypeOrder={onUpdateRatingTypeOrder}
+        onDeleteRatingType={onDeleteRatingType}
+        onAssignExtraQuestion2SelectionPlan={assignExtraQuestion2SelectionPlan}
+        onAddProgressFlag={onAddProgressFlag}
+        onEditProgressFlag={onEditProgressFlag}
+        onAssignProgressFlag2SelectionPlan={assignProgressFlag2SelectionPlan}
+        onUnassignProgressFlag={onUnassignProgressFlag}
+        onUpdateProgressFlagOrder={onUpdateProgressFlagOrder}
+        onAllowedMemberAdd={addAllowedMemberToSelectionPlan}
+        onAllowedMemberDelete={removeAllowedMemberFromSelectionPlan}
+        onAllowedMembersPageChange={getAllowedMembers}
+        onImportAllowedMembers={importAllowedMembersCSV}
+      />
+      <Grid2
+        size={12}
+        sx={{ p: 3, pt: 0, display: "flex", justifyContent: "flex-end" }}
+      >
+        <Button
+          type="submit"
+          form="selection-plan-form"
+          variant="contained"
+          disabled={isSaving}
+        >
+          {T.translate("general.save")}
+        </Button>
+      </Grid2>
+    </div>
   );
 };
 
@@ -219,6 +294,8 @@ const mapStateToProps = ({
 });
 
 export default connect(mapStateToProps, {
+  saveSelectionPlan,
+  saveSelectionPlanSettings,
   addTrackGroupToSelectionPlan,
   removeTrackGroupFromSelectionPlan,
   addEventTypeSelectionPlan,
