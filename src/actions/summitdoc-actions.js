@@ -17,8 +17,7 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  showMessage,
-  showSuccessMessage,
+  snackbarSuccessHandler,
   authErrorHandler,
   postRequest,
   putRequest,
@@ -179,15 +178,14 @@ export const saveSummitDoc = (entity, file) => async (dispatch, getState) => {
       authErrorHandler,
       entity
     )(params)(dispatch).then(() => {
-      dispatch(showSuccessMessage(T.translate("summitdoc.saved")));
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.done"),
+          html: T.translate("summitdoc.saved")
+        })
+      );
     });
   } else {
-    const successMessage = {
-      title: T.translate("general.done"),
-      html: T.translate("summitdoc.created"),
-      type: "success"
-    };
-
     postFile(
       createAction(UPDATE_SUMMITDOC),
       createAction(SUMMITDOC_ADDED),
@@ -198,11 +196,13 @@ export const saveSummitDoc = (entity, file) => async (dispatch, getState) => {
       entity
     )(params)(dispatch).then((payload) => {
       dispatch(
-        showMessage(successMessage, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/summitdocs/${payload.response.id}`
-          );
+        snackbarSuccessHandler({
+          title: T.translate("general.done"),
+          html: T.translate("summitdoc.created")
         })
+      );
+      history.push(
+        `/app/summits/${currentSummit.id}/summitdocs/${payload.response.id}`
       );
     });
   }
