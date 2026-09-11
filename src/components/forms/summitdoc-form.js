@@ -9,249 +9,292 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
-import TextArea from "openstack-uicore-foundation/lib/components/inputs/textarea-input"
+import Box from "@mui/material/Box";
+import { Grid2 } from "@mui/material";
+import TextField from "@mui/material/TextField";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Button from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
-import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
+import { scrollToError, shallowEqual } from "../../utils/methods";
 
-class SummitDocForm extends React.Component {
-  constructor(props) {
-    super(props);
+const SummitDocForm = ({
+  currentSummit,
+  entity: entityProp,
+  errors: errorsProp,
+  onSubmit,
+  addFileToDoc,
+  removeFileFromDoc
+}) => {
+  const [entity, setEntity] = useState({ ...entityProp });
+  const [errors, setErrors] = useState(errorsProp);
+  const [file, setFile] = useState(null);
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors
-    };
+  useEffect(() => {
+    scrollToError(errorsProp);
+  }, [errorsProp]);
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleUploadFile = this.handleUploadFile.bind(this);
-    this.handleRemoveFile = this.handleRemoveFile.bind(this);
-  }
-
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const state = {};
-    scrollToError(this.props.errors);
-
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
+  useEffect(() => {
+    if (!shallowEqual(entity, entityProp)) {
+      setEntity({ ...entityProp });
+      setErrors({});
     }
+  }, [entityProp]);
 
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
+  useEffect(() => {
+    if (!shallowEqual(errors, errorsProp)) {
+      setErrors({ ...errorsProp });
     }
+  }, [errorsProp]);
 
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
-    }
-  }
-
-  handleChange(ev) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
-    let { value, id } = ev.target;
+  const handleChange = (ev) => {
+    const newEntity = { ...entity };
+    const newErrors = { ...errors };
+    const { id } = ev.target;
+    let { value } = ev.target;
 
     if (ev.target.type === "checkbox") {
       value = ev.target.checked;
     }
 
     if (ev.target.type === "number") {
-      value = parseInt(ev.target.value);
+      value = parseInt(value, 10);
     }
 
-    errors[id] = "";
-    entity[id] = value;
+    newErrors[id] = "";
+    newEntity[id] = value;
 
     if (id === "show_always" && value) {
-      entity.event_types = [];
+      newEntity.event_types = [];
     }
 
-    this.setState({ entity: entity, errors: errors });
-  }
+    setEntity(newEntity);
+    setErrors(newErrors);
+  };
 
-  handleSubmit(ev) {
-    const { entity, file } = this.state;
+  const handleSubmit = (ev) => {
     ev.preventDefault();
+    onSubmit(entity, file);
+  };
 
-    this.props.onSubmit(entity, file);
-  }
-
-  hasErrors(field) {
-    let { errors } = this.state;
+  const hasErrors = (field) => {
     if (field in errors) {
       return errors[field];
     }
 
     return "";
-  }
+  };
 
-  handleUploadFile(file) {
-    let entity = { ...this.state.entity };
+  const handleUploadFile = (uploadedFile) => {
+    const newEntity = { ...entity };
 
-    if (entity.id) {
-      this.props.addFileToDoc(entity, file);
+    if (newEntity.id) {
+      addFileToDoc(newEntity, uploadedFile);
     } else {
-      entity.file_preview = file.preview;
-      this.setState({ file: file, entity: entity });
+      newEntity.file_preview = uploadedFile.preview;
+      setFile(uploadedFile);
+      setEntity(newEntity);
     }
-  }
+  };
 
-  handleRemoveFile(ev) {
-    let entity = { ...this.state.entity };
+  const handleRemoveFile = () => {
+    const newEntity = { ...entity };
 
-    if (entity.id) {
-      this.props.removeFileFromDoc(entity);
+    if (newEntity.id) {
+      removeFileFromDoc(newEntity);
     } else {
-      entity.file_preview = "";
-      this.setState({ file: null, entity: entity });
+      newEntity.file_preview = "";
+      setFile(null);
+      setEntity(newEntity);
     }
-  }
+  };
 
-  render() {
-    const { entity } = this.state;
-    const { currentSummit } = this.props;
+  const eventTypesDDL = currentSummit.event_types.map((et) => ({
+    value: et.id,
+    label: et.name
+  }));
 
-    let event_types_ddl = currentSummit.event_types.map((et) => ({
-      value: et.id,
-      label: et.name
-    }));
+  const selectionPlansDDL = currentSummit.selection_plans.map((sp) => ({
+    value: sp.id,
+    label: sp.name
+  }));
 
-    let selection_plans_ddl = currentSummit.selection_plans.map((et) => ({
-      value: et.id,
-      label: et.name
-    }));
+  return (
+    <Box component="form">
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <label htmlFor="name">{T.translate("summitdoc.name")} *</label>
+          <TextField
+            id="name"
+            value={entity.name}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            error={!!hasErrors("name")}
+            helperText={hasErrors("name")}
+          />
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <label htmlFor="label">{T.translate("summitdoc.label")} *</label>
+          <TextField
+            id="label"
+            value={entity.label}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            error={!!hasErrors("label")}
+            helperText={hasErrors("label")}
+          />
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <label htmlFor="event_types">
+            {T.translate("summitdoc.event_types")} *{" "}
+            <Tooltip title={T.translate("summitdoc.event_types_info")}>
+              <InfoOutlinedIcon fontSize="inherit" />
+            </Tooltip>
+          </label>
+          <Select
+            id="event_types"
+            name="event_types"
+            data-testid="event-types-select"
+            multiple
+            fullWidth
+            size="small"
+            displayEmpty
+            value={entity.event_types || []}
+            disabled={entity.show_always}
+            onChange={(ev) =>
+              handleChange({
+                target: { id: "event_types", value: ev.target.value }
+              })
+            }
+            renderValue={(selected) =>
+              selected
+                .map(
+                  (id) => eventTypesDDL.find((opt) => opt.value === id)?.label
+                )
+                .filter(Boolean)
+                .join(", ")
+            }
+          >
+            {eventTypesDDL.map((opt) => (
+              <MenuItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </Grid2>
+      </Grid2>
 
-    return (
-      <form className="summitdoc-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("summitdoc.name")} *</label>
-            <Input
-              id="name"
-              value={entity.name}
-              onChange={this.handleChange}
-              className="form-control"
-              error={this.hasErrors("name")}
-            />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("summitdoc.label")} *</label>
-            <Input
-              id="label"
-              value={entity.label}
-              onChange={this.handleChange}
-              className="form-control"
-              error={this.hasErrors("label")}
-            />
-          </div>
-          <div className="col-md-4">
-            <label>
-              {T.translate("summitdoc.event_types")} * &nbsp;
-              <i
-                className="fa fa-info-circle"
-                aria-hidden="true"
-                title={T.translate("summitdoc.event_types_info")}
-              />
-            </label>
-            <Dropdown
-              id="event_types"
-              value={entity.event_types}
-              placeholder={T.translate("summitdoc.placeholders.select_type")}
-              options={event_types_ddl}
-              onChange={this.handleChange}
-              isMulti
-              disabled={entity.show_always}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-8">
-            <label> {T.translate("summitdoc.description")} *</label>
-            <TextArea
-              id="description"
-              value={entity.description}
-              onChange={this.handleChange}
-              className="form-control"
-              error={this.hasErrors("description")}
-            />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("summitdoc.selection_plan")}</label>
-            <Dropdown
-              id="selection_plan_id"
-              value={entity.selection_plan_id || null}
-              isClearable={true}
-              placeholder={T.translate("summitdoc.placeholders.selection_plan")}
-              options={selection_plans_ddl}
-              onChange={this.handleChange}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-4 col-md-offset-8 checkboxes-div">
-            <div className="form-check abc-checkbox">
-              <input
-                type="checkbox"
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, md: 8 }}>
+          <label htmlFor="description">
+            {T.translate("summitdoc.description")} *
+          </label>
+          <TextField
+            id="description"
+            value={entity.description}
+            onChange={handleChange}
+            fullWidth
+            multiline
+            minRows={3}
+            size="small"
+            error={!!hasErrors("description")}
+            helperText={hasErrors("description")}
+          />
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <label htmlFor="selection_plan_id">
+            {T.translate("summitdoc.selection_plan")}
+          </label>
+          <Select
+            id="selection_plan_id"
+            name="selection_plan_id"
+            fullWidth
+            size="small"
+            displayEmpty
+            value={entity.selection_plan_id || ""}
+            onChange={(ev) =>
+              handleChange({
+                target: { id: "selection_plan_id", value: ev.target.value }
+              })
+            }
+          >
+            <MenuItem value="">
+              {T.translate("summitdoc.placeholders.selection_plan")}
+            </MenuItem>
+            {selectionPlansDDL.map((opt) => (
+              <MenuItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </Grid2>
+      </Grid2>
+
+      <Grid2 container justifyContent="flex-end" sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <FormControlLabel
+            control={
+              <Checkbox
                 id="show_always"
                 checked={entity.show_always}
-                onChange={this.handleChange}
-                className="form-check-input"
+                onChange={handleChange}
               />
-              <label className="form-check-label" htmlFor="show_always">
-                {T.translate("summitdoc.show_always")}
-              </label>
-            </div>
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label> {T.translate("summitdoc.file")} *</label>
-            <UploadInput
-              value={entity.file_preview || entity.file}
-              handleUpload={this.handleUploadFile}
-              handleRemove={this.handleRemoveFile}
-              className="dropzone col-md-6"
-              multiple={false}
-              disabled={entity.web_link?.length > 0}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label> {T.translate("summitdoc.web_link")} *</label>
-            <Input
-              id="web_link"
-              value={entity.web_link}
-              onChange={this.handleChange}
-              placeholder={T.translate("summitdoc.placeholders.web_link")}
-              className="form-control"
-              disabled={entity.file_preview || entity.file}
-              error={this.hasErrors("web_link")}
-            />
-          </div>
-        </div>
+            }
+            label={T.translate("summitdoc.show_always")}
+          />
+        </Grid2>
+      </Grid2>
 
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
-        </div>
-      </form>
-    );
-  }
-}
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={12}>
+          <label>{T.translate("summitdoc.file")} *</label>
+          <UploadInput
+            value={entity.file_preview || entity.file}
+            handleUpload={handleUploadFile}
+            handleRemove={handleRemoveFile}
+            className="dropzone"
+            multiple={false}
+            disabled={entity.web_link?.length > 0}
+          />
+        </Grid2>
+      </Grid2>
+
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={12}>
+          <label htmlFor="web_link">
+            {T.translate("summitdoc.web_link")} *
+          </label>
+          <TextField
+            id="web_link"
+            value={entity.web_link}
+            onChange={handleChange}
+            placeholder={T.translate("summitdoc.placeholders.web_link")}
+            fullWidth
+            size="small"
+            disabled={!!(entity.file_preview || entity.file)}
+            error={!!hasErrors("web_link")}
+            helperText={hasErrors("web_link")}
+          />
+        </Grid2>
+      </Grid2>
+
+      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        <Button variant="contained" onClick={handleSubmit}>
+          {T.translate("general.save")}
+        </Button>
+      </Box>
+    </Box>
+  );
+};
 
 export default SummitDocForm;
