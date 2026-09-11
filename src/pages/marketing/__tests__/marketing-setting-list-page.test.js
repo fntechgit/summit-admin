@@ -1,5 +1,5 @@
 import React from "react";
-import { act, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import flushPromises from "flush-promises";
@@ -30,30 +30,42 @@ jest.mock("../../../components/summit-dropdown", () => ({
   )
 }));
 
+let capturedColumns;
+
 jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => ({
   __esModule: true,
-  default: ({ onEdit, onDelete, onSort, onPageChange, onPerPageChange }) => (
-    <div>
-      <button type="button" onClick={() => onEdit({ id: 1, key: "test-key" })}>
-        edit-row
-      </button>
-      <button
-        type="button"
-        onClick={() => onDelete({ id: 1, key: "test-key" })}
-      >
-        delete-row
-      </button>
-      <button type="button" onClick={() => onSort("key", -1)}>
-        sort-col
-      </button>
-      <button type="button" onClick={() => onPageChange(2)}>
-        page-2
-      </button>
-      <button type="button" onClick={() => onPerPageChange(50)}>
-        perpage-50
-      </button>
-    </div>
-  )
+  default: ({
+    onEdit,
+    onDelete,
+    onSort,
+    onPageChange,
+    onPerPageChange,
+    columns
+  }) => {
+    capturedColumns = columns;
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={() => onEdit({ id: 1, key: "test-key" })}
+        >
+          edit-row
+        </button>
+        <button type="button" onClick={() => onDelete(1)}>
+          delete-row
+        </button>
+        <button type="button" onClick={() => onSort("key", -1)}>
+          sort-col
+        </button>
+        <button type="button" onClick={() => onPageChange(2)}>
+          page-2
+        </button>
+        <button type="button" onClick={() => onPerPageChange(50)}>
+          perpage-50
+        </button>
+      </div>
+    );
+  }
 }));
 
 jest.mock(
@@ -106,23 +118,25 @@ describe("MarketingSettingListPage", () => {
     showConfirmDialog.mockResolvedValue(true);
   });
 
-  it("deletes the setting when the confirm dialog resolves true", async () => {
+  it("bounds the value column width and wraps long values instead of overflowing", () => {
     renderWithRedux(<MarketingSettingListPage history={mockHistory} />, {
       initialState
     });
 
-    await act(async () => {
-      await userEvent.click(screen.getByRole("button", { name: "delete-row" }));
-      await flushPromises();
-    });
+    const valueColumn = capturedColumns.find((c) => c.columnKey === "value");
+    expect(valueColumn.width).toBe(450);
 
-    expect(showConfirmDialog).toHaveBeenCalled();
-    expect(deleteSetting).toHaveBeenCalledWith(1);
+    const longValue = "lorem ipsum ".repeat(50);
+    const { container } = render(valueColumn.render({ value: longValue }));
+
+    expect(container.firstChild).toHaveStyle({
+      wordBreak: "break-word",
+      overflowWrap: "anywhere"
+    });
+    expect(container).toHaveTextContent(longValue);
   });
 
-  it("does not delete the setting when the confirm dialog resolves false", async () => {
-    showConfirmDialog.mockResolvedValue(false);
-
+  it("deletes the setting by id (confirm is handled inside MuiTable)", async () => {
     renderWithRedux(<MarketingSettingListPage history={mockHistory} />, {
       initialState
     });
@@ -132,7 +146,7 @@ describe("MarketingSettingListPage", () => {
       await flushPromises();
     });
 
-    expect(deleteSetting).not.toHaveBeenCalled();
+    expect(deleteSetting).toHaveBeenCalledWith(1);
   });
 
   it("clones settings when the confirm dialog resolves true", async () => {

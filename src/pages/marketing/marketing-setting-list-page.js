@@ -92,18 +92,6 @@ const MarketingSettingListPage = ({
     history.push(`/app/summits/${currentSummit.id}/marketing/new`);
   };
 
-  const handleDeleteSetting = async (row) => {
-    const confirmed = await showConfirmDialog({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("marketing.delete_setting_warning")} ${row.key}`,
-      iconType: "warning",
-      confirmButtonText: T.translate("general.yes_delete"),
-      confirmButtonColor: "error"
-    });
-
-    if (confirmed) deleteSetting(row.id);
-  };
-
   const handleCloneSettings = async (summitId) => {
     const confirmed = await showConfirmDialog({
       title: T.translate("general.are_you_sure"),
@@ -127,6 +115,7 @@ const MarketingSettingListPage = ({
     {
       columnKey: "value",
       header: T.translate("marketing.value"),
+      width: 450,
       render: (row) => wrapLongText(row.value)
     },
     {
@@ -185,7 +174,12 @@ const MarketingSettingListPage = ({
             onPerPageChange={handlePerPageChange}
             onSort={handleSort}
             onEdit={handleEdit}
-            onDelete={handleDeleteSetting}
+            onDelete={deleteSetting}
+            getName={(row) => row.key}
+            deleteDialogBody={(name) =>
+              `${T.translate("marketing.delete_setting_warning")} ${name}`
+            }
+            confirmButtonColor="error"
           />
         </div>
       )}
