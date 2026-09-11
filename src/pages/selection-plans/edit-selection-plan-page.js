@@ -14,7 +14,6 @@ import React, { useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import { Breadcrumb } from "react-breadcrumbs";
 import { Button, Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SelectionPlanForm from "../../components/forms/selection-plan-form";
@@ -44,7 +43,6 @@ const EditSelectionPlanPage = ({
   entity,
   allowedMembers,
   errors,
-  match,
   history,
   extraQuestionsOrder,
   extraQuestionsOrderDir,
@@ -210,11 +208,9 @@ const EditSelectionPlanPage = ({
   const title = entity?.id
     ? T.translate("general.edit")
     : T.translate("general.add");
-  const breadcrumb = entity?.id ? entity.name : T.translate("general.new");
 
   return (
     <div className="container">
-      <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
       <Grid2
         container
         sx={{ justifyContent: "space-between", alignItems: "center" }}
