@@ -26,7 +26,7 @@ jest.mock("i18n-react", () => ({
   default: { translate: (k) => k }
 }));
 
-// The gate renders null until it's open, so the breadcrumb's presence is our signal.
+// The page renders null until it's ready, so the breadcrumb's presence is our signal.
 jest.mock("react-breadcrumbs", () => ({
   Breadcrumb: () => <div data-testid="breadcrumb" />
 }));
@@ -70,7 +70,7 @@ const renderAt = (path, currentSelectionPlan) => {
 
 const settle = () => act(async () => flushPromises());
 
-const gateOpen = () => screen.queryByTestId("breadcrumb") !== null;
+const isPageRendered = () => screen.queryByTestId("breadcrumb") !== null;
 
 // Mirrors the sibling /new and /:id(\d+) routes in selection-plan-layout.js.
 const NewOrEditHarness = ({ history }) => (
@@ -90,7 +90,7 @@ const NewOrEditHarness = ({ history }) => (
   </Router>
 );
 
-describe("SelectionPlanIdLayout selection-plan gate", () => {
+describe("SelectionPlanIdLayout load guard", () => {
   beforeEach(() => {
     getSelectionPlan.mockReset();
     getMarketingSettingsBySelectionPlan.mockReset();
@@ -100,13 +100,13 @@ describe("SelectionPlanIdLayout selection-plan gate", () => {
     );
   });
 
-  it("stays closed on direct load until the matching plan finishes fetching", async () => {
+  it("does not render on direct load until the matching plan finishes fetching", async () => {
     getSelectionPlan.mockImplementation(() => () => new Promise(() => {}));
     renderAt("/app/summits/1/selection-plans/5", { id: 5 });
-    expect(gateOpen()).toBe(false);
+    expect(isPageRendered()).toBe(false);
   });
 
-  it("closes when switching to a different plan id until the store catches up", async () => {
+  it("stops rendering when switching to a different plan id until the store catches up", async () => {
     const history = createMemoryHistory({
       initialEntries: ["/app/summits/1/selection-plans/5"]
     });
@@ -125,20 +125,20 @@ describe("SelectionPlanIdLayout selection-plan gate", () => {
       }
     );
     await settle();
-    expect(gateOpen()).toBe(true);
+    expect(isPageRendered()).toBe(true);
 
     act(() => {
       history.push("/app/summits/1/selection-plans/8");
     });
-    expect(gateOpen()).toBe(false);
+    expect(isPageRendered()).toBe(false);
     expect(getSelectionPlan).toHaveBeenCalledWith("8");
 
-    // Fetch settles, but the store's entity.id is still "5" — must stay closed.
+    // Fetch settles, but the store's entity.id is still "5" — must stay unrendered.
     await settle();
-    expect(gateOpen()).toBe(false);
+    expect(isPageRendered()).toBe(false);
   });
 
-  it("closes when navigating from an existing plan to /new until the store reflects the reset", async () => {
+  it("stops rendering when navigating from an existing plan to /new until the store reflects the reset", async () => {
     const history = createMemoryHistory({
       initialEntries: ["/app/summits/1/selection-plans/5"]
     });
@@ -149,16 +149,16 @@ describe("SelectionPlanIdLayout selection-plan gate", () => {
       }
     });
     await settle();
-    expect(gateOpen()).toBe(true);
+    expect(isPageRendered()).toBe(true);
 
-    // Store still holds plan 5's entity (reset hasn't landed) — gate must close.
+    // Store still holds plan 5's entity (reset hasn't landed) — must not render.
     act(() => {
       history.push("/app/summits/1/selection-plans/new");
     });
-    expect(gateOpen()).toBe(false);
+    expect(isPageRendered()).toBe(false);
   });
 
-  it("opens on /new once the store reflects the reset (default) entity", async () => {
+  it("renders on /new once the store reflects the reset (default) entity", async () => {
     const history = createMemoryHistory({
       initialEntries: ["/app/summits/1/selection-plans/new"]
     });
@@ -169,6 +169,15 @@ describe("SelectionPlanIdLayout selection-plan gate", () => {
       }
     });
     await settle();
-    expect(gateOpen()).toBe(true);
+    expect(isPageRendered()).toBe(true);
+  });
+
+  it("does not render or throw when the fetch rejects", async () => {
+    getSelectionPlan.mockImplementation(
+      () => () => Promise.reject(new Error("fail"))
+    );
+    renderAt("/app/summits/1/selection-plans/5", { id: 0 });
+    await expect(settle()).resolves.not.toThrow();
+    expect(isPageRendered()).toBe(false);
   });
 });
