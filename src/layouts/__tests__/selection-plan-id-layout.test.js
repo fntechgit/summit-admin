@@ -13,7 +13,7 @@
 
 import React from "react";
 import { screen, act } from "@testing-library/react";
-import { Router, Route } from "react-router-dom";
+import { Router, Route, Switch } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import flushPromises from "flush-promises";
 import { renderWithRedux } from "../../utils/test-utils";
@@ -26,8 +26,7 @@ jest.mock("i18n-react", () => ({
   default: { translate: (k) => k }
 }));
 
-// The gate returns null until the fetch resolves and the loaded entity
-// matches the URL id, so the breadcrumb's presence signals the gate is open.
+// The gate renders null until it's open, so the breadcrumb's presence is our signal.
 jest.mock("react-breadcrumbs", () => ({
   Breadcrumb: () => <div data-testid="breadcrumb" />
 }));
@@ -45,8 +44,7 @@ jest.mock("../../actions/marketing-actions", () => ({
   getMarketingSettingsBySelectionPlan: jest.fn()
 }));
 
-// Keep the gated subtree trivial so an open gate doesn't drag in the real
-// form (which needs a fuller marketing-settings shape than these tests set up).
+// Stub the page: the real form needs a fuller marketing-settings shape than set up here.
 jest.mock("../../pages/selection-plans/edit-selection-plan-page", () => ({
   __esModule: true,
   default: () => <div data-testid="edit-selection-plan-page" />
@@ -73,6 +71,24 @@ const renderAt = (path, currentSelectionPlan) => {
 const settle = () => act(async () => flushPromises());
 
 const gateOpen = () => screen.queryByTestId("breadcrumb") !== null;
+
+// Mirrors the sibling /new and /:id(\d+) routes in selection-plan-layout.js.
+const NewOrEditHarness = ({ history }) => (
+  <Router history={history}>
+    <Switch>
+      <Route
+        strict
+        exact
+        path="/app/summits/:summit_id/selection-plans/new"
+        component={SelectionPlanIdLayout}
+      />
+      <Route
+        path="/app/summits/:summit_id/selection-plans/:selection_plan_id(\d+)"
+        component={SelectionPlanIdLayout}
+      />
+    </Switch>
+  </Router>
+);
 
 describe("SelectionPlanIdLayout selection-plan gate", () => {
   beforeEach(() => {
@@ -116,5 +132,43 @@ describe("SelectionPlanIdLayout selection-plan gate", () => {
     });
     expect(gateOpen()).toBe(false);
     expect(getSelectionPlan).toHaveBeenCalledWith("8");
+
+    // Fetch settles, but the store's entity.id is still "5" — must stay closed.
+    await settle();
+    expect(gateOpen()).toBe(false);
+  });
+
+  it("closes when navigating from an existing plan to /new until the store reflects the reset", async () => {
+    const history = createMemoryHistory({
+      initialEntries: ["/app/summits/1/selection-plans/5"]
+    });
+    renderWithRedux(<NewOrEditHarness history={history} />, {
+      initialState: {
+        currentSelectionPlanState: { entity: { id: 5 } },
+        currentSummitState: { currentSummit: { id: 1 } }
+      }
+    });
+    await settle();
+    expect(gateOpen()).toBe(true);
+
+    // Store still holds plan 5's entity (reset hasn't landed) — gate must close.
+    act(() => {
+      history.push("/app/summits/1/selection-plans/new");
+    });
+    expect(gateOpen()).toBe(false);
+  });
+
+  it("opens on /new once the store reflects the reset (default) entity", async () => {
+    const history = createMemoryHistory({
+      initialEntries: ["/app/summits/1/selection-plans/new"]
+    });
+    renderWithRedux(<NewOrEditHarness history={history} />, {
+      initialState: {
+        currentSelectionPlanState: { entity: { id: 0 } },
+        currentSummitState: { currentSummit: { id: 1 } }
+      }
+    });
+    await settle();
+    expect(gateOpen()).toBe(true);
   });
 });

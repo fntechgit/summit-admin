@@ -55,10 +55,7 @@ const SelectionPlanIdLayout = ({
     }
   }, [selectionPlanId]);
 
-  if (
-    selectionPlanId &&
-    (!hasLoaded || currentSelectionPlan.id !== Number(selectionPlanId))
-  ) {
+  if (!hasLoaded || currentSelectionPlan.id !== Number(selectionPlanId || 0)) {
     return null;
   }
 
