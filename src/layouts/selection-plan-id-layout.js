@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { Breadcrumb } from "react-breadcrumbs";
@@ -29,14 +29,17 @@ const SelectionPlanIdLayout = ({
   resetSelectionPlanForm,
   getMarketingSettingsBySelectionPlan
 }) => {
+  const [hasLoaded, setHasLoaded] = useState(false);
   const selectionPlanId = match.params.selection_plan_id;
   const breadcrumb = selectionPlanId
     ? currentSelectionPlan.name
     : T.translate("general.new");
 
   useEffect(() => {
+    setHasLoaded(false);
     if (!selectionPlanId) {
       resetSelectionPlanForm();
+      setHasLoaded(true);
     } else {
       getSelectionPlan(selectionPlanId)
         .then(() =>
@@ -47,9 +50,17 @@ const SelectionPlanIdLayout = ({
             MAX_PER_PAGE
           )
         )
+        .then(() => setHasLoaded(true))
         .catch(() => {});
     }
   }, [selectionPlanId]);
+
+  if (
+    selectionPlanId &&
+    (!hasLoaded || currentSelectionPlan.id !== Number(selectionPlanId))
+  ) {
+    return null;
+  }
 
   return (
     <div>
