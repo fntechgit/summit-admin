@@ -11,10 +11,14 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
+import { FormikProvider, useFormik } from "formik";
+import * as yup from "yup";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import SummitDocForm from "../../components/forms/summitdoc-form";
 import { getSummitById } from "../../actions/summit-actions";
 import {
@@ -25,62 +29,122 @@ import {
   saveSummitDoc
 } from "../../actions/summitdoc-actions";
 import AddNewButton from "../../components/buttons/add-new-button";
+import { requiredStringValidation } from "../../utils/yup";
 // import '../../styles/edit-summitdoc-page.less';
 
-class EditSummitDocPage extends React.Component {
-  constructor(props) {
-    const summitDocId = props.match.params.summitdoc_id;
-    super(props);
+export const buildValues = (entity) => ({
+  id: entity?.id ?? 0,
+  name: entity?.name ?? "",
+  label: entity?.label ?? "",
+  description: entity?.description ?? "",
+  event_types: entity?.event_types ?? [],
+  file_preview: entity?.file_preview ?? "",
+  file: entity?.file ?? null,
+  selection_plan_id: entity?.selection_plan_id ?? "",
+  show_always: !!entity?.show_always,
+  web_link: entity?.web_link ?? ""
+});
 
+export const validationSchema = yup.object().shape({
+  name: requiredStringValidation(),
+  label: requiredStringValidation(),
+  description: requiredStringValidation(),
+  event_types: yup.array().when("show_always", {
+    is: true,
+    then: (schema) => schema,
+    otherwise: (schema) => schema.min(1, T.translate("validation.required"))
+  }),
+  file_preview: yup.string().nullable(),
+  file: yup.mixed().nullable(),
+  web_link: yup
+    .string()
+    .nullable()
+    .when(["file_preview", "file"], {
+      is: (filePreview, file) => !filePreview && !file,
+      then: (schema) => schema.required(T.translate("validation.required")),
+      otherwise: (schema) => schema
+    })
+});
+
+const EditSummitDocPage = ({
+  currentSummit,
+  entity,
+  match,
+  history,
+  getSummitDoc,
+  resetSummitDocForm,
+  saveSummitDoc,
+  addFileToDoc,
+  removeFileFromDoc
+}) => {
+  const summitDocId = match.params.summitdoc_id;
+  const [file, setFile] = useState(null);
+
+  useEffect(() => {
     if (!summitDocId) {
-      props.resetSummitDocForm();
+      resetSummitDocForm();
     } else {
-      props.getSummitDoc(summitDocId);
+      getSummitDoc(summitDocId);
     }
-  }
+  }, [summitDocId]);
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const oldId = prevProps.match.params.summitdoc_id;
-    const newId = this.props.match.params.summitdoc_id;
-
-    if (newId !== oldId) {
-      if (!newId) {
-        this.props.resetSummitDocForm();
-      } else {
-        this.props.getSummitDoc(newId);
-      }
+  const formik = useFormik({
+    initialValues: buildValues(entity),
+    validationSchema,
+    onSubmit: (values) => {
+      saveSummitDoc(values, file)
+        .then(() => {
+          history.push(`/app/summits/${currentSummit.id}/summitdocs`);
+        })
+        .catch(() => {});
     }
-  }
+  });
 
-  render() {
-    const { currentSummit, entity, errors, match } = this.props;
-    const title = entity.id
-      ? T.translate("general.edit")
-      : T.translate("general.add");
-    const breadcrumb = entity.id ? entity.label : T.translate("general.new");
+  useEffect(() => {
+    formik.resetForm({ values: buildValues(entity) });
+    setFile(null);
+  }, [entity.id]);
 
-    return (
-      <div className="container">
-        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-        <h3>
-          {title} {T.translate("summitdoc.summitdoc")}
-          <AddNewButton entity={entity} />
-        </h3>
-        <hr />
-        {currentSummit && (
-          <SummitDocForm
-            currentSummit={currentSummit}
-            entity={entity}
-            errors={errors}
-            onSubmit={this.props.saveSummitDoc}
-            addFileToDoc={this.props.addFileToDoc}
-            removeFileFromDoc={this.props.removeFileFromDoc}
-          />
-        )}
-      </div>
-    );
-  }
-}
+  // addFileToDoc/removeFileFromDoc update entity.file directly via redux,
+  // independent of entity.id - resync just this field so it doesn't go
+  // stale, without resetting the rest of the in-progress form.
+  useEffect(() => {
+    formik.setFieldValue("file", entity.file ?? null);
+  }, [entity.file]);
+
+  const title = entity.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
+  const breadcrumb = entity.id ? entity.label : T.translate("general.new");
+
+  return (
+    <div className="container">
+      <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+      <h3>
+        {title} {T.translate("summitdoc.summitdoc")}
+        <AddNewButton entity={entity} />
+      </h3>
+      <hr />
+      {currentSummit && (
+        <FormikProvider value={formik}>
+          <Box component="form" onSubmit={formik.handleSubmit} noValidate>
+            <SummitDocForm
+              currentSummit={currentSummit}
+              addFileToDoc={addFileToDoc}
+              removeFileFromDoc={removeFileFromDoc}
+              setFile={setFile}
+            />
+            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+              <Button type="submit" variant="contained">
+                {T.translate("general.save")}
+              </Button>
+            </Box>
+          </Box>
+        </FormikProvider>
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({ currentSummitState, summitDocState }) => ({
   currentSummit: currentSummitState.currentSummit,

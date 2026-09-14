@@ -9,16 +9,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import T from "i18n-react/dist/i18n-react";
 import {
   RECEIVE_SUMMITDOCS,
   REQUEST_SUMMITDOCS,
   SUMMITDOC_DELETED
 } from "../../actions/summitdoc-actions";
-
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
   summitDocs: [],
@@ -39,32 +39,37 @@ const summitDocListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SUMMITDOCS: {
-      let { order, orderDir, term } = payload;
+      const { order, orderDir, term } = payload;
 
       return { ...state, order, orderDir, term };
     }
     case RECEIVE_SUMMITDOCS: {
-      let { total, last_page, current_page } = payload.response;
-      let summitDocs = payload.response.data.map((s) => {
-        return {
-          id: s.id,
-          name: s.name,
-          label: s.label,
-          description: s.description,
-          event_types_string: s.event_types.map((et) => et.name).join(", ")
-        };
-      });
+      const {
+        total: totalSummitDocs,
+        last_page: lastPage,
+        current_page: currentPage
+      } = payload.response;
+      const summitDocs = payload.response.data.map((s) => ({
+        id: s.id,
+        name: s.name,
+        label: s.label,
+        description: s.description,
+        event_types_string: s.show_always
+          ? T.translate("summitdoc.all_types")
+          : s.event_types.map((et) => et.name).join(", "),
+        selection_plan: s.selection_plan?.name
+      }));
 
       return {
         ...state,
-        summitDocs: summitDocs,
-        currentPage: current_page,
-        totalSummitDocs: total,
-        lastPage: last_page
+        summitDocs,
+        currentPage,
+        totalSummitDocs,
+        lastPage
       };
     }
     case SUMMITDOC_DELETED: {
-      let { summitDocId } = payload;
+      const { summitDocId } = payload;
       return {
         ...state,
         summitDocs: state.summitDocs.filter((s) => s.id !== summitDocId)

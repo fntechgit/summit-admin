@@ -11,111 +11,31 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React from "react";
+import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
+import { useFormikContext } from "formik";
 import Box from "@mui/material/Box";
 import { Grid2 } from "@mui/material";
-import TextField from "@mui/material/TextField";
-import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import Checkbox from "@mui/material/Checkbox";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
+import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
 import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
-import { scrollToError, shallowEqual } from "../../utils/methods";
+import useScrollToError from "../../hooks/useScrollToError";
 
 const SummitDocForm = ({
   currentSummit,
-  entity: entityProp,
-  errors: errorsProp,
-  onSubmit,
   addFileToDoc,
-  removeFileFromDoc
+  removeFileFromDoc,
+  setFile
 }) => {
-  const [entity, setEntity] = useState({ ...entityProp });
-  const [errors, setErrors] = useState(errorsProp);
-  const [file, setFile] = useState(null);
+  const formik = useFormikContext();
+  const { values, setFieldValue, setValues } = formik;
 
-  useEffect(() => {
-    scrollToError(errorsProp);
-  }, [errorsProp]);
-
-  useEffect(() => {
-    if (!shallowEqual(entity, entityProp)) {
-      setEntity({ ...entityProp });
-      setErrors({});
-    }
-  }, [entityProp]);
-
-  useEffect(() => {
-    if (!shallowEqual(errors, errorsProp)) {
-      setErrors({ ...errorsProp });
-    }
-  }, [errorsProp]);
-
-  const handleChange = (ev) => {
-    const newEntity = { ...entity };
-    const newErrors = { ...errors };
-    const { id } = ev.target;
-    let { value } = ev.target;
-
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
-
-    if (ev.target.type === "number") {
-      value = parseInt(value, 10);
-    }
-
-    newErrors[id] = "";
-    newEntity[id] = value;
-
-    if (id === "show_always" && value) {
-      newEntity.event_types = [];
-    }
-
-    setEntity(newEntity);
-    setErrors(newErrors);
-  };
-
-  const handleSubmit = (ev) => {
-    ev.preventDefault();
-    onSubmit(entity, file);
-  };
-
-  const hasErrors = (field) => {
-    if (field in errors) {
-      return errors[field];
-    }
-
-    return "";
-  };
-
-  const handleUploadFile = (uploadedFile) => {
-    const newEntity = { ...entity };
-
-    if (newEntity.id) {
-      addFileToDoc(newEntity, uploadedFile);
-    } else {
-      newEntity.file_preview = uploadedFile.preview;
-      setFile(uploadedFile);
-      setEntity(newEntity);
-    }
-  };
-
-  const handleRemoveFile = () => {
-    const newEntity = { ...entity };
-
-    if (newEntity.id) {
-      removeFileFromDoc(newEntity);
-    } else {
-      newEntity.file_preview = "";
-      setFile(null);
-      setEntity(newEntity);
-    }
-  };
+  useScrollToError(formik, true);
 
   const eventTypesDDL = currentSummit.event_types.map((et) => ({
     value: et.id,
@@ -127,55 +47,72 @@ const SummitDocForm = ({
     label: sp.name
   }));
 
+  const handleShowAlwaysChange = (ev) => {
+    const { checked } = ev.target;
+    // Update both fields in one call - two sequential setFieldValue calls
+    // each trigger their own validation pass against a stale snapshot of
+    // the other field, flashing a spurious "required" error on event_types.
+    setValues({
+      ...values,
+      show_always: checked,
+      event_types: checked ? [] : values.event_types
+    });
+  };
+
+  const handleUploadFile = (uploadedFile) => {
+    if (values.id) {
+      addFileToDoc(values, uploadedFile);
+    } else {
+      setFieldValue("file_preview", uploadedFile.preview);
+      setFile(uploadedFile);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    if (values.id) {
+      removeFileFromDoc(values);
+    } else {
+      setFieldValue("file_preview", "");
+      setFile(null);
+    }
+  };
+
   return (
-    <Box component="form">
+    <Box>
       <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 4 }}>
+        <Grid2 size={{ xs: 12, md: 3 }}>
           <label htmlFor="name">{T.translate("summitdoc.name")} *</label>
-          <TextField
-            id="name"
-            value={entity.name}
-            onChange={handleChange}
+          <MuiFormikTextField
+            name="name"
+            margin="none"
             fullWidth
             size="small"
-            error={!!hasErrors("name")}
-            helperText={hasErrors("name")}
           />
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }}>
+        <Grid2 size={{ xs: 12, md: 3 }}>
           <label htmlFor="label">{T.translate("summitdoc.label")} *</label>
-          <TextField
-            id="label"
-            value={entity.label}
-            onChange={handleChange}
+          <MuiFormikTextField
+            name="label"
+            margin="none"
             fullWidth
             size="small"
-            error={!!hasErrors("label")}
-            helperText={hasErrors("label")}
           />
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }}>
+        <Grid2 size={{ xs: 12, md: 3 }}>
           <label htmlFor="event_types">
             {T.translate("summitdoc.event_types")} *{" "}
             <Tooltip title={T.translate("summitdoc.event_types_info")}>
               <InfoOutlinedIcon fontSize="inherit" />
             </Tooltip>
           </label>
-          <Select
-            id="event_types"
+          <MuiFormikSelect
             name="event_types"
             data-testid="event-types-select"
             multiple
             fullWidth
             size="small"
             displayEmpty
-            value={entity.event_types || []}
-            disabled={entity.show_always}
-            onChange={(ev) =>
-              handleChange({
-                target: { id: "event_types", value: ev.target.value }
-              })
-            }
+            disabled={values.show_always}
             renderValue={(selected) =>
               selected
                 .map(
@@ -190,42 +127,44 @@ const SummitDocForm = ({
                 {opt.label}
               </MenuItem>
             ))}
-          </Select>
+          </MuiFormikSelect>
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 3 }}>
+          <MuiFormikCheckbox
+            name="show_always"
+            label={T.translate("summitdoc.show_always")}
+            onChange={handleShowAlwaysChange}
+          />
         </Grid2>
       </Grid2>
 
       <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 8 }}>
+        <Grid2 size={{ xs: 12, md: 9 }}>
           <label htmlFor="description">
             {T.translate("summitdoc.description")} *
           </label>
-          <TextField
-            id="description"
-            value={entity.description}
-            onChange={handleChange}
+          <MuiFormikTextField
+            name="description"
+            margin="none"
             fullWidth
             multiline
             minRows={3}
             size="small"
-            error={!!hasErrors("description")}
-            helperText={hasErrors("description")}
           />
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }}>
+        <Grid2 size={{ xs: 12, md: 3 }}>
           <label htmlFor="selection_plan_id">
             {T.translate("summitdoc.selection_plan")}
           </label>
-          <Select
-            id="selection_plan_id"
+          <MuiFormikSelect
             name="selection_plan_id"
             fullWidth
             size="small"
             displayEmpty
-            value={entity.selection_plan_id || ""}
-            onChange={(ev) =>
-              handleChange({
-                target: { id: "selection_plan_id", value: ev.target.value }
-              })
+            renderValue={(selected) =>
+              selected
+                ? selectionPlansDDL.find((opt) => opt.value === selected)?.label
+                : T.translate("summitdoc.placeholders.selection_plan")
             }
           >
             <MenuItem value="">
@@ -236,36 +175,34 @@ const SummitDocForm = ({
                 {opt.label}
               </MenuItem>
             ))}
-          </Select>
-        </Grid2>
-      </Grid2>
-
-      <Grid2 container justifyContent="flex-end" sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                id="show_always"
-                checked={entity.show_always}
-                onChange={handleChange}
-              />
-            }
-            label={T.translate("summitdoc.show_always")}
-          />
+          </MuiFormikSelect>
         </Grid2>
       </Grid2>
 
       <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={12}>
+        <Grid2 size={{ xs: 12 }}>
           <label>{T.translate("summitdoc.file")} *</label>
-          <UploadInput
-            value={entity.file_preview || entity.file}
-            handleUpload={handleUploadFile}
-            handleRemove={handleRemoveFile}
-            className="dropzone"
-            multiple={false}
-            disabled={entity.web_link?.length > 0}
-          />
+          {/* need this styles to adapt bootstrap to MUI */}
+          <Box
+            sx={{
+              "& .file-upload": {
+                display: "flex",
+                gap: 2,
+                alignItems: "flex-start"
+              },
+              "& .file-upload > :first-of-type": { flex: 1 },
+              "& .selected-files-box": { flex: "0 0 auto", maxWidth: "50%" }
+            }}
+          >
+            <UploadInput
+              value={values.file_preview || values.file}
+              handleUpload={handleUploadFile}
+              handleRemove={handleRemoveFile}
+              className="dropzone"
+              multiple={false}
+              disabled={values.web_link?.length > 0}
+            />
+          </Box>
         </Grid2>
       </Grid2>
 
@@ -274,27 +211,25 @@ const SummitDocForm = ({
           <label htmlFor="web_link">
             {T.translate("summitdoc.web_link")} *
           </label>
-          <TextField
-            id="web_link"
-            value={entity.web_link}
-            onChange={handleChange}
-            placeholder={T.translate("summitdoc.placeholders.web_link")}
+          <MuiFormikTextField
+            name="web_link"
+            margin="none"
             fullWidth
             size="small"
-            disabled={!!(entity.file_preview || entity.file)}
-            error={!!hasErrors("web_link")}
-            helperText={hasErrors("web_link")}
+            placeholder={T.translate("summitdoc.placeholders.web_link")}
+            disabled={!!(values.file_preview || values.file)}
           />
         </Grid2>
       </Grid2>
-
-      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-        <Button variant="contained" onClick={handleSubmit}>
-          {T.translate("general.save")}
-        </Button>
-      </Box>
     </Box>
   );
+};
+
+SummitDocForm.propTypes = {
+  currentSummit: PropTypes.object.isRequired,
+  addFileToDoc: PropTypes.func.isRequired,
+  removeFileFromDoc: PropTypes.func.isRequired,
+  setFile: PropTypes.func.isRequired
 };
 
 export default SummitDocForm;

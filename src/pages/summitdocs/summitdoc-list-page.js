@@ -25,12 +25,6 @@ import {
 } from "../../actions/summitdoc-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
-const wrapLongText = (value) => (
-  <div style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
-    {value}
-  </div>
-);
-
 const SummitDocListPage = ({
   currentSummit,
   summitDocs,
@@ -84,15 +78,15 @@ const SummitDocListPage = ({
     },
     {
       columnKey: "description",
-      header: T.translate("summitdoc.description"),
-      width: 400,
-      render: (row) => wrapLongText(row.description)
+      header: T.translate("summitdoc.description")
+    },
+    {
+      columnKey: "selection_plan",
+      header: T.translate("summitdoc.selection_plan")
     },
     {
       columnKey: "event_types_string",
-      header: T.translate("summitdoc.event_types"),
-      width: 300,
-      render: (row) => wrapLongText(row.event_types_string)
+      header: T.translate("summitdoc.event_types")
     }
   ];
 
