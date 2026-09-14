@@ -12,18 +12,18 @@
  * */
 import T from "i18n-react/dist/i18n-react";
 import {
-  getRequest,
-  deleteRequest,
-  createAction,
-  stopLoading,
-  startLoading,
-  snackbarSuccessHandler,
-  snackbarErrorHandler,
   authErrorHandler,
+  createAction,
+  deleteRequest,
+  escapeFilterValue,
+  getRequest,
+  postFile,
   postRequest,
   putRequest,
-  postFile,
-  escapeFilterValue
+  snackbarErrorHandler,
+  snackbarSuccessHandler,
+  startLoading,
+  stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely, wrapFormFile } from "../utils/methods";
 import { DEFAULT_PER_PAGE } from "../utils/constants";
@@ -86,7 +86,7 @@ export const getSummitDocs =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/summit-documents`,
       authErrorHandler,
       { order, orderDir, term, currentPage: page, perPage }
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -107,7 +107,7 @@ export const getSummitDoc = (summitDocId) => async (dispatch, getState) => {
     createAction(RECEIVE_SUMMITDOC),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/summit-documents/${summitDocId}`,
     authErrorHandler
-  )(params)(dispatch).then(() => {
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
@@ -133,7 +133,7 @@ export const addFileToDoc = (entity, file) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/summit-documents/${entity.id}/file`,
     wrapFormFile(file),
     authErrorHandler
-  )(params)(dispatch).then(() => {
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
@@ -155,7 +155,7 @@ export const removeFileFromDoc = (entity) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/summit-documents/${entity.id}/file`,
     null,
     authErrorHandler
-  )(params)(dispatch).then(() => {
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
@@ -178,14 +178,16 @@ export const saveSummitDoc = (entity, file) => async (dispatch, getState) => {
       normalizedEntity,
       snackbarErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(
-        snackbarSuccessHandler({
-          title: T.translate("general.done"),
-          html: T.translate("summitdoc.saved")
-        })
-      );
-    });
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.done"),
+            html: T.translate("summitdoc.saved")
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
   }
 
   return postFile(
@@ -196,14 +198,16 @@ export const saveSummitDoc = (entity, file) => async (dispatch, getState) => {
     normalizedEntity,
     snackbarErrorHandler,
     entity
-  )(params)(dispatch).then(() => {
-    dispatch(
-      snackbarSuccessHandler({
-        title: T.translate("general.done"),
-        html: T.translate("summitdoc.created")
-      })
-    );
-  });
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.done"),
+          html: T.translate("summitdoc.created")
+        })
+      );
+    })
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const deleteSummitDoc = (summitDocId) => async (dispatch, getState) => {
@@ -221,7 +225,7 @@ export const deleteSummitDoc = (summitDocId) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/summit-documents/${summitDocId}`,
     null,
     authErrorHandler
-  )(params)(dispatch).then(() => {
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };

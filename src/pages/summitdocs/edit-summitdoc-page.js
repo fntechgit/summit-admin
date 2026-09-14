@@ -91,13 +91,12 @@ const EditSummitDocPage = ({
   const formik = useFormik({
     initialValues: buildValues(entity),
     validationSchema,
-    onSubmit: (values) => {
+    onSubmit: (values) =>
       saveSummitDoc(values, file)
         .then(() => {
           history.push(`/app/summits/${currentSummit.id}/summitdocs`);
         })
-        .catch(() => {});
-    }
+        .catch(() => {})
   });
 
   useEffect(() => {
@@ -135,7 +134,11 @@ const EditSummitDocPage = ({
               setFile={setFile}
             />
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-              <Button type="submit" variant="contained">
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={formik.isSubmitting}
+              >
                 {T.translate("general.save")}
               </Button>
             </Box>
