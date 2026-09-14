@@ -115,13 +115,12 @@ const MarketingSettingListPage = ({
     {
       columnKey: "value",
       header: T.translate("marketing.value"),
-      width: 450,
+      width: 300,
       render: (row) => wrapLongText(row.value)
     },
     {
       columnKey: "selection_plan_id",
-      header: T.translate("marketing.selection_plan"),
-      render: (row) => wrapLongText(row.selection_plan_id)
+      header: T.translate("marketing.selection_plan")
     }
   ];
 

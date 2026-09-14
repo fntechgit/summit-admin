@@ -20,9 +20,9 @@ import {
   authErrorHandler,
   postFile,
   putFile,
-  putRequest
+  putRequest,
+  setSnackbarMessage
 } from "openstack-uicore-foundation/lib/utils/actions";
-import Swal from "sweetalert2";
 import { getAccessTokenSafely, isHexColorSetting } from "../utils/methods";
 import {
   DEFAULT_PER_PAGE,
@@ -69,6 +69,7 @@ export const getMarketingSettings =
     };
 
     if (term) {
+      // TODO: key__contains is case sensitive
       params.key__contains = term;
     }
 
@@ -83,7 +84,7 @@ export const getMarketingSettings =
       createAction(RECEIVE_SETTINGS),
       `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
       authErrorHandler,
-      { order, orderDir, term }
+      { order, orderDir, term, currentPage: page, perPage }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -359,7 +360,7 @@ export const customErrorHandler = (err, res) => (dispatch) => {
         }
       }
 
-      Swal.fire("Validation error", msg, "warning");
+      dispatch(setSnackbarMessage({ html: msg, type: "warning" }));
 
       if (err.response.body.errors) {
         dispatch({
