@@ -85,7 +85,7 @@ export const getSummitDocs =
       createAction(RECEIVE_SUMMITDOCS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/summit-documents`,
       authErrorHandler,
-      { order, orderDir, term }
+      { order, orderDir, term, currentPage: page, perPage }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

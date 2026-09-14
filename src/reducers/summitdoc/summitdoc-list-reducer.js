@@ -39,9 +39,9 @@ const summitDocListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SUMMITDOCS: {
-      const { order, orderDir, term } = payload;
+      const { order, orderDir, term, currentPage, perPage } = payload;
 
-      return { ...state, order, orderDir, term };
+      return { ...state, order, orderDir, term, currentPage, perPage };
     }
     case RECEIVE_SUMMITDOCS: {
       const {
