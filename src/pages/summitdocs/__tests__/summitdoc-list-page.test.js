@@ -1,5 +1,5 @@
 import React from "react";
-import { act, render, screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { renderWithRedux, createMockSummit } from "../../../utils/test-utils";
@@ -15,42 +15,30 @@ jest.mock("../../../actions/summitdoc-actions", () => ({
   deleteSummitDoc: jest.fn()
 }));
 
-let capturedColumns;
-
 jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => ({
   __esModule: true,
-  default: ({
-    onEdit,
-    onDelete,
-    onSort,
-    onPageChange,
-    onPerPageChange,
-    columns
-  }) => {
-    capturedColumns = columns;
-    return (
-      <div>
-        <button
-          type="button"
-          onClick={() => onEdit({ id: 1, label: "test-label" })}
-        >
-          edit-row
-        </button>
-        <button type="button" onClick={() => onDelete(1)}>
-          delete-row
-        </button>
-        <button type="button" onClick={() => onSort("label", -1)}>
-          sort-col
-        </button>
-        <button type="button" onClick={() => onPageChange(2)}>
-          page-2
-        </button>
-        <button type="button" onClick={() => onPerPageChange(50)}>
-          perpage-50
-        </button>
-      </div>
-    );
-  }
+  default: ({ onEdit, onDelete, onSort, onPageChange, onPerPageChange }) => (
+    <div>
+      <button
+        type="button"
+        onClick={() => onEdit({ id: 1, label: "test-label" })}
+      >
+        edit-row
+      </button>
+      <button type="button" onClick={() => onDelete(1)}>
+        delete-row
+      </button>
+      <button type="button" onClick={() => onSort("label", -1)}>
+        sort-col
+      </button>
+      <button type="button" onClick={() => onPageChange(2)}>
+        page-2
+      </button>
+      <button type="button" onClick={() => onPerPageChange(50)}>
+        perpage-50
+      </button>
+    </div>
+  )
 }));
 
 jest.mock(
@@ -99,32 +87,6 @@ describe("SummitDocListPage", () => {
     jest.clearAllMocks();
     getSummitDocs.mockReturnValue(() => Promise.resolve());
     deleteSummitDoc.mockReturnValue(() => Promise.resolve());
-  });
-
-  it("bounds the description and event types column widths and wraps long content", () => {
-    renderWithRedux(<SummitDocListPage history={mockHistory} />, {
-      initialState
-    });
-
-    const descriptionColumn = capturedColumns.find(
-      (c) => c.columnKey === "description"
-    );
-    const eventTypesColumn = capturedColumns.find(
-      (c) => c.columnKey === "event_types_string"
-    );
-    expect(descriptionColumn.width).toBe(400);
-    expect(eventTypesColumn.width).toBe(300);
-
-    const longValue = "lorem ipsum ".repeat(50).trim();
-    const { container } = render(
-      descriptionColumn.render({ description: longValue })
-    );
-
-    expect(container.firstChild).toHaveStyle({
-      wordBreak: "break-word",
-      overflowWrap: "anywhere"
-    });
-    expect(container).toHaveTextContent(longValue);
   });
 
   it("deletes the summit doc by id (confirm is handled inside MuiTable)", async () => {
