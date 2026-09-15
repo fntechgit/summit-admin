@@ -62,9 +62,14 @@ const MarketingSettingForm = ({ onDeleteImage }) => {
     setValues({ ...values, file: "", file_preview: "" });
 
     if (values.id) {
-      onDeleteImage(values.id).then(() => {
-        setFieldValue("id", 0);
-      });
+      onDeleteImage(values.id)
+        .then(() => {
+          setFieldValue("id", 0);
+        })
+        .catch(() => {
+          setFieldValue("file", values.file);
+          setFieldValue("file_preview", values.file_preview);
+        });
     }
   };
 
