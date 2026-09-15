@@ -15,6 +15,7 @@ import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
+import CustomAlert from "openstack-uicore-foundation/lib/components/mui/custom-alert";
 import SpeakerForm from "../../components/forms/speaker-form";
 import {
   getSpeaker,
@@ -85,11 +86,7 @@ class EditSummitSpeakerPage extends React.Component {
           <AddNewButton entity={entity} />
         </h3>
         <hr />
-        <div className="alert alert-info">
-          <i className="fa fa-info-circle" />
-          &nbsp;&nbsp;
-          {T.translate("edit_speaker.disclaimer")}
-        </div>
+        <CustomAlert message={T.translate("edit_speaker.disclaimer")} />
         <SpeakerForm
           summits={summits}
           history={history}
