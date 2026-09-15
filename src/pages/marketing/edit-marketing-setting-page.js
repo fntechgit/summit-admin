@@ -69,6 +69,7 @@ export const validationSchema = yup.object().shape({
 const EditMarketingSettingPage = ({
   currentSummit,
   entity,
+  errors,
   match,
   history,
   getMarketingSetting,
@@ -108,6 +109,11 @@ const EditMarketingSettingPage = ({
   useEffect(() => {
     formik.resetForm({ values: buildValues(entity) });
   }, [entity.id]);
+
+  useEffect(() => {
+    const errorFields = Object.keys(errors || {});
+    formik.setErrors(errorFields.length > 0 ? errors : {});
+  }, [errors]);
 
   const title = entity.id
     ? T.translate("general.edit")
