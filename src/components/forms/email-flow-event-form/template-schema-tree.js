@@ -1,99 +1,103 @@
 import React, { useEffect, useState } from "react";
-import TreeView, { flattenTree } from "react-accessible-treeview";
+import { Grid2 } from "@mui/material";
+import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
+import { TreeItem } from "@mui/x-tree-view/TreeItem";
 
-const ExpandIndicator = ({ isExpanded }) => {
-  return isExpanded ? " - " : " + ";
-};
+const formatLabel = (name, type) =>
+  type && type !== "object" ? `${name} (${type})` : name;
 
-const TemplateSchemaTree = ({ template_schema }) => {
-  const [data, setData] = useState(null);
+const populateChildren = (entries) =>
+  entries.map((s) => ({ name: formatLabel(s[0], s[1].type) }));
 
-  useEffect(() => {
-    if (template_schema) {
-      const treeData = Object.entries(template_schema)
-        .map((o) => expand(o[0], o[1]))
-        .filter((o) => o);
-      setData(flattenTree({ name: "", children: treeData }));
-    }
-  }, [template_schema]);
+const expand = (name, def) => {
+  if (!def) return null;
 
-  const formatLabel = (name, type) =>
-    type && type !== "object" ? `${name} (${type})` : name;
+  if (def.type === "array") {
+    return expand(formatLabel(name, def.type), def.items);
+  }
+  if (def.type === "object") {
+    const res = expand(formatLabel(name, def.type), def.properties);
+    const props = Object.entries(def.properties);
 
-  const populateChildren = (entries) =>
-    entries.map((s) => {
-      return { name: formatLabel(s[0], s[1].type) };
+    res.children = populateChildren(props);
+
+    // expand nested objects
+    props.forEach((prop, index) => {
+      const propDef = prop[1];
+      let expanded = null;
+      if (propDef.type === "array") {
+        expanded = expand(prop[0], {
+          type: propDef.type,
+          items: propDef.items
+        });
+      } else if (propDef.type === "object") {
+        expanded = expand(prop[0], {
+          type: propDef.type,
+          properties: propDef.properties
+        });
+      }
+      const child = res.children[index];
+      if (child && expanded) child.children = expanded.children;
     });
 
-  const expand = (name, def) => {
-    if (!def) return null;
+    return res;
+  }
 
-    if (def.type === "array") {
-      return expand(formatLabel(name, def.type), def.items);
-    } else if (def.type === "object") {
-      const res = expand(formatLabel(name, def.type), def.properties);
-      const props = Object.entries(def.properties);
+  const entries = Object.entries(def);
 
-      res.children = populateChildren(props);
+  if (entries.length === 1) {
+    return { name: formatLabel(name, def.type), children: [] };
+  }
 
-      //expand nested objects
+  return { name, children: populateChildren(entries) };
+};
 
-      props.forEach((prop, index) => {
-        const def = prop[1];
-        let expanded = null;
-        if (def.type === "array") {
-          expanded = expand(prop[0], { type: def.type, items: def.items });
-        } else if (def.type === "object") {
-          expanded = expand(prop[0], {
-            type: def.type,
-            properties: def.properties
-          });
-        }
-        const child = res.children[index];
-        if (child && expanded) child.children = expanded.children;
-      });
+const toTreeItems = (nodes, idPrefix) =>
+  nodes.map((node, index) => {
+    const itemId = `${idPrefix}-${index}`;
+    return (
+      <TreeItem key={itemId} itemId={itemId} label={node.name}>
+        {node.children?.length > 0 ? toTreeItems(node.children, itemId) : null}
+      </TreeItem>
+    );
+  });
 
-      return res;
+const TemplateSchemaTree = ({ templateSchema }) => {
+  const [treeData, setTreeData] = useState([]);
+
+  useEffect(() => {
+    if (templateSchema) {
+      const data = Object.entries(templateSchema)
+        .map((entry) => expand(entry[0], entry[1]))
+        .filter((node) => node);
+      setTreeData(data);
+    } else {
+      setTreeData([]);
     }
+  }, [templateSchema]);
 
-    const entries = Object.entries(def);
+  if (treeData.length === 0) return null;
 
-    if (entries.length === 1) {
-      return { name: formatLabel(name, def.type), children: [] };
-    }
-
-    return { name, children: populateChildren(entries) };
-  };
+  const COLUMN_COUNT = 2;
+  const midpoint = Math.ceil(treeData.length / COLUMN_COUNT);
+  const columns = [treeData.slice(0, midpoint), treeData.slice(midpoint)];
 
   return (
-    <div className="checkbox">
-      {data && (
-        <TreeView
-          data={data}
-          aria-label="Template schema tree"
-          nodeRenderer={({
-            element,
-            isBranch,
-            isExpanded,
-            getNodeProps,
-            level,
-            handleExpand
-          }) => {
-            return (
-              <div
-                {...getNodeProps({ onClick: handleExpand })}
-                style={{
-                  marginLeft: 40 * (level - 1)
-                }}
+    <Grid2 container spacing={2}>
+      {columns.map(
+        (columnNodes, columnIndex) =>
+          columnNodes.length > 0 && (
+            // eslint-disable-next-line react/no-array-index-key
+            <Grid2 key={columnIndex} size={{ xs: 12, md: 6 }}>
+              <SimpleTreeView
+                aria-label={`Template schema tree ${columnIndex + 1}`}
               >
-                {isBranch && <ExpandIndicator isExpanded={isExpanded} />}
-                <span className="name">{element.name}</span>
-              </div>
-            );
-          }}
-        />
+                {toTreeItems(columnNodes, `col${columnIndex}`)}
+              </SimpleTreeView>
+            </Grid2>
+          )
       )}
-    </div>
+    </Grid2>
   );
 };
 

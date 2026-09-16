@@ -26,9 +26,9 @@ import {
   resetEmailFlowEventForm,
   saveEmailFlowEvent
 } from "../../actions/email-flows-events-actions";
-import { validateEmail } from "../../utils/methods";
-import "../../styles/edit-email-flow-event-page.less";
-import AddNewButton from "../../components/buttons/add-new-button";
+import { truncateText, validateEmail } from "../../utils/methods";
+
+const BREADCRUMB_LENGTH = 40;
 
 export const buildValues = (entity) => ({
   id: entity?.id ?? 0,
@@ -95,7 +95,8 @@ const EditEmailFlowEventPage = ({
   }, [errors]);
 
   const title = T.translate("general.edit");
-  const breadcrumb = entity.id ? entity.flow_name : T.translate("general.new");
+  const breadcrumb =
+    truncateText(entity?.event_type_name, BREADCRUMB_LENGTH) || "";
 
   return (
     <div className="container">
@@ -103,7 +104,6 @@ const EditEmailFlowEventPage = ({
       <h3>
         {title} {entity.flow_name}{" "}
         {T.translate("edit_email_flow_event.email_flow_event")}
-        <AddNewButton entity={entity} />
       </h3>
       <hr />
       {currentSummit && (

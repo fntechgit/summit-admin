@@ -19,7 +19,7 @@ import {
   stopLoading,
   startLoading,
   setSnackbarMessage,
-  snackbarErrorHandler,
+  authErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
@@ -34,7 +34,7 @@ export const EMAIL_FLOW_EVENT_UPDATED = "EMAIL_FLOW_EVENT_UPDATED";
 
 export const getEmailFlowEvents =
   (
-    term = null,
+    term = "",
     page = 1,
     perPage = DEFAULT_PER_PAGE,
     order = "email_template_identifier",
@@ -75,7 +75,8 @@ export const getEmailFlowEvents =
       createAction(REQUEST_EMAIL_FLOW_EVENTS),
       createAction(RECEIVE_EMAIL_FLOW_EVENTS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/email-flows-events`,
-      snackbarErrorHandler,
+      // TODO: replace with snackbarErrorHandler once it handles 401's (re-login redirect)
+      authErrorHandler,
       { order, orderDir, term }
     )(params)(dispatch)
       .finally(() => {
@@ -100,7 +101,8 @@ export const getEmailFlowEvent = (eventId) => async (dispatch, getState) => {
     null,
     createAction(RECEIVE_EMAIL_FLOW_EVENT),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/email-flows-events/${eventId}`,
-    snackbarErrorHandler
+    // TODO: replace with snackbarErrorHandler once it handles 401's (re-login redirect)
+    authErrorHandler
   )(params)(dispatch)
     .finally(() => {
       dispatch(stopLoading());
@@ -128,7 +130,8 @@ export const saveEmailFlowEvent = (entity) => async (dispatch, getState) => {
     createAction(EMAIL_FLOW_EVENT_UPDATED),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/email-flows-events/${entity.id}`,
     entity,
-    snackbarErrorHandler,
+    // TODO: replace with snackbarErrorHandler once it handles 401's (re-login redirect)
+    authErrorHandler,
     entity
   )(params)(dispatch)
     .then(() => {
