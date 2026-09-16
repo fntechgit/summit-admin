@@ -16,8 +16,9 @@ const expand = (name, def) => {
     return expand(formatLabel(name, def.type), def.items);
   }
   if (def.type === "object") {
-    const res = expand(formatLabel(name, def.type), def.properties);
-    const props = Object.entries(def.properties);
+    const properties = def.properties ?? {};
+    const res = expand(formatLabel(name, def.type), properties);
+    const props = Object.entries(properties);
 
     res.children = populateChildren(props);
 
