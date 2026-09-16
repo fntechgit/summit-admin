@@ -30,6 +30,7 @@ import {
 } from "openstack-uicore-foundation/lib/security/methods";
 import IdTokenVerifier from "idtoken-verifier";
 import T from "i18n-react";
+import { Breadcrumbs } from "react-breadcrumbs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import AppBar from "@mui/material/AppBar";
@@ -219,7 +220,9 @@ class App extends React.PureComponent {
                       onClick={this.toggleMenu}
                       sx={{ mr: 2 }}
                     >
-                      <MenuIcon sx={{ fontSize: "1.75rem", color: "#555555" }} />
+                      <MenuIcon
+                        sx={{ fontSize: "1.75rem", color: "#555555" }}
+                      />
                     </IconButton>
                   )}
                   <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -232,6 +235,21 @@ class App extends React.PureComponent {
                     initLogOut={initLogOut}
                   />
                 </Toolbar>
+                {isLoggedUser && (
+                  <Toolbar
+                    variant="dense"
+                    sx={{
+                      minHeight: 36,
+                      borderTop: "1px solid #e0e0e0",
+                      overflowX: "auto"
+                    }}
+                  >
+                    <Breadcrumbs
+                      className="breadcrumbs-wrapper"
+                      separator="/"
+                    />
+                  </Toolbar>
+                )}
               </AppBar>
               <Switch>
                 <AuthorizedRoute
