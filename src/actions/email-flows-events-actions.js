@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -18,11 +18,12 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  showSuccessMessage,
-  authErrorHandler,
+  setSnackbarMessage,
+  snackbarErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
+import { DEFAULT_PER_PAGE } from "../utils/constants";
 
 export const REQUEST_EMAIL_FLOW_EVENTS = "REQUEST_EMAIL_FLOW_EVENTS";
 export const RECEIVE_EMAIL_FLOW_EVENTS = "RECEIVE_EMAIL_FLOW_EVENTS";
@@ -30,13 +31,12 @@ export const RECEIVE_EMAIL_FLOW_EVENT = "RECEIVE_EMAIL_FLOW_EVENT";
 export const RESET_EMAIL_FLOW_EVENT_FORM = "RESET_EMAIL_FLOW_EVENT_FORM";
 export const UPDATE_EMAIL_FLOW_EVENT = "UPDATE_EMAIL_FLOW_EVENT";
 export const EMAIL_FLOW_EVENT_UPDATED = "EMAIL_FLOW_EVENT_UPDATED";
-export const EMAIL_FLOW_EVENT_DELETED = "EMAIL_FLOW_EVENT_DELETED";
 
 export const getEmailFlowEvents =
   (
     term = null,
     page = 1,
-    perPage = 10,
+    perPage = DEFAULT_PER_PAGE,
     order = "email_template_identifier",
     orderDir = 1
   ) =>
@@ -49,7 +49,7 @@ export const getEmailFlowEvents =
     const filter = [];
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
@@ -64,7 +64,7 @@ export const getEmailFlowEvents =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     if (filter.length > 0) {
@@ -75,7 +75,7 @@ export const getEmailFlowEvents =
       createAction(REQUEST_EMAIL_FLOW_EVENTS),
       createAction(RECEIVE_EMAIL_FLOW_EVENTS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/email-flows-events`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { order, orderDir, term }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -98,13 +98,13 @@ export const getEmailFlowEvent = (eventId) => async (dispatch, getState) => {
     null,
     createAction(RECEIVE_EMAIL_FLOW_EVENT),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/email-flows-events/${eventId}`,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
 };
 
-export const resetEmailFlowEventForm = () => (dispatch, getState) => {
+export const resetEmailFlowEventForm = () => (dispatch) => {
   dispatch(createAction(RESET_EMAIL_FLOW_EVENT_FORM)({}));
 };
 
@@ -119,14 +119,19 @@ export const saveEmailFlowEvent = (entity) => async (dispatch, getState) => {
 
   dispatch(startLoading());
 
-  putRequest(
+  return putRequest(
     createAction(UPDATE_EMAIL_FLOW_EVENT),
     createAction(EMAIL_FLOW_EVENT_UPDATED),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/email-flows-events/${entity.id}`,
     entity,
-    authErrorHandler,
+    snackbarErrorHandler,
     entity
-  )(params)(dispatch).then((payload) => {
-    dispatch(showSuccessMessage(T.translate("edit_email_flow_event.saved")));
+  )(params)(dispatch).then(() => {
+    dispatch(
+      setSnackbarMessage({
+        html: T.translate("edit_email_flow_event.saved"),
+        type: "success"
+      })
+    );
   });
 };

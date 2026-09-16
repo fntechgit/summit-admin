@@ -12,167 +12,95 @@
  * */
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
+import { useFormikContext } from "formik";
+import Box from "@mui/material/Box";
+import { Grid2 } from "@mui/material";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import useScrollToError from "../../../hooks/useScrollToError";
 import EmailTemplateInput from "../../inputs/email-template-input";
-import {
-  hasErrors,
-  isEmpty,
-  scrollToError,
-  shallowEqual,
-  validateEmail
-} from "../../../utils/methods";
 import TemplateSchemaTree from "./template-schema-tree";
 import CopyClipboard from "../../buttons/copy-clipboard";
 
-class EmailFlowEventForm extends React.Component {
-  constructor(props) {
-    super(props);
+const EmailFlowEventForm = ({ entity }) => {
+  const formik = useFormikContext();
+  const { values, setFieldValue } = formik;
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors
-    };
+  useScrollToError(formik, true);
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+  const handleTemplateChange = (ev) => {
+    setFieldValue(ev.target.id, ev.target.value);
+  };
 
-  componentDidUpdate(prevProps) {
-    const state = {};
-    scrollToError(this.props.errors);
+  return (
+    <Box>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <label>{T.translate("edit_email_flow_event.flow_name")} *</label>
+          <br />
+          {entity.flow_name}
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <label>{T.translate("edit_email_flow_event.event_type")} *</label>
+          <br />
+          {entity.event_type_name}
+        </Grid2>
+      </Grid2>
 
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
-    }
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={12}>
+          <label htmlFor="email_template_identifier">
+            {T.translate("edit_email_flow_event.email_template_identifier")} *
+            {values.email_template_identifier && (
+              <>
+                &nbsp;
+                <a
+                  href={`/app/emails/templates/${values.email_template_identifier}`}
+                >
+                  see template
+                </a>
+                <CopyClipboard
+                  text={values.email_template_identifier}
+                  tooltipText={T.translate(
+                    "edit_email_flow_event.copy_email_template"
+                  )}
+                />
+              </>
+            )}
+          </label>
+          <EmailTemplateInput
+            id="email_template_identifier"
+            value={values.email_template_identifier}
+            placeholder={T.translate(
+              "edit_email_flow_event.placeholders.select_template"
+            )}
+            onChange={handleTemplateChange}
+            plainValue
+          />
+        </Grid2>
+      </Grid2>
 
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
-    }
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={12}>
+          <label htmlFor="recipients">
+            {T.translate("edit_email_flow_event.recipient")}
+          </label>
+          <MuiFormikTextField
+            name="recipients"
+            margin="none"
+            fullWidth
+            size="small"
+          />
+        </Grid2>
+      </Grid2>
 
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
-    }
-  }
-
-  handleChange(ev) {
-    const newEntity = { ...this.state.entity };
-    const newErrors = { ...this.state.errors };
-    let { value, id } = ev.target;
-
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
-
-    newErrors[id] = "";
-
-    // this is an array
-    if (id === "recipients") {
-      value = value.split(",").map((email) => email.trim());
-      // then validate emails
-      value.forEach((email) => {
-        if (!validateEmail(email)) {
-          newErrors[id] = `email ${email} is not valid`;
-        }
-      });
-    }
-    newEntity[id] = value;
-    this.setState({ entity: newEntity, errors: newErrors });
-  }
-
-  handleSubmit(ev) {
-    const { errors } = this.state;
-    ev.preventDefault();
-    if (hasErrors("recipients", errors) !== "") return;
-    this.props.onSubmit(this.state.entity);
-  }
-
-  render() {
-    const { entity, errors } = this.state;
-
-    return (
-      <form className="email-flow-event-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("edit_email_flow_event.flow_name")} *</label>
-            <br />
-            {entity.flow_name}
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_email_flow_event.event_type")} *</label>
-            <br />
-            {entity.event_type_name}
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label>
-              {T.translate("edit_email_flow_event.email_template_identifier")} *
-              {entity.email_template_identifier && (
-                <>
-                  &nbsp;
-                  <a
-                    href={`/app/emails/templates/${entity.email_template_identifier}`}
-                  >
-                    see template
-                  </a>
-                  <CopyClipboard
-                    text={entity.email_template_identifier}
-                    tooltipText={T.translate(
-                      "edit_email_flow_event.copy_email_template"
-                    )}
-                  />
-                </>
-              )}
-            </label>
-            <EmailTemplateInput
-              id="email_template_identifier"
-              value={entity.email_template_identifier}
-              placeholder={T.translate(
-                "edit_email_flow_event.placeholders.select_template"
-              )}
-              onChange={this.handleChange}
-              plainValue
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label>{T.translate("edit_email_flow_event.recipient")}</label>
-            <Input
-              id="recipients"
-              value={entity.recipients.join(",")}
-              onChange={this.handleChange}
-              className="form-control"
-              error={hasErrors("recipients", errors)}
-            />
-          </div>
-        </div>
-
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label>{T.translate("edit_email_flow_event.variables")}</label>
-            <TemplateSchemaTree template_schema={entity.template_schema} />
-          </div>
-        </div>
-
-        <hr />
-
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
-        </div>
-      </form>
-    );
-  }
-}
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={12}>
+          <label>{T.translate("edit_email_flow_event.variables")}</label>
+          <TemplateSchemaTree template_schema={entity.template_schema} />
+        </Grid2>
+      </Grid2>
+    </Box>
+  );
+};
 
 export default EmailFlowEventForm;
