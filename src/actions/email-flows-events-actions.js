@@ -77,9 +77,11 @@ export const getEmailFlowEvents =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/email-flows-events`,
       snackbarErrorHandler,
       { order, orderDir, term }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .finally(() => {
+        dispatch(stopLoading());
+      })
+      .catch(() => {});
   };
 
 export const getEmailFlowEvent = (eventId) => async (dispatch, getState) => {
@@ -99,9 +101,11 @@ export const getEmailFlowEvent = (eventId) => async (dispatch, getState) => {
     createAction(RECEIVE_EMAIL_FLOW_EVENT),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/email-flows-events/${eventId}`,
     snackbarErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+  )(params)(dispatch)
+    .finally(() => {
+      dispatch(stopLoading());
+    })
+    .catch(() => {});
 };
 
 export const resetEmailFlowEventForm = () => (dispatch) => {
@@ -126,12 +130,17 @@ export const saveEmailFlowEvent = (entity) => async (dispatch, getState) => {
     entity,
     snackbarErrorHandler,
     entity
-  )(params)(dispatch).then(() => {
-    dispatch(
-      setSnackbarMessage({
-        html: T.translate("edit_email_flow_event.saved"),
-        type: "success"
-      })
-    );
-  });
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        setSnackbarMessage({
+          html: T.translate("edit_email_flow_event.saved"),
+          type: "success"
+        })
+      );
+    })
+    .finally(() => {
+      dispatch(stopLoading());
+    })
+    .catch(() => {});
 };

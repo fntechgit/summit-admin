@@ -81,7 +81,7 @@ const EditEmailFlowEventPage = ({
           ? values.recipients.split(",").map((email) => email.trim())
           : []
       };
-      return saveEmailFlowEvent(normalizedValues).catch(() => {});
+      return saveEmailFlowEvent(normalizedValues);
     }
   });
 
