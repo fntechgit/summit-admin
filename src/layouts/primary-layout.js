@@ -42,7 +42,14 @@ const AddOnTypesListPage = React.lazy(() =>
   import("../pages/sponsors-global/add-on-types/add-on-types-list-page")
 );
 
-const PrimaryLayout = ({ match, currentSummit, location, member }) => {
+const PrimaryLayout = ({
+  match,
+  currentSummit,
+  location,
+  member,
+  menuOpen,
+  toggleMenu
+}) => {
   let extraClass = "container";
 
   // full width pages
@@ -55,7 +62,12 @@ const PrimaryLayout = ({ match, currentSummit, location, member }) => {
 
   return (
     <div className="primary-layout">
-      <Menu currentSummit={currentSummit} member={member} />
+      <Menu
+        currentSummit={currentSummit}
+        member={member}
+        menuOpen={menuOpen}
+        toggleMenu={toggleMenu}
+      />
       <main id="page-wrap">
         <Breadcrumbs
           className={`breadcrumbs-wrapper ${extraClass}`}

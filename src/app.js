@@ -32,6 +32,11 @@ import IdTokenVerifier from "idtoken-verifier";
 import T from "i18n-react";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
 // eslint-disable-next-line
 import * as Sentry from "@sentry/react";
 import exclusiveSections from "./exclusive-sections.yml";
@@ -146,6 +151,8 @@ class App extends React.PureComponent {
   constructor(props) {
     super(props);
     props.resetLoading();
+    this.state = { menuOpen: false };
+    this.toggleMenu = this.toggleMenu.bind(this);
   }
 
   onClickLogin() {
@@ -154,6 +161,10 @@ class App extends React.PureComponent {
 
   componentDidMount() {
     this.props.getTimezones();
+  }
+
+  toggleMenu() {
+    this.setState((prevState) => ({ menuOpen: !prevState.menuOpen }));
   }
 
   render() {
@@ -165,6 +176,7 @@ class App extends React.PureComponent {
       backUrl,
       loading
     } = this.props;
+    const { menuOpen } = this.state;
 
     const idToken = getIdToken();
 
@@ -188,23 +200,46 @@ class App extends React.PureComponent {
           <Router history={history}>
             <div>
               <AjaxLoader show={loading} size={120} />
-              <div className="header" id="page-header">
-                <div className="header-title">
-                  {T.translate("landing.os_summit_admin")}
+              <AppBar
+                position="static"
+                id="page-header"
+                className="header"
+                elevation={0}
+                sx={{
+                  bgcolor: "background.paper",
+                  color: "text.primary",
+                  borderBottom: "1px solid #b3b3b3"
+                }}
+              >
+                <Toolbar>
+                  {isLoggedUser && (
+                    <IconButton
+                      edge="start"
+                      aria-label={T.translate("menu.toggle_navigation")}
+                      onClick={this.toggleMenu}
+                      sx={{ mr: 2 }}
+                    >
+                      <MenuIcon sx={{ fontSize: "1.75rem", color: "#555555" }} />
+                    </IconButton>
+                  )}
+                  <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                    {T.translate("landing.os_summit_admin")}
+                  </Typography>
                   <AuthButton
                     isLoggedUser={isLoggedUser}
                     picture={profile_pic}
                     doLogin={this.onClickLogin.bind(this)}
                     initLogOut={initLogOut}
                   />
-                </div>
-              </div>
+                </Toolbar>
+              </AppBar>
               <Switch>
                 <AuthorizedRoute
                   isLoggedUser={isLoggedUser}
                   backUrl={backUrl}
                   path="/app"
                   component={PrimaryLayout}
+                  componentProps={{ menuOpen, toggleMenu: this.toggleMenu }}
                 />
                 <AuthorizationCallbackRoute
                   onUserAuth={onUserAuth}

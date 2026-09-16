@@ -139,6 +139,7 @@
     "not_logged_in": "You are not logged in. Please log in to continue:"
   },
   "menu": {
+    "toggle_navigation": "Toggle navigation menu",
     "general": "General",
     "directory": "Directory",
     "dashboard": "Dashboard",
