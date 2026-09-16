@@ -12,13 +12,10 @@ body {
   font-size: 22px;
 }
 
-.primary-layout {
-  margin: 30px 0;
-}
-
 .container {
+  width: 100%;
   background-color: white;
-  padding: 30px;
+  padding: 10px 30px;
 }
 
 .form-check-label {
