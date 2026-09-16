@@ -14,6 +14,8 @@ import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { useFormikContext } from "formik";
 import Box from "@mui/material/Box";
+import FormLabel from "@mui/material/FormLabel";
+import Typography from "@mui/material/Typography";
 import { Grid2 } from "@mui/material";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import useScrollToError from "../../../hooks/useScrollToError";
@@ -34,30 +36,35 @@ const EmailFlowEventForm = ({ entity }) => {
   return (
     <Box>
       <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <label>{T.translate("edit_email_flow_event.flow_name")} *</label>
-          <br />
+        <Grid2 size={{ xs: 12, md: 6 }}>
+          <Typography variant="label">
+            {T.translate("edit_email_flow_event.flow_name")}
+          </Typography>
           {entity.flow_name}
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <label>{T.translate("edit_email_flow_event.event_type")} *</label>
-          <br />
-          {entity.event_type_name}
+        <Grid2 size={{ xs: 12, md: 6 }}>
+          <Typography variant="label">
+            {T.translate("edit_email_flow_event.event_type")}
+          </Typography>
+          <Box sx={{ overflowWrap: "break-word" }}>
+            {entity.event_type_name}
+          </Box>
         </Grid2>
       </Grid2>
 
       <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={12}>
-          <label htmlFor="email_template_identifier">
+        <Grid2 size={{ xs: 12, md: 6 }}>
+          <FormLabel htmlFor="email_template_identifier">
             {T.translate("edit_email_flow_event.email_template_identifier")} *
             {values.email_template_identifier && (
               <>
-                &nbsp;
+                &nbsp;&nbsp;
                 <a
                   href={`/app/emails/templates/${values.email_template_identifier}`}
                 >
                   see template
                 </a>
+                &nbsp;&nbsp;
                 <CopyClipboard
                   text={values.email_template_identifier}
                   tooltipText={T.translate(
@@ -66,7 +73,7 @@ const EmailFlowEventForm = ({ entity }) => {
                 />
               </>
             )}
-          </label>
+          </FormLabel>
           <EmailTemplateInput
             id="email_template_identifier"
             value={values.email_template_identifier}
@@ -77,13 +84,10 @@ const EmailFlowEventForm = ({ entity }) => {
             plainValue
           />
         </Grid2>
-      </Grid2>
-
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={12}>
-          <label htmlFor="recipients">
+        <Grid2 size={{ xs: 12, md: 6 }}>
+          <FormLabel htmlFor="recipients">
             {T.translate("edit_email_flow_event.recipient")}
-          </label>
+          </FormLabel>
           <MuiFormikTextField
             name="recipients"
             margin="none"
@@ -91,12 +95,11 @@ const EmailFlowEventForm = ({ entity }) => {
             size="small"
           />
         </Grid2>
-      </Grid2>
-
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
         <Grid2 size={12}>
-          <label>{T.translate("edit_email_flow_event.variables")}</label>
-          <TemplateSchemaTree template_schema={entity.template_schema} />
+          <Typography variant="label">
+            {T.translate("edit_email_flow_event.variables")}
+          </Typography>
+          <TemplateSchemaTree templateSchema={entity.template_schema} />
         </Grid2>
       </Grid2>
     </Box>

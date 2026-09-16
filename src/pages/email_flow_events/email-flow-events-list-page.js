@@ -15,7 +15,7 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import { getSummitById } from "../../actions/summit-actions";
 import { getEmailFlowEvents } from "../../actions/email-flows-events-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
@@ -52,8 +52,12 @@ const EmailFlowEventListPage = ({
     getEmailFlowEvents(term, page, perPage, order, orderDir);
   };
 
+  const handlePerPageChange = (newPerPage) => {
+    getEmailFlowEvents(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
+  };
+
   const handleSort = (key, dir) => {
-    getEmailFlowEvents(term, currentPage, perPage, key, dir);
+    getEmailFlowEvents(term, DEFAULT_CURRENT_PAGE, perPage, key, dir);
   };
 
   const columns = [
@@ -64,11 +68,13 @@ const EmailFlowEventListPage = ({
     },
     {
       columnKey: "event_type_name",
-      header: T.translate("email_flow_event_list.event_type_name")
+      header: T.translate("email_flow_event_list.event_type_name"),
+      cellSx: { maxWidth: 400 }
     },
     {
       columnKey: "email_template_identifier",
-      header: T.translate("email_flow_event_list.email_template_identifier")
+      header: T.translate("email_flow_event_list.email_template_identifier"),
+      cellSx: { maxWidth: 400 }
     }
   ];
 
@@ -76,17 +82,19 @@ const EmailFlowEventListPage = ({
 
   if (!currentSummit.id) return <div />;
 
-    return (
-      <div className="container table-container">
-        <h3>
-          {T.translate("email_flow_event_list.email_flow_event_list")} (
-          {totalEmailFlowEvents})
-        </h3>
-        <SearchInput
-          term={term ?? ""}
-          onSearch={handleSearch}
-          placeholder={T.translate("email_flow_event_list.placeholders.search")}
-        />
+  return (
+    <div className="container table-container">
+      <h3>
+        {T.translate("email_flow_event_list.email_flow_event_list")} (
+        {totalEmailFlowEvents})
+      </h3>
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate("email_flow_event_list.placeholders.search")
+        }}
+      />
 
       {emailFlowEvents.length === 0 && (
         <div>{T.translate("email_flow_event_list.no_email_flow_events")}</div>
@@ -101,6 +109,7 @@ const EmailFlowEventListPage = ({
           perPage={perPage}
           totalRows={totalEmailFlowEvents}
           onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
           onSort={handleSort}
           onEdit={handleEdit}
         />

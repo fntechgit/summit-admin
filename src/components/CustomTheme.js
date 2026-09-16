@@ -4,24 +4,29 @@ import { createTheme } from "@mui/material/styles";
 import { MuiBaseCustomTheme } from "openstack-uicore-foundation/lib/utils/theme";
 import PropTypes from "prop-types";
 
-const theme = createTheme(MuiBaseCustomTheme, {
-  palette: {
-    primary: {
-      main: "#2196F3",
-      dark: "#1E88E5",
-      contrast: "#FFFFFF"
-    },
-    background: {
-      light: "#F7F7F9",
-      light_gray: "#eaeaea"
-    },
-    text: {
-      primary: "#000000DE",
-      secondary: "#00000099",
-      link: "#2196f3",
-      disabled: "#00000061"
-    }
+// theme.typography.<variant> functions are silently ignored by MUI (it only
+// applies plain-object entries), so a palette-derived typography color can't
+// read the theme at runtime - build the palette first and reference it directly.
+const palette = {
+  primary: {
+    main: "#2196F3",
+    dark: "#1E88E5",
+    contrast: "#FFFFFF"
   },
+  background: {
+    light: "#F7F7F9",
+    light_gray: "#eaeaea"
+  },
+  text: {
+    primary: "#000000DE",
+    secondary: "#00000099",
+    link: "#2196f3",
+    disabled: "#00000061"
+  }
+};
+
+const theme = createTheme(MuiBaseCustomTheme, {
+  palette,
   typography: {
     fontFamily: ["Roboto", "sans-serif"].join(","),
     body1: {
@@ -30,9 +35,15 @@ const theme = createTheme(MuiBaseCustomTheme, {
     body2: {
       fontWeight: 500
     },
-    subtitle2: ({ theme: t }) => ({
-      color: t.palette.text.primary
-    }),
+    subtitle2: {
+      color: palette.text.primary
+    },
+    label: {
+      fontSize: "14px",
+      fontWeight: 400,
+      lineHeight: "1.4375em",
+      color: palette.text.secondary
+    },
     h4: {
       fontWeight: 500
     },
@@ -48,6 +59,11 @@ const theme = createTheme(MuiBaseCustomTheme, {
     }
   },
   components: {
+    MuiTypography: {
+      variantMapping: {
+        label: "p"
+      }
+    },
     MuiFormHelperText: {
       styleOverrides: {
         root: {

@@ -9,25 +9,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_EMAIL_FLOW_EVENTS,
   REQUEST_EMAIL_FLOW_EVENTS
 } from "../../actions/email-flows-events-actions";
-
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { DEFAULT_PER_PAGE } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   emailFlowEvents: [],
   order: "email_template_identifier",
   orderDir: 1,
   totalEmailFlowEvents: 0,
-  term: null,
+  term: "",
   currentPage: 1,
   lastPage: 1,
-  perPage: 10
+  perPage: DEFAULT_PER_PAGE
 };
 
 const emailFlowEventsListReducer = (state = DEFAULT_STATE, action) => {
@@ -38,18 +38,22 @@ const emailFlowEventsListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_EMAIL_FLOW_EVENTS: {
-      let { order, orderDir, term } = payload;
+      const { order, orderDir, term } = payload;
       return { ...state, order, orderDir, term };
     }
     case RECEIVE_EMAIL_FLOW_EVENTS: {
-      let { current_page, total, last_page } = payload.response;
-      let emailFlowEvents = payload.response.data;
+      const {
+        current_page: currentPage,
+        total,
+        last_page: lastPage
+      } = payload.response;
+
       return {
         ...state,
-        emailFlowEvents: emailFlowEvents,
+        emailFlowEvents: payload.response.data,
         totalEmailFlowEvents: total,
-        currentPage: current_page,
-        lastPage: last_page
+        currentPage,
+        lastPage
       };
     }
     default:
