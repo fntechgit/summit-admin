@@ -18,6 +18,7 @@ import {
   stopLoading,
   startLoading,
   authErrorHandler,
+  snackbarErrorHandler,
   postFile,
   putFile,
   putRequest,
@@ -83,11 +84,13 @@ export const getMarketingSettings =
       createAction(REQUEST_SETTINGS),
       createAction(RECEIVE_SETTINGS),
       `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { order, orderDir, term, currentPage: page, perPage }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .finally(() => {
+        dispatch(stopLoading());
+      })
+      .catch(() => {});
   };
 
 export const getMarketingSettingsForRegLite =
@@ -108,11 +111,13 @@ export const getMarketingSettingsForRegLite =
       createAction(REQUEST_REG_LITE_SETTINGS),
       createAction(RECEIVE_REG_LITE_SETTINGS),
       `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
-      authErrorHandler,
+      snackbarErrorHandler,
       {}
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .finally(() => {
+        dispatch(stopLoading());
+      })
+      .catch(() => {});
   };
 
 export const getMarketingSettingsForPrintApp =
@@ -133,11 +138,13 @@ export const getMarketingSettingsForPrintApp =
       createAction(REQUEST_PRINT_APP_SETTINGS),
       createAction(RECEIVE_PRINT_APP_SETTINGS),
       `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
-      authErrorHandler,
+      snackbarErrorHandler,
       {}
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .finally(() => {
+        dispatch(stopLoading());
+      })
+      .catch(() => {});
   };
 
 export const getMarketingSettingsBySelectionPlan =
@@ -175,11 +182,13 @@ export const getMarketingSettingsBySelectionPlan =
       createAction(REQUEST_SELECTION_PLAN_SETTINGS),
       createAction(RECEIVE_SELECTION_PLAN_SETTINGS),
       `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { order, orderDir, term }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .finally(() => {
+        dispatch(stopLoading());
+      })
+      .catch(() => {});
   };
 
 export const getMarketingSetting = (settingId) => (dispatch) => {
@@ -191,10 +200,12 @@ export const getMarketingSetting = (settingId) => (dispatch) => {
     null,
     createAction(RECEIVE_SETTING),
     `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/${settingId}`,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .finally(() => {
+      dispatch(stopLoading());
+    })
+    .catch(() => {});
 };
 
 export const resetSettingForm = () => (dispatch) => {
@@ -220,11 +231,11 @@ export const saveMarketingSetting =
       if (entity.id && !entity.value) return dispatch(deleteSetting(entity.id));
     }
 
+    dispatch(startLoading());
+
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-
-    dispatch(startLoading());
 
     const normalizedEntity = normalizeEntity(entity, currentSummit.id);
     const params = { access_token: accessToken };
@@ -239,9 +250,8 @@ export const saveMarketingSetting =
           normalizedEntity,
           customErrorHandler,
           entity
-        )(params)(dispatch).then((payload) => {
+        )(params)(dispatch).finally(() => {
           dispatch(stopLoading());
-          return payload;
         });
       // regular PUT
       return putRequest(
@@ -251,9 +261,8 @@ export const saveMarketingSetting =
         normalizedEntity,
         customErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).finally(() => {
         dispatch(stopLoading());
-        return payload;
       });
     }
 
@@ -266,9 +275,8 @@ export const saveMarketingSetting =
         normalizedEntity,
         customErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).finally(() => {
         dispatch(stopLoading());
-        return payload;
       });
     // regular POST
     return postRequest(
@@ -278,13 +286,14 @@ export const saveMarketingSetting =
       normalizedEntity,
       customErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
-      return payload;
     });
   };
 
+// TODO: replace with snackbarErrorHandler once it handles 401s (re-login redirect) correctly.
 export const deleteSetting = (settingId) => async (dispatch) => {
+  dispatch(startLoading());
   const accessToken = await getAccessTokenSafely();
 
   const params = {
@@ -297,13 +306,17 @@ export const deleteSetting = (settingId) => async (dispatch) => {
     `${window.MARKETING_API_BASE_URL}/api/v1/config-values/${settingId}`,
     null,
     authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+  )(params)(dispatch)
+    .finally(() => {
+      dispatch(stopLoading());
+    })
+    .catch(() => {});
 };
 
+// TODO: replace with snackbarErrorHandler once it handles 401s (re-login redirect) correctly.
 export const cloneMarketingSettings =
   (summitId) => async (dispatch, getState) => {
+    dispatch(startLoading());
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
@@ -318,10 +331,14 @@ export const cloneMarketingSettings =
       `${window.MARKETING_API_BASE_URL}/api/v1/config-values/all/shows/${summitId}/clone/${currentSummit.id}`,
       null,
       authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-      dispatch(getMarketingSettings());
-    });
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(getMarketingSettings());
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      })
+      .catch(() => {});
   };
 
 const normalizeEntity = (entity, summitId) => {
