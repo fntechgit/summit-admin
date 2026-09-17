@@ -117,11 +117,11 @@ describe("LinesManifestView", () => {
   // HEADER row, which is a separate array (HEADERS). If the two desync by
   // one, every column right of the break silently misaligns and stays
   // green. Assert exact header/cell cardinality directly.
-  it("has exactly 13 column headers matching 13 cells per row", () => {
+  it("has exactly 14 column headers matching 14 cells per row", () => {
     renderView();
-    expect(screen.getAllByRole("columnheader")).toHaveLength(13);
+    expect(screen.getAllByRole("columnheader")).toHaveLength(14);
     const row = screen.getByText("AV1").closest("tr");
-    expect(within(row).getAllByRole("cell")).toHaveLength(13);
+    expect(within(row).getAllByRole("cell")).toHaveLength(14);
   });
 
   // Sponsor bucketing (formerly bucketLinesBySponsor, now a private helper).
@@ -204,6 +204,93 @@ describe("Destination booth fallback", () => {
     expect(
       screen.getByText("sponsor_reports_page.destination_booth_fallback")
     ).toBeInTheDocument();
+  });
+});
+
+describe("Additional Fields column", () => {
+  it("renders every answered field as 'Label: value', one per line, in the order received", () => {
+    renderView({
+      rows: [
+        line({
+          additional_fields: [
+            { label: "Chair Color", value: "Blue" },
+            { label: "Start Time", value: "08:30" }
+          ]
+        })
+      ]
+    });
+    const row = screen.getByText("AV1").closest("tr");
+    const cells = within(row).getAllByRole("cell");
+    // Immediately after Notes (index 6), so index 7.
+    const cell = cells[7];
+    expect(cell).toHaveTextContent("Chair Color: Blue");
+    expect(cell).toHaveTextContent("Start Time: 08:30");
+    // Order received, not sorted: the backend preserves the source snapshot's order
+    // and the logistics manifest is read in that order.
+    expect(cell.textContent.indexOf("Chair Color")).toBeLessThan(
+      cell.textContent.indexOf("Start Time")
+    );
+    // One element per entry, so each renders on its own line rather than as one run-on string.
+    expect(cell.querySelectorAll("div")).toHaveLength(2);
+  });
+
+  it("renders an empty cell for a null, missing or empty additional_fields", () => {
+    // Three shapes the API can legitimately send. A crash here takes down the whole
+    // report page, so all three are pinned in one test rather than left to chance.
+    [
+      line({ additional_fields: null }),
+      line({ additional_fields: [] }),
+      (() => {
+        const l = line();
+        delete l.additional_fields;
+        return l;
+      })()
+    ].forEach((row) => {
+      const { unmount } = renderView({ rows: [row] });
+      const cells = within(screen.getByText("AV1").closest("tr")).getAllByRole(
+        "cell"
+      );
+      expect(cells[7]).toBeEmptyDOMElement();
+      unmount();
+    });
+  });
+
+  it("renders a value containing markup literally, never as HTML", () => {
+    // Sponsor-entered free text reaches this cell. If anyone reaches for
+    // dangerouslySetInnerHTML, this fails.
+    renderView({
+      rows: [
+        line({
+          additional_fields: [
+            { label: "Notes", value: "<b>bold</b><script>x()</script>" }
+          ]
+        })
+      ]
+    });
+    const cell = within(screen.getByText("AV1").closest("tr")).getAllByRole(
+      "cell"
+    )[7];
+    expect(cell).toHaveTextContent("Notes: <b>bold</b><script>x()</script>");
+    expect(cell.querySelector("b")).toBeNull();
+    expect(cell.querySelector("script")).toBeNull();
+  });
+
+  it("strikes the cell through on a fully canceled line, like every other cell", () => {
+    renderView({
+      rows: [
+        line({
+          is_canceled: true,
+          additional_fields: [{ label: "Chair Color", value: "Blue" }]
+        })
+      ]
+    });
+    const row = screen.getByText("AV1").closest("tr");
+    // The row-level sx targets "& td", so the new cell inherits the treatment only
+    // because it is a real TableCell. A Box or a fragment in the row would not.
+    expect(row).toHaveAttribute("data-canceled", "true");
+    expect(within(row).getAllByRole("cell")[7]).toHaveTextContent(
+      "Chair Color: Blue"
+    );
   });
 });
 
