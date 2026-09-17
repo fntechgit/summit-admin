@@ -47,7 +47,9 @@ const PrimaryLayout = ({
   currentSummit,
   member,
   menuOpen,
-  toggleMenu
+  toggleMenu,
+  onMenuMouseEnter,
+  onMenuMouseLeave
 }) => (
   <div className="primary-layout">
     <Menu
@@ -55,6 +57,8 @@ const PrimaryLayout = ({
       member={member}
       menuOpen={menuOpen}
       toggleMenu={toggleMenu}
+      onMenuMouseEnter={onMenuMouseEnter}
+      onMenuMouseLeave={onMenuMouseLeave}
     />
     <main id="page-wrap">
       <Breadcrumb
