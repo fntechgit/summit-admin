@@ -12,14 +12,14 @@
  * */
 
 import React from "react";
-import { connect } from "react-redux";
-import { Redirect, Route, Switch } from "react-router-dom";
+import { Route, Switch } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import SelectionPlanListPage from "../pages/selection-plans/selection-plan-list-page";
 import SelectionPlanIdLayout from "./selection-plan-id-layout";
+import NoMatchPage from "../pages/no-match-page";
 
-const SelectionPlanLayout = ({ match, currentSummit }) => (
+const SelectionPlanLayout = ({ match }) => (
   <div>
     <Breadcrumb
       data={{
@@ -44,13 +44,9 @@ const SelectionPlanLayout = ({ match, currentSummit }) => (
         path={`${match.url}/:selection_plan_id(\\d+)`}
         component={SelectionPlanIdLayout}
       />
-      <Redirect to={`/app/summits/${currentSummit.id}`} />
+      <Route component={NoMatchPage} />
     </Switch>
   </div>
 );
 
-const mapStateToProps = ({ currentSummitState }) => ({
-  ...currentSummitState
-});
-
-export default connect(mapStateToProps, {})(SelectionPlanLayout);
+export default SelectionPlanLayout;
