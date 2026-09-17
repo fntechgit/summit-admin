@@ -25,7 +25,15 @@ import { getGlobalItems, getSummitItems } from "./menu-definition";
 
 const DRAWER_WIDTH = 260;
 
-const Menu = ({ currentSummit, member, history, menuOpen, toggleMenu }) => {
+const Menu = ({
+  currentSummit,
+  member,
+  history,
+  menuOpen,
+  toggleMenu,
+  onMenuMouseEnter,
+  onMenuMouseLeave
+}) => {
   const memberObj = new Member(member);
   const globalItems = getGlobalItems();
   const summitItems = currentSummit ? getSummitItems(currentSummit.id) : [];
@@ -78,10 +86,17 @@ const Menu = ({ currentSummit, member, history, menuOpen, toggleMenu }) => {
       onClose={closeMenu}
       slotProps={{
         root: { keepMounted: true },
-        paper: { sx: { width: DRAWER_WIDTH } }
+        paper: {
+          sx: { width: DRAWER_WIDTH },
+          onMouseEnter: onMenuMouseEnter,
+          onMouseLeave: onMenuMouseLeave
+        }
       }}
     >
-      <Box role="presentation" sx={{ width: DRAWER_WIDTH, overflowY: "auto", pb: 3 }}>
+      <Box
+        role="presentation"
+        sx={{ width: DRAWER_WIDTH, overflowY: "auto", pb: 3 }}
+      >
         <ExpandableItem label={T.translate("menu.general")} isHeader>
           {globalItems.map(drawMenuItem)}
         </ExpandableItem>
