@@ -12,16 +12,19 @@
  * */
 
 import React from "react";
+import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import { useFormikContext } from "formik";
+import Box from "@mui/material/Box";
+import { Grid2 } from "@mui/material";
+import MenuItem from "@mui/material/MenuItem";
+import FormHelperText from "@mui/material/FormHelperText";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
 import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
-import Swal from "sweetalert2";
-import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
-import history from "../../history";
-import HexColorInput from "../inputs/hex-color-input";
+import useScrollToError from "../../hooks/useScrollToError";
+import MuiFormikColorField from "../mui/formik-inputs/mui-formik-color-field";
 import {
   MARKETING_SETTING_TYPE_FILE,
   MARKETING_SETTING_TYPE_HEX_COLOR,
@@ -29,235 +32,158 @@ import {
   MARKETING_SETTING_TYPE_TEXTAREA
 } from "../../utils/constants";
 
-const setting_types_ddl = [
+const settingTypesDdl = [
   { label: "Plain Text", value: MARKETING_SETTING_TYPE_TEXT },
   { label: "Html", value: MARKETING_SETTING_TYPE_TEXTAREA },
   { label: "File", value: MARKETING_SETTING_TYPE_FILE },
   { label: "Hex Color", value: MARKETING_SETTING_TYPE_HEX_COLOR }
 ];
 
-class MarketingSettingForm extends React.Component {
-  constructor(props) {
-    super(props);
+const MarketingSettingForm = ({ onDeleteImage }) => {
+  const formik = useFormikContext();
+  const { values, errors, touched, submitCount, setFieldValue, setValues } =
+    formik;
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors
-    };
+  useScrollToError(formik, true);
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleUploadFile = this.handleUploadFile.bind(this);
-    this.handleRemoveFile = this.handleRemoveFile.bind(this);
-  }
+  const handleFieldChange = (ev) => {
+    setFieldValue(ev.target.id, ev.target.value);
+  };
 
-  componentDidUpdate(prevProps) {
-    const state = {};
-    scrollToError(this.props.errors);
+  const handleUploadFile = (file) => {
+    // Batch both updates - two sequential setFieldValue calls each trigger
+    // their own synchronous re-render on React 16 (no auto-batching outside
+    // synthetic events), so UploadInput's value prop would briefly be the
+    // raw File object (file_preview not yet set) and crash on value.split().
+    setValues({ ...values, file, file_preview: file.preview });
+  };
 
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
+  const handleRemoveFile = () => {
+    setValues({ ...values, file: "", file_preview: "" });
+
+    if (values.id) {
+      onDeleteImage(values.id)
+        .then(() => {
+          setFieldValue("id", 0);
+        })
+        .catch(() => {
+          setFieldValue("file", values.file);
+          setFieldValue("file_preview", values.file_preview);
+        });
     }
+  };
 
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
-    }
+  const valueError = touched.value && errors.value;
+  const fileError = submitCount > 0 && errors.file_preview;
 
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
-    }
-  }
+  return (
+    <Box>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <label htmlFor="type">{T.translate("marketing.type")} *</label>
+          <MuiFormikSelect
+            name="type"
+            fullWidth
+            size="small"
+            displayEmpty
+            disabled={values.id !== 0}
+            renderValue={(selected) =>
+              selected
+                ? settingTypesDdl.find((opt) => opt.value === selected)?.label
+                : T.translate("marketing.placeholders.select_type")
+            }
+          >
+            {settingTypesDdl.map((opt) => (
+              <MenuItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </MenuItem>
+            ))}
+          </MuiFormikSelect>
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <label htmlFor="key">{T.translate("marketing.key")} *</label>
+          <MuiFormikTextField name="key" margin="none" fullWidth size="small" />
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <label htmlFor="selection_plan_id">
+            {T.translate("marketing.selection_plan")}
+          </label>
+          <MuiFormikTextField
+            name="selection_plan_id"
+            margin="none"
+            fullWidth
+            size="small"
+          />
+        </Grid2>
+      </Grid2>
 
-  handleChange(ev) {
-    const newEntity = { ...this.state.entity };
-    const newErrors = { ...this.state.errors };
-    let { value, id } = ev.target;
-
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
-
-    if (ev.target.type === "number") {
-      value = parseInt(ev.target.value);
-    }
-
-    newErrors[id] = "";
-    newEntity[id] = value;
-    this.setState({ entity: newEntity, errors: newErrors });
-  }
-
-  handleSubmit(ev) {
-    ev.preventDefault();
-    const { entity } = this.state;
-    const { currentSummit } = this.props;
-    if (
-      (entity.type !== MARKETING_SETTING_TYPE_FILE && !entity.value) ||
-      (entity.type === MARKETING_SETTING_TYPE_FILE && !entity.file)
-    ) {
-      const msg = `${
-        setting_types_ddl.find((e) => e.value === entity.type)?.label
-      }: This field may not be blank.`;
-      return Swal.fire("Validation error", msg, "warning");
-    }
-
-    this.props.onSubmit(entity, entity.file).then((payload) => {
-      if (entity.id && entity.id > 0) {
-        // UPDATE
-        this.props.showSuccessMessage(T.translate("marketing.setting_saved"));
-        return;
-      }
-
-      const success_message = {
-        title: T.translate("general.done"),
-        html: T.translate("marketing.setting_created"),
-        type: "success"
-      };
-
-      this.props.showMessage(success_message, () => {
-        history.push(
-          `/app/summits/${currentSummit.id}/marketing/${payload.response.id}`
-        );
-      });
-    });
-  }
-
-  hasErrors(field) {
-    const { errors } = this.state;
-    if (field in errors) {
-      return errors[field];
-    }
-
-    return "";
-  }
-
-  handleUploadFile(file) {
-    const newEntity = { ...this.state.entity };
-
-    newEntity.file = file;
-    newEntity.file_preview = file.preview;
-
-    this.setState({ entity: newEntity });
-  }
-
-  handleRemoveFile() {
-    const newEntity = { ...this.state.entity };
-
-    newEntity.file_preview = "";
-    newEntity.file = "";
-
-    if (newEntity.id) {
-      this.props.onDeleteImage(newEntity.id).then(() => {
-        newEntity.id = 0;
-      });
-    }
-
-    this.setState({ entity: newEntity });
-  }
-
-  render() {
-    const { entity } = this.state;
-
-    return (
-      <form className="marketing-setting-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("marketing.type")} *</label>
-            <Dropdown
-              id="type"
-              value={entity.type}
-              placeholder={T.translate("marketing.placeholders.select_type")}
-              options={setting_types_ddl}
-              onChange={this.handleChange}
-              disabled={entity.id !== 0}
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        {values.type === MARKETING_SETTING_TYPE_TEXT && (
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <label htmlFor="value">
+              {T.translate("marketing.plain_text")} *
+            </label>
+            <MuiFormikTextField
+              name="value"
+              margin="none"
+              fullWidth
+              size="small"
             />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("marketing.key")} *</label>
-            <Input
-              id="key"
-              value={entity.key}
-              onChange={this.handleChange}
-              className="form-control"
-              error={this.hasErrors("key")}
+          </Grid2>
+        )}
+        {values.type === MARKETING_SETTING_TYPE_TEXTAREA && (
+          <Grid2 size={12}>
+            <label htmlFor="value">{T.translate("marketing.html")} *</label>
+            <TextEditorV3
+              id="value"
+              value={values.value}
+              onChange={handleFieldChange}
+              error={valueError}
+              license={process.env.JODIT_LICENSE_KEY}
             />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("marketing.selection_plan")}</label>
-            <Input
-              id="selection_plan_id"
-              value={entity.selection_plan_id}
-              onChange={this.handleChange}
-              className="form-control"
-              error={this.hasErrors("selection_plan_id")}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          {entity.type === MARKETING_SETTING_TYPE_TEXT && (
-            <div className="col-md-4">
-              <label> {T.translate("marketing.plain_text")} *</label>
-              <Input
-                id="value"
-                value={entity.value}
-                onChange={this.handleChange}
-                className="form-control"
-                error={this.hasErrors("value")}
-              />
-            </div>
-          )}
-          {entity.type === MARKETING_SETTING_TYPE_TEXTAREA && (
-            <div className="col-md-12">
-              <label> {T.translate("marketing.html")} *</label>
-              <TextEditorV3
-                id="value"
-                value={entity.value}
-                onChange={this.handleChange}
-                error={this.hasErrors("value")}
-                license={process.env.JODIT_LICENSE_KEY}
-              />
-            </div>
-          )}
-          {entity.type === MARKETING_SETTING_TYPE_FILE && (
-            <div className="col-md-12">
-              <label> {T.translate("marketing.file")} *</label>
+          </Grid2>
+        )}
+        {values.type === MARKETING_SETTING_TYPE_FILE && (
+          <Grid2 size={12}>
+            <label htmlFor="file">{T.translate("marketing.file")} *</label>
+            {/* need this styles to adapt bootstrap to MUI */}
+            <Box
+              sx={{
+                "& .file-upload": {
+                  display: "flex",
+                  gap: 2,
+                  alignItems: "flex-start"
+                },
+                "& .file-upload > :first-of-type": { flex: 1 },
+                "& .selected-files-box": { flex: "0 0 auto", maxWidth: "50%" }
+              }}
+            >
               <UploadInput
-                value={entity.file_preview || entity.file}
-                handleUpload={this.handleUploadFile}
-                handleRemove={this.handleRemoveFile}
-                className="dropzone col-md-6"
+                value={values.file_preview || values.file}
+                handleUpload={handleUploadFile}
+                handleRemove={handleRemoveFile}
+                className="dropzone"
                 multiple={false}
               />
-            </div>
-          )}
-          {entity.type === MARKETING_SETTING_TYPE_HEX_COLOR && (
-            <div className="col-md-4">
-              <label> {T.translate("marketing.hex_color")} *</label>
-              <HexColorInput
-                onChange={this.handleChange}
-                id="value"
-                value={entity.value}
-                className="form-control"
-                error={this.hasErrors("value")}
-              />
-            </div>
-          )}
-        </div>
+              {fileError && <FormHelperText error>{fileError}</FormHelperText>}
+            </Box>
+          </Grid2>
+        )}
+        {values.type === MARKETING_SETTING_TYPE_HEX_COLOR && (
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <label htmlFor="value">
+              {T.translate("marketing.hex_color")} *
+            </label>
+            <MuiFormikColorField name="value" />
+          </Grid2>
+        )}
+      </Grid2>
+    </Box>
+  );
+};
 
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
-        </div>
-      </form>
-    );
-  }
-}
+MarketingSettingForm.propTypes = {
+  onDeleteImage: PropTypes.func.isRequired
+};
 
 export default MarketingSettingForm;
