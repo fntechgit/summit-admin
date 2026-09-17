@@ -4,6 +4,7 @@ import { Redirect, Route, Switch } from "react-router-dom";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react";
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
+import NoMatchPage from "../pages/no-match-page";
 import {
   getSelectionPlan,
   resetSelectionPlanForm
@@ -30,6 +31,7 @@ const SelectionPlanIdLayout = ({
   getMarketingSettingsBySelectionPlan
 }) => {
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const selectionPlanId = match.params.selection_plan_id;
   const breadcrumb = selectionPlanId
     ? currentSelectionPlan.name
@@ -37,6 +39,7 @@ const SelectionPlanIdLayout = ({
 
   useEffect(() => {
     setHasLoaded(false);
+    setHasError(false);
     if (!selectionPlanId) {
       resetSelectionPlanForm();
       setHasLoaded(true);
@@ -51,9 +54,13 @@ const SelectionPlanIdLayout = ({
           )
         )
         .then(() => setHasLoaded(true))
-        .catch(() => {});
+        .catch(() => setHasError(true));
     }
   }, [selectionPlanId]);
+
+  if (hasError) {
+    return <Redirect to={`/app/summits/${currentSummit.id}/selection-plans`} />;
+  }
 
   if (!hasLoaded || currentSelectionPlan.id !== Number(selectionPlanId || 0)) {
     return null;
@@ -78,9 +85,7 @@ const SelectionPlanIdLayout = ({
             path={`${match.url}/rating-types`}
             component={SelectionPlanRatingTypesLayout}
           />
-          <Redirect
-            to={`/app/summits/${currentSummit.id}/selection-plans/${selectionPlanId}`}
-          />
+          <Route component={NoMatchPage} />
         </Switch>
       </Suspense>
     </div>
