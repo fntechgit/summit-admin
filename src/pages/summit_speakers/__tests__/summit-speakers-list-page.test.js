@@ -8,7 +8,7 @@ const SummitSpeakersListPage = ConnectedSummitSpeakersListPage.WrappedComponent;
 const buildSubjectProps = () => ({
   term: null,
   order: "full_name",
-  page: 1,
+  currentPage: 3,
   orderDir: 1,
   perPage: 10,
   selectionPlanFilter: [],
@@ -17,6 +17,7 @@ const buildSubjectProps = () => ({
   activityTypeFilter: [],
   selectionStatusFilter: [],
   mediaUploadTypeFilter: { operator: null, value: [] },
+  pendingSubmissionsFilter: null,
   selectedCount: 0,
   totalActivities: 0
 });
@@ -52,8 +53,11 @@ describe("SummitSpeakersListPage.handleChangeSelectionStatusFilter", () => {
         target: { value: selectedValues }
       });
 
-      const filtersArg = getSpeakersBySummit.mock.calls[0][5];
+      const [, pageArg, , , , filtersArg] = getSpeakersBySummit.mock.calls[0];
       expect(filtersArg.selectionStatusFilter).toEqual(expected);
+      // a filter change can shrink the result set below the current page -
+      // it must reset to page 1, not preserve the page the user was on
+      expect(pageArg).toBe(1);
     }
   );
 
@@ -65,8 +69,9 @@ describe("SummitSpeakersListPage.handleChangeSelectionStatusFilter", () => {
       target: { value: ["accepted", "rejected"] }
     });
 
-    const filtersArg = getSpeakersBySummit.mock.calls[0][5];
+    const [, pageArg, , , , filtersArg] = getSpeakersBySummit.mock.calls[0];
     expect(filtersArg.selectionStatusFilter).toEqual(["accepted", "rejected"]);
+    expect(pageArg).toBe(1);
   });
 
   // Both values can be present at once (see resolveExclusiveSelectionStatusFilter) -
@@ -87,8 +92,9 @@ describe("SummitSpeakersListPage.handleChangeSelectionStatusFilter", () => {
         target: { value: selectedValues }
       });
 
-      const filtersArg = getSpeakersBySummit.mock.calls[0][5];
+      const [, pageArg, , , , filtersArg] = getSpeakersBySummit.mock.calls[0];
       expect(filtersArg.selectionStatusFilter).toEqual(expected);
+      expect(pageArg).toBe(1);
     }
   );
 
@@ -106,7 +112,21 @@ describe("SummitSpeakersListPage.handleChangeSelectionStatusFilter", () => {
       target: { value: ["published", "accepted"] }
     });
 
-    const filtersArg = getSpeakersBySummit.mock.calls[0][5];
+    const [, pageArg, , , , filtersArg] = getSpeakersBySummit.mock.calls[0];
     expect(filtersArg.selectionStatusFilter).toEqual(["accepted"]);
+    expect(pageArg).toBe(1);
+  });
+});
+
+describe("SummitSpeakersListPage.handleOrAndFilter", () => {
+  it("resets to page 1 and dispatches the new or/and combinator", () => {
+    const getSpeakersBySummit = jest.fn();
+    const instance = buildInstance({ getSpeakersBySummit });
+
+    instance.handleOrAndFilter("or");
+
+    const [, pageArg, , , , filtersArg] = getSpeakersBySummit.mock.calls[0];
+    expect(pageArg).toBe(1);
+    expect(filtersArg.orAndFilter).toBe("or");
   });
 });

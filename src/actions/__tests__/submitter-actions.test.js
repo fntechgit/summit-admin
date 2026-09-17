@@ -89,4 +89,37 @@ describe("getSubmittersBySummit - published filter", () => {
     );
     expect(filter.join(",")).not.toContain("has_published_presentations");
   });
+
+  it.each([
+    [true, "true"],
+    [false, "false"]
+  ])(
+    "maps pendingSubmissionsFilter %s to has_pending_presentations==%s",
+    async (pendingSubmissionsFilter, expectedFlag) => {
+      const store = mockStore(stateWithSummit);
+
+      await store.dispatch(
+        getSubmittersBySummit(null, 1, 10, "full_name", 1, {
+          pendingSubmissionsFilter
+        })
+      );
+
+      expect(listRequestFor().params["filter[]"]).toContain(
+        `has_pending_presentations==${expectedFlag}`
+      );
+    }
+  );
+
+  it("omits the pending-submissions filter when it is null", async () => {
+    const store = mockStore(stateWithSummit);
+
+    await store.dispatch(
+      getSubmittersBySummit(null, 1, 10, "full_name", 1, {
+        pendingSubmissionsFilter: null
+      })
+    );
+
+    const filter = listRequestFor().params["filter[]"] ?? [];
+    expect(filter.join(",")).not.toContain("has_pending_presentations");
+  });
 });

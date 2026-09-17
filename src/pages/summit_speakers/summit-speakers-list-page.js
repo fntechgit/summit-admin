@@ -56,7 +56,11 @@ import {
   AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE
 } from "../../actions/promocode-actions";
 
-import { ALL_FILTER, SpeakersSources as sources } from "../../utils/constants";
+import {
+  ALL_FILTER,
+  DEFAULT_CURRENT_PAGE,
+  SpeakersSources as sources
+} from "../../utils/constants";
 import { validateEmail } from "../../utils/methods";
 import MediaTypeFilter from "../../components/filters/media-type-filter";
 
@@ -260,36 +264,20 @@ class SummitSpeakersListPage extends React.Component {
 
   handleSpeakerSubmitterSourceChange(ev) {
     const { value } = ev.target;
-    const {
-      term,
-      order,
-      orderDir,
-      perPage,
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter,
-      mediaUploadTypeFilter,
-      pendingSubmissionsFilter
-    } = this.getSubjectProps();
-    const {
-      speakerFilters: { orAndFilter }
-    } = this.state;
+    const { term, order, orderDir, perPage } = this.getSubjectProps();
+    const filters = this.getFilters();
     const { initSubmittersList, initSpeakersList } = this.props;
     this.setState({ ...this.state, source: value }, function () {
       initSubmittersList();
       initSpeakersList();
-      this.getBySummit(term, 1, perPage, order, orderDir, {
-        selectionPlanFilter,
-        trackFilter,
-        trackGroupFilter,
-        activityTypeFilter,
-        selectionStatusFilter,
-        orAndFilter,
-        mediaUploadTypeFilter,
-        pendingSubmissionsFilter
-      });
+      this.getBySummit(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        filters
+      );
     });
   }
 
@@ -309,34 +297,52 @@ class SummitSpeakersListPage extends React.Component {
   }
 
   handleSearch(term) {
-    this.callBySummit({ term });
+    // a new term can shrink the result set below the current page, leaving
+    // the user stranded on an empty page with no visible pagination - reset
+    // to page 1, same as every filter change below
+    this.callBySummit({ page: DEFAULT_CURRENT_PAGE, term });
   }
 
   handleChangeSelectionPlanFilter(ev) {
-    this.callBySummit({}, { selectionPlanFilter: ev.target.value });
+    this.callBySummit(
+      { page: DEFAULT_CURRENT_PAGE },
+      { selectionPlanFilter: ev.target.value }
+    );
   }
 
   handleChangeTrackFilter(ev) {
-    this.callBySummit({}, { trackFilter: ev.target.value });
+    this.callBySummit(
+      { page: DEFAULT_CURRENT_PAGE },
+      { trackFilter: ev.target.value }
+    );
   }
 
   handleChangeTrackGroupFilter(ev) {
-    this.callBySummit({}, { trackGroupFilter: ev.target.value });
+    this.callBySummit(
+      { page: DEFAULT_CURRENT_PAGE },
+      { trackGroupFilter: ev.target.value }
+    );
   }
 
   handleChangeActivityTypeFilter(ev) {
-    this.callBySummit({}, { activityTypeFilter: ev.target.value });
+    this.callBySummit(
+      { page: DEFAULT_CURRENT_PAGE },
+      { activityTypeFilter: ev.target.value }
+    );
   }
 
   handleChangeMediaUploadTypeFilter(ev) {
     const { value, operator } = ev.target;
     const { mediaUploadTypeFilter } = this.getSubjectProps();
     if (operator && value.length > 0) {
-      this.callBySummit({}, { mediaUploadTypeFilter: { operator, value } });
+      this.callBySummit(
+        { page: DEFAULT_CURRENT_PAGE },
+        { mediaUploadTypeFilter: { operator, value } }
+      );
       // get speakers if the media upload types filter is clear
     } else if (mediaUploadTypeFilter.value.length > 0 && value.length === 0) {
       this.callBySummit(
-        {},
+        { page: DEFAULT_CURRENT_PAGE },
         { mediaUploadTypeFilter: { operator: null, value: [] } }
       );
     }
@@ -344,44 +350,26 @@ class SummitSpeakersListPage extends React.Component {
 
   handleChangeSelectionStatusFilter(ev) {
     const { value: rawSelectionStatusFilter } = ev.target;
-    const {
-      term,
-      order,
-      page,
-      orderDir,
-      perPage,
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      selectionStatusFilter: previousSelectionStatusFilter,
-      mediaUploadTypeFilter,
-      pendingSubmissionsFilter
-    } = this.getSubjectProps();
+    const { selectionStatusFilter: previousSelectionStatusFilter } =
+      this.getSubjectProps();
 
     const newSelectionStatusFilter = resolveExclusiveSelectionStatusFilter(
       rawSelectionStatusFilter,
       previousSelectionStatusFilter
     );
 
-    const {
-      speakerFilters: { orAndFilter }
-    } = this.state;
-    this.getBySummit(term, page, perPage, order, orderDir, {
-      selectionPlanFilter,
-      trackFilter,
-      trackGroupFilter,
-      activityTypeFilter,
-      orAndFilter,
-      selectionStatusFilter: newSelectionStatusFilter,
-      mediaUploadTypeFilter,
-      pendingSubmissionsFilter
-    });
+    this.callBySummit(
+      { page: DEFAULT_CURRENT_PAGE },
+      { selectionStatusFilter: newSelectionStatusFilter }
+    );
   }
 
   handleChangePendingSubmissionsFilter(ev) {
     const { value } = ev.target;
-    this.callBySummit({}, { pendingSubmissionsFilter: value });
+    this.callBySummit(
+      { page: DEFAULT_CURRENT_PAGE },
+      { pendingSubmissionsFilter: value }
+    );
   }
 
   handleChangeFlowEvent(ev) {
@@ -528,7 +516,7 @@ class SummitSpeakersListPage extends React.Component {
       ...this.state,
       speakerFilters: { ...this.state.speakerFilters, orAndFilter: ev }
     });
-    this.callBySummit({}, { orAndFilter: ev });
+    this.callBySummit({ page: DEFAULT_CURRENT_PAGE }, { orAndFilter: ev });
   }
 
   render() {
