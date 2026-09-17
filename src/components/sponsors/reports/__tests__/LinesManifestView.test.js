@@ -275,7 +275,7 @@ describe("Additional Fields column", () => {
     expect(cell.querySelector("script")).toBeNull();
   });
 
-  it("strikes the cell through on a fully canceled line, like every other cell", () => {
+  it("keeps the Additional Fields cell populated on a fully canceled line", () => {
     renderView({
       rows: [
         line({
