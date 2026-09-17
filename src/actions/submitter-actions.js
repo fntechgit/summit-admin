@@ -84,7 +84,8 @@ export const getSelectedSubmittersActivityCount =
       trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
-      mediaUploadTypeFilter
+      mediaUploadTypeFilter,
+      pendingSubmissionsFilter
     } = currentSummitSubmittersListState;
     const filters = {
       selectionPlanFilter,
@@ -92,7 +93,8 @@ export const getSelectedSubmittersActivityCount =
       trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
-      mediaUploadTypeFilter
+      mediaUploadTypeFilter,
+      pendingSubmissionsFilter
     };
     const filter = parseFilters(filters);
     const params = { access_token: accessToken };

@@ -297,9 +297,6 @@ class SummitSpeakersListPage extends React.Component {
   }
 
   handleSearch(term) {
-    // a new term can shrink the result set below the current page, leaving
-    // the user stranded on an empty page with no visible pagination - reset
-    // to page 1, same as every filter change below
     this.callBySummit({ page: DEFAULT_CURRENT_PAGE, term });
   }
 
