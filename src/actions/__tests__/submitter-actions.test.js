@@ -4,7 +4,10 @@
 import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import { getRequest } from "openstack-uicore-foundation/lib/utils/actions";
-import { getSubmittersBySummit } from "../submitter-actions";
+import {
+  getSubmittersBySummit,
+  getSelectedSubmittersActivityCount
+} from "../submitter-actions";
 import * as methods from "../../utils/methods";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
@@ -122,4 +125,37 @@ describe("getSubmittersBySummit - published filter", () => {
     const filter = listRequestFor().params["filter[]"] ?? [];
     expect(filter.join(",")).not.toContain("has_pending_presentations");
   });
+
+  it.each([
+    [true, "true"],
+    [false, "false"]
+  ])(
+    "maps pendingSubmissionsFilter %s to has_pending_presentations==%s on the selected-activity count request",
+    async (pendingSubmissionsFilter, expectedFlag) => {
+      const store = mockStore({
+        ...stateWithSummit,
+        currentSummitSubmittersListState: {
+          totalActivities: 0,
+          term: null,
+          selectedCount: 1,
+          selectedItems: [42],
+          excludedItems: [],
+          selectedAll: false,
+          selectionPlanFilter: [],
+          trackFilter: [],
+          trackGroupFilter: [],
+          activityTypeFilter: [],
+          selectionStatusFilter: [],
+          mediaUploadTypeFilter: { operator: null, value: [] },
+          pendingSubmissionsFilter
+        }
+      });
+
+      await store.dispatch(getSelectedSubmittersActivityCount());
+
+      expect(countRequestFor().params["filter[]"]).toContain(
+        `has_pending_presentations==${expectedFlag}`
+      );
+    }
+  );
 });
