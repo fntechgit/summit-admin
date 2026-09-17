@@ -98,6 +98,7 @@ import configureMockStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import showConfirmDialog from "../../../../../../../../components/mui/showConfirmDialog";
 import EditCartForm from "../edit-cart-form";
+import { buildGlobalQuantitySchema } from "../quantity-schema";
 /* eslint-enable import/first */
 
 const middlewares = [thunk];
@@ -575,6 +576,73 @@ describe("EditCartForm", () => {
         expect(screen.getByText("Item 2")).toBeInTheDocument();
         expect(screen.getByText("Item 3")).toBeInTheDocument();
       });
+    });
+  });
+
+  describe("EditForm - buildInitialValues (out-of-stock default_quantity)", () => {
+    const buildQuantityInitialValue = (item) => {
+      const hasStock =
+        !item.is_sold_out && item.remaining_quantity_sponsor !== 0;
+      return hasStock
+        ? item.quantity || item.default_quantity || 0
+        : item.quantity || 0;
+    };
+
+    it("ignores default_quantity when the item is sold out for the show", () => {
+      const item = { is_sold_out: true, default_quantity: 1 };
+      expect(buildQuantityInitialValue(item)).toBe(0);
+    });
+
+    it("ignores default_quantity when the sponsor's remaining quantity is 0", () => {
+      const item = { remaining_quantity_sponsor: 0, default_quantity: 1 };
+      expect(buildQuantityInitialValue(item)).toBe(0);
+    });
+
+    it("keeps the sponsor's own existing quantity even when out of stock", () => {
+      const item = { is_sold_out: true, quantity: 3, default_quantity: 1 };
+      expect(buildQuantityInitialValue(item)).toBe(3);
+    });
+
+    it("still applies default_quantity when the item has stock", () => {
+      const item = { is_sold_out: false, default_quantity: 1 };
+      expect(buildQuantityInitialValue(item)).toBe(1);
+    });
+  });
+
+  describe("EditForm - buildValidationSchema (quantity cap)", () => {
+    it("rejects a quantity above remaining_quantity_show when it is the tighter axis", async () => {
+      const schema = buildGlobalQuantitySchema({
+        remaining_quantity_show: 2,
+        remaining_quantity_sponsor: 5
+      });
+      await expect(schema.isValid(3)).resolves.toBe(false);
+      await expect(schema.isValid(2)).resolves.toBe(true);
+    });
+
+    it("rejects a quantity above remaining_quantity_sponsor when it is the tighter axis", async () => {
+      const schema = buildGlobalQuantitySchema({
+        remaining_quantity_show: 8,
+        remaining_quantity_sponsor: 3
+      });
+      await expect(schema.isValid(4)).resolves.toBe(false);
+      await expect(schema.isValid(3)).resolves.toBe(true);
+    });
+
+    it("applies no upper bound when both remaining quantities are null", async () => {
+      const schema = buildGlobalQuantitySchema({
+        remaining_quantity_show: null,
+        remaining_quantity_sponsor: null
+      });
+      await expect(schema.isValid(1000)).resolves.toBe(true);
+    });
+
+    it("rejects any positive quantity when remaining_quantity_show is 0 (boundary)", async () => {
+      const schema = buildGlobalQuantitySchema({
+        remaining_quantity_show: 0,
+        remaining_quantity_sponsor: 5
+      });
+      await expect(schema.isValid(1)).resolves.toBe(false);
+      await expect(schema.isValid(0)).resolves.toBe(true);
     });
   });
 });
