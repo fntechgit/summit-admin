@@ -237,10 +237,11 @@ class SummitSpeakersListPage extends React.Component {
   }
 
   callBySummit(posOverrides = {}, filterOverrides = {}) {
-    const { term, page, perPage, order, orderDir } = this.getSubjectProps();
+    const { term, currentPage, perPage, order, orderDir } =
+      this.getSubjectProps();
     this.getBySummit(
       posOverrides.term ?? term,
-      posOverrides.page ?? page,
+      posOverrides.page ?? currentPage,
       posOverrides.perPage ?? perPage,
       posOverrides.order ?? order,
       posOverrides.orderDir ?? orderDir,
@@ -627,70 +628,70 @@ class SummitSpeakersListPage extends React.Component {
     const emailFlowDDL =
       this.state.source === sources.speakers
         ? [
-          { label: "-- SELECT EMAIL EVENT --", value: "" },
-          {
-            label:
-              "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ALTERNATE",
-            value:
-              "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ALTERNATE"
-          },
-          {
-            label:
-              "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_REJECTED",
-            value: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_REJECTED"
-          },
-          {
-            label:
-              "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_REJECTED",
-            value:
-              "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_REJECTED"
-          },
-          {
-            label: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ONLY",
-            value: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ONLY"
-          },
-          {
-            label: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_ONLY",
-            value: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_ONLY"
-          },
-          {
-            label: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_REJECTED_ONLY",
-            value: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_REJECTED_ONLY"
-          }
-        ]
+            { label: "-- SELECT EMAIL EVENT --", value: "" },
+            {
+              label:
+                "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ALTERNATE",
+              value:
+                "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ALTERNATE"
+            },
+            {
+              label:
+                "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_REJECTED",
+              value: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_REJECTED"
+            },
+            {
+              label:
+                "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_REJECTED",
+              value:
+                "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_REJECTED"
+            },
+            {
+              label: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ONLY",
+              value: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ONLY"
+            },
+            {
+              label: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_ONLY",
+              value: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_ONLY"
+            },
+            {
+              label: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_REJECTED_ONLY",
+              value: "SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_REJECTED_ONLY"
+            }
+          ]
         : [
-          { label: "-- SELECT EMAIL EVENT --", value: "" },
-          {
-            label:
-              "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ALTERNATE",
-            value:
-              "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ALTERNATE"
-          },
-          {
-            label:
-              "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_REJECTED",
-            value:
-              "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_REJECTED"
-          },
-          {
-            label:
-              "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_REJECTED",
-            value:
-              "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_REJECTED"
-          },
-          {
-            label: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ONLY",
-            value: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ONLY"
-          },
-          {
-            label: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_ONLY",
-            value: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_ONLY"
-          },
-          {
-            label: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_REJECTED_ONLY",
-            value: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_REJECTED_ONLY"
-          }
-        ];
+            { label: "-- SELECT EMAIL EVENT --", value: "" },
+            {
+              label:
+                "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ALTERNATE",
+              value:
+                "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ALTERNATE"
+            },
+            {
+              label:
+                "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_REJECTED",
+              value:
+                "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_REJECTED"
+            },
+            {
+              label:
+                "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_REJECTED",
+              value:
+                "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_REJECTED"
+            },
+            {
+              label: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ONLY",
+              value: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ONLY"
+            },
+            {
+              label: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_ONLY",
+              value: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_ONLY"
+            },
+            {
+              label: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_REJECTED_ONLY",
+              value: "SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_REJECTED_ONLY"
+            }
+          ];
 
     const promoCodeStrategiesDDL = [
       {
