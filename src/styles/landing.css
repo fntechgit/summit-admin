@@ -18,6 +18,38 @@ body {
   padding: 10px 30px;
 }
 
+/* Selected-event pages (everything under summit-id-layout.js) keep the
+   original, narrower container width instead of the widened default used
+   elsewhere, centered like a standard Bootstrap container. */
+.summit-scope .container {
+  width: auto;
+  margin: 30px auto;
+}
+
+@media (min-width: 768px) {
+  .summit-scope .container {
+    width: 750px;
+  }
+}
+
+@media (min-width: 992px) {
+  .summit-scope .container {
+    width: 970px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .summit-scope .container {
+    width: 1170px;
+  }
+}
+
+.table-container {
+  width: 100%;
+  background-color: white;
+  padding: 10px 30px;
+}
+
 .form-check-label {
   padding-left: 10px !important;
   padding-top: 2px;
