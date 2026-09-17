@@ -80,21 +80,13 @@ export const Destination = ({ name, booth }) => {
   );
 };
 
-// One "Label: value" line per answered field. Values arrive display-ready from the
-// API (option text resolved, DateTime already UTC, CheckBox already Yes/No), so the
-// UI must not reformat or translate them: the screen, the print view and the CSV
-// have to agree. Plain JSX text, never dangerouslySetInnerHTML — the values are
-// sponsor-entered free text.
-//
-// Nullish-coalescing covers all three shapes the API can send: a list, null, and
-// the key being absent entirely.
+// Values arrive display-ready from the API; reformatting here would desync the
+// screen from the CSV.
 const AdditionalFields = ({ fields }) => (
   <>
     {(fields ?? []).map((field, idx) => (
-      // No stable id on an answer, and a form may legitimately carry two fields
-      // with the same label, so the label alone is not a safe key. Same
-      // composite-index approach the row key above uses, for the same reason.
       <Box
+        // Answers carry no id and labels are not unique — as with the row key below.
         // eslint-disable-next-line react/no-array-index-key
         key={`${field.label}-${idx}`}
       >{`${field.label}: ${field.value}`}</Box>

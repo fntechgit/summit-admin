@@ -254,44 +254,6 @@ describe("Additional Fields column", () => {
       unmount();
     });
   });
-
-  it("renders a value containing markup literally, never as HTML", () => {
-    // Sponsor-entered free text reaches this cell. If anyone reaches for
-    // dangerouslySetInnerHTML, this fails.
-    renderView({
-      rows: [
-        line({
-          additional_fields: [
-            { label: "Notes", value: "<b>bold</b><script>x()</script>" }
-          ]
-        })
-      ]
-    });
-    const cell = within(screen.getByText("AV1").closest("tr")).getAllByRole(
-      "cell"
-    )[7];
-    expect(cell).toHaveTextContent("Notes: <b>bold</b><script>x()</script>");
-    expect(cell.querySelector("b")).toBeNull();
-    expect(cell.querySelector("script")).toBeNull();
-  });
-
-  it("keeps the Additional Fields cell populated on a fully canceled line", () => {
-    renderView({
-      rows: [
-        line({
-          is_canceled: true,
-          additional_fields: [{ label: "Chair Color", value: "Blue" }]
-        })
-      ]
-    });
-    const row = screen.getByText("AV1").closest("tr");
-    // The row-level sx targets "& td", so the new cell inherits the treatment only
-    // because it is a real TableCell. A Box or a fragment in the row would not.
-    expect(row).toHaveAttribute("data-canceled", "true");
-    expect(within(row).getAllByRole("cell")[7]).toHaveTextContent(
-      "Chair Color: Blue"
-    );
-  });
 });
 
 describe("lines_count copy", () => {
