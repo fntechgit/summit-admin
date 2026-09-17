@@ -57,7 +57,6 @@ import {
 } from "../../actions/promocode-actions";
 
 import {
-  ALL_FILTER,
   DEFAULT_CURRENT_PAGE,
   SpeakersSources as sources
 } from "../../utils/constants";
@@ -150,7 +149,6 @@ class SummitSpeakersListPage extends React.Component {
     this.handleSendEmails = this.handleSendEmails.bind(this);
     this.handleChangePromoCodeStrategy =
       this.handleChangePromoCodeStrategy.bind(this);
-    this.handleOrAndFilter = this.handleOrAndFilter.bind(this);
     this.handleChangeMediaUploadTypeFilter =
       this.handleChangeMediaUploadTypeFilter.bind(this);
     this.handleChangePendingSubmissionsFilter =
@@ -161,10 +159,7 @@ class SummitSpeakersListPage extends React.Component {
       showSendEmailModal: false,
       excerptRecipient: "",
       source: sources.speakers,
-      promoCodeStrategy: 0,
-      speakerFilters: {
-        orAndFilter: ALL_FILTER
-      }
+      promoCodeStrategy: 0
     };
   }
 
@@ -224,16 +219,12 @@ class SummitSpeakersListPage extends React.Component {
       mediaUploadTypeFilter,
       pendingSubmissionsFilter
     } = this.getSubjectProps();
-    const {
-      speakerFilters: { orAndFilter }
-    } = this.state;
     return {
       selectionPlanFilter,
       trackFilter,
       trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
-      orAndFilter,
       mediaUploadTypeFilter,
       pendingSubmissionsFilter,
       ...filterOverrides
@@ -506,14 +497,6 @@ class SummitSpeakersListPage extends React.Component {
         this.props.unselectAllSummitSubmitters();
       }
     }
-  }
-
-  handleOrAndFilter(ev) {
-    this.setState({
-      ...this.state,
-      speakerFilters: { ...this.state.speakerFilters, orAndFilter: ev }
-    });
-    this.callBySummit({ page: DEFAULT_CURRENT_PAGE }, { orAndFilter: ev });
   }
 
   render() {

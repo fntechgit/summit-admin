@@ -117,16 +117,3 @@ describe("SummitSpeakersListPage.handleChangeSelectionStatusFilter", () => {
     expect(pageArg).toBe(1);
   });
 });
-
-describe("SummitSpeakersListPage.handleOrAndFilter", () => {
-  it("resets to page 1 and dispatches the new or/and combinator", () => {
-    const getSpeakersBySummit = jest.fn();
-    const instance = buildInstance({ getSpeakersBySummit });
-
-    instance.handleOrAndFilter("or");
-
-    const [, pageArg, , , , filtersArg] = getSpeakersBySummit.mock.calls[0];
-    expect(pageArg).toBe(1);
-    expect(filtersArg.orAndFilter).toBe("or");
-  });
-});
