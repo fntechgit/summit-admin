@@ -257,15 +257,24 @@ class App extends React.PureComponent {
                       />
                     </IconButton>
                   )}
-                  <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                  <Typography
+                    variant="h6"
+                    component="div"
+                    sx={{
+                      flexGrow: 1,
+                      ...(!isLoggedUser && { textAlign: "center" })
+                    }}
+                  >
                     {T.translate("landing.os_summit_admin")}
                   </Typography>
-                  <AuthButton
-                    isLoggedUser={isLoggedUser}
-                    picture={profile_pic}
-                    doLogin={this.onClickLogin.bind(this)}
-                    initLogOut={initLogOut}
-                  />
+                  {isLoggedUser && (
+                    <AuthButton
+                      isLoggedUser={isLoggedUser}
+                      picture={profile_pic}
+                      doLogin={this.onClickLogin.bind(this)}
+                      initLogOut={initLogOut}
+                    />
+                  )}
                 </Toolbar>
                 {isLoggedUser && (
                   <Toolbar
@@ -283,6 +292,14 @@ class App extends React.PureComponent {
                   </Toolbar>
                 )}
               </AppBar>
+              {!isLoggedUser && (
+                <AuthButton
+                  isLoggedUser={isLoggedUser}
+                  picture={profile_pic}
+                  doLogin={this.onClickLogin.bind(this)}
+                  initLogOut={initLogOut}
+                />
+              )}
               <Switch>
                 <AuthorizedRoute
                   isLoggedUser={isLoggedUser}
