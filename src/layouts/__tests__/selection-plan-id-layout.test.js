@@ -12,7 +12,7 @@
  * */
 
 import React from "react";
-import { screen, act } from "@testing-library/react";
+import { screen, act, waitFor } from "@testing-library/react";
 import { Router, Route, Switch } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import flushPromises from "flush-promises";
@@ -52,7 +52,7 @@ jest.mock("../../pages/selection-plans/edit-selection-plan-page", () => ({
 
 const renderAt = (path, currentSelectionPlan) => {
   const history = createMemoryHistory({ initialEntries: [path] });
-  return renderWithRedux(
+  const result = renderWithRedux(
     <Router history={history}>
       <Route
         path="/app/summits/:summit_id/selection-plans/:selection_plan_id"
@@ -66,6 +66,7 @@ const renderAt = (path, currentSelectionPlan) => {
       }
     }
   );
+  return { ...result, history };
 };
 
 const settle = () => act(async () => flushPromises());
@@ -172,12 +173,16 @@ describe("SelectionPlanIdLayout load guard", () => {
     expect(isPageRendered()).toBe(true);
   });
 
-  it("does not render or throw when the fetch rejects", async () => {
+  it("redirects to the selection plans list when the fetch rejects", async () => {
     getSelectionPlan.mockImplementation(
       () => () => Promise.reject(new Error("fail"))
     );
-    renderAt("/app/summits/1/selection-plans/5", { id: 0 });
-    await expect(settle()).resolves.not.toThrow();
+    const { history } = renderAt("/app/summits/1/selection-plans/5", {
+      id: 0
+    });
+    await waitFor(() =>
+      expect(history.location.pathname).toBe("/app/summits/1/selection-plans")
+    );
     expect(isPageRendered()).toBe(false);
   });
 });
