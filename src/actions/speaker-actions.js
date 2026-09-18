@@ -932,6 +932,15 @@ const parseFilters = (filters) => {
     );
   }
 
+  if (
+    filters.hasOwnProperty("pendingSubmissionsFilter") &&
+    filters.pendingSubmissionsFilter !== null
+  ) {
+    filter.push(
+      `has_pending_presentations==${filters.pendingSubmissionsFilter}`
+    );
+  }
+
   // return checkOrFilter(filters, filter);
   return filter;
 };
@@ -965,7 +974,8 @@ export const getSelectedSpeakersActivityCount =
       trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
-      mediaUploadTypeFilter
+      mediaUploadTypeFilter,
+      pendingSubmissionsFilter
     } = currentSummitSpeakersListState;
     const filters = {
       selectionPlanFilter,
@@ -973,7 +983,8 @@ export const getSelectedSpeakersActivityCount =
       trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
-      mediaUploadTypeFilter
+      mediaUploadTypeFilter,
+      pendingSubmissionsFilter
     };
     const filter = parseFilters(filters);
     const params = { access_token: accessToken };
