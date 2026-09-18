@@ -11,10 +11,14 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
+import { FormikProvider, useFormik } from "formik";
+import * as yup from "yup";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import EmailFlowEventForm from "../../components/forms/email-flow-event-form";
 import { getSummitById } from "../../actions/summit-actions";
 import {
@@ -22,59 +26,105 @@ import {
   resetEmailFlowEventForm,
   saveEmailFlowEvent
 } from "../../actions/email-flows-events-actions";
-import "../../styles/edit-email-flow-event-page.less";
-import AddNewButton from "../../components/buttons/add-new-button";
+import { truncateText, validateEmail } from "../../utils/methods";
 
-class EditEmailFlowEventPage extends React.Component {
-  constructor(props) {
-    const { match } = props;
-    const eventId = match.params.event_id;
-    super(props);
+const BREADCRUMB_LENGTH = 40;
 
-    props.getEmailFlowEvent(eventId);
-  }
+export const buildValues = (entity) => ({
+  id: entity?.id ?? 0,
+  email_template_identifier: entity?.email_template_identifier ?? "",
+  recipients: (entity?.recipients ?? []).join(",")
+});
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const oldId = prevProps.match.params.event_id;
-    const newId = this.props.match.params.event_id;
-
-    if (oldId !== newId) {
-      if (!newId) {
-        this.props.resetEmailFlowEventForm();
-      } else {
-        this.props.getEmailFlowEvent(newId);
+export const validationSchema = yup.object().shape({
+  recipients: yup
+    .string()
+    .test("valid-emails", "Invalid email", function validateRecipients(value) {
+      if (!value) return true;
+      const emails = value.split(",").map((email) => email.trim());
+      const invalidEmail = emails.find((email) => !validateEmail(email));
+      if (invalidEmail) {
+        return this.createError({
+          message: `email ${invalidEmail} is not valid`
+        });
       }
+      return true;
+    })
+});
+
+const EditEmailFlowEventPage = ({
+  currentSummit,
+  entity,
+  errors,
+  match,
+  getEmailFlowEvent,
+  resetEmailFlowEventForm,
+  saveEmailFlowEvent
+}) => {
+  const eventId = match.params.event_id;
+
+  useEffect(() => {
+    if (eventId) {
+      getEmailFlowEvent(eventId);
+    } else {
+      resetEmailFlowEventForm();
     }
-  }
+  }, [eventId]);
 
-  render() {
-    const { currentSummit, entity, errors, match, history } = this.props;
-    const title = T.translate("general.edit");
-    const breadcrumb = entity.id
-      ? entity.flow_name
-      : T.translate("general.new");
+  const formik = useFormik({
+    initialValues: buildValues(entity),
+    validationSchema,
+    onSubmit: (values) => {
+      const normalizedValues = {
+        ...values,
+        recipients: values.recipients
+          ? values.recipients.split(",").map((email) => email.trim())
+          : []
+      };
+      return saveEmailFlowEvent(normalizedValues);
+    }
+  });
 
-    return (
-      <div className="container">
-        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-        <h3>
-          {title} {entity.flow_name}{" "}
-          {T.translate("edit_email_flow_event.email_flow_event")}
-          <AddNewButton entity={entity} />
-        </h3>
-        <hr />
-        {currentSummit && (
-          <EmailFlowEventForm
-            entity={entity}
-            currentSummit={currentSummit}
-            errors={errors}
-            onSubmit={this.props.saveEmailFlowEvent}
-          />
-        )}
-      </div>
-    );
-  }
-}
+  useEffect(() => {
+    formik.resetForm({ values: buildValues(entity) });
+  }, [entity.id]);
+
+  useEffect(() => {
+    const errorFields = Object.keys(errors || {});
+    formik.setErrors(errorFields.length > 0 ? errors : {});
+  }, [errors]);
+
+  const title = T.translate("general.edit");
+  const breadcrumb =
+    truncateText(entity?.event_type_name, BREADCRUMB_LENGTH) || "";
+
+  return (
+    <div className="container">
+      <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+      <h3>
+        {title} {entity.flow_name}{" "}
+        {T.translate("edit_email_flow_event.email_flow_event")}
+      </h3>
+      <hr />
+      {currentSummit && (
+        <FormikProvider value={formik}>
+          <Box component="form" onSubmit={formik.handleSubmit} noValidate>
+            <EmailFlowEventForm entity={entity} />
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={formik.isSubmitting}
+              >
+                {T.translate("general.save")}
+              </Button>
+            </Box>
+          </Box>
+        </FormikProvider>
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({
   currentSummitState,
