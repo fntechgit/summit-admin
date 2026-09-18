@@ -13,61 +13,40 @@
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
 
-export default class AuthButton extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      showLogOut: false
-    };
-
-    this.toggleLogOut = this.toggleLogOut.bind(this);
+const AuthButton = ({ isLoggedUser, doLogin, initLogOut, picture }) => {
+  if (isLoggedUser) {
+    return (
+      <Button
+        variant="outlined"
+        color="inherit"
+        startIcon={<Avatar src={picture} sx={{ width: 24, height: 24 }} />}
+        onClick={() => {
+          initLogOut();
+        }}
+      >
+        {T.translate("landing.sign_out")}
+      </Button>
+    );
   }
 
-  toggleLogOut(ev) {
-    this.setState({ showLogOut: !this.state.showLogOut });
-  }
+  return (
+    <div className="login">
+      {T.translate("landing.not_logged_in")}
+      <br />
+      <br />
+      <button
+        className="btn btn-primary btn-lg"
+        onClick={() => {
+          doLogin();
+        }}
+      >
+        {T.translate("landing.log_in")}
+      </button>
+    </div>
+  );
+};
 
-  render() {
-    let { isLoggedUser, doLogin, initLogOut, picture } = this.props;
-    let { showLogOut } = this.state;
-
-    if (isLoggedUser) {
-      return (
-        <div className="user-menu" onClick={this.toggleLogOut}>
-          <div
-            className="profile-pic"
-            style={{ backgroundImage: `url(${picture})` }}
-          />
-          {showLogOut && (
-            <button
-              className="btn btn-default logout"
-              onClick={() => {
-                initLogOut();
-              }}
-            >
-              {T.translate("landing.sign_out")}
-            </button>
-          )}
-        </div>
-      );
-    } else {
-      return (
-        <div className="login">
-          {T.translate("landing.not_logged_in")}
-          <br />
-          <br />
-          <button
-            className="btn btn-primary btn-lg"
-            onClick={() => {
-              doLogin();
-            }}
-          >
-            {T.translate("landing.log_in")}
-          </button>
-        </div>
-      );
-    }
-  }
-}
+export default AuthButton;

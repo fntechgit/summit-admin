@@ -21,6 +21,7 @@ class AuthorizedRoute extends React.Component {
       isLoggedUser,
       backUrl,
       currentSummit,
+      componentProps,
       ...rest
     } = this.props;
     return (
@@ -39,7 +40,14 @@ class AuthorizedRoute extends React.Component {
           }
 
           if (isLoggedUser) {
-            return <Component currentSummit={currentSummit} {...props} />;
+            return (
+              <Component
+                currentSummit={currentSummit}
+                {...props}
+                // eslint-disable-next-line react/jsx-props-no-spreading
+                {...componentProps}
+              />
+            );
           } else {
             return (
               <Redirect

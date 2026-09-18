@@ -5,28 +5,6 @@ body {
 #root {
 }
 
-.header {
-  height: 64px;
-  border-bottom: 1px solid #b3b3b3;
-  background-color: white;
-}
-
-.header-title {
-  font-size: 16px;
-  text-align: center;
-  height: 100%;
-  line-height: 60px;
-}
-
-.user-menu {
-  position: absolute;
-  top: 7px;
-  right: 30px;
-  height: 40px;
-  width: 140px;
-  cursor: pointer;
-}
-
 .login {
   margin-top: 60px;
   padding: 30px 0 50px 0;
@@ -34,33 +12,42 @@ body {
   font-size: 22px;
 }
 
-.logout {
-  position: absolute;
-  top: 4px;
-  right: 55px;
+.container {
+  width: 100%;
+  background-color: white;
+  padding: 10px 30px;
 }
 
-.profile-pic {
-  height: 40px;
-  width: 40px;
-  border: 1px solid #afafaf;
-  border-radius: 20px;
-  overflow: hidden;
-  float: right;
-  background-size: cover;
+/* Selected-event pages (everything under summit-id-layout.js) keep the
+   original, narrower container width instead of the widened default used
+   elsewhere, centered like a standard Bootstrap container. */
+.summit-scope .container {
+  width: auto;
+  margin: 30px auto;
 }
 
-.primary-layout {
-  margin: 30px 0;
-
-  @media (min-width: 768px) {
-    margin: 30px 0 30px 40px;
+@media (min-width: 768px) {
+  .summit-scope .container {
+    width: 750px;
   }
 }
 
-.container {
+@media (min-width: 992px) {
+  .summit-scope .container {
+    width: 970px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .summit-scope .container {
+    width: 1170px;
+  }
+}
+
+.table-container {
+  width: 100%;
   background-color: white;
-  padding: 30px;
+  padding: 10px 30px;
 }
 
 .form-check-label {

@@ -30,8 +30,14 @@ import {
 } from "openstack-uicore-foundation/lib/security/methods";
 import IdTokenVerifier from "idtoken-verifier";
 import T from "i18n-react";
+import { Breadcrumbs } from "react-breadcrumbs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
 // eslint-disable-next-line
 import * as Sentry from "@sentry/react";
 import exclusiveSections from "./exclusive-sections.yml";
@@ -116,6 +122,8 @@ if (exclusiveSections.hasOwnProperty(process.env.APP_CLIENT_NAME)) {
   window.EXCLUSIVE_SECTIONS = exclusiveSections[process.env.APP_CLIENT_NAME];
 }
 
+const MENU_CLOSE_DELAY_MS = 200;
+
 if (window.SENTRY_DSN && window.SENTRY_DSN !== "") {
   console.log("app init sentry ...");
   // Initialize Sentry
@@ -146,6 +154,12 @@ class App extends React.PureComponent {
   constructor(props) {
     super(props);
     props.resetLoading();
+    this.state = { menuOpen: false };
+    this.menuCloseTimeout = null;
+    this.toggleMenu = this.toggleMenu.bind(this);
+    this.openMenu = this.openMenu.bind(this);
+    this.cancelMenuClose = this.cancelMenuClose.bind(this);
+    this.scheduleMenuClose = this.scheduleMenuClose.bind(this);
   }
 
   onClickLogin() {
@@ -154,6 +168,34 @@ class App extends React.PureComponent {
 
   componentDidMount() {
     this.props.getTimezones();
+  }
+
+  componentWillUnmount() {
+    this.cancelMenuClose();
+  }
+
+  toggleMenu() {
+    this.cancelMenuClose();
+    this.setState((prevState) => ({ menuOpen: !prevState.menuOpen }));
+  }
+
+  openMenu() {
+    this.cancelMenuClose();
+    this.setState({ menuOpen: true });
+  }
+
+  cancelMenuClose() {
+    if (this.menuCloseTimeout) {
+      clearTimeout(this.menuCloseTimeout);
+      this.menuCloseTimeout = null;
+    }
+  }
+
+  scheduleMenuClose() {
+    this.cancelMenuClose();
+    this.menuCloseTimeout = setTimeout(() => {
+      this.setState({ menuOpen: false });
+    }, MENU_CLOSE_DELAY_MS);
   }
 
   render() {
@@ -165,6 +207,7 @@ class App extends React.PureComponent {
       backUrl,
       loading
     } = this.props;
+    const { menuOpen } = this.state;
 
     const idToken = getIdToken();
 
@@ -188,23 +231,87 @@ class App extends React.PureComponent {
           <Router history={history}>
             <div>
               <AjaxLoader show={loading} size={120} />
-              <div className="header" id="page-header">
-                <div className="header-title">
-                  {T.translate("landing.os_summit_admin")}
-                  <AuthButton
-                    isLoggedUser={isLoggedUser}
-                    picture={profile_pic}
-                    doLogin={this.onClickLogin.bind(this)}
-                    initLogOut={initLogOut}
-                  />
-                </div>
-              </div>
+              <AppBar
+                position="static"
+                id="page-header"
+                className="header"
+                elevation={0}
+                sx={{
+                  bgcolor: "background.paper",
+                  color: "text.primary",
+                  borderBottom: "1px solid #b3b3b3"
+                }}
+              >
+                <Toolbar>
+                  {isLoggedUser && (
+                    <IconButton
+                      edge="start"
+                      aria-label={T.translate("menu.toggle_navigation")}
+                      onClick={this.toggleMenu}
+                      onMouseEnter={this.openMenu}
+                      onMouseLeave={this.scheduleMenuClose}
+                      sx={{ mr: 2 }}
+                    >
+                      <MenuIcon
+                        sx={{ fontSize: "1.75rem", color: "#555555" }}
+                      />
+                    </IconButton>
+                  )}
+                  <Typography
+                    variant="h6"
+                    component="div"
+                    sx={{
+                      flexGrow: 1,
+                      ...(!isLoggedUser && { textAlign: "center" })
+                    }}
+                  >
+                    {T.translate("landing.os_summit_admin")}
+                  </Typography>
+                  {isLoggedUser && (
+                    <AuthButton
+                      isLoggedUser={isLoggedUser}
+                      picture={profile_pic}
+                      doLogin={this.onClickLogin.bind(this)}
+                      initLogOut={initLogOut}
+                    />
+                  )}
+                </Toolbar>
+                {isLoggedUser && (
+                  <Toolbar
+                    variant="dense"
+                    sx={{
+                      minHeight: 36,
+                      borderTop: "1px solid #e0e0e0",
+                      overflowX: "auto"
+                    }}
+                  >
+                    <Breadcrumbs
+                      className="breadcrumbs-wrapper"
+                      separator="/"
+                    />
+                  </Toolbar>
+                )}
+              </AppBar>
+              {!isLoggedUser && (
+                <AuthButton
+                  isLoggedUser={isLoggedUser}
+                  picture={profile_pic}
+                  doLogin={this.onClickLogin.bind(this)}
+                  initLogOut={initLogOut}
+                />
+              )}
               <Switch>
                 <AuthorizedRoute
                   isLoggedUser={isLoggedUser}
                   backUrl={backUrl}
                   path="/app"
                   component={PrimaryLayout}
+                  componentProps={{
+                    menuOpen,
+                    toggleMenu: this.toggleMenu,
+                    onMenuMouseEnter: this.cancelMenuClose,
+                    onMenuMouseLeave: this.scheduleMenuClose
+                  }}
                 />
                 <AuthorizationCallbackRoute
                   onUserAuth={onUserAuth}

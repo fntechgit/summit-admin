@@ -11,29 +11,36 @@
  * limitations under the License.
  * */
 
-import React, { useState } from "react";
+import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { withRouter } from "react-router-dom";
 import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
 import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import SubMenuItem from "./sub-menu-item";
 import MenuItem from "./menu-item";
 import ExpandableItem from "./expandable-item";
 import Member from "../../models/member";
 import { getGlobalItems, getSummitItems } from "./menu-definition";
 
-import styles from "./menu.module.less";
+const DRAWER_WIDTH = 260;
 
-const Menu = ({ currentSummit, member, history }) => {
-  const [menuOpen, setMenuOpen] = useState(false);
+const Menu = ({
+  currentSummit,
+  member,
+  history,
+  menuOpen,
+  toggleMenu,
+  onMenuMouseEnter,
+  onMenuMouseLeave
+}) => {
   const memberObj = new Member(member);
   const globalItems = getGlobalItems();
   const summitItems = currentSummit ? getSummitItems(currentSummit.id) : [];
 
-  const closeMenu = () => setMenuOpen(false);
+  const closeMenu = () => {
+    if (menuOpen) toggleMenu();
+  };
 
   const onMenuItemClick = (ev, url) => {
     ev.preventDefault();
@@ -73,52 +80,37 @@ const Menu = ({ currentSummit, member, history }) => {
   };
 
   return (
-    <>
-      {menuOpen && (
-        <Box
-          sx={{ position: "fixed", inset: 0, zIndex: 99998 }}
-          onClick={closeMenu}
-          onTouchStart={closeMenu}
-        />
-      )}
+    <Drawer
+      anchor="left"
+      open={Boolean(menuOpen)}
+      onClose={closeMenu}
+      slotProps={{
+        root: { keepMounted: true },
+        paper: {
+          sx: { width: DRAWER_WIDTH },
+          onMouseEnter: onMenuMouseEnter,
+          onMouseLeave: onMenuMouseLeave
+        }
+      }}
+    >
       <Box
-        className={`${styles.wrapper} ${
-          styles[menuOpen ? "opened" : "closed"]
-        }`}
+        role="presentation"
+        sx={{ width: DRAWER_WIDTH, overflowY: "auto", pb: 3 }}
       >
-        <Box className={styles.burgerButton}>
-          <IconButton
-            onClick={() => (menuOpen ? closeMenu() : setMenuOpen(true))}
-          >
-            <MenuIcon sx={{ fontSize: "2.5rem", color: "#555555" }} />
-          </IconButton>
-        </Box>
-        <Box
-          className={styles.menuWrapper}
-          onMouseEnter={() => setMenuOpen(true)}
-          onMouseLeave={() => setMenuOpen(false)}
-        >
-          <Box className={styles.expandButton}>
-            <ChevronRightIcon sx={{ fontSize: "2em", color: "#555555" }} />
-          </Box>
+        <ExpandableItem label={T.translate("menu.general")} isHeader>
+          {globalItems.map(drawMenuItem)}
+        </ExpandableItem>
 
-          <Box className={styles.menuItemsWrapper}>
-            <ExpandableItem label={T.translate("menu.general")} isHeader>
-              {globalItems.map(drawMenuItem)}
+        {!!currentSummit?.id && (
+          <>
+            <Divider sx={{ my: 2 }} />
+            <ExpandableItem label={currentSummit.name} isHeader>
+              {summitItems.map(drawMenuItem)}
             </ExpandableItem>
-
-            {!!currentSummit?.id && (
-              <>
-                <Divider sx={{ my: 2 }} />
-                <ExpandableItem label={currentSummit.name} isHeader>
-                  {summitItems.map(drawMenuItem)}
-                </ExpandableItem>
-              </>
-            )}
-          </Box>
-        </Box>
+          </>
+        )}
       </Box>
-    </>
+    </Drawer>
   );
 };
 
