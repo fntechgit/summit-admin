@@ -13,7 +13,6 @@ import mjml2html from "mjml-browser";
 
 import EmailTemplateForm from "../email-template-form";
 
-// Mock heavy children that don't matter for the effect logic under test.
 jest.mock("@uiw/react-codemirror", () => ({
   __esModule: true,
   default: () => null
@@ -115,14 +114,13 @@ describe("EmailTemplateForm preview dispatch", () => {
     await act(async () => {
       jest.advanceTimersByTime(600);
     });
-    // initial MJML-mode request
     expect(sharedRender).toHaveBeenLastCalledWith(
       mjProps.templateJsonData,
       mjmlEntity.mjml_content,
       true
     );
 
-    // simulate in-place navigation to a DIFFERENT (HTML) template on the SAME form instance
+    // navigate to a different template on the same form instance (no remount)
     const htmlProps = {
       ...baseProps(htmlEntity),
       renderEmailTemplate: sharedRender
@@ -132,7 +130,6 @@ describe("EmailTemplateForm preview dispatch", () => {
       jest.advanceTimersByTime(600);
     });
 
-    // FIX: mode must re-init to HTML and send isMjml=false (pre-fix this stays true / sends mjml_content)
     expect(sharedRender).toHaveBeenLastCalledWith(
       htmlProps.templateJsonData,
       htmlEntity.html_content,
@@ -144,7 +141,6 @@ describe("EmailTemplateForm preview dispatch", () => {
     const props = baseProps(mjmlEntity);
     const { getByText } = render(<EmailTemplateForm {...props} />);
 
-    // initial mount → one MJML-mode request
     await act(async () => {
       jest.advanceTimersByTime(600);
     });
@@ -155,8 +151,6 @@ describe("EmailTemplateForm preview dispatch", () => {
       true
     );
 
-    // click the "switch to HTML" button — button-only mode toggle,
-    // mutates neither content field directly
     // T.translate returns the key string when no i18n config is loaded
     await act(async () => {
       fireEvent.click(getByText("emails.display_html"));
@@ -165,7 +159,6 @@ describe("EmailTemplateForm preview dispatch", () => {
       jest.advanceTimersByTime(600);
     });
 
-    // the HTML-mode effect re-fires with isMjml=false
     expect(props.renderEmailTemplate).toHaveBeenCalledTimes(2);
     expect(props.renderEmailTemplate).toHaveBeenLastCalledWith(
       props.templateJsonData,
@@ -194,7 +187,6 @@ describe("EmailTemplateForm preview dispatch", () => {
       })
     );
 
-    // switch is kept — the button now offers to go back to HTML
     expect(getByText("emails.display_html")).toBeTruthy();
   });
 
@@ -211,7 +203,6 @@ describe("EmailTemplateForm preview dispatch", () => {
       fireEvent.click(getByText("emails.display_mjml"));
     });
 
-    // reverted back — the button offers to switch to MJML again
     expect(getByText("emails.display_mjml")).toBeTruthy();
   });
 
@@ -300,7 +291,6 @@ describe("EmailTemplateForm submit", () => {
     );
     expect(saveButton).toBeDisabled();
 
-    // clicking again while disabled must not call onSubmit a second time
     fireEvent.click(saveButton);
     expect(onSubmit).toHaveBeenCalledTimes(1);
 
@@ -347,8 +337,6 @@ describe("EmailTemplateForm responsive preview scale", () => {
   });
 
   it("recovers to full scale once the preview container widens after an early narrow measurement", async () => {
-    // simulate the preview container being measured while still narrow --
-    // e.g. the surrounding page layout hasn't settled yet on first mount
     offsetWidthSpy.mockReturnValue(400);
     const props = baseProps(htmlEntity);
     const { container } = render(<EmailTemplateForm {...props} />);
@@ -361,13 +349,11 @@ describe("EmailTemplateForm responsive preview scale", () => {
       "scale(0.5)"
     );
 
-    // the container widens (e.g. the rest of the page layout settles)
     offsetWidthSpy.mockReturnValue(800);
     await act(async () => {
       window.dispatchEvent(new Event("resize"));
     });
 
-    // FIX: scale must recover to 1 -- pre-fix it stays stuck at 0.5 forever
     expect(container.querySelector("iframe").style.transform).toBe("scale(1)");
   });
 });

@@ -41,17 +41,16 @@ jest.mock("../../../components/forms/email-template-form", () => ({
 
 jest.mock("../email-template-json-dialog", () => ({
   __esModule: true,
-  default: ({ open, onUpdate, onClose }) =>
-    open ? (
-      <div data-testid="email-template-json-dialog">
-        <button type="button" onClick={() => onUpdate({ foo: "bar" })}>
-          json-update
-        </button>
-        <button type="button" onClick={onClose}>
-          json-close
-        </button>
-      </div>
-    ) : null
+  default: ({ onUpdate, onClose }) => (
+    <div data-testid="email-template-json-dialog">
+      <button type="button" onClick={() => onUpdate({ foo: "bar" })}>
+        json-update
+      </button>
+      <button type="button" onClick={onClose}>
+        json-close
+      </button>
+    </div>
+  )
 }));
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
