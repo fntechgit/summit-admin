@@ -52,15 +52,7 @@ const badgeFeatureReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
     case BADGE_FEATURE_ADDED:
     case RECEIVE_BADGE_FEATURE: {
-      const entity = { ...payload.response };
-
-      for (const key in entity) {
-        if (entity.hasOwnProperty(key)) {
-          entity[key] = entity[key] == null ? "" : entity[key];
-        }
-      }
-
-      return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+      return { ...state, entity: { ...DEFAULT_ENTITY, ...payload.response } };
     }
     case BADGE_FEATURE_UPDATED:
       return state;
