@@ -23,7 +23,8 @@ import {
   showMessage,
   showSuccessMessage,
   escapeFilterValue,
-  authErrorHandler,
+  snackbarErrorHandler,
+  setSnackbarMessage,
   fetchResponseHandler,
   fetchErrorHandler,
   getCSV
@@ -121,7 +122,7 @@ export const getBadgeSettings =
       null,
       createAction(RECEIVE_BADGE_SETTINGS),
       `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
-      authErrorHandler,
+      snackbarErrorHandler,
       {}
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -173,7 +174,7 @@ export const deleteBadge = (ticketId) => async (dispatch, getState) => {
     createAction(BADGE_DELETED)({ ticketId }),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tickets/${ticketId}/badge/current`,
     null,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
     dispatch(showSuccessMessage(T.translate("edit_ticket.badge_deleted")));
@@ -200,7 +201,7 @@ export const changeBadgeType = (badge) => async (dispatch, getState) => {
     createAction(BADGE_TYPE_CHANGED)({ newBadgeType }),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tickets/${badge.ticket_id}/badge/current/type/${badge.type_id}`,
     {},
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -223,7 +224,7 @@ export const addFeatureToBadge =
       createAction(FEATURE_BADGE_ADDED)({ feature }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tickets/${ticketId}/badge/current/features/${feature.id}`,
       {},
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -246,7 +247,7 @@ export const removeFeatureFromBadge =
       createAction(FEATURE_BADGE_REMOVED)({ featureId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tickets/${ticketId}/badge/current/features/${featureId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -286,7 +287,7 @@ export const checkInBadge = (code) => async (dispatch, getState) => {
     createAction(DUMMY_ACTION),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-scans/checkin`,
     { qr_code: code },
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then((ticket) => {
     dispatch(stopLoading());
     return ticket;
@@ -337,7 +338,7 @@ export const getBadgePrints =
       createAction(REQUEST_BADGE_PRINTS),
       createAction(RECEIVE_BADGE_PRINTS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tickets/${ticketId}/badge/current/prints`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { order, orderDir, term, summitTz: currentSummit.time_zone_id }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -444,7 +445,7 @@ export const clearBadgePrints = (ticketId) => async (dispatch, getState) => {
     createAction(BADGE_PRINTS_CLEARED),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tickets/${ticketId}/badge/current/prints`,
     null,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -490,7 +491,7 @@ export const getViewTypes =
       createAction(REQUEST_VIEW_TYPES),
       createAction(RECEIVE_VIEW_TYPES),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { order, orderDir, term }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -512,7 +513,7 @@ export const getViewType = (viewTypeId) => async (dispatch, getState) => {
     null,
     createAction(RECEIVE_VIEW_TYPE),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types/${viewTypeId}`,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -541,7 +542,7 @@ export const saveViewType = (entity) => async (dispatch, getState) => {
       createAction(VIEW_TYPE_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types/${entity.id}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch).then(() => {
       dispatch(
@@ -560,7 +561,7 @@ export const saveViewType = (entity) => async (dispatch, getState) => {
       createAction(VIEW_TYPE_ADDED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch).then((payload) => {
       dispatch(
@@ -588,7 +589,7 @@ export const deleteViewType = (viewTypeId) => async (dispatch, getState) => {
     createAction(VIEW_TYPE_DELETED)({ viewTypeId }),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types/${viewTypeId}`,
     null,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -636,7 +637,7 @@ export const getBadgeTypes =
       createAction(REQUEST_BADGE_TYPES),
       createAction(RECEIVE_BADGE_TYPES),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { order, orderDir }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -659,7 +660,7 @@ export const getBadgeType = (badgeTypeId) => async (dispatch, getState) => {
     null,
     createAction(RECEIVE_BADGE_TYPE),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}`,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -691,7 +692,7 @@ export const saveBadgeType = (entity) => async (dispatch, getState) => {
       createAction(BADGE_TYPE_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${entity.id}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch).then(() => {
       dispatch(
@@ -710,7 +711,7 @@ export const saveBadgeType = (entity) => async (dispatch, getState) => {
       createAction(BADGE_TYPE_ADDED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch).then((payload) => {
       dispatch(
@@ -738,7 +739,7 @@ export const deleteBadgeType = (badgeTypeId) => async (dispatch, getState) => {
     createAction(BADGE_TYPE_DELETED)({ badgeTypeId }),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}`,
     null,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -761,7 +762,7 @@ export const addAccessLevelToBadgeType =
       createAction(BADGE_ACCESS_LEVEL_ADDED)({ accessLevel }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}/access-levels/${accessLevel.id}`,
       {},
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -784,7 +785,7 @@ export const removeAccessLevelFromBadgeType =
       createAction(BADGE_ACCESS_LEVEL_REMOVED)({ accessLevelId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}/access-levels/${accessLevelId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -807,7 +808,7 @@ export const addFeatureToBadgeType =
       createAction(FEATURE_ADDED_TO_TYPE)({ feature }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}/features/${feature.id}`,
       {},
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -830,7 +831,7 @@ export const removeFeatureFromBadgeType =
       createAction(FEATURE_REMOVED_FROM_TYPE)({ featureId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}/features/${featureId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -853,7 +854,7 @@ export const addViewTypeToBadgeType =
       createAction(BADGE_VIEW_TYPE_ADDED)({ viewType }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}/view-types/${viewType.id}`,
       {},
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -876,7 +877,7 @@ export const removeViewTypeFromBadgeType =
       createAction(BADGE_VIEW_TYPE_REMOVED)({ viewTypeId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}/view-types/${viewTypeId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -942,7 +943,7 @@ export const getBadgeFeatures =
       createAction(REQUEST_BADGE_FEATURES),
       createAction(RECEIVE_BADGE_FEATURES),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-feature-types`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { order, orderDir }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -965,7 +966,7 @@ export const getBadgeFeature =
       null,
       createAction(RECEIVE_BADGE_FEATURE),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-feature-types/${badgeFeatureId}`,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -989,44 +990,43 @@ export const saveBadgeFeature = (entity) => async (dispatch, getState) => {
   const normalizedEntity = normalizeBadgeFeature(entity);
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_BADGE_FEATURE),
       createAction(BADGE_FEATURE_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-feature-types/${entity.id}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(
-        showSuccessMessage(
-          T.translate("edit_badge_feature.badge_feature_saved")
-        )
-      );
-    });
-  } else {
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_badge_feature.badge_feature_created"),
-      type: "success"
-    };
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          setSnackbarMessage({
+            html: T.translate("edit_badge_feature.badge_feature_saved"),
+            type: "success"
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
+  }
 
-    postRequest(
-      createAction(UPDATE_BADGE_FEATURE),
-      createAction(BADGE_FEATURE_ADDED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-feature-types`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then((payload) => {
+  return postRequest(
+    createAction(UPDATE_BADGE_FEATURE),
+    createAction(BADGE_FEATURE_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-feature-types`,
+    normalizedEntity,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch)
+    .then((payload) => {
       dispatch(
-        showMessage(success_message, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/badge-features/${payload.response.id}`
-          );
+        setSnackbarMessage({
+          html: T.translate("edit_badge_feature.badge_feature_created"),
+          type: "success"
         })
       );
-    });
-  }
+      return payload;
+    })
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const deleteBadgeFeature =
@@ -1044,7 +1044,7 @@ export const deleteBadgeFeature =
       createAction(BADGE_FEATURE_DELETED)({ badgeFeatureId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-feature-types/${badgeFeatureId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -1067,7 +1067,7 @@ export const uploadBadgeFeatureImage =
       createAction(BADGE_FEATURE_IMAGE_ATTACHED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-feature-types/${entity.id}/image`,
       file,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
       history.push(
@@ -1093,7 +1093,7 @@ export const removeBadgeFeatureImage =
       createAction(BADGE_FEATURE_IMAGE_DELETED)({}),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-feature-types/${badgeFeatureId}/image`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -1135,7 +1135,7 @@ export const getAccessLevels =
       createAction(REQUEST_ACCESS_LEVELS),
       createAction(RECEIVE_ACCESS_LEVELS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/access-level-types`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { order, orderDir }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -1157,7 +1157,7 @@ export const getAccessLevel = (accessLevelId) => async (dispatch, getState) => {
     null,
     createAction(RECEIVE_ACCESS_LEVEL),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/access-level-types/${accessLevelId}`,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -1186,7 +1186,7 @@ export const saveAccessLevel = (entity) => async (dispatch, getState) => {
       createAction(ACCESS_LEVEL_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/access-level-types/${entity.id}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch).then(() => {
       dispatch(
@@ -1205,7 +1205,7 @@ export const saveAccessLevel = (entity) => async (dispatch, getState) => {
       createAction(ACCESS_LEVEL_ADDED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/access-level-types`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch).then((payload) => {
       dispatch(
@@ -1234,7 +1234,7 @@ export const deleteAccessLevel =
       createAction(ACCESS_LEVEL_DELETED)({ accessLevelId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/access-level-types/${accessLevelId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
