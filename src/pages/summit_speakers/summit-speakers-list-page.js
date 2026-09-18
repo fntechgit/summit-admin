@@ -567,6 +567,7 @@ class SummitSpeakersListPage extends React.Component {
     const excerptRecipient = this.ingestEmailRef.value;
     const shouldSendCopy2Submitter =
       isSpeakerMode && this.shouldSendCopy2SubmitterRef.checked;
+    const shouldResend = this.shouldResendRef.checked;
     const {
       term,
       selectionPlanFilter,
@@ -610,6 +611,7 @@ class SummitSpeakersListPage extends React.Component {
           testRecipient,
           excerptRecipient,
           shouldSendCopy2Submitter,
+          shouldResend,
           source,
           promoCodeStrategy,
           currentPromocodeSpecification.entity
@@ -1235,6 +1237,33 @@ class SummitSpeakersListPage extends React.Component {
                       </div>
                     </div>
                   )}
+                  <div
+                    className="col-md-12 ticket-ingest-email-wrapper"
+                    style={{ paddingTop: "3px" }}
+                  >
+                    <div className="form-check abc-checkbox">
+                      <input
+                        id="should_resend_speakers"
+                        className="form-check-input"
+                        type="checkbox"
+                        ref={(node) => {
+                          this.shouldResendRef = node;
+                        }}
+                        defaultChecked
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor="should_resend_speakers"
+                      >
+                        {T.translate("summit_speakers_list.should_resend", {
+                          users:
+                            this.state.source === sources.speakers
+                              ? T.translate("summit_speakers_list.speakers")
+                              : T.translate("summit_speakers_list.submitters")
+                        })}
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </Modal.Body>
               <Modal.Footer>
