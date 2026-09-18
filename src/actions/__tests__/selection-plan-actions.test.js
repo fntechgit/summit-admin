@@ -6,16 +6,18 @@ import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
 import {
   postRequest,
-  putRequest
+  putRequest,
+  getRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { saveSelectionPlan } from "../selection-plan-actions";
+import { saveSelectionPlan, getSelectionPlan } from "../selection-plan-actions";
 import * as methods from "../../utils/methods";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   __esModule: true,
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
   postRequest: jest.fn(),
-  putRequest: jest.fn()
+  putRequest: jest.fn(),
+  getRequest: jest.fn()
 }));
 
 jest.mock("../marketing-actions", () => ({
@@ -135,5 +137,70 @@ describe("saveSelectionPlan", () => {
         code: 200
       });
     });
+  });
+});
+
+describe("getSelectionPlan - stale response guard", () => {
+  const middlewares = [thunk];
+  const mockStore = configureStore(middlewares);
+
+  // Only the primary "/selection-plans/{id}" fetch is held open (its
+  // resolution order is controlled from the test); the allowed-members and
+  // progress-flags follow-up calls resolve immediately so `await`s in
+  // getSelectionPlan don't hang.
+  const isPrimaryFetchUrl = (url) => /\/selection-plans\/[^/]+$/.test(url);
+
+  beforeEach(() => {
+    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("drops an older plan's response after a newer plan's response already landed", async () => {
+    const resolvers = {};
+    getRequest.mockImplementation(
+      (requestActionCreator, receiveActionCreator, url) => () => (dispatch) => {
+        if (isPrimaryFetchUrl(url)) {
+          const id = Number(url.split("/").pop());
+          return new Promise((resolve) => {
+            resolvers[id] = () => {
+              dispatch(receiveActionCreator({ response: { id } }));
+              resolve();
+            };
+          });
+        }
+        if (requestActionCreator) dispatch(requestActionCreator({}));
+        dispatch(receiveActionCreator({ response: {} }));
+        return Promise.resolve();
+      }
+    );
+
+    const store = mockStore(storeState);
+
+    // User opens plan 5, then quickly navigates to plan 8 before plan 5's
+    // fetch settles - both requests are genuinely in flight when plan 8's
+    // response lands first.
+    store.dispatch(getSelectionPlan("5"));
+    await flushPromises();
+    store.dispatch(getSelectionPlan("8"));
+    await flushPromises();
+
+    // The newer request (plan 8) resolves first...
+    resolvers[8]();
+    await flushPromises();
+
+    // ...then the older, superseded request (plan 5) resolves late.
+    resolvers[5]();
+    await flushPromises();
+
+    const receivedIds = store
+      .getActions()
+      .filter((a) => a.type === "RECEIVE_SELECTION_PLAN")
+      .map((a) => a.payload.response.id);
+
+    // Plan 5's stale response must never reach the store - only plan 8's.
+    expect(receivedIds).toEqual([8]);
   });
 });

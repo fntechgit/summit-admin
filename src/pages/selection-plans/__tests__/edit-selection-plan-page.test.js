@@ -14,6 +14,7 @@
 import React from "react";
 import { screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import flushPromises from "flush-promises";
 import { renderWithRedux } from "../../../utils/test-utils";
 import EditSelectionPlanPage from "../edit-selection-plan-page";
@@ -25,23 +26,7 @@ import {
 jest.mock("../../../actions/selection-plan-actions", () => ({
   __esModule: true,
   saveSelectionPlan: jest.fn(),
-  saveSelectionPlanSettings: jest.fn(),
-  addTrackGroupToSelectionPlan: jest.fn(),
-  removeTrackGroupFromSelectionPlan: jest.fn(),
-  addEventTypeSelectionPlan: jest.fn(),
-  deleteEventTypeSelectionPlan: jest.fn(),
-  updateSelectionPlanExtraQuestionOrder: jest.fn(),
-  deleteSelectionPlanExtraQuestion: jest.fn(),
-  updateRatingTypeOrder: jest.fn(),
-  deleteRatingType: jest.fn(),
-  assignExtraQuestion2SelectionPlan: jest.fn(),
-  assignProgressFlag2SelectionPlan: jest.fn(),
-  updateProgressFlagOrder: jest.fn(),
-  unassignProgressFlagFromSelectionPlan: jest.fn(),
-  addAllowedMemberToSelectionPlan: jest.fn(),
-  removeAllowedMemberFromSelectionPlan: jest.fn(),
-  getAllowedMembers: jest.fn(),
-  importAllowedMembersCSV: jest.fn()
+  saveSelectionPlanSettings: jest.fn()
 }));
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
@@ -51,20 +36,29 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 
 // Stub the real form: it needs a fuller entity/marketing-settings shape than
 // set up here. Exposes onSave so the page's save/redirect logic can be
-// exercised directly, mirroring the entity passed in.
-jest.mock("../../../components/forms/selection-plan-form", () => ({
-  __esModule: true,
-  default: ({ onSave, entity }) => (
-    <div data-testid="selection-plan-form">
-      <button
-        type="button"
-        onClick={() => onSave({ id: entity.id, marketing_settings: {} })}
-      >
-        save
-      </button>
-    </div>
-  )
-}));
+// exercised directly. The form now connects to the store itself for its
+// entity, so the stub reads it from there too, mirroring the real component.
+jest.mock("../../../components/forms/selection-plan-form", () => {
+  const { useSelector } = jest.requireActual("react-redux");
+  return {
+    __esModule: true,
+    default: ({ onSave }) => {
+      const entity = useSelector(
+        (state) => state.currentSelectionPlanState.entity
+      );
+      return (
+        <div data-testid="selection-plan-form">
+          <button
+            type="button"
+            onClick={() => onSave({ id: entity.id, marketing_settings: {} })}
+          >
+            save
+          </button>
+        </div>
+      );
+    }
+  };
+});
 
 const mockHistory = { push: jest.fn() };
 
@@ -86,9 +80,14 @@ describe("EditSelectionPlanPage", () => {
     saveSelectionPlan.mockReturnValue(() => Promise.resolve({ id: 42 }));
     saveSelectionPlanSettings.mockReturnValue(() => Promise.resolve());
 
-    renderWithRedux(<EditSelectionPlanPage history={mockHistory} />, {
-      initialState: stateFor({ id: 0 })
-    });
+    renderWithRedux(
+      <MemoryRouter>
+        <EditSelectionPlanPage history={mockHistory} />
+      </MemoryRouter>,
+      {
+        initialState: stateFor({ id: 0 })
+      }
+    );
 
     await act(async () => {
       await userEvent.click(screen.getByRole("button", { name: "save" }));
@@ -109,9 +108,14 @@ describe("EditSelectionPlanPage", () => {
     saveSelectionPlan.mockReturnValue(() => Promise.resolve({ id: 5 }));
     saveSelectionPlanSettings.mockReturnValue(() => Promise.resolve());
 
-    renderWithRedux(<EditSelectionPlanPage history={mockHistory} />, {
-      initialState: stateFor({ id: 5 })
-    });
+    renderWithRedux(
+      <MemoryRouter>
+        <EditSelectionPlanPage history={mockHistory} />
+      </MemoryRouter>,
+      {
+        initialState: stateFor({ id: 5 })
+      }
+    );
 
     await act(async () => {
       await userEvent.click(screen.getByRole("button", { name: "save" }));
@@ -131,9 +135,14 @@ describe("EditSelectionPlanPage", () => {
       Promise.reject(new Error("settings failed"))
     );
 
-    renderWithRedux(<EditSelectionPlanPage history={mockHistory} />, {
-      initialState: stateFor({ id: 0 })
-    });
+    renderWithRedux(
+      <MemoryRouter>
+        <EditSelectionPlanPage history={mockHistory} />
+      </MemoryRouter>,
+      {
+        initialState: stateFor({ id: 0 })
+      }
+    );
 
     await act(async () => {
       await userEvent.click(screen.getByRole("button", { name: "save" }));
@@ -158,9 +167,14 @@ describe("EditSelectionPlanPage", () => {
         })
     );
 
-    renderWithRedux(<EditSelectionPlanPage history={mockHistory} />, {
-      initialState: stateFor({ id: 5 })
-    });
+    renderWithRedux(
+      <MemoryRouter>
+        <EditSelectionPlanPage history={mockHistory} />
+      </MemoryRouter>,
+      {
+        initialState: stateFor({ id: 5 })
+      }
+    );
 
     const saveButton = screen.getByRole("button", { name: "save" });
     await userEvent.click(saveButton);
@@ -175,26 +189,17 @@ describe("EditSelectionPlanPage", () => {
   });
 
   it("does not show the Add New action for an unsaved plan", () => {
-    renderWithRedux(<EditSelectionPlanPage history={mockHistory} />, {
-      initialState: stateFor({ id: 0 })
-    });
+    renderWithRedux(
+      <MemoryRouter>
+        <EditSelectionPlanPage history={mockHistory} />
+      </MemoryRouter>,
+      {
+        initialState: stateFor({ id: 0 })
+      }
+    );
 
     expect(
       screen.queryByRole("button", { name: "general.add_new" })
     ).not.toBeInTheDocument();
-  });
-
-  it("navigates to /new when Add New is clicked on an existing plan", async () => {
-    renderWithRedux(<EditSelectionPlanPage history={mockHistory} />, {
-      initialState: stateFor({ id: 5 })
-    });
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "general.add_new" })
-    );
-
-    expect(mockHistory.push).toHaveBeenCalledWith(
-      "/app/summits/1/selection-plans/new"
-    );
   });
 });

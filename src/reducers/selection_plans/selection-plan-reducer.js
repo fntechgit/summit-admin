@@ -87,6 +87,8 @@ export const DEFAULT_ENTITY = {
   track_chair_rating_types: [],
   allow_track_change_requests: true,
   allowed_presentation_action_types: [],
+  actionTypesOrder: "order",
+  actionTypesOrderDir: 1,
   allowed_presentation_questions: DEFAULT_ALLOWED_QUESTIONS.map((q) => q.value),
   allowed_presentation_editable_questions:
     DEFAULT_ALLOWED_EDITABLE_QUESTIONS.map((q) => q.value),
