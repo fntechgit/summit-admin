@@ -12,167 +12,103 @@
  * */
 
 import React from "react";
-import T from "i18n-react";
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import PropTypes from "prop-types";
+import T from "i18n-react/dist/i18n-react";
+import { useFormikContext } from "formik";
+import { Box, Grid2, InputLabel } from "@mui/material";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import FormikTextEditor from "openstack-uicore-foundation/lib/components/mui/formik-inputs/texteditor";
 import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
-import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
-import {
-  hasErrors,
-  isEmpty,
-  scrollToError,
-  shallowEqual
-} from "../../utils/methods";
+import useScrollToError from "../../hooks/useScrollToError";
 
-class BadgeFeatureTypeForm extends React.Component {
-  constructor(props) {
-    super(props);
+const BadgeFeatureTypeForm = ({ entity, onUploadImage, onRemoveImage }) => {
+  const formik = useFormikContext();
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors
-    };
+  useScrollToError(formik, true);
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleUploadImage = this.handleUploadImage.bind(this);
-    this.handleRemoveFile = this.handleRemoveFile.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  componentDidUpdate(prevProps) {
-    const state = {};
-    scrollToError(this.props.errors);
-
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
-    }
-
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
-    }
-
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
-    }
-  }
-
-  handleChange(ev) {
-    const entity = { ...this.state.entity };
-    const errors = { ...this.state.errors };
-    let { value, id } = ev.target;
-
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
-
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ entity, errors });
-  }
-
-  handleSubmit(ev) {
-    ev.preventDefault();
-    this.props.onSubmit(this.state.entity);
-  }
-
-  handleUploadImage(file) {
-    const entity = { ...this.state.entity };
-
-    entity.image = file.preview;
-    this.setState({ entity });
-
+  const handleUploadImage = (file) => {
     const formData = new FormData();
     formData.append("file", file);
-    this.props.onUploadImage(this.state.entity, formData, "profile");
-  }
+    onUploadImage(entity, formData);
+  };
 
-  handleRemoveFile(attr) {
-    const entity = { ...this.state.entity };
+  return (
+    <Box>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={12}>
+          <InputLabel htmlFor="name">
+            {T.translate("edit_badge_feature.name")} *
+          </InputLabel>
+          <MuiFormikTextField
+            name="name"
+            margin="none"
+            fullWidth
+            size="small"
+          />
+        </Grid2>
+      </Grid2>
 
-    entity[attr] = "";
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={12}>
+          <InputLabel htmlFor="description">
+            {T.translate("edit_badge_feature.description")} *
+          </InputLabel>
+          <FormikTextEditor
+            name="description"
+            licence={process.env.JODIT_LICENSE_KEY}
+          />
+        </Grid2>
+      </Grid2>
 
-    if (attr === "image") {
-      this.props.onRemoveImage(entity.id);
-    }
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={12}>
+          <InputLabel htmlFor="template_content">
+            {T.translate("edit_badge_feature.template_content")} *
+          </InputLabel>
+          <FormikTextEditor
+            name="template_content"
+            licence={process.env.JODIT_LICENSE_KEY}
+          />
+        </Grid2>
+      </Grid2>
 
-    this.setState({ entity });
-  }
-
-  render() {
-    const { entity, errors } = this.state;
-
-    return (
-      <form className="badge-feature-type-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label> {T.translate("edit_badge_feature.name")} *</label>
-            <Input
-              id="name"
-              className="form-control"
-              error={hasErrors("name", errors)}
-              onChange={this.handleChange}
-              value={entity.name}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label> {T.translate("edit_badge_feature.description")} *</label>
-            <TextEditorV3
-              id="description"
-              value={entity.description}
-              onChange={this.handleChange}
-              error={hasErrors("description", errors)}
-              license={process.env.JODIT_LICENSE_KEY}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label>
-              {" "}
-              {T.translate("edit_badge_feature.template_content")} *
-            </label>
-            <TextEditorV3
-              id="template_content"
-              value={entity.template_content}
-              onChange={this.handleChange}
-              error={hasErrors("template_content", errors)}
-              license={process.env.JODIT_LICENSE_KEY}
-            />
-          </div>
-        </div>
-        {entity.id !== 0 && (
-          <div className="row form-group">
-            <div className="col-md-12">
-              <label> {T.translate("edit_badge_feature.image")} </label>
+      {/* image endpoint needs an existing id, so upload is only offered after the first save */}
+      {entity.id !== 0 && (
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={12}>
+            <InputLabel>{T.translate("edit_badge_feature.image")}</InputLabel>
+            {/* need this styles to adapt bootstrap to MUI */}
+            <Box
+              sx={{
+                "& .file-upload": {
+                  display: "flex",
+                  gap: 2,
+                  alignItems: "flex-start"
+                },
+                "& .file-upload > :first-of-type": { flex: 1 },
+                "& .selected-files-box": { flex: "0 0 auto", maxWidth: "50%" }
+              }}
+            >
               <UploadInput
                 value={entity.image}
-                handleUpload={this.handleUploadImage}
-                handleRemove={() => this.handleRemoveFile("image")}
-                className="dropzone col-md-6"
+                handleUpload={handleUploadImage}
+                handleRemove={() => onRemoveImage(entity.id)}
+                className="dropzone"
                 multiple={false}
                 accept="image/*"
               />
-            </div>
-          </div>
-        )}
-        <hr />
+            </Box>
+          </Grid2>
+        </Grid2>
+      )}
+    </Box>
+  );
+};
 
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
-        </div>
-      </form>
-    );
-  }
-}
+BadgeFeatureTypeForm.propTypes = {
+  entity: PropTypes.object.isRequired,
+  onUploadImage: PropTypes.func.isRequired,
+  onRemoveImage: PropTypes.func.isRequired
+};
 
 export default BadgeFeatureTypeForm;

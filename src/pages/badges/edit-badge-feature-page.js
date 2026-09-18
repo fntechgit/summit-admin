@@ -11,13 +11,14 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import { getSummitById } from "../../actions/summit-actions";
+import { FormikProvider, useFormik } from "formik";
+import * as yup from "yup";
+import { Box, Button, Divider, Typography } from "@mui/material";
 import BadgeFeatureTypeForm from "../../components/forms/badge-feature-type-form";
-
 import {
   getBadgeFeature,
   resetBadgeFeatureForm,
@@ -26,86 +27,99 @@ import {
   uploadBadgeFeatureImage
 } from "../../actions/badge-actions";
 import AddNewButton from "../../components/buttons/add-new-button";
+import {
+  requiredHTMLValidation,
+  requiredStringValidation
+} from "../../utils/yup";
 
-class EditBadgeFeaturePage extends React.Component {
-  constructor(props) {
-    const badgeFeatureId = props.match.params.badge_feature_id;
-    super(props);
+export const buildValues = (entity) => ({
+  id: entity?.id ?? 0,
+  name: entity?.name ?? "",
+  description: entity?.description ?? "",
+  template_content: entity?.template_content ?? ""
+});
 
+export const validationSchema = yup.object().shape({
+  name: requiredStringValidation(),
+  description: requiredHTMLValidation(),
+  template_content: requiredHTMLValidation()
+});
+
+const EditBadgeFeaturePage = ({
+  currentSummit,
+  entity,
+  match,
+  history,
+  getBadgeFeature,
+  resetBadgeFeatureForm,
+  saveBadgeFeature,
+  uploadBadgeFeatureImage,
+  removeBadgeFeatureImage
+}) => {
+  const badgeFeatureId = match.params.badge_feature_id;
+
+  useEffect(() => {
     if (!badgeFeatureId) {
-      props.resetBadgeFeatureForm();
+      resetBadgeFeatureForm();
     } else {
-      props.getBadgeFeature(badgeFeatureId);
+      getBadgeFeature(badgeFeatureId);
     }
+  }, [badgeFeatureId]);
 
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+  const formik = useFormik({
+    initialValues: buildValues(entity),
+    validationSchema,
+    onSubmit: (values) =>
+      saveBadgeFeature(values)
+        .then((payload) => {
+          const listUrl = `/app/summits/${currentSummit.id}/badge-features`;
+          // new entities stay on their edit route so the image can be attached
+          history.push(
+            values.id ? listUrl : `${listUrl}/${payload.response.id}`
+          );
+        })
+        .catch(() => {})
+  });
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const oldId = prevProps.match.params.badge_feature_id;
-    const newId = this.props.match.params.badge_feature_id;
+  useEffect(() => {
+    formik.resetForm({ values: buildValues(entity) });
+  }, [entity.id]);
 
-    if (oldId !== newId) {
-      if (!newId) {
-        this.props.resetBadgeFeatureForm();
-      } else {
-        this.props.getBadgeFeature(newId);
-      }
-    }
-  }
+  const title = entity.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
+  const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
-  handleSubmit(entity) {
-    this.props.saveBadgeFeature(entity);
-  }
-
-  render() {
-    const { currentSummit, entity, errors, match, history } = this.props;
-    const title = entity.id
-      ? T.translate("general.edit")
-      : T.translate("general.add");
-    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
-
-    const fields = [
-      {
-        type: "text",
-        name: "name",
-        label: T.translate("edit_badge_feature.name")
-      },
-      /* {type: 'text', name: 'tag_name', label: T.translate("edit_badge_feature.tag_name")}, */
-      {
-        type: "textarea",
-        name: "description",
-        label: T.translate("edit_badge_feature.description")
-      },
-      {
-        type: "textarea",
-        name: "template_content",
-        label: T.translate("edit_badge_feature.template_content")
-      }
-    ];
-
-    return (
-      <div className="container">
-        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-        <h3>
-          {title} {T.translate("edit_badge_feature.badge_feature")}
-          <AddNewButton entity={entity} />
-        </h3>
-        <hr />
-        {currentSummit && (
+  return (
+    <Box className="container">
+      <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+      <Typography variant="h5" component="h3" sx={{ my: 2 }}>
+        {title} {T.translate("edit_badge_feature.badge_feature")}
+        <AddNewButton entity={entity} />
+      </Typography>
+      <Divider sx={{ mb: 2 }} />
+      <FormikProvider value={formik}>
+        <Box component="form" onSubmit={formik.handleSubmit} noValidate>
           <BadgeFeatureTypeForm
-            history={this.props.history}
             entity={entity}
-            errors={errors}
-            onSubmit={this.props.saveBadgeFeature}
-            onUploadImage={this.props.uploadBadgeFeatureImage}
-            onRemoveImage={this.props.removeBadgeFeatureImage}
+            onUploadImage={uploadBadgeFeatureImage}
+            onRemoveImage={removeBadgeFeatureImage}
           />
-        )}
-      </div>
-    );
-  }
-}
+          <Divider sx={{ mb: 2 }} />
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={formik.isSubmitting}
+            >
+              {T.translate("general.save")}
+            </Button>
+          </Box>
+        </Box>
+      </FormikProvider>
+    </Box>
+  );
+};
 
 const mapStateToProps = ({ currentSummitState, currentBadgeFeatureState }) => ({
   currentSummit: currentSummitState.currentSummit,
@@ -113,7 +127,6 @@ const mapStateToProps = ({ currentSummitState, currentBadgeFeatureState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  getSummitById,
   getBadgeFeature,
   resetBadgeFeatureForm,
   saveBadgeFeature,
