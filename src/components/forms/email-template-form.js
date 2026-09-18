@@ -34,6 +34,46 @@ import {
   EMAIL_TEMPLATE_TYPE_MJML
 } from "../../utils/constants";
 
+const TemplateModeToggle = ({ mjmlEditor, onDisplayMjml, onDisplayHtml }) =>
+  mjmlEditor ? (
+    <>
+      <label>
+        {T.translate("emails.mjml_content")}
+        {" using "}
+        <a
+          target="_blank"
+          href="https://documentation.mjml.io/"
+          rel="noreferrer"
+        >
+          MJML format
+        </a>
+      </label>
+      <br />
+      <Button variant="contained" onClick={onDisplayHtml}>
+        {T.translate("emails.display_html")}
+      </Button>
+    </>
+  ) : (
+    <>
+      <label>
+        {T.translate("emails.html_content")}
+        {" in "}
+        <a
+          target="_blank"
+          href="https://opensource.com/sites/default/files/gated-content/osdc_cheatsheet-jinja2.pdf"
+          rel="noreferrer"
+        >
+          jinja format
+        </a>
+        {" *"}
+      </label>
+      <br />
+      <Button variant="contained" onClick={onDisplayMjml}>
+        {T.translate("emails.display_mjml")}
+      </Button>
+    </>
+  );
+
 const default_mjml_content = `
 ### Sample MJML Code
 <mjml>
@@ -460,52 +500,11 @@ const EmailTemplateForm = ({
                 {!previewOnly && (
                   <div>
                     <div>
-                      {mjmlEditor ? (
-                        <>
-                          <label>
-                            {T.translate("emails.mjml_content")}
-                            {" using "}
-                            <a
-                              target="_blank"
-                              href="https://documentation.mjml.io/"
-                              rel="noreferrer"
-                            >
-                              MJML format
-                            </a>
-                          </label>
-                          <br />
-                          <Button
-                            variant="contained"
-                            onClick={() => {
-                              setMjmlEditor(false);
-                            }}
-                          >
-                            {T.translate("emails.display_html")}
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <label>
-                            {T.translate("emails.html_content")}
-                            {" in "}
-                            <a
-                              target="_blank"
-                              href="https://opensource.com/sites/default/files/gated-content/osdc_cheatsheet-jinja2.pdf"
-                              rel="noreferrer"
-                            >
-                              jinja format
-                            </a>
-                            {" *"}
-                          </label>
-                          <br />
-                          <Button
-                            variant="contained"
-                            onClick={handleDisplayMjml}
-                          >
-                            {T.translate("emails.display_mjml")}
-                          </Button>
-                        </>
-                      )}
+                      <TemplateModeToggle
+                        mjmlEditor={mjmlEditor}
+                        onDisplayMjml={handleDisplayMjml}
+                        onDisplayHtml={() => setMjmlEditor(false)}
+                      />
                     </div>
                     {entity.id > 0 && stateEntity.versions.length > 0 && (
                       <Grid2 container spacing={1} sx={{ width: "66.66%" }}>
