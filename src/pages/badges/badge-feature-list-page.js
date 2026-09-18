@@ -59,7 +59,11 @@ const BadgeFeatureListPage = ({
     },
     {
       columnKey: "description",
-      header: T.translate("badge_feature_list.description")
+      header: T.translate("badge_feature_list.description"),
+      // description is Jodit HTML; legacy Table injected it, MuiTable renders text
+      render: (row) => (
+        <Box dangerouslySetInnerHTML={{ __html: row.description }} />
+      )
     }
   ];
 
