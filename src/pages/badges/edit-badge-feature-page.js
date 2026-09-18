@@ -62,6 +62,8 @@ const EditBadgeFeaturePage = ({
     if (!badgeFeatureId) {
       resetBadgeFeatureForm();
     } else {
+      // entity is persisted; resetting first changes entity.id so the Formik resync fires on refetch
+      resetBadgeFeatureForm();
       getBadgeFeature(badgeFeatureId);
     }
   }, [badgeFeatureId]);
