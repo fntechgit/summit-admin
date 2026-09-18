@@ -35,20 +35,20 @@ const EditEmailTemplatePage = ({
   errors,
   clients,
   preview,
-  render_errors: renderErrors,
-  json_data: templateJsonData,
-  getEmailTemplate: fetchEmailTemplate,
-  resetTemplateForm: resetForm,
-  saveEmailTemplate: saveTemplate,
-  getAllClients: fetchAllClients,
-  renderEmailTemplate: renderTemplate,
-  updateTemplateJsonData: updateJsonData
+  render_errors,
+  json_data,
+  getEmailTemplate,
+  resetTemplateForm,
+  saveEmailTemplate,
+  getAllClients,
+  renderEmailTemplate,
+  updateTemplateJsonData
 }) => {
   const [showJsonDialog, setShowJsonDialog] = useState(false);
   const [entityReady, setEntityReady] = useState(false);
 
   useEffect(() => {
-    fetchAllClients();
+    getAllClients();
   }, []);
 
   useEffect(() => {
@@ -56,8 +56,8 @@ const EditEmailTemplatePage = ({
     setEntityReady(false);
     const templateId = match.params.template_id;
     const loadEntity = templateId
-      ? fetchEmailTemplate(templateId)
-      : resetForm();
+      ? getEmailTemplate(templateId)
+      : resetTemplateForm();
 
     Promise.resolve(loadEntity)
       .catch(() => {})
@@ -76,7 +76,7 @@ const EditEmailTemplatePage = ({
   const breadcrumb = entity.id ? entity.identifier : T.translate("general.new");
 
   const handleJsonUpdate = (parsedJSON) =>
-    updateJsonData(parsedJSON).then(() => setShowJsonDialog(false));
+    updateTemplateJsonData(parsedJSON).then(() => setShowJsonDialog(false));
 
   return (
     <Box
@@ -95,19 +95,19 @@ const EditEmailTemplatePage = ({
             entity={entity}
             clients={clients}
             errors={errors}
-            onSubmit={saveTemplate}
+            onSubmit={saveEmailTemplate}
             onRender={() => setShowJsonDialog(true)}
             preview={preview}
-            renderErrors={renderErrors}
+            renderErrors={render_errors}
             templateLoading={templateLoading}
-            templateJsonData={templateJsonData}
-            renderEmailTemplate={renderTemplate}
+            templateJsonData={json_data}
+            renderEmailTemplate={renderEmailTemplate}
           />
 
           <EmailTemplateJsonDialog
             open={showJsonDialog}
-            jsonData={templateJsonData}
-            renderErrors={renderErrors}
+            jsonData={json_data}
+            renderErrors={render_errors}
             onUpdate={handleJsonUpdate}
             onClose={() => setShowJsonDialog(false)}
           />
