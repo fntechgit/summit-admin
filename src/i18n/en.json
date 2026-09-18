@@ -3318,6 +3318,7 @@
     "delete_template_warning": "Are you sure you want to delete template ",
     "template_saved": "Template saved successfully.",
     "template_created": "Template created successfully.",
+    "error_render_template": "There is an error trying to render the email template:",
     "placeholders": {
       "search_emails": "Search emails",
       "search_templates": "Search templates by name",
