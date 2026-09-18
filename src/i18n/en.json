@@ -226,10 +226,11 @@
     "registration_stats": "Registration Stats",
     "audit_log": "Audit Log",
     "submission_invitations": "Submission Invitations",
-    "sponsors_inventory": "Sponsors",
-    "form_templates": "Form Templates",
+    "sponsors_services": "Sponsor Services",
+    "commercial_offerings": "Commercial Offerings",
+    "form_templates": "Order Forms",
     "inventory": "Inventory",
-    "page_templates": "Pages",
+    "page_templates": "File Exchange Pages",
     "add_on_types": "Add-On Types"
   },
   "schedule": {
@@ -4059,7 +4060,7 @@
     }
   },
   "form_template_list": {
-    "form_templates": "Form Templates",
+    "form_templates": "Order Form Templates",
     "form": "form",
     "alert_info": "To add an order form, select New Form Template. To edit an existing form, click on the list item. To edit the items within the form, click manage items on the form line you wish to edit.",
     "code_column_label": "Code",
@@ -4206,7 +4207,7 @@
     }
   },
   "page_template_list": {
-    "page_templates": "Page Templates",
+    "page_templates": "File Exchange Page Templates",
     "page": "page",
     "alert_info": "You can create or archive Pages from the list. To edit a Page click on the item's Edit botton.",
     "code": "Code",

@@ -19,11 +19,15 @@ import List from "@mui/material/List";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 
+const DEFAULT_PL = 2;
+const HEADER_PR = 2;
+
 function ExpandableItem({
   label,
   children,
   defaultOpen = true,
-  isHeader = false
+  isHeader = false,
+  pl
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -31,7 +35,11 @@ function ExpandableItem({
     <>
       <ListItemButton
         onClick={() => setOpen((prev) => !prev)}
-        sx={{ py: 1, ...(isHeader ? { px: 2 } : { pl: 2 }) }}
+        sx={{
+          py: 1,
+          pl: pl ?? DEFAULT_PL,
+          ...(isHeader && { pr: HEADER_PR })
+        }}
       >
         <Typography
           variant="body1"
