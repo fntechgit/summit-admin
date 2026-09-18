@@ -43,9 +43,7 @@ const EditSelectionPlanPage = ({
           .catch(() => {})
           .then(() => {
             if (!values.id) {
-              history.push(
-                `/app/summits/${currentSummit.id}/selection-plans/${savedEntity.id}`
-              );
+              history.push(`/app/summits/${currentSummit.id}/selection-plans`);
             }
           });
       })
