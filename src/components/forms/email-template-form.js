@@ -74,6 +74,61 @@ const TemplateModeToggle = ({ mjmlEditor, onDisplayMjml, onDisplayHtml }) =>
     </>
   );
 
+const VersionHistoryPicker = ({
+  historyVersion,
+  versionsDdl,
+  currentVersionExternalLink,
+  onChange
+}) => (
+  <Grid2 container spacing={1} sx={{ width: "66.66%" }}>
+    <Grid2 size={11}>
+      <label>{T.translate("emails.previous_template")}</label>
+      <br />
+      <MuiDropdown
+        id="history_version"
+        size="small"
+        value={historyVersion}
+        placeholder={T.translate("emails.placeholders.select_version")}
+        options={versionsDdl}
+        onChange={onChange}
+      />
+    </Grid2>
+    {currentVersionExternalLink && (
+      <Grid2 size={1}>
+        <a
+          href={currentVersionExternalLink}
+          title={T.translate("emails.placeholders.see_version")}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <i className="fa fa-github fa-lg" />
+        </a>
+      </Grid2>
+    )}
+  </Grid2>
+);
+
+const CodeEditorPane = ({ width, id, value, onChange }) => (
+  <div className="email-template-code" style={{ width }}>
+    <CodeMirror
+      id={id}
+      value={value}
+      onChange={onChange}
+      height="960px"
+      theme={sublimeInit({
+        settings: { caret: "#c6c6c6", fontFamily: "monospace" }
+      })}
+      extensions={[
+        html({
+          autoCloseTags: true,
+          matchClosingTags: true,
+          selfClosingTags: true
+        })
+      ]}
+    />
+  </div>
+);
+
 const default_mjml_content = `
 ### Sample MJML Code
 <mjml>
@@ -156,7 +211,7 @@ const EmailTemplateForm = ({
 
   useEffect(() => {
     if (singleTab) {
-      setCodeOnly(true);
+      if (!previewOnly) setCodeOnly(true);
     } else {
       setCodeOnly(false);
       setPreviewOnly(false);
@@ -244,14 +299,10 @@ const EmailTemplateForm = ({
     });
   };
 
-  const handleCodeMirrorHTMLChange = (value) => {
-    setStateErrors({ ...stateErrors, html_content: "" });
-    setStateEntity({ ...stateEntity, html_content: value });
-  };
-
-  const handleCodeMirrorMJMLChange = (value) => {
-    setStateErrors({ ...stateErrors, mjml_content: "" });
-    setStateEntity({ ...stateEntity, mjml_content: value });
+  const handleCodeMirrorChange = (value) => {
+    const field = mjmlEditor ? "mjml_content" : "html_content";
+    setStateErrors({ ...stateErrors, [field]: "" });
+    setStateEntity({ ...stateEntity, [field]: value });
   };
 
   const handleChange = (ev) => {
@@ -404,6 +455,48 @@ const EmailTemplateForm = ({
       ]
     : [];
 
+  const showCodeEditor = !previewOnly;
+  const showPreview = !codeOnly;
+  const codeWidth = codeOnly ? "100%" : "50%";
+  const previewWidth = previewOnly ? "100%" : "50%";
+
+  const renderPreviewBody = () => {
+    if (renderErrors.length > 0) {
+      return (
+        <Box>
+          {T.translate("emails.error_render_template")}
+          <ul>
+            {renderErrors.map((err) => (
+              <li key={err}>{err}</li>
+            ))}
+          </ul>
+        </Box>
+      );
+    }
+    if (mjmlRenderError?.message) {
+      return (
+        <Box>
+          {T.translate("emails.error_render_template")}
+          <ul>
+            <li>{mjmlRenderError.message}</li>
+          </ul>
+        </Box>
+      );
+    }
+    return (
+      previewLoaded && (
+        <iframe
+          style={{ ...style }}
+          id="preview"
+          name="preview"
+          title="Email template preview"
+          sandbox="allow-same-origin"
+          srcDoc={preview}
+        />
+      )
+    );
+  };
+
   return (
     <form className="email-template-form">
       <input type="hidden" id="id" value={stateEntity.id} />
@@ -493,12 +586,9 @@ const EmailTemplateForm = ({
         <Grid2 size={12}>
           {templateLoaded ? (
             <div className="email-template-container">
-              <div
-                className="email-template-buttons"
-                style={{ width: singleTab && mjmlEditor ? "" : "" }}
-              >
-                {!previewOnly && (
-                  <div>
+              <div className="email-template-buttons">
+                {showCodeEditor && (
+                  <div style={{ width: codeWidth }}>
                     <div>
                       <TemplateModeToggle
                         mjmlEditor={mjmlEditor}
@@ -507,43 +597,17 @@ const EmailTemplateForm = ({
                       />
                     </div>
                     {entity.id > 0 && stateEntity.versions.length > 0 && (
-                      <Grid2 container spacing={1} sx={{ width: "66.66%" }}>
-                        <Grid2 size={11}>
-                          <label>
-                            {T.translate("emails.previous_template")}
-                          </label>
-                          <br />
-                          <MuiDropdown
-                            id="history_version"
-                            size="small"
-                            value={historyVersion}
-                            placeholder={T.translate(
-                              "emails.placeholders.select_version"
-                            )}
-                            options={versions_ddl}
-                            onChange={handleVersionChange}
-                          />
-                        </Grid2>
-                        {currentVersionExternalLink && (
-                          <Grid2 size={1}>
-                            <a
-                              href={currentVersionExternalLink}
-                              title={T.translate(
-                                "emails.placeholders.see_version"
-                              )}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              <i className="fa fa-github fa-lg" />
-                            </a>
-                          </Grid2>
-                        )}
-                      </Grid2>
+                      <VersionHistoryPicker
+                        historyVersion={historyVersion}
+                        versionsDdl={versions_ddl}
+                        currentVersionExternalLink={currentVersionExternalLink}
+                        onChange={handleVersionChange}
+                      />
                     )}
                   </div>
                 )}
-                {!codeOnly && (
-                  <div>
+                {showPreview && (
+                  <div style={{ width: previewWidth }}>
                     <label>{T.translate("emails.preview_title")}</label>
                     <br />
                     <Button
@@ -559,61 +623,20 @@ const EmailTemplateForm = ({
               </div>
               <br />
               <div className="email-template-content">
-                {!previewOnly && (
-                  <div className="email-template-code">
-                    {mjmlEditor ? (
-                      <CodeMirror
-                        id="mjml_content"
-                        value={stateEntity.mjml_content}
-                        onChange={(value, viewUpdate) =>
-                          handleCodeMirrorMJMLChange(value, viewUpdate)
-                        }
-                        height="960px"
-                        theme={sublimeInit({
-                          settings: {
-                            caret: "#c6c6c6",
-                            fontFamily: "monospace"
-                          }
-                        })}
-                        extensions={[
-                          html({
-                            autoCloseTags: true,
-                            matchClosingTags: true,
-                            selfClosingTags: true
-                          })
-                        ]}
-                      />
-                    ) : (
-                      <CodeMirror
-                        id="html_content"
-                        value={stateEntity.html_content}
-                        onChange={(value, viewUpdate) =>
-                          handleCodeMirrorHTMLChange(value, viewUpdate)
-                        }
-                        height="960px"
-                        theme={sublimeInit({
-                          settings: {
-                            caret: "#c6c6c6",
-                            fontFamily: "monospace"
-                          }
-                        })}
-                        extensions={[
-                          html({
-                            autoCloseTags: true,
-                            matchClosingTags: true,
-                            selfClosingTags: true
-                          })
-                        ]}
-                      />
-                    )}
-                  </div>
+                {showCodeEditor && (
+                  <CodeEditorPane
+                    width={codeWidth}
+                    id={mjmlEditor ? "mjml_content" : "html_content"}
+                    value={editorContent}
+                    onChange={handleCodeMirrorChange}
+                  />
                 )}
                 <div
                   className={`email-template-content-buttons ${
-                    previewOnly || codeOnly ? "single-button" : ""
+                    codeOnly || previewOnly ? "single-button" : ""
                   }`}
                 >
-                  {!codeOnly && (
+                  {showPreview && (
                     <button
                       type="button"
                       id="code"
@@ -622,7 +645,7 @@ const EmailTemplateForm = ({
                       <i className="fa fa-chevron-right" />
                     </button>
                   )}
-                  {!previewOnly && (
+                  {showCodeEditor && (
                     <button
                       type="button"
                       id="preview"
@@ -632,8 +655,12 @@ const EmailTemplateForm = ({
                     </button>
                   )}
                 </div>
-                {!codeOnly && (
-                  <div className="email-template-preview" ref={previewRef}>
+                {showPreview && (
+                  <div
+                    className="email-template-preview"
+                    ref={previewRef}
+                    style={{ width: previewWidth }}
+                  >
                     {templateLoading && (
                       <Box
                         sx={{
@@ -647,34 +674,7 @@ const EmailTemplateForm = ({
                         <CircularProgress size={120} />
                       </Box>
                     )}
-                    {renderErrors.length > 0 ? (
-                      <Box>
-                        There is an error trying to render the email template:
-                        <ul>
-                          {renderErrors.map((err) => (
-                            <li key={err}>{err}</li>
-                          ))}
-                        </ul>
-                      </Box>
-                    ) : mjmlRenderError?.message ? (
-                      <Box>
-                        There is an error trying to render the email template:
-                        <ul>
-                          <li>{mjmlRenderError.message}</li>
-                        </ul>
-                      </Box>
-                    ) : (
-                      previewLoaded && (
-                        <iframe
-                          style={{ ...style }}
-                          id="preview"
-                          name="preview"
-                          title="Email template preview"
-                          sandbox="allow-same-origin"
-                          srcDoc={preview}
-                        />
-                      )
-                    )}
+                    {renderPreviewBody()}
                   </div>
                 )}
               </div>
