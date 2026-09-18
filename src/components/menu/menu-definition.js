@@ -49,8 +49,8 @@ export const getGlobalItems = () => [
           { name: "form_templates", linkUrl: "form-templates" }
         ]
       },
-      { name: "add_on_types", linkUrl: "add-on-types" },
-      { name: "page_templates", linkUrl: "page-templates" }
+      { name: "page_templates", linkUrl: "page-templates" },
+      { name: "add_on_types", linkUrl: "add-on-types" }
     ]
   },
   {
