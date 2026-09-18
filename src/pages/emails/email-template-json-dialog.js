@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import Dialog from "@mui/material/Dialog";
@@ -28,21 +28,15 @@ import { sublimeInit } from "@uiw/codemirror-theme-sublime";
 import { DECIMAL_DIGITS } from "../../utils/constants";
 
 const EmailTemplateJsonDialog = ({
-  open,
   jsonData,
   renderErrors,
   onUpdate,
   onClose
 }) => {
-  const [jsonPreview, setJsonPreview] = useState("");
+  const [jsonPreview, setJsonPreview] = useState(
+    JSON.stringify(jsonData, null, DECIMAL_DIGITS)
+  );
   const [invalidJson, setInvalidJson] = useState(false);
-
-  useEffect(() => {
-    if (open) {
-      setJsonPreview(JSON.stringify(jsonData, null, DECIMAL_DIGITS));
-      setInvalidJson(false);
-    }
-  }, [open, jsonData]);
 
   const handleJsonChange = (value) => {
     setInvalidJson(false);
@@ -61,7 +55,7 @@ const EmailTemplateJsonDialog = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle
         sx={{
           display: "flex",
@@ -123,7 +117,6 @@ const EmailTemplateJsonDialog = ({
 };
 
 EmailTemplateJsonDialog.propTypes = {
-  open: PropTypes.bool.isRequired,
   jsonData: PropTypes.object,
   renderErrors: PropTypes.array,
   onUpdate: PropTypes.func.isRequired,

@@ -104,13 +104,14 @@ const EditEmailTemplatePage = ({
             renderEmailTemplate={renderEmailTemplate}
           />
 
-          <EmailTemplateJsonDialog
-            open={showJsonDialog}
-            jsonData={json_data}
-            renderErrors={render_errors}
-            onUpdate={handleJsonUpdate}
-            onClose={() => setShowJsonDialog(false)}
-          />
+          {showJsonDialog && (
+            <EmailTemplateJsonDialog
+              jsonData={json_data}
+              renderErrors={render_errors}
+              onUpdate={handleJsonUpdate}
+              onClose={() => setShowJsonDialog(false)}
+            />
+          )}
         </>
       ) : (
         <div>{T.translate("emails.loading_template")}</div>

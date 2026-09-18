@@ -21,10 +21,9 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 }));
 
 describe("EmailTemplateJsonDialog", () => {
-  it("seeds the editor with the formatted jsonData when opened", () => {
+  it("seeds the editor with the formatted jsonData on mount", () => {
     render(
       <EmailTemplateJsonDialog
-        open
         jsonData={{ foo: "bar" }}
         renderErrors={[]}
         onUpdate={jest.fn()}
@@ -41,7 +40,6 @@ describe("EmailTemplateJsonDialog", () => {
     const onUpdate = jest.fn();
     render(
       <EmailTemplateJsonDialog
-        open
         jsonData={{ foo: "bar" }}
         renderErrors={[]}
         onUpdate={onUpdate}
@@ -63,7 +61,6 @@ describe("EmailTemplateJsonDialog", () => {
     const onUpdate = jest.fn();
     render(
       <EmailTemplateJsonDialog
-        open
         jsonData={{ foo: "bar" }}
         renderErrors={[]}
         onUpdate={onUpdate}
@@ -80,19 +77,5 @@ describe("EmailTemplateJsonDialog", () => {
 
     expect(onUpdate).not.toHaveBeenCalled();
     expect(screen.getByText("emails.invalid_json")).toBeInTheDocument();
-  });
-
-  it("does not render when closed", () => {
-    render(
-      <EmailTemplateJsonDialog
-        open={false}
-        jsonData={{}}
-        renderErrors={[]}
-        onUpdate={jest.fn()}
-        onClose={jest.fn()}
-      />
-    );
-
-    expect(screen.queryByTestId("json-editor")).not.toBeInTheDocument();
   });
 });
