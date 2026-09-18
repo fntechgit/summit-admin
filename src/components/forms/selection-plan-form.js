@@ -12,11 +12,13 @@
  * */
 
 import React, { useState, useEffect } from "react";
+import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { useFormik, FormikProvider } from "formik";
 import moment from "moment-timezone";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import showConfirmDialog from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
@@ -30,6 +32,24 @@ import TrackChairSettingsTab from "./selection-plan-form/track-chair-settings-ta
 import PresentationActionTypesTab from "./selection-plan-form/presentation-action-types-tab";
 import AllowedMembersTab from "./selection-plan-form/allowed-members-tab";
 import CfpSettingsTab from "./selection-plan-form/cfp-settings-tab";
+import {
+  addAllowedMemberToSelectionPlan,
+  addEventTypeSelectionPlan,
+  addTrackGroupToSelectionPlan,
+  assignExtraQuestion2SelectionPlan,
+  assignProgressFlag2SelectionPlan,
+  deleteEventTypeSelectionPlan,
+  deleteRatingType,
+  deleteSelectionPlanExtraQuestion,
+  getAllowedMembers,
+  importAllowedMembersCSV,
+  removeAllowedMemberFromSelectionPlan,
+  removeTrackGroupFromSelectionPlan,
+  unassignProgressFlagFromSelectionPlan,
+  updateProgressFlagOrder,
+  updateRatingTypeOrder,
+  updateSelectionPlanExtraQuestionOrder
+} from "../../actions/selection-plan-actions";
 
 const DATE_FIELDS = [
   "submission_begin_date",
@@ -64,32 +84,25 @@ const SelectionPlanForm = (props) => {
     entity: propsEntity,
     errors: propsErrors,
     currentSummit,
-    extraQuestionsOrderDir,
-    extraQuestionsOrder,
-    actionTypesOrderDir,
-    actionTypesOrder,
     allowedMembers,
+    history,
     onSave,
-    onTrackGroupLink,
-    onTrackGroupUnLink,
-    onAddEventType,
-    onDeleteEventType,
-    onAddRatingType,
-    onEditRatingType,
-    onDeleteRatingType,
-    onEditExtraQuestion,
-    onDeleteExtraQuestion,
-    onAddNewExtraQuestion,
-    onAssignExtraQuestion2SelectionPlan,
-    onAssignProgressFlag2SelectionPlan,
-    onUnassignProgressFlag,
-    onUpdateProgressFlagOrder,
-    onUpdateRatingTypeOrder,
-    updateExtraQuestionOrder,
-    onImportAllowedMembers,
-    onAllowedMemberAdd,
-    onAllowedMemberDelete,
-    onAllowedMembersPageChange
+    addTrackGroupToSelectionPlan,
+    removeTrackGroupFromSelectionPlan,
+    addEventTypeSelectionPlan,
+    deleteEventTypeSelectionPlan,
+    deleteSelectionPlanExtraQuestion,
+    updateSelectionPlanExtraQuestionOrder,
+    assignExtraQuestion2SelectionPlan,
+    deleteRatingType,
+    updateRatingTypeOrder,
+    assignProgressFlag2SelectionPlan,
+    unassignProgressFlagFromSelectionPlan,
+    updateProgressFlagOrder,
+    addAllowedMemberToSelectionPlan,
+    removeAllowedMemberFromSelectionPlan,
+    getAllowedMembers,
+    importAllowedMembersCSV
   } = props;
 
   const [activeTab, setActiveTab] = useState("main");
@@ -142,6 +155,113 @@ const SelectionPlanForm = (props) => {
       setActiveTab("main");
     }
   }, [formik.values.is_hidden]);
+
+  const onUpdateExtraQuestionOrder = (questions, questionId, newOrder) => {
+    updateSelectionPlanExtraQuestionOrder(
+      propsEntity.id,
+      questions,
+      questionId,
+      newOrder
+    );
+  };
+
+  const onEditExtraQuestion = (questionId) => {
+    history.push(
+      `/app/summits/${currentSummit.id}/selection-plans/${propsEntity.id}/extra-questions/${questionId}`
+    );
+  };
+
+  const onAddNewExtraQuestion = () => {
+    history.push(
+      `/app/summits/${currentSummit.id}/selection-plans/${propsEntity.id}/extra-questions/new`
+    );
+  };
+
+  const onDeleteExtraQuestion = async (questionId) => {
+    const extraQuestion = propsEntity.extra_questions.find(
+      (t) => t.id === questionId
+    );
+    const isConfirmed = await showConfirmDialog({
+      title: T.translate("general.are_you_sure"),
+      text: `${T.translate(
+        "edit_selection_plan.extra_question_remove_warning"
+      )} ${extraQuestion.name}`,
+      iconType: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "error",
+      confirmButtonText: T.translate("general.yes_delete")
+    });
+    if (isConfirmed) {
+      deleteSelectionPlanExtraQuestion(propsEntity.id, questionId);
+    }
+  };
+
+  const onAddRatingType = () => {
+    history.push(
+      `/app/summits/${currentSummit.id}/selection-plans/${propsEntity.id}/rating-types/new`
+    );
+  };
+
+  const onEditRatingType = (ratingTypeId) => {
+    history.push(
+      `/app/summits/${currentSummit.id}/selection-plans/${propsEntity.id}/rating-types/${ratingTypeId}`
+    );
+  };
+
+  const onUpdateRatingTypeOrder = (ratingTypes, ratingTypeId, newOrder) => {
+    updateRatingTypeOrder(propsEntity.id, ratingTypes, ratingTypeId, newOrder);
+  };
+
+  const onDeleteRatingType = async (ratingTypeId) => {
+    const ratingType = propsEntity.track_chair_rating_types.find(
+      (t) => t.id === ratingTypeId
+    );
+    const isConfirmed = await showConfirmDialog({
+      title: T.translate("general.are_you_sure"),
+      text: `${T.translate("edit_selection_plan.rating_type_remove_warning")} ${
+        ratingType.name
+      }`,
+      iconType: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "error",
+      confirmButtonText: T.translate("general.yes_delete")
+    });
+    if (isConfirmed) {
+      deleteRatingType(propsEntity.id, ratingTypeId);
+    }
+  };
+
+  const onUpdateProgressFlagOrder = (
+    progressFlags,
+    progressFlagId,
+    newOrder
+  ) => {
+    updateProgressFlagOrder(
+      propsEntity.id,
+      progressFlags,
+      progressFlagId,
+      newOrder
+    );
+  };
+
+  const onUnassignProgressFlag = async (progressFlagId) => {
+    const ratingType = propsEntity.allowed_presentation_action_types.find(
+      (t) => t.id === progressFlagId
+    );
+    const isConfirmed = await showConfirmDialog({
+      title: T.translate("general.are_you_sure"),
+      text: `${T.translate(
+        "edit_selection_plan.presentation_action_type_remove_warning"
+      )} ${ratingType.label}`,
+      iconType: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "error",
+      confirmButtonText: T.translate("general.yes_delete")
+    });
+    if (isConfirmed) {
+      unassignProgressFlagFromSelectionPlan(propsEntity.id, progressFlagId);
+    }
+  };
 
   const isNewPlan = formik.values.id === 0;
 
@@ -231,27 +351,27 @@ const SelectionPlanForm = (props) => {
             <TrackGroupsTab
               hidden={activeTab !== "track_groups"}
               currentSummit={currentSummit}
-              onTrackGroupLink={onTrackGroupLink}
-              onTrackGroupUnLink={onTrackGroupUnLink}
+              onTrackGroupLink={addTrackGroupToSelectionPlan}
+              onTrackGroupUnLink={removeTrackGroupFromSelectionPlan}
             />
             <EventTypesTab
               hidden={activeTab !== "event_types"}
               currentSummit={currentSummit}
-              onAddEventType={onAddEventType}
-              onDeleteEventType={onDeleteEventType}
+              onAddEventType={addEventTypeSelectionPlan}
+              onDeleteEventType={deleteEventTypeSelectionPlan}
             />
             <ExtraQuestionsTab
               hidden={activeTab !== "extra_questions"}
               currentSummit={currentSummit}
-              extraQuestionsOrder={extraQuestionsOrder}
-              extraQuestionsOrderDir={extraQuestionsOrderDir}
+              extraQuestionsOrder={propsEntity.extraQuestionsOrder}
+              extraQuestionsOrderDir={propsEntity.extraQuestionsOrderDir}
               onEditExtraQuestion={onEditExtraQuestion}
               onDeleteExtraQuestion={onDeleteExtraQuestion}
               onAddNewExtraQuestion={onAddNewExtraQuestion}
               onAssignExtraQuestion2SelectionPlan={
-                onAssignExtraQuestion2SelectionPlan
+                assignExtraQuestion2SelectionPlan
               }
-              updateExtraQuestionOrder={updateExtraQuestionOrder}
+              updateExtraQuestionOrder={onUpdateExtraQuestionOrder}
             />
             <EmailTemplatesTab hidden={activeTab !== "email_templates"} />
             <TrackChairSettingsTab
@@ -264,10 +384,10 @@ const SelectionPlanForm = (props) => {
             <PresentationActionTypesTab
               hidden={activeTab !== "presentation_action_types"}
               currentSummit={currentSummit}
-              actionTypesOrder={actionTypesOrder}
-              actionTypesOrderDir={actionTypesOrderDir}
+              actionTypesOrder={propsEntity.actionTypesOrder}
+              actionTypesOrderDir={propsEntity.actionTypesOrderDir}
               onAssignProgressFlag2SelectionPlan={
-                onAssignProgressFlag2SelectionPlan
+                assignProgressFlag2SelectionPlan
               }
               onUnassignProgressFlag={onUnassignProgressFlag}
               onUpdateProgressFlagOrder={onUpdateProgressFlagOrder}
@@ -276,10 +396,10 @@ const SelectionPlanForm = (props) => {
               <AllowedMembersTab
                 hidden={activeTab !== "allowed_members"}
                 allowedMembers={allowedMembers}
-                onImportAllowedMembers={onImportAllowedMembers}
-                onAllowedMemberAdd={onAllowedMemberAdd}
-                onAllowedMemberDelete={onAllowedMemberDelete}
-                onAllowedMembersPageChange={onAllowedMembersPageChange}
+                onImportAllowedMembers={importAllowedMembersCSV}
+                onAllowedMemberAdd={addAllowedMemberToSelectionPlan}
+                onAllowedMemberDelete={removeAllowedMemberFromSelectionPlan}
+                onAllowedMembersPageChange={getAllowedMembers}
               />
             )}
             {/* cfp_settings kept in DOM always - contains TextEditorV3 */}
@@ -300,8 +420,12 @@ SelectionPlanForm.propTypes = {
     track_groups: PropTypes.arrayOf(PropTypes.shape({})),
     event_types: PropTypes.arrayOf(PropTypes.shape({})),
     extra_questions: PropTypes.arrayOf(PropTypes.shape({})),
+    extraQuestionsOrder: PropTypes.string,
+    extraQuestionsOrderDir: PropTypes.number,
     track_chair_rating_types: PropTypes.arrayOf(PropTypes.shape({})),
-    allowed_presentation_action_types: PropTypes.arrayOf(PropTypes.shape({}))
+    allowed_presentation_action_types: PropTypes.arrayOf(PropTypes.shape({})),
+    actionTypesOrder: PropTypes.string,
+    actionTypesOrderDir: PropTypes.number
   }).isRequired,
   errors: PropTypes.shape({}),
   currentSummit: PropTypes.shape({
@@ -309,10 +433,6 @@ SelectionPlanForm.propTypes = {
     time_zone_id: PropTypes.string.isRequired,
     slug: PropTypes.string
   }).isRequired,
-  extraQuestionsOrder: PropTypes.string.isRequired,
-  extraQuestionsOrderDir: PropTypes.number.isRequired,
-  actionTypesOrder: PropTypes.string.isRequired,
-  actionTypesOrderDir: PropTypes.number.isRequired,
   allowedMembers: PropTypes.shape({
     data: PropTypes.arrayOf(
       PropTypes.shape({ id: PropTypes.number, email: PropTypes.string })
@@ -320,31 +440,53 @@ SelectionPlanForm.propTypes = {
     currentPage: PropTypes.number.isRequired,
     lastPage: PropTypes.number.isRequired
   }).isRequired,
+  history: PropTypes.shape({ push: PropTypes.func.isRequired }).isRequired,
   onSave: PropTypes.func.isRequired,
-  onTrackGroupLink: PropTypes.func.isRequired,
-  onTrackGroupUnLink: PropTypes.func.isRequired,
-  onAddEventType: PropTypes.func.isRequired,
-  onDeleteEventType: PropTypes.func.isRequired,
-  onAddRatingType: PropTypes.func.isRequired,
-  onEditRatingType: PropTypes.func.isRequired,
-  onDeleteRatingType: PropTypes.func.isRequired,
-  onEditExtraQuestion: PropTypes.func.isRequired,
-  onDeleteExtraQuestion: PropTypes.func.isRequired,
-  onAddNewExtraQuestion: PropTypes.func.isRequired,
-  onAssignExtraQuestion2SelectionPlan: PropTypes.func.isRequired,
-  onAssignProgressFlag2SelectionPlan: PropTypes.func.isRequired,
-  onUnassignProgressFlag: PropTypes.func.isRequired,
-  onUpdateProgressFlagOrder: PropTypes.func.isRequired,
-  onUpdateRatingTypeOrder: PropTypes.func.isRequired,
-  updateExtraQuestionOrder: PropTypes.func.isRequired,
-  onImportAllowedMembers: PropTypes.func.isRequired,
-  onAllowedMemberAdd: PropTypes.func.isRequired,
-  onAllowedMemberDelete: PropTypes.func.isRequired,
-  onAllowedMembersPageChange: PropTypes.func.isRequired
+  addTrackGroupToSelectionPlan: PropTypes.func.isRequired,
+  removeTrackGroupFromSelectionPlan: PropTypes.func.isRequired,
+  addEventTypeSelectionPlan: PropTypes.func.isRequired,
+  deleteEventTypeSelectionPlan: PropTypes.func.isRequired,
+  deleteSelectionPlanExtraQuestion: PropTypes.func.isRequired,
+  updateSelectionPlanExtraQuestionOrder: PropTypes.func.isRequired,
+  assignExtraQuestion2SelectionPlan: PropTypes.func.isRequired,
+  deleteRatingType: PropTypes.func.isRequired,
+  updateRatingTypeOrder: PropTypes.func.isRequired,
+  assignProgressFlag2SelectionPlan: PropTypes.func.isRequired,
+  unassignProgressFlagFromSelectionPlan: PropTypes.func.isRequired,
+  updateProgressFlagOrder: PropTypes.func.isRequired,
+  addAllowedMemberToSelectionPlan: PropTypes.func.isRequired,
+  removeAllowedMemberFromSelectionPlan: PropTypes.func.isRequired,
+  getAllowedMembers: PropTypes.func.isRequired,
+  importAllowedMembersCSV: PropTypes.func.isRequired
 };
 
 SelectionPlanForm.defaultProps = {
   errors: {}
 };
 
-export default SelectionPlanForm;
+const mapStateToProps = ({
+  currentSummitState,
+  currentSelectionPlanState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  ...currentSelectionPlanState
+});
+
+export default connect(mapStateToProps, {
+  addTrackGroupToSelectionPlan,
+  removeTrackGroupFromSelectionPlan,
+  addEventTypeSelectionPlan,
+  deleteEventTypeSelectionPlan,
+  deleteSelectionPlanExtraQuestion,
+  updateSelectionPlanExtraQuestionOrder,
+  assignExtraQuestion2SelectionPlan,
+  deleteRatingType,
+  updateRatingTypeOrder,
+  assignProgressFlag2SelectionPlan,
+  unassignProgressFlagFromSelectionPlan,
+  updateProgressFlagOrder,
+  addAllowedMemberToSelectionPlan,
+  removeAllowedMemberFromSelectionPlan,
+  getAllowedMembers,
+  importAllowedMembersCSV
+})(SelectionPlanForm);

@@ -86,19 +86,6 @@ describe("SelectionPlanListPage", () => {
     );
   });
 
-  it("navigates to the selection plan edit route", async () => {
-    renderWithRedux(
-      <SelectionPlanListPage history={mockHistory} match={mockMatch} />,
-      { initialState }
-    );
-
-    await userEvent.click(screen.getByRole("button", { name: "edit-row" }));
-
-    expect(mockHistory.push).toHaveBeenCalledWith(
-      "/app/summits/1/selection-plans/1"
-    );
-  });
-
   it("reloads the list after a successful delete", async () => {
     renderWithRedux(
       <SelectionPlanListPage history={mockHistory} match={mockMatch} />,

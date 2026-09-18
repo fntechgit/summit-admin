@@ -1,8 +1,17 @@
 import React from "react";
-import { render, screen, within, waitFor } from "@testing-library/react";
+import { screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import { renderWithRedux } from "../../../utils/test-utils";
 import SelectionPlanForm from "../selection-plan-form";
+import {
+  addAllowedMemberToSelectionPlan,
+  deleteEventTypeSelectionPlan,
+  importAllowedMembersCSV,
+  removeAllowedMemberFromSelectionPlan,
+  removeTrackGroupFromSelectionPlan,
+  unassignProgressFlagFromSelectionPlan
+} from "../../../actions/selection-plan-actions";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   __esModule: true,
@@ -12,6 +21,14 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 jest.mock(
   "openstack-uicore-foundation/lib/components/inputs/editor-input-v3",
   () => ({ __esModule: true, default: () => null })
+);
+
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog",
+  () => ({
+    __esModule: true,
+    default: jest.fn(() => Promise.resolve(true))
+  })
 );
 
 jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => ({
@@ -91,9 +108,32 @@ jest.mock("../../inputs/many-2-many-dropdown", () => ({
   default: () => null
 }));
 
-jest.mock("../../../actions/selection-plan-actions", () => ({
-  querySelectionPlanExtraQuestions: jest.fn()
-}));
+// Action creators are dispatched through connect's bindActionCreators, and
+// redux-mock-store requires every dispatched action to be a plain object -
+// each mock must return one instead of the default undefined.
+jest.mock("../../../actions/selection-plan-actions", () => {
+  const mockAction = () => jest.fn(() => ({ type: "MOCK_ACTION" }));
+  return {
+    __esModule: true,
+    querySelectionPlanExtraQuestions: jest.fn(),
+    addAllowedMemberToSelectionPlan: mockAction(),
+    addEventTypeSelectionPlan: mockAction(),
+    addTrackGroupToSelectionPlan: mockAction(),
+    assignExtraQuestion2SelectionPlan: mockAction(),
+    assignProgressFlag2SelectionPlan: mockAction(),
+    deleteEventTypeSelectionPlan: mockAction(),
+    deleteRatingType: mockAction(),
+    deleteSelectionPlanExtraQuestion: mockAction(),
+    getAllowedMembers: mockAction(),
+    importAllowedMembersCSV: mockAction(),
+    removeAllowedMemberFromSelectionPlan: mockAction(),
+    removeTrackGroupFromSelectionPlan: mockAction(),
+    unassignProgressFlagFromSelectionPlan: mockAction(),
+    updateProgressFlagOrder: mockAction(),
+    updateRatingTypeOrder: mockAction(),
+    updateSelectionPlanExtraQuestionOrder: mockAction()
+  };
+});
 
 jest.mock("../../../actions/track-chair-actions", () => ({
   querySummitProgressFlags: jest.fn()
@@ -130,7 +170,11 @@ const newEntity = {
   track_groups: [],
   event_types: [],
   extra_questions: [],
+  extraQuestionsOrder: "order",
+  extraQuestionsOrderDir: 1,
   allowed_presentation_action_types: [],
+  actionTypesOrder: "order",
+  actionTypesOrderDir: 1,
   allowed_presentation_questions: [],
   allowed_presentation_editable_questions: [],
   marketing_settings: {}
@@ -139,37 +183,23 @@ const newEntity = {
 // Existing plan entity (tabs shown)
 const existingEntity = { ...newEntity, id: 42, name: "Spring CFP" };
 
+const mockHistory = { push: jest.fn() };
+
 const baseProps = {
-  entity: newEntity,
-  errors: {},
-  currentSummit: { id: 1, time_zone_id: "UTC", slug: "test-summit" },
-  extraQuestionsOrder: "id",
-  extraQuestionsOrderDir: 1,
-  actionTypesOrder: "id",
-  actionTypesOrderDir: 1,
-  allowedMembers: { data: [], currentPage: 1, lastPage: 1 },
-  onSave: jest.fn(() => Promise.resolve()),
-  onTrackGroupLink: jest.fn(),
-  onTrackGroupUnLink: jest.fn(),
-  onAddEventType: jest.fn(),
-  onDeleteEventType: jest.fn(),
-  onAddRatingType: jest.fn(),
-  onEditRatingType: jest.fn(),
-  onDeleteRatingType: jest.fn(),
-  onEditExtraQuestion: jest.fn(),
-  onDeleteExtraQuestion: jest.fn(),
-  onAddNewExtraQuestion: jest.fn(),
-  onAssignExtraQuestion2SelectionPlan: jest.fn(),
-  onAssignProgressFlag2SelectionPlan: jest.fn(),
-  onUnassignProgressFlag: jest.fn(),
-  onUpdateProgressFlagOrder: jest.fn(),
-  onUpdateRatingTypeOrder: jest.fn(),
-  updateExtraQuestionOrder: jest.fn(),
-  onImportAllowedMembers: jest.fn(),
-  onAllowedMemberAdd: jest.fn(),
-  onAllowedMemberDelete: jest.fn(),
-  onAllowedMembersPageChange: jest.fn()
+  history: mockHistory,
+  onSave: jest.fn(() => Promise.resolve())
 };
+
+const stateFor = (
+  entity,
+  allowedMembers = { data: [], currentPage: 1, lastPage: 1 },
+  errors = {}
+) => ({
+  currentSummitState: {
+    currentSummit: { id: 1, time_zone_id: "UTC", slug: "test-summit" }
+  },
+  currentSelectionPlanState: { entity, allowedMembers, errors }
+});
 
 // Mirrors the popup - external submit button via form attribute
 const FormWithButton = (props) => (
@@ -182,11 +212,17 @@ const FormWithButton = (props) => (
   </>
 );
 
-const renderForm = (overrides = {}) => {
-  const merged = { ...baseProps, ...overrides };
-  // eslint-disable-next-line react/jsx-props-no-spreading
-  return render(<FormWithButton {...merged} />);
-};
+const renderForm = ({
+  entity = newEntity,
+  allowedMembers,
+  errors,
+  ...props
+} = {}) =>
+  renderWithRedux(
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    <FormWithButton {...baseProps} {...props} />,
+    { initialState: stateFor(entity, allowedMembers, errors) }
+  );
 
 const renderExistingForm = (overrides = {}) =>
   renderForm({ entity: existingEntity, ...overrides });
@@ -312,18 +348,19 @@ describe("SelectionPlanForm - track_groups tab", () => {
     expect(within(panel).getByText("Group A")).toBeInTheDocument();
   });
 
-  it("calls onTrackGroupUnLink when delete is clicked", async () => {
-    const onTrackGroupUnLink = jest.fn();
+  it("calls removeTrackGroupFromSelectionPlan when delete is clicked", async () => {
     renderExistingForm({
       entity: {
         ...existingEntity,
         track_groups: [{ id: 7, name: "G", description: "" }]
-      },
-      onTrackGroupUnLink
+      }
     });
     await clickTab("edit_selection_plan.track_groups");
     await userEvent.click(screen.getByRole("button", { name: "delete" }));
-    expect(onTrackGroupUnLink).toHaveBeenCalledWith(existingEntity.id, 7);
+    expect(removeTrackGroupFromSelectionPlan).toHaveBeenCalledWith(
+      existingEntity.id,
+      7
+    );
   });
 });
 
@@ -357,15 +394,16 @@ describe("SelectionPlanForm - event_types tab", () => {
     expect(within(panel).getByText("Presentation")).toBeInTheDocument();
   });
 
-  it("calls onDeleteEventType when delete is clicked", async () => {
-    const onDeleteEventType = jest.fn();
+  it("calls deleteEventTypeSelectionPlan when delete is clicked", async () => {
     renderExistingForm({
-      entity: { ...existingEntity, event_types: [{ id: 5, name: "Talk" }] },
-      onDeleteEventType
+      entity: { ...existingEntity, event_types: [{ id: 5, name: "Talk" }] }
     });
     await clickTab("edit_selection_plan.event_types");
     await userEvent.click(screen.getByRole("button", { name: "delete" }));
-    expect(onDeleteEventType).toHaveBeenCalledWith(existingEntity.id, 5);
+    expect(deleteEventTypeSelectionPlan).toHaveBeenCalledWith(
+      existingEntity.id,
+      5
+    );
   });
 });
 
@@ -387,30 +425,31 @@ describe("SelectionPlanForm - extra_questions tab", () => {
     ).toBeInTheDocument();
   });
 
-  it("calls onAddNewExtraQuestion when Add button is clicked", async () => {
-    const onAddNewExtraQuestion = jest.fn();
-    renderExistingForm({ onAddNewExtraQuestion });
+  it("navigates to the new extra question route when Add button is clicked", async () => {
+    renderExistingForm();
     await clickTab("edit_selection_plan.extra_questions");
     await userEvent.click(
       screen.getByRole("button", {
         name: "edit_selection_plan.add_extra_questions"
       })
     );
-    expect(onAddNewExtraQuestion).toHaveBeenCalledTimes(1);
+    expect(mockHistory.push).toHaveBeenCalledWith(
+      `/app/summits/1/selection-plans/${existingEntity.id}/extra-questions/new`
+    );
   });
 
-  it("renders extra questions and calls onEditExtraQuestion on edit", async () => {
-    const onEditExtraQuestion = jest.fn();
+  it("renders extra questions and navigates to edit route on edit", async () => {
     renderExistingForm({
       entity: {
         ...existingEntity,
         extra_questions: [{ id: 10, name: "q1", label: "Q One", type: "text" }]
-      },
-      onEditExtraQuestion
+      }
     });
     await clickTab("edit_selection_plan.extra_questions");
     await userEvent.click(screen.getByRole("button", { name: "edit" }));
-    expect(onEditExtraQuestion).toHaveBeenCalledWith(10);
+    expect(mockHistory.push).toHaveBeenCalledWith(
+      `/app/summits/1/selection-plans/${existingEntity.id}/extra-questions/10`
+    );
   });
 });
 
@@ -458,30 +497,31 @@ describe("SelectionPlanForm - track_chair_settings tab", () => {
     ).toBeInTheDocument();
   });
 
-  it("calls onAddRatingType when Add Rating Type is clicked", async () => {
-    const onAddRatingType = jest.fn();
-    renderExistingForm({ onAddRatingType });
+  it("navigates to the new rating type route when Add Rating Type is clicked", async () => {
+    renderExistingForm();
     await clickTab("track_chair_settings.title");
     await userEvent.click(
       screen.getByRole("button", {
         name: "track_chair_settings.add_rating_type"
       })
     );
-    expect(onAddRatingType).toHaveBeenCalledTimes(1);
+    expect(mockHistory.push).toHaveBeenCalledWith(
+      `/app/summits/1/selection-plans/${existingEntity.id}/rating-types/new`
+    );
   });
 
-  it("renders rating types and calls onEditRatingType on edit", async () => {
-    const onEditRatingType = jest.fn();
+  it("renders rating types and navigates to edit route on edit", async () => {
     renderExistingForm({
       entity: {
         ...existingEntity,
         track_chair_rating_types: [{ id: 20, name: "Excellent", weight: 10 }]
-      },
-      onEditRatingType
+      }
     });
     await clickTab("track_chair_settings.title");
     await userEvent.click(screen.getByRole("button", { name: "edit" }));
-    expect(onEditRatingType).toHaveBeenCalledWith(20);
+    expect(mockHistory.push).toHaveBeenCalledWith(
+      `/app/summits/1/selection-plans/${existingEntity.id}/rating-types/20`
+    );
   });
 });
 
@@ -505,18 +545,21 @@ describe("SelectionPlanForm - presentation_action_types tab", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders action types and calls onUnassignProgressFlag on delete", async () => {
-    const onUnassignProgressFlag = jest.fn();
+  it("renders action types and calls unassignProgressFlagFromSelectionPlan on delete", async () => {
     renderExistingForm({
       entity: {
         ...existingEntity,
         allowed_presentation_action_types: [{ id: 30, label: "Approve" }]
-      },
-      onUnassignProgressFlag
+      }
     });
     await clickTab("edit_selection_plan.presentation_action_types");
     await userEvent.click(screen.getByRole("button", { name: "delete" }));
-    expect(onUnassignProgressFlag).toHaveBeenCalledWith(30);
+    await waitFor(() =>
+      expect(unassignProgressFlagFromSelectionPlan).toHaveBeenCalledWith(
+        existingEntity.id,
+        30
+      )
+    );
   });
 });
 
@@ -525,8 +568,9 @@ describe("SelectionPlanForm - presentation_action_types tab", () => {
 // ---------------------------------------------------------------------------
 
 describe("SelectionPlanForm - allowed_members tab", () => {
-  const membersProps = {
-    entity: { ...existingEntity, is_hidden: false },
+  const membersEntity = { ...existingEntity, is_hidden: false };
+  const membersOverrides = {
+    entity: membersEntity,
     allowedMembers: {
       data: [{ id: 1, email: "user@example.com" }],
       currentPage: 1,
@@ -534,17 +578,18 @@ describe("SelectionPlanForm - allowed_members tab", () => {
     }
   };
 
-  it("renders members and calls onAllowedMemberDelete on delete", async () => {
-    const onAllowedMemberDelete = jest.fn();
-    renderExistingForm({ ...membersProps, onAllowedMemberDelete });
+  it("renders members and calls removeAllowedMemberFromSelectionPlan on delete", async () => {
+    renderExistingForm(membersOverrides);
     await clickTab("edit_selection_plan.allowed_members");
     await userEvent.click(screen.getByRole("button", { name: "delete" }));
-    expect(onAllowedMemberDelete).toHaveBeenCalledWith(existingEntity.id, 1);
+    expect(removeAllowedMemberFromSelectionPlan).toHaveBeenCalledWith(
+      membersEntity.id,
+      1
+    );
   });
 
-  it("calls onAllowedMemberAdd when Add is clicked with an email", async () => {
-    const onAllowedMemberAdd = jest.fn();
-    renderExistingForm({ ...membersProps, onAllowedMemberAdd });
+  it("calls addAllowedMemberToSelectionPlan when Add is clicked with an email", async () => {
+    renderExistingForm(membersOverrides);
     await clickTab("edit_selection_plan.allowed_members");
     const panel = document.getElementById("tabpanel-allowed_members");
     const emailInput = within(panel).getByRole("textbox");
@@ -552,23 +597,22 @@ describe("SelectionPlanForm - allowed_members tab", () => {
     await userEvent.click(
       within(panel).getByRole("button", { name: "general.add" })
     );
-    expect(onAllowedMemberAdd).toHaveBeenCalledWith(
-      existingEntity.id,
+    expect(addAllowedMemberToSelectionPlan).toHaveBeenCalledWith(
+      membersEntity.id,
       "new@test.com"
     );
   });
 
-  it("calls onImportAllowedMembers when import modal is confirmed", async () => {
-    const onImportAllowedMembers = jest.fn();
-    renderExistingForm({ ...membersProps, onImportAllowedMembers });
+  it("calls importAllowedMembersCSV when import modal is confirmed", async () => {
+    renderExistingForm(membersOverrides);
     await clickTab("edit_selection_plan.allowed_members");
     const panel = document.getElementById("tabpanel-allowed_members");
     await userEvent.click(
       within(panel).getByRole("button", { name: "edit_selection_plan.import" })
     );
     await userEvent.click(screen.getByRole("button", { name: "ingest" }));
-    expect(onImportAllowedMembers).toHaveBeenCalledWith(
-      existingEntity.id,
+    expect(importAllowedMembersCSV).toHaveBeenCalledWith(
+      membersEntity.id,
       expect.any(File)
     );
   });
