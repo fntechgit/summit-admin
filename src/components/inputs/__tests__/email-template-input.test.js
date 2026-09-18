@@ -110,6 +110,7 @@ describe("EmailTemplateInput", () => {
         id="parent"
         value={{ id: 42, identifier: "welcome_email" }}
         onChange={onChange}
+        isClearable
       />
     );
 
