@@ -40,6 +40,7 @@ import {
   DEFAULT_PER_PAGE,
   DUMMY_ACTION,
   HUNDRED_PER_PAGE,
+  MAX_PER_PAGE,
   TEN
 } from "../utils/constants";
 
@@ -927,7 +928,7 @@ export const getBadgeFeatures =
     const params = {
       page: 1,
       fields: "name,id,description",
-      per_page: HUNDRED_PER_PAGE,
+      per_page: MAX_PER_PAGE,
       access_token: accessToken
     };
 
