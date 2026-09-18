@@ -4398,6 +4398,7 @@
     "col_destination": "Destination",
     "col_checkout_at": "Checked Out At",
     "col_notes": "Notes",
+    "col_additional_fields": "Additional Fields",
     "col_quantity": "Qty",
     "col_sponsor": "Sponsor",
     "col_sponsor_note": "Sponsor Note",
