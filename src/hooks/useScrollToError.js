@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 // Smooth scroll for window
 function smoothScrollTo(targetScrollTop, duration) {
@@ -27,41 +27,101 @@ function smoothScrollTo(targetScrollTop, duration) {
   requestAnimationFrame(animationStep);
 }
 
-const useScrollToError = (formik, relative = false) => {
-  const { errors, isValid, isSubmitting } = formik;
+// Waits two animation frames so a DOM mutation applied just before this call
+// (e.g. React removing a tabpanel's `hidden` attribute after setActiveTab)
+// has been through layout before we measure/scroll against it.
+function afterNextLayout(callback) {
+  requestAnimationFrame(() => requestAnimationFrame(callback));
+}
+
+const useScrollToError = (formik, relative = false, setActiveTab) => {
+  const { errors, isValid, submitCount } = formik;
   const errorArray = Object.keys(errors);
   const errorCount = errorArray.length;
 
+  // submitCount change marks "the user tried to save"
+  // armedRef stays true across renders until the first render with errors
+  const prevSubmitCountRef = useRef(submitCount);
+  const armedRef = useRef(false);
+
   useEffect(() => {
-    if (isValid || errorCount === 0) return;
-
-    const elementsSorted = errorArray
-      .reduce((result, error) => {
-        const element = document.querySelector(`[name='${error}']`);
-        if (!element) return result;
-
-        const rect = element.getBoundingClientRect();
-        const absoluteTop = rect.top + window.pageYOffset;
-
-        result.push({ element, top: absoluteTop });
-        return result;
-      }, [])
-      .sort((a, b) => a.top - b.top);
-
-    if (elementsSorted.length === 0) return;
-
-    const target = elementsSorted[0];
-
-    const offset = 100; // adjust as needed
-    const duration = 500; // 500ms scroll duration
-    const scrollToY = target.top - offset;
-
-    if (relative) {
-      target?.element.scrollIntoView({ behavior: "smooth", block: "center" });
-    } else {
-      smoothScrollTo(scrollToY, duration);
+    if (submitCount !== prevSubmitCountRef.current) {
+      prevSubmitCountRef.current = submitCount;
+      armedRef.current = true;
     }
-  }, [isSubmitting]);
+
+    if (isValid || errorCount === 0) return;
+    if (!armedRef.current) return;
+    armedRef.current = false;
+
+    const scrollToFirstVisible = () => {
+      const elementsSorted = errorArray
+        .reduce((result, error) => {
+          const element = document.querySelector(`[name='${error}']`);
+          if (!element || element.offsetParent === null) return result;
+
+          const rect = element.getBoundingClientRect();
+          const absoluteTop = rect.top + window.pageYOffset;
+
+          result.push({ element, top: absoluteTop });
+          return result;
+        }, [])
+        .sort((a, b) => a.top - b.top);
+
+      if (elementsSorted.length === 0) return;
+
+      const target = elementsSorted[0];
+
+      const offset = 100; // adjust as needed
+      const duration = 500; // 500ms scroll duration
+      const scrollToY = target.top - offset;
+
+      if (relative) {
+        target?.element.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+      } else {
+        smoothScrollTo(scrollToY, duration);
+      }
+    };
+
+    if (typeof setActiveTab !== "function") {
+      scrollToFirstVisible(); // unchanged path for every other call site
+      return;
+    }
+
+    // Tab-aware path: panels in a tabbed form are typically mounted-but-
+    // hidden, so `[name=...]` selectors still match fields on an inactive
+    // tab, but measuring/scrolling a `display:none` element is meaningless.
+    // `offsetParent` is `null` for any element hidden via `display:none`,
+    // including via an ancestor's `hidden` attribute.
+    const matches = errorArray
+      .map((error) => document.querySelector(`[name='${error}']`))
+      .filter(Boolean);
+
+    const allMatchesHidden =
+      matches.length > 0 && matches.every((el) => el.offsetParent === null);
+
+    if (!allMatchesHidden) {
+      scrollToFirstVisible();
+      return;
+    }
+
+    // Every matched field is hidden: jump to the tab that owns the first
+    // errored field, then defer the scroll until it's actually visible.
+    // Tab panels are identified by the `id="tabpanel-<value>"` convention.
+    const panelId = matches[0].closest("[role=\"tabpanel\"]")?.id;
+    const tabValue = panelId?.match(/^tabpanel-(.+)$/)?.[1];
+
+    if (!tabValue) {
+      scrollToFirstVisible(); // not inside a tagged tab panel, fall back
+      return;
+    }
+
+    setActiveTab(tabValue);
+    afterNextLayout(scrollToFirstVisible);
+  }, [submitCount, errorCount]);
 };
 
 export default useScrollToError;
