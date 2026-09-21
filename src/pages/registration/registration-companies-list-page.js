@@ -84,7 +84,7 @@ const RegistrationCompaniesListPage = ({
     );
 
   const handleSort = (key, dir) =>
-    getRegistrationCompanies(term, currentPage, perPage, key, dir);
+    getRegistrationCompanies(term, DEFAULT_CURRENT_PAGE, perPage, key, dir);
 
   const columns = [
     {
