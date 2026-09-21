@@ -40,7 +40,7 @@ import {
   removeItemFile
 } from "../../../actions/sponsor-forms-actions";
 import { getInventoryItems } from "../../../actions/inventory-item-actions";
-import SponsorFormItemPopup from "./components/sponsor-form-item-popup";
+import SponsorInventoryDialog from "../../sponsors-global/form-templates/sponsor-inventory-popup";
 import SponsorFormAddItemFromInventoryPopup from "./components/sponsor-form-add-item-from-inventory-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 import { rateCellValidation } from "../../../utils/yup";
@@ -364,11 +364,12 @@ const SponsorFormItemListPage = ({
         </div>
       )}
       {openPopup === "crud" && (
-        <SponsorFormItemPopup
-          item={currentItem}
+        <SponsorInventoryDialog
+          entity={currentItem}
           onSave={handleSaveItem}
           onClose={handleClosePopup}
-          onRemoveImage={handleRemoveItemImage}
+          onImageDeleted={handleRemoveItemImage}
+          requireDefaultQuantity
         />
       )}
       {openPopup === "inventory" && (
