@@ -37,26 +37,7 @@ describe("RegistrationCompaniesImportDialog", () => {
     jest.clearAllMocks();
   });
 
-  it("calls onImport with a FormData containing the selected file", async () => {
-    const user = userEvent.setup();
-    const onImport = jest.fn(() => Promise.resolve());
-    render(
-      <RegistrationCompaniesImportDialog
-        onClose={jest.fn()}
-        onImport={onImport}
-      />
-    );
-
-    await selectFile(user);
-    await user.click(getIngestButton());
-
-    expect(onImport).toHaveBeenCalledTimes(1);
-    const formData = onImport.mock.calls[0][0];
-    expect(formData).toBeInstanceOf(FormData);
-    expect(formData.get("file").name).toBe("companies.csv");
-  });
-
-  it("closes the dialog when onImport resolves", async () => {
+  it("calls onImport with a FormData containing the selected file, then closes on success", async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();
     const onImport = jest.fn(() => Promise.resolve());
@@ -69,6 +50,11 @@ describe("RegistrationCompaniesImportDialog", () => {
 
     await selectFile(user);
     await user.click(getIngestButton());
+
+    expect(onImport).toHaveBeenCalledTimes(1);
+    const formData = onImport.mock.calls[0][0];
+    expect(formData).toBeInstanceOf(FormData);
+    expect(formData.get("file").name).toBe("companies.csv");
 
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
   });
