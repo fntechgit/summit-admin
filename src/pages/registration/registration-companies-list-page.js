@@ -9,17 +9,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import { Modal, Pagination } from "react-bootstrap";
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import Table from "openstack-uicore-foundation/lib/components/table"
-import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input"
-import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
+import { Box, Button } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input";
+import GridToolbar from "../../components/mui/grid-toolbar";
+import RegistrationCompaniesImportDialog from "./registration-companies-import-dialog";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getRegistrationCompanies,
@@ -27,244 +28,158 @@ import {
   deleteRegistrationCompany,
   importRegistrationCompaniesCSV
 } from "../../actions/registration-companies-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
-class RegistrationCompaniesListPage extends React.Component {
-  constructor(props) {
-    super(props);
+const RegistrationCompaniesListPage = ({
+  currentSummit,
+  companies,
+  term,
+  order,
+  orderDir,
+  perPage,
+  currentPage,
+  totalCompanies,
+  getRegistrationCompanies,
+  addRegistrationCompany,
+  deleteRegistrationCompany,
+  importRegistrationCompaniesCSV,
+  history
+}) => {
+  const [dropdownCompany, setDropdownCompany] = useState(null);
+  const [showImportDialog, setShowImportDialog] = useState(false);
 
-    this.handleAddCompany = this.handleAddCompany.bind(this);
-    this.handleImportCompanies = this.handleImportCompanies.bind(this);
-    this.handleDeleteCompany = this.handleDeleteCompany.bind(this);
-    this.handleSearch = this.handleSearch.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSort = this.handleSort.bind(this);
-    this.handlePageChange = this.handlePageChange.bind(this);
+  useEffect(() => {
+    if (currentSummit) getRegistrationCompanies();
+  }, [currentSummit]);
 
-    this.state = {
-      searchTerm: "",
-      dropdownCompany: null,
-      importFile: null,
-      showImportModal: false
-    };
-  }
+  const handleChange = (ev) => setDropdownCompany(ev.target.value);
 
-  componentDidMount() {
-    const { currentSummit } = this.props;
-    if (currentSummit) {
-      this.props.getRegistrationCompanies();
-    }
-  }
+  const handleAddCompany = (company) => {
+    if (!company) return;
+    addRegistrationCompany(company);
+    setDropdownCompany(null);
+  };
 
-  handleChange(ev) {
-    this.setState({ dropdownCompany: ev.target.value });
-  }
+  const handleImportCompanies = (formData) =>
+    importRegistrationCompaniesCSV(formData);
 
-  handleAddCompany(company) {
-    this.props.addRegistrationCompany(company);
-    this.setState({ dropdownCompany: null });
-  }
+  const handleDeleteCompany = (companyId) =>
+    deleteRegistrationCompany(companyId);
 
-  handleImportCompanies() {
-    this.setState({ showImportModal: false });
-    let formData = new FormData();
-    if (this.state.importFile) {
-      formData.append("file", this.state.importFile);
-      this.props.importRegistrationCompaniesCSV(formData);
-    }
-  }
+  const handleEditCompany = (company) =>
+    history.push(`/app/companies/${company.id}`);
 
-  handleDeleteCompany(companyId) {
-    const { deleteRegistrationCompany, companies } = this.props;
-    let company = companies.find((t) => t.id === companyId);
+  const handleSearch = (searchTerm) => getRegistrationCompanies(searchTerm);
 
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("registration_companies.remove_warning") +
-        " " +
-        company.name,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
-      if (result.value) {
-        deleteRegistrationCompany(companyId);
-      }
-    });
-  }
+  const handlePageChange = (page) =>
+    getRegistrationCompanies(term, page, perPage, order, orderDir);
 
-  handleSearch(term) {
-    this.props.getRegistrationCompanies(term);
-  }
-
-  handlePageChange(page) {
-    const { term, order, orderDir, perPage } = this.props;
-    this.props.getRegistrationCompanies(term, page, perPage, order, orderDir);
-  }
-
-  handleSort(index, key, dir, func) {
-    const { term, page, perPage } = this.props;
-    this.props.getRegistrationCompanies(term, page, perPage, key, dir);
-  }
-
-  render() {
-    let {
-      currentSummit,
-      companies,
+  const handlePerPageChange = (newPerPage) =>
+    getRegistrationCompanies(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
       order,
-      orderDir,
-      lastPage,
-      currentPage,
-      totalCompanies
-    } = this.props;
+      orderDir
+    );
 
-    let { searchTerm, dropdownCompany, showImportModal, importFile } =
-      this.state;
+  const handleSort = (key, dir) =>
+    getRegistrationCompanies(term, currentPage, perPage, key, dir);
 
-    const columns = [
-      {
-        columnKey: "name",
-        value: T.translate("registration_companies.name"),
-        sortable: true
-      }
-    ];
+  const columns = [
+    {
+      columnKey: "name",
+      header: T.translate("registration_companies.name"),
+      sortable: true
+    }
+  ];
 
-    const table_options = {
-      sortCol: order,
-      sortDir: orderDir,
-      actions: {
-        edit: {
-          onClick: (companyId) => {
-            window.location = `/app/companies/${companyId}`;
-          }
-        },
-        delete: { onClick: this.handleDeleteCompany }
-      }
-    };
+  const table_options = {
+    sortCol: order,
+    sortDir: orderDir
+  };
 
-    if (!currentSummit.id) return <div />;
+  if (!currentSummit.id) return <div />;
 
-    return (
-      <div className="container">
-        <h3>
-          {" "}
-          {T.translate("registration_companies.registration_companies_list")} (
-          {totalCompanies})
-        </h3>
-        <div className={"row"}>
-          <div className={"col-md-4"}>
-            <FreeTextSearch
-              value={searchTerm ?? ""}
-              placeholder={T.translate(
-                "registration_companies.placeholders.search_companies"
-              )}
-              onSearch={this.handleSearch}
-            />
-          </div>
-          <div className="col-md-4 text-right col-md-offset-2">
+  return (
+    <div className="container">
+      <h3>
+        {T.translate("registration_companies.registration_companies_list")}
+      </h3>
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate(
+            "registration_companies.placeholders.search_companies"
+          )
+        }}
+      >
+        <Box
+          sx={{ display: "flex", gap: 1, flexGrow: 1, justifyContent: "end" }}
+        >
+          <Box sx={{ flexGrow: 1, maxWidth: 350 }}>
             <CompanyInput
               id="registration-company"
               value={dropdownCompany}
-              onChange={this.handleChange}
+              onChange={handleChange}
               summitId={currentSummit.id}
             />
-          </div>
-          <div className="col-md-2 text-right">
-            <button
-              className="btn btn-default right-space"
-              onClick={() => this.handleAddCompany(dropdownCompany)}
-            >
-              Add
-            </button>
-            <button
-              className="btn btn-default"
-              onClick={() => this.setState({ showImportModal: true })}
-            >
-              {T.translate("registration_companies.import")}
-            </button>
-          </div>
-        </div>
-
-        {companies.length === 0 && (
-          <div>
-            {T.translate("registration_companies.no_registration_companies")}
-          </div>
-        )}
-
-        {companies.length > 0 && (
-          <>
-            <Table
-              options={table_options}
-              data={companies}
-              columns={columns}
-              onSort={this.handleSort}
-            />
-            <Pagination
-              bsSize="medium"
-              prev
-              next
-              first
-              last
-              ellipsis
-              boundaryLinks
-              maxButtons={10}
-              items={lastPage}
-              activePage={currentPage}
-              onSelect={this.handlePageChange}
-            />
-          </>
-        )}
-        <Modal
-          show={showImportModal}
-          onHide={() => this.setState({ showImportModal: false })}
+          </Box>
+          <Button
+            variant="contained"
+            onClick={() => handleAddCompany(dropdownCompany)}
+            startIcon={<AddIcon />}
+          >
+            {T.translate("general.add")}
+          </Button>
+        </Box>
+        <Button
+          variant="contained"
+          onClick={() => setShowImportDialog(true)}
+          startIcon={<UploadFileIcon />}
         >
-          <Modal.Header closeButton>
-            <Modal.Title>
-              {T.translate("registration_companies.import_companies")}
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <div className="row">
-              <div className="col-md-12">
-                Format must be as described using
-                <br />
-                column name
-                <br />
-                description of column content values
-                <br />
-                <br />
-                <b>name</b>
-                <br />
-                company names
-                <br />
-              </div>
-              <div className="col-md-12 invitation-import-upload-wrapper">
-                <UploadInput
-                  value={importFile && importFile.name}
-                  handleUpload={(file) => this.setState({ importFile: file })}
-                  handleRemove={() => this.setState({ importFile: null })}
-                  className="dropzone col-md-6"
-                  multiple={false}
-                  accept=".csv"
-                />
-              </div>
-            </div>
-          </Modal.Body>
-          <Modal.Footer>
-            <button
-              disabled={!this.state.importFile}
-              className="btn btn-primary"
-              onClick={this.handleImportCompanies}
-            >
-              {T.translate("registration_companies.ingest")}
-            </button>
-          </Modal.Footer>
-        </Modal>
-      </div>
-    );
-  }
-}
+          {T.translate("registration_companies.import")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {totalCompanies}{" "}
+        {T.translate("registration_companies.registration_companies")}
+      </Box>
+
+      {companies.length === 0 && (
+        <div>
+          {T.translate("registration_companies.no_registration_companies")}
+        </div>
+      )}
+
+      {companies.length > 0 && (
+        <MuiTable
+          options={table_options}
+          data={companies}
+          columns={columns}
+          perPage={perPage}
+          currentPage={currentPage}
+          totalRows={totalCompanies}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSort={handleSort}
+          onDelete={handleDeleteCompany}
+          deleteDialogBody={(name) =>
+            T.translate("registration_companies.remove_warning", { name })
+          }
+          onEdit={handleEditCompany}
+        />
+      )}
+      {showImportDialog && (
+        <RegistrationCompaniesImportDialog
+          onClose={() => setShowImportDialog(false)}
+          onImport={handleImportCompanies}
+        />
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({
   currentSummitState,

@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -25,6 +25,7 @@ import {
   showSuccessMessage
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
+import { DEFAULT_PER_PAGE } from "../utils/constants";
 
 export const REQUEST_REGISTRATION_COMPANIES = "REQUEST_REGISTRATION_COMPANIES";
 export const RECEIVE_REGISTRATION_COMPANIES = "RECEIVE_REGISTRATION_COMPANIES";
@@ -34,10 +35,16 @@ export const REGISTRATION_COMPANY_DELETED = "REGISTRATION_COMPANY_DELETED";
 export const REGISTRATION_COMPANIES_IMPORTED =
   "REGISTRATION_COMPANIES_IMPORTED";
 
-/**************************   REGISTRATION COMPANIES   ******************************************/
+/* *************************   REGISTRATION COMPANIES   ***************************************** */
 
 export const getRegistrationCompanies =
-  (term = null, page = 1, perPage = 10, order = "id", orderDir = 1) =>
+  (
+    term = null,
+    page = 1,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = 1
+  ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -47,7 +54,7 @@ export const getRegistrationCompanies =
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
@@ -82,21 +89,20 @@ export const addRegistrationCompany =
       access_token: accessToken
     };
 
-    putRequest(
+    return putRequest(
       createAction(ADD_REGISTRATION_COMPANY),
       createAction(REGISTRATION_COMPANY_ADDED)({ entity }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/registration-companies/${entity.id}`,
       null,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(
         showSuccessMessage(
           T.translate("registration_companies.registration_company_saved")
         )
       );
     });
-    return;
   };
 
 export const deleteRegistrationCompany =
@@ -132,7 +138,7 @@ export const importRegistrationCompaniesCSV =
       access_token: accessToken
     };
 
-    postRequest(
+    return postRequest(
       null,
       createAction(REGISTRATION_COMPANIES_IMPORTED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/registration-companies/csv`,
@@ -143,8 +149,3 @@ export const importRegistrationCompaniesCSV =
       window.location.reload();
     });
   };
-
-const normalizeEntity = (entity) => {
-  const normalizedEntity = { ...entity };
-  return normalizedEntity;
-};
