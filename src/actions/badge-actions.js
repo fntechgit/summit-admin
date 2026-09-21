@@ -1099,6 +1099,8 @@ export const removeBadgeFeatureImage =
 const normalizeBadgeFeature = (entity) => {
   const normalizedEntity = { ...entity };
   delete normalizedEntity.id;
+  // strip the read-only URL echoed back from a GET; a pending File API dto goes through
+  if (typeof normalizedEntity.image === "string") delete normalizedEntity.image;
 
   return normalizedEntity;
 };

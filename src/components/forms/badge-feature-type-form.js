@@ -18,18 +18,41 @@ import { useFormikContext } from "formik";
 import { Box, Grid2, InputLabel } from "@mui/material";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import FormikTextEditor from "openstack-uicore-foundation/lib/components/mui/formik-inputs/texteditor";
-import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
+import UploadInputV3 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v3";
 import useScrollToError from "../../hooks/useScrollToError";
+import { KB, MAX_BADGE_FEATURE_IMAGE_UPLOAD_SIZE } from "../../utils/constants";
 
-const BadgeFeatureTypeForm = ({ entity, onUploadImage, onRemoveImage }) => {
+// image is a URL string when read back from the API, or a pending File API dto after upload
+const getImageValue = (value) => {
+  if (!value) return [];
+  if (typeof value === "string") return [{ filename: value, file_url: value }];
+  return [{ filename: value.filename, file_url: value.filepath }];
+};
+
+const BadgeFeatureTypeForm = ({ entity, onRemoveImage }) => {
   const formik = useFormikContext();
 
   useScrollToError(formik, true);
 
-  const handleUploadImage = (file) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    onUploadImage(entity, formData);
+  const handleUploadComplete = (response) => {
+    const path =
+      response.path && response.name
+        ? `${response.path}${response.name}`
+        : response.file_url ?? response.path ?? "";
+    const image = { ...response, filepath: path, filename: response.name };
+    delete image.path;
+    delete image.name;
+    formik.setFieldValue("image", image);
+  };
+
+  const handleRemoveImage = () => {
+    const prevValue = formik.values.image;
+    formik.setFieldValue("image", null);
+    // only hit the API when an image was already persisted; a pending dto just clears
+    if (entity.id && typeof prevValue === "string")
+      onRemoveImage(entity.id).catch(() =>
+        formik.setFieldValue("image", prevValue)
+      );
   };
 
   return (
@@ -72,42 +95,34 @@ const BadgeFeatureTypeForm = ({ entity, onUploadImage, onRemoveImage }) => {
         </Grid2>
       </Grid2>
 
-      {/* image endpoint needs an existing id, so upload is only offered after the first save */}
-      {entity.id !== 0 && (
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={12}>
-            <InputLabel>{T.translate("edit_badge_feature.image")}</InputLabel>
-            {/* need this styles to adapt bootstrap to MUI */}
-            <Box
-              sx={{
-                "& .file-upload": {
-                  display: "flex",
-                  gap: 2,
-                  alignItems: "flex-start"
-                },
-                "& .file-upload > :first-of-type": { flex: 1 },
-                "& .selected-files-box": { flex: "0 0 auto", maxWidth: "50%" }
-              }}
-            >
-              <UploadInput
-                value={entity.image}
-                handleUpload={handleUploadImage}
-                handleRemove={() => onRemoveImage(entity.id)}
-                className="dropzone"
-                multiple={false}
-                accept="image/*"
-              />
-            </Box>
-          </Grid2>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={12}>
+          <InputLabel>{T.translate("edit_badge_feature.image")}</InputLabel>
+          <UploadInputV3
+            id="image"
+            name="image"
+            value={getImageValue(formik.values.image)}
+            onUploadComplete={handleUploadComplete}
+            onRemove={handleRemoveImage}
+            postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
+            djsConfig={{ withCredentials: true }}
+            maxFiles={1}
+            canAdd={!formik.values.image}
+            mediaType={{
+              max_size: MAX_BADGE_FEATURE_IMAGE_UPLOAD_SIZE * KB,
+              type: {
+                allowed_extensions: ["png", "jpg", "jpeg", "gif", "svg"]
+              }
+            }}
+          />
         </Grid2>
-      )}
+      </Grid2>
     </Box>
   );
 };
 
 BadgeFeatureTypeForm.propTypes = {
   entity: PropTypes.object.isRequired,
-  onUploadImage: PropTypes.func.isRequired,
   onRemoveImage: PropTypes.func.isRequired
 };
 
