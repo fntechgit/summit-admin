@@ -74,7 +74,7 @@ export const getRegistrationCompanies =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/registration-companies`,
       authErrorHandler,
       { page, perPage, order, orderDir, term }
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -121,7 +121,7 @@ export const deleteRegistrationCompany =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/registration-companies/${companyId}`,
       null,
       authErrorHandler
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -144,8 +144,11 @@ export const importRegistrationCompaniesCSV =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/registration-companies/csv`,
       file,
       authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-      window.location.reload();
-    });
+    )(params)(dispatch)
+      .then(() => {
+        window.location.reload();
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
