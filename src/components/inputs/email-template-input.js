@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import AsyncSelect from "react-select/lib/Async";
@@ -67,7 +67,7 @@ export default class EmailTemplateInput extends React.Component {
   }
 
   render() {
-    const { error, value, onChange, id, multi, plainValue, ...rest } =
+    const { error, value, onChange, id, name, multi, plainValue, ...rest } =
       this.props;
     const has_error = this.props.hasOwnProperty("error") && error !== "";
 
@@ -77,12 +77,12 @@ export default class EmailTemplateInput extends React.Component {
 
     if (value) {
       theValue = plainValue
-        ? { value: value, label: value }
+        ? { value, label: value }
         : { value: value.id.toString(), label: value.identifier };
     }
 
     return (
-      <div>
+      <div name={name}>
         <AsyncSelect
           value={theValue}
           onChange={this.handleChange}

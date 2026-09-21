@@ -95,6 +95,7 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
             </label>
             <TextEditorV3
               id="cfp_presentation_edition_custom_message"
+              name="cfp_presentation_edition_custom_message"
               error={hasErrors("cfp_presentation_edition_custom_message")}
               onChange={handleChange}
               value={ms.cfp_presentation_edition_custom_message?.value || ""}
@@ -255,6 +256,7 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
               </label>
               <TextField
                 id={field}
+                name={field}
                 fullWidth
                 size="small"
                 error={!!hasErrors(field)}

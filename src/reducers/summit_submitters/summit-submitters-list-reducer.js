@@ -32,8 +32,6 @@ import {
 } from "../../actions/summit-actions";
 import { buildSpeakersSubmittersList } from "../utils/methods";
 
-
-
 const DEFAULT_STATE = {
   items: [],
   term: null,
@@ -56,6 +54,7 @@ const DEFAULT_STATE = {
   activityTypeFilter: [],
   selectionStatusFilter: [],
   mediaUploadTypeFilter: { operator: null, value: [] },
+  pendingSubmissionsFilter: null,
   currentFlowEvent: "",
   currentSummitId: null
 };
