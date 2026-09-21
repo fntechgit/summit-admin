@@ -120,6 +120,7 @@ const MuiFormikAsyncAutocomplete = ({
       renderInput={(params) => (
         <TextField
           {...params}
+          name={name}
           placeholder={placeholder}
           variant="outlined"
           error={Boolean(error)}
