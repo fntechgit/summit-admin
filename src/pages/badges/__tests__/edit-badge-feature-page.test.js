@@ -17,7 +17,6 @@ jest.mock("../../../actions/badge-actions", () => ({
   getBadgeFeature: jest.fn(),
   resetBadgeFeatureForm: jest.fn(),
   saveBadgeFeature: jest.fn(),
-  uploadBadgeFeatureImage: jest.fn(),
   removeBadgeFeatureImage: jest.fn()
 }));
 
@@ -30,7 +29,7 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 }));
 
 jest.mock(
-  "openstack-uicore-foundation/lib/components/inputs/upload-input",
+  "openstack-uicore-foundation/lib/components/inputs/upload-input-v3",
   () => ({
     __esModule: true,
     default: () => <div data-testid="upload-input" />
@@ -92,9 +91,9 @@ describe("EditBadgeFeaturePage", () => {
     saveBadgeFeature.mockReturnValue(() => Promise.resolve());
   });
 
-  it("hides the image upload until the badge feature has been saved", () => {
+  it("shows the image upload for a new badge feature", () => {
     renderPage(emptyEntity);
-    expect(screen.queryByTestId("upload-input")).not.toBeInTheDocument();
+    expect(screen.getByTestId("upload-input")).toBeInTheDocument();
   });
 
   it("shows the image upload for a saved badge feature", () => {
