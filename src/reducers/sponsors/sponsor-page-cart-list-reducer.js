@@ -170,15 +170,7 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
 
       return {
         ...state,
-        cartForm: {
-          ...cartForm,
-          items: [
-            ...cartForm.items.map((item) => ({
-              ...item,
-              notes: item.user_notes || ""
-            }))
-          ]
-        }
+        cartForm
       };
     }
     case SPONSOR_CART_NOTE_ADDED:
