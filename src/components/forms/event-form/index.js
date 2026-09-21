@@ -19,7 +19,6 @@ import moment from "moment-timezone";
 import { Tooltip } from "react-tooltip";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
-import GroupedDropdown from "openstack-uicore-foundation/lib/components/inputs/grouped-dropdown";
 import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
 import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input";
 import SpeakerInput from "openstack-uicore-foundation/lib/components/inputs/speaker-input";
@@ -1168,6 +1167,16 @@ class EventForm extends React.Component {
 
     const locations_ddl = [{ label: "TBD", value: 0 }, ...venues];
 
+    // Dropdown can't resolve a value nested inside a group's `options`,
+    // so rooms need to be pre-matched here rather than passed as a raw id
+    const flattened_locations_ddl = locations_ddl.reduce(
+      (acc, opt) => [...acc, opt, ...(opt.options || [])],
+      []
+    );
+    const selected_location =
+      flattened_locations_ddl.find((opt) => opt.value == entity.location_id) ||
+      null;
+
     const levels_ddl = levelOpts.map((l) => ({ label: l, value: l }));
 
     let selection_plans_ddl = [];
@@ -1517,9 +1526,9 @@ class EventForm extends React.Component {
           {this.shouldShowField("allows_location") && (
             <div className="col-md-4">
               <label> {T.translate("edit_event.location")} </label>
-              <GroupedDropdown
+              <Dropdown
                 id="location_id"
-                value={entity.location_id}
+                value={selected_location}
                 options={locations_ddl}
                 placeholder={T.translate(
                   "edit_event.placeholders.select_venue"
