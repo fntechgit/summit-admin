@@ -11,7 +11,8 @@ import {
 import {
   removeAttachedPicture,
   saveSpeaker,
-  getSpeakersBySummit
+  getSpeakersBySummit,
+  getSelectedSpeakersActivityCount
 } from "../speaker-actions";
 import * as methods from "../../utils/methods";
 
@@ -225,4 +226,70 @@ describe("getSpeakersBySummit - published filter", () => {
     );
     expect(filter.join(",")).not.toContain("has_published_presentations");
   });
+
+  it.each([
+    [true, "true"],
+    [false, "false"]
+  ])(
+    "maps pendingSubmissionsFilter %s to has_pending_presentations==%s",
+    async (pendingSubmissionsFilter, expectedFlag) => {
+      const store = mockStore(stateWithSummit);
+
+      await store.dispatch(
+        getSpeakersBySummit(null, 1, 10, "full_name", 1, {
+          pendingSubmissionsFilter
+        })
+      );
+
+      expect(listRequestFor().params["filter[]"]).toContain(
+        `has_pending_presentations==${expectedFlag}`
+      );
+    }
+  );
+
+  it("omits the pending-submissions filter when it is null", async () => {
+    const store = mockStore(stateWithSummit);
+
+    await store.dispatch(
+      getSpeakersBySummit(null, 1, 10, "full_name", 1, {
+        pendingSubmissionsFilter: null
+      })
+    );
+
+    const filter = listRequestFor().params["filter[]"] ?? [];
+    expect(filter.join(",")).not.toContain("has_pending_presentations");
+  });
+
+  it.each([
+    [true, "true"],
+    [false, "false"]
+  ])(
+    "maps pendingSubmissionsFilter %s to has_pending_presentations==%s on the selected-activity count request",
+    async (pendingSubmissionsFilter, expectedFlag) => {
+      const store = mockStore({
+        ...stateWithSummit,
+        currentSummitSpeakersListState: {
+          totalActivities: 0,
+          term: null,
+          selectedCount: 1,
+          selectedItems: [42],
+          excludedItems: [],
+          selectedAll: false,
+          selectionPlanFilter: [],
+          trackFilter: [],
+          trackGroupFilter: [],
+          activityTypeFilter: [],
+          selectionStatusFilter: [],
+          mediaUploadTypeFilter: { operator: null, value: [] },
+          pendingSubmissionsFilter
+        }
+      });
+
+      await store.dispatch(getSelectedSpeakersActivityCount());
+
+      expect(countRequestFor().params["filter[]"]).toContain(
+        `has_pending_presentations==${expectedFlag}`
+      );
+    }
+  );
 });

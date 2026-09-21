@@ -352,7 +352,7 @@ export const getSentEmails =
       createAction(RECEIVE_EMAILS),
       `${window.EMAIL_API_BASE_URL}/api/v1/mails`,
       authErrorHandler,
-      { order, orderDir, term, filters }
+      { order, orderDir, term, page, perPage, filters }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

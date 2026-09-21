@@ -30,11 +30,11 @@ jest.mock(
 );
 
 jest.mock(
-  "../components/sponsor-form-item-popup",
+  "../../../sponsors-global/form-templates/sponsor-inventory-popup",
   () =>
-    function MockSponsorFormItemPopup({ onRemoveImage }) {
+    function MockSponsorInventoryDialog({ onImageDeleted }) {
       return (
-        <button onClick={() => onRemoveImage(999)}>
+        <button onClick={() => onImageDeleted(999)}>
           mock-remove-item-image
         </button>
       );

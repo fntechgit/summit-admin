@@ -80,6 +80,20 @@ export const Destination = ({ name, booth }) => {
   );
 };
 
+// Values arrive display-ready from the API; reformatting here would desync the
+// screen from the CSV.
+const AdditionalFields = ({ fields }) => (
+  <>
+    {(fields ?? []).map((field, idx) => (
+      <Box
+        // Answers carry no id and labels are not unique — as with the row key below.
+        // eslint-disable-next-line react/no-array-index-key
+        key={`${field.label}-${idx}`}
+      >{`${field.label}: ${field.value}`}</Box>
+    ))}
+  </>
+);
+
 // Buckets flat per-line rows into sponsor groups, preserving first-seen order.
 //
 // Do NOT rely on row adjacency: the backend orders lines by sponsor NAME
@@ -119,6 +133,7 @@ const HEADERS = [
   { key: "col_destination" },
   { key: "col_checkout_at" },
   { key: "col_notes" },
+  { key: "col_additional_fields" },
   { key: "col_quantity", align: "right" },
   { key: "col_used_rate" },
   { key: "col_status" },
@@ -229,6 +244,9 @@ const LinesManifestView = ({
                         {formatCheckoutTime(line.purchase?.checkout_at)}
                       </TableCell>
                       <TableCell>{line.notes}</TableCell>
+                      <TableCell>
+                        <AdditionalFields fields={line.additional_fields} />
+                      </TableCell>
                       <TableCell align="right">
                         {line.is_partially_canceled
                           ? `${liveQuantity(line)} / ${line.quantity}`

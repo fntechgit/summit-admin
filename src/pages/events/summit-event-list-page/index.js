@@ -159,7 +159,7 @@ const SummitEventListPage = ({
   };
 
   const handlePerPageChange = (newPerPage) => {
-    _getEvents({ perPage: newPerPage });
+    _getEvents({ page: 1, perPage: newPerPage });
   };
 
   const handleSort = (index, key, dir) => {
@@ -341,6 +341,7 @@ const SummitEventListPage = ({
           variant="contained"
           onClick={handleNewEvent}
           startIcon={<AddIcon />}
+          sx={{ whiteSpace: "nowrap", flexShrink: 0, minWidth: 140 }}
         >
           {T.translate("event_list.add_event")}
         </Button>
@@ -350,7 +351,7 @@ const SummitEventListPage = ({
         <Button
           variant="outlined"
           onClick={handleMUXImport}
-          sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
+          sx={{ whiteSpace: "nowrap", flexShrink: 0, minWidth: 190 }}
         >
           {T.translate("event_list.mux_import")}
         </Button>
@@ -407,6 +408,7 @@ const SummitEventListPage = ({
             deleteDialogBody={(name) =>
               `${T.translate("event_list.delete_event_warning")} ${name}`
             }
+            showPageJump
           />
         </div>
       )}

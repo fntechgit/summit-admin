@@ -93,6 +93,7 @@
     "n_a": "N/A",
     "to": "To",
     "from": "From",
+    "add_new": "Add new",
     "placeholders": {
       "search": "Search...",
       "search_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id",
@@ -335,6 +336,7 @@
     "attendees": "Attendees",
     "registration": "Registration",
     "events": "Activities",
+    "published_speakers": "Published Speakers",
     "submitted_events": "Submitted Activities",
     "published_events": "Published Activities",
     "venues": "Venues",
@@ -3276,6 +3278,7 @@
     }
   },
   "emails": {
+    "emails": "Emails",
     "email_templates": "Email Templates",
     "sent": "Sent",
     "templates": "Templates",
@@ -3329,7 +3332,9 @@
   "email_logs": {
     "email_logs": "Email Logs",
     "email_list": "Email List",
-    "apply_filters": "Apply Filters",
+    "is_sent_filter": "Is Sent?",
+    "template_filter": "Template",
+    "not_sent": "Not Sent",
     "email_templates": "Email Templates",
     "subject": "Subject",
     "from_email": "From Email",
@@ -3337,13 +3342,7 @@
     "sent_date": "Sent Date",
     "last_error": "Last Error",
     "payload": "Payload",
-    "select_fields": "Show Columns",
-    "placeholders": {
-      "select_fields": "Select data to display",
-      "template": "Filter by Template",
-      "sent_date_from": "Filter Sent Date from",
-      "sent_date_to": "Filter Sent Date to"
-    }
+    "select_fields": "Show Columns"
   },
   "summitdoc": {
     "summitdocs": "Event Docs",
@@ -4137,13 +4136,6 @@
     "form_template_item_created": "Form Template Item created successfully.",
     "form_template_item_saved": "Form Template Item saved successfully."
   },
-  "mui_table": {
-    "no_items": "No items found.",
-    "rows_per_page": "Rows per page",
-    "sorted_desc": "sorted descending",
-    "sorted_asc": "sorted ascending",
-    "total": "Total"
-  },
   "event_rsvp_list": {
     "name": "Name",
     "no_rsvp": "No RSVP found.",
@@ -4405,6 +4397,7 @@
     "col_destination": "Destination",
     "col_checkout_at": "Checked Out At",
     "col_notes": "Notes",
+    "col_additional_fields": "Additional Fields",
     "col_quantity": "Qty",
     "col_sponsor": "Sponsor",
     "col_sponsor_note": "Sponsor Note",

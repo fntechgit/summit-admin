@@ -495,12 +495,17 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case REQUEST_SPONSOR_SPONSORSHIPS: {
-      const { order, orderDir } = payload;
+      const { order, orderDir, perPage } = payload;
       return {
         ...state,
-        sponsorships_collection: {
-          order,
-          orderDir
+        entity: {
+          ...state.entity,
+          sponsorships_collection: {
+            ...state.entity.sponsorships_collection,
+            order,
+            orderDir,
+            perPage
+          }
         }
       };
     }

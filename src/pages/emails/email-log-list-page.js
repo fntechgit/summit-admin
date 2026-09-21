@@ -14,64 +14,70 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Pagination } from "react-bootstrap";
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import Table from "openstack-uicore-foundation/lib/components/table"
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import { SegmentedControl } from "segmented-control";
-import { getSentEmails } from "../../actions/email-actions";
-import "../../styles/email-logs-page.less";
-import EmailTemplateInput from "../../components/inputs/email-template-input";
 import {
-  DATE_FILTER_ARRAY_SIZE,
-  DEFAULT_CURRENT_PAGE
-} from "../../utils/constants";
+  Box,
+  FormControl,
+  Grid2,
+  InputLabel,
+  MenuItem,
+  OutlinedInput,
+  Select
+} from "@mui/material";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import {
+  GridFilter,
+  useGridFilter
+} from "openstack-uicore-foundation/lib/components/mui/grid-filter";
+import { getSentEmails } from "../../actions/email-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+import { buildEmailFilters, getCriterias } from "./email-log-list-page.helpers";
 
-const SentEmailListPage = function ({
+const FILTER_ID = "email_log_list";
+
+const SentEmailListPage = ({
   emails,
-  lastPage,
   currentPage,
   term,
   order,
   orderDir,
   totalEmails,
-  match,
   perPage,
-  filters,
-  getSentEmails,
-  ...props
-}) {
+  getSentEmails
+}) => {
+  const { parsedFilter, filterValues } = useGridFilter(FILTER_ID);
+  const emailFilters = buildEmailFilters(filterValues);
+
   useEffect(() => {
-    getSentEmails(term, currentPage, perPage, order, orderDir, filters);
-  }, []);
+    getSentEmails(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      emailFilters
+    );
+  }, [parsedFilter.join(",")]);
 
-  const defaultFilters = {
-    is_sent_filter: null,
-    sent_date_filter: Array(DATE_FILTER_ARRAY_SIZE).fill(null),
-    template_filter: ""
-  };
-
-  const [enabledFilters, setEnabledFilters] = useState(
-    Object.keys(filters).filter((e) =>
-      Array.isArray(filters[e])
-        ? filters[e]?.some((e) => e !== null)
-        : filters[e]?.length > 0
-    )
-  );
-  const [emailFilters, setEmailFilters] = useState({
-    ...defaultFilters,
-    ...filters
-  });
   const [selectedColumns, setSelectedColumns] = useState([]);
 
   const handlePageChange = (newPage) => {
     getSentEmails(term, newPage, perPage, order, orderDir, emailFilters);
   };
 
-  const handleSort = (index, key, dir, func) => {
-    getSentEmails(term, currentPage, perPage, key, dir, emailFilters);
+  const handleSort = (key, dir) => {
+    getSentEmails(term, DEFAULT_CURRENT_PAGE, perPage, key, dir, emailFilters);
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    getSentEmails(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir,
+      emailFilters
+    );
   };
 
   const handleSearch = (newTerm) => {
@@ -88,93 +94,18 @@ const SentEmailListPage = function ({
   const handleDDLSortByLabel = (ddlArray) =>
     ddlArray.sort((a, b) => a.label.localeCompare(b.label));
 
-  const handleFiltersChange = (ev) => {
-    const { value } = ev.target;
-    if (value.length < enabledFilters.length) {
-      if (value.length === 0) {
-        setEnabledFilters(value);
-        setEmailFilters(defaultFilters);
-      } else {
-        const removedFilter = enabledFilters.filter(
-          (e) => !value.includes(e)
-        )[0];
-        const defaultValue = Array.isArray(emailFilters[removedFilter])
-          ? []
-          : "";
-        const newEventFilters = {
-          ...emailFilters,
-          [removedFilter]: defaultValue
-        };
-        setEnabledFilters(value);
-        setEmailFilters(newEventFilters);
-      }
-    } else {
-      setEnabledFilters(value);
-    }
-  };
-
-  const handleChangeDateFilter = (ev, lastDate) => {
-    const { value, id } = ev.target;
-    const newDateFilter = emailFilters[id];
-
-    setEmailFilters({
-      ...emailFilters,
-      [id]: lastDate
-        ? [newDateFilter[0], value.unix()]
-        : [value.unix(), newDateFilter[1]]
-    });
-  };
-
-  const handleEmailFilterChange = (ev) => {
-    const { type, id } = ev.target;
-    let { value } = ev.target;
-    if (type === "operatorinput") {
-      value = Array.isArray(value)
-        ? value
-        : `${ev.target.operator}${ev.target.value}`;
-      if (id === "duration_filter") {
-        value = Array.isArray(value)
-          ? value
-          : `${ev.target.operator}${ev.target.value}`;
-      }
-    }
-    if (type === "mediatypeinput") {
-      value = {
-        operator: ev.target.operator,
-        value: ev.target.value
-      };
-    }
-    setEmailFilters({ ...emailFilters, [id]: value });
-  };
-
   const handleColumnsChange = (ev) => {
     const { value } = ev.target;
-    const newColumns = value;
-
-    setSelectedColumns(newColumns);
-  };
-
-  const handleSetSentFilter = (ev) => {
-    setEmailFilters({ ...emailFilters, is_sent_filter: ev });
-  };
-
-  const handleApplyEmailFilters = () => {
-    getSentEmails(
-      term,
-      DEFAULT_CURRENT_PAGE,
-      perPage,
-      order,
-      orderDir,
-      emailFilters
-    );
+    setSelectedColumns(value);
   };
 
   const fieldNames = [
-    { columnKey: "last_error", value: "last_error" },
+    { columnKey: "last_error", header: "last_error" },
     {
       columnKey: "payload",
-      value: "payload",
-      render: (row, data) => <div className="email-table-payload">{data}</div>
+      header: "payload",
+      width: 300,
+      render: (row) => row.payload
     }
   ];
 
@@ -183,7 +114,7 @@ const SentEmailListPage = function ({
     .map((f2) => {
       let c = {
         columnKey: f2.columnKey,
-        value: T.translate(`email_logs.${f2.value}`),
+        header: T.translate(`email_logs.${f2.header}`),
         sortable: f2.sortable
       };
       // optional fields
@@ -191,27 +122,27 @@ const SentEmailListPage = function ({
 
       if (f2.hasOwnProperty("render")) c = { ...c, render: f2.render };
 
+      if (f2.hasOwnProperty("width")) c = { ...c, width: f2.width };
+
       return c;
     });
 
   let columns = [
-    { columnKey: "id", value: T.translate("general.id"), sortable: true },
+    { columnKey: "id", header: T.translate("general.id"), sortable: true },
     {
       columnKey: "template",
-      value: T.translate("email_logs.email_templates"),
-      styles: { wordBreak: "break-all" },
+      header: T.translate("email_logs.email_templates"),
       sortable: true
     },
-    { columnKey: "subject", value: T.translate("email_logs.subject") },
-    { columnKey: "from_email", value: T.translate("email_logs.from_email") },
+    { columnKey: "subject", header: T.translate("email_logs.subject") },
+    { columnKey: "from_email", header: T.translate("email_logs.from_email") },
     {
       columnKey: "to_email",
-      value: T.translate("email_logs.to_email"),
-      styles: { wordBreak: "break-word" }
+      header: T.translate("email_logs.to_email")
     },
     {
       columnKey: "sent_date",
-      value: T.translate("email_logs.sent_date"),
+      header: T.translate("email_logs.sent_date"),
       sortable: true
     }
   ];
@@ -228,180 +159,91 @@ const SentEmailListPage = function ({
     sortDir: orderDir
   };
 
-  const filters_ddl = [
-    { label: "Is Sent?", value: "is_sent_filter" },
-    { label: "Sent Date", value: "sent_date_filter" },
-    { label: "Template", value: "template_filter" }
-  ];
-
   return (
     <div className="container">
-      <h3>
-        {" "}
-        {T.translate("email_logs.email_list")} ({totalEmails})
-      </h3>
-      <div className="row">
-        <div className="col-md-6">
-          <FreeTextSearch
-            value={term}
-            placeholder={T.translate("emails.placeholders.search_emails")}
-            onSearch={handleSearch}
-          />
-        </div>
-      </div>
-      <hr />
-      <div className="row">
-        <div className="col-md-6">
-          <Dropdown
-            id="enabled_filters"
-            placeholder="Enabled Filters"
-            value={enabledFilters}
-            onChange={handleFiltersChange}
-            options={handleDDLSortByLabel(filters_ddl)}
-            isClearable
-            isMulti
-          />
-        </div>
-        <div className="col-md-6">
-          <button
-            className="btn btn-primary right-space"
-            onClick={handleApplyEmailFilters}
-            type="button"
-          >
-            {T.translate("email_logs.apply_filters")}
-          </button>
-        </div>
-      </div>
-      <div className="filters-row">
-        {enabledFilters.includes("is_sent_filter") && (
-          <div className="col-md-6">
-            <SegmentedControl
-              name="is_sent_filter"
-              options={[
-                {
-                  label: "All",
-                  value: null,
-                  default: emailFilters.is_sent_filter === null
-                },
-                {
-                  label: "Sent",
-                  value: "1",
-                  default: emailFilters.is_sent_filter === "1"
-                },
-                {
-                  label: "Not Sent",
-                  value: "0",
-                  default: emailFilters.is_sent_filter === "0"
-                }
-              ]}
-              setValue={(newValue) => handleSetSentFilter(newValue)}
-              style={{
-                width: "100%",
-                height: 40,
-                color: "#337ab7",
-                fontSize: "10px"
-              }}
+      <h3> {T.translate("email_logs.email_list")}</h3>
+      <Grid2
+        container
+        spacing={2}
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+        <Grid2 size={2}>
+          <Box component="span">
+            {totalEmails} {T.translate("emails.emails")}
+          </Box>
+        </Grid2>
+        <Grid2
+          container
+          size={10}
+          spacing={1}
+          gap={1}
+          sx={{
+            justifyContent: "flex-end",
+            alignItems: "center"
+          }}
+        >
+          <Grid2 size={6}>
+            <SearchInput
+              term={term}
+              onSearch={handleSearch}
+              placeholder={T.translate("emails.placeholders.search_emails")}
             />
-          </div>
-        )}
-        {enabledFilters.includes("sent_date_filter") && (
-          <>
-            <div className="col-md-3">
-              <DateTimePicker
-                id="sent_date_filter"
-                format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                inputProps={{
-                  placeholder: T.translate(
-                    "email_logs.placeholders.sent_date_from"
-                  )
-                }}
-                onChange={(ev) => handleChangeDateFilter(ev, false)}
-                timezone="UTC"
-                value={epochToMomentTimeZone(
-                  emailFilters.sent_date_filter[0],
-                  "UTC"
-                )}
-                className="event-list-date-picker"
-              />
-            </div>
-            <div className="col-md-3">
-              <DateTimePicker
-                id="sent_date_filter"
-                format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                inputProps={{
-                  placeholder: T.translate(
-                    "email_logs.placeholders.sent_date_to"
-                  )
-                }}
-                onChange={(ev) => handleChangeDateFilter(ev, true)}
-                timezone="UTC"
-                value={epochToMomentTimeZone(
-                  emailFilters.sent_date_filter[1],
-                  "UTC"
-                )}
-                className="event-list-date-picker"
-              />
-            </div>
-          </>
-        )}
-        {enabledFilters.includes("template_filter") && (
-          <div className="col-md-6">
-            <EmailTemplateInput
-              id="template_filter"
-              value={emailFilters.template_filter}
-              placeholder={T.translate("email_logs.placeholders.template")}
-              onChange={handleEmailFilterChange}
-              isClearable
-              cacheOptions
-              defaultOptions
-              plainValue
-            />
-          </div>
-        )}
-      </div>
-      <div className="row" style={{ marginBottom: 15 }}>
-        <div className="col-md-12">
-          <label htmlFor="select_fields">
+          </Grid2>
+          <GridFilter
+            id={FILTER_ID}
+            criterias={getCriterias()}
+            hideJoinOperators
+          />
+        </Grid2>
+      </Grid2>
+      <Grid2 sx={{ mb: 2 }}>
+        <FormControl fullWidth size="small">
+          <InputLabel id="select_fields-label">
             {T.translate("email_logs.select_fields")}
-          </label>
-          <Dropdown
+          </InputLabel>
+          <Select
+            labelId="select_fields-label"
             id="select_fields"
-            placeholder={T.translate("email_logs.placeholders.select_fields")}
+            multiple
             value={selectedColumns}
             onChange={handleColumnsChange}
-            options={handleDDLSortByLabel(ddl_columns)}
-            isClearable
-            isMulti
-          />
-        </div>
-      </div>
+            input={
+              <OutlinedInput label={T.translate("email_logs.select_fields")} />
+            }
+            renderValue={(selected) =>
+              handleDDLSortByLabel(ddl_columns)
+                .filter((option) => selected.includes(option.value))
+                .map((option) => option.label)
+                .join(", ")
+            }
+          >
+            {handleDDLSortByLabel(ddl_columns).map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Grid2>
 
       {emails.length === 0 && <div>{T.translate("emails.no_emails")}</div>}
 
       {emails.length > 0 && (
-        <>
-          <div className="email-logs-table-wrapper">
-            <Table
-              options={table_options}
-              data={emails}
-              columns={columns}
-              onSort={handleSort}
-            />
-          </div>
-          <Pagination
-            bsSize="medium"
-            prev
-            next
-            first
-            last
-            ellipsis
-            boundaryLinks
-            maxButtons={10}
-            items={lastPage}
-            activePage={currentPage}
-            onSelect={handlePageChange}
-          />
-        </>
+        <MuiTable
+          options={table_options}
+          data={emails}
+          columns={columns}
+          onSort={handleSort}
+          perPage={perPage}
+          currentPage={currentPage}
+          totalRows={totalEmails}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+        />
       )}
     </div>
   );

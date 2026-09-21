@@ -321,7 +321,7 @@ export const getEvents =
       createAction(RECEIVE_EVENTS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events`,
       authErrorHandler,
-      { order, orderDir, term, summitTZ, filters, extraColumns }
+      { order, perPage, orderDir, term, summitTZ, filters, extraColumns }
     )(params)(dispatch).then((data) => {
       dispatch(stopLoading());
       return data.response;

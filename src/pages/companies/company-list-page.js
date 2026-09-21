@@ -11,58 +11,28 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import GridToolbar from "../../components/mui/grid-toolbar";
-import {
-  getCompanies,
-  getCompany,
-  deleteCompany,
-  saveCompany,
-  resetCompanyForm,
-  attachLogo,
-  removeLogo
-} from "../../actions/company-actions";
-import {
-  getSponsoredProjects,
-  saveSupportingCompany,
-  deleteSupportingCompany
-} from "../../actions/sponsored-project-actions";
-import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../utils/constants";
-import CompanyDialog from "./components/company-dialog";
+import { getCompanies, deleteCompany } from "../../actions/company-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
 const CompanyListPage = ({
   companies,
-  currentCompany,
   term,
   order,
   orderDir,
   currentPage,
   perPage,
   totalCompanies,
+  history,
   getCompanies,
-  getCompany,
-  deleteCompany,
-  saveCompany,
-  resetCompanyForm,
-  attachLogo,
-  removeLogo,
-  getSponsoredProjects,
-  saveSupportingCompany,
-  deleteSupportingCompany,
-  sponsoredProjects
+  deleteCompany
 }) => {
-  const [companyPopup, setCompanyPopup] = useState(false);
-
-  useEffect(() => {
-    if (window.APP_CLIENT_NAME === "openstack")
-      getSponsoredProjects("", 1, MAX_PER_PAGE);
-  }, []);
-
   const columns = [
     { columnKey: "id", header: "Id", sortable: true },
     { columnKey: "name", header: T.translate("general.name"), sortable: true },
@@ -83,7 +53,7 @@ const CompanyListPage = ({
   }, []);
 
   const handleEdit = (company) => {
-    getCompany(company.id).then(() => setCompanyPopup(true));
+    history.push(`/app/companies/${company.id}`);
   };
 
   const handleDelete = (companyId) => {
@@ -109,17 +79,7 @@ const CompanyListPage = ({
   };
 
   const handleNewCompany = () => {
-    resetCompanyForm();
-    setCompanyPopup(true);
-  };
-
-  const handleSave = (entity) =>
-    saveCompany(entity).then(() =>
-      getCompanies(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
-    );
-
-  const handleClose = () => {
-    setCompanyPopup(false);
+    history.push("/app/companies/new");
   };
 
   return (
@@ -166,42 +126,15 @@ const CompanyListPage = ({
       {companies.length === 0 && (
         <div>{T.translate("company_list.no_results")}</div>
       )}
-
-      {companyPopup && (
-        <CompanyDialog
-          entity={currentCompany}
-          onClose={handleClose}
-          onSave={handleSave}
-          onAttach={attachLogo}
-          onRemove={removeLogo}
-          onAddSponsorship={saveSupportingCompany}
-          onDeleteSponsorship={deleteSupportingCompany}
-          sponsoredProjects={sponsoredProjects}
-        />
-      )}
     </div>
   );
 };
 
-const mapStateToProps = ({
-  currentCompanyListState,
-  sponsoredProjectListState,
-  currentCompanyState
-}) => ({
-  ...currentCompanyListState,
-  currentCompany: currentCompanyState.entity,
-  sponsoredProjects: sponsoredProjectListState.sponsoredProjects
+const mapStateToProps = ({ currentCompanyListState }) => ({
+  ...currentCompanyListState
 });
 
 export default connect(mapStateToProps, {
   getCompanies,
-  getCompany,
-  deleteCompany,
-  saveCompany,
-  resetCompanyForm,
-  getSponsoredProjects,
-  saveSupportingCompany,
-  deleteSupportingCompany,
-  attachLogo,
-  removeLogo
+  deleteCompany
 })(CompanyListPage);
