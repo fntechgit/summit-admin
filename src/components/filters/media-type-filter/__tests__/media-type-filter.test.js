@@ -1,48 +1,54 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import MediaTypeFilter from "..";
+import { getAllMediaUploadTypes } from "../../../../actions/media-upload-actions";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   translate: (key) => key
 }));
 
-jest.mock("react-select", () => function MockSelect({ id, value, options, onChange }) {
-    return (
-      <select
-        aria-label={id}
-        data-testid="operator-select"
-        value={value?.value || ""}
-        onChange={(e) => {
-          const option =
-            options.find((o) => o.value === e.target.value) || null;
-          onChange(option);
-        }}
-      >
-        <option value="">none</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    );
-  });
+jest.mock("../../../../actions/media-upload-actions", () => ({
+  getAllMediaUploadTypes: jest.fn()
+}));
 
-jest.mock("../../../inputs/media-upload-type-input", () => function MockMediaUploadTypeInput({ id, value, onChange }) {
-    return (
-      <input
-        data-testid="media-upload-type-input"
-        id={id}
-        value={value || ""}
-        onChange={(e) => onChange({ target: { value: e.target.value } })}
-      />
-    );
-  });
+// Mirrors the real Dropdown (react-select) wrapper's isMulti contract:
+// value/onChange both deal in a flat array of raw option ids.
+jest.mock(
+  "openstack-uicore-foundation/lib/components/inputs/dropdown",
+  () =>
+    function MockDropdown({ id, value, options, onChange }) {
+      return (
+        <select
+          multiple
+          data-testid="media-type-dropdown"
+          aria-label={id}
+          value={value}
+          onChange={(e) => {
+            const selected = Array.from(
+              e.target.selectedOptions,
+              (option) => option.value
+            );
+            onChange({ target: { id, value: selected } });
+          }}
+        >
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      );
+    }
+);
 
 describe("MediaTypeFilter", () => {
+  const mediaTypes = [
+    { id: "1", name: "Video" },
+    { id: "2", name: "Slides" }
+  ];
+
   const baseProps = {
     onChange: jest.fn(),
-    operatorInitialValue: null,
     filterInitialValue: null,
     id: "media-type-filter",
     summitId: 1
@@ -50,85 +56,52 @@ describe("MediaTypeFilter", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    getAllMediaUploadTypes.mockResolvedValue(mediaTypes);
   });
 
-  test("does not crash when selecting media type before selecting operator", () => {
+  test("loads the available media types for the given summit", async () => {
     render(<MediaTypeFilter {...baseProps} />);
 
-    expect(() => {
-      fireEvent.change(screen.getByTestId("media-upload-type-input"), {
-        target: { value: "video" }
-      });
-    }).not.toThrow();
+    await waitFor(() => expect(getAllMediaUploadTypes).toHaveBeenCalledWith(1));
+    expect(screen.getByText("Video")).toBeInTheDocument();
+    expect(screen.getByText("Slides")).toBeInTheDocument();
+  });
 
-    expect(baseProps.onChange).toHaveBeenCalledTimes(1);
+  test("selecting a media type reports it as an inclusive filter", async () => {
+    render(<MediaTypeFilter {...baseProps} />);
+    await waitFor(() => screen.getByText("Video"));
+
+    const select = screen.getByTestId("media-type-dropdown");
+    select.querySelector("option[value='1']").selected = true;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+
     expect(baseProps.onChange).toHaveBeenCalledWith({
       target: {
         id: "media-type-filter",
-        value: "video",
-        type: "mediatypeinput",
-        operator: null
-      }
-    });
-  });
-
-  test("keeps existing behavior when selecting operator first and then value", () => {
-    render(<MediaTypeFilter {...baseProps} />);
-
-    fireEvent.change(screen.getByTestId("operator-select"), {
-      target: { value: "has_media_upload_with_type==" }
-    });
-
-    fireEvent.change(screen.getByTestId("media-upload-type-input"), {
-      target: { value: "slides" }
-    });
-
-    expect(baseProps.onChange).toHaveBeenCalledTimes(2);
-    expect(baseProps.onChange).toHaveBeenNthCalledWith(1, {
-      target: {
-        id: "media-type-filter",
-        value: null,
-        type: "mediatypeinput",
-        operator: "has_media_upload_with_type=="
-      }
-    });
-    expect(baseProps.onChange).toHaveBeenNthCalledWith(2, {
-      target: {
-        id: "media-type-filter",
-        value: "slides",
+        value: [{ id: "1", name: "Video" }],
         type: "mediatypeinput",
         operator: "has_media_upload_with_type=="
       }
     });
   });
 
-  test("does not crash when clearing operator and re-selecting filter value", () => {
+  test("clearing the selection clears the filter", async () => {
     render(
       <MediaTypeFilter
         {...baseProps}
-        operatorInitialValue="has_media_upload_with_type=="
+        filterInitialValue={[{ id: "1", name: "Video" }]}
       />
     );
+    await waitFor(() => screen.getByText("Video"));
 
-    fireEvent.change(screen.getByTestId("media-upload-type-input"), {
-      target: { value: "video" }
-    });
+    const select = screen.getByTestId("media-type-dropdown");
+    select.querySelector("option[value='1']").selected = false;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
 
-    fireEvent.change(screen.getByTestId("operator-select"), {
-      target: { value: "" }
-    });
-
-    expect(() => {
-      fireEvent.change(screen.getByTestId("media-upload-type-input"), {
-        target: { value: "slides" }
-      });
-    }).not.toThrow();
-
-    expect(baseProps.onChange).toHaveBeenCalledTimes(2);
-    expect(baseProps.onChange).toHaveBeenLastCalledWith({
+    expect(baseProps.onChange).toHaveBeenCalledWith({
       target: {
         id: "media-type-filter",
-        value: "slides",
+        value: [],
         type: "mediatypeinput",
         operator: null
       }

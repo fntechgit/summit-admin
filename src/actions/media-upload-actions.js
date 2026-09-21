@@ -28,7 +28,11 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import debounce from "lodash/debounce";
 import { getAccessTokenSafely } from "../utils/methods";
-import { DEBOUNCE_WAIT, DEFAULT_PER_PAGE } from "../utils/constants";
+import {
+  DEBOUNCE_WAIT,
+  DEFAULT_PER_PAGE,
+  MAX_PER_PAGE
+} from "../utils/constants";
 
 URI.escapeQuerySpace = false;
 
@@ -141,6 +145,22 @@ export const queryMediaUploads = debounce(async (summitId, input, callback) => {
     })
     .catch(fetchErrorHandler);
 }, DEBOUNCE_WAIT);
+
+export const getAllMediaUploadTypes = async (summitId) => {
+  const accessToken = await getAccessTokenSafely();
+  const apiUrl = URI(
+    `${window.API_BASE_URL}/api/v1/summits/${summitId}/media-upload-types`
+  );
+
+  apiUrl.addQuery("access_token", accessToken);
+  apiUrl.addQuery("order", "name");
+  apiUrl.addQuery("per_page", MAX_PER_PAGE);
+
+  return fetch(apiUrl.toString())
+    .then(fetchResponseHandler)
+    .then((json) => json.data)
+    .catch(fetchErrorHandler);
+};
 
 export const resetMediaUploadForm = () => (dispatch) => {
   dispatch(createAction(RESET_MEDIA_UPLOAD_FORM)({}));
