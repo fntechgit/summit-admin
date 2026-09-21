@@ -69,7 +69,14 @@ const RegistrationCompaniesListPage = ({
   const handleEditCompany = (company) =>
     history.push(`/app/companies/${company.id}`);
 
-  const handleSearch = (searchTerm) => getRegistrationCompanies(searchTerm);
+  const handleSearch = (searchTerm) =>
+    getRegistrationCompanies(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir
+    );
 
   const handlePageChange = (page) =>
     getRegistrationCompanies(term, page, perPage, order, orderDir);
