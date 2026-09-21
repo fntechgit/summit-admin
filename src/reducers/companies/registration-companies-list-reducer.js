@@ -9,7 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 import {
   REQUEST_REGISTRATION_COMPANIES,
@@ -19,7 +21,6 @@ import {
 } from "../../actions/registration-companies-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
   companies: [],
@@ -40,18 +41,18 @@ const registrationCompanyListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_REGISTRATION_COMPANIES: {
-      let { order, orderDir, term, page } = payload;
-      return { ...state, order, orderDir, term, currentPage: page };
+      const { order, orderDir, perPage, term, page } = payload;
+      return { ...state, order, orderDir, term, perPage, currentPage: page };
     }
     case RECEIVE_REGISTRATION_COMPANIES: {
-      let { current_page, total, last_page } = payload.response;
-      let companies = payload.response.data.map((c) => ({
+      const { current_page, total, last_page } = payload.response;
+      const companies = payload.response.data.map((c) => ({
         ...c
       }));
 
       return {
         ...state,
-        companies: companies,
+        companies,
         currentPage: current_page,
         totalCompanies: total,
         lastPage: last_page
@@ -61,7 +62,7 @@ const registrationCompanyListReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, companies: [...state.companies, payload.entity] };
     }
     case REGISTRATION_COMPANY_DELETED: {
-      let { companyId } = payload;
+      const { companyId } = payload;
       return {
         ...state,
         companies: state.companies.filter((s) => s.id !== companyId)
