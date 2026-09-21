@@ -11,99 +11,54 @@
  * limitations under the License.
  * */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
-import Select from "react-select";
-import MediaUploadTypeInput from "../../inputs/media-upload-type-input";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import { getAllMediaUploadTypes } from "../../../actions/media-upload-actions";
 
-import styles from "./index.module.less";
+const MediaTypeFilter = ({ onChange, filterInitialValue, id, summitId }) => {
+  const [mediaTypes, setMediaTypes] = useState([]);
 
-const MediaTypeFilter = ({
-  onChange,
-  operatorInitialValue,
-  filterInitialValue,
-  id,
-  summitId
-}) => {
-  const operatorOptions = [
-    {
-      label: T.translate("media_upload_type_filter.has_media_upload"),
-      value: "has_media_upload_with_type=="
-    },
-    {
-      label: T.translate("media_upload_type_filter.has_not_media_upload"),
-      value: "has_not_media_upload_with_type=="
-    }
-  ];
+  useEffect(() => {
+    getAllMediaUploadTypes(summitId).then((types) =>
+      setMediaTypes(types || [])
+    );
+  }, [summitId]);
 
-  const [operatorValue, setOperatorValue] = useState(
-    operatorInitialValue
-      ? operatorOptions.find((o) => o.value === operatorInitialValue)
-      : null
-  );
-  const [filterValue, setFilterValue] = useState(filterInitialValue || null);
+  const options = mediaTypes.map((mediaType) => ({
+    label: mediaType.name,
+    value: mediaType.id
+  }));
 
-  const onChangeOperator = (newOperatorValue) => {
-    setOperatorValue(newOperatorValue);
-    if (newOperatorValue?.value == null) return;
+  const value = (filterInitialValue || []).map((mediaType) => mediaType.id);
 
-    const ev = {
+  const handleChange = (ev) => {
+    const selectedIds = ev.target.value || [];
+    const selectedTypes = mediaTypes.filter((mediaType) =>
+      selectedIds.includes(mediaType.id)
+    );
+
+    onChange({
       target: {
         id,
-        value: filterValue,
+        value: selectedTypes,
         type: "mediatypeinput",
-        operator: newOperatorValue?.value ?? null
+        operator:
+          selectedTypes.length > 0 ? "has_media_upload_with_type==" : null
       }
-    };
-    onChange(ev);
-  };
-
-  const onChangeFilterValue = (newFilterValue) => {
-    const { value } = newFilterValue.target;
-    setFilterValue(value);
-    const ev = {
-      target: {
-        id,
-        value,
-        type: "mediatypeinput",
-        operator: operatorValue?.value ?? null
-      }
-    };
-    onChange(ev);
+    });
   };
 
   return (
-    <div className={`${styles.mediaTypeFilterWrapper} row`} id={id}>
-      <div className="col-xs-4">
-        {T.translate("media_upload_type_filter.media_type")}
-      </div>
-      <div className="col-xs-4">
-        <Select
-          id={`${id}_operator`}
-          value={operatorValue}
-          placeholder={T.translate(
-            "media_upload_type_filter.placeholders.operator"
-          )}
-          options={operatorOptions}
-          onChange={onChangeOperator}
-        />
-      </div>
-      <div className="col-xs-4">
-        <MediaUploadTypeInput
-          id={`${id}_value`}
-          value={filterValue}
-          placeholder={T.translate(
-            `${
-              operatorValue?.value
-                ? `media_upload_type_filter.placeholders.${operatorValue.value}`
-                : ""
-            }`
-          )}
-          summitId={summitId}
-          onChange={onChangeFilterValue}
-        />
-      </div>
-    </div>
+    <Dropdown
+      id={id}
+      value={value}
+      onChange={handleChange}
+      options={options}
+      isClearable
+      isMulti
+      placeholder={T.translate("media_upload_type_filter.media_type")}
+    />
   );
 };
 
