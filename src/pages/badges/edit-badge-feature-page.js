@@ -23,8 +23,7 @@ import {
   getBadgeFeature,
   resetBadgeFeatureForm,
   saveBadgeFeature,
-  removeBadgeFeatureImage,
-  uploadBadgeFeatureImage
+  removeBadgeFeatureImage
 } from "../../actions/badge-actions";
 import AddNewButton from "../../components/buttons/add-new-button";
 import {
@@ -36,7 +35,8 @@ export const buildValues = (entity) => ({
   id: entity?.id ?? 0,
   name: entity?.name ?? "",
   description: entity?.description ?? "",
-  template_content: entity?.template_content ?? ""
+  template_content: entity?.template_content ?? "",
+  image: entity?.image ?? null
 });
 
 export const validationSchema = yup.object().shape({
@@ -53,7 +53,6 @@ const EditBadgeFeaturePage = ({
   getBadgeFeature,
   resetBadgeFeatureForm,
   saveBadgeFeature,
-  uploadBadgeFeatureImage,
   removeBadgeFeatureImage
 }) => {
   const badgeFeatureId = match.params.badge_feature_id;
@@ -104,7 +103,6 @@ const EditBadgeFeaturePage = ({
         <Box component="form" onSubmit={formik.handleSubmit} noValidate>
           <BadgeFeatureTypeForm
             entity={entity}
-            onUploadImage={uploadBadgeFeatureImage}
             onRemoveImage={removeBadgeFeatureImage}
           />
           <Divider sx={{ mb: 2 }} />
@@ -132,6 +130,5 @@ export default connect(mapStateToProps, {
   getBadgeFeature,
   resetBadgeFeatureForm,
   saveBadgeFeature,
-  removeBadgeFeatureImage,
-  uploadBadgeFeatureImage
+  removeBadgeFeatureImage
 })(EditBadgeFeaturePage);
