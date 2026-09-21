@@ -1166,8 +1166,16 @@
     "items_qty": "Selected {qty} Speakers | {activitiesQty} Activities",
     "placeholders": {
       "search_speakers": "Search by Full Name, Email, Speaker Id, Member Id, Title Or Abstract",
-      "test_recipient": "Optional Test Recipient"
+      "test_recipient": "Optional Test Recipient",
+      "selection_plan_filter": "Filter By Selection Plan",
+      "track_filter": "Filter By Track",
+      "track_group_filter": "Filter By Track Group",
+      "activity_type_filter": "Filter By Activity Type",
+      "selection_status_filter": "Filter By Selection Status",
+      "pending_submissions_filter": "Filter By Pending Submissions",
+      "media_upload_filter": "Filter by Media Upload Type"
     },
+    "email_section_title": "Email Speakers",
     "speakers": "Speakers",
     "submitters": "Submitters"
   },
@@ -3895,14 +3903,7 @@
     "following": " of the following: "
   },
   "media_upload_type_filter": {
-    "media_type": "Media Upload Types",
-    "has_media_upload": "Has",
-    "has_not_media_upload": "Has Not",
-    "placeholders": {
-      "has_media_upload_with_type==": "Select the Media Upload Types to include",
-      "has_not_media_upload_with_type==": "Select the Media Upload Types to exclude",
-      "operator": "'Has' or 'Has Not' Media Upload Types"
-    }
+    "media_type": "Filter By Media Upload Type"
   },
   "edit_reg_feed_metadata": {
     "reg_feed_metadata": "Registration Feed Metadata",
