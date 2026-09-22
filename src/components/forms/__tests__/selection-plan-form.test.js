@@ -23,13 +23,10 @@ jest.mock(
   () => ({ __esModule: true, default: () => null })
 );
 
-jest.mock(
-  "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog",
-  () => ({
-    __esModule: true,
-    default: jest.fn(() => Promise.resolve(true))
-  })
-);
+jest.mock("../../mui/showConfirmDialog", () => ({
+  __esModule: true,
+  default: jest.fn(() => Promise.resolve(true))
+}));
 
 jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => ({
   __esModule: true,
