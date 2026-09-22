@@ -811,7 +811,8 @@
     "speaker_created": "Speaker created successfully.",
     "company": "Company",
     "phone_number": "Phone #",
-    "copy_email": "Copy Email"
+    "copy_email": "Copy Email",
+    "disclaimer": "All information on this page — bio, photos, affiliations, company, title, social links, etc. — <strong>except email and phone number</strong> — is considered public information and may be published or displayed by any show on the platform."
   },
   "merge_speakers": {
     "merge_speakers": "Merge Speakers",
@@ -1164,13 +1165,15 @@
     "resend_done": "Emails sent successfully.",
     "send_emails_title": "You are about to send an EMAIL BLAST to selected speakers !",
     "should_send_copy_2_submitter": "Also send to submitter?",
+    "should_resend": "Resend to already-sent {users}?",
     "allows_to_reassign": "Allow to reassign?",
     "items_qty": "Selected {qty} Speakers | {activitiesQty} Activities",
     "placeholders": {
       "search_speakers": "Search by Full Name, Email, Speaker Id, Member Id, Title Or Abstract",
       "test_recipient": "Optional Test Recipient"
     },
-    "speakers": "Speakers"
+    "speakers": "Speakers",
+    "submitters": "Submitters"
   },
   "summit_submitters_list": {
     "summit_submitters_list": "Summit Submitters List",
