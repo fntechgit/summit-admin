@@ -50,13 +50,13 @@ export const getGlobalItems = () => [
         ]
       },
       { name: "page_templates", linkUrl: "page-templates" },
-      { name: "add_on_types", linkUrl: "add-on-types" }
+      { name: "add_on_types", linkUrl: "add-on-types" },
+      {
+        name: "sponsorship_types",
+        linkUrl: "sponsorship-types",
+        accessRoute: "sponsorship-types"
+      }
     ]
-  },
-  {
-    name: "sponsorship_types",
-    linkUrl: "sponsorship-types",
-    accessRoute: "sponsorship-types"
   },
   {
     name: "tags",
@@ -185,13 +185,13 @@ export const getSummitItems = (summitId) => [
         isGroup: true,
         subItems: [
           {
-            name: "submission_invitations",
-            linkUrl: `summits/${summitId}/submission-invitations`,
+            name: "summit_speaker_list",
+            linkUrl: `summits/${summitId}/speakers`,
             accessRoute: "speakers"
           },
           {
-            name: "summit_speaker_list",
-            linkUrl: `summits/${summitId}/speakers`,
+            name: "submission_invitations",
+            linkUrl: `summits/${summitId}/submission-invitations`,
             accessRoute: "speakers"
           },
           {
