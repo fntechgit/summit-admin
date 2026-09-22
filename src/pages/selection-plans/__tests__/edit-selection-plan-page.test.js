@@ -76,7 +76,7 @@ describe("EditSelectionPlanPage", () => {
     jest.clearAllMocks();
   });
 
-  it("saves and redirects to the new plan on create", async () => {
+  it("saves and redirects to the list on create", async () => {
     saveSelectionPlan.mockReturnValue(() => Promise.resolve({ id: 42 }));
     saveSelectionPlanSettings.mockReturnValue(() => Promise.resolve());
 
@@ -100,11 +100,11 @@ describe("EditSelectionPlanPage", () => {
     });
     expect(saveSelectionPlanSettings).toHaveBeenCalledWith({}, 42);
     expect(mockHistory.push).toHaveBeenCalledWith(
-      "/app/summits/1/selection-plans/42"
+      "/app/summits/1/selection-plans"
     );
   });
 
-  it("saves an existing plan without redirecting", async () => {
+  it("saves an existing plan and redirects to the list", async () => {
     saveSelectionPlan.mockReturnValue(() => Promise.resolve({ id: 5 }));
     saveSelectionPlanSettings.mockReturnValue(() => Promise.resolve());
 
@@ -126,7 +126,9 @@ describe("EditSelectionPlanPage", () => {
       id: 5,
       marketing_settings: {}
     });
-    expect(mockHistory.push).not.toHaveBeenCalled();
+    expect(mockHistory.push).toHaveBeenCalledWith(
+      "/app/summits/1/selection-plans"
+    );
   });
 
   it("still redirects and re-enables the save button when saving marketing settings fails", async () => {
@@ -151,7 +153,7 @@ describe("EditSelectionPlanPage", () => {
     });
 
     expect(mockHistory.push).toHaveBeenCalledWith(
-      "/app/summits/1/selection-plans/42"
+      "/app/summits/1/selection-plans"
     );
     expect(
       screen.getByRole("button", { name: "general.save" })
