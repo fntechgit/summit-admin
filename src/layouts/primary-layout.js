@@ -15,9 +15,15 @@ import React, { Suspense } from "react";
 import { connect } from "react-redux";
 import { Switch, Route, Redirect } from "react-router-dom";
 import { Breadcrumbs, Breadcrumb } from "react-breadcrumbs";
+import T from "i18n-react/dist/i18n-react";
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
 import Restrict from "../routes/restrict";
 import Menu from "../components/menu";
+import {
+  getGlobalItems,
+  getSummitItems
+} from "../components/menu/menu-definition";
+import { findMenuPath } from "../components/menu/menu-path";
 
 const SummitLayout = React.lazy(() => import("./summit-layout"));
 const SummitDirectoryPage = React.lazy(() =>
@@ -42,6 +48,18 @@ const AddOnTypesListPage = React.lazy(() =>
   import("../pages/sponsors-global/add-on-types/add-on-types-list-page")
 );
 
+const insertMenuFolders = (menuPath) => (crumbs) => {
+  if (!menuPath || menuPath.length === 0) return crumbs;
+
+  const folderCrumbs = menuPath.map((name) => ({
+    id: `menu-folder-${name}`,
+    title: T.translate(`menu.${name}`),
+    pathname: crumbs[crumbs.length - 1]?.pathname
+  }));
+
+  return [...crumbs.slice(0, -1), ...folderCrumbs, crumbs[crumbs.length - 1]];
+};
+
 const PrimaryLayout = ({ match, currentSummit, location, member }) => {
   let extraClass = "container";
 
@@ -53,6 +71,11 @@ const PrimaryLayout = ({ match, currentSummit, location, member }) => {
     extraClass = "";
   }
 
+  const menuItems = currentSummit
+    ? getSummitItems(currentSummit.id)
+    : getGlobalItems();
+  const menuPath = findMenuPath(menuItems, location.pathname);
+
   return (
     <div className="primary-layout">
       <Menu currentSummit={currentSummit} member={member} />
@@ -60,6 +83,7 @@ const PrimaryLayout = ({ match, currentSummit, location, member }) => {
         <Breadcrumbs
           className={`breadcrumbs-wrapper ${extraClass}`}
           separator="/"
+          setCrumbs={insertMenuFolders(menuPath)}
         />
 
         <Breadcrumb
