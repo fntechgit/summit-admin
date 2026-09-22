@@ -33,11 +33,6 @@ export const getGlobalItems = () => [
     ]
   },
   {
-    name: "companies",
-    linkUrl: "companies",
-    accessRoute: "companies"
-  },
-  {
     name: "sponsors_services",
     accessRoute: "inventory",
     subItems: [
@@ -59,6 +54,19 @@ export const getGlobalItems = () => [
     ]
   },
   {
+    name: "emails",
+    accessRoute: "emails",
+    subItems: [
+      { name: "email_templates", linkUrl: "emails/templates" },
+      { name: "email_logs", linkUrl: "emails/log" }
+    ]
+  },
+  {
+    name: "companies",
+    linkUrl: "companies",
+    accessRoute: "companies"
+  },
+  {
     name: "tags",
     linkUrl: "tags",
     accessRoute: "tags"
@@ -68,14 +76,6 @@ export const getGlobalItems = () => [
     linkUrl: "sponsored-projects",
     accessRoute: "sponsored-projects",
     exclusive: "sponsored-projects"
-  },
-  {
-    name: "emails",
-    accessRoute: "emails",
-    subItems: [
-      { name: "email_templates", linkUrl: "emails/templates" },
-      { name: "email_logs", linkUrl: "emails/log" }
-    ]
   },
   {
     name: "admin_access",
@@ -96,39 +96,8 @@ export const getSummitItems = (summitId) => [
     accessRoute: "general"
   },
   {
-    name: "activities_speakers",
+    name: "program_management",
     subItems: [
-      {
-        name: "selection_plans",
-        linkUrl: `summits/${summitId}/selection-plans`,
-        accessRoute: "selection_plans"
-      },
-      {
-        name: "track_chairs",
-        isGroup: true,
-        subItems: [
-          {
-            name: "track_chair_list",
-            linkUrl: `summits/${summitId}/track-chairs`,
-            accessRoute: "track-chairs"
-          },
-          {
-            name: "progress_flags",
-            linkUrl: `summits/${summitId}/track-chairs/progress-flags`,
-            accessRoute: "progress-flags"
-          },
-          {
-            name: "track_timeframes",
-            linkUrl: `summits/${summitId}/track-chairs/track-timeframes`,
-            accessRoute: "track-timeframes"
-          },
-          {
-            name: "track_chair_team_lists",
-            linkUrl: `summits/${summitId}/track-chairs/team-lists`,
-            accessRoute: "team-lists"
-          }
-        ]
-      },
       {
         name: "events",
         isGroup: true,
@@ -176,6 +145,32 @@ export const getSummitItems = (summitId) => [
         ]
       },
       {
+        name: "track_chairs",
+        isGroup: true,
+        subItems: [
+          {
+            name: "track_chair_list",
+            linkUrl: `summits/${summitId}/track-chairs`,
+            accessRoute: "track-chairs"
+          },
+          {
+            name: "progress_flags",
+            linkUrl: `summits/${summitId}/track-chairs/progress-flags`,
+            accessRoute: "progress-flags"
+          },
+          {
+            name: "track_timeframes",
+            linkUrl: `summits/${summitId}/track-chairs/track-timeframes`,
+            accessRoute: "track-timeframes"
+          },
+          {
+            name: "track_chair_team_lists",
+            linkUrl: `summits/${summitId}/track-chairs/team-lists`,
+            accessRoute: "team-lists"
+          }
+        ]
+      },
+      {
         name: "summit_speakers",
         isGroup: true,
         subItems: [
@@ -200,11 +195,16 @@ export const getSummitItems = (summitId) => [
             accessRoute: "speakers"
           }
         ]
+      },
+      {
+        name: "selection_plans",
+        linkUrl: `summits/${summitId}/selection-plans`,
+        accessRoute: "selection_plans"
       }
     ]
   },
   {
-    name: "attendees_badging",
+    name: "attendee_operations",
     subItems: [
       {
         name: "attendees",
