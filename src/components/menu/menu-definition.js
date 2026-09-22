@@ -113,11 +113,6 @@ export const getSummitItems = (summitId) => [
             accessRoute: "events"
           },
           {
-            name: "schedule",
-            linkUrl: `summits/${summitId}/events/schedule`,
-            accessRoute: "events"
-          },
-          {
             name: "event_types",
             linkUrl: `summits/${summitId}/event-types`,
             accessRoute: "events"
@@ -130,16 +125,6 @@ export const getSummitItems = (summitId) => [
           {
             name: "event_category_groups",
             linkUrl: `summits/${summitId}/event-category-groups`,
-            accessRoute: "events"
-          },
-          {
-            name: "voteable_presentations",
-            linkUrl: `summits/${summitId}/voteable-presentations`,
-            accessRoute: "events"
-          },
-          {
-            name: "media_uploads",
-            linkUrl: `summits/${summitId}/media-uploads`,
             accessRoute: "events"
           }
         ]
@@ -200,6 +185,21 @@ export const getSummitItems = (summitId) => [
         name: "selection_plans",
         linkUrl: `summits/${summitId}/selection-plans`,
         accessRoute: "selection_plans"
+      },
+      {
+        name: "schedule",
+        linkUrl: `summits/${summitId}/events/schedule`,
+        accessRoute: "events"
+      },
+      {
+        name: "voteable_presentations",
+        linkUrl: `summits/${summitId}/voteable-presentations`,
+        accessRoute: "events"
+      },
+      {
+        name: "media_uploads",
+        linkUrl: `summits/${summitId}/media-uploads`,
+        accessRoute: "events"
       }
     ]
   },
@@ -436,7 +436,7 @@ export const getSummitItems = (summitId) => [
     ]
   },
   {
-    name: "summit_configuration",
+    name: "event_administration",
     subItems: [
       {
         name: "settings",
