@@ -41,11 +41,9 @@ const EditSelectionPlanPage = ({
           savedEntity.id
         )
           .catch(() => {})
-          .then(() => {
-            if (!values.id) {
-              history.push(`/app/summits/${currentSummit.id}/selection-plans`);
-            }
-          });
+          .then(() =>
+            history.push(`/app/summits/${currentSummit.id}/selection-plans`)
+          );
       })
       .catch(() => {})
       .finally(() => setIsSaving(false));
