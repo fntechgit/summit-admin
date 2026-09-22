@@ -47,7 +47,7 @@ import {
 const DAY_IN_SECONDS = 86400; // 86400 seconds per day
 const ELLIPSIS = 3;
 
-export const trim = (string, length) =>
+export const truncateText = (string, length) =>
   string?.length > length
     ? `${string.substring(0, length - ELLIPSIS)}...`
     : string;

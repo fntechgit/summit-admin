@@ -9,147 +9,113 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import Table from "openstack-uicore-foundation/lib/components/table";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import { getSummitById } from "../../actions/summit-actions";
 import { getEmailFlowEvents } from "../../actions/email-flows-events-actions";
-import { Pagination } from "react-bootstrap";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
-class EmailFlowEventListPage extends React.Component {
-  constructor(props) {
-    super(props);
-    this.handleEdit = this.handleEdit.bind(this);
-    this.handleSort = this.handleSort.bind(this);
-    this.handlePageChange = this.handlePageChange.bind(this);
-    this.handleSearch = this.handleSearch.bind(this);
-    this.state = {};
-  }
-
-  handleSearch(term) {
-    const { order, orderDir, page, perPage } = this.props;
-    this.props.getEmailFlowEvents(term, page, perPage, order, orderDir);
-  }
-
-  componentDidMount() {
-    const { currentSummit, term, order, orderDir, page, perPage } = this.props;
+const EmailFlowEventListPage = ({
+  currentSummit,
+  emailFlowEvents,
+  order,
+  orderDir,
+  totalEmailFlowEvents,
+  currentPage,
+  perPage,
+  term,
+  history,
+  getEmailFlowEvents
+}) => {
+  useEffect(() => {
     if (currentSummit) {
-      this.props.getEmailFlowEvents(term, page, perPage, order, orderDir);
+      getEmailFlowEvents(term, currentPage, perPage, order, orderDir);
     }
-  }
+  }, [currentSummit]);
 
-  handleEdit(event_id) {
-    const { currentSummit, history } = this.props;
+  const handleEdit = (row) => {
     history.push(
-      `/app/summits/${currentSummit.id}/email-flow-events/${event_id}`
+      `/app/summits/${currentSummit.id}/email-flow-events/${row.id}`
     );
-  }
+  };
 
-  handlePageChange(page) {
-    const { term, order, orderDir, perPage } = this.props;
-    this.props.getEmailFlowEvents(term, page, perPage, order, orderDir);
-  }
+  const handleSearch = (newTerm) => {
+    getEmailFlowEvents(newTerm, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+  };
 
-  handleSort(index, key, dir, func) {
-    const { term, page, perPage } = this.props;
-    this.props.getEmailFlowEvents(term, page, perPage, key, dir);
-  }
+  const handlePageChange = (page) => {
+    getEmailFlowEvents(term, page, perPage, order, orderDir);
+  };
 
-  render() {
-    const {
-      currentSummit,
-      emailFlowEvents,
-      order,
-      orderDir,
-      totalEmailFlowEvents,
-      lastPage,
-      currentPage,
-      term
-    } = this.props;
+  const handlePerPageChange = (newPerPage) => {
+    getEmailFlowEvents(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
+  };
 
-    const columns = [
-      {
-        columnKey: "flow_name",
-        value: T.translate("email_flow_event_list.flow_name"),
-        sortable: true
-      },
-      {
-        columnKey: "event_type_name",
-        value: T.translate("email_flow_event_list.event_type_name"),
-        title: true
-      },
-      {
-        columnKey: "email_template_identifier",
-        value: T.translate("email_flow_event_list.email_template_identifier"),
-        title: true
-      }
-    ];
+  const handleSort = (key, dir) => {
+    getEmailFlowEvents(term, DEFAULT_CURRENT_PAGE, perPage, key, dir);
+  };
 
-    const table_options = {
-      sortCol: order,
-      sortDir: orderDir,
-      actions: {
-        edit: { onClick: this.handleEdit }
-      }
-    };
+  const columns = [
+    {
+      columnKey: "flow_name",
+      header: T.translate("email_flow_event_list.flow_name"),
+      sortable: true
+    },
+    {
+      columnKey: "event_type_name",
+      header: T.translate("email_flow_event_list.event_type_name"),
+      cellSx: { maxWidth: 400 }
+    },
+    {
+      columnKey: "email_template_identifier",
+      header: T.translate("email_flow_event_list.email_template_identifier"),
+      cellSx: { maxWidth: 400 }
+    }
+  ];
 
-    if (!currentSummit.id) return <div />;
+  const tableOptions = { sortCol: order, sortDir: orderDir };
 
-    return (
-      <div className="container">
-        <h3>
-          {" "}
-          {T.translate("email_flow_event_list.email_flow_event_list")} (
-          {totalEmailFlowEvents})
-        </h3>
-        <div className={"row"}>
-          <div className={"col-md-6"}>
-            <FreeTextSearch
-              value={term ?? ""}
-              placeholder={T.translate(
-                "email_flow_event_list.placeholders.search"
-              )}
-              onSearch={this.handleSearch}
-            />
-          </div>
-        </div>
+  return (
+    <div className="container">
+      <h3>
+        {T.translate("email_flow_event_list.email_flow_event_list")} (
+        {totalEmailFlowEvents})
+      </h3>
 
-        {emailFlowEvents.length === 0 && (
-          <div>{T.translate("email_flow_event_list.no_email_flow_events")}</div>
-        )}
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate("email_flow_event_list.placeholders.search")
+        }}
+      />
 
-        {emailFlowEvents.length > 0 && (
-          <div className="email-flow-table-wrapper">
-            <Table
-              options={table_options}
-              data={emailFlowEvents}
-              columns={columns}
-              onSort={this.handleSort}
-            />
+      {emailFlowEvents.length === 0 && (
+        <div>{T.translate("email_flow_event_list.no_email_flow_events")}</div>
+      )}
 
-            <Pagination
-              bsSize="medium"
-              prev
-              next
-              first
-              last
-              ellipsis
-              boundaryLinks
-              maxButtons={10}
-              items={lastPage}
-              activePage={currentPage}
-              onSelect={this.handlePageChange}
-            />
-          </div>
-        )}
-      </div>
-    );
-  }
-}
+      {emailFlowEvents.length > 0 && (
+        <MuiTable
+          options={tableOptions}
+          data={emailFlowEvents}
+          columns={columns}
+          currentPage={currentPage}
+          perPage={perPage}
+          totalRows={totalEmailFlowEvents}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSort={handleSort}
+          onEdit={handleEdit}
+        />
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({ currentSummitState, emailFlowEventsListState }) => ({
   currentSummit: currentSummitState.currentSummit,
