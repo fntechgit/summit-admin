@@ -18,7 +18,6 @@ import T from "i18n-react/dist/i18n-react";
 import { useFormik, FormikProvider } from "formik";
 import moment from "moment-timezone";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import showConfirmDialog from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
@@ -32,6 +31,7 @@ import TrackChairSettingsTab from "./selection-plan-form/track-chair-settings-ta
 import PresentationActionTypesTab from "./selection-plan-form/presentation-action-types-tab";
 import AllowedMembersTab from "./selection-plan-form/allowed-members-tab";
 import CfpSettingsTab from "./selection-plan-form/cfp-settings-tab";
+import showConfirmDialog from "../mui/showConfirmDialog";
 import {
   addAllowedMemberToSelectionPlan,
   addEventTypeSelectionPlan,
