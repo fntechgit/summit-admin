@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import {
   getRequest,
@@ -20,13 +20,12 @@ import {
   putRequest,
   postRequest,
   deleteRequest,
-  showMessage,
-  showSuccessMessage
+  showMessage
 } from "openstack-uicore-foundation/lib/utils/actions";
+import T from "i18n-react";
 import { getAccessTokenSafely } from "../utils/methods";
 
 import history from "../history";
-import T from "i18n-react";
 
 export const REQUEST_ALL_SCHEDULE_SETTINGS = "REQUEST_ALL_SCHEDULE_SETTINGS";
 export const RECEIVE_ALL_SCHEDULE_SETTINGS = "RECEIVE_ALL_SCHEDULE_SETTINGS";
@@ -95,7 +94,7 @@ export const getAllScheduleSettings =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -153,7 +152,7 @@ export const deleteScheduleSetting =
     });
   };
 
-export const resetScheduleSettingsForm = () => (dispatch, getState) => {
+export const resetScheduleSettingsForm = () => (dispatch) => {
   dispatch(createAction(RESET_SCHEDULE_SETTINGS_FORM)({}));
 };
 
@@ -171,6 +170,12 @@ export const saveScheduleSettings = (entity) => async (dispatch, getState) => {
   dispatch(startLoading());
 
   if (entity.id) {
+    const success_message = {
+      title: T.translate("general.done"),
+      html: T.translate("edit_schedule_settings.saved"),
+      type: "success"
+    };
+
     putRequest(
       createAction(UPDATE_SCHEDULE_SETTINGS),
       createAction(SCHEDULE_SETTINGS_UPDATED),
@@ -178,8 +183,12 @@ export const saveScheduleSettings = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
-      dispatch(showSuccessMessage(T.translate("edit_schedule_settings.saved")));
+    )(params)(dispatch).then(() => {
+      dispatch(
+        showMessage(success_message, () => {
+          history.push(`/app/summits/${currentSummit.id}/schedule-settings`);
+        })
+      );
     });
   } else {
     const success_message = {
@@ -195,12 +204,10 @@ export const saveScheduleSettings = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(
         showMessage(success_message, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/schedule-settings/${payload.response.id}`
-          );
+          history.push(`/app/summits/${currentSummit.id}/schedule-settings`);
         })
       );
     });
@@ -217,7 +224,7 @@ const normalizeEntity = (entity) => {
     is_enabled: f.is_enabled
   }));
   normalized.pre_filters = entity.pre_filters.map((pf) => {
-    let values = pf.values;
+    let { values } = pf;
     if (pf.type === FILTER_TYPES.company) {
       values = values.map((v) => v.id);
     }

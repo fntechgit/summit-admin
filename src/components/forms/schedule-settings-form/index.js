@@ -140,9 +140,7 @@ class ScheduleSettingsForm extends React.Component {
       }
     ];
 
-    const table_options = {
-      actions: {}
-    };
+    const table_options = {};
 
     return (
       <form className="schedule-settings-form">
@@ -158,21 +156,6 @@ class ScheduleSettingsForm extends React.Component {
             />
           </div>
           <div className="col-md-4">
-            <label> {T.translate("edit_schedule_settings.enabled")}</label>
-            <br />
-            <Switch
-              checked={entity.is_enabled}
-              onChange={(val) => {
-                this.onSwitchChange("is_enabled", val);
-              }}
-              uncheckedIcon={false}
-              checkedIcon={false}
-              className="react-switch"
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-4">
             <label>
               {" "}
               {T.translate("edit_schedule_settings.color_source")} *
@@ -185,61 +168,6 @@ class ScheduleSettingsForm extends React.Component {
               disabled={!entity.is_enabled}
             />
           </div>
-          <div className="col-md-2">
-            <label>
-              {T.translate("edit_schedule_settings.is_my_schedule")}
-            </label>
-            <br />
-            <Switch
-              checked={entity.is_my_schedule}
-              onChange={(val) => {
-                this.onSwitchChange("is_my_schedule", val);
-              }}
-              uncheckedIcon={false}
-              checkedIcon={false}
-              className="react-switch"
-              disabled={!entity.is_enabled}
-            />
-          </div>
-          <div className="col-md-3">
-            <label>
-              {" "}
-              {T.translate("edit_schedule_settings.access_levels_only")}
-            </label>
-            <br />
-            <Switch
-              checked={entity.only_events_with_attendee_access}
-              onChange={(val) => {
-                this.onSwitchChange("only_events_with_attendee_access", val);
-              }}
-              uncheckedIcon={false}
-              checkedIcon={false}
-              className="react-switch"
-              disabled={!entity.is_enabled}
-            />
-          </div>
-          <div className="col-md-3">
-            <label>
-              {" "}
-              {T.translate("edit_schedule_settings.hide_past_permanent")}
-            </label>
-            <br />
-            <Switch
-              checked={entity.hide_past_events_with_show_always_on_schedule}
-              onChange={(val) => {
-                this.onSwitchChange(
-                  "hide_past_events_with_show_always_on_schedule",
-                  val
-                );
-              }}
-              uncheckedIcon={false}
-              checkedIcon={false}
-              className="react-switch"
-              disabled={!entity.is_enabled}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
           <div className="col-md-4">
             <label>
               {" "}
@@ -254,21 +182,107 @@ class ScheduleSettingsForm extends React.Component {
             />
           </div>
         </div>
-        <br />
-        <br />
-        <legend>Filters</legend>
-        <div className="row form-group">
-          <SortableTable
-            options={table_options}
-            data={entity.filters}
-            columns={columns}
-            dropCallback={this.updateFilterOrder}
-            orderField="order"
-          />
+        <div className="row">
+          <div className="col-md-12">
+            <legend>
+              {T.translate("edit_schedule_settings.options_title")}
+            </legend>
+          </div>
+        </div>
+        <div className="row form-group toggle-options">
+          <div className="col-md-6 toggle-option">
+            <div className="toggle-option-header">
+              <label>{T.translate("edit_schedule_settings.enabled")}</label>
+              <Switch
+                checked={entity.is_enabled}
+                onChange={(val) => {
+                  this.onSwitchChange("is_enabled", val);
+                }}
+                uncheckedIcon={false}
+                checkedIcon={false}
+                className="react-switch"
+              />
+            </div>
+            <p className="text-muted">
+              {T.translate("edit_schedule_settings.enabled_info")}
+            </p>
+          </div>
+          <div className="col-md-6 toggle-option">
+            <div className="toggle-option-header">
+              <label>
+                {T.translate("edit_schedule_settings.is_my_schedule")}
+              </label>
+              <Switch
+                checked={entity.is_my_schedule}
+                onChange={(val) => {
+                  this.onSwitchChange("is_my_schedule", val);
+                }}
+                uncheckedIcon={false}
+                checkedIcon={false}
+                className="react-switch"
+                disabled={!entity.is_enabled}
+              />
+            </div>
+            <p className="text-muted">
+              {T.translate("edit_schedule_settings.is_my_schedule_info")}
+            </p>
+          </div>
+          <div className="col-md-6 toggle-option">
+            <div className="toggle-option-header">
+              <label>
+                {T.translate("edit_schedule_settings.access_levels_only")}
+              </label>
+              <Switch
+                checked={entity.only_events_with_attendee_access}
+                onChange={(val) => {
+                  this.onSwitchChange("only_events_with_attendee_access", val);
+                }}
+                uncheckedIcon={false}
+                checkedIcon={false}
+                className="react-switch"
+                disabled={!entity.is_enabled}
+              />
+            </div>
+            <p className="text-muted">
+              {T.translate("edit_schedule_settings.access_levels_only_info")}
+            </p>
+          </div>
+          <div className="col-md-6 toggle-option">
+            <div className="toggle-option-header">
+              <label>
+                {T.translate("edit_schedule_settings.hide_past_permanent")}
+              </label>
+              <Switch
+                checked={entity.hide_past_events_with_show_always_on_schedule}
+                onChange={(val) => {
+                  this.onSwitchChange(
+                    "hide_past_events_with_show_always_on_schedule",
+                    val
+                  );
+                }}
+                uncheckedIcon={false}
+                checkedIcon={false}
+                className="react-switch"
+                disabled={!entity.is_enabled}
+              />
+            </div>
+            <p className="text-muted">
+              {T.translate("edit_schedule_settings.hide_past_permanent_info")}
+            </p>
+          </div>
         </div>
         <br />
         <br />
-        <legend>Pre Filters</legend>
+        <div className="row">
+          <div className="col-md-12">
+            <legend>
+              {T.translate("edit_schedule_settings.pre_filter_title")}
+            </legend>
+            <p className="text-muted">
+              {T.translate("edit_schedule_settings.pre_filter_subtitle")}
+            </p>
+          </div>
+        </div>
         <div className="row form-group pre-filters">
           {enabledPreFilters.map((pf) => (
             <div className="col-md-6" key={pf.type}>
@@ -281,6 +295,29 @@ class ScheduleSettingsForm extends React.Component {
               />
             </div>
           ))}
+        </div>
+        <br />
+        <br />
+        <div className="row">
+          <div className="col-md-12">
+            <legend>
+              {T.translate("edit_schedule_settings.filter_title")}
+            </legend>
+            <p className="text-muted">
+              {T.translate("edit_schedule_settings.filter_subtitle")}
+            </p>
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-12">
+            <SortableTable
+              options={table_options}
+              data={entity.filters}
+              columns={columns}
+              dropCallback={this.updateFilterOrder}
+              orderField="order"
+            />
+          </div>
         </div>
         <div className="row">
           <div className="col-md-12 submit-buttons">
