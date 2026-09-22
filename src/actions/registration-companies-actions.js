@@ -74,9 +74,11 @@ export const getRegistrationCompanies =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/registration-companies`,
       authErrorHandler,
       { page, perPage, order, orderDir, term }
-    )(params)(dispatch).finally(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .catch(() => {})
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 export const addRegistrationCompany =
@@ -96,13 +98,15 @@ export const addRegistrationCompany =
       null,
       authErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(
-        showSuccessMessage(
-          T.translate("registration_companies.registration_company_saved")
-        )
-      );
-    });
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          showSuccessMessage(
+            T.translate("registration_companies.registration_company_saved")
+          )
+        );
+      })
+      .catch(() => {});
   };
 
 export const deleteRegistrationCompany =
@@ -121,9 +125,11 @@ export const deleteRegistrationCompany =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/registration-companies/${companyId}`,
       null,
       authErrorHandler
-    )(params)(dispatch).finally(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .catch(() => {})
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 export const importRegistrationCompaniesCSV =
