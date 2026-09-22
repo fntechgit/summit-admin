@@ -27,6 +27,12 @@ const isAccessible = (item, memberObj) =>
   !item.hasOwnProperty("accessRoute") ||
   memberObj.hasAccess(item.accessRoute);
 
+// Do not show a parent folder if the user does not have access to any of the children
+const hasVisibleContent = (item, memberObj) =>
+  item.isGroup
+    ? item.subItems.some((child) => hasVisibleContent(child, memberObj))
+    : isAccessible(item, memberObj);
+
 const isActive = (item, currentPath, memberObj) =>
   item.isGroup
     ? item.subItems
@@ -37,7 +43,9 @@ const isActive = (item, currentPath, memberObj) =>
 function SubMenuItem({ name, onItemClick, subItems, memberObj, currentPath }) {
   const _subItems = subItems.filter((item) => isAccessible(item, memberObj));
 
-  if (_subItems.length === 0) return null;
+  if (!subItems.some((item) => hasVisibleContent(item, memberObj))) {
+    return null;
+  }
 
   const isChildActive = _subItems.some((ch) =>
     isActive(ch, currentPath, memberObj)
