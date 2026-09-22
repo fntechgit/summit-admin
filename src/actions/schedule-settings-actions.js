@@ -21,8 +21,7 @@ import {
   putRequest,
   postRequest,
   deleteRequest,
-  showMessage,
-  showSuccessMessage
+  showMessage
 } from "openstack-uicore-foundation/lib/utils/actions";
 
 import { getAccessTokenSafely } from "../utils/methods";
@@ -210,9 +209,7 @@ export const saveScheduleSettings = (entity) => async (dispatch, getState) => {
     .then((payload) => {
       dispatch(
         showMessage(success_message, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/schedule-settings/${payload.response.id}`
-          );
+          history.push(`/app/summits/${currentSummit.id}/schedule-settings`);
         })
       );
     })
