@@ -175,6 +175,7 @@ export const getSelectionPlan =
   };
 
 export const resetSelectionPlanForm = () => (dispatch) => {
+  getSelectionPlanSeq(dispatch); // invalidates any in-flight getSelectionPlan
   dispatch(createAction(RESET_SELECTION_PLAN_FORM)({}));
 };
 

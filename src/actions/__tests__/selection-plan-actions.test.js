@@ -9,7 +9,11 @@ import {
   putRequest,
   getRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { saveSelectionPlan, getSelectionPlan } from "../selection-plan-actions";
+import {
+  saveSelectionPlan,
+  getSelectionPlan,
+  resetSelectionPlanForm
+} from "../selection-plan-actions";
 import * as methods from "../../utils/methods";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
@@ -202,5 +206,41 @@ describe("getSelectionPlan - stale response guard", () => {
 
     // Plan 5's stale response must never reach the store - only plan 8's.
     expect(receivedIds).toEqual([8]);
+  });
+
+  it("drops a plan's response that lands after resetSelectionPlanForm supersedes it", async () => {
+    const resolvers = {};
+    getRequest.mockImplementation(
+      (requestActionCreator, receiveActionCreator, url) => () => (dispatch) => {
+        if (isPrimaryFetchUrl(url)) {
+          const id = Number(url.split("/").pop());
+          return new Promise((resolve) => {
+            resolvers[id] = () => {
+              dispatch(receiveActionCreator({ response: { id } }));
+              resolve();
+            };
+          });
+        }
+        if (requestActionCreator) dispatch(requestActionCreator({}));
+        dispatch(receiveActionCreator({ response: {} }));
+        return Promise.resolve();
+      }
+    );
+
+    const store = mockStore(storeState);
+
+    // User opens plan 5, then navigates back to the list and clicks
+    // "Add new" before plan 5's fetch settles.
+    store.dispatch(getSelectionPlan("5"));
+    await flushPromises();
+    store.dispatch(resetSelectionPlanForm());
+    await flushPromises();
+    resolvers[5]();
+    await flushPromises();
+
+    const actionTypes = store.getActions().map((a) => a.type);
+
+    expect(actionTypes).not.toContain("RECEIVE_SELECTION_PLAN");
+    expect(actionTypes).toContain("RESET_SELECTION_PLAN_FORM");
   });
 });
