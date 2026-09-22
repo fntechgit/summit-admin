@@ -11,129 +11,201 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import Table from "openstack-uicore-foundation/lib/components/table";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Grid2 from "@mui/material/Grid2";
+import AddIcon from "@mui/icons-material/Add";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   getEventCategoryGroups,
   deleteEventCategoryGroup
 } from "../../actions/event-category-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
-class EventCategoryGroupListPage extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.handleEdit = this.handleEdit.bind(this);
-    this.handleNew = this.handleNew.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
-  }
-
-  componentDidMount() {
-    const { currentSummit } = this.props;
-    if (currentSummit) {
-      this.props.getEventCategoryGroups();
+const EventCategoryGroupListPage = ({
+  currentSummit,
+  eventCategoryGroups,
+  term,
+  currentPage,
+  perPage,
+  order,
+  orderDir,
+  totalEventCategoryGroups,
+  getEventCategoryGroups,
+  deleteEventCategoryGroup,
+  history
+}) => {
+  useEffect(() => {
+    if (currentSummit?.id) {
+      getEventCategoryGroups();
     }
-  }
+  }, [currentSummit?.id]);
 
-  handleEdit(groupId) {
-    const { currentSummit, history } = this.props;
+  const handleEdit = (row) => {
     history.push(
-      `/app/summits/${currentSummit.id}/event-category-groups/${groupId}`
+      `/app/summits/${currentSummit.id}/event-category-groups/${row.id}`
     );
-  }
+  };
 
-  handleNew() {
-    const { currentSummit, history } = this.props;
+  const handleNew = () => {
     history.push(`/app/summits/${currentSummit.id}/event-category-groups/new`);
-  }
+  };
 
-  handleDelete(groupId) {
-    const { deleteEventCategoryGroup, eventCategoryGroups } = this.props;
-    const group = eventCategoryGroups.find((g) => g.id === groupId);
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("event_category_group_list.delete_warning")} ${
-        group.name
-      }`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteEventCategoryGroup(groupId);
-      }
-    });
-  }
-
-  render() {
-    const { currentSummit, eventCategoryGroups } = this.props;
-
-    const columns = [
-      { columnKey: "id", value: T.translate("general.id") },
-      {
-        columnKey: "name",
-        value: T.translate("event_category_group_list.name")
-      },
-      {
-        columnKey: "type",
-        value: T.translate("event_category_group_list.type")
-      },
-      {
-        columnKey: "categories",
-        value: T.translate("event_category_group_list.categories")
-      },
-      {
-        columnKey: "color",
-        value: T.translate("event_category_group_list.color")
-      }
-    ];
-
-    const table_options = {
-      actions: {
-        edit: { onClick: this.handleEdit },
-        delete: { onClick: this.handleDelete }
-      }
-    };
-
-    if (!currentSummit.id) return <div />;
-
-    return (
-      <div className="container">
-        <h3> {T.translate("event_category_list.event_category_list")} </h3>
-        <div className="row">
-          <div className="col-md-6 col-md-offset-6 text-right">
-            <button
-              className="btn btn-primary right-space"
-              onClick={this.handleNew}
-            >
-              {T.translate("event_category_group_list.add_category_group")}
-            </button>
-          </div>
-        </div>
-
-        {eventCategoryGroups.length === 0 && (
-          <div className="no-items">
-            {T.translate("event_category_group_list.no_items")}
-          </div>
-        )}
-
-        {eventCategoryGroups.length > 0 && (
-          <div>
-            <Table
-              options={table_options}
-              data={eventCategoryGroups}
-              columns={columns}
-            />
-          </div>
-        )}
-      </div>
+  const handleDelete = (groupId) => {
+    deleteEventCategoryGroup(groupId).then(() =>
+      getEventCategoryGroups(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir
+      )
     );
-  }
-}
+  };
+
+  const handleSearch = (searchTerm) => {
+    getEventCategoryGroups(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir
+    );
+  };
+
+  const handlePageChange = (page) => {
+    getEventCategoryGroups(term, page, perPage, order, orderDir);
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    getEventCategoryGroups(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir
+    );
+  };
+
+  const handleSort = (key, dir) => {
+    getEventCategoryGroups(term, currentPage, perPage, key, dir);
+  };
+
+  const columns = [
+    {
+      columnKey: "id",
+      header: T.translate("general.id"),
+      width: 60,
+      sortable: true
+    },
+    {
+      columnKey: "name",
+      header: T.translate("event_category_group_list.name"),
+      width: 160,
+      sortable: true
+    },
+    {
+      columnKey: "type",
+      header: T.translate("event_category_group_list.type"),
+      width: 90
+    },
+    {
+      columnKey: "categories",
+      header: T.translate("event_category_group_list.categories")
+    },
+    {
+      columnKey: "color",
+      header: T.translate("event_category_group_list.color"),
+      width: 70,
+      render: (row) => (
+        <Box
+          sx={{
+            width: 24,
+            height: 24,
+            backgroundColor: row.color,
+            borderRadius: 1
+          }}
+        />
+      )
+    }
+  ];
+
+  const tableOptions = { sortCol: order, sortDir: orderDir };
+
+  if (!currentSummit.id) return <div />;
+
+  return (
+    <div className="container">
+      <h3>
+        {T.translate("event_category_group_list.event_category_group_list")}
+      </h3>
+      <Grid2
+        container
+        spacing={1}
+        sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}
+      >
+        <Grid2 size={2}>
+          <Box component="span">
+            {totalEventCategoryGroups}{" "}
+            {T.translate("event_category_group_list.event_category_groups")}
+          </Box>
+        </Grid2>
+        <Grid2
+          container
+          size={10}
+          gap={1}
+          sx={{ justifyContent: "flex-end", alignItems: "center" }}
+        >
+          <Grid2 size={4}>
+            <SearchInput term={term} onSearch={handleSearch} />
+          </Grid2>
+          <Button
+            variant="contained"
+            onClick={handleNew}
+            startIcon={<AddIcon />}
+            sx={{
+              height: "36px",
+              padding: "6px 16px",
+              fontSize: "1.4rem",
+              lineHeight: "2.4rem",
+              letterSpacing: "0.4px"
+            }}
+          >
+            {T.translate("event_category_group_list.add_category_group")}
+          </Button>
+        </Grid2>
+      </Grid2>
+
+      {eventCategoryGroups.length > 0 && (
+        <MuiTable
+          columns={columns}
+          data={eventCategoryGroups}
+          options={tableOptions}
+          perPage={perPage}
+          currentPage={currentPage}
+          totalRows={totalEventCategoryGroups}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSort={handleSort}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          deleteDialogBody={(name) =>
+            `${T.translate("event_category_group_list.delete_warning")} ${name}`
+          }
+          confirmButtonColor="error"
+        />
+      )}
+
+      {eventCategoryGroups.length === 0 && (
+        <div>{T.translate("event_category_group_list.no_items")}</div>
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({
   currentSummitState,
