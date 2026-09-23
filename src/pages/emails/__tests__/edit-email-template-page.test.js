@@ -2,6 +2,7 @@ import React from "react";
 import { act, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import { MemoryRouter } from "react-router-dom";
 import flushPromises from "flush-promises";
 import { renderWithRedux } from "../../../utils/test-utils";
 import EditEmailTemplatePage from "../edit-email-template-page";
@@ -241,5 +242,39 @@ describe("EditEmailTemplatePage", () => {
     expect(
       screen.queryByTestId("email-template-json-dialog")
     ).not.toBeInTheDocument();
+  });
+
+  it("does not mount the form with a stale entity when the template fetch fails", async () => {
+    getEmailTemplate.mockReturnValue(() =>
+      Promise.reject(Object.assign(new Error("Not Found"), { status: 404 }))
+    );
+
+    renderWithRedux(
+      <MemoryRouter>
+        <EditEmailTemplatePage
+          match={{
+            url: "/app/emails/templates/5",
+            params: { template_id: "5" }
+          }}
+        />
+      </MemoryRouter>,
+      {
+        initialState: {
+          emailTemplateState: {
+            ...initialState.emailTemplateState,
+            // persisted from a previously viewed template
+            entity: { id: 7, identifier: "other-template" }
+          }
+        }
+      }
+    );
+
+    await act(async () => {
+      await flushPromises();
+    });
+
+    expect(getEmailTemplate).toHaveBeenCalledWith("5");
+    expect(screen.queryByTestId("email-template-form")).not.toBeInTheDocument();
+    expect(saveEmailTemplate).not.toHaveBeenCalled();
   });
 });
