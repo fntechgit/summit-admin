@@ -47,6 +47,8 @@
     "remove": "Remove",
     "row_remove_warning": "Are you sure you want to delete row ",
     "delete": "Delete",
+    "more_actions": "More actions",
+    "select": "Select",
     "clone": "Clone",
     "new": "New",
     "all": "All",
