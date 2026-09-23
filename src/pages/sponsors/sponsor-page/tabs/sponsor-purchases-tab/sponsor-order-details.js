@@ -128,9 +128,8 @@ const SponsorOrderDetails = ({
   const handleUndoCancelForm = (item) =>
     undoCancelSponsorForm(currentOrder.id, item.id);
 
-  const handleOrderRefund = (values) => {
+  const handleOrderRefund = (values) =>
     refundSponsorOrder(currentOrder.id, values.amount, values.reason);
-  };
 
   return (
     <Box sx={{ mt: 2 }}>
