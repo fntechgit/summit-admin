@@ -46,7 +46,7 @@ const EmailTemplateInput = ({
         ? templates.filter((t) => t.id !== ownerId)
         : templates;
       const mappedOptions = filtered.map((t) => ({
-        value: t.id.toString(),
+        value: plainValue ? t.identifier : t.id.toString(),
         label: t.identifier
       }));
       if (cacheOptions) optionsCacheRef.current.set(input, mappedOptions);

@@ -13,6 +13,7 @@
 
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
+import { Redirect } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Box from "@mui/material/Box";
@@ -46,6 +47,7 @@ const EditEmailTemplatePage = ({
 }) => {
   const [showJsonDialog, setShowJsonDialog] = useState(false);
   const [entityReady, setEntityReady] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   useEffect(() => {
     getAllClients();
@@ -54,13 +56,16 @@ const EditEmailTemplatePage = ({
   useEffect(() => {
     let active = true;
     setEntityReady(false);
+    setLoadFailed(false);
     const templateId = match.params.template_id;
     const loadEntity = templateId
       ? getEmailTemplate(templateId)
       : resetTemplateForm();
 
     Promise.resolve(loadEntity)
-      .catch(() => {})
+      .catch(() => {
+        if (active) setLoadFailed(true);
+      })
       .finally(() => {
         if (active) setEntityReady(true);
       });
@@ -77,6 +82,10 @@ const EditEmailTemplatePage = ({
 
   const handleJsonUpdate = (parsedJSON) =>
     updateTemplateJsonData(parsedJSON).then(() => setShowJsonDialog(false));
+
+  if (loadFailed) {
+    return <Redirect to="/app/emails/templates" />;
+  }
 
   return (
     <Box

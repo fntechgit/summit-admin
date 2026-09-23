@@ -141,4 +141,51 @@ describe("EmailTemplateInput", () => {
 
     expect(queryTemplates).toHaveBeenCalledWith("", expect.any(Function));
   });
+
+  it("lists the selected template only once in plainValue mode", async () => {
+    queryTemplates.mockImplementation((input, callback) => {
+      callback([
+        { id: 42, identifier: "welcome_email" },
+        { id: 43, identifier: "welcome_email_2" }
+      ]);
+    });
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    const Harness = () => {
+      const [value, setValue] = React.useState("");
+      return (
+        <EmailTemplateInput
+          id="template_filter"
+          value={value}
+          onChange={(ev) => setValue(ev.target.value)}
+          plainValue
+        />
+      );
+    };
+    render(<Harness />);
+
+    const input = screen.getByRole("combobox");
+    await userEvent.type(input, "welcome");
+    await userEvent.click(
+      await screen.findByRole("option", { name: "welcome_email" })
+    );
+
+    // reopen the listbox with the value selected
+    await userEvent.click(input);
+    await userEvent.keyboard("{ArrowDown}");
+
+    const labels = (await screen.findAllByRole("option")).map(
+      (option) => option.textContent
+    );
+    expect(labels.filter((label) => label === "welcome_email")).toHaveLength(1);
+    expect(
+      consoleError.mock.calls.some((args) =>
+        args.map(String).join(" ").includes("same key")
+      )
+    ).toBe(false);
+
+    consoleError.mockRestore();
+  });
 });
