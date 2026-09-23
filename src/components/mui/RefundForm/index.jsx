@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useRef } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
@@ -22,6 +22,24 @@ import InfoNote from "openstack-uicore-foundation/lib/components/mui/info-note";
 import CustomAlert from "openstack-uicore-foundation/lib/components/mui/custom-alert";
 
 const RefundForm = ({ onSubmit, disabled = false }) => {
+  // Formik does not block concurrent submits, so repeated Enter presses would
+  // each queue a refund. The ref guards the gap before isSubmitting re-renders.
+  const submittingRef = useRef(false);
+
+  const handleSubmit = (values, formikHelpers) => {
+    if (submittingRef.current) return undefined;
+    submittingRef.current = true;
+
+    return Promise.resolve(onSubmit(values, formikHelpers))
+      .then(() => formikHelpers.resetForm())
+      .catch(() => {
+        // keep the values so the user can retry
+      })
+      .finally(() => {
+        submittingRef.current = false;
+      });
+  };
+
   const formik = useFormik({
     initialValues: {
       reason: "",
@@ -37,10 +55,12 @@ const RefundForm = ({ onSubmit, disabled = false }) => {
         .positive(T.translate("validation.positive"))
         .required(T.translate("validation.required"))
     }),
-    onSubmit,
+    onSubmit: handleSubmit,
     validateOnChange: false,
     enableReinitialize: true
   });
+
+  const isDisabled = disabled || formik.isSubmitting;
 
   return (
     <FormikProvider value={formik}>
@@ -57,7 +77,7 @@ const RefundForm = ({ onSubmit, disabled = false }) => {
               fullWidth
               size="small"
               label={T.translate("refund_form.reason")}
-              disabled={disabled}
+              disabled={isDisabled}
             />
           </Grid2>
           <Grid2 size={4}>
@@ -67,7 +87,7 @@ const RefundForm = ({ onSubmit, disabled = false }) => {
               size="small"
               inCents
               label={T.translate("refund_form.amount")}
-              disabled={disabled}
+              disabled={isDisabled}
             />
           </Grid2>
           <Grid2 size={2} sx={{ pt: 2 }}>
@@ -77,7 +97,7 @@ const RefundForm = ({ onSubmit, disabled = false }) => {
               color="primary"
               fullWidth
               size="small"
-              disabled={disabled}
+              disabled={isDisabled}
             >
               {T.translate("refund_form.queue_refund")}
             </Button>
