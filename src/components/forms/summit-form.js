@@ -1589,7 +1589,7 @@ class SummitForm extends React.Component {
         <Exclusive name="room-booking">
           <Panel
             show={showSection === "room-booking"}
-            title={`${T.translate("edit_summit.room-booking")} *`}
+            title={`${T.translate("edit_summit.room-booking")}`}
             handleClick={(ev) => this.toggleSection("room-booking", ev)}
           >
             <div className="row form-group">
@@ -1641,7 +1641,6 @@ class SummitForm extends React.Component {
                   {T.translate(
                     "room_bookings.meeting_room_booking_start_time"
                   )}{" "}
-                  *
                 </label>
                 <DateTimePicker
                   id="meeting_room_booking_start_time"
@@ -1655,7 +1654,7 @@ class SummitForm extends React.Component {
               <div className="col-md-4">
                 <label htmlFor="meeting_room_booking_end_time">
                   {" "}
-                  {T.translate("room_bookings.meeting_room_booking_end_time")} *
+                  {T.translate("room_bookings.meeting_room_booking_end_time")}
                 </label>
                 <DateTimePicker
                   id="meeting_room_booking_end_time"
@@ -1674,7 +1673,6 @@ class SummitForm extends React.Component {
                   {T.translate(
                     "room_bookings.meeting_room_booking_slot_length"
                   )}{" "}
-                  *
                 </label>
                 <Input
                   id="meeting_room_booking_slot_length"
@@ -1690,7 +1688,6 @@ class SummitForm extends React.Component {
                   {T.translate(
                     "room_bookings.meeting_room_booking_max_allowed"
                   )}{" "}
-                  *
                 </label>
                 <Input
                   id="meeting_room_booking_max_allowed"
