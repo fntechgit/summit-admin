@@ -8,21 +8,22 @@ import {
   afterEach
 } from "@jest/globals";
 import { render, act, fireEvent } from "@testing-library/react";
+import mjml2html from "mjml-browser";
+import showConfirmDialog from "../../mui/showConfirmDialog";
 
 import EmailTemplateForm from "../email-template-form";
 
-// Mock heavy children that don't matter for the effect logic under test.
 jest.mock("@uiw/react-codemirror", () => ({
   __esModule: true,
   default: () => null
 }));
-jest.mock("sweetalert2", () => ({
+jest.mock("../../mui/showConfirmDialog", () => ({
   __esModule: true,
-  default: { fire: jest.fn(() => Promise.resolve({})) }
+  default: jest.fn(() => Promise.resolve(true))
 }));
 jest.mock("mjml-browser", () => ({
   __esModule: true,
-  default: () => ({ html: "<html></html>" })
+  default: jest.fn(() => ({ html: "<html></html>" }))
 }));
 jest.mock("../../inputs/email-template-input", () => ({
   __esModule: true,
@@ -31,7 +32,6 @@ jest.mock("../../inputs/email-template-input", () => ({
 
 const baseProps = (entity) => ({
   entity,
-  match: { params: { template_id: `${entity.id}` } },
   errors: {},
   clients: [],
   preview: null,
@@ -62,7 +62,10 @@ const htmlEntity = {
 };
 
 describe("EmailTemplateForm preview dispatch", () => {
-  beforeEach(() => jest.useFakeTimers());
+  beforeEach(() => {
+    jest.useFakeTimers();
+    showConfirmDialog.mockResolvedValue(true);
+  });
   afterEach(() => {
     jest.runOnlyPendingTimers();
     jest.useRealTimers();
@@ -108,14 +111,13 @@ describe("EmailTemplateForm preview dispatch", () => {
     await act(async () => {
       jest.advanceTimersByTime(600);
     });
-    // initial MJML-mode request
     expect(sharedRender).toHaveBeenLastCalledWith(
       mjProps.templateJsonData,
       mjmlEntity.mjml_content,
       true
     );
 
-    // simulate in-place navigation to a DIFFERENT (HTML) template on the SAME form instance
+    // navigate to a different template on the same form instance (no remount)
     const htmlProps = {
       ...baseProps(htmlEntity),
       renderEmailTemplate: sharedRender
@@ -125,7 +127,6 @@ describe("EmailTemplateForm preview dispatch", () => {
       jest.advanceTimersByTime(600);
     });
 
-    // FIX: mode must re-init to HTML and send isMjml=false (pre-fix this stays true / sends mjml_content)
     expect(sharedRender).toHaveBeenLastCalledWith(
       htmlProps.templateJsonData,
       htmlEntity.html_content,
@@ -135,9 +136,8 @@ describe("EmailTemplateForm preview dispatch", () => {
 
   it("re-fires the HTML-mode preview when toggled from MJML to HTML", async () => {
     const props = baseProps(mjmlEntity);
-    const { getByDisplayValue } = render(<EmailTemplateForm {...props} />);
+    const { getByText } = render(<EmailTemplateForm {...props} />);
 
-    // initial mount → one MJML-mode request
     await act(async () => {
       jest.advanceTimersByTime(600);
     });
@@ -148,22 +148,189 @@ describe("EmailTemplateForm preview dispatch", () => {
       true
     );
 
-    // click the "switch to HTML" button — button-only mode toggle,
-    // mutates neither content field directly
     // T.translate returns the key string when no i18n config is loaded
     await act(async () => {
-      fireEvent.click(getByDisplayValue("emails.display_html"));
+      fireEvent.click(getByText("emails.display_html"));
     });
     await act(async () => {
       jest.advanceTimersByTime(600);
     });
 
-    // the HTML-mode effect re-fires with isMjml=false
     expect(props.renderEmailTemplate).toHaveBeenCalledTimes(2);
     expect(props.renderEmailTemplate).toHaveBeenLastCalledWith(
       props.templateJsonData,
       expect.any(String),
       false
     );
+  });
+
+  it("warns before switching to MJML on an HTML-only template and keeps the switch on confirm", async () => {
+    showConfirmDialog.mockResolvedValue(true);
+    const props = baseProps(htmlEntity);
+    const { getByText } = render(<EmailTemplateForm {...props} />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    await act(async () => {
+      fireEvent.click(getByText("emails.display_mjml"));
+    });
+
+    expect(showConfirmDialog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: "emails.mjml_warning",
+        iconType: "warning"
+      })
+    );
+
+    expect(getByText("emails.display_html")).toBeTruthy();
+  });
+
+  it("reverts to HTML mode when the MJML switch warning is cancelled", async () => {
+    showConfirmDialog.mockResolvedValue(false);
+    const props = baseProps(htmlEntity);
+    const { getByText } = render(<EmailTemplateForm {...props} />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    await act(async () => {
+      fireEvent.click(getByText("emails.display_mjml"));
+    });
+
+    expect(getByText("emails.display_mjml")).toBeTruthy();
+  });
+
+  it("does not preview or compile the empty mjml_content while the switch warning is still pending", async () => {
+    let resolveConfirm;
+    showConfirmDialog.mockReturnValue(
+      new Promise((resolve) => {
+        resolveConfirm = resolve;
+      })
+    );
+    const props = baseProps(htmlEntity);
+    const { getByText } = render(<EmailTemplateForm {...props} />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    props.renderEmailTemplate.mockClear();
+
+    fireEvent.click(getByText("emails.display_mjml"));
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    // the dialog hasn't resolved yet -- mode must still be HTML, so no
+    // preview request went out for the (empty) mjml_content
+    expect(props.renderEmailTemplate).not.toHaveBeenCalled();
+    expect(getByText("emails.display_mjml")).toBeTruthy();
+
+    await act(async () => {
+      resolveConfirm(true);
+    });
+  });
+
+  it("does not attempt to compile mjml on a bare mode switch with unchanged (empty) content", async () => {
+    const props = baseProps(htmlEntity);
+    const { getByText } = render(<EmailTemplateForm {...props} />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    mjml2html.mockClear();
+
+    await act(async () => {
+      fireEvent.click(getByText("emails.display_mjml"));
+    });
+
+    // switching modes alone must not attempt a compile of the unchanged,
+    // still-empty mjml_content -- doing so would leave a stale
+    // mjmlRenderError behind after switching back to HTML
+    expect(mjml2html).not.toHaveBeenCalled();
+  });
+});
+
+describe("EmailTemplateForm submit", () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    showConfirmDialog.mockResolvedValue(true);
+  });
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    jest.clearAllMocks();
+  });
+
+  it("submits the current entity and disables the Save button while saving, blocking a double submit", async () => {
+    let resolveSave;
+    const onSubmit = jest.fn(
+      () =>
+        new Promise((resolve) => {
+          resolveSave = resolve;
+        })
+    );
+    const props = { ...baseProps(htmlEntity), onSubmit };
+    const { getByRole } = render(<EmailTemplateForm {...props} />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    const saveButton = getByRole("button", { name: "general.save" });
+    fireEvent.click(saveButton);
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ id: htmlEntity.id })
+    );
+    expect(saveButton).toBeDisabled();
+
+    fireEvent.click(saveButton);
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveSave();
+    });
+  });
+
+  it("keeps unsaved edits when a failed save returns validation errors", async () => {
+    Element.prototype.scrollIntoView = jest.fn();
+    const props = baseProps(htmlEntity);
+    const { container, getByRole, rerender } = render(
+      <EmailTemplateForm {...props} />
+    );
+
+    fireEvent.change(container.querySelector("#subject"), {
+      target: { id: "subject", value: "Edited subject" }
+    });
+    rerender(
+      <EmailTemplateForm {...props} errors={{ identifier: "already taken" }} />
+    );
+    fireEvent.click(getByRole("button", { name: "general.save" }));
+
+    expect(props.onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ subject: "Edited subject" })
+    );
+  });
+
+  it("re-enables the Save button after a rejected save", async () => {
+    const onSubmit = jest.fn(() => Promise.reject(new Error("save failed")));
+    const props = { ...baseProps(htmlEntity), onSubmit };
+    const { getByRole } = render(<EmailTemplateForm {...props} />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    const saveButton = getByRole("button", { name: "general.save" });
+
+    await act(async () => {
+      fireEvent.click(saveButton);
+    });
+
+    expect(saveButton).not.toBeDisabled();
   });
 });

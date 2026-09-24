@@ -48,8 +48,6 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
   default: { translate: (key) => key }
 }));
 
-const mockHistory = { push: jest.fn() };
-
 const initialState = {
   emailTemplateListState: {
     templates: [
@@ -70,14 +68,17 @@ const initialState = {
 };
 
 describe("EmailTemplateListPage", () => {
+  let history;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    history = { push: jest.fn() };
     getEmailTemplates.mockReturnValue(() => Promise.resolve());
     deleteEmailTemplate.mockReturnValue(() => Promise.resolve());
   });
 
   it("reloads the list after a successful delete", async () => {
-    renderWithRedux(<EmailTemplateListPage history={mockHistory} />, {
+    renderWithRedux(<EmailTemplateListPage history={history} />, {
       initialState
     });
 
@@ -95,7 +96,7 @@ describe("EmailTemplateListPage", () => {
       Promise.reject(new Error("delete failed"))
     );
 
-    renderWithRedux(<EmailTemplateListPage history={mockHistory} />, {
+    renderWithRedux(<EmailTemplateListPage history={history} />, {
       initialState
     });
 

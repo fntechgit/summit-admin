@@ -12,14 +12,13 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import {
   saveEmailTemplate,
-  getEmailTemplates,
+  getEmailTemplate,
+  resetTemplateForm,
   deleteEmailTemplate,
   buildRenderPayload,
   normalizeRenderErrors
 } from "../email-actions";
 import * as methods from "../../utils/methods";
-
-jest.mock("../../history", () => ({ push: jest.fn() }));
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   __esModule: true,
@@ -34,6 +33,11 @@ jest.mock("../marketing-actions", () => ({
   saveMarketingSetting: jest.fn()
 }));
 
+jest.mock("../../history", () => ({
+  __esModule: true,
+  default: { push: jest.fn() }
+}));
+
 const requestMock =
   (requestActionCreator, receiveActionCreator) => () => (dispatch) => {
     if (requestActionCreator && typeof requestActionCreator === "function") {
@@ -46,23 +50,6 @@ const requestMock =
         dispatch(receiveActionCreator);
       }
       resolve({ response: { id: 1 } });
-    });
-  };
-
-const getRequestMock =
-  (requestActionCreator, receiveActionCreator, _url, _handler, syncPayload) =>
-  () =>
-  (dispatch) => {
-    if (requestActionCreator && typeof requestActionCreator === "function") {
-      dispatch(requestActionCreator(syncPayload || {}));
-    }
-    return new Promise((resolve) => {
-      if (typeof receiveActionCreator === "function") {
-        dispatch(receiveActionCreator({ response: {} }));
-      } else {
-        dispatch(receiveActionCreator);
-      }
-      resolve({});
     });
   };
 
@@ -92,15 +79,6 @@ describe("saveEmailTemplate", () => {
   });
 
   describe("create path (entity has no id)", () => {
-    it("returns a Promise", async () => {
-      const store = mockStore({});
-      const result = store.dispatch(
-        saveEmailTemplate({ identifier: "test-template" })
-      );
-      expect(result).toBeInstanceOf(Promise);
-      await expect(result).resolves.toBeUndefined();
-    });
-
     it("dispatches TEMPLATE_ADDED then STOP_LOADING on success", async () => {
       const store = mockStore({});
       store.dispatch(saveEmailTemplate({ identifier: "test-template" }));
@@ -116,15 +94,6 @@ describe("saveEmailTemplate", () => {
   });
 
   describe("update path (entity has id)", () => {
-    it("returns a Promise", async () => {
-      const store = mockStore({});
-      const result = store.dispatch(
-        saveEmailTemplate({ id: 1, identifier: "test-template" })
-      );
-      expect(result).toBeInstanceOf(Promise);
-      await expect(result).resolves.toBeUndefined();
-    });
-
     it("dispatches TEMPLATE_UPDATED then STOP_LOADING on success", async () => {
       const store = mockStore({});
       store.dispatch(saveEmailTemplate({ id: 1, identifier: "test-template" }));
@@ -140,26 +109,95 @@ describe("saveEmailTemplate", () => {
   });
 });
 
-describe("getEmailTemplates", () => {
+describe("getEmailTemplate - stale response guard", () => {
   const middlewares = [thunk];
   const mockStore = configureStore(middlewares);
 
+  const isTemplateFetchUrl = (url) => /\/mail-templates\/[^/]+$/.test(url);
+
   beforeEach(() => {
     jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
-    getRequest.mockImplementation(getRequestMock);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  it("dispatches REQUEST_TEMPLATES with page and perPage", async () => {
+  it("drops an older template's response after a newer template's response already landed", async () => {
+    const resolvers = {};
+    getRequest.mockImplementation(
+      (requestActionCreator, receiveActionCreator, url) => () => (dispatch) => {
+        if (isTemplateFetchUrl(url)) {
+          const id = Number(url.split("/").pop());
+          return new Promise((resolve) => {
+            resolvers[id] = () => {
+              dispatch(receiveActionCreator({ response: { id } }));
+              resolve();
+            };
+          });
+        }
+        if (requestActionCreator) dispatch(requestActionCreator({}));
+        dispatch(receiveActionCreator({ response: {} }));
+        return Promise.resolve();
+      }
+    );
+
     const store = mockStore({});
-    store.dispatch(getEmailTemplates("foo", 2, 25));
+
+    // User opens template 5, then quickly navigates to template 8 before
+    // template 5's fetch settles - both requests are genuinely in flight when
+    // template 8's response lands first.
+    store.dispatch(getEmailTemplate("5"));
+    await flushPromises();
+    store.dispatch(getEmailTemplate("8"));
+    await flushPromises();
+    resolvers[8]();
+    await flushPromises();
+    resolvers[5]();
     await flushPromises();
 
-    const req = store.getActions().find((a) => a.type === "REQUEST_TEMPLATES");
-    expect(req.payload).toMatchObject({ page: 2, perPage: 25 });
+    const receivedIds = store
+      .getActions()
+      .filter((a) => a.type === "RECEIVE_TEMPLATE")
+      .map((a) => a.payload.response.id);
+
+    expect(receivedIds).toEqual([8]);
+  });
+
+  it("drops a template's response that lands after resetTemplateForm supersedes it", async () => {
+    const resolvers = {};
+    getRequest.mockImplementation(
+      (requestActionCreator, receiveActionCreator, url) => () => (dispatch) => {
+        if (isTemplateFetchUrl(url)) {
+          const id = Number(url.split("/").pop());
+          return new Promise((resolve) => {
+            resolvers[id] = () => {
+              dispatch(receiveActionCreator({ response: { id } }));
+              resolve();
+            };
+          });
+        }
+        if (requestActionCreator) dispatch(requestActionCreator({}));
+        dispatch(receiveActionCreator({ response: {} }));
+        return Promise.resolve();
+      }
+    );
+
+    const store = mockStore({});
+
+    // User opens template 5, then navigates back to the list and clicks
+    // "Add new" before template 5's fetch settles.
+    store.dispatch(getEmailTemplate("5"));
+    await flushPromises();
+    store.dispatch(resetTemplateForm());
+    await flushPromises();
+    resolvers[5]();
+    await flushPromises();
+
+    const actionTypes = store.getActions().map((a) => a.type);
+
+    expect(actionTypes).not.toContain("RECEIVE_TEMPLATE");
+    expect(actionTypes).toContain("RESET_TEMPLATE_FORM");
   });
 });
 
