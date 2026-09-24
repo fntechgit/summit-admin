@@ -22,8 +22,7 @@ import {
   startLoading,
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
-import moment from "moment-timezone";
-import { getAccessTokenSafely } from "../utils/methods";
+import { dateToShowTZEpoch, getAccessTokenSafely } from "../utils/methods";
 import { ERROR_CODE_404 } from "../utils/constants";
 
 export const REQUEST_SPONSOR_SETTINGS = "REQUEST_SPONSOR_SETTINGS";
@@ -179,27 +178,35 @@ const normalizeEntityFprPurchaseAPI = (entity, summitTZ) => {
     wire_transfer_notification_email?.split(";") || [];
 
   if (early_bird_end_date)
-    normalizedEntity.early_bird_end_date = moment
-      .tz(early_bird_end_date, summitTZ)
-      .unix();
+    normalizedEntity.early_bird_end_date = dateToShowTZEpoch(
+      early_bird_end_date,
+      summitTZ,
+      "end"
+    );
   else delete normalizedEntity.early_bird_end_date;
 
   if (standard_price_end_date)
-    normalizedEntity.standard_price_end_date = moment
-      .tz(standard_price_end_date, summitTZ)
-      .unix();
+    normalizedEntity.standard_price_end_date = dateToShowTZEpoch(
+      standard_price_end_date,
+      summitTZ,
+      "end"
+    );
   else delete normalizedEntity.standard_price_end_date;
 
   if (onsite_price_start_date)
-    normalizedEntity.onsite_price_start_date = moment
-      .tz(onsite_price_start_date, summitTZ)
-      .unix();
+    normalizedEntity.onsite_price_start_date = dateToShowTZEpoch(
+      onsite_price_start_date,
+      summitTZ,
+      "start"
+    );
   else delete normalizedEntity.onsite_price_start_date;
 
   if (onsite_price_end_date)
-    normalizedEntity.onsite_price_end_date = moment
-      .tz(onsite_price_end_date, summitTZ)
-      .unix();
+    normalizedEntity.onsite_price_end_date = dateToShowTZEpoch(
+      onsite_price_end_date,
+      summitTZ,
+      "end"
+    );
   else delete normalizedEntity.onsite_price_end_date;
 
   return normalizedEntity;

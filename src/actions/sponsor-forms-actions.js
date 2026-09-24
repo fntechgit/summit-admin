@@ -25,8 +25,8 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 
 import T from "i18n-react/dist/i18n-react";
-import moment from "moment-timezone";
 import {
+  dateToShowTZEpoch,
   escapeFilterValue,
   getAccessTokenSafely,
   normalizeSelectAllField
@@ -519,8 +519,8 @@ export const normalizeFormTemplate = (entity, summitTZ) => {
   const normalizedEntity = { ...entity };
   const { opens_at, expires_at, sponsorship_types, meta_fields } = entity;
 
-  normalizedEntity.opens_at = moment.tz(opens_at, summitTZ).unix();
-  normalizedEntity.expires_at = moment.tz(expires_at, summitTZ).unix();
+  normalizedEntity.opens_at = dateToShowTZEpoch(opens_at, summitTZ, "start");
+  normalizedEntity.expires_at = dateToShowTZEpoch(expires_at, summitTZ, "end");
 
   Object.assign(
     normalizedEntity,
@@ -1017,9 +1017,13 @@ export const normalizeSponsorCustomizedForm = (entity, summitTZ) => {
   } = entity;
 
   if (opens_at)
-    normalizedEntity.opens_at = moment.tz(opens_at, summitTZ).unix();
+    normalizedEntity.opens_at = dateToShowTZEpoch(opens_at, summitTZ, "start");
   if (expires_at)
-    normalizedEntity.expires_at = moment.tz(expires_at, summitTZ).unix();
+    normalizedEntity.expires_at = dateToShowTZEpoch(
+      expires_at,
+      summitTZ,
+      "end"
+    );
 
   Object.assign(
     normalizedEntity,
