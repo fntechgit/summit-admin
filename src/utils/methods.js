@@ -590,6 +590,19 @@ export const formatDate = (
     .format(format);
 };
 
+/**
+ * Epoch (seconds) of the first ("start") or last ("end") second of the
+ * calendar day carried by a date-picker value, in the given show timezone.
+ *
+ * Only the calendar date is used: a picker value lives in the admin's browser
+ * zone (or the show zone when editing), and re-zoning it with moment.tz()
+ * would shift the instant instead of keeping the date the admin picked.
+ */
+export const dateToShowTZEpoch = (value, timeZone, boundary = "start") => {
+  const day = moment.tz(moment(value).format("YYYY-MM-DD"), timeZone);
+  return (boundary === "end" ? day.endOf("day") : day.startOf("day")).unix();
+};
+
 export const getFileUploadAllowedExtensions = () => {
   const ext = window.FILE_UPLOAD_ALLOWED_EXTENSIONS;
   if (!ext) return [];
