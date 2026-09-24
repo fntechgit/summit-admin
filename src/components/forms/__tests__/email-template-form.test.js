@@ -296,6 +296,26 @@ describe("EmailTemplateForm submit", () => {
     });
   });
 
+  it("keeps unsaved edits when a failed save returns validation errors", async () => {
+    Element.prototype.scrollIntoView = jest.fn();
+    const props = baseProps(htmlEntity);
+    const { container, getByRole, rerender } = render(
+      <EmailTemplateForm {...props} />
+    );
+
+    fireEvent.change(container.querySelector("#subject"), {
+      target: { id: "subject", value: "Edited subject" }
+    });
+    rerender(
+      <EmailTemplateForm {...props} errors={{ identifier: "already taken" }} />
+    );
+    fireEvent.click(getByRole("button", { name: "general.save" }));
+
+    expect(props.onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ subject: "Edited subject" })
+    );
+  });
+
   it("re-enables the Save button after a rejected save", async () => {
     const onSubmit = jest.fn(() => Promise.reject(new Error("save failed")));
     const props = { ...baseProps(htmlEntity), onSubmit };

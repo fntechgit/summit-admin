@@ -28,7 +28,6 @@ import mjml2html from "mjml-browser";
 import showConfirmDialog from "../mui/showConfirmDialog";
 import EmailTemplateInput from "../inputs/email-template-input";
 import { scrollToError, shallowEqual, hasErrors } from "../../utils/methods";
-import "./email-template.less";
 import {
   EMAIL_TEMPLATE_TYPE_HTML,
   EMAIL_TEMPLATE_TYPE_MJML
@@ -38,14 +37,15 @@ const TemplateModeToggle = ({ mjmlEditor, onDisplayMjml, onDisplayHtml }) =>
   mjmlEditor ? (
     <>
       <label>
-        {T.translate("emails.mjml_content")}
-        {" using "}
+        {`${T.translate("emails.mjml_content")} ${T.translate(
+          "emails.using"
+        )} `}
         <a
           target="_blank"
           href="https://documentation.mjml.io/"
           rel="noreferrer"
         >
-          MJML format
+          {T.translate("emails.mjml_format")}
         </a>
       </label>
       <br />
@@ -56,14 +56,13 @@ const TemplateModeToggle = ({ mjmlEditor, onDisplayMjml, onDisplayHtml }) =>
   ) : (
     <>
       <label>
-        {T.translate("emails.html_content")}
-        {" in "}
+        {`${T.translate("emails.html_content")} ${T.translate("emails.in")} `}
         <a
           target="_blank"
           href="https://opensource.com/sites/default/files/gated-content/osdc_cheatsheet-jinja2.pdf"
           rel="noreferrer"
         >
-          jinja format
+          {T.translate("emails.jinja_format")}
         </a>
         {" *"}
       </label>
@@ -109,7 +108,7 @@ const VersionHistoryPicker = ({
 );
 
 const CodeEditorPane = ({ width, id, value, onChange }) => (
-  <div className="email-template-code" style={{ width }}>
+  <Box sx={{ width, minWidth: "50%" }}>
     <CodeMirror
       id={id}
       value={value}
@@ -126,8 +125,48 @@ const CodeEditorPane = ({ width, id, value, onChange }) => (
         })
       ]}
     />
-  </div>
+  </Box>
 );
+
+const toolbarSx = {
+  display: "flex",
+  flexDirection: "row",
+  "& > div:first-of-type": {
+    display: "flex",
+    alignItems: "end",
+    justifyContent: "space-between",
+    mr: "30px"
+  },
+  "& > div:last-of-type": { ml: "30px" },
+  "@media only screen and (max-width: 992px)": {
+    "& > div:first-of-type": {
+      ml: 0,
+      "& > div:last-of-type": { width: "100%" }
+    }
+  },
+  "@media only screen and (max-width: 600px)": {
+    "& > div:first-of-type": {
+      flexDirection: "column",
+      alignItems: "start",
+      "& > div:last-of-type": { padding: 0 }
+    }
+  }
+};
+
+const paneToggleButtonSx = {
+  width: "100%",
+  padding: 0,
+  backgroundColor: "#42474e",
+  border: "none",
+  borderRight: "1px solid #343436",
+  color: "#fff",
+  cursor: "pointer",
+  flex: 1,
+  fontSize: "12px",
+  justifyContent: "center",
+  transition: "background-color 0.3s ease-in-out",
+  "&:hover": { backgroundColor: "#535a63" }
+};
 
 const default_mjml_content = `
 ### Sample MJML Code
@@ -187,7 +226,11 @@ const EmailTemplateForm = ({
     if (!shallowEqual(stateErrors, errors)) {
       setStateErrors({ ...errors });
     }
+  }, [errors]);
 
+  // kept apart from the errors effect: a failed save only updates errors,
+  // and resyncing from the store there would discard the unsaved edits
+  useEffect(() => {
     const isNewEntity = loadedEntityIdRef.current !== entity.id;
     loadedEntityIdRef.current = entity.id;
 
@@ -207,7 +250,7 @@ const EmailTemplateForm = ({
     } else if (!shallowEqual(stateEntity, entity)) {
       setStateEntity({ ...entity });
     }
-  }, [errors, entity]);
+  }, [entity]);
 
   useEffect(() => {
     if (singleTab) {
@@ -489,7 +532,7 @@ const EmailTemplateForm = ({
           style={{ ...style }}
           id="preview"
           name="preview"
-          title="Email template preview"
+          title={T.translate("emails.preview_title")}
           sandbox="allow-same-origin"
           srcDoc={preview}
         />
@@ -585,8 +628,8 @@ const EmailTemplateForm = ({
       <Grid2 container spacing={2}>
         <Grid2 size={12}>
           {templateLoaded ? (
-            <div className="email-template-container">
-              <div className="email-template-buttons">
+            <Box sx={{ height: "960px", mb: "50px" }}>
+              <Box sx={toolbarSx}>
                 {showCodeEditor && (
                   <div style={{ width: codeWidth }}>
                     <div>
@@ -620,9 +663,11 @@ const EmailTemplateForm = ({
                     </Button>
                   </div>
                 )}
-              </div>
+              </Box>
               <br />
-              <div className="email-template-content">
+              <Box
+                sx={{ display: "flex", flexDirection: "row", height: "100%" }}
+              >
                 {showCodeEditor && (
                   <CodeEditorPane
                     width={codeWidth}
@@ -631,10 +676,12 @@ const EmailTemplateForm = ({
                     onChange={handleCodeMirrorChange}
                   />
                 )}
-                <div
-                  className={`email-template-content-buttons ${
-                    codeOnly || previewOnly ? "single-button" : ""
-                  }`}
+                <Box
+                  sx={{
+                    width: codeOnly || previewOnly ? "20px" : "30px",
+                    display: "flex",
+                    "& > button": paneToggleButtonSx
+                  }}
                 >
                   {showPreview && (
                     <button
@@ -654,12 +701,21 @@ const EmailTemplateForm = ({
                       <i className="fa fa-chevron-left" />
                     </button>
                   )}
-                </div>
+                </Box>
                 {showPreview && (
-                  <div
-                    className="email-template-preview"
+                  <Box
                     ref={previewRef}
-                    style={{ width: previewWidth }}
+                    sx={{
+                      width: previewWidth,
+                      minWidth: "50%",
+                      position: "relative",
+                      "& > iframe": {
+                        border: "none",
+                        display: "block",
+                        margin: "0 auto",
+                        transformOrigin: "top left"
+                      }
+                    }}
                   >
                     {templateLoading && (
                       <Box
@@ -675,12 +731,12 @@ const EmailTemplateForm = ({
                       </Box>
                     )}
                     {renderPreviewBody()}
-                  </div>
+                  </Box>
                 )}
-              </div>
-            </div>
+              </Box>
+            </Box>
           ) : (
-            <div>Loading template...</div>
+            <div>{T.translate("emails.loading_template")}</div>
           )}
         </Grid2>
       </Grid2>
