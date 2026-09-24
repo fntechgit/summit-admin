@@ -84,14 +84,13 @@ const EmailTemplateJsonDialog = ({
           </Box>
         )}
         <label>
-          {" "}
-          JSON{" "}
+          {`${T.translate("emails.json")} `}
           <a
             href="https://jsonformatter.curiousconcept.com/"
             target="_blank"
             rel="noreferrer"
           >
-            format
+            {T.translate("emails.format")}
           </a>
         </label>
         <CodeMirror
