@@ -4,6 +4,21 @@ import { TextEncoder, TextDecoder } from "util";
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
+// jsdom does not implement window.matchMedia. Components that gate hover-only
+// affordances on pointer capability call it during render, so rendering them
+// in tests would throw. Default to the coarse-pointer / no-hover branch, which
+// is the conservative one; tests needing the hover branch can override this.
+window.matchMedia = (query) => ({
+  matches: false,
+  media: query,
+  onchange: null,
+  addListener: () => {},
+  removeListener: () => {},
+  addEventListener: () => {},
+  removeEventListener: () => {},
+  dispatchEvent: () => false
+});
+
 // Suppress console.error noise from known React 16 + MUI v6 incompatibilities:
 //   1. DOM nesting: AccordionSummary renders as <button> and contains IconButton
 //      (also <button>). This is a structural MUI pattern constraint; browsers are
