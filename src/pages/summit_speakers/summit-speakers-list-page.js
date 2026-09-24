@@ -832,6 +832,7 @@ class SummitSpeakersListPage extends React.Component {
           <div className="col-md-4 speaker-list-filter-col">
             <MediaTypeFilter
               id="media_upload_with_type"
+              operatorInitialValue={mediaUploadTypeFilter.operator}
               filterInitialValue={mediaUploadTypeFilter.value}
               summitId={currentSummit.id}
               onChange={this.handleChangeMediaUploadTypeFilter}
