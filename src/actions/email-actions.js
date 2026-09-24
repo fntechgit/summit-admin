@@ -104,10 +104,36 @@ export const getEmailTemplates =
     });
   };
 
+// Sequence-guard (see sequenced()): EditEmailTemplatePage dispatches a fresh
+// getEmailTemplate(id) on every route param change, and concurrent calls for
+// different template ids never abort each other - a stale response landing
+// after a newer one (or after a reset) would overwrite the store's entity
+// with the wrong template's data, and EmailTemplateForm's loadedEntityIdRef
+// check would silently reseed the visible form with it. guardedDispatch
+// drops the RECEIVE/loading dispatches from a superseded call.
+const sequenced = () => {
+  let seq = 0;
+  return (dispatch) => {
+    seq += 1;
+    const mySeq = seq;
+    return {
+      isCurrent: () => mySeq === seq,
+      guardedDispatch: (action) => {
+        if (mySeq === seq) dispatch(action);
+      }
+    };
+  };
+};
+const getEmailTemplateSeq = sequenced();
+
 export const getEmailTemplate = (templateId) => async (dispatch) => {
+  const { isCurrent, guardedDispatch } = getEmailTemplateSeq(dispatch);
   const accessToken = await getAccessTokenSafely();
 
-  dispatch(startLoading());
+  // Superseded while awaiting the token -> don't fire a request at all.
+  if (!isCurrent()) return Promise.resolve();
+
+  guardedDispatch(startLoading());
 
   const params = { access_token: accessToken, expand: "parent,versions" };
 
@@ -116,12 +142,11 @@ export const getEmailTemplate = (templateId) => async (dispatch) => {
     createAction(RECEIVE_TEMPLATE),
     `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/${templateId}`,
     authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+  )(params)(guardedDispatch).finally(() => guardedDispatch(stopLoading()));
 };
 
 export const resetTemplateForm = () => (dispatch) => {
+  getEmailTemplateSeq(dispatch); // invalidates any in-flight getEmailTemplate
   dispatch(createAction(RESET_TEMPLATE_FORM)({}));
 };
 
