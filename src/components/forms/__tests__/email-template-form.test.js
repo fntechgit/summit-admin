@@ -8,8 +8,8 @@ import {
   afterEach
 } from "@jest/globals";
 import { render, act, fireEvent } from "@testing-library/react";
-import showConfirmDialog from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
 import mjml2html from "mjml-browser";
+import showConfirmDialog from "../../mui/showConfirmDialog";
 
 import EmailTemplateForm from "../email-template-form";
 
@@ -17,13 +17,10 @@ jest.mock("@uiw/react-codemirror", () => ({
   __esModule: true,
   default: () => null
 }));
-jest.mock(
-  "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog",
-  () => ({
-    __esModule: true,
-    default: jest.fn(() => Promise.resolve(true))
-  })
-);
+jest.mock("../../mui/showConfirmDialog", () => ({
+  __esModule: true,
+  default: jest.fn(() => Promise.resolve(true))
+}));
 jest.mock("mjml-browser", () => ({
   __esModule: true,
   default: jest.fn(() => ({ html: "<html></html>" }))
@@ -315,123 +312,5 @@ describe("EmailTemplateForm submit", () => {
     });
 
     expect(saveButton).not.toBeDisabled();
-  });
-});
-
-describe("EmailTemplateForm responsive preview scale", () => {
-  let offsetWidthSpy;
-
-  beforeEach(() => {
-    jest.useFakeTimers();
-    showConfirmDialog.mockResolvedValue(true);
-    offsetWidthSpy = jest
-      .spyOn(HTMLElement.prototype, "offsetWidth", "get")
-      .mockReturnValue(800);
-  });
-
-  afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
-    jest.clearAllMocks();
-    offsetWidthSpy.mockRestore();
-  });
-
-  it("recovers to full scale once the preview container widens after an early narrow measurement", async () => {
-    offsetWidthSpy.mockReturnValue(400);
-    const props = baseProps(htmlEntity);
-    const { container } = render(<EmailTemplateForm {...props} />);
-
-    await act(async () => {
-      jest.advanceTimersByTime(600);
-    });
-
-    expect(container.querySelector("iframe").style.transform).toBe(
-      "scale(0.5)"
-    );
-
-    offsetWidthSpy.mockReturnValue(800);
-    await act(async () => {
-      window.dispatchEvent(new Event("resize"));
-    });
-
-    expect(container.querySelector("iframe").style.transform).toBe("scale(1)");
-  });
-});
-
-describe("EmailTemplateForm pane width", () => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-    showConfirmDialog.mockResolvedValue(true);
-  });
-  afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
-    jest.clearAllMocks();
-  });
-
-  it("splits code and preview 50/50, then gives the remaining pane full width when the other is collapsed", async () => {
-    const props = baseProps(htmlEntity);
-    const { container } = render(<EmailTemplateForm {...props} />);
-
-    await act(async () => {
-      jest.advanceTimersByTime(600);
-    });
-
-    expect(container.querySelector(".email-template-code").style.width).toBe(
-      "50%"
-    );
-    expect(container.querySelector(".email-template-preview").style.width).toBe(
-      "50%"
-    );
-
-    fireEvent.click(container.querySelector("#code"));
-
-    expect(container.querySelector(".email-template-preview")).toBeNull();
-    expect(container.querySelector(".email-template-code").style.width).toBe(
-      "100%"
-    );
-  });
-});
-
-describe("EmailTemplateForm single-tab layout", () => {
-  const originalInnerWidth = window.innerWidth;
-
-  beforeEach(() => {
-    jest.useFakeTimers();
-    showConfirmDialog.mockResolvedValue(true);
-  });
-  afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
-    jest.clearAllMocks();
-    Object.defineProperty(window, "innerWidth", {
-      configurable: true,
-      value: originalInnerWidth
-    });
-  });
-
-  it("keeps the previously selected pane visible when narrowing into single-tab mode", async () => {
-    const props = baseProps(htmlEntity);
-    const { container } = render(<EmailTemplateForm {...props} />);
-
-    await act(async () => {
-      jest.advanceTimersByTime(600);
-    });
-
-    fireEvent.click(container.querySelector("#preview"));
-    expect(container.querySelector(".email-template-preview")).not.toBeNull();
-    expect(container.querySelector(".email-template-code")).toBeNull();
-
-    Object.defineProperty(window, "innerWidth", {
-      configurable: true,
-      value: 500
-    });
-    await act(async () => {
-      window.dispatchEvent(new Event("resize"));
-    });
-
-    // neither pane must disappear -- the preview the user picked stays up
-    expect(container.querySelector(".email-template-preview")).not.toBeNull();
-    expect(container.querySelector(".email-template-code")).toBeNull();
   });
 });

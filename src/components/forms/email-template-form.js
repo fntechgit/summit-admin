@@ -25,7 +25,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { sublimeInit } from "@uiw/codemirror-theme-sublime";
 import { html } from "@codemirror/lang-html";
 import mjml2html from "mjml-browser";
-import showConfirmDialog from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
+import showConfirmDialog from "../mui/showConfirmDialog";
 import EmailTemplateInput from "../inputs/email-template-input";
 import { scrollToError, shallowEqual, hasErrors } from "../../utils/methods";
 import "./email-template.less";
