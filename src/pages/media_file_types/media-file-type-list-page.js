@@ -85,8 +85,7 @@ const MediaFileTypeListPage = ({
     setOpen(false);
   };
 
-  const handleSave = (entity) =>
-    saveMediaFileType(entity)
+  const handleSave = (entity) => saveMediaFileType(entity)
       .then(() =>
         getMediaFileTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
       )
