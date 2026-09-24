@@ -273,7 +273,11 @@ const TicketTypeListPage = function ({
       >
         <GridFilter
           id={FILTER_ID}
-          criterias={getCriterias(audienceDDL, badge_types_ddl)}
+          criterias={getCriterias(
+            audienceDDL,
+            badge_types_ddl,
+            currentSummit.time_zone_id
+          )}
           hideJoinOperators
         />
         {ticketTypes?.length > 0 && (

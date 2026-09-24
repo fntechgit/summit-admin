@@ -15,7 +15,7 @@ import T from "i18n-react/dist/i18n-react";
 import { OPERATORS } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import { DATE_FILTER_ARRAY_SIZE } from "../../utils/constants";
 
-export const getCriterias = (audienceDDL, badgeTypesDDL) => [
+export const getCriterias = (audienceDDL, badgeTypesDDL, timezone) => [
   {
     key: "audience_filter",
     label: T.translate("ticket_type_list.audience"),
@@ -35,7 +35,7 @@ export const getCriterias = (audienceDDL, badgeTypesDDL) => [
     key: "sale_period_filter",
     label: T.translate("ticket_type_list.sale_period"),
     operators: [OPERATORS.AFTER, OPERATORS.BEFORE],
-    values: { type: "datetime", props: { mode: "datetime" } }
+    values: { type: "datetime", props: { mode: "datetime", timezone } }
   }
 ];
 

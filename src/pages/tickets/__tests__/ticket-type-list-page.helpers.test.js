@@ -1,10 +1,22 @@
 import { OPERATORS } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
-import { buildTicketTypeFilters } from "../ticket-type-list-page.helpers";
+import {
+  getCriterias,
+  buildTicketTypeFilters
+} from "../ticket-type-list-page.helpers";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   __esModule: true,
   default: { translate: (key) => key }
 }));
+
+describe("getCriterias", () => {
+  test("forwards the summit timezone to the sale_period_filter datetime criterion", () => {
+    const criterias = getCriterias([], [], "America/Los_Angeles");
+    const salePeriod = criterias.find((c) => c.key === "sale_period_filter");
+
+    expect(salePeriod.values.props.timezone).toBe("America/Los_Angeles");
+  });
+});
 
 describe("buildTicketTypeFilters", () => {
   test("returns empty/null defaults when no filter is set", () => {
