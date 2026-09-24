@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import MediaTypeFilter from "..";
 import { getAllMediaUploadTypes } from "../../../../actions/media-upload-actions";
 
@@ -10,6 +11,31 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 jest.mock("../../../../actions/media-upload-actions", () => ({
   getAllMediaUploadTypes: jest.fn()
 }));
+
+// Mirrors the real react-select single-select contract: the operator control
+// receives and emits whole option objects, not raw values.
+jest.mock(
+  "react-select",
+  () =>
+    function MockSelect({ id, value, options, onChange }) {
+      return (
+        <select
+          data-testid="operator-select"
+          aria-label={id}
+          value={value?.value ?? ""}
+          onChange={(e) =>
+            onChange(options.find((o) => o.value === e.target.value) || null)
+          }
+        >
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      );
+    }
+);
 
 // Mirrors the real Dropdown (react-select) wrapper's isMulti contract:
 // value/onChange both deal in a flat array of raw option ids.
@@ -104,6 +130,28 @@ describe("MediaTypeFilter", () => {
         value: [],
         type: "mediatypeinput",
         operator: null
+      }
+    });
+  });
+
+  test("switching the operator reports the current selection as an exclusion", async () => {
+    const user = userEvent.setup();
+    render(<MediaTypeFilter {...baseProps} />);
+    await waitFor(() => screen.getByText("Video"));
+
+    await user.selectOptions(screen.getByTestId("media-type-dropdown"), ["1"]);
+    await user.selectOptions(
+      screen.getByTestId("operator-select"),
+      "has_not_media_upload_with_type=="
+    );
+
+    expect(baseProps.onChange).toHaveBeenCalledTimes(2);
+    expect(baseProps.onChange).toHaveBeenLastCalledWith({
+      target: {
+        id: "media-type-filter",
+        value: [{ id: "1", name: "Video" }],
+        type: "mediatypeinput",
+        operator: "has_not_media_upload_with_type=="
       }
     });
   });
