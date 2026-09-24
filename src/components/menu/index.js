@@ -30,6 +30,7 @@ const Menu = ({
   member,
   history,
   menuOpen,
+  openedByHover,
   toggleMenu,
   onMenuMouseEnter,
   onMenuMouseLeave
@@ -89,7 +90,12 @@ const Menu = ({
       open={Boolean(menuOpen)}
       onClose={closeMenu}
       slotProps={{
-        root: { keepMounted: true },
+        root: {
+          keepMounted: true,
+          disableAutoFocus: openedByHover,
+          disableEnforceFocus: openedByHover,
+          disableScrollLock: true
+        },
         paper: {
           sx: { width: DRAWER_WIDTH },
           ...(canHover && {

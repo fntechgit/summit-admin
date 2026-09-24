@@ -47,6 +47,7 @@ const PrimaryLayout = ({
   currentSummit,
   member,
   menuOpen,
+  openedByHover,
   toggleMenu,
   onMenuMouseEnter,
   onMenuMouseLeave
@@ -56,6 +57,7 @@ const PrimaryLayout = ({
       currentSummit={currentSummit}
       member={member}
       menuOpen={menuOpen}
+      openedByHover={openedByHover}
       toggleMenu={toggleMenu}
       onMenuMouseEnter={onMenuMouseEnter}
       onMenuMouseLeave={onMenuMouseLeave}

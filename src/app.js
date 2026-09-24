@@ -155,7 +155,7 @@ class App extends React.PureComponent {
   constructor(props) {
     super(props);
     props.resetLoading();
-    this.state = { menuOpen: false };
+    this.state = { menuOpen: false, openedByHover: false };
     this.menuCloseTimeout = null;
     this.lastHoverOpen = 0;
     this.toggleMenu = this.toggleMenu.bind(this);
@@ -179,13 +179,16 @@ class App extends React.PureComponent {
   toggleMenu() {
     this.cancelMenuClose();
     if (Date.now() - this.lastHoverOpen < HOVER_OPEN_CLICK_GRACE_MS) return;
-    this.setState((prevState) => ({ menuOpen: !prevState.menuOpen }));
+    this.setState((prevState) => ({
+      menuOpen: !prevState.menuOpen,
+      openedByHover: false
+    }));
   }
 
   openMenu() {
     this.cancelMenuClose();
     this.lastHoverOpen = Date.now();
-    this.setState({ menuOpen: true });
+    this.setState({ menuOpen: true, openedByHover: true });
   }
 
   cancelMenuClose() {
@@ -211,7 +214,7 @@ class App extends React.PureComponent {
       backUrl,
       loading
     } = this.props;
-    const { menuOpen } = this.state;
+    const { menuOpen, openedByHover } = this.state;
 
     const idToken = getIdToken();
 
@@ -318,6 +321,7 @@ class App extends React.PureComponent {
                   component={PrimaryLayout}
                   componentProps={{
                     menuOpen,
+                    openedByHover,
                     toggleMenu: this.toggleMenu,
                     onMenuMouseEnter: this.cancelMenuClose,
                     onMenuMouseLeave: this.scheduleMenuClose
