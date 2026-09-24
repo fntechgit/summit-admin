@@ -4,6 +4,7 @@
 import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
+import moment from "moment-timezone";
 import {
   getRequest,
   postRequest,
@@ -33,6 +34,11 @@ jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   putRequest: jest.fn(),
   deleteRequest: jest.fn()
 }));
+
+// 2026-09-25 in America/Los_Angeles (PDT, UTC-7): 00:00:00 and 23:59:59
+const SHOW_TZ = "America/Los_Angeles";
+const SEP_25_PT_START_EPOCH = Date.UTC(2026, 8, 25, 7, 0, 0) / 1000;
+const SEP_25_PT_END_EPOCH = Date.UTC(2026, 8, 26, 6, 59, 59) / 1000;
 
 describe("Sponsor Forms Actions", () => {
   describe("GetSponsorForms", () => {
@@ -147,6 +153,36 @@ describe("Sponsor Forms Actions", () => {
       expect(result.apply_to_all_types).toBe(false);
       expect(result.sponsorship_types).toEqual([]);
     });
+
+    it("should store the picked date in show time regardless of the picker timezone", () => {
+      // the admin's browser is Eastern, the show is Pacific
+      const picked = moment.tz("2026-09-25", "America/New_York");
+      const entity = {
+        opens_at: picked,
+        expires_at: picked,
+        sponsorship_types: [1],
+        meta_fields: []
+      };
+
+      const result = normalizeFormTemplate(entity, SHOW_TZ);
+
+      expect(result.opens_at).toBe(SEP_25_PT_START_EPOCH);
+      expect(result.expires_at).toBe(SEP_25_PT_END_EPOCH);
+    });
+
+    it("should keep the stored epochs when a value already in show time is saved again", () => {
+      const entity = {
+        opens_at: moment.unix(SEP_25_PT_START_EPOCH).tz(SHOW_TZ),
+        expires_at: moment.unix(SEP_25_PT_END_EPOCH).tz(SHOW_TZ),
+        sponsorship_types: [1],
+        meta_fields: []
+      };
+
+      const result = normalizeFormTemplate(entity, SHOW_TZ);
+
+      expect(result.opens_at).toBe(SEP_25_PT_START_EPOCH);
+      expect(result.expires_at).toBe(SEP_25_PT_END_EPOCH);
+    });
   });
 
   describe("normalizeSponsorCustomizedForm", () => {
@@ -199,6 +235,22 @@ describe("Sponsor Forms Actions", () => {
 
       expect(result.apply_to_all_add_ons).toBe(false);
       expect(result.allowed_add_ons).toEqual([]);
+    });
+
+    it("should store the picked date in show time regardless of the picker timezone", () => {
+      const picked = moment.tz("2026-09-25", "America/New_York");
+      const entity = {
+        id: 1,
+        opens_at: picked,
+        expires_at: picked,
+        allowed_add_ons: [],
+        meta_fields: []
+      };
+
+      const result = normalizeSponsorCustomizedForm(entity, SHOW_TZ);
+
+      expect(result.opens_at).toBe(SEP_25_PT_START_EPOCH);
+      expect(result.expires_at).toBe(SEP_25_PT_END_EPOCH);
     });
   });
 
