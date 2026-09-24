@@ -1941,6 +1941,7 @@
     "currency_updated": "Currency updated successfully",
     "yes_change": "Yes, change.",
     "select_fields": "Show Columns",
+    "sale_period": "Sale Period",
     "placeholders": {
       "search_ticket_types": "Search by Name, Description or ID",
       "select_currency": "Select currency",

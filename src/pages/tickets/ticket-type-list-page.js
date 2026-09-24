@@ -14,14 +14,22 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import { Pagination } from "react-bootstrap";
-import ActionDropdown from "openstack-uicore-foundation/lib/components/inputs/action-dropdown"
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import Table from "openstack-uicore-foundation/lib/components/table"
-import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import {
+  Box,
+  Button,
+  Divider,
+  FormControl,
+  Grid2,
+  MenuItem,
+  Select
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
+import {
+  GridFilter,
+  useGridFilter
+} from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getTicketTypes,
@@ -31,7 +39,15 @@ import {
 } from "../../actions/ticket-actions";
 import { getBadgeTypes } from "../../actions/badge-actions";
 import { handleDDLSortByLabel } from "../../utils/methods";
-import { DATE_FILTER_ARRAY_SIZE } from "../../utils/constants";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+import showConfirmDialog from "../../components/mui/showConfirmDialog";
+import GridToolbar from "../../components/mui/grid-toolbar";
+import {
+  getCriterias,
+  buildTicketTypeFilters
+} from "./ticket-type-list-page.helpers";
+
+const FILTER_ID = "ticket_type_list";
 
 const TicketTypeListPage = function ({
   ticketTypes,
@@ -41,38 +57,22 @@ const TicketTypeListPage = function ({
   orderDir,
   currentPage,
   perPage,
-  lastPage,
-  filters,
   totalTicketTypes,
   ...props
 }) {
-  const defaultFilters = {
-    audience_filter: [],
-    badge_type_filter: [],
-    sale_period_filter: Array(DATE_FILTER_ARRAY_SIZE).fill(null)
-  };
-
-  const [enabledFilters, setEnabledFilters] = useState(
-    Object.keys(filters).filter((e) =>
-      Array.isArray(filters[e])
-        ? filters[e]?.some((e) => e !== null)
-        : filters[e]?.length > 0
-    )
-  );
-  const [ticketTypeFilters, setTicketTypeFilters] = useState({
-    ...defaultFilters,
-    ...filters
-  });
+  const { parsedFilter, filterValues } = useGridFilter(FILTER_ID);
+  const ticketTypeFilters = buildTicketTypeFilters(filterValues);
 
   const [selectedColumns, setSelectedColumns] = useState([]);
+  const [currency, setCurrency] = useState(null);
 
   useEffect(() => {
-    if (currentSummit) {
+    if (currentSummit?.id) {
       props.getTicketTypes(
         term,
         order,
         orderDir,
-        currentPage,
+        DEFAULT_CURRENT_PAGE,
         perPage,
         ticketTypeFilters
       );
@@ -80,7 +80,7 @@ const TicketTypeListPage = function ({
         props.getBadgeTypes();
       }
     }
-  }, [currentSummit?.id]);
+  }, [currentSummit?.id, parsedFilter.join(",")]);
 
   const handlePageChange = (page) => {
     props.getTicketTypes(
@@ -93,42 +93,37 @@ const TicketTypeListPage = function ({
     );
   };
 
-  const handleEdit = (ticket_type_id) => {
-    props.history.push(
-      `/app/summits/${currentSummit.id}/ticket-types/${ticket_type_id}`
+  const handlePerPageChange = (newPerPage) => {
+    props.getTicketTypes(
+      term,
+      order,
+      orderDir,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      ticketTypeFilters
     );
   };
 
-  const handleSeedTickets = (ev) => {
-    ev.preventDefault();
+  const handleEdit = (ticket_type) => {
+    props.history.push(
+      `/app/summits/${currentSummit.id}/ticket-types/${ticket_type.id}`
+    );
+  };
+
+  const handleSeedTickets = () => {
     props.seedTicketTypes();
   };
 
   const handleDelete = (ticketTypeId) => {
-    const ticketType = ticketTypes.find((t) => t.id === ticketTypeId);
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("ticket_type_list.remove_warning")} ${
-        ticketType.name
-      }`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        props.deleteTicketType(ticketTypeId);
-      }
-    });
+    props.deleteTicketType(ticketTypeId);
   };
 
-  const handleSort = (index, key, dir) => {
+  const handleSort = (key, dir) => {
     props.getTicketTypes(
       term,
       key,
       dir,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       perPage,
       ticketTypeFilters
     );
@@ -143,130 +138,64 @@ const TicketTypeListPage = function ({
       newTerm,
       order,
       orderDir,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       perPage,
       ticketTypeFilters
     );
   };
 
-  const handleFiltersChange = (ev) => {
-    const { value } = ev.target;
-    if (value.length < enabledFilters.length) {
-      if (value.length === 0) {
-        setEnabledFilters(value);
-        setTicketTypeFilters(defaultFilters);
-      } else {
-        const removedFilter = enabledFilters.filter(
-          (e) => !value.includes(e)
-        )[0];
-        const defaultValue = Array.isArray(ticketTypeFilters[removedFilter])
-          ? []
-          : "";
-        const newTicketTypeFilter = {
-          ...ticketTypeFilters,
-          [removedFilter]: defaultValue
-        };
-        setEnabledFilters(value);
-        setTicketTypeFilters(newTicketTypeFilter);
-      }
-    } else {
-      setEnabledFilters(value);
-    }
-  };
-
-  const handleChangeDateFilter = (ev, lastDate) => {
-    const { value, id } = ev.target;
-    const newDateFilter = ticketTypeFilters[id];
-
-    setTicketTypeFilters({
-      ...ticketTypeFilters,
-      [id]: lastDate
-        ? [newDateFilter[0], value.unix()]
-        : [value.unix(), newDateFilter[1]]
-    });
-  };
-
-  const handleTicketTypeFilterChange = (ev) => {
-    const { value, id } = ev.target;
-    setTicketTypeFilters({ ...ticketTypeFilters, [id]: value });
-  };
-
-  const handleApplyTicketTypeFilters = () => {
-    props.getTicketTypes(
-      term,
-      order,
-      orderDir,
-      currentPage,
-      perPage,
-      ticketTypeFilters
-    );
-  };
-
-  const handleChangeCurrency = (currency) => {
-    Swal.fire({
+  const handleChangeCurrency = async (newCurrency) => {
+    const confirmed = await showConfirmDialog({
       title: T.translate("general.are_you_sure"),
       text: `${T.translate(
         "ticket_type_list.change_currency_warning"
-      )} ${currency}`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
+      )} ${newCurrency}`,
       confirmButtonText: T.translate("ticket_type_list.yes_change")
-    }).then((result) => {
-      if (result.value) {
-        props.changeTicketTypesCurrency(currency);
-      }
     });
+
+    if (confirmed) {
+      props.changeTicketTypesCurrency(newCurrency);
+    }
   };
 
   const handleColumnsChange = (ev) => {
-    const { value } = ev.target;
-    const newColumns = value;
-
-    setSelectedColumns(newColumns);
+    setSelectedColumns(ev.target.value);
   };
 
   const fieldNames = [
-    { columnKey: "audience", value: "audience" },
-    { columnKey: "external_id", value: "external_id" },
-    { columnKey: "badge_type_name", value: "badge_type_name" },
-    { columnKey: "cost", value: "cost" },
-    { columnKey: "quantity_2_sell", value: "quantity_2_sell" },
-    { columnKey: "sales_start_date", value: "sales_start_date" },
-    { columnKey: "sales_end_date", value: "sales_end_date" }
+    { columnKey: "audience", header: "audience" },
+    { columnKey: "external_id", header: "external_id" },
+    { columnKey: "badge_type_name", header: "badge_type_name" },
+    { columnKey: "cost", header: "cost" },
+    { columnKey: "quantity_2_sell", header: "quantity_2_sell" },
+    { columnKey: "sales_start_date", header: "sales_start_date" },
+    { columnKey: "sales_end_date", header: "sales_end_date" }
   ];
 
   const showColumns = fieldNames
     .filter((f) => selectedColumns.includes(f.columnKey))
-    .map((f2) => {
-      let c = {
-        columnKey: f2.columnKey,
-        value: T.translate(`ticket_type_list.${f2.value}`),
-        sortable: f2.sortable
-      };
-      // optional fields
-      if (f2.hasOwnProperty("title")) c = { ...c, title: f2.title };
+    .map((f) => ({
+      columnKey: f.columnKey,
+      header: T.translate(`ticket_type_list.${f.header}`),
+      sortable: f.sortable
+    }));
 
-      if (f2.hasOwnProperty("render")) c = { ...c, render: f2.render };
-
-      return c;
-    });
-
-  let columns = [
+  const columns = [
     {
       columnKey: "id",
-      value: T.translate("ticket_type_list.id"),
+      header: T.translate("ticket_type_list.id"),
       sortable: true
     },
     {
       columnKey: "name",
-      value: T.translate("ticket_type_list.name"),
+      header: T.translate("ticket_type_list.name"),
       sortable: true
     },
     {
       columnKey: "description",
-      value: T.translate("ticket_type_list.description")
-    }
+      header: T.translate("ticket_type_list.description")
+    },
+    ...showColumns
   ];
 
   const ddl_columns = [
@@ -298,22 +227,7 @@ const TicketTypeListPage = function ({
     }
   ];
 
-  columns = [...columns, ...showColumns];
-
-  const table_options = {
-    sortCol: order,
-    sortDir: orderDir,
-    actions: {
-      edit: { onClick: handleEdit },
-      delete: { onClick: handleDelete }
-    }
-  };
-
-  const filters_ddl = [
-    { label: "Audience", value: "audience_filter" },
-    { label: "Badge Type", value: "badge_type_filter" },
-    { label: "Sale Period", value: "sale_period_filter" }
-  ];
+  const table_options = { sortCol: order, sortDir: orderDir };
 
   const audienceDDL = [
     { label: "All", value: "All" },
@@ -327,10 +241,11 @@ const TicketTypeListPage = function ({
     }
   ];
 
-  const badge_types_ddl = currentSummit.badge_types?.map((bt) => ({
-    value: bt.id,
-    label: bt.name
-  }));
+  const badge_types_ddl =
+    currentSummit.badge_types?.map((bt) => ({
+      value: bt.id,
+      label: bt.name
+    })) ?? [];
 
   const currencyOptions = currentSummit.supported_currencies.map((c) => ({
     value: c,
@@ -340,194 +255,101 @@ const TicketTypeListPage = function ({
     currentSummit.default_ticket_type_currency ||
     ticketTypes?.[0]?.currency ||
     "USD";
+  const selectedCurrency = currency ?? defaultCurrency;
 
   if (!currentSummit.id) return <div />;
 
   return (
     <div className="container">
-      <h3>
-        {" "}
-        {T.translate("ticket_type_list.ticket_type_list")} ({totalTicketTypes})
-      </h3>
-      <div className="row">
-        <div className="col-md-5">
-          <FreeTextSearch
-            value={term}
-            placeholder={T.translate(
-              "ticket_type_list.placeholders.search_ticket_types"
-            )}
-            onSearch={handleSearch}
-          />
-        </div>
-        <div className="col-md-7 text-right">
-          {ticketTypes?.length > 0 && (
-            <span className="right-space">
-              <ActionDropdown
-                value={{ value: defaultCurrency, label: defaultCurrency }}
-                options={currencyOptions}
-                actionLabel={T.translate("ticket_type_list.apply")}
-                placeholder={T.translate(
-                  "ticket_type_list.placeholders.select_currency"
-                )}
-                onClick={handleChangeCurrency}
-              />
-            </span>
-          )}
-          <button
-            className="btn btn-primary right-space"
-            onClick={handleNewTicketType}
-            type="button"
-          >
-            {T.translate("ticket_type_list.add_ticket_type")}
-          </button>
-          {currentSummit.external_registration_feed_type === "Eventbrite" && (
-            <button
-              className="btn btn-default"
-              onClick={handleSeedTickets}
-              type="button"
+      <h3>{T.translate("ticket_type_list.ticket_type_list")}</h3>
+      <GridToolbar
+        searchProps={{
+          term,
+          placeholder: T.translate(
+            "ticket_type_list.placeholders.search_ticket_types"
+          ),
+          onSearch: handleSearch
+        }}
+      >
+        <GridFilter
+          id={FILTER_ID}
+          criterias={getCriterias(audienceDDL, badge_types_ddl)}
+          hideJoinOperators
+        />
+        {ticketTypes?.length > 0 && (
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <FormControl size="small" sx={{ minWidth: 140 }}>
+              <Select
+                value={selectedCurrency}
+                onChange={(ev) => setCurrency(ev.target.value)}
+              >
+                {currencyOptions.map((c) => (
+                  <MenuItem key={c.value} value={c.value}>
+                    {c.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Button
+              variant="outlined"
+              onClick={() => handleChangeCurrency(selectedCurrency)}
             >
-              {T.translate("ticket_type_list.seed_tickets")}
-            </button>
+              {T.translate("ticket_type_list.apply")}
+            </Button>
+          </Box>
+        )}
+        <Button
+          variant="contained"
+          onClick={handleNewTicketType}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("ticket_type_list.add_ticket_type")}
+        </Button>
+        {currentSummit.external_registration_feed_type === "Eventbrite" && (
+          <Button variant="outlined" onClick={handleSeedTickets}>
+            {T.translate("ticket_type_list.seed_tickets")}
+          </Button>
+        )}
+      </GridToolbar>
+      <Grid2 size={2}>
+        <Box component="span">
+          {totalTicketTypes} {T.translate("ticket_type_list.ticket_types")}
+        </Box>
+      </Grid2>
+      <Divider sx={{ my: 2 }} />
+      <Box sx={{ my: 2 }}>
+        <MuiDropdown
+          id="select_fields"
+          label={T.translate("ticket_type_list.select_fields")}
+          placeholder={T.translate(
+            "ticket_type_list.placeholders.select_fields"
           )}
-        </div>
-      </div>
-      <hr />
-      <div className="row">
-        <div className="col-md-6">
-          <Dropdown
-            id="enabled_filters"
-            placeholder="Enabled Filters"
-            value={enabledFilters}
-            onChange={handleFiltersChange}
-            options={handleDDLSortByLabel(filters_ddl)}
-            isClearable
-            isMulti
-          />
-        </div>
-        <div className="col-md-6">
-          <button
-            className="btn btn-primary right-space"
-            onClick={handleApplyTicketTypeFilters}
-            type="button"
-          >
-            {T.translate("ticket_type_list.apply_filters")}
-          </button>
-        </div>
-      </div>
-      <div className="filters-row">
-        {enabledFilters.includes("audience_filter") && (
-          <div className="col-md-6">
-            <Dropdown
-              id="audience_filter"
-              value={ticketTypeFilters.audience_filter}
-              onChange={handleTicketTypeFilterChange}
-              options={audienceDDL}
-              isClearable
-              placeholder="Filter By Audience"
-              isMulti
-            />
-          </div>
-        )}
-        {enabledFilters.includes("badge_type_filter") && (
-          <div className="col-md-6">
-            <Dropdown
-              id="badge_type_filter"
-              value={ticketTypeFilters.badge_type_filter}
-              onChange={handleTicketTypeFilterChange}
-              options={badge_types_ddl}
-              isClearable
-              placeholder="Filter By Badge Type"
-              isMulti
-            />
-          </div>
-        )}
-        {enabledFilters.includes("sale_period_filter") && (
-          <>
-            <div className="col-md-3">
-              <DateTimePicker
-                id="sale_period_filter"
-                format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                inputProps={{
-                  placeholder: T.translate(
-                    "ticket_type_list.placeholders.sale_period_from"
-                  )
-                }}
-                onChange={(ev) => handleChangeDateFilter(ev, false)}
-                timezone={currentSummit.time_zone_id}
-                value={epochToMomentTimeZone(
-                  ticketTypeFilters.sale_period_filter[0],
-                  currentSummit.time
-                )}
-                className="event-list-date-picker"
-              />
-            </div>
-            <div className="col-md-3">
-              <DateTimePicker
-                id="sale_period_filter"
-                format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                inputProps={{
-                  placeholder: T.translate(
-                    "ticket_type_list.placeholders.sale_period_to"
-                  )
-                }}
-                onChange={(ev) => handleChangeDateFilter(ev, true)}
-                timezone={currentSummit.time_zone_id}
-                value={epochToMomentTimeZone(
-                  ticketTypeFilters.sale_period_filter[1],
-                  currentSummit.time_zone_id
-                )}
-                className="event-list-date-picker"
-              />
-            </div>
-          </>
-        )}
-      </div>
-      <hr />
-      <div className="row" style={{ marginBottom: 15 }}>
-        <div className="col-md-12">
-          <label htmlFor="select_fields">
-            {T.translate("ticket_type_list.select_fields")}
-          </label>
-          <Dropdown
-            id="select_fields"
-            placeholder={T.translate(
-              "ticket_type_list.placeholders.select_fields"
-            )}
-            value={selectedColumns}
-            onChange={handleColumnsChange}
-            options={handleDDLSortByLabel(ddl_columns)}
-            isClearable
-            isMulti
-          />
-        </div>
-      </div>
+          value={selectedColumns}
+          onChange={handleColumnsChange}
+          options={handleDDLSortByLabel(ddl_columns)}
+          multiple
+        />
+      </Box>
 
-      {ticketTypes.length === 0 && (
+      {ticketTypes.length === 0 ? (
         <div>{T.translate("ticket_type_list.no_ticket_types")}</div>
-      )}
-
-      {ticketTypes.length > 0 && (
-        <div>
-          <Table
-            options={table_options}
-            data={ticketTypes}
-            columns={columns}
-            onSort={handleSort}
-          />
-          <Pagination
-            bsSize="medium"
-            prev
-            next
-            first
-            last
-            ellipsis
-            boundaryLinks
-            maxButtons={10}
-            items={lastPage}
-            activePage={currentPage}
-            onSelect={handlePageChange}
-          />
-        </div>
+      ) : (
+        <MuiTable
+          options={table_options}
+          data={ticketTypes}
+          columns={columns}
+          perPage={perPage}
+          currentPage={currentPage}
+          totalRows={totalTicketTypes}
+          onSort={handleSort}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          deleteDialogBody={(name) =>
+            `${T.translate("ticket_type_list.remove_warning")} ${name}`
+          }
+        />
       )}
     </div>
   );
