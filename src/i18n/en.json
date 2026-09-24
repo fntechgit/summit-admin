@@ -3903,7 +3903,13 @@
     "following": " of the following: "
   },
   "media_upload_type_filter": {
-    "media_type": "Filter By Media Upload Type"
+    "has_media_upload": "Uploaded",
+    "has_not_media_upload": "Not uploaded",
+    "placeholders": {
+      "has_media_upload_with_type==": "Select media type(s)",
+      "has_not_media_upload_with_type==": "Select media type(s)",
+      "operator": "Uploaded or not uploaded"
+    }
   },
   "edit_reg_feed_metadata": {
     "reg_feed_metadata": "Registration Feed Metadata",
