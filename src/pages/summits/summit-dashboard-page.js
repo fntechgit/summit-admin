@@ -16,6 +16,7 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
 import Grid2 from "@mui/material/Grid2";
 import Stack from "@mui/material/Stack";
 import Tab from "@mui/material/Tab";
@@ -60,7 +61,7 @@ function SummitDashboardPage({
   ).length;
 
   return (
-    <div className="container">
+    <Container>
       <Breadcrumb
         data={{
           title: T.translate("dashboard.dashboard"),
@@ -204,7 +205,7 @@ function SummitDashboardPage({
           </Grid2>
         )}
       </Grid2>
-    </div>
+    </Container>
   );
 }
 
