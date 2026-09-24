@@ -50,6 +50,10 @@ const Menu = ({
 
   const currentPath = history.location.pathname;
 
+  const canHover = window.matchMedia(
+    "(hover: hover) and (pointer: fine)"
+  ).matches;
+
   const drawMenuItem = (item) => {
     const hasAccess =
       !item.accessRoute || memberObj.hasAccess(item.accessRoute);
@@ -88,8 +92,10 @@ const Menu = ({
         root: { keepMounted: true },
         paper: {
           sx: { width: DRAWER_WIDTH },
-          onMouseEnter: onMenuMouseEnter,
-          onMouseLeave: onMenuMouseLeave
+          ...(canHover && {
+            onMouseEnter: onMenuMouseEnter,
+            onMouseLeave: onMenuMouseLeave
+          })
         }
       }}
     >

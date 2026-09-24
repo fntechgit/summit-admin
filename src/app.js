@@ -123,6 +123,7 @@ if (exclusiveSections.hasOwnProperty(process.env.APP_CLIENT_NAME)) {
 }
 
 const MENU_CLOSE_DELAY_MS = 200;
+const HOVER_OPEN_CLICK_GRACE_MS = 300;
 
 if (window.SENTRY_DSN && window.SENTRY_DSN !== "") {
   console.log("app init sentry ...");
@@ -156,6 +157,7 @@ class App extends React.PureComponent {
     props.resetLoading();
     this.state = { menuOpen: false };
     this.menuCloseTimeout = null;
+    this.lastHoverOpen = 0;
     this.toggleMenu = this.toggleMenu.bind(this);
     this.openMenu = this.openMenu.bind(this);
     this.cancelMenuClose = this.cancelMenuClose.bind(this);
@@ -176,11 +178,13 @@ class App extends React.PureComponent {
 
   toggleMenu() {
     this.cancelMenuClose();
+    if (Date.now() - this.lastHoverOpen < HOVER_OPEN_CLICK_GRACE_MS) return;
     this.setState((prevState) => ({ menuOpen: !prevState.menuOpen }));
   }
 
   openMenu() {
     this.cancelMenuClose();
+    this.lastHoverOpen = Date.now();
     this.setState({ menuOpen: true });
   }
 
@@ -223,6 +227,10 @@ class App extends React.PureComponent {
       profile_pic = jwt.payload.picture;
     }
 
+    const canHover = window.matchMedia(
+      "(hover: hover) and (pointer: fine)"
+    ).matches;
+
     return (
       <Sentry.ErrorBoundary
         fallback={SentryFallbackFunction({ componentName: "Summit Admin App" })}
@@ -248,8 +256,10 @@ class App extends React.PureComponent {
                       edge="start"
                       aria-label={T.translate("menu.toggle_navigation")}
                       onClick={this.toggleMenu}
-                      onMouseEnter={this.openMenu}
-                      onMouseLeave={this.scheduleMenuClose}
+                      {...(canHover && {
+                        onMouseEnter: this.openMenu,
+                        onMouseLeave: this.scheduleMenuClose
+                      })}
                       sx={{ mr: 2 }}
                     >
                       <MenuIcon
