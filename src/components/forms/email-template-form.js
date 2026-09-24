@@ -397,7 +397,7 @@ const EmailTemplateForm = ({
   };
 
   const handleTabChange = (ev) => {
-    const { id } = ev.target;
+    const { id } = ev.currentTarget;
     if (singleTab) {
       if (id === "preview") {
         setCodeOnly(false);
