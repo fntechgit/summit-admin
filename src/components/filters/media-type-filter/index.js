@@ -108,6 +108,7 @@ const MediaTypeFilter = ({
             label: mediaType.name,
             value: mediaType.id
           }))}
+          formatOptionLabel={(option) => option.label}
           isClearable
           isMulti
           placeholder={T.translate(
