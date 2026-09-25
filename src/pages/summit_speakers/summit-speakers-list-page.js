@@ -847,7 +847,11 @@ class SummitSpeakersListPage extends React.Component {
         </div>
 
         <hr />
-        <h4>{T.translate("summit_speakers_list.email_section_title")}</h4>
+        <h4>
+          {source === sources.speakers
+            ? T.translate("summit_speakers_list.email_section_title")
+            : T.translate("summit_submitters_list.email_section_title")}
+        </h4>
         <div className="row">
           <div className="col-md-6 speaker-list-email-col">
             <Dropdown
