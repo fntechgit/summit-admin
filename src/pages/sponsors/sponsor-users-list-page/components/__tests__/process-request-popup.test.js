@@ -66,17 +66,12 @@ jest.mock("../../../../../actions/sponsor-actions", () => {
   };
 });
 
-jest.mock("../../../../../actions/sponsorship-actions", () => {
-  const originalModule = jest.requireActual(
-    "../../../../../actions/sponsorship-actions"
-  );
-
-  return {
-    __esModule: true,
-    ...originalModule,
-    querySponsorshipsBySummit: jest.fn()
-  };
-});
+// The real tiers select fires a debounced, authenticated fetch on mount; with
+// no session in tests it calls back with an Error and blows up in `.filter`.
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/sponsorship-summit-select",
+  () => () => null
+);
 
 jest.mock("lodash", () => {
   const originalModule = jest.requireActual("lodash");
