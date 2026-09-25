@@ -30,8 +30,14 @@ import {
 } from "openstack-uicore-foundation/lib/security/methods";
 import IdTokenVerifier from "idtoken-verifier";
 import T from "i18n-react";
+import { Breadcrumbs } from "react-breadcrumbs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
 // eslint-disable-next-line
 import * as Sentry from "@sentry/react";
 import exclusiveSections from "./exclusive-sections.yml";
@@ -116,6 +122,9 @@ if (exclusiveSections.hasOwnProperty(process.env.APP_CLIENT_NAME)) {
   window.EXCLUSIVE_SECTIONS = exclusiveSections[process.env.APP_CLIENT_NAME];
 }
 
+const MENU_CLOSE_DELAY_MS = 200;
+const HOVER_OPEN_CLICK_GRACE_MS = 300;
+
 if (window.SENTRY_DSN && window.SENTRY_DSN !== "") {
   console.log("app init sentry ...");
   // Initialize Sentry
@@ -146,6 +155,13 @@ class App extends React.PureComponent {
   constructor(props) {
     super(props);
     props.resetLoading();
+    this.state = { menuOpen: false, openedByHover: false };
+    this.menuCloseTimeout = null;
+    this.lastHoverOpen = 0;
+    this.toggleMenu = this.toggleMenu.bind(this);
+    this.openMenu = this.openMenu.bind(this);
+    this.cancelMenuClose = this.cancelMenuClose.bind(this);
+    this.scheduleMenuClose = this.scheduleMenuClose.bind(this);
   }
 
   onClickLogin() {
@@ -154,6 +170,46 @@ class App extends React.PureComponent {
 
   componentDidMount() {
     this.props.getTimezones();
+    // A client-side route change does not reset scroll, so navigating from a
+    // scrolled list used to land mid-page. POP is excluded so back/forward
+    // keeps the position the browser restores.
+    this.unlistenHistory = history.listen((location, action) => {
+      if (action === "PUSH") window.scrollTo(0, 0);
+    });
+  }
+
+  componentWillUnmount() {
+    this.cancelMenuClose();
+    if (this.unlistenHistory) this.unlistenHistory();
+  }
+
+  toggleMenu() {
+    this.cancelMenuClose();
+    if (Date.now() - this.lastHoverOpen < HOVER_OPEN_CLICK_GRACE_MS) return;
+    this.setState((prevState) => ({
+      menuOpen: !prevState.menuOpen,
+      openedByHover: false
+    }));
+  }
+
+  openMenu() {
+    this.cancelMenuClose();
+    this.lastHoverOpen = Date.now();
+    this.setState({ menuOpen: true, openedByHover: true });
+  }
+
+  cancelMenuClose() {
+    if (this.menuCloseTimeout) {
+      clearTimeout(this.menuCloseTimeout);
+      this.menuCloseTimeout = null;
+    }
+  }
+
+  scheduleMenuClose() {
+    this.cancelMenuClose();
+    this.menuCloseTimeout = setTimeout(() => {
+      this.setState({ menuOpen: false });
+    }, MENU_CLOSE_DELAY_MS);
   }
 
   render() {
@@ -165,6 +221,7 @@ class App extends React.PureComponent {
       backUrl,
       loading
     } = this.props;
+    const { menuOpen, openedByHover } = this.state;
 
     const idToken = getIdToken();
 
@@ -180,6 +237,10 @@ class App extends React.PureComponent {
       profile_pic = jwt.payload.picture;
     }
 
+    const canHover = window.matchMedia(
+      "(hover: hover) and (pointer: fine)"
+    ).matches;
+
     return (
       <Sentry.ErrorBoundary
         fallback={SentryFallbackFunction({ componentName: "Summit Admin App" })}
@@ -188,23 +249,97 @@ class App extends React.PureComponent {
           <Router history={history}>
             <div>
               <AjaxLoader show={loading} size={120} />
-              <div className="header" id="page-header">
-                <div className="header-title">
-                  {T.translate("landing.os_summit_admin")}
-                  <AuthButton
-                    isLoggedUser={isLoggedUser}
-                    picture={profile_pic}
-                    doLogin={this.onClickLogin.bind(this)}
-                    initLogOut={initLogOut}
-                  />
-                </div>
-              </div>
+              <AppBar
+                position="sticky"
+                id="page-header"
+                className="header"
+                elevation={0}
+                sx={{
+                  bgcolor: "background.paper",
+                  color: "text.primary",
+                  borderBottom: "1px solid #b3b3b3"
+                }}
+              >
+                <Toolbar
+                  sx={{
+                    minHeight: { xs: 48, sm: 56 },
+                    // Short viewports (landscape phones) get the compact bar;
+                    // keyed off height so desktop, which is also landscape, keeps
+                    // the sm value.
+                    "@media (max-height:500px)": { minHeight: 48 }
+                  }}
+                >
+                  {isLoggedUser && (
+                    <IconButton
+                      edge="start"
+                      aria-label={T.translate("menu.toggle_navigation")}
+                      onClick={this.toggleMenu}
+                      {...(canHover && {
+                        onMouseEnter: this.openMenu,
+                        onMouseLeave: this.scheduleMenuClose
+                      })}
+                      sx={{ mr: 2 }}
+                    >
+                      <MenuIcon
+                        sx={{ fontSize: "1.75rem", color: "#555555" }}
+                      />
+                    </IconButton>
+                  )}
+                  <Typography
+                    variant="h6"
+                    component="div"
+                    sx={{
+                      flexGrow: 1,
+                      ...(!isLoggedUser && { textAlign: "center" })
+                    }}
+                  >
+                    {T.translate("landing.os_summit_admin")}
+                  </Typography>
+                  {isLoggedUser && (
+                    <AuthButton
+                      isLoggedUser={isLoggedUser}
+                      picture={profile_pic}
+                      doLogin={this.onClickLogin.bind(this)}
+                      initLogOut={initLogOut}
+                    />
+                  )}
+                </Toolbar>
+              </AppBar>
+              {/* Outside the AppBar so it scrolls away, not pinned */}
+              {isLoggedUser && (
+                <Toolbar
+                  variant="dense"
+                  sx={{
+                    minHeight: 36,
+                    bgcolor: "background.paper",
+                    borderBottom: "1px solid #e0e0e0",
+                    overflowX: "auto"
+                  }}
+                >
+                  <Breadcrumbs className="breadcrumbs-wrapper" separator="/" />
+                </Toolbar>
+              )}
+              {!isLoggedUser && (
+                <AuthButton
+                  isLoggedUser={isLoggedUser}
+                  picture={profile_pic}
+                  doLogin={this.onClickLogin.bind(this)}
+                  initLogOut={initLogOut}
+                />
+              )}
               <Switch>
                 <AuthorizedRoute
                   isLoggedUser={isLoggedUser}
                   backUrl={backUrl}
                   path="/app"
                   component={PrimaryLayout}
+                  componentProps={{
+                    menuOpen,
+                    openedByHover,
+                    toggleMenu: this.toggleMenu,
+                    onMenuMouseEnter: this.cancelMenuClose,
+                    onMenuMouseLeave: this.scheduleMenuClose
+                  }}
                 />
                 <AuthorizationCallbackRoute
                   onUserAuth={onUserAuth}

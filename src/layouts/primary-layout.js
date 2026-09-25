@@ -14,7 +14,7 @@
 import React, { Suspense } from "react";
 import { connect } from "react-redux";
 import { Switch, Route, Redirect } from "react-router-dom";
-import { Breadcrumbs, Breadcrumb } from "react-breadcrumbs";
+import { Breadcrumb } from "react-breadcrumbs";
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
 import Restrict from "../routes/restrict";
 import Menu from "../components/menu";
@@ -42,72 +42,66 @@ const AddOnTypesListPage = React.lazy(() =>
   import("../pages/sponsors-global/add-on-types/add-on-types-list-page")
 );
 
-const PrimaryLayout = ({ match, currentSummit, location, member }) => {
-  let extraClass = "container";
+const PrimaryLayout = ({
+  match,
+  currentSummit,
+  member,
+  menuOpen,
+  openedByHover,
+  toggleMenu,
+  onMenuMouseEnter,
+  onMenuMouseLeave
+}) => (
+  <div className="primary-layout">
+    <Menu
+      currentSummit={currentSummit}
+      member={member}
+      menuOpen={menuOpen}
+      openedByHover={openedByHover}
+      toggleMenu={toggleMenu}
+      onMenuMouseEnter={onMenuMouseEnter}
+      onMenuMouseLeave={onMenuMouseLeave}
+    />
+    <main id="page-wrap">
+      <Breadcrumb
+        data={{ title: <i className="fa fa-home" />, pathname: match.url }}
+      />
 
-  // full width pages
-  if (
-    location.pathname.includes("schedule") ||
-    location.pathname.includes("bulk-actions")
-  ) {
-    extraClass = "";
-  }
-
-  return (
-    <div className="primary-layout">
-      <Menu currentSummit={currentSummit} member={member} />
-      <main id="page-wrap">
-        <Breadcrumbs
-          className={`breadcrumbs-wrapper ${extraClass}`}
-          separator="/"
-        />
-
-        <Breadcrumb
-          data={{ title: <i className="fa fa-home" />, pathname: match.url }}
-        />
-
-        <Suspense fallback={<AjaxLoader show relative size={120} />}>
-          <Switch>
-            <Route
-              strict
-              exact
-              path="/app/directory"
-              component={SummitDirectoryPage}
-            />
-            <Route path="/app/speakers" component={SpeakerLayout} />
-            <Route path="/app/companies" component={CompanyLayout} />
-            <Route path="/app/inventory" component={InventoryItemLayout} />
-            <Route path="/app/form-templates" component={FormTemplateLayout} />
-            <Route path="/app/page-templates" component={PageTemplateLayout} />
-            <Route
-              strict
-              exact
-              path="/app/add-on-types"
-              component={AddOnTypesListPage}
-            />
-            <Route
-              path="/app/sponsorship-types"
-              component={SponsorshipLayout}
-            />
-            <Route path="/app/tags" component={TagLayout} />
-            <Route
-              path="/app/sponsored-projects"
-              component={SponsoredProjectLayout}
-            />
-            <Route path="/app/emails" component={EmailLayout} />
-            <Route path="/app/admin-access" component={AdminAccessLayout} />
-            <Route
-              path="/app/media-file-types"
-              component={MediaFileTypeLayout}
-            />
-            <Route path="/app/summits" component={SummitLayout} />
-            <Route render={() => <Redirect to="/app/directory" />} />
-          </Switch>
-        </Suspense>
-      </main>
-    </div>
-  );
-};
+      <Suspense fallback={<AjaxLoader show relative size={120} />}>
+        <Switch>
+          <Route
+            strict
+            exact
+            path="/app/directory"
+            component={SummitDirectoryPage}
+          />
+          <Route path="/app/speakers" component={SpeakerLayout} />
+          <Route path="/app/companies" component={CompanyLayout} />
+          <Route path="/app/inventory" component={InventoryItemLayout} />
+          <Route path="/app/form-templates" component={FormTemplateLayout} />
+          <Route path="/app/page-templates" component={PageTemplateLayout} />
+          <Route
+            strict
+            exact
+            path="/app/add-on-types"
+            component={AddOnTypesListPage}
+          />
+          <Route path="/app/sponsorship-types" component={SponsorshipLayout} />
+          <Route path="/app/tags" component={TagLayout} />
+          <Route
+            path="/app/sponsored-projects"
+            component={SponsoredProjectLayout}
+          />
+          <Route path="/app/emails" component={EmailLayout} />
+          <Route path="/app/admin-access" component={AdminAccessLayout} />
+          <Route path="/app/media-file-types" component={MediaFileTypeLayout} />
+          <Route path="/app/summits" component={SummitLayout} />
+          <Route render={() => <Redirect to="/app/directory" />} />
+        </Switch>
+      </Suspense>
+    </main>
+  </div>
+);
 
 const mapStateToProps = ({ currentSummitState, loggedUserState }) => ({
   currentSummit: currentSummitState.currentSummit,
