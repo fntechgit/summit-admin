@@ -870,7 +870,10 @@ export const saveEvent = (entity, publish) => async (dispatch, getState) => {
       }
       dispatch(
         getAuditLog(
-          [`event_id==${entity.id}`, "class_name==SummitEvent||Presentation"],
+          [
+            `event_id==${entity.id}`,
+            "class_name==SummitEvent||Presentation||SummitEventWithFile||SummitGroupEvent"
+          ],
           null,
           DEFAULT_CURRENT_PAGE,
           DEFAULT_PER_PAGE

@@ -2242,7 +2242,7 @@ class EventForm extends React.Component {
           <AuditLogs
             entityFilter={[
               `event_id==${entity.id}`,
-              "class_name==SummitEvent||Presentation"
+              "class_name==SummitEvent||Presentation||SummitEventWithFile||SummitGroupEvent"
             ]}
           />
         </Panel>

@@ -18,15 +18,19 @@ import { Breadcrumb } from "react-breadcrumbs";
 import AuditLogs from "../../components/audit-logs";
 
 const AuditLogPage = ({ totalLogEntries, match }) => (
-    <div className="container">
-      <Breadcrumb data={{ title: "Audit Logs", pathname: match.url }} />
-      <h3>
-        {" "}
-        {T.translate("audit_log.log_entries")} ({totalLogEntries})
-      </h3>
-      <AuditLogs entityFilter={["class_name==SummitEvent||Presentation"]} />
-    </div>
-  );
+  <div className="container">
+    <Breadcrumb data={{ title: "Audit Logs", pathname: match.url }} />
+    <h3>
+      {" "}
+      {T.translate("audit_log.log_entries")} ({totalLogEntries})
+    </h3>
+    <AuditLogs
+      entityFilter={[
+        "class_name==SummitEvent||Presentation||SummitEventWithFile||SummitGroupEvent"
+      ]}
+    />
+  </div>
+);
 
 const mapStateToProps = ({ auditLogState }) => ({
   ...auditLogState
