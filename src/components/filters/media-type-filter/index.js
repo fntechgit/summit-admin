@@ -15,7 +15,6 @@ import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import Select from "react-select";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
-import { getAllMediaUploadTypes } from "../../../actions/media-upload-actions";
 
 import styles from "./index.module.less";
 
@@ -24,7 +23,8 @@ const MediaTypeFilter = ({
   operatorInitialValue,
   filterInitialValue,
   id,
-  summitId
+  summitId,
+  getAllMediaUploadTypes
 }) => {
   const [mediaTypes, setMediaTypes] = useState([]);
 

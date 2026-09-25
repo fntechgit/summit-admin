@@ -2,14 +2,9 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import MediaTypeFilter from "..";
-import { getAllMediaUploadTypes } from "../../../../actions/media-upload-actions";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   translate: (key) => key
-}));
-
-jest.mock("../../../../actions/media-upload-actions", () => ({
-  getAllMediaUploadTypes: jest.fn()
 }));
 
 // Mirrors the real react-select single-select contract: the operator control
@@ -73,11 +68,14 @@ describe("MediaTypeFilter", () => {
     { id: "2", name: "Slides" }
   ];
 
+  const getAllMediaUploadTypes = jest.fn();
+
   const baseProps = {
     onChange: jest.fn(),
     filterInitialValue: null,
     id: "media-type-filter",
-    summitId: 1
+    summitId: 1,
+    getAllMediaUploadTypes
   };
 
   beforeEach(() => {
