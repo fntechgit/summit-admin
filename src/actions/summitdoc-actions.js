@@ -12,21 +12,19 @@
  * */
 import T from "i18n-react/dist/i18n-react";
 import {
-  getRequest,
-  deleteRequest,
-  createAction,
-  stopLoading,
-  startLoading,
-  showMessage,
-  showSuccessMessage,
   authErrorHandler,
+  createAction,
+  deleteRequest,
+  escapeFilterValue,
+  getRequest,
+  postFile,
   postRequest,
   putRequest,
-  postFile,
-  escapeFilterValue
+  snackbarSuccessHandler,
+  startLoading,
+  stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely, wrapFormFile } from "../utils/methods";
-import history from "../history";
 import { DEFAULT_PER_PAGE } from "../utils/constants";
 
 export const REQUEST_SUMMITDOCS = "REQUEST_SUMMITDOCS";
@@ -49,12 +47,11 @@ export const getSummitDocs =
     orderDir = 1
   ) =>
   async (dispatch, getState) => {
+    dispatch(startLoading());
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const filter = [];
-
-    dispatch(startLoading());
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
@@ -65,9 +62,10 @@ export const getSummitDocs =
       page,
       per_page: perPage,
       access_token: accessToken,
-      expand: "event_types",
-      relations: "event_types.none",
-      fields: "id,description,label,event_types.id,event_types.name"
+      expand: "event_types,selection_plan",
+      relations: "event_types.none,selection_plan.none",
+      fields:
+        "id,description,label,event_types.id,event_types.name,selection_plan.name,show_always"
     };
 
     if (filter.length > 0) {
@@ -85,18 +83,19 @@ export const getSummitDocs =
       createAction(RECEIVE_SUMMITDOCS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/summit-documents`,
       authErrorHandler,
-      { order, orderDir, term }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+      { order, orderDir, term, currentPage: page, perPage }
+    )(params)(dispatch)
+      .finally(() => {
+        dispatch(stopLoading());
+      })
+      .catch(() => {});
   };
 
 export const getSummitDoc = (summitDocId) => async (dispatch, getState) => {
+  dispatch(startLoading());
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
-
-  dispatch(startLoading());
 
   const params = {
     access_token: accessToken
@@ -107,9 +106,11 @@ export const getSummitDoc = (summitDocId) => async (dispatch, getState) => {
     createAction(RECEIVE_SUMMITDOC),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/summit-documents/${summitDocId}`,
     authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+  )(params)(dispatch)
+    .finally(() => {
+      dispatch(stopLoading());
+    })
+    .catch(() => {});
 };
 
 export const resetSummitDocForm = () => (dispatch) => {
@@ -117,33 +118,33 @@ export const resetSummitDocForm = () => (dispatch) => {
 };
 
 export const addFileToDoc = (entity, file) => async (dispatch, getState) => {
+  dispatch(startLoading());
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
-
-  dispatch(startLoading());
 
   const params = {
     access_token: accessToken
   };
 
-  postRequest(
+  return postRequest(
     null,
     createAction(SUMMITDOC_FILE_ADDED),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/summit-documents/${entity.id}/file`,
     wrapFormFile(file),
     authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+  )(params)(dispatch)
+    .finally(() => {
+      dispatch(stopLoading());
+    })
+    .catch(() => {});
 };
 
 export const removeFileFromDoc = (entity) => async (dispatch, getState) => {
+  dispatch(startLoading());
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
-
-  dispatch(startLoading());
 
   const params = {
     access_token: accessToken
@@ -155,60 +156,65 @@ export const removeFileFromDoc = (entity) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/summit-documents/${entity.id}/file`,
     null,
     authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+  )(params)(dispatch)
+    .finally(() => {
+      dispatch(stopLoading());
+    })
+    .catch(() => {});
 };
 
+// TODO: replace with snackbarErrorHandler once it handles 401s (re-login redirect) correctly.
 export const saveSummitDoc = (entity, file) => async (dispatch, getState) => {
+  dispatch(startLoading());
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
-
-  dispatch(startLoading());
 
   const normalizedEntity = normalizeEntity(entity);
   const params = { access_token: accessToken };
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_SUMMITDOC),
       createAction(SUMMITDOC_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/summit-documents/${entity.id}`,
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(showSuccessMessage(T.translate("summitdoc.saved")));
-    });
-  } else {
-    const successMessage = {
-      title: T.translate("general.done"),
-      html: T.translate("summitdoc.created"),
-      type: "success"
-    };
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.done"),
+            html: T.translate("summitdoc.saved")
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
+  }
 
-    postFile(
-      createAction(UPDATE_SUMMITDOC),
-      createAction(SUMMITDOC_ADDED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/summit-documents`,
-      file,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then((payload) => {
+  return postFile(
+    createAction(UPDATE_SUMMITDOC),
+    createAction(SUMMITDOC_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/summit-documents`,
+    file,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )(params)(dispatch)
+    .then(() => {
       dispatch(
-        showMessage(successMessage, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/summitdocs/${payload.response.id}`
-          );
+        snackbarSuccessHandler({
+          title: T.translate("general.done"),
+          html: T.translate("summitdoc.created")
         })
       );
-    });
-  }
+    })
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const deleteSummitDoc = (summitDocId) => async (dispatch, getState) => {
+  dispatch(startLoading());
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
@@ -223,9 +229,11 @@ export const deleteSummitDoc = (summitDocId) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/summit-documents/${summitDocId}`,
     null,
     authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+  )(params)(dispatch)
+    .finally(() => {
+      dispatch(stopLoading());
+    })
+    .catch(() => {});
 };
 
 const normalizeEntity = (entity) => {
