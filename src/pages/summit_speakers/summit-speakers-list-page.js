@@ -55,6 +55,7 @@ import {
   AUTO_GENERATED_SPEAKERS_PROMO_CODE,
   AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE
 } from "../../actions/promocode-actions";
+import { getAllMediaUploadTypes } from "../../actions/media-upload-actions";
 
 import {
   DEFAULT_CURRENT_PAGE,
@@ -374,13 +375,13 @@ class SummitSpeakersListPage extends React.Component {
     ev.stopPropagation();
     ev.preventDefault();
     const { currentPromocodeSpecification } = this.props;
-    const { promoCodeStrategy, testRecipient, source } = this.state;    
+    const { promoCodeStrategy, testRecipient, source } = this.state;
     const isSpeakerMode = source === sources.speakers;
     const excerptRecipient = this.ingestEmailRef.value;
     const shouldSendCopy2Submitter =
-      isSpeakerMode && this.shouldSendCopy2SubmitterRef.checked;    
+      isSpeakerMode && this.shouldSendCopy2SubmitterRef.checked;
     const shouldResend = this.shouldResendRef.checked;
-    const { term } = this.getSubjectProps();    
+    const { term } = this.getSubjectProps();
 
     this.props.validateSpecs(
       promoCodeStrategy,
@@ -502,7 +503,11 @@ class SummitSpeakersListPage extends React.Component {
   }
 
   render() {
-    const { currentSummit, currentPromocodeSpecification } = this.props;
+    const {
+      currentSummit,
+      currentPromocodeSpecification,
+      getAllMediaUploadTypes
+    } = this.props;
 
     const { testRecipient, source, promoCodeStrategy } = this.state;
 
@@ -836,6 +841,7 @@ class SummitSpeakersListPage extends React.Component {
               filterInitialValue={mediaUploadTypeFilter.value}
               summitId={currentSummit.id}
               onChange={this.handleChangeMediaUploadTypeFilter}
+              getAllMediaUploadTypes={getAllMediaUploadTypes}
             />
           </div>
         </div>
@@ -1099,5 +1105,6 @@ export default connect(mapStateToProps, {
   setCurrentSubmitterFlowEvent,
   sendSubmitterEmails,
   validateSpecs,
-  resetPromoCodeSpecForm
+  resetPromoCodeSpecForm,
+  getAllMediaUploadTypes
 })(SummitSpeakersListPage);
