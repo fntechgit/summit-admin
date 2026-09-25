@@ -243,7 +243,7 @@ class App extends React.PureComponent {
             <div>
               <AjaxLoader show={loading} size={120} />
               <AppBar
-                position="static"
+                position="sticky"
                 id="page-header"
                 className="header"
                 elevation={0}
@@ -253,7 +253,15 @@ class App extends React.PureComponent {
                   borderBottom: "1px solid #b3b3b3"
                 }}
               >
-                <Toolbar>
+                <Toolbar
+                  sx={{
+                    minHeight: { xs: 48, sm: 56 },
+                    // Short viewports (landscape phones) get the compact bar;
+                    // keyed off height so desktop, which is also landscape, keeps
+                    // the sm value.
+                    "@media (max-height:500px)": { minHeight: 48 }
+                  }}
+                >
                   {isLoggedUser && (
                     <IconButton
                       edge="start"
@@ -289,22 +297,21 @@ class App extends React.PureComponent {
                     />
                   )}
                 </Toolbar>
-                {isLoggedUser && (
-                  <Toolbar
-                    variant="dense"
-                    sx={{
-                      minHeight: 36,
-                      borderTop: "1px solid #e0e0e0",
-                      overflowX: "auto"
-                    }}
-                  >
-                    <Breadcrumbs
-                      className="breadcrumbs-wrapper"
-                      separator="/"
-                    />
-                  </Toolbar>
-                )}
               </AppBar>
+              {/* Outside the AppBar so it scrolls away, not pinned */}
+              {isLoggedUser && (
+                <Toolbar
+                  variant="dense"
+                  sx={{
+                    minHeight: 36,
+                    bgcolor: "background.paper",
+                    borderBottom: "1px solid #e0e0e0",
+                    overflowX: "auto"
+                  }}
+                >
+                  <Breadcrumbs className="breadcrumbs-wrapper" separator="/" />
+                </Toolbar>
+              )}
               {!isLoggedUser && (
                 <AuthButton
                   isLoggedUser={isLoggedUser}
