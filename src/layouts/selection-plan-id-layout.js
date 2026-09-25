@@ -1,9 +1,10 @@
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react";
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
+import NoMatchPage from "../pages/no-match-page";
 import {
   getSelectionPlan,
   resetSelectionPlanForm
@@ -11,6 +12,9 @@ import {
 import { getMarketingSettingsBySelectionPlan } from "../actions/marketing-actions";
 import { MAX_PER_PAGE } from "../utils/constants";
 
+const EditSelectionPlanPage = React.lazy(() =>
+  import("../pages/selection-plans/edit-selection-plan-page")
+);
 const SelectionPlanExtraQuestionsLayout = React.lazy(() =>
   import("./selection-plan-extra-questions-layout")
 );
@@ -26,31 +30,53 @@ const SelectionPlanIdLayout = ({
   resetSelectionPlanForm,
   getMarketingSettingsBySelectionPlan
 }) => {
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const selectionPlanId = match.params.selection_plan_id;
   const breadcrumb = selectionPlanId
     ? currentSelectionPlan.name
     : T.translate("general.new");
 
   useEffect(() => {
+    setHasLoaded(false);
+    setHasError(false);
     if (!selectionPlanId) {
       resetSelectionPlanForm();
+      setHasLoaded(true);
     } else {
-      getSelectionPlan(selectionPlanId).then(() =>
-        getMarketingSettingsBySelectionPlan(
-          selectionPlanId,
-          null,
-          1,
-          MAX_PER_PAGE
+      getSelectionPlan(selectionPlanId)
+        .then(() =>
+          getMarketingSettingsBySelectionPlan(
+            selectionPlanId,
+            null,
+            1,
+            MAX_PER_PAGE
+          )
         )
-      );
+        .then(() => setHasLoaded(true))
+        .catch(() => setHasError(true));
     }
   }, [selectionPlanId]);
+
+  if (hasError) {
+    return <Redirect to={`/app/summits/${currentSummit.id}/selection-plans`} />;
+  }
+
+  if (!hasLoaded || currentSelectionPlan.id !== Number(selectionPlanId || 0)) {
+    return null;
+  }
 
   return (
     <div>
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
       <Suspense fallback={<AjaxLoader show relative size={120} />}>
         <Switch>
+          <Route
+            strict
+            exact
+            path={`${match.url}`}
+            component={EditSelectionPlanPage}
+          />
           <Route
             path={`${match.url}/extra-questions`}
             component={SelectionPlanExtraQuestionsLayout}
@@ -59,7 +85,7 @@ const SelectionPlanIdLayout = ({
             path={`${match.url}/rating-types`}
             component={SelectionPlanRatingTypesLayout}
           />
-          <Redirect to={`/app/summits/${currentSummit.id}/selection-plans`} />
+          <Route component={NoMatchPage} />
         </Switch>
       </Suspense>
     </div>
