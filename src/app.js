@@ -170,10 +170,17 @@ class App extends React.PureComponent {
 
   componentDidMount() {
     this.props.getTimezones();
+    // A client-side route change does not reset scroll, so navigating from a
+    // scrolled list used to land mid-page. POP is excluded so back/forward
+    // keeps the position the browser restores.
+    this.unlistenHistory = history.listen((location, action) => {
+      if (action === "PUSH") window.scrollTo(0, 0);
+    });
   }
 
   componentWillUnmount() {
     this.cancelMenuClose();
+    if (this.unlistenHistory) this.unlistenHistory();
   }
 
   toggleMenu() {

@@ -19,6 +19,10 @@ window.matchMedia = (query) => ({
   dispatchEvent: () => false
 });
 
+// jsdom does not implement window.scrollTo. App calls it on route changes, so
+// stub it to keep that out of test output.
+window.scrollTo = () => {};
+
 // Suppress console.error noise from known React 16 + MUI v6 incompatibilities:
 //   1. DOM nesting: AccordionSummary renders as <button> and contains IconButton
 //      (also <button>). This is a structural MUI pattern constraint; browsers are
