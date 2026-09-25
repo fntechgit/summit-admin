@@ -11,10 +11,10 @@
  * limitations under the License.
  * */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import Select from "react-select";
-import MediaUploadTypeInput from "../../inputs/media-upload-type-input";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 
 import styles from "./index.module.less";
 
@@ -23,8 +23,11 @@ const MediaTypeFilter = ({
   operatorInitialValue,
   filterInitialValue,
   id,
-  summitId
+  summitId,
+  getAllMediaUploadTypes
 }) => {
+  const [mediaTypes, setMediaTypes] = useState([]);
+
   const operatorOptions = [
     {
       label: T.translate("media_upload_type_filter.has_media_upload"),
@@ -39,9 +42,15 @@ const MediaTypeFilter = ({
   const [operatorValue, setOperatorValue] = useState(
     operatorInitialValue
       ? operatorOptions.find((o) => o.value === operatorInitialValue)
-      : null
+      : operatorOptions[0]
   );
   const [filterValue, setFilterValue] = useState(filterInitialValue || null);
+
+  useEffect(() => {
+    getAllMediaUploadTypes(summitId).then((types) =>
+      setMediaTypes(types || [])
+    );
+  }, [summitId]);
 
   const onChangeOperator = (newOperatorValue) => {
     setOperatorValue(newOperatorValue);
@@ -59,14 +68,17 @@ const MediaTypeFilter = ({
   };
 
   const onChangeFilterValue = (newFilterValue) => {
-    const { value } = newFilterValue.target;
+    const selectedIds = newFilterValue.target.value || [];
+    const value = mediaTypes.filter((mediaType) =>
+      selectedIds.includes(mediaType.id)
+    );
     setFilterValue(value);
     const ev = {
       target: {
         id,
         value,
         type: "mediatypeinput",
-        operator: operatorValue?.value ?? null
+        operator: value.length > 0 ? operatorValue?.value ?? null : null
       }
     };
     onChange(ev);
@@ -74,11 +86,9 @@ const MediaTypeFilter = ({
 
   return (
     <div className={`${styles.mediaTypeFilterWrapper} row`} id={id}>
-      <div className="col-xs-4">
-        {T.translate("media_upload_type_filter.media_type")}
-      </div>
-      <div className="col-xs-4">
+      <div className={`col-xs-5 ${styles.operatorCol}`}>
         <Select
+          classNamePrefix="mediaTypeOperator"
           id={`${id}_operator`}
           value={operatorValue}
           placeholder={T.translate(
@@ -88,19 +98,24 @@ const MediaTypeFilter = ({
           onChange={onChangeOperator}
         />
       </div>
-      <div className="col-xs-4">
-        <MediaUploadTypeInput
+      <div className={`col-xs-7 ${styles.typesCol}`}>
+        <Dropdown
+          classNamePrefix="mediaTypeValue"
           id={`${id}_value`}
-          value={filterValue}
+          value={(filterValue || []).map((mediaType) => mediaType.id)}
+          onChange={onChangeFilterValue}
+          options={mediaTypes.map((mediaType) => ({
+            label: mediaType.name,
+            value: mediaType.id
+          }))}
+          formatOptionLabel={(option) => option.label}
+          isClearable
+          isMulti
           placeholder={T.translate(
-            `${
-              operatorValue?.value
-                ? `media_upload_type_filter.placeholders.${operatorValue.value}`
-                : ""
+            `media_upload_type_filter.placeholders.${
+              operatorValue?.value ?? "has_media_upload_with_type=="
             }`
           )}
-          summitId={summitId}
-          onChange={onChangeFilterValue}
         />
       </div>
     </div>

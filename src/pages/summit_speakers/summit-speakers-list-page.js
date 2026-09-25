@@ -55,6 +55,7 @@ import {
   AUTO_GENERATED_SPEAKERS_PROMO_CODE,
   AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE
 } from "../../actions/promocode-actions";
+import { getAllMediaUploadTypes } from "../../actions/media-upload-actions";
 
 import {
   DEFAULT_CURRENT_PAGE,
@@ -374,13 +375,13 @@ class SummitSpeakersListPage extends React.Component {
     ev.stopPropagation();
     ev.preventDefault();
     const { currentPromocodeSpecification } = this.props;
-    const { promoCodeStrategy, testRecipient, source } = this.state;    
+    const { promoCodeStrategy, testRecipient, source } = this.state;
     const isSpeakerMode = source === sources.speakers;
     const excerptRecipient = this.ingestEmailRef.value;
     const shouldSendCopy2Submitter =
-      isSpeakerMode && this.shouldSendCopy2SubmitterRef.checked;    
+      isSpeakerMode && this.shouldSendCopy2SubmitterRef.checked;
     const shouldResend = this.shouldResendRef.checked;
-    const { term } = this.getSubjectProps();    
+    const { term } = this.getSubjectProps();
 
     this.props.validateSpecs(
       promoCodeStrategy,
@@ -502,7 +503,11 @@ class SummitSpeakersListPage extends React.Component {
   }
 
   render() {
-    const { currentSummit, currentPromocodeSpecification } = this.props;
+    const {
+      currentSummit,
+      currentPromocodeSpecification,
+      getAllMediaUploadTypes
+    } = this.props;
 
     const { testRecipient, source, promoCodeStrategy } = this.state;
 
@@ -718,7 +723,7 @@ class SummitSpeakersListPage extends React.Component {
             : T.translate("summit_submitters_list.submitters")}{" "}
           | {totalActivities} {T.translate("general.activities")})
         </h3>
-        <div className="row">
+        <div className="row speaker-list-search-row">
           <div className="col-md-6">
             <FreeTextSearch
               value={term ?? ""}
@@ -748,90 +753,109 @@ class SummitSpeakersListPage extends React.Component {
           </div>
         </div>
         <div className="row">
-          <div className="col-md-3 speaker-list-filter-col">
+          <div className="col-md-4 speaker-list-filter-col">
             <Dropdown
               id="selectionPlanFilter"
               value={selectionPlanFilter}
               onChange={this.handleChangeSelectionPlanFilter}
               options={selectionPlansDDL}
               isClearable
-              placeholder="Filter By Selection Plan"
+              placeholder={T.translate(
+                "summit_speakers_list.placeholders.selection_plan_filter"
+              )}
               isMulti
             />
           </div>
-          <div className="col-md-3 speaker-list-filter-col">
+          <div className="col-md-4 speaker-list-filter-col">
             <Dropdown
               id="trackFilter"
               value={trackFilter}
               onChange={this.handleChangeTrackFilter}
               options={tracksDDL}
               isClearable
-              placeholder="Filter By Track"
+              placeholder={T.translate(
+                "summit_speakers_list.placeholders.track_filter"
+              )}
               isMulti
             />
           </div>
-          <div className="col-md-3 speaker-list-filter-col">
-            <Dropdown
-              id="activityTypeFilter"
-              value={activityTypeFilter}
-              onChange={this.handleChangeActivityTypeFilter}
-              options={activityTypesDDL}
-              isClearable
-              placeholder="Filter By Activity Type"
-              isMulti
-            />
-          </div>
-          <div className="col-md-3 speaker-list-filter-col">
-            <Dropdown
-              id="selectionStatusFilter"
-              value={selectionStatusFilter}
-              onChange={this.handleChangeSelectionStatusFilter}
-              options={selectionStatusDDL}
-              isClearable
-              placeholder="Filter By Selection Status"
-              isMulti
-            />
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-md-3 speaker-list-filter-col">
+          <div className="col-md-4 speaker-list-filter-col">
             <Dropdown
               id="trackGroupFilter"
               value={trackGroupFilter}
               onChange={this.handleChangeTrackGroupFilter}
               options={trackGroupsDDL}
               isClearable
-              placeholder="Filter By Track Group"
+              placeholder={T.translate(
+                "summit_speakers_list.placeholders.track_group_filter"
+              )}
               isMulti
             />
           </div>
-          <div className="col-md-3 speaker-list-filter-col">
+        </div>
+        <div className="row">
+          <div className="col-md-4 speaker-list-filter-col">
+            <Dropdown
+              id="activityTypeFilter"
+              value={activityTypeFilter}
+              onChange={this.handleChangeActivityTypeFilter}
+              options={activityTypesDDL}
+              isClearable
+              placeholder={T.translate(
+                "summit_speakers_list.placeholders.activity_type_filter"
+              )}
+              isMulti
+            />
+          </div>
+          <div className="col-md-4 speaker-list-filter-col">
+            <Dropdown
+              id="selectionStatusFilter"
+              value={selectionStatusFilter}
+              onChange={this.handleChangeSelectionStatusFilter}
+              options={selectionStatusDDL}
+              isClearable
+              placeholder={T.translate(
+                "summit_speakers_list.placeholders.selection_status_filter"
+              )}
+              isMulti
+            />
+          </div>
+          <div className="col-md-4 speaker-list-filter-col">
             <Dropdown
               id="pendingSubmissionsFilter"
               value={pendingSubmissionsFilter}
               onChange={this.handleChangePendingSubmissionsFilter}
               options={pendingSubmissionsDDL}
               isClearable
-              placeholder="Filter By Pending Submissions"
+              placeholder={T.translate(
+                "summit_speakers_list.placeholders.pending_submissions_filter"
+              )}
             />
           </div>
         </div>
         <div className="row">
-          <div className="col-md-9 speaker-list-filter-col">
+          <div className="col-md-4 speaker-list-filter-col">
             <MediaTypeFilter
               id="media_upload_with_type"
               operatorInitialValue={mediaUploadTypeFilter.operator}
               filterInitialValue={mediaUploadTypeFilter.value}
               summitId={currentSummit.id}
               onChange={this.handleChangeMediaUploadTypeFilter}
+              getAllMediaUploadTypes={getAllMediaUploadTypes}
             />
           </div>
         </div>
 
+        <hr />
+        <h4>
+          {source === sources.speakers
+            ? T.translate("summit_speakers_list.email_section_title")
+            : T.translate("summit_submitters_list.email_section_title")}
+        </h4>
         <div className="row">
           <div className="col-md-6 speaker-list-email-col">
             <Dropdown
-              id="activityTypeFilter"
+              id="emailFlowEventFilter"
               value={currentFlowEvent}
               onChange={this.handleChangeFlowEvent}
               options={emailFlowDDL}
@@ -1085,5 +1109,6 @@ export default connect(mapStateToProps, {
   setCurrentSubmitterFlowEvent,
   sendSubmitterEmails,
   validateSpecs,
-  resetPromoCodeSpecForm
+  resetPromoCodeSpecForm,
+  getAllMediaUploadTypes
 })(SummitSpeakersListPage);
