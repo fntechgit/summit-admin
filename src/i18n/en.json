@@ -1185,6 +1185,7 @@
     "select_items": "Select at least one submitter to perform the action.",
     "send_emails_title": "You are about to send an EMAIL BLAST to selected submitters !",
     "resend_done": "Emails sent successfully.",
+    "email_section_title": "Email Submitters",
     "submitters": "Submitters",
     "submitters_no_speakers": "Submitters (no speakers)",
     "items_qty": "Selected {qty} Submitters | {activitiesQty} Activities"
