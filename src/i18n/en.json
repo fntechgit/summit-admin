@@ -1627,6 +1627,7 @@
     }
   },
   "question_form": {
+    "advanced": "Advanced",
     "question_type": "Question Type",
     "question_id": "Question Identifier",
     "visible_question": "Visible Question (as appears on site)",
