@@ -61,7 +61,10 @@ const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
     initialValues: {
       id: entity?.id ?? 0,
       member: toMemberOption(entity?.member ?? null),
-      trackIds: entity?.trackIds ?? []
+      // drop assigned tracks that are no longer chair visible, the API rejects them
+      trackIds: (entity?.trackIds ?? []).filter((id) =>
+        tracks.some((t) => t.id === id)
+      )
     },
     validationSchema: yup.object().shape({
       member: yup
