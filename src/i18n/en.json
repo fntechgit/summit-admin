@@ -1621,6 +1621,8 @@
   },
   "question_form": {
     "advanced": "Advanced",
+    "add_option": "Add option",
+    "save_to_add_values": "Save the question to add options.",
     "question_type": "Question Type",
     "question_id": "Question Identifier",
     "visible_question": "Visible Question (as appears on site)",

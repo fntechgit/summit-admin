@@ -68,7 +68,17 @@ const baseEntity = (overrides = {}) => ({
   ...overrides
 });
 
-const renderForm = (entity = baseEntity(), onSubmit = jest.fn()) => {
+const valueHandlers = () => ({
+  onValueSave: jest.fn(),
+  onValueDelete: jest.fn(),
+  updateQuestionValueOrder: jest.fn()
+});
+
+const renderForm = (
+  entity = baseEntity(),
+  onSubmit = jest.fn(),
+  handlers = valueHandlers()
+) => {
   render(
     <OrderExtraQuestionForm
       currentSummit={SUMMIT}
@@ -77,6 +87,7 @@ const renderForm = (entity = baseEntity(), onSubmit = jest.fn()) => {
       onSubmit={onSubmit}
       onRuleDelete={jest.fn()}
       updateSubQuestionRuleOrder={jest.fn()}
+      {...handlers}
     />
   );
   return onSubmit;
@@ -210,6 +221,126 @@ describe("OrderExtraQuestionForm", () => {
       expect(
         screen.queryByText("question_form.sub_questions_rules")
       ).toBeNull();
+    });
+  });
+
+  describe("options", () => {
+    const OPTIONS = [
+      { id: 1, value: "s", label: "Small", order: 1, is_default: false },
+      { id: 2, value: "m", label: "Medium", order: 2, is_default: true }
+    ];
+
+    const withOptions = (overrides = {}) =>
+      baseEntity({
+        id: 9,
+        type: "CheckBoxList",
+        values: OPTIONS,
+        ...overrides
+      });
+
+    // DOM order: one field per saved option, then the add row's field last.
+    const labelFields = () =>
+      screen.getAllByLabelText("question_form.visible_option");
+
+    it("should stay hidden for a type the API returns no values for", () => {
+      renderForm(baseEntity({ id: 9, type: "Text" }));
+      expect(
+        screen.queryByLabelText("question_form.visible_option")
+      ).toBeNull();
+    });
+
+    // Options post to /{id}/values, so they cannot exist before the question does.
+    it("should explain that the question must be saved before adding options", () => {
+      renderForm(baseEntity({ type: "CheckBoxList" }));
+      expect(
+        screen.getByText("question_form.save_to_add_values")
+      ).toBeInTheDocument();
+    });
+
+    it("should list the saved options in their stored order", () => {
+      renderForm(withOptions({ values: [OPTIONS[1], OPTIONS[0]] }));
+      const fields = labelFields();
+      expect(fields[0]).toHaveValue("Small");
+      expect(fields[1]).toHaveValue("Medium");
+    });
+
+    it("should save an option once the edit is committed", async () => {
+      const handlers = valueHandlers();
+      renderForm(withOptions(), jest.fn(), handlers);
+
+      await userEvent.clear(labelFields()[0]);
+      await userEvent.type(labelFields()[0], "Tiny");
+      await userEvent.tab();
+
+      expect(handlers.onValueSave).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 1, label: "Tiny", value: "s" })
+      );
+    });
+
+    // Without the guard every focus-and-leave would PUT the option again.
+    it("should not save an option that was not edited", async () => {
+      const handlers = valueHandlers();
+      renderForm(withOptions(), jest.fn(), handlers);
+
+      await userEvent.click(labelFields()[0]);
+      await userEvent.tab();
+
+      expect(handlers.onValueSave).not.toHaveBeenCalled();
+    });
+
+    it("should save the option when its default flag is toggled", async () => {
+      const handlers = valueHandlers();
+      renderForm(withOptions(), jest.fn(), handlers);
+
+      await userEvent.click(
+        screen.getAllByRole("button", {
+          name: "question_form.is_default"
+        })[0]
+      );
+
+      expect(handlers.onValueSave).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 1, is_default: true })
+      );
+    });
+
+    it("should delete the option that was clicked", async () => {
+      const handlers = valueHandlers();
+      renderForm(withOptions(), jest.fn(), handlers);
+
+      await userEvent.click(
+        screen.getAllByRole("button", { name: "general.delete" })[1]
+      );
+
+      expect(handlers.onValueDelete).toHaveBeenCalledWith(2);
+    });
+
+    // The API rejects a value-less option, so the control stays inert until typed in.
+    it("should not allow adding an option with no stored value", () => {
+      renderForm(withOptions());
+      expect(
+        screen.getByRole("button", { name: "question_form.add_option" })
+      ).toBeDisabled();
+    });
+
+    it("should add a new option and clear the row for the next one", async () => {
+      const handlers = valueHandlers();
+      renderForm(withOptions(), jest.fn(), handlers);
+
+      const fields = labelFields();
+      const addLabel = fields[fields.length - 1];
+      const addValue = screen.getAllByLabelText("question_form.value").pop();
+
+      await userEvent.type(addLabel, "Large");
+      await userEvent.type(addValue, "l");
+      await userEvent.click(
+        screen.getByRole("button", { name: "question_form.add_option" })
+      );
+
+      expect(handlers.onValueSave).toHaveBeenCalledWith({
+        value: "l",
+        label: "Large"
+      });
+      expect(addLabel).toHaveValue("");
     });
   });
 });
