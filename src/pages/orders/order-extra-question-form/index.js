@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { FormikProvider, useFormik } from "formik";
 import {
@@ -11,20 +11,34 @@ import {
   CardContent,
   Divider,
   Grid2,
+  IconButton,
   MenuItem,
   Stack,
+  TextField,
+  Tooltip,
   Typography
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
+import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
 import MuiFormikSwitch from "openstack-uicore-foundation/lib/components/mui/formik-inputs/switch";
 import MuiFormikDropdownCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/dropdown-checkbox";
 import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
+import DragAndDropList from "../../../components/mui/dnd-list";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
 import useScrollToError from "../../../hooks/useScrollToError";
 import history from "../../../history";
-import { ExtraQuestionsTypeAllowSubQuestion } from "../../../utils/constants";
+import {
+  ExtraQuestionsTypeAllowSubQuestion,
+  INT_BASE
+} from "../../../utils/constants";
 
 // A Google Forms style question card keeps the title visually light, so the
 // editor is cut back from the default toolbar to basic formatting.
@@ -44,11 +58,132 @@ const humanizeType = (type) => type.split(/(?=[A-Z])/).join(" ");
 const toIds = (collection = []) =>
   collection.map((item) => (item?.id !== undefined ? item.id : item));
 
+// Google Forms shows the answer control beside each option; these are decorative.
+const OptionGlyph = ({ type }) =>
+  type === "CheckBoxList" ? (
+    <CheckBoxOutlineBlankIcon sx={{ color: "text.disabled" }} />
+  ) : (
+    <RadioButtonUncheckedIcon sx={{ color: "text.disabled" }} />
+  );
+
+// Options persist one at a time through the values endpoints, exactly as the
+// legacy modal did — the only change is that blur replaces a Save button.
+const OptionRow = ({ option, type, onSave, onDelete }) => {
+  const [label, setLabel] = useState(option.label || "");
+  const [value, setValue] = useState(option.value || "");
+
+  useEffect(() => {
+    setLabel(option.label || "");
+    setValue(option.value || "");
+  }, [option.label, option.value]);
+
+  const saveIfChanged = () => {
+    if (label === option.label && value === option.value) return;
+    onSave({ ...option, label, value });
+  };
+
+  return (
+    <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.5 }}>
+      <DragIndicatorIcon sx={{ color: "text.disabled" }} />
+      <OptionGlyph type={type} />
+      <TextField
+        variant="standard"
+        fullWidth
+        label={T.translate("question_form.visible_option")}
+        value={label}
+        onChange={(ev) => setLabel(ev.target.value)}
+        onBlur={saveIfChanged}
+      />
+      <TextField
+        variant="standard"
+        label={T.translate("question_form.value")}
+        value={value}
+        onChange={(ev) => setValue(ev.target.value)}
+        onBlur={saveIfChanged}
+        sx={{ width: "30%" }}
+      />
+      <Tooltip title={T.translate("question_form.is_default")}>
+        <IconButton
+          aria-label={T.translate("question_form.is_default")}
+          onClick={() => onSave({ ...option, is_default: !option.is_default })}
+        >
+          {option.is_default ? (
+            <StarIcon color="primary" />
+          ) : (
+            <StarBorderIcon />
+          )}
+        </IconButton>
+      </Tooltip>
+      <Tooltip title={T.translate("general.delete")}>
+        <IconButton
+          aria-label={T.translate("general.delete")}
+          onClick={() => onDelete(option.id)}
+        >
+          <CloseIcon />
+        </IconButton>
+      </Tooltip>
+    </Stack>
+  );
+};
+
+const AddOptionRow = ({ type, onAdd }) => {
+  const [label, setLabel] = useState("");
+  const [value, setValue] = useState("");
+
+  // The API requires a value; the visible label is optional.
+  const canAdd = value.trim().length > 0;
+
+  const commit = () => {
+    if (!canAdd) return;
+    onAdd({ value, label });
+    setValue("");
+    setLabel("");
+  };
+
+  return (
+    <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.5 }}>
+      <DragIndicatorIcon sx={{ visibility: "hidden" }} />
+      <OptionGlyph type={type} />
+      <TextField
+        variant="standard"
+        fullWidth
+        placeholder={T.translate("question_form.add_option")}
+        label={T.translate("question_form.visible_option")}
+        value={label}
+        onChange={(ev) => setLabel(ev.target.value)}
+        onKeyDown={(ev) => ev.key === "Enter" && commit()}
+      />
+      <TextField
+        variant="standard"
+        label={T.translate("question_form.value")}
+        value={value}
+        onChange={(ev) => setValue(ev.target.value)}
+        onKeyDown={(ev) => ev.key === "Enter" && commit()}
+        sx={{ width: "30%" }}
+      />
+      <Tooltip title={T.translate("question_form.add_option")}>
+        <span>
+          <IconButton
+            aria-label={T.translate("question_form.add_option")}
+            disabled={!canAdd}
+            onClick={commit}
+          >
+            <AddIcon />
+          </IconButton>
+        </span>
+      </Tooltip>
+    </Stack>
+  );
+};
+
 const OrderExtraQuestionForm = ({
   currentSummit,
   entity,
   allClasses = [],
   onSubmit,
+  onValueSave,
+  onValueDelete,
+  updateQuestionValueOrder,
   onRuleDelete,
   updateSubQuestionRuleOrder
 }) => {
@@ -78,6 +213,19 @@ const OrderExtraQuestionForm = ({
   const showsMaxSelected = formik.values.type === "CheckBoxList";
   const showsSubRules =
     !isNew && ExtraQuestionsTypeAllowSubQuestion.includes(entity.type);
+
+  // Mirrors the legacy shouldShowField("values"): /metadata flags multi-value
+  // types with values: "array", so a new API type needs no frontend change.
+  const questionClass = allClasses.find((c) => c.type === formik.values.type);
+  const typeHasOptions = Boolean(questionClass?.values);
+
+  const options = [...(entity.values || [])].sort((a, b) => a.order - b.order);
+
+  const handleOptionReorder = (reordered, result) => {
+    const valueId = parseInt(result.draggableId, INT_BASE);
+    const moved = reordered.find((v) => v.id === valueId);
+    updateQuestionValueOrder(reordered, valueId, moved.order);
+  };
 
   const ticketTypeOptions = (currentSummit.ticket_types || []).map((tt) => ({
     label: tt.name,
@@ -137,12 +285,9 @@ const OrderExtraQuestionForm = ({
                   disabled={!isNew}
                   renderValue={(value) => (value ? humanizeType(value) : "")}
                 >
-                  {allClasses.map((questionClass) => (
-                    <MenuItem
-                      key={questionClass.type}
-                      value={questionClass.type}
-                    >
-                      {humanizeType(questionClass.type)}
+                  {allClasses.map((questionType) => (
+                    <MenuItem key={questionType.type} value={questionType.type}>
+                      {humanizeType(questionType.type)}
                     </MenuItem>
                   ))}
                 </MuiFormikSelect>
@@ -167,6 +312,37 @@ const OrderExtraQuestionForm = ({
                 </Grid2>
               )}
             </Grid2>
+
+            {typeHasOptions && (
+              <Box sx={{ mt: 3 }}>
+                <Divider sx={{ mb: 2 }} />
+                {isNew ? (
+                  <Typography color="text.secondary">
+                    {T.translate("question_form.save_to_add_values")}
+                  </Typography>
+                ) : (
+                  <>
+                    <DragAndDropList
+                      items={options}
+                      onReorder={handleOptionReorder}
+                      droppableId="question-options"
+                      renderItem={(option) => (
+                        <OptionRow
+                          option={option}
+                          type={formik.values.type}
+                          onSave={onValueSave}
+                          onDelete={onValueDelete}
+                        />
+                      )}
+                    />
+                    <AddOptionRow
+                      type={formik.values.type}
+                      onAdd={onValueSave}
+                    />
+                  </>
+                )}
+              </Box>
+            )}
 
             <Accordion elevation={0} disableGutters sx={{ mt: 3 }}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 0 }}>
