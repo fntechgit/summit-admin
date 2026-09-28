@@ -2,23 +2,21 @@ import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { FormikProvider, useFormik } from "formik";
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Box,
   Button,
   Card,
   CardContent,
   Divider,
+  FormControlLabel,
   Grid2,
   IconButton,
   MenuItem,
   Stack,
+  Switch,
   TextField,
   Tooltip,
   Typography
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import StarIcon from "@mui/icons-material/Star";
@@ -28,7 +26,6 @@ import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
-import MuiFormikSwitch from "openstack-uicore-foundation/lib/components/mui/formik-inputs/switch";
 import MuiFormikDropdownCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/dropdown-checkbox";
 import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
 import DragAndDropList from "../../../components/mui/dnd-list";
@@ -49,6 +46,14 @@ const LABEL_EDITOR_OPTIONS = {
 };
 
 const QUESTION_USAGES = ["Order", "Ticket", "Both"];
+
+const required = (label) => `${label} *`;
+
+const OUTLINED_FIELD = {
+  fullWidth: true,
+  margin: "none",
+  slotProps: { inputLabel: { shrink: true }, input: { notched: true } }
+};
 
 const PLACEHOLDER_TYPES = ["Text", "TextArea"];
 
@@ -269,16 +274,20 @@ const OrderExtraQuestionForm = ({
   return (
     <FormikProvider value={formik}>
       <form onSubmit={formik.handleSubmit}>
-        <Card elevation={2} sx={{ borderLeft: 4, borderColor: "primary.main" }}>
+        <Card
+          elevation={2}
+          sx={{
+            borderLeft: 4,
+            borderColor: "primary.main",
+            "& .MuiInputLabel-root": { fontSize: "1.25rem", fontWeight: 500 }
+          }}
+        >
           <CardContent>
             <Grid2 container spacing={3}>
-              <Grid2 size={{ xs: 12, md: 8 }}>
-                <FormikTextEditor name="label" options={LABEL_EDITOR_OPTIONS} />
-              </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <MuiFormikSelect
                   name="type"
-                  label={T.translate("question_form.question_type")}
+                  label={required(T.translate("question_form.question_type"))}
                   placeholder={T.translate(
                     "question_form.placeholders.select_type"
                   )}
@@ -292,12 +301,42 @@ const OrderExtraQuestionForm = ({
                   ))}
                 </MuiFormikSelect>
               </Grid2>
+              <Grid2 size={{ xs: 12, md: 4 }}>
+                <MuiFormikTextField
+                  name="name"
+                  label={required(T.translate("question_form.question_id"))}
+                  {...OUTLINED_FIELD}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 12, md: 4 }}>
+                <MuiFormikSelect
+                  name="usage"
+                  label={required(T.translate("question_form.usage"))}
+                  placeholder={T.translate(
+                    "question_form.placeholders.select_usage"
+                  )}
+                >
+                  {QUESTION_USAGES.map((usage) => (
+                    <MenuItem key={usage} value={usage}>
+                      {usage}
+                    </MenuItem>
+                  ))}
+                </MuiFormikSelect>
+              </Grid2>
+
+              <Grid2 size={12}>
+                <Typography sx={{ mb: 1, fontWeight: 500 }}>
+                  {required(T.translate("question_form.visible_question"))}
+                </Typography>
+                <FormikTextEditor name="label" options={LABEL_EDITOR_OPTIONS} />
+              </Grid2>
 
               {showsPlaceholder && (
                 <Grid2 size={12}>
                   <MuiFormikTextField
                     name="placeholder"
                     label={T.translate("question_form.hint")}
+                    {...OUTLINED_FIELD}
                   />
                 </Grid2>
               )}
@@ -308,6 +347,7 @@ const OrderExtraQuestionForm = ({
                     name="max_selected_values"
                     type="number"
                     label={T.translate("question_form.max_selected_values")}
+                    {...OUTLINED_FIELD}
                   />
                 </Grid2>
               )}
@@ -344,73 +384,68 @@ const OrderExtraQuestionForm = ({
               </Box>
             )}
 
-            <Accordion elevation={0} disableGutters sx={{ mt: 3 }}>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 0 }}>
-                <Typography color="text.secondary">
-                  {T.translate("question_form.advanced")}
+            <Divider sx={{ my: 3 }} />
+
+            <Typography color="text.secondary" sx={{ mb: 2, fontWeight: 500 }}>
+              {T.translate("question_form.advanced")}
+            </Typography>
+
+            <Grid2 container spacing={3}>
+              <Grid2 size={{ xs: 12, md: 6 }}>
+                <MuiFormikDropdownCheckbox
+                  name="allowed_ticket_types"
+                  label={T.translate("question_form.allowed_ticket_types")}
+                  placeholder={T.translate("question_form.no_restriction")}
+                  options={ticketTypeOptions}
+                />
+                <Typography variant="caption" color="text.secondary">
+                  {T.translate("question_form.allowed_ticket_types_info")}
                 </Typography>
-              </AccordionSummary>
-              <AccordionDetails sx={{ px: 0 }}>
-                <Grid2 container spacing={3}>
-                  <Grid2 size={{ xs: 12, md: 6 }}>
-                    <MuiFormikTextField
-                      name="name"
-                      label={T.translate("question_form.question_id")}
+              </Grid2>
+              <Grid2 size={{ xs: 12, md: 6 }}>
+                <MuiFormikDropdownCheckbox
+                  name="allowed_badge_features_types"
+                  label={T.translate(
+                    "question_form.allowed_badge_features_types"
+                  )}
+                  placeholder={T.translate("question_form.no_restriction")}
+                  options={badgeFeatureOptions}
+                />
+                <Typography variant="caption" color="text.secondary">
+                  {T.translate(
+                    "question_form.allowed_badge_features_types_info"
+                  )}
+                </Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, md: 6 }}>
+                <FormControlLabel
+                  labelPlacement="start"
+                  sx={{ ml: 0 }}
+                  label={T.translate("question_form.mandatory_label")}
+                  control={
+                    <Switch
+                      name="mandatory"
+                      checked={formik.values.mandatory}
+                      onChange={formik.handleChange}
                     />
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, md: 6 }}>
-                    <MuiFormikSelect
-                      name="usage"
-                      label={T.translate("question_form.usage")}
-                      placeholder={T.translate(
-                        "question_form.placeholders.select_usage"
-                      )}
-                    >
-                      {QUESTION_USAGES.map((usage) => (
-                        <MenuItem key={usage} value={usage}>
-                          {usage}
-                        </MenuItem>
-                      ))}
-                    </MuiFormikSelect>
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, md: 6 }}>
-                    <MuiFormikDropdownCheckbox
-                      name="allowed_ticket_types"
-                      label={T.translate("question_form.allowed_ticket_types")}
-                      placeholder={T.translate(
-                        "question_form.allowed_ticket_types_info"
-                      )}
-                      options={ticketTypeOptions}
+                  }
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 12, md: 6 }}>
+                <FormControlLabel
+                  labelPlacement="start"
+                  sx={{ ml: 0 }}
+                  label={T.translate("question_form.printable_label")}
+                  control={
+                    <Switch
+                      name="printable"
+                      checked={formik.values.printable}
+                      onChange={formik.handleChange}
                     />
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, md: 6 }}>
-                    <MuiFormikDropdownCheckbox
-                      name="allowed_badge_features_types"
-                      label={T.translate(
-                        "question_form.allowed_badge_features_types"
-                      )}
-                      placeholder={T.translate(
-                        "question_form.allowed_badge_features_types_info"
-                      )}
-                      options={badgeFeatureOptions}
-                    />
-                  </Grid2>
-                </Grid2>
-              </AccordionDetails>
-            </Accordion>
-
-            <Divider sx={{ my: 2 }} />
-
-            <Stack direction="row" spacing={4} justifyContent="flex-end">
-              <MuiFormikSwitch
-                name="mandatory"
-                label={T.translate("question_form.mandatory")}
-              />
-              <MuiFormikSwitch
-                name="printable"
-                label={T.translate("question_form.printable")}
-              />
-            </Stack>
+                  }
+                />
+              </Grid2>
+            </Grid2>
           </CardContent>
         </Card>
 

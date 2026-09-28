@@ -14,8 +14,8 @@
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import ExtraQuestionForm from "../../components/forms/extra-question-form";
+import OrderExtraQuestionForm from "./order-extra-question-form";
+import showConfirmDialog from "../../components/mui/showConfirmDialog";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getOrderExtraQuestionMeta,
@@ -43,44 +43,37 @@ class EditOrderExtraQuestionPage extends React.Component {
     this.handleRuleDelete = this.handleRuleDelete.bind(this);
   }
 
-  handleValueDelete(valueId) {
+  async handleValueDelete(valueId) {
     const { deleteOrderExtraQuestionValue, entity } = this.props;
     const value = entity.values.find((v) => v.id === valueId);
 
-    Swal.fire({
+    const confirmed = await showConfirmDialog({
       title: T.translate("general.are_you_sure"),
       text: `${T.translate("edit_order_extra_question.remove_value_warning")} ${
         value.value
       }`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
+      iconType: "warning",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteOrderExtraQuestionValue(entity.id, valueId);
-      }
     });
+
+    if (confirmed) deleteOrderExtraQuestionValue(entity.id, valueId);
   }
 
-  handleRuleDelete(valueId) {
+  async handleRuleDelete(valueId) {
     const { deleteOrderExtraQuestionsSubQuestionsRule, entity } = this.props;
-    const value = entity.sub_question_rules.find((v) => v.id === valueId);
+    const rule = entity.sub_question_rules.find((v) => v.id === valueId);
 
-    Swal.fire({
+    const confirmed = await showConfirmDialog({
       title: T.translate("general.are_you_sure"),
       text: `${T.translate("edit_order_extra_question.remove_value_warning")} ${
-        value.value
+        rule.sub_question.name
       }`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
+      iconType: "warning",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteOrderExtraQuestionsSubQuestionsRule(entity.id, valueId);
-      }
     });
+
+    if (confirmed)
+      deleteOrderExtraQuestionsSubQuestionsRule(entity.id, valueId);
   }
 
   handleValueSave(valueEntity) {
@@ -92,7 +85,6 @@ class EditOrderExtraQuestionPage extends React.Component {
     const {
       currentSummit,
       entity,
-      errors,
       allClasses,
       updateOrderExtraQuestionsSubQuestionsRuleOrder,
       updateOrderExtraQuestionValueOrder
@@ -110,23 +102,18 @@ class EditOrderExtraQuestionPage extends React.Component {
         </h3>
         <hr />
         {currentSummit && (
-          <ExtraQuestionForm
+          <OrderExtraQuestionForm
             currentSummit={currentSummit}
-            questionClasses={allClasses}
             entity={entity}
-            errors={errors}
-            shouldAllowSubRules
-            shouldShowUsage
-            shouldShowPrintable
-            onValueDelete={this.handleValueDelete}
-            onValueSave={this.handleValueSave}
-            onRuleDelete={this.handleRuleDelete}
+            allClasses={allClasses}
             onSubmit={this.props.saveOrderExtraQuestion}
+            onValueSave={this.handleValueSave}
+            onValueDelete={this.handleValueDelete}
+            updateQuestionValueOrder={updateOrderExtraQuestionValueOrder}
+            onRuleDelete={this.handleRuleDelete}
             updateSubQuestionRuleOrder={
               updateOrderExtraQuestionsSubQuestionsRuleOrder
             }
-            updateQuestionValueOrder={updateOrderExtraQuestionValueOrder}
-            shouldShowEditable={false}
           />
         )}
       </div>
