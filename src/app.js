@@ -385,7 +385,7 @@ const mapStateToProps = ({
   backUrl: loggedUserState.backUrl,
   member: loggedUserState.member,
   loading: baseState.loading,
-  currentSummit: currentSummitState.currentSummit
+  currentSummit: currentSummitState?.currentSummit
 });
 
 export default connect(mapStateToProps, {
