@@ -9,146 +9,144 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  IconButton,
+  Tooltip,
+  Typography
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import DragAndDropList from "../../components/mui/dnd-list";
+import showConfirmDialog from "../../components/mui/showConfirmDialog";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getOrderExtraQuestions,
   deleteOrderExtraQuestion,
   updateOrderExtraQuestionOrder
 } from "../../actions/order-actions";
+import { INT_BASE } from "../../utils/constants";
 
-class OrderExtraQuestionListPage extends React.Component {
-  constructor(props) {
-    super(props);
+// "CheckBoxList" -> "Check Box List"
+const humanizeType = (type) => type.split(/(?=[A-Z])/).join(" ");
 
-    this.handleEdit = this.handleEdit.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
-    this.handleNewOrderExtraQuestion =
-      this.handleNewOrderExtraQuestion.bind(this);
+const OrderExtraQuestionListPage = ({
+  currentSummit,
+  orderExtraQuestions,
+  totalOrderExtraQuestions,
+  history,
+  ...props
+}) => {
+  useEffect(() => {
+    if (currentSummit?.id) props.getOrderExtraQuestions();
+  }, [currentSummit?.id]);
 
-    this.state = {};
-  }
+  const questionsUrl = `/app/summits/${currentSummit.id}/order-extra-questions`;
 
-  componentDidMount() {
-    const { currentSummit } = this.props;
-    if (currentSummit) {
-      this.props.getOrderExtraQuestions();
-    }
-  }
+  const handleEdit = (questionId) =>
+    history.push(`${questionsUrl}/${questionId}`);
 
-  handleEdit(order_extra_question_id) {
-    const { currentSummit, history } = this.props;
-    history.push(
-      `/app/summits/${currentSummit.id}/order-extra-questions/${order_extra_question_id}`
-    );
-  }
+  const handleAdd = () => history.push(`${questionsUrl}/new`);
 
-  handleDelete(orderExtraQuestionId) {
-    const { deleteOrderExtraQuestion, orderExtraQuestions } = this.props;
-    let orderExtraQuestion = orderExtraQuestions.find(
-      (t) => t.id === orderExtraQuestionId
-    );
-
-    Swal.fire({
+  const handleDelete = async (question) => {
+    const confirmed = await showConfirmDialog({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("order_extra_question_list.remove_warning") +
-        " " +
-        orderExtraQuestion.name,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
+      text: `${T.translate("order_extra_question_list.remove_warning")}${
+        question.name
+      }`,
+      iconType: "warning",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
-      if (result.value) {
-        deleteOrderExtraQuestion(orderExtraQuestionId);
-      }
     });
-  }
 
-  handleNewOrderExtraQuestion(ev) {
-    const { currentSummit, history } = this.props;
-    history.push(`/app/summits/${currentSummit.id}/order-extra-questions/new`);
-  }
+    if (confirmed) props.deleteOrderExtraQuestion(question.id);
+  };
 
-  render() {
-    const {
-      currentSummit,
-      orderExtraQuestions,
-      order,
-      orderDir,
-      totalOrderExtraQuestions
-    } = this.props;
-
-    const columns = [
-      {
-        columnKey: "type",
-        value: T.translate("order_extra_question_list.question_type")
-      },
-      {
-        columnKey: "label",
-        value: T.translate("order_extra_question_list.visible_question")
-      },
-      {
-        columnKey: "name",
-        value: T.translate("order_extra_question_list.question_id")
-      }
-    ];
-
-    const table_options = {
-      sortCol: order,
-      sortDir: orderDir,
-      actions: {
-        edit: { onClick: this.handleEdit },
-        delete: { onClick: this.handleDelete }
-      }
-    };
-
-    if (!currentSummit.id) return <div />;
-
-    return (
-      <div className="container">
-        <h3>
-          {" "}
-          {T.translate("order_extra_question_list.order_extra_questions")} (
-          {totalOrderExtraQuestions})
-        </h3>
-        <div className={"row"}>
-          <div className="col-md-6 text-right col-md-offset-6">
-            <button
-              className="btn btn-primary right-space"
-              onClick={this.handleNewOrderExtraQuestion}
-            >
-              {T.translate("order_extra_question_list.add_question")}
-            </button>
-          </div>
-        </div>
-
-        {orderExtraQuestions.length === 0 && (
-          <div>
-            {T.translate("order_extra_question_list.no_order_extra_questions")}
-          </div>
-        )}
-
-        {orderExtraQuestions.length > 0 && (
-          <SortableTable
-            options={table_options}
-            data={orderExtraQuestions}
-            columns={columns}
-            dropCallback={this.props.updateOrderExtraQuestionOrder}
-            orderField="order"
-          />
-        )}
-      </div>
+  // dnd-list renumbers `order` across the list; the action PUTs the moved one.
+  const handleReorder = (reordered, result) =>
+    props.updateOrderExtraQuestionOrder(
+      reordered,
+      parseInt(result.draggableId, INT_BASE)
     );
-  }
-}
+
+  if (!currentSummit.id) return <div />;
+
+  return (
+    <Box className="container">
+      <Typography variant="h5" sx={{ mb: 2 }}>
+        {T.translate("order_extra_question_list.order_extra_questions")} (
+        {totalOrderExtraQuestions})
+      </Typography>
+
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={handleAdd}>
+          {T.translate("order_extra_question_list.add_question")}
+        </Button>
+      </Box>
+
+      {orderExtraQuestions.length === 0 ? (
+        <Typography color="text.secondary">
+          {T.translate("order_extra_question_list.no_order_extra_questions")}
+        </Typography>
+      ) : (
+        <DragAndDropList
+          items={orderExtraQuestions}
+          onReorder={handleReorder}
+          droppableId="order-extra-questions"
+          renderItem={(question) => (
+            <Card elevation={1} sx={{ mb: 1.5 }}>
+              <CardContent
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  "&:last-child": { pb: 2 }
+                }}
+              >
+                <DragIndicatorIcon sx={{ color: "text.disabled" }} />
+                <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                  <Box
+                    component="div"
+                    sx={{ "& p": { m: 0 } }}
+                    dangerouslySetInnerHTML={{ __html: question.label }}
+                  />
+                  <Typography variant="body2" color="text.secondary">
+                    {humanizeType(question.type)} &middot; {question.name}
+                  </Typography>
+                </Box>
+                <Tooltip title={T.translate("general.edit")}>
+                  <IconButton
+                    aria-label={T.translate("general.edit")}
+                    onClick={() => handleEdit(question.id)}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title={T.translate("general.delete")}>
+                  <IconButton
+                    aria-label={T.translate("general.delete")}
+                    onClick={() => handleDelete(question)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Tooltip>
+              </CardContent>
+            </Card>
+          )}
+        />
+      )}
+    </Box>
+  );
+};
 
 const mapStateToProps = ({
   currentSummitState,
