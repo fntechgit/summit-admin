@@ -36,6 +36,7 @@ import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 // eslint-disable-next-line
@@ -219,7 +220,8 @@ class App extends React.PureComponent {
       doLogout,
       getUserInfo,
       backUrl,
-      loading
+      loading,
+      currentSummit
     } = this.props;
     const { menuOpen, openedByHover } = this.state;
 
@@ -294,6 +296,20 @@ class App extends React.PureComponent {
                     }}
                   >
                     {T.translate("landing.os_summit_admin")}
+                    {currentSummit?.id > 0 && currentSummit?.name && (
+                      <Box
+                        component="span"
+                        sx={{
+                          ml: 1.5,
+                          pl: 1.5,
+                          borderLeft: "1px solid #b3b3b3",
+                          color: "text.secondary",
+                          fontWeight: 400
+                        }}
+                      >
+                        {currentSummit.name}
+                      </Box>
+                    )}
                   </Typography>
                   {isLoggedUser && (
                     <AuthButton
@@ -360,11 +376,16 @@ class App extends React.PureComponent {
   }
 }
 
-const mapStateToProps = ({ loggedUserState, baseState }) => ({
+const mapStateToProps = ({
+  loggedUserState,
+  baseState,
+  currentSummitState
+}) => ({
   isLoggedUser: loggedUserState.isLoggedUser,
   backUrl: loggedUserState.backUrl,
   member: loggedUserState.member,
-  loading: baseState.loading
+  loading: baseState.loading,
+  currentSummit: currentSummitState.currentSummit
 });
 
 export default connect(mapStateToProps, {
