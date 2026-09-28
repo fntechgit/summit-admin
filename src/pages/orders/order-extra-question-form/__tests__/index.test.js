@@ -184,6 +184,26 @@ describe("OrderExtraQuestionForm", () => {
       );
     });
 
+    // The toggles are raw MUI bound through formik.handleChange, so a wrong
+    // binding would send "on" rather than a boolean.
+    it("should submit the toggles as booleans", async () => {
+      const onSubmit = renderForm(baseEntity({ id: 9, type: "Text" }));
+
+      await userEvent.click(
+        screen.getByRole("checkbox", { name: "question_form.mandatory_label" })
+      );
+      await userEvent.click(
+        screen.getByRole("checkbox", { name: "question_form.printable_label" })
+      );
+      await userEvent.click(
+        screen.getByRole("button", { name: "general.save" })
+      );
+
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ mandatory: true, printable: true })
+      );
+    });
+
     it("should submit edits made in the card", async () => {
       const onSubmit = renderForm(baseEntity({ id: 9, type: "Text" }));
 
