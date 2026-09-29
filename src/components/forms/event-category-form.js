@@ -41,6 +41,7 @@ import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/f
 import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
 import FormikTextEditor from "openstack-uicore-foundation/lib/components/mui/formik-inputs/texteditor";
 import MuiFormikAsyncAutocomplete from "openstack-uicore-foundation/lib/components/mui/formik-inputs/async-select";
+import AuditLogs from "../audit-logs";
 import MuiFormikColorField from "../mui/formik-inputs/mui-formik-color-field";
 import useScrollToError from "../../hooks/useScrollToError";
 import {
@@ -474,6 +475,27 @@ const EventCategoryForm = ({
             />
           </Box>
         )}
+
+        {entity.id > 0 && (
+          <Accordion sx={{ my: 2 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography>
+                <b>{T.translate("audit_log.title")}</b>
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <AuditLogs
+                filterId="event_category"
+                entityFilter={[
+                  `entity_id==${entity.id}`,
+                  "class_name==PresentationCategory"
+                ]}
+                columns={["created", "action_description", "user"]}
+              />
+            </AccordionDetails>
+          </Accordion>
+        )}
+        <hr />
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
           <Button type="submit" variant="contained" disabled={isSaving}>
