@@ -14,8 +14,6 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { withRouter } from "react-router-dom";
-import Box from "@mui/material/Box";
-import Drawer from "@mui/material/Drawer";
 import Divider from "@mui/material/Divider";
 import SubMenuItem from "./sub-menu-item";
 import MenuItem from "./menu-item";
@@ -23,37 +21,18 @@ import ExpandableItem from "./expandable-item";
 import Member from "../../models/member";
 import { getGlobalItems, getSummitItems } from "./menu-definition";
 
-const DRAWER_WIDTH = 260;
-
-const Menu = ({
-  currentSummit,
-  member,
-  history,
-  menuOpen,
-  openedByHover,
-  toggleMenu,
-  onMenuMouseEnter,
-  onMenuMouseLeave
-}) => {
+const Menu = ({ currentSummit, member, history, onNavigate }) => {
   const memberObj = new Member(member);
   const globalItems = getGlobalItems();
   const summitItems = currentSummit ? getSummitItems(currentSummit.id) : [];
 
-  const closeMenu = () => {
-    if (menuOpen) toggleMenu();
-  };
-
   const onMenuItemClick = (ev, url) => {
     ev.preventDefault();
-    closeMenu();
+    if (onNavigate) onNavigate();
     history.push(`/app/${url}`);
   };
 
   const currentPath = history.location.pathname;
-
-  const canHover = window.matchMedia(
-    "(hover: hover) and (pointer: fine)"
-  ).matches;
 
   const drawMenuItem = (item) => {
     const hasAccess =
@@ -85,44 +64,20 @@ const Menu = ({
   };
 
   return (
-    <Drawer
-      anchor="left"
-      open={Boolean(menuOpen)}
-      onClose={closeMenu}
-      slotProps={{
-        root: {
-          keepMounted: true,
-          disableAutoFocus: openedByHover,
-          disableEnforceFocus: openedByHover,
-          disableScrollLock: true
-        },
-        paper: {
-          sx: { width: DRAWER_WIDTH },
-          ...(canHover && {
-            onMouseEnter: onMenuMouseEnter,
-            onMouseLeave: onMenuMouseLeave
-          })
-        }
-      }}
-    >
-      <Box
-        role="presentation"
-        sx={{ width: DRAWER_WIDTH, overflowY: "auto", pb: 3 }}
-      >
-        <ExpandableItem label={T.translate("menu.general")} isHeader>
-          {globalItems.map(drawMenuItem)}
-        </ExpandableItem>
+    <>
+      <ExpandableItem label={T.translate("menu.general")} isHeader>
+        {globalItems.map(drawMenuItem)}
+      </ExpandableItem>
 
-        {!!currentSummit?.id && (
-          <>
-            <Divider sx={{ my: 2 }} />
-            <ExpandableItem label={currentSummit.name} isHeader>
-              {summitItems.map(drawMenuItem)}
-            </ExpandableItem>
-          </>
-        )}
-      </Box>
-    </Drawer>
+      {!!currentSummit?.id && (
+        <>
+          <Divider sx={{ my: 2 }} />
+          <ExpandableItem label={currentSummit.name} isHeader>
+            {summitItems.map(drawMenuItem)}
+          </ExpandableItem>
+        </>
+      )}
+    </>
   );
 };
 

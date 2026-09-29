@@ -3,6 +3,7 @@ import { screen, fireEvent, act } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { renderWithRedux } from "../utils/test-utils";
 import App from "../app";
+import history from "../history";
 
 // --- i18n: app.js and menu/index.js import different entry points ---
 jest.mock("i18n-react", () => ({
@@ -64,13 +65,11 @@ jest.mock("../history", () => {
   };
 });
 
-// PrimaryLayout's real body is a tree of lazy route layouts we don't need. Swap
-// it for the real Menu so the Drawer under test is genuine and receives the
-// same componentProps AuthorizedRoute forwards in production.
-jest.mock("../layouts/primary-layout", () => {
-  const RealMenu = require("../components/menu").default;
-  return { __esModule: true, default: (props) => <RealMenu {...props} /> };
-});
+
+jest.mock("../layouts/primary-layout", () => ({
+  __esModule: true,
+  default: () => <div data-testid="page" />
+}));
 jest.mock("../components/menu/menu-definition", () => ({
   getGlobalItems: () => [{ name: "directory", linkUrl: "directory" }],
   getSummitItems: () => []
@@ -85,24 +84,12 @@ jest.mock("../routes/logout-callback-route", () => () => null);
 jest.mock("../routes/default-route", () => () => null);
 jest.mock("../pages/custom-error-page", () => () => null);
 
-const setCanHover = (matches) => {
-  window.matchMedia = (query) => ({
-    matches,
-    media: query,
-    onchange: null,
-    addListener: () => {},
-    removeListener: () => {},
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => false
-  });
-};
-
 const renderApp = () =>
   renderWithRedux(<App />, {
     initialState: {
       loggedUserState: { isLoggedUser: true, backUrl: null, member: {} },
-      baseState: { loading: false }
+      baseState: { loading: false },
+      currentSummitState: { currentSummit: null }
     }
   });
 
@@ -111,17 +98,17 @@ const burger = () =>
 
 // keepMounted leaves the drawer in the DOM when closed, so presence proves
 // nothing — visibility is the signal.
-const drawerIsOpen = () => screen.getByText("menu.general");
+const drawer = () => screen.getByText("menu.general");
 
-// The Drawer's Slide has a 225ms exit transition, so an element that is being
-// closed still reports visible for a while. Fake timers let each assertion run
-// after the transition has actually settled.
 const settle = () =>
   act(() => {
     jest.advanceTimersByTime(500);
   });
 
-describe("App burger wiring", () => {
+// TopNav's open/close behaviour is covered in its own spec. What is only
+// observable here is that App hands it the right pieces: the burger opens a
+// drawer containing the real Menu, and a menu item navigates and dismisses it.
+describe("App nav wiring", () => {
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -131,67 +118,26 @@ describe("App burger wiring", () => {
     jest.clearAllMocks();
   });
 
-  describe("fine pointer (hover available)", () => {
-    beforeEach(() => setCanHover(true));
+  test("the burger opens a drawer holding the app menu", () => {
+    renderApp();
+    expect(drawer()).not.toBeVisible();
 
-    test("a click arriving during a hover-open is ignored", () => {
-      renderApp();
-      // Held across the open: once the Modal mounts it marks the rest of the
-      // app aria-hidden, so the burger is no longer reachable by role.
-      const button = burger();
-      expect(drawerIsOpen()).not.toBeVisible();
+    fireEvent.click(burger());
+    settle();
 
-      // React 16 derives onMouseEnter from the top-level mouseover event.
-      // No settle() here: advancing the clock would take us past the grace
-      // window, which is exactly the condition under test.
-      fireEvent.mouseOver(button);
-      expect(drawerIsOpen()).toBeVisible();
-
-      // Without the grace window this click toggles the drawer shut again.
-      fireEvent.click(button);
-      settle();
-      expect(drawerIsOpen()).toBeVisible();
-    });
-
-    test("a click after the grace window still closes the drawer", () => {
-      renderApp();
-      const button = burger();
-
-      fireEvent.mouseOver(button);
-      expect(drawerIsOpen()).toBeVisible();
-
-      // Past HOVER_OPEN_CLICK_GRACE_MS, so the click is no longer suppressed.
-      act(() => {
-        jest.advanceTimersByTime(400);
-      });
-      fireEvent.click(button);
-      settle();
-      expect(drawerIsOpen()).not.toBeVisible();
-    });
-
-    test("hover alone opens the drawer", () => {
-      renderApp();
-      fireEvent.mouseOver(burger());
-      settle();
-      expect(drawerIsOpen()).toBeVisible();
-    });
+    expect(drawer()).toBeVisible();
+    expect(screen.getByText("menu.directory")).toBeVisible();
   });
 
-  describe("coarse pointer (no hover)", () => {
-    beforeEach(() => setCanHover(false));
+  test("choosing a menu item navigates and closes the drawer", () => {
+    renderApp();
+    fireEvent.click(burger());
+    settle();
 
-    test("hover does not open the drawer", () => {
-      renderApp();
-      fireEvent.mouseOver(burger());
-      settle();
-      expect(drawerIsOpen()).not.toBeVisible();
-    });
+    fireEvent.click(screen.getByText("menu.directory"));
+    settle();
 
-    test("a single click opens the drawer", () => {
-      renderApp();
-      fireEvent.click(burger());
-      settle();
-      expect(drawerIsOpen()).toBeVisible();
-    });
+    expect(history.location.pathname).toBe("/app/directory");
+    expect(drawer()).not.toBeVisible();
   });
 });

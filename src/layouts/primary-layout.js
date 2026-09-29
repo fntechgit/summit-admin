@@ -12,12 +12,10 @@
  * */
 
 import React, { Suspense } from "react";
-import { connect } from "react-redux";
 import { Switch, Route, Redirect } from "react-router-dom";
 import { Breadcrumb } from "react-breadcrumbs";
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
 import Restrict from "../routes/restrict";
-import Menu from "../components/menu";
 
 const SummitLayout = React.lazy(() => import("./summit-layout"));
 const SummitDirectoryPage = React.lazy(() =>
@@ -42,26 +40,8 @@ const AddOnTypesListPage = React.lazy(() =>
   import("../pages/sponsors-global/add-on-types/add-on-types-list-page")
 );
 
-const PrimaryLayout = ({
-  match,
-  currentSummit,
-  member,
-  menuOpen,
-  openedByHover,
-  toggleMenu,
-  onMenuMouseEnter,
-  onMenuMouseLeave
-}) => (
+const PrimaryLayout = ({ match }) => (
   <div className="primary-layout">
-    <Menu
-      currentSummit={currentSummit}
-      member={member}
-      menuOpen={menuOpen}
-      openedByHover={openedByHover}
-      toggleMenu={toggleMenu}
-      onMenuMouseEnter={onMenuMouseEnter}
-      onMenuMouseLeave={onMenuMouseLeave}
-    />
     <main id="page-wrap">
       <Breadcrumb
         data={{ title: <i className="fa fa-home" />, pathname: match.url }}
@@ -103,9 +83,4 @@ const PrimaryLayout = ({
   </div>
 );
 
-const mapStateToProps = ({ currentSummitState, loggedUserState }) => ({
-  currentSummit: currentSummitState.currentSummit,
-  member: loggedUserState.member
-});
-
-export default Restrict(connect(mapStateToProps, {})(PrimaryLayout), "general");
+export default Restrict(PrimaryLayout, "general");

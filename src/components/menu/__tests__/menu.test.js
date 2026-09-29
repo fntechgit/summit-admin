@@ -64,48 +64,21 @@ describe("Menu", () => {
     expect(mockHistory.push).toHaveBeenCalledWith("/app/directory");
   });
 
-  // The onClose path has no "already closed" case to assert: MUI's Modal only
-  // attaches its backdrop/Escape handlers while open, so onClose cannot fire at
-  // all when menuOpen is false. The menu-item click below is the path that can
-  // reach closeMenu in either state, so that is where the guard is pinned.
-  describe("closeMenu is gated on menuOpen", () => {
-    test("Drawer onClose (backdrop click) calls toggleMenu when open", async () => {
-      const toggleMenu = jest.fn();
-      const { baseElement } = renderMenu({ menuOpen: true, toggleMenu });
+  test("notifies the host so the drawer can close, then navigates", async () => {
+    const onNavigate = jest.fn();
+    renderMenu({ onNavigate });
 
-      await userEvent.click(baseElement.querySelector(".MuiBackdrop-root"));
+    await userEvent.click(screen.getByText("menu.directory"));
 
-      expect(toggleMenu).toHaveBeenCalledTimes(1);
-    });
+    expect(onNavigate).toHaveBeenCalledTimes(1);
+    expect(mockHistory.push).toHaveBeenCalledWith("/app/directory");
+  });
 
-    test("Drawer onClose (Escape) calls toggleMenu when open", async () => {
-      const toggleMenu = jest.fn();
-      renderMenu({ menuOpen: true, toggleMenu });
+  test("navigates even when the host supplies no onNavigate", async () => {
+    renderMenu();
 
-      await userEvent.keyboard("{Escape}");
+    await userEvent.click(screen.getByText("menu.directory"));
 
-      expect(toggleMenu).toHaveBeenCalledTimes(1);
-    });
-
-    test("a menu item click calls toggleMenu when the menu is open", async () => {
-      const toggleMenu = jest.fn();
-      renderMenu({ menuOpen: true, toggleMenu });
-
-      await userEvent.click(screen.getByText("menu.directory"));
-
-      expect(toggleMenu).toHaveBeenCalledTimes(1);
-      expect(mockHistory.push).toHaveBeenCalledWith("/app/directory");
-    });
-
-    test("a menu item click does not call toggleMenu when already closed", async () => {
-      const toggleMenu = jest.fn();
-      renderMenu({ menuOpen: false, toggleMenu });
-
-      await userEvent.click(screen.getByText("menu.directory"));
-
-      // Navigation still happens; only the close is suppressed.
-      expect(toggleMenu).not.toHaveBeenCalled();
-      expect(mockHistory.push).toHaveBeenCalledWith("/app/directory");
-    });
+    expect(mockHistory.push).toHaveBeenCalledWith("/app/directory");
   });
 });
