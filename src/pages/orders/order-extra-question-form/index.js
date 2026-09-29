@@ -35,14 +35,6 @@ import {
   INT_BASE
 } from "../../../utils/constants";
 
-// A Google Forms style question card keeps the title visually light, so the
-// editor is cut back from the default toolbar to basic formatting.
-const LABEL_EDITOR_OPTIONS = {
-  buttons: ["bold", "italic", "underline", "link", "|", "source"],
-  toolbarAdaptive: false,
-  statusbar: false
-};
-
 const QUESTION_USAGES = ["Order", "Ticket", "Both"];
 
 const required = (label) => `${label} *`;
@@ -316,7 +308,7 @@ const OrderExtraQuestionForm = ({
                 <Typography sx={{ mb: 1, fontWeight: 500 }}>
                   {required(T.translate("question_form.visible_question"))}
                 </Typography>
-                <FormikTextEditor name="label" options={LABEL_EDITOR_OPTIONS} />
+                <FormikTextEditor name="label" />
               </Grid2>
 
               {showsPlaceholder && (
