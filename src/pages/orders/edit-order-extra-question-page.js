@@ -14,8 +14,8 @@
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
+import Swal from "sweetalert2";
 import OrderExtraQuestionForm from "./order-extra-question-form";
-import showConfirmDialog from "../../components/mui/showConfirmDialog";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getOrderExtraQuestionMeta,
@@ -43,37 +43,44 @@ class EditOrderExtraQuestionPage extends React.Component {
     this.handleRuleDelete = this.handleRuleDelete.bind(this);
   }
 
-  async handleValueDelete(valueId) {
+  handleValueDelete(valueId) {
     const { deleteOrderExtraQuestionValue, entity } = this.props;
     const value = entity.values.find((v) => v.id === valueId);
 
-    const confirmed = await showConfirmDialog({
+    Swal.fire({
       title: T.translate("general.are_you_sure"),
       text: `${T.translate("edit_order_extra_question.remove_value_warning")} ${
         value.value
       }`,
-      iconType: "warning",
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
+    }).then((result) => {
+      if (result.value) {
+        deleteOrderExtraQuestionValue(entity.id, valueId);
+      }
     });
-
-    if (confirmed) deleteOrderExtraQuestionValue(entity.id, valueId);
   }
 
-  async handleRuleDelete(valueId) {
+  handleRuleDelete(valueId) {
     const { deleteOrderExtraQuestionsSubQuestionsRule, entity } = this.props;
-    const rule = entity.sub_question_rules.find((v) => v.id === valueId);
+    const value = entity.sub_question_rules.find((v) => v.id === valueId);
 
-    const confirmed = await showConfirmDialog({
+    Swal.fire({
       title: T.translate("general.are_you_sure"),
       text: `${T.translate("edit_order_extra_question.remove_value_warning")} ${
-        rule.sub_question.name
+        value.value
       }`,
-      iconType: "warning",
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
+    }).then((result) => {
+      if (result.value) {
+        deleteOrderExtraQuestionsSubQuestionsRule(entity.id, valueId);
+      }
     });
-
-    if (confirmed)
-      deleteOrderExtraQuestionsSubQuestionsRule(entity.id, valueId);
   }
 
   handleValueSave(valueEntity) {

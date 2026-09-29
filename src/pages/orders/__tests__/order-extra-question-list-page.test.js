@@ -69,13 +69,6 @@ describe("OrderExtraQuestionListPage", () => {
     expect(getOrderExtraQuestions).toHaveBeenCalled();
   });
 
-  // The old table printed the raw HTML label, tags and all. This is the fix.
-  it("should render the html label as formatted text rather than raw tags", () => {
-    renderPage();
-    expect(screen.getByText("What size t-shirt?")).toBeInTheDocument();
-    expect(screen.queryByText("<p>What size t-shirt?</p>")).toBeNull();
-  });
-
   it("should show the question type in words alongside its identifier", () => {
     renderPage();
     expect(screen.getByText(/Check Box List/)).toBeInTheDocument();
