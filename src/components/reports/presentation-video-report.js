@@ -9,14 +9,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import Table from "openstack-uicore-foundation/lib/components/table";
-const Query = require("graphql-query-builder");
+import moment from "moment-timezone";
 import wrapReport from "./report-wrapper";
 import { flattenData } from "../../actions/report-actions";
-import moment from "moment-timezone";
+
+const Query = require("graphql-query-builder");
 
 class PresentationVideoReport extends React.Component {
   constructor(props) {
@@ -34,19 +35,19 @@ class PresentationVideoReport extends React.Component {
     listFilters.hasVideo = true;
 
     if (sortKey) {
-      let querySortKey = this.translateSortKey(sortKey);
-      let order = sortDir == 1 ? "" : "-";
-      filters.ordering = order + "" + querySortKey;
+      const querySortKey = this.translateSortKey(sortKey);
+      const order = sortDir == 1 ? "" : "-";
+      filters.ordering = `${order}${querySortKey}`;
     }
 
-    let query = new Query("presentations", listFilters);
-    let venue = new Query("venue");
+    const query = new Query("presentations", listFilters);
+    const venue = new Query("venue");
     venue.find(["id", "name"]);
-    let venueroom = new Query("venueroom");
-    venueroom.find(["id", "name", { venue: venue }]);
-    let location = new Query("location");
-    location.find(["id", { venueroom: venueroom }]);
-    let results = new Query("results", filters);
+    const venueroom = new Query("venueroom");
+    venueroom.find(["id", "name", { venue }]);
+    const location = new Query("location");
+    location.find(["id", { venueroom }]);
+    const results = new Query("results", filters);
     results.find([
       "id",
       "title",
@@ -55,34 +56,33 @@ class PresentationVideoReport extends React.Component {
       "tagNames",
       "youtubeId",
       "externalUrl",
-      { location: location }
+      { location }
     ]);
 
-    query.find([{ results: results }, "totalCount"]);
+    query.find([{ results }, "totalCount"]);
 
     return query;
   }
 
-  preProcessData(data, extraData, forExport = false) {
+  preProcessData(data) {
     const { currentSummit } = this.props;
-    let flatData = flattenData(data);
+    const flatData = flattenData(data);
 
-    let processedData = flatData.map((it) => {
-      let momentStartDate = moment
+    const processedData = flatData.map((it) => {
+      const momentStartDate = moment
         .tz(it.startDate, "UTC")
         .tz(currentSummit.time_zone_id);
-      let momentEndDate = moment
+      const momentEndDate = moment
         .tz(it.endDate, "UTC")
         .tz(currentSummit.time_zone_id);
-      let time =
-        momentStartDate.format("h:mm a") +
-        " - " +
-        momentEndDate.format("h:mm a");
+      const time = `${momentStartDate.format(
+        "ddd, MMM D YYYY h:mm a"
+      )} - ${momentEndDate.format("h:mm a")}`;
 
       return {
         id: it.id,
         event: it.title,
-        time: time,
+        time,
         tags: it.tagNames,
         room: it.location_venueroom_name,
         venue: it.location_venueroom_venue_name,
@@ -91,9 +91,9 @@ class PresentationVideoReport extends React.Component {
       };
     });
 
-    let columns = [
+    const columns = [
       { columnKey: "id", value: "ID", sortable: true },
-      { columnKey: "time", value: "Time" },
+      { columnKey: "time", value: "Date / Time", sortable: true },
       { columnKey: "tags", value: "Tags" },
       { columnKey: "event", value: "Event" },
       { columnKey: "room", value: "Room" },
@@ -107,6 +107,13 @@ class PresentationVideoReport extends React.Component {
 
   translateSortKey(key) {
     let sortKey = key;
+    switch (key) {
+      case "time":
+        sortKey = "start_date";
+        break;
+      default:
+        break;
+    }
     return sortKey;
   }
 
@@ -115,18 +122,18 @@ class PresentationVideoReport extends React.Component {
   }
 
   render() {
-    let { data, extraData, totalCount, sortKey, sortDir } = this.props;
-    let storedDataName = this.props.name;
+    const { data, extraData, totalCount, sortKey, sortDir } = this.props;
+    const storedDataName = this.props.name;
 
     if (!data || storedDataName !== this.getName()) return <div />;
 
-    let report_options = {
+    const report_options = {
       sortCol: sortKey,
-      sortDir: sortDir,
+      sortDir,
       actions: {}
     };
 
-    let { reportData, tableColumns } = this.preProcessData(data, extraData);
+    const { reportData, tableColumns } = this.preProcessData(data, extraData);
 
     return (
       <div className="tag-report">
