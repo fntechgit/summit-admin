@@ -44,12 +44,6 @@ body {
   }
 }
 
-.table-container {
-  width: 100%;
-  background-color: white;
-  padding: 10px 30px;
-}
-
 .form-check-label {
   padding-left: 10px !important;
   padding-top: 2px;

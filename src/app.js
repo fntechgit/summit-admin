@@ -205,8 +205,6 @@ class App extends React.PureComponent {
             <div>
               <AjaxLoader show={loading} size={120} />
               <TopNav
-                id="page-header"
-                className="header"
                 sx={{ borderBottom: "1px solid #b3b3b3" }}
                 title={T.translate("landing.os_summit_admin")}
                 contextLabel={currentSummit?.id > 0 ? currentSummit.name : null}

@@ -22,7 +22,7 @@ import IconButton from "@mui/material/IconButton";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import MenuIcon from "@mui/icons-material/Menu";
 
-const DEFAULT_DRAWER_WIDTH = 260;
+const DRAWER_WIDTH = 260;
 const CLOSE_DELAY_MS = 200;
 const HOVER_CLICK_GRACE_MS = 300;
 const COMPACT_BAR_HEIGHT = 48;
@@ -50,11 +50,8 @@ const TopNav = ({
   actions,
   subBar,
   renderDrawer,
-  drawerWidth,
   menuButtonLabel,
-  hoverToOpen,
-  sx,
-  ...rest
+  sx
 }) => {
   const [open, setOpen] = useState(false);
   const [openedByHover, setOpenedByHover] = useState(false);
@@ -62,7 +59,6 @@ const TopNav = ({
   const lastHoverOpen = useRef(0);
 
   const canHover = useMediaQuery("(hover: hover) and (pointer: fine)");
-  const hoverEnabled = hoverToOpen && canHover;
 
   const cancelClose = useCallback(() => {
     if (closeTimeout.current) {
@@ -104,10 +100,10 @@ const TopNav = ({
 
   useEffect(() => cancelClose, [cancelClose]);
 
-  const hoverHandlers = hoverEnabled
+  const hoverHandlers = canHover
     ? { onMouseEnter: openByHover, onMouseLeave: scheduleClose }
     : {};
-  const drawerHoverHandlers = hoverEnabled
+  const drawerHoverHandlers = canHover
     ? { onMouseEnter: cancelClose, onMouseLeave: scheduleClose }
     : {};
 
@@ -127,7 +123,6 @@ const TopNav = ({
           borderColor: "divider",
           ...sx
         }}
-        {...rest}
       >
         <Toolbar
           sx={{
@@ -206,14 +201,14 @@ const TopNav = ({
               disableScrollLock: true
             },
             paper: {
-              sx: { width: drawerWidth },
+              sx: { width: DRAWER_WIDTH },
               ...drawerHoverHandlers
             }
           }}
         >
           <Box
             role="presentation"
-            sx={{ width: drawerWidth, overflowY: "auto", pb: 3 }}
+            sx={{ width: DRAWER_WIDTH, overflowY: "auto", pb: 3 }}
           >
             {renderDrawer({ closeDrawer })}
           </Box>
@@ -237,10 +232,8 @@ TopNav.propTypes = {
    * neither the burger button nor the drawer is rendered.
    */
   renderDrawer: PropTypes.func,
-  drawerWidth: PropTypes.number,
+  /** Accessible name for the burger button; supply it with `renderDrawer`. */
   menuButtonLabel: PropTypes.string,
-  /** Open the drawer on hover where the pointer supports it. */
-  hoverToOpen: PropTypes.bool,
   /** Style overrides merged into the app bar. */
   // eslint-disable-next-line react/forbid-prop-types
   sx: PropTypes.object
@@ -251,9 +244,7 @@ TopNav.defaultProps = {
   actions: null,
   subBar: null,
   renderDrawer: null,
-  drawerWidth: DEFAULT_DRAWER_WIDTH,
-  menuButtonLabel: "Toggle navigation menu",
-  hoverToOpen: true,
+  menuButtonLabel: null,
   sx: null
 };
 

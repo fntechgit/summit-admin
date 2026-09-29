@@ -104,13 +104,6 @@ describe("TopNav", () => {
       settle();
       expect(drawer()).not.toBeVisible();
     });
-
-    test("hoverToOpen={false} leaves hover inert", () => {
-      renderNav({ hoverToOpen: false });
-      fireEvent.mouseOver(burger());
-      settle();
-      expect(drawer()).not.toBeVisible();
-    });
   });
 
   describe("coarse pointer (no hover)", () => {
