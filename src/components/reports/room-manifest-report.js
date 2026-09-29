@@ -136,6 +136,16 @@ class RoomManifestReport extends React.Component {
   preProcessData(data, extraData, forExport = false) {
     const { currentSummit } = this.props;
 
+    // one column per speaker of the largest session, kept last so empty cells trail off
+    const maxSpeakers = Math.max(
+      1,
+      ...data.map((it) => it.speakers?.length ?? 0)
+    );
+    const speakerColumns = Array.from({ length: maxSpeakers }, (_, i) => ({
+      columnKey: `speaker_${i + 1}`,
+      value: `Speaker ${i + 1}`
+    }));
+
     const columns = [
       { columnKey: "id", value: "Id" },
       { columnKey: "time", value: "Time", sortable: true },
@@ -145,11 +155,9 @@ class RoomManifestReport extends React.Component {
       { columnKey: "capacity", value: "Capacity" },
       { columnKey: "speakerCount", value: "# Speakers" },
       { columnKey: "type", value: "Session Type" },
-      { columnKey: "speaker_1", value: "Speaker 1" },
-      { columnKey: "speaker_2", value: "Speaker 2" },
-      { columnKey: "speaker_3", value: "Speaker 3" },
+      { columnKey: "materials", value: "Presentation Materials" },
       { columnKey: "moderator", value: "Moderator" },
-      { columnKey: "materials", value: "Presentation Materials" }
+      ...speakerColumns
     ];
 
     const processedData = data.map((it) => {
@@ -212,10 +220,13 @@ class RoomManifestReport extends React.Component {
         speakerCount,
         type: it.type.type,
         materials: forExport ? materials.join(", ") : <div>{materials}</div>,
-        speaker_1: speakers[0] || "",
-        speaker_2: speakers[1] || "",
-        speaker_3: speakers[2] || "",
-        moderator: formatSpeaker(it.moderator, forExport)
+        moderator: formatSpeaker(it.moderator, forExport),
+        ...Object.fromEntries(
+          speakerColumns.map(({ columnKey }, i) => [
+            columnKey,
+            speakers?.[i] || ""
+          ])
+        )
       };
     });
 
