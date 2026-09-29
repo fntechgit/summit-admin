@@ -22,8 +22,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
 import MuiFormikDropdownCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/dropdown-checkbox";
@@ -63,17 +61,9 @@ const humanizeType = (type) => type.split(/(?=[A-Z])/).join(" ");
 const toIds = (collection = []) =>
   collection.map((item) => (item?.id !== undefined ? item.id : item));
 
-// Google Forms shows the answer control beside each option; these are decorative.
-const OptionGlyph = ({ type }) =>
-  type === "CheckBoxList" ? (
-    <CheckBoxOutlineBlankIcon sx={{ color: "text.disabled" }} />
-  ) : (
-    <RadioButtonUncheckedIcon sx={{ color: "text.disabled" }} />
-  );
-
 // Options persist one at a time through the values endpoints, exactly as the
 // legacy modal did — the only change is that blur replaces a Save button.
-const OptionRow = ({ option, type, onSave, onDelete }) => {
+const OptionRow = ({ option, onSave, onDelete }) => {
   const [label, setLabel] = useState(option.label || "");
   const [value, setValue] = useState(option.value || "");
 
@@ -90,7 +80,6 @@ const OptionRow = ({ option, type, onSave, onDelete }) => {
   return (
     <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.5 }}>
       <DragIndicatorIcon sx={{ color: "text.disabled" }} />
-      <OptionGlyph type={type} />
       <TextField
         variant="standard"
         fullWidth
@@ -131,7 +120,7 @@ const OptionRow = ({ option, type, onSave, onDelete }) => {
   );
 };
 
-const AddOptionRow = ({ type, onAdd }) => {
+const AddOptionRow = ({ onAdd }) => {
   const [label, setLabel] = useState("");
   const [value, setValue] = useState("");
 
@@ -148,7 +137,6 @@ const AddOptionRow = ({ type, onAdd }) => {
   return (
     <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.5 }}>
       <DragIndicatorIcon sx={{ visibility: "hidden" }} />
-      <OptionGlyph type={type} />
       <TextField
         variant="standard"
         fullWidth
@@ -369,16 +357,12 @@ const OrderExtraQuestionForm = ({
                       renderItem={(option) => (
                         <OptionRow
                           option={option}
-                          type={formik.values.type}
                           onSave={onValueSave}
                           onDelete={onValueDelete}
                         />
                       )}
                     />
-                    <AddOptionRow
-                      type={formik.values.type}
-                      onAdd={onValueSave}
-                    />
+                    <AddOptionRow onAdd={onValueSave} />
                   </>
                 )}
               </Box>
