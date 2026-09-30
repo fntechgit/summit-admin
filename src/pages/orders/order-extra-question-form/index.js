@@ -46,19 +46,6 @@ const OUTLINED_FIELD = {
   slotProps: { inputLabel: { shrink: true }, input: { notched: true } }
 };
 
-// Making the container a flex column lets `order` put tool bar underneath
-// The border flips with it so the seam stays between toolbar and text.
-const TOOLBAR_AT_BOTTOM = {
-  ".jodit-container": { display: "flex", flexDirection: "column" },
-  ".jodit-workplace": { order: 1 },
-  ".jodit-toolbar__box": {
-    order: 2,
-    top: "auto",
-    borderBottom: "none",
-    borderTop: "1px solid var(--jd-color-border)"
-  }
-};
-
 const JODIT_CONFIG = {
   buttons: [
     "bold",
@@ -321,7 +308,7 @@ const OrderExtraQuestionForm = ({
       >
         <CardContent>
           <form onSubmit={formik.handleSubmit}>
-            <Box sx={{ ...TOOLBAR_AT_BOTTOM, mb: 3 }}>
+            <Box sx={{ mb: 3 }}>
               <FormikTextEditor name="label" options={JODIT_CONFIG} />
             </Box>
             <Grid2 container spacing={3}>
