@@ -477,23 +477,31 @@ const EventCategoryForm = ({
         )}
 
         {entity.id > 0 && (
-          <Accordion sx={{ my: 2 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography>
-                <b>{T.translate("audit_log.title")}</b>
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <AuditLogs
-                filterId="event_category"
-                entityFilter={[
-                  `entity_id==${entity.id}`,
-                  "class_name==PresentationCategory"
-                ]}
-                columns={["created", "action_description", "user"]}
-              />
-            </AccordionDetails>
-          </Accordion>
+          <Box
+            onKeyDown={(ev) => {
+              if (ev.key === "Enter" && ev.target.tagName === "INPUT") {
+                ev.preventDefault();
+              }
+            }}
+          >
+            <Accordion sx={{ my: 2 }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography>
+                  <b>{T.translate("audit_log.title")}</b>
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <AuditLogs
+                  filterId="event_category"
+                  entityFilter={[
+                    `entity_id==${entity.id}`,
+                    "class_name==PresentationCategory"
+                  ]}
+                  columns={["created", "action_description", "user"]}
+                />
+              </AccordionDetails>
+            </Accordion>
+          </Box>
         )}
         <hr />
 
