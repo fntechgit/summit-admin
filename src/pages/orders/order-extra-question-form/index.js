@@ -472,14 +472,16 @@ const OrderExtraQuestionForm = ({
           </form>
 
           {showsSubRules && (
-            <Box sx={{ mt: 4 }}>
+            <Box>
+              <Divider sx={{ my: 3 }} />
+
               <Stack
                 direction="row"
                 alignItems="center"
                 justifyContent="space-between"
                 sx={{ mb: 2 }}
               >
-                <Typography variant="h6">
+                <Typography color="text.secondary" sx={{ fontWeight: 500 }}>
                   {T.translate("question_form.sub_questions_rules")}
                 </Typography>
                 <Button
