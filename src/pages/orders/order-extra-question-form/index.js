@@ -305,16 +305,16 @@ const OrderExtraQuestionForm = ({
 
   return (
     <FormikProvider value={formik}>
-      <form onSubmit={formik.handleSubmit}>
-        <Card
-          elevation={2}
-          sx={{
-            borderLeft: 4,
-            borderColor: "primary.main",
-            "& .MuiInputLabel-root": { fontSize: "1.25rem", fontWeight: 500 }
-          }}
-        >
-          <CardContent>
+      <Card
+        elevation={2}
+        sx={{
+          borderLeft: 4,
+          borderColor: "primary.main",
+          "& .MuiInputLabel-root": { fontSize: "1.25rem", fontWeight: 500 }
+        }}
+      >
+        <CardContent>
+          <form onSubmit={formik.handleSubmit}>
             <Box sx={{ ...TOOLBAR_AT_BOTTOM, mb: 3 }}>
               <FormikTextEditor name="label" options={JODIT_CONFIG} />
             </Box>
@@ -462,58 +462,58 @@ const OrderExtraQuestionForm = ({
                 />
               </Grid2>
             </Grid2>
-          </CardContent>
-        </Card>
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
-          <Button type="submit" variant="contained">
-            {T.translate("general.save")}
-          </Button>
-        </Box>
-      </form>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
+              <Button type="submit" variant="contained">
+                {T.translate("general.save")}
+              </Button>
+            </Box>
+          </form>
 
-      {showsSubRules && (
-        <Box sx={{ mt: 4 }}>
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-            sx={{ mb: 2 }}
-          >
-            <Typography variant="h6">
-              {T.translate("question_form.sub_questions_rules")}
-            </Typography>
-            <Button
-              variant="outlined"
-              onClick={() => history.push(`${subRulesUrl}/new`)}
-            >
-              {T.translate("question_form.sub_questions_rules_add")}
-            </Button>
-          </Stack>
+          {showsSubRules && (
+            <Box sx={{ mt: 4 }}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+                sx={{ mb: 2 }}
+              >
+                <Typography variant="h6">
+                  {T.translate("question_form.sub_questions_rules")}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={() => history.push(`${subRulesUrl}/new`)}
+                >
+                  {T.translate("question_form.sub_questions_rules_add")}
+                </Button>
+              </Stack>
 
-          {entity.sub_question_rules.length === 0 ? (
-            <Typography color="text.secondary">
-              {T.translate("question_form.no_sub_questions_rules")}
-            </Typography>
-          ) : (
-            <SortableTable
-              options={{
-                actions: {
-                  edit: {
-                    onClick: (ruleId) =>
-                      history.push(`${subRulesUrl}/${ruleId}`)
-                  },
-                  delete: { onClick: onRuleDelete }
-                }
-              }}
-              data={entity.sub_question_rules}
-              columns={subRuleColumns}
-              dropCallback={updateSubQuestionRuleOrder}
-              orderField="order"
-            />
+              {entity.sub_question_rules.length === 0 ? (
+                <Typography color="text.secondary">
+                  {T.translate("question_form.no_sub_questions_rules")}
+                </Typography>
+              ) : (
+                <SortableTable
+                  options={{
+                    actions: {
+                      edit: {
+                        onClick: (ruleId) =>
+                          history.push(`${subRulesUrl}/${ruleId}`)
+                      },
+                      delete: { onClick: onRuleDelete }
+                    }
+                  }}
+                  data={entity.sub_question_rules}
+                  columns={subRuleColumns}
+                  dropCallback={updateSubQuestionRuleOrder}
+                  orderField="order"
+                />
+              )}
+            </Box>
           )}
-        </Box>
-      )}
+        </CardContent>
+      </Card>
     </FormikProvider>
   );
 };
