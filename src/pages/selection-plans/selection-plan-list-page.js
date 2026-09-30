@@ -65,7 +65,8 @@ const SelectionPlanListPage = ({
             MAX_PER_PAGE
           )
         )
-        .then(() => setOpenSelectionPlanPopup(true));
+        .then(() => setOpenSelectionPlanPopup(true))
+        .catch(() => {});
     },
     [getMarketingSettingsBySelectionPlan, getSelectionPlan]
   );

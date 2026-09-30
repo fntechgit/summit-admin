@@ -184,11 +184,9 @@ export const getMarketingSettingsBySelectionPlan =
       `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
       snackbarErrorHandler,
       { order, orderDir, term }
-    )(params)(dispatch)
-      .finally(() => {
-        dispatch(stopLoading());
-      })
-      .catch(() => {});
+    )(params)(dispatch).finally(() => {
+      dispatch(stopLoading());
+    });
   };
 
 export const getMarketingSetting = (settingId) => (dispatch) => {
@@ -306,11 +304,9 @@ export const deleteSetting = (settingId) => async (dispatch) => {
     `${window.MARKETING_API_BASE_URL}/api/v1/config-values/${settingId}`,
     null,
     authErrorHandler
-  )(params)(dispatch)
-    .finally(() => {
-      dispatch(stopLoading());
-    })
-    .catch(() => {});
+  )(params)(dispatch).finally(() => {
+    dispatch(stopLoading());
+  });
 };
 
 // TODO: replace with snackbarErrorHandler once it handles 401s (re-login redirect) correctly.

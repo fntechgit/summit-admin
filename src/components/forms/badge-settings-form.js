@@ -124,9 +124,12 @@ class BadgeSettingsForm extends React.Component {
     newEntity[attr].file = "";
 
     if (newEntity[attr].id) {
-      this.props.onDeleteImage(newEntity[attr].id).then(() => {
-        newEntity[attr].id = 0;
-      });
+      this.props
+        .onDeleteImage(newEntity[attr].id)
+        .then(() => {
+          newEntity[attr].id = 0;
+        })
+        .catch(() => {});
     }
 
     this.setState({ entity: newEntity });

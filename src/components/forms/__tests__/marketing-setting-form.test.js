@@ -311,4 +311,28 @@ describe("MarketingSettingForm", () => {
     expect(onDeleteImage).toHaveBeenCalledWith(5);
     expect(readFormikValues().id).toBe(0);
   });
+
+  it("keeps the id and restores the preview when the delete fails", async () => {
+    const onDeleteImage = jest.fn(() => Promise.reject(new Error("500")));
+    render(
+      <Harness
+        entity={{
+          ...TEXT_ENTITY,
+          id: 5,
+          type: "FILE",
+          value: "",
+          file_preview: "https://cdn.example.com/existing.png"
+        }}
+        onDeleteImage={onDeleteImage}
+      />
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "remove-file" }));
+
+    expect(onDeleteImage).toHaveBeenCalledWith(5);
+    expect(readFormikValues().id).toBe(5);
+    expect(readFormikValues().file_preview).toBe(
+      "https://cdn.example.com/existing.png"
+    );
+  });
 });

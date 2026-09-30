@@ -173,7 +173,7 @@ const MarketingSettingListPage = ({
             onPerPageChange={handlePerPageChange}
             onSort={handleSort}
             onEdit={handleEdit}
-            onDelete={deleteSetting}
+            onDelete={(id) => deleteSetting(id).catch(() => {})}
             getName={(row) => row.key}
             deleteDialogBody={(name) =>
               `${T.translate("marketing.delete_setting_warning")} ${name}`

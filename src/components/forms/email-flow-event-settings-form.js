@@ -9,16 +9,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import { hasErrors, scrollToError } from "../../utils/methods";
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
-import HexColorInput from "../inputs/hex-color-input";
 import Swal from "sweetalert2";
 import { parse } from "address-rfc2822";
+import HexColorInput from "../inputs/hex-color-input";
+import { hasErrors, scrollToError } from "../../utils/methods";
 
 const EmailFlowEventSettingsForm = ({ id, entity, errors, ...props }) => {
   const [_errors, setErrors] = useState(errors);
@@ -68,7 +68,7 @@ const EmailFlowEventSettingsForm = ({ id, entity, errors, ...props }) => {
     entityTmp[id].file = "";
 
     if (entityTmp[id].id) {
-      props.onDeleteImage(entityTmp[id].id);
+      props.onDeleteImage(entityTmp[id].id).catch(() => {});
     }
 
     setEntity(entityTmp);
@@ -86,7 +86,7 @@ const EmailFlowEventSettingsForm = ({ id, entity, errors, ...props }) => {
         settingsToSave.EMAIL_TEMPLATE_GENERIC_FROM.value =
           addresses[0].format();
       } catch (e) {
-        errorsTmp.EMAIL_TEMPLATE_GENERIC_FROM = `email is not valid`;
+        errorsTmp.EMAIL_TEMPLATE_GENERIC_FROM = "email is not valid";
         result = false;
       }
     }
@@ -98,7 +98,7 @@ const EmailFlowEventSettingsForm = ({ id, entity, errors, ...props }) => {
         settingsToSave.EMAIL_TEMPLATE_SPEAKERS_FROM.value =
           addresses[0].format();
       } catch (e) {
-        errorsTmp.EMAIL_TEMPLATE_SPEAKERS_FROM = `email is not valid`;
+        errorsTmp.EMAIL_TEMPLATE_SPEAKERS_FROM = "email is not valid";
         result = false;
       }
     }
@@ -115,13 +115,12 @@ const EmailFlowEventSettingsForm = ({ id, entity, errors, ...props }) => {
 
     // save only the settings with the following conditions
     const settingsToSave = Object.fromEntries(
-      Object.entries(_entity).filter(([key, values]) => {
-        return (
+      Object.values(_entity).filter(
+        (values) =>
           (values.type === "TEXT" && (values.value !== "" || values.id)) ||
           (values.type === "HEX_COLOR" && values.value !== "") ||
           (values.type === "FILE" && values.file)
-        );
-      })
+      )
     );
 
     if (validate(settingsToSave)) {
