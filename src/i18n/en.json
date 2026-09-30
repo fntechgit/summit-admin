@@ -1623,7 +1623,7 @@
     "advanced": "Advanced",
     "add_option": "Add option",
     "no_restriction": "No restriction",
-    "mandatory_label": "Mandatory",
+    "mandatory_label": "Required",
     "printable_label": "Printable",
     "save_to_add_values": "Save the question to add options.",
     "question_type": "Question Type",
