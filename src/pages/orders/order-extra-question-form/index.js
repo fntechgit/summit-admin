@@ -45,6 +45,58 @@ const OUTLINED_FIELD = {
   slotProps: { inputLabel: { shrink: true }, input: { notched: true } }
 };
 
+// Making the container a flex column lets `order` put tool bar underneath
+// The border flips with it so the seam stays between toolbar and text.
+const TOOLBAR_AT_BOTTOM = {
+  ".jodit-container": { display: "flex", flexDirection: "column" },
+  ".jodit-workplace": { order: 1 },
+  ".jodit-toolbar__box": {
+    order: 2,
+    top: "auto",
+    borderBottom: "none",
+    borderTop: "1px solid var(--jd-color-border)"
+  }
+};
+
+const JODIT_CONFIG = {
+  buttons: [
+    "bold",
+    "italic",
+    "strikethrough",
+    "underline",
+    "|",
+    "source",
+    "|",
+    "font",
+    "fontsize",
+    "align",
+    "|",
+    "ul",
+    "ol",
+    "image",
+    "link",
+    "|",
+    "undo",
+    "redo",
+    "|",
+    "spellcheck",
+    "table"
+  ],
+
+  toolbar: true,
+  toolbarAdaptive: false,
+
+  statusbar: false,
+  showCharsCounter: false,
+  showWordsCounter: false,
+  showXPathInStatusbar: false,
+
+  height: "auto",
+  minHeight: 120,
+
+  placeholder: required(T.translate("question_form.visible_question"))
+};
+
 const PLACEHOLDER_TYPES = ["Text", "TextArea"];
 
 // "CheckBoxList" -> "Check Box List"
@@ -263,6 +315,9 @@ const OrderExtraQuestionForm = ({
           }}
         >
           <CardContent>
+            <Box sx={{ ...TOOLBAR_AT_BOTTOM, mb: 3 }}>
+              <FormikTextEditor name="label" options={JODIT_CONFIG} />
+            </Box>
             <Grid2 container spacing={3}>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <MuiFormikSelect
@@ -302,13 +357,6 @@ const OrderExtraQuestionForm = ({
                     </MenuItem>
                   ))}
                 </MuiFormikSelect>
-              </Grid2>
-
-              <Grid2 size={12}>
-                <Typography sx={{ mb: 1, fontWeight: 500 }}>
-                  {required(T.translate("question_form.visible_question"))}
-                </Typography>
-                <FormikTextEditor name="label" />
               </Grid2>
 
               {showsPlaceholder && (
@@ -374,9 +422,6 @@ const OrderExtraQuestionForm = ({
                   placeholder={T.translate("question_form.no_restriction")}
                   options={ticketTypeOptions}
                 />
-                <Typography variant="caption" color="text.secondary">
-                  {T.translate("question_form.allowed_ticket_types_info")}
-                </Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, md: 6 }}>
                 <MuiFormikDropdownCheckbox
@@ -387,11 +432,6 @@ const OrderExtraQuestionForm = ({
                   placeholder={T.translate("question_form.no_restriction")}
                   options={badgeFeatureOptions}
                 />
-                <Typography variant="caption" color="text.secondary">
-                  {T.translate(
-                    "question_form.allowed_badge_features_types_info"
-                  )}
-                </Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, md: 6 }}>
                 <FormControlLabel
