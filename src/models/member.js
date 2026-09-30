@@ -31,6 +31,17 @@ class Member {
     return false;
   }
 
+  // true when the reports access comes only from the room administrators group
+  hasRoomReportsAccessOnly() {
+    const roomGroup = "summit-room-administrators";
+    const codes = (this._member?.groups || []).map((g) => g.code);
+    if (!codes.includes(roomGroup)) return false;
+
+    return !codes.some(
+      (code) => code !== roomGroup && access.reports.includes(code)
+    );
+  }
+
   canEditSummit() {
     for (const i in this._member.groups) {
       if (access["summit-edit"].includes(this._member.groups[i].code))
