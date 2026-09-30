@@ -13,6 +13,10 @@ const reorder = (list, startIndex, endIndex, updateOrderKey) => {
   }));
 };
 
+// react-beautiful-dnd animates a dropped item to its resting place
+const getDropStyle = (style, snapshot) =>
+  snapshot.isDropAnimating ? { ...style, transitionDuration: "0.001s" } : style;
+
 const DragAndDropList = ({
   items,
   onReorder,
@@ -53,6 +57,10 @@ const DragAndDropList = ({
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
+                    style={getDropStyle(
+                      provided.draggableProps.style,
+                      snapshot
+                    )}
                     sx={{
                       background: snapshot.isDragging ? "#f0f0f0" : "inherit",
                       transition: "background 0.2s ease"
