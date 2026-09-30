@@ -24,6 +24,7 @@ import SimpleLinkList from "openstack-uicore-foundation/lib/components/simple-li
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
+import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
 import Swal from "sweetalert2";
 import {
   isEmpty,
@@ -31,6 +32,7 @@ import {
   shallowEqual,
   hasErrors
 } from "../../utils/methods";
+import AuditLogs from "../audit-logs";
 
 class EventCategoryGroupForm extends React.Component {
   constructor(props) {
@@ -38,7 +40,8 @@ class EventCategoryGroupForm extends React.Component {
 
     this.state = {
       entity: { ...props.entity },
-      errors: props.errors
+      errors: props.errors,
+      showAuditLog: false
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -47,6 +50,7 @@ class EventCategoryGroupForm extends React.Component {
     this.handleTrackUnLink = this.handleTrackUnLink.bind(this);
     this.handleAllowedGroupLink = this.handleAllowedGroupLink.bind(this);
     this.handleAllowedGroupUnLink = this.handleAllowedGroupUnLink.bind(this);
+    this.toggleAuditLog = this.toggleAuditLog.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -118,6 +122,11 @@ class EventCategoryGroupForm extends React.Component {
     this.props.onAllowedGroupUnLink(entity.id, valueId);
   }
 
+  toggleAuditLog(ev) {
+    ev.preventDefault();
+    this.setState((prevState) => ({ showAuditLog: !prevState.showAuditLog }));
+  }
+
   shouldShowField(flag) {
     const { entity } = this.state;
     if (!entity.class_name) return false;
@@ -129,7 +138,7 @@ class EventCategoryGroupForm extends React.Component {
   }
 
   render() {
-    const { entity, errors } = this.state;
+    const { entity, errors, showAuditLog } = this.state;
     const { currentSummit, allClasses } = this.props;
     const selectedTrackIds = entity?.tracks?.map((t) => t.id) || [];
 
@@ -348,6 +357,23 @@ class EventCategoryGroupForm extends React.Component {
             columns={allowedGroupsColumns}
             options={allowedGroupsOptions}
           />
+        )}
+
+        {entity.id !== 0 && (
+          <Panel
+            show={showAuditLog}
+            title={T.translate("audit_log.title")}
+            handleClick={this.toggleAuditLog}
+          >
+            <AuditLogs
+              filterId="category_group"
+              entityFilter={[
+                `entity_id==${entity.id}`,
+                `class_name==${entity.class_name}`
+              ]}
+              columns={["created", "action_description", "user"]}
+            />
+          </Panel>
         )}
 
         <div className="row">
