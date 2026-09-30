@@ -32,6 +32,24 @@ export const RESET_EMAIL_FLOW_EVENT_FORM = "RESET_EMAIL_FLOW_EVENT_FORM";
 export const UPDATE_EMAIL_FLOW_EVENT = "UPDATE_EMAIL_FLOW_EVENT";
 export const EMAIL_FLOW_EVENT_UPDATED = "EMAIL_FLOW_EVENT_UPDATED";
 
+const sequenced = () => {
+  let seq = 0;
+  return (dispatch) => {
+    seq += 1;
+    const mySeq = seq;
+    return {
+      isCurrent: () => mySeq === seq,
+      guardedDispatch: (action) => {
+        if (mySeq === seq) dispatch(action);
+      }
+    };
+  };
+};
+
+// One sequence per thunk that commits fetched data to the store.
+const emailFlowEventsSeq = sequenced();
+const emailFlowEventSeq = sequenced();
+
 export const getEmailFlowEvents =
   (
     term = "",
@@ -42,10 +60,15 @@ export const getEmailFlowEvents =
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
+    // getRequest only aborts an identical URL, so calls with different
+    // page/sort/term race; the guard drops every dispatch from a superseded one.
+    const { isCurrent, guardedDispatch } = emailFlowEventsSeq(dispatch);
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
 
-    dispatch(startLoading());
+    if (!isCurrent()) return Promise.resolve();
+
+    guardedDispatch(startLoading());
     const filter = [];
 
     const params = {
@@ -78,19 +101,20 @@ export const getEmailFlowEvents =
       // TODO: replace with snackbarErrorHandler once it handles 401's (re-login redirect)
       authErrorHandler,
       { order, orderDir, term, perPage }
-    )(params)(dispatch)
-      .finally(() => {
-        dispatch(stopLoading());
-      })
-      .catch(() => {});
+    )(params)(guardedDispatch)
+      .catch(() => {})
+      .finally(() => guardedDispatch(stopLoading()));
   };
 
 export const getEmailFlowEvent = (eventId) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
+  const { isCurrent, guardedDispatch } = emailFlowEventSeq(dispatch);
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
 
-  dispatch(startLoading());
+  if (!isCurrent()) return Promise.resolve();
+
+  guardedDispatch(startLoading());
 
   const params = {
     access_token: accessToken,
@@ -103,11 +127,9 @@ export const getEmailFlowEvent = (eventId) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/email-flows-events/${eventId}`,
     // TODO: replace with snackbarErrorHandler once it handles 401's (re-login redirect)
     authErrorHandler
-  )(params)(dispatch)
-    .finally(() => {
-      dispatch(stopLoading());
-    })
-    .catch(() => {});
+  )(params)(guardedDispatch)
+    .catch(() => {})
+    .finally(() => guardedDispatch(stopLoading()));
 };
 
 export const resetEmailFlowEventForm = () => (dispatch) => {
@@ -116,14 +138,15 @@ export const resetEmailFlowEventForm = () => (dispatch) => {
 
 export const saveEmailFlowEvent = (entity) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
+
+  dispatch(startLoading());
+
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
 
   const params = {
     access_token: accessToken
   };
-
-  dispatch(startLoading());
 
   return putRequest(
     createAction(UPDATE_EMAIL_FLOW_EVENT),
