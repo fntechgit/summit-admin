@@ -115,6 +115,11 @@ const EditMarketingSettingPage = ({
   useEffect(() => {
     const errorFields = Object.keys(errors || {});
     formik.setErrors(errorFields.length > 0 ? errors : {});
+    if (errorFields.length > 0) {
+      formik.setTouched(
+        errorFields.reduce((acc, field) => ({ ...acc, [field]: true }), {})
+      );
+    }
   }, [errors]);
 
   const title = entity.id

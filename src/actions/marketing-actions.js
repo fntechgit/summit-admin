@@ -218,7 +218,11 @@ export const resetSettingForm = () => (dispatch) => {
 export const saveMarketingSetting =
   (entity, file = null) =>
   async (dispatch, getState) => {
-    if (entity.type === MARKETING_SETTING_TYPE_FILE && !file)
+    if (
+      entity.type === MARKETING_SETTING_TYPE_FILE &&
+      !file &&
+      !entity.file_preview
+    )
       return Promise.resolve();
 
     // Helper function to check if the entity is a hex color setting
@@ -343,7 +347,7 @@ const normalizeEntity = (entity, summitId) => {
   delete normalizedEntity.id;
   delete normalizedEntity.created;
   delete normalizedEntity.modified;
-  if (entity.type !== MARKETING_SETTING_TYPE_FILE) {
+  if (entity.type !== MARKETING_SETTING_TYPE_FILE || !entity.file) {
     delete normalizedEntity.file;
   }
 

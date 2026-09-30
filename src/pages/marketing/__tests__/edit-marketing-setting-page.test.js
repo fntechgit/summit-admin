@@ -56,7 +56,7 @@ jest.mock("../../../components/forms/marketing-setting-form", () => {
   return {
     __esModule: true,
     default: function MockMarketingSettingForm() {
-      const { values, errors, setFieldValue } = useFormikContext();
+      const { values, errors, touched, setFieldValue } = useFormikContext();
       return (
         <div>
           <input
@@ -74,7 +74,9 @@ jest.mock("../../../components/forms/marketing-setting-form", () => {
             value={values.value}
             onChange={(ev) => setFieldValue("value", ev.target.value)}
           />
-          {errors.key && <p data-testid="key-error">{errors.key}</p>}
+          {touched.key && errors.key && (
+            <p data-testid="key-error">{errors.key}</p>
+          )}
         </div>
       );
     }
@@ -297,5 +299,24 @@ describe("EditMarketingSettingPage", () => {
     expect(screen.getByTestId("key-error")).toHaveTextContent(
       "marketing.key_already_exists"
     );
+  });
+
+  it("does not mark fields touched when there are no server errors", () => {
+    renderWithRedux(
+      <EditMarketingSettingPage
+        history={mockHistory}
+        match={{ params: { setting_id: "5" }, url: "/x" }}
+      />,
+      {
+        initialState: buildInitialState({
+          id: 5,
+          key: "existing",
+          type: "TEXT",
+          value: "hello"
+        })
+      }
+    );
+
+    expect(screen.queryByTestId("key-error")).not.toBeInTheDocument();
   });
 });
