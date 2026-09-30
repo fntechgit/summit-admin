@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
@@ -64,34 +64,29 @@ const DEFAULT_STATE = {
 const emailFlowEventSettingsReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
-    case LOGOUT_USER:
-      {
-        // we need this in case the token expired while editing the form
-        if (payload.hasOwnProperty("persistStore")) {
-          return state;
-        } else {
-          return {
-            ...state,
-            email_marketing_settings: { ...DEFAULT_EMAIL_MARKETING_SETTINGS },
-            errors: {}
-          };
-        }
+    case LOGOUT_USER: {
+      // we need this in case the token expired while editing the form
+      if (payload.hasOwnProperty("persistStore")) {
+        return state;
       }
-      break;
-    case SET_CURRENT_SUMMIT:
-      {
-        return {
-          ...state,
-          email_marketing_settings: { ...DEFAULT_EMAIL_MARKETING_SETTINGS },
-          errors: {}
-        };
-      }
-      break;
+      return {
+        ...state,
+        email_marketing_settings: { ...DEFAULT_EMAIL_MARKETING_SETTINGS },
+        errors: {}
+      };
+    }
+    case SET_CURRENT_SUMMIT: {
+      return {
+        ...state,
+        email_marketing_settings: { ...DEFAULT_EMAIL_MARKETING_SETTINGS },
+        errors: {}
+      };
+    }
     case RECEIVE_EMAIL_SETTINGS: {
-      let reducerSettings = { ...DEFAULT_EMAIL_MARKETING_SETTINGS };
+      const reducerSettings = { ...DEFAULT_EMAIL_MARKETING_SETTINGS };
       if (payload.response.data.length > 0) {
         payload.response.data.forEach((apiValue) => {
-          const key = apiValue.key;
+          const { key } = apiValue;
           if (reducerSettings[key]) {
             reducerSettings[key] = apiValue;
           }
@@ -104,7 +99,7 @@ const emailFlowEventSettingsReducer = (state = DEFAULT_STATE, action) => {
       const { response: entity } = payload;
       const newMarketingSettings = {};
       Object.keys(state.email_marketing_settings).forEach((key) => {
-        let setting = state.email_marketing_settings[key];
+        const setting = state.email_marketing_settings[key];
         if (key === entity.key)
           newMarketingSettings[key] =
             entity.type === "FILE"
@@ -120,7 +115,7 @@ const emailFlowEventSettingsReducer = (state = DEFAULT_STATE, action) => {
     case SETTING_DELETED: {
       const newMarketingSettings = {};
       Object.keys(state.email_marketing_settings).forEach((key) => {
-        let setting = state.email_marketing_settings[key];
+        const setting = state.email_marketing_settings[key];
         if (setting.id === payload.settingId) {
           newMarketingSettings[key] =
             setting.type === "FILE"
@@ -133,11 +128,9 @@ const emailFlowEventSettingsReducer = (state = DEFAULT_STATE, action) => {
         email_marketing_settings: { ...newMarketingSettings }
       };
     }
-    case VALIDATE:
-      {
-        return { ...state, errors: payload.errors };
-      }
-      break;
+    case VALIDATE: {
+      return { ...state, errors: payload.errors };
+    }
     default:
       return state;
   }

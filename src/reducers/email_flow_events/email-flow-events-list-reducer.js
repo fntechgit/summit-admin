@@ -38,8 +38,8 @@ const emailFlowEventsListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_EMAIL_FLOW_EVENTS: {
-      const { order, orderDir, term } = payload;
-      return { ...state, order, orderDir, term };
+      const { order, orderDir, term, perPage } = payload;
+      return { ...state, order, orderDir, term, perPage };
     }
     case RECEIVE_EMAIL_FLOW_EVENTS: {
       const {
