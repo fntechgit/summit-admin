@@ -409,24 +409,6 @@ const OrderExtraQuestionForm = ({
 
             <Grid2 container spacing={3}>
               <Grid2 size={{ xs: 12, md: 6 }}>
-                <MuiFormikDropdownCheckbox
-                  name="allowed_ticket_types"
-                  label={T.translate("question_form.allowed_ticket_types")}
-                  placeholder={T.translate("question_form.no_restriction")}
-                  options={ticketTypeOptions}
-                />
-              </Grid2>
-              <Grid2 size={{ xs: 12, md: 6 }}>
-                <MuiFormikDropdownCheckbox
-                  name="allowed_badge_features_types"
-                  label={T.translate(
-                    "question_form.allowed_badge_features_types"
-                  )}
-                  placeholder={T.translate("question_form.no_restriction")}
-                  options={badgeFeatureOptions}
-                />
-              </Grid2>
-              <Grid2 size={{ xs: 12, md: 6 }}>
                 <FormControlLabel
                   labelPlacement="start"
                   sx={{ ml: 0 }}
@@ -452,6 +434,24 @@ const OrderExtraQuestionForm = ({
                       onChange={formik.handleChange}
                     />
                   }
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 12, md: 6 }}>
+                <MuiFormikDropdownCheckbox
+                  name="allowed_ticket_types"
+                  label={T.translate("question_form.allowed_ticket_types")}
+                  placeholder={T.translate("question_form.no_restriction")}
+                  options={ticketTypeOptions}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 12, md: 6 }}>
+                <MuiFormikDropdownCheckbox
+                  name="allowed_badge_features_types"
+                  label={T.translate(
+                    "question_form.allowed_badge_features_types"
+                  )}
+                  placeholder={T.translate("question_form.no_restriction")}
+                  options={badgeFeatureOptions}
                 />
               </Grid2>
             </Grid2>
