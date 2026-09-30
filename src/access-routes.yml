@@ -193,6 +193,7 @@ reports:
   - administrators
   - summit-front-end-administrators
   - summit-registration-administrators
+  - summit-room-administrators
 
 purchase-orders:
   - super-admins
