@@ -163,6 +163,34 @@ describe("EditMarketingSettingPage", () => {
     expect(screen.getByTestId("key-input")).toHaveValue("entity-b");
   });
 
+  it("resyncs formik values when the same setting is re-fetched", () => {
+    const middlewares = [thunk];
+    const mockStore = configureStore(middlewares);
+    const match = { params: { setting_id: "5" }, url: "/x" };
+
+    const staleStore = mockStore(
+      buildInitialState({ id: 5, key: "STALE_KEY", type: "TEXT" })
+    );
+    const { rerender } = render(
+      <Provider store={staleStore}>
+        <EditMarketingSettingPage history={mockHistory} match={match} />
+      </Provider>
+    );
+
+    expect(screen.getByTestId("key-input")).toHaveValue("STALE_KEY");
+
+    const freshStore = mockStore(
+      buildInitialState({ id: 5, key: "SERVER_KEY", type: "TEXT" })
+    );
+    rerender(
+      <Provider store={freshStore}>
+        <EditMarketingSettingPage history={mockHistory} match={match} />
+      </Provider>
+    );
+
+    expect(screen.getByTestId("key-input")).toHaveValue("SERVER_KEY");
+  });
+
   it("saves an update, shows the update message, and navigates to the list", async () => {
     saveMarketingSetting.mockReturnValue(() => Promise.resolve());
     renderWithRedux(
