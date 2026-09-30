@@ -300,6 +300,8 @@ export const deleteOrderExtraQuestion =
 
 export const updateOrderExtraQuestionOrder =
   (questions, questionId) => async (dispatch, getState) => {
+    dispatch(createAction(ORDER_EXTRA_QUESTION_ORDER_UPDATED)(questions));
+
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;

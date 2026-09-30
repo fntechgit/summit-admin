@@ -103,16 +103,33 @@ const OrderExtraQuestionListPage = ({
           onReorder={handleReorder}
           droppableId="order-extra-questions"
           renderItem={(question) => (
-            <Card elevation={1} sx={{ mb: 1.5 }}>
+            <Card
+              elevation={1}
+              sx={{
+                mb: 1.5,
+                "&:hover .drag-handle": { visibility: "visible" }
+              }}
+            >
+              <Box sx={{ display: "flex", justifyContent: "center", pt: 0.5 }}>
+                <DragIndicatorIcon
+                  className="drag-handle"
+                  sx={{
+                    color: "text.disabled",
+                    visibility: "hidden",
+                    transform: "rotate(90deg)",
+                    fontSize: 18
+                  }}
+                />
+              </Box>
               <CardContent
                 sx={{
                   display: "flex",
                   alignItems: "center",
                   gap: 2,
+                  pt: 0,
                   "&:last-child": { pb: 2 }
                 }}
               >
-                <DragIndicatorIcon sx={{ color: "text.disabled" }} />
                 <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                   <Box
                     component="div"
