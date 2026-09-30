@@ -29,7 +29,6 @@ import {
   updateOrderExtraQuestionValueOrder
 } from "../../actions/order-actions";
 import { getBadgeFeatures } from "../../actions/badge-actions";
-import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditOrderExtraQuestionPage extends React.Component {
   constructor(props) {
@@ -105,7 +104,6 @@ class EditOrderExtraQuestionPage extends React.Component {
         <h3>
           {title}{" "}
           {T.translate("edit_order_extra_question.order_extra_question")}
-          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (
