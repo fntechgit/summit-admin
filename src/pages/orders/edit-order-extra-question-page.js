@@ -93,11 +93,33 @@ class EditOrderExtraQuestionPage extends React.Component {
       entity,
       allClasses,
       updateOrderExtraQuestionsSubQuestionsRuleOrder,
-      updateOrderExtraQuestionValueOrder
+      updateOrderExtraQuestionValueOrder,
+      inline
     } = this.props;
     const title = entity.id
       ? T.translate("general.edit")
       : T.translate("general.add");
+
+    const form = currentSummit && (
+      <OrderExtraQuestionForm
+        inline={inline}
+        currentSummit={currentSummit}
+        entity={entity}
+        allClasses={allClasses}
+        onSubmit={this.props.saveOrderExtraQuestion}
+        onValueSave={this.handleValueSave}
+        onValueDelete={this.handleValueDelete}
+        updateQuestionValueOrder={updateOrderExtraQuestionValueOrder}
+        onRuleDelete={this.handleRuleDelete}
+        updateSubQuestionRuleOrder={
+          updateOrderExtraQuestionsSubQuestionsRuleOrder
+        }
+      />
+    );
+
+    // Rendered under a row on the list page: the page chrome belongs to the
+    // list, not to each expanded card.
+    if (inline) return form || null;
 
     return (
       <div className="container">
@@ -106,21 +128,7 @@ class EditOrderExtraQuestionPage extends React.Component {
           {T.translate("edit_order_extra_question.order_extra_question")}
         </h3>
         <hr />
-        {currentSummit && (
-          <OrderExtraQuestionForm
-            currentSummit={currentSummit}
-            entity={entity}
-            allClasses={allClasses}
-            onSubmit={this.props.saveOrderExtraQuestion}
-            onValueSave={this.handleValueSave}
-            onValueDelete={this.handleValueDelete}
-            updateQuestionValueOrder={updateOrderExtraQuestionValueOrder}
-            onRuleDelete={this.handleRuleDelete}
-            updateSubQuestionRuleOrder={
-              updateOrderExtraQuestionsSubQuestionsRuleOrder
-            }
-          />
-        )}
+        {form}
       </div>
     );
   }
