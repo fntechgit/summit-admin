@@ -107,8 +107,10 @@ const EditMarketingSettingPage = ({
   });
 
   useEffect(() => {
-    formik.resetForm({ values: buildValues(entity) });
-  }, [entity.id]);
+    if (!formik.isSubmitting) {
+      formik.resetForm({ values: buildValues(entity) });
+    }
+  }, [entity, formik.isSubmitting]);
 
   useEffect(() => {
     const errorFields = Object.keys(errors || {});
