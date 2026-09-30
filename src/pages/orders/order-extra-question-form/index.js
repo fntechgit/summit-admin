@@ -98,6 +98,8 @@ const JODIT_CONFIG = {
   placeholder: required(T.translate("question_form.visible_question"))
 };
 
+const CARD_ELEVATION = 2;
+
 const PLACEHOLDER_TYPES = ["Text", "TextArea"];
 
 // "CheckBoxList" -> "Check Box List"
@@ -223,7 +225,8 @@ const OrderExtraQuestionForm = ({
   onValueDelete,
   updateQuestionValueOrder,
   onRuleDelete,
-  updateSubQuestionRuleOrder
+  updateSubQuestionRuleOrder,
+  inline = false
 }) => {
   const formik = useFormik({
     initialValues: {
@@ -307,8 +310,10 @@ const OrderExtraQuestionForm = ({
   return (
     <FormikProvider value={formik}>
       <Card
-        elevation={2}
+        elevation={inline ? 0 : CARD_ELEVATION}
+        square={inline}
         sx={{
+          border: "none",
           borderLeft: 4,
           borderColor: "primary.main",
           "& .MuiInputLabel-root": { fontSize: "1.25rem", fontWeight: 500 }

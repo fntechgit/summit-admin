@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -19,22 +19,25 @@ import {
   Button,
   Card,
   CardContent,
+  Collapse,
+  Divider,
   IconButton,
   Tooltip,
   Typography
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import DragAndDropList from "../../components/mui/dnd-list";
 import showConfirmDialog from "../../components/mui/showConfirmDialog";
 import { getSummitById } from "../../actions/summit-actions";
 import {
+  getOrderExtraQuestion,
   getOrderExtraQuestions,
   deleteOrderExtraQuestion,
   updateOrderExtraQuestionOrder
 } from "../../actions/order-actions";
+import EditOrderExtraQuestionPage from "./edit-order-extra-question-page";
 import { INT_BASE } from "../../utils/constants";
 
 // "CheckBoxList" -> "Check Box List"
@@ -53,8 +56,18 @@ const OrderExtraQuestionListPage = ({
 
   const questionsUrl = `/app/summits/${currentSummit.id}/order-extra-questions`;
 
-  const handleEdit = (questionId) =>
-    history.push(`${questionsUrl}/${questionId}`);
+  // One card open at a time: the form reads currentOrderExtraQuestionState,
+  // which holds a single entity, so a second expansion would fight the first.
+  const [expandedId, setExpandedId] = useState(null);
+
+  const handleToggle = (questionId) => {
+    if (expandedId === questionId) {
+      setExpandedId(null);
+      return;
+    }
+    props.getOrderExtraQuestion(questionId);
+    setExpandedId(questionId);
+  };
 
   const handleAdd = () => history.push(`${questionsUrl}/new`);
 
@@ -122,11 +135,13 @@ const OrderExtraQuestionListPage = ({
                 />
               </Box>
               <CardContent
+                onClick={() => handleToggle(question.id)}
                 sx={{
                   display: "flex",
                   alignItems: "center",
                   gap: 2,
                   pt: 0,
+                  cursor: "pointer",
                   "&:last-child": { pb: 2 }
                 }}
               >
@@ -140,23 +155,23 @@ const OrderExtraQuestionListPage = ({
                     {humanizeType(question.type)} &middot; {question.name}
                   </Typography>
                 </Box>
-                <Tooltip title={T.translate("general.edit")}>
-                  <IconButton
-                    aria-label={T.translate("general.edit")}
-                    onClick={() => handleEdit(question.id)}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                </Tooltip>
                 <Tooltip title={T.translate("general.delete")}>
                   <IconButton
                     aria-label={T.translate("general.delete")}
-                    onClick={() => handleDelete(question)}
+                    onClick={(ev) => {
+                      ev.stopPropagation();
+                      handleDelete(question);
+                    }}
                   >
                     <DeleteIcon />
                   </IconButton>
                 </Tooltip>
               </CardContent>
+              {/* unmountOnExit so only the open card pays for a Jodit editor */}
+              <Collapse in={expandedId === question.id} unmountOnExit>
+                <Divider />
+                <EditOrderExtraQuestionPage inline />
+              </Collapse>
             </Card>
           )}
         />
@@ -175,6 +190,7 @@ const mapStateToProps = ({
 
 export default connect(mapStateToProps, {
   getSummitById,
+  getOrderExtraQuestion,
   getOrderExtraQuestions,
   updateOrderExtraQuestionOrder,
   deleteOrderExtraQuestion
