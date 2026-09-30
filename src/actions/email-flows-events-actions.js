@@ -77,7 +77,7 @@ export const getEmailFlowEvents =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/email-flows-events`,
       // TODO: replace with snackbarErrorHandler once it handles 401's (re-login redirect)
       authErrorHandler,
-      { order, orderDir, term }
+      { order, orderDir, term, perPage }
     )(params)(dispatch)
       .finally(() => {
         dispatch(stopLoading());

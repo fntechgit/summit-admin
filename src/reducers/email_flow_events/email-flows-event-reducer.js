@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
@@ -39,50 +39,41 @@ const DEFAULT_STATE = {
 const emailFlowEventReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
-    case LOGOUT_USER:
-      {
-        // we need this in case the token expired while editing the form
-        if (payload.hasOwnProperty("persistStore")) {
-          return state;
-        } else {
-          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-        }
-      }
-      break;
-    case SET_CURRENT_SUMMIT:
-    case RESET_EMAIL_FLOW_EVENT_FORM:
-      {
-        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-      }
-      break;
-    case UPDATE_EMAIL_FLOW_EVENT:
-      {
-        return { ...state, entity: { ...payload }, errors: {} };
-      }
-      break;
-    case RECEIVE_EMAIL_FLOW_EVENT:
-      {
-        let entity = { ...payload.response };
-
-        for (var key in entity) {
-          if (entity.hasOwnProperty(key)) {
-            entity[key] = entity[key] == null ? "" : entity[key];
-          }
-        }
-
-        return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
-      }
-      break;
-    case EMAIL_FLOW_EVENT_UPDATED:
-      {
+    case LOGOUT_USER: {
+      // we need this in case the token expired while editing the form
+      if (payload.hasOwnProperty("persistStore")) {
         return state;
       }
-      break;
-    case VALIDATE:
-      {
-        return { ...state, errors: payload.errors };
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    }
+    case SET_CURRENT_SUMMIT:
+    case RESET_EMAIL_FLOW_EVENT_FORM: {
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    }
+    case UPDATE_EMAIL_FLOW_EVENT: {
+      return {
+        ...state,
+        entity: { ...state.entity, ...payload },
+        errors: {}
+      };
+    }
+    case RECEIVE_EMAIL_FLOW_EVENT: {
+      const entity = { ...payload.response };
+
+      for (const key in entity) {
+        if (entity.hasOwnProperty(key)) {
+          entity[key] = entity[key] == null ? "" : entity[key];
+        }
       }
-      break;
+
+      return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+    }
+    case EMAIL_FLOW_EVENT_UPDATED: {
+      return state;
+    }
+    case VALIDATE: {
+      return { ...state, errors: payload.errors };
+    }
     default:
       return state;
   }
