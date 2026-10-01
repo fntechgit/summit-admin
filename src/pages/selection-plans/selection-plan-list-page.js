@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Box from "@mui/material/Box";
@@ -21,55 +21,23 @@ import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import GridToolbar from "../../components/mui/grid-toolbar";
 import {
   deleteSelectionPlan,
-  getSelectionPlan,
-  getSelectionPlans,
-  resetSelectionPlanForm,
-  saveSelectionPlan,
-  saveSelectionPlanSettings
+  getSelectionPlans
 } from "../../actions/selection-plan-actions";
-import { getMarketingSettingsBySelectionPlan } from "../../actions/marketing-actions";
-import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../utils/constants";
-import SelectionPlanPopup from "./selection-plan-popup";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
 const SelectionPlanListPage = ({
   currentSummit,
   history,
   selectionPlans,
-  currentSelectionPlan,
   totalSelectionPlans,
   perPage,
   term,
   order,
   orderDir,
   currentPage,
-  getSelectionPlan,
   getSelectionPlans,
-  resetSelectionPlanForm,
-  getMarketingSettingsBySelectionPlan,
-  deleteSelectionPlan,
-  saveSelectionPlan,
-  saveSelectionPlanSettings
+  deleteSelectionPlan
 }) => {
-  const [openSelectionPlanPopup, setOpenSelectionPlanPopup] = useState(false);
-
-  const openEditModal = useCallback(
-    (selectionPlanId) => {
-      if (!selectionPlanId) return;
-
-      getSelectionPlan(selectionPlanId)
-        .then(() =>
-          getMarketingSettingsBySelectionPlan(
-            selectionPlanId,
-            null,
-            DEFAULT_CURRENT_PAGE,
-            MAX_PER_PAGE
-          )
-        )
-        .then(() => setOpenSelectionPlanPopup(true));
-    },
-    [getMarketingSettingsBySelectionPlan, getSelectionPlan]
-  );
-
   useEffect(() => {
     if (currentSummit?.id) {
       getSelectionPlans(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
@@ -81,7 +49,9 @@ const SelectionPlanListPage = ({
 
   const handleEdit = (selectionPlan) => {
     if (!selectionPlan?.id) return;
-    openEditModal(selectionPlan.id);
+    history.push(
+      `/app/summits/${currentSummit.id}/selection-plans/${selectionPlan.id}`
+    );
   };
 
   const handleDelete = (id) => {
@@ -93,25 +63,8 @@ const SelectionPlanListPage = ({
   };
 
   const handleNew = () => {
-    resetSelectionPlanForm();
-    setOpenSelectionPlanPopup(true);
+    history.push(`/app/summits/${currentSummit.id}/selection-plans/new`);
   };
-
-  const handleClosePopup = () => {
-    resetSelectionPlanForm();
-    setOpenSelectionPlanPopup(false);
-  };
-
-  const handleSave = (entity) =>
-    saveSelectionPlan(entity)
-      .then((savedEntity) => {
-        if (!savedEntity?.id) return null;
-        return saveSelectionPlanSettings(
-          entity.marketing_settings ?? {},
-          savedEntity.id
-        );
-      })
-      .then(() => refreshSelectionPlans());
 
   const handleSort = (key, dir) => {
     getSelectionPlans(term, currentPage, perPage, key, dir);
@@ -209,35 +162,19 @@ const SelectionPlanListPage = ({
           />
         </div>
       )}
-
-      {openSelectionPlanPopup && (
-        <SelectionPlanPopup
-          isEditing={!!currentSelectionPlan?.id}
-          onClose={handleClosePopup}
-          onSave={handleSave}
-          history={history}
-        />
-      )}
     </div>
   );
 };
 
 const mapStateToProps = ({
   currentSummitState,
-  currentSelectionPlanListState,
-  currentSelectionPlanState
+  currentSelectionPlanListState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
-  ...currentSelectionPlanListState,
-  currentSelectionPlan: currentSelectionPlanState.entity
+  ...currentSelectionPlanListState
 });
 
 export default connect(mapStateToProps, {
   getSelectionPlans,
-  getSelectionPlan,
-  resetSelectionPlanForm,
-  getMarketingSettingsBySelectionPlan,
-  deleteSelectionPlan,
-  saveSelectionPlan,
-  saveSelectionPlanSettings
+  deleteSelectionPlan
 })(SelectionPlanListPage);

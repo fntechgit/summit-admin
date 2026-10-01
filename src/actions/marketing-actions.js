@@ -139,6 +139,29 @@ export const getMarketingSettingsForPrintApp =
     });
   };
 
+// Sequence-guard (see sequenced()): SelectionPlanIdLayout dispatches a fresh
+// getMarketingSettingsBySelectionPlan(id) on every route param change, and
+// concurrent calls for different plan ids never abort each other (the
+// selection_plan_id lives in the query, and uicore's getRequest only aborts
+// an identical URL+query) - a stale response landing after a newer one would
+// merge the wrong plan's settings into whatever entity is current at that
+// moment. guardedDispatch drops the REQUEST/RECEIVE/loading dispatches from
+// a superseded call.
+const sequenced = () => {
+  let seq = 0;
+  return (dispatch) => {
+    seq += 1;
+    const mySeq = seq;
+    return {
+      isCurrent: () => mySeq === seq,
+      guardedDispatch: (action) => {
+        if (mySeq === seq) dispatch(action);
+      }
+    };
+  };
+};
+const selectionPlanSettingsSeq = sequenced();
+
 export const getMarketingSettingsBySelectionPlan =
   (
     selectionPlanId,
@@ -151,8 +174,9 @@ export const getMarketingSettingsBySelectionPlan =
   (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
+    const { guardedDispatch } = selectionPlanSettingsSeq(dispatch);
 
-    dispatch(startLoading());
+    guardedDispatch(startLoading());
 
     const params = {
       page,
@@ -176,8 +200,8 @@ export const getMarketingSettingsBySelectionPlan =
       `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
       authErrorHandler,
       { order, orderDir, term }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
+    )(params)(guardedDispatch).then(() => {
+      guardedDispatch(stopLoading());
     });
   };
 
