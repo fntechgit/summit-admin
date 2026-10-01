@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
@@ -26,79 +26,56 @@ import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/da
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
 import Swal from "sweetalert2";
-import {
-  isEmpty,
-  scrollToError,
-  shallowEqual,
-  hasErrors
-} from "../../utils/methods";
+import { scrollToError, hasErrors } from "../../utils/methods";
 import AuditLogs from "../audit-logs";
 
-class EventCategoryGroupForm extends React.Component {
-  constructor(props) {
-    super(props);
+const EventCategoryGroupForm = ({
+  currentSummit,
+  allClasses,
+  entity: initialEntity,
+  errors: initialErrors,
+  onSubmit,
+  onTrackLink,
+  onTrackUnLink,
+  onAllowedGroupLink,
+  onAllowedGroupUnLink
+}) => {
+  const [entity, setEntity] = useState({ ...initialEntity });
+  const [errors, setErrors] = useState(initialErrors);
+  const [showAuditLog, setShowAuditLog] = useState(false);
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors,
-      showAuditLog: false
-    };
+  useEffect(() => {
+    setEntity({ ...initialEntity });
+    setErrors({});
+  }, [initialEntity]);
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleTrackLink = this.handleTrackLink.bind(this);
-    this.handleTrackUnLink = this.handleTrackUnLink.bind(this);
-    this.handleAllowedGroupLink = this.handleAllowedGroupLink.bind(this);
-    this.handleAllowedGroupUnLink = this.handleAllowedGroupUnLink.bind(this);
-    this.toggleAuditLog = this.toggleAuditLog.bind(this);
-  }
+  useEffect(() => {
+    setErrors({ ...initialErrors });
+    scrollToError(initialErrors);
+  }, [initialErrors]);
 
-  componentDidUpdate(prevProps) {
-    const state = {};
-    scrollToError(this.props.errors);
-
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
-    }
-
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
-    }
-
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
-    }
-  }
-
-  handleChange(ev) {
-    const entity = { ...this.state.entity };
-    const errors = { ...this.state.errors };
-    let { value, id } = ev.target;
+  const handleChange = (ev) => {
+    let { value } = ev.target;
+    const { id } = ev.target;
 
     if (ev.target.type === "datetime") {
       value = value.unix();
     }
 
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ entity, errors });
-  }
+    setErrors((prev) => ({ ...prev, [id]: "" }));
+    setEntity((prev) => ({ ...prev, [id]: value }));
+  };
 
-  handleSubmit(ev) {
+  const handleSubmit = (ev) => {
     ev.preventDefault();
-    this.props.onSubmit(this.state.entity);
-  }
+    onSubmit(entity);
+  };
 
-  handleTrackLink(value) {
-    const { entity } = this.state;
-    this.props.onTrackLink(entity.id, value);
-  }
+  const handleTrackLink = (value) => {
+    onTrackLink(entity.id, value);
+  };
 
-  handleTrackUnLink(valueId) {
-    const { entity } = this.state;
-    const { onTrackUnLink } = this.props;
-
+  const handleTrackUnLink = (valueId) => {
     Swal.fire({
       title: T.translate("general.are_you_sure"),
       text: T.translate("edit_event_category_group.unlink_track_warning"),
@@ -110,134 +87,194 @@ class EventCategoryGroupForm extends React.Component {
         onTrackUnLink(entity.id, valueId);
       }
     });
-  }
+  };
 
-  handleAllowedGroupLink(value) {
-    const { entity } = this.state;
-    this.props.onAllowedGroupLink(entity.id, value);
-  }
+  const handleAllowedGroupLink = (value) => {
+    onAllowedGroupLink(entity.id, value);
+  };
 
-  handleAllowedGroupUnLink(valueId) {
-    const { entity } = this.state;
-    this.props.onAllowedGroupUnLink(entity.id, valueId);
-  }
+  const handleAllowedGroupUnLink = (valueId) => {
+    onAllowedGroupUnLink(entity.id, valueId);
+  };
 
-  toggleAuditLog(ev) {
+  const toggleAuditLog = (ev) => {
     ev.preventDefault();
-    this.setState((prevState) => ({ showAuditLog: !prevState.showAuditLog }));
-  }
+    setShowAuditLog((prev) => !prev);
+  };
 
-  shouldShowField(flag) {
-    const { entity } = this.state;
+  const shouldShowField = (flag) => {
     if (!entity.class_name) return false;
-    const class_name = this.props.allClasses.find(
+    const class_name = allClasses.find(
       (c) => c.class_name === entity.class_name
     );
 
     return class_name[flag];
-  }
+  };
 
-  render() {
-    const { entity, errors, showAuditLog } = this.state;
-    const { currentSummit, allClasses } = this.props;
-    const selectedTrackIds = entity?.tracks?.map((t) => t.id) || [];
+  const selectedTrackIds = entity?.tracks?.map((t) => t.id) || [];
 
-    const tracksColumns = [
-      { columnKey: "name", value: T.translate("edit_event_category.name") },
-      { columnKey: "code", value: T.translate("edit_event_category.code") }
-    ];
+  const tracksColumns = [
+    { columnKey: "name", value: T.translate("edit_event_category.name") },
+    { columnKey: "code", value: T.translate("edit_event_category.code") }
+  ];
 
-    const tracksOptions = {
-      title: T.translate("edit_event_category_group.tracks"),
-      valueKey: "name",
-      labelKey: "name",
-      actions: {
-        search: (input, callback) => {
-          queryTracks(currentSummit.id, input, callback, selectedTrackIds);
-        },
-        delete: { onClick: this.handleTrackUnLink },
-        add: { onClick: this.handleTrackLink }
-      }
-    };
+  const tracksOptions = {
+    title: T.translate("edit_event_category_group.tracks"),
+    valueKey: "name",
+    labelKey: "name",
+    actions: {
+      search: (input, callback) => {
+        queryTracks(currentSummit.id, input, callback, selectedTrackIds);
+      },
+      delete: { onClick: handleTrackUnLink },
+      add: { onClick: handleTrackLink }
+    }
+  };
 
-    const allowedGroupsColumns = [
-      { columnKey: "title", value: T.translate("edit_event_category.name") },
-      {
-        columnKey: "description",
-        value: T.translate("edit_event_category.description")
-      }
-    ];
+  const allowedGroupsColumns = [
+    { columnKey: "title", value: T.translate("edit_event_category.name") },
+    {
+      columnKey: "description",
+      value: T.translate("edit_event_category.description")
+    }
+  ];
 
-    const allowedGroupsOptions = {
-      title: T.translate("edit_event_category_group.allowed_groups"),
-      valueKey: "id",
-      labelKey: "title",
-      actions: {
-        search: queryGroups,
-        delete: { onClick: this.handleAllowedGroupUnLink },
-        add: { onClick: this.handleAllowedGroupLink }
-      }
-    };
+  const allowedGroupsOptions = {
+    title: T.translate("edit_event_category_group.allowed_groups"),
+    valueKey: "id",
+    labelKey: "title",
+    actions: {
+      search: queryGroups,
+      delete: { onClick: handleAllowedGroupUnLink },
+      add: { onClick: handleAllowedGroupLink }
+    }
+  };
 
-    const class_name_ddl = allClasses.map((i) => ({
-      label: i.class_name,
-      value: i.class_name
-    }));
+  const class_name_ddl = allClasses.map((i) => ({
+    label: i.class_name,
+    value: i.class_name
+  }));
 
-    return (
-      <form className="event-type-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("edit_event_category_group.class")} *</label>
-            <Dropdown
-              id="class_name"
-              disabled={entity.id !== 0}
-              value={entity.class_name}
-              onChange={this.handleChange}
-              placeholder={T.translate(
-                "edit_event_category_group.placeholders.select_class"
-              )}
-              options={class_name_ddl}
-              error={hasErrors("class_name", errors)}
-            />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_event_category_group.name")} *</label>
-            <Input
-              id="name"
-              value={entity.name}
-              onChange={this.handleChange}
-              className="form-control"
-              error={hasErrors("name", errors)}
-            />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_event_category_group.color")} *</label>
-            <Input
-              id="color"
-              type="color"
-              value={entity.color}
-              onChange={this.handleChange}
-              className="form-control"
-            />
-          </div>
+  return (
+    <form className="event-type-form">
+      <input type="hidden" id="id" value={entity.id} />
+      <div className="row form-group">
+        <div className="col-md-4">
+          <label> {T.translate("edit_event_category_group.class")} *</label>
+          <Dropdown
+            id="class_name"
+            disabled={entity.id !== 0}
+            value={entity.class_name}
+            onChange={handleChange}
+            placeholder={T.translate(
+              "edit_event_category_group.placeholders.select_class"
+            )}
+            options={class_name_ddl}
+            error={hasErrors("class_name", errors)}
+          />
         </div>
+        <div className="col-md-4">
+          <label> {T.translate("edit_event_category_group.name")} *</label>
+          <Input
+            id="name"
+            value={entity.name}
+            onChange={handleChange}
+            className="form-control"
+            error={hasErrors("name", errors)}
+          />
+        </div>
+        <div className="col-md-4">
+          <label> {T.translate("edit_event_category_group.color")} *</label>
+          <Input
+            id="color"
+            type="color"
+            value={entity.color}
+            onChange={handleChange}
+            className="form-control"
+          />
+        </div>
+      </div>
+      <div className="row form-group">
+        <div className="col-md-4">
+          <label>
+            {" "}
+            {T.translate(
+              "edit_event_category_group.begin_attendee_voting_period_date"
+            )}
+          </label>
+          <DateTimePicker
+            id="begin_attendee_voting_period_date"
+            onChange={handleChange}
+            format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
+            timezone={currentSummit.time_zone_id}
+            value={epochToMomentTimeZone(
+              entity.begin_attendee_voting_period_date,
+              currentSummit.time_zone_id
+            )}
+          />
+        </div>
+        <div className="col-md-4">
+          <label>
+            {" "}
+            {T.translate(
+              "edit_event_category_group.end_attendee_voting_period_date"
+            )}
+          </label>
+          <DateTimePicker
+            id="end_attendee_voting_period_date"
+            onChange={handleChange}
+            format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
+            timezone={currentSummit.time_zone_id}
+            value={epochToMomentTimeZone(
+              entity.end_attendee_voting_period_date,
+              currentSummit.time_zone_id
+            )}
+          />
+        </div>
+        <div className="col-md-4">
+          <label>
+            {" "}
+            {T.translate("edit_event_category_group.max_attendee_votes")}
+          </label>
+          <Input
+            id="max_attendee_votes"
+            type="number"
+            value={entity.max_attendee_votes}
+            onChange={handleChange}
+            className="form-control"
+          />
+        </div>
+      </div>
+      {shouldShowField("submission_begin_date") && (
         <div className="row form-group">
           <div className="col-md-4">
             <label>
               {" "}
-              {T.translate(
-                "edit_event_category_group.begin_attendee_voting_period_date"
-              )}
+              {T.translate("edit_event_category_group.submission_begin_date")}
             </label>
             <DateTimePicker
-              id="begin_attendee_voting_period_date"
-              onChange={this.handleChange}
+              id="submission_begin_date"
+              onChange={handleChange}
               format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
               timezone={currentSummit.time_zone_id}
               value={epochToMomentTimeZone(
-                entity.begin_attendee_voting_period_date,
+                entity.submission_begin_date,
+                currentSummit.time_zone_id
+              )}
+            />
+          </div>
+          <div className="col-md-4">
+            <label>
+              {" "}
+              {T.translate("edit_event_category_group.submission_end_date")}
+            </label>
+            <DateTimePicker
+              id="submission_end_date"
+              onChange={handleChange}
+              format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
+              timezone={currentSummit.time_zone_id}
+              value={epochToMomentTimeZone(
+                entity.submission_end_date,
                 currentSummit.time_zone_id
               )}
             />
@@ -246,149 +283,82 @@ class EventCategoryGroupForm extends React.Component {
             <label>
               {" "}
               {T.translate(
-                "edit_event_category_group.end_attendee_voting_period_date"
+                "edit_event_category_group.max_submission_allowed_per_user"
               )}
-            </label>
-            <DateTimePicker
-              id="end_attendee_voting_period_date"
-              onChange={this.handleChange}
-              format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-              timezone={currentSummit.time_zone_id}
-              value={epochToMomentTimeZone(
-                entity.end_attendee_voting_period_date,
-                currentSummit.time_zone_id
-              )}
-            />
-          </div>
-          <div className="col-md-4">
-            <label>
-              {" "}
-              {T.translate("edit_event_category_group.max_attendee_votes")}
             </label>
             <Input
-              id="max_attendee_votes"
+              id="max_submission_allowed_per_user"
               type="number"
-              value={entity.max_attendee_votes}
-              onChange={this.handleChange}
+              value={entity.max_submission_allowed_per_user}
+              onChange={handleChange}
               className="form-control"
             />
           </div>
         </div>
-        {this.shouldShowField("submission_begin_date") && (
-          <div className="row form-group">
-            <div className="col-md-4">
-              <label>
-                {" "}
-                {T.translate("edit_event_category_group.submission_begin_date")}
-              </label>
-              <DateTimePicker
-                id="submission_begin_date"
-                onChange={this.handleChange}
-                format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                timezone={currentSummit.time_zone_id}
-                value={epochToMomentTimeZone(
-                  entity.submission_begin_date,
-                  currentSummit.time_zone_id
-                )}
-              />
-            </div>
-            <div className="col-md-4">
-              <label>
-                {" "}
-                {T.translate("edit_event_category_group.submission_end_date")}
-              </label>
-              <DateTimePicker
-                id="submission_end_date"
-                onChange={this.handleChange}
-                format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                timezone={currentSummit.time_zone_id}
-                value={epochToMomentTimeZone(
-                  entity.submission_end_date,
-                  currentSummit.time_zone_id
-                )}
-              />
-            </div>
-            <div className="col-md-4">
-              <label>
-                {" "}
-                {T.translate(
-                  "edit_event_category_group.max_submission_allowed_per_user"
-                )}
-              </label>
-              <Input
-                id="max_submission_allowed_per_user"
-                type="number"
-                value={entity.max_submission_allowed_per_user}
-                onChange={this.handleChange}
-                className="form-control"
-              />
-            </div>
-          </div>
-        )}
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label>
-              {" "}
-              {T.translate("edit_event_category_group.description")}{" "}
-            </label>
-            <TextEditorV3
-              id="description"
-              value={entity.description}
-              onChange={this.handleChange}
-              error={hasErrors("description", errors)}
-              license={process.env.JODIT_LICENSE_KEY}
-            />
-          </div>
-        </div>
-
-        <hr />
-        {entity.id !== 0 && (
-          <SimpleLinkList
-            values={entity.tracks}
-            columns={tracksColumns}
-            options={tracksOptions}
+      )}
+      <div className="row form-group">
+        <div className="col-md-12">
+          <label>
+            {" "}
+            {T.translate("edit_event_category_group.description")}{" "}
+          </label>
+          <TextEditorV3
+            id="description"
+            value={entity.description}
+            onChange={handleChange}
+            error={hasErrors("description", errors)}
+            license={process.env.JODIT_LICENSE_KEY}
           />
-        )}
-        <br />
-        <br />
-        {entity.id !== 0 && this.shouldShowField("allowed_groups") && (
-          <SimpleLinkList
-            values={entity.allowed_groups}
-            columns={allowedGroupsColumns}
-            options={allowedGroupsOptions}
-          />
-        )}
-
-        {entity.id !== 0 && (
-          <Panel
-            show={showAuditLog}
-            title={T.translate("audit_log.title")}
-            handleClick={this.toggleAuditLog}
-          >
-            <AuditLogs
-              filterId="category_group"
-              entityFilter={[
-                `entity_id==${entity.id}`,
-                `class_name==${entity.class_name}`
-              ]}
-              columns={["created", "action_description", "user"]}
-            />
-          </Panel>
-        )}
-
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
         </div>
-      </form>
-    );
-  }
-}
+      </div>
+
+      <hr />
+      {entity.id !== 0 && (
+        <SimpleLinkList
+          values={entity.tracks}
+          columns={tracksColumns}
+          options={tracksOptions}
+        />
+      )}
+      <br />
+      <br />
+      {entity.id !== 0 && shouldShowField("allowed_groups") && (
+        <SimpleLinkList
+          values={entity.allowed_groups}
+          columns={allowedGroupsColumns}
+          options={allowedGroupsOptions}
+        />
+      )}
+
+      {entity.id !== 0 && (
+        <Panel
+          show={showAuditLog}
+          title={T.translate("audit_log.title")}
+          handleClick={toggleAuditLog}
+        >
+          <AuditLogs
+            filterId="category_group"
+            entityFilter={[
+              `entity_id==${entity.id}`,
+              `class_name==${entity.class_name}`
+            ]}
+            columns={["created", "action_description", "user"]}
+          />
+        </Panel>
+      )}
+
+      <div className="row">
+        <div className="col-md-12 submit-buttons">
+          <input
+            type="button"
+            onClick={handleSubmit}
+            className="btn btn-primary pull-right"
+            value={T.translate("general.save")}
+          />
+        </div>
+      </div>
+    </form>
+  );
+};
 
 export default EventCategoryGroupForm;
