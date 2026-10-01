@@ -169,6 +169,25 @@ describe("TopNav", () => {
       expect(screen.getByText("crumbs")).toBeInTheDocument();
     });
 
+    test("isLoggedUser={false} suppresses actions, sub bar and drawer", () => {
+      renderNav({
+        isLoggedUser: false,
+        actions: <button type="button">sign out</button>,
+        subBar: <span>crumbs</span>
+      });
+
+      expect(
+        screen.queryByRole("button", { name: "Toggle navigation menu" })
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText(DRAWER_TEXT)).not.toBeInTheDocument();
+      expect(screen.queryByText("crumbs")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "sign out" })
+      ).not.toBeInTheDocument();
+      // The title still renders; it is the only thing left on the bar.
+      expect(screen.getByText("Admin")).toBeInTheDocument();
+    });
+
     test("omits the sub bar when none is supplied", () => {
       renderNav();
       expect(screen.queryByText("crumbs")).not.toBeInTheDocument();

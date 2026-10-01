@@ -209,35 +209,25 @@ class App extends React.PureComponent {
                 title={T.translate("landing.os_summit_admin")}
                 contextLabel={currentSummit?.id > 0 ? currentSummit.name : null}
                 menuButtonLabel={T.translate("menu.toggle_navigation")}
+                isLoggedUser={isLoggedUser}
                 actions={
-                  isLoggedUser && (
-                    <AuthButton
-                      isLoggedUser={isLoggedUser}
-                      picture={profile_pic}
-                      doLogin={this.onClickLogin}
-                      initLogOut={initLogOut}
-                    />
-                  )
+                  <AuthButton
+                    isLoggedUser={isLoggedUser}
+                    picture={profile_pic}
+                    doLogin={this.onClickLogin}
+                    initLogOut={initLogOut}
+                  />
                 }
                 subBar={
-                  isLoggedUser && (
-                    <Breadcrumbs
-                      className="breadcrumbs-wrapper"
-                      separator="/"
-                    />
-                  )
+                  <Breadcrumbs className="breadcrumbs-wrapper" separator="/" />
                 }
-                renderDrawer={
-                  isLoggedUser
-                    ? ({ closeDrawer }) => (
-                        <Menu
-                          currentSummit={currentSummit}
-                          member={member}
-                          onNavigate={closeDrawer}
-                        />
-                      )
-                    : null
-                }
+                renderDrawer={({ closeDrawer }) => (
+                  <Menu
+                    currentSummit={currentSummit}
+                    member={member}
+                    onNavigate={closeDrawer}
+                  />
+                )}
               />
               {!isLoggedUser && (
                 <AuthButton

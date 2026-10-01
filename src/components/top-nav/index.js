@@ -50,6 +50,7 @@ const TopNav = ({
   actions,
   subBar,
   renderDrawer,
+  isLoggedUser,
   menuButtonLabel,
   sx
 }) => {
@@ -109,7 +110,13 @@ const TopNav = ({
 
   // With nothing on either side of it, the title reads as a banner rather than
   // as the left-hand item of a bar.
-  const titleCentered = !renderDrawer && !actions;
+  // Signed out, the bar carries nothing but the title, so the three
+  // authenticated regions are suppressed in one place.
+  const showActions = isLoggedUser ? actions : null;
+  const showSubBar = isLoggedUser ? subBar : null;
+  const showDrawer = isLoggedUser ? renderDrawer : null;
+
+  const titleCentered = !showDrawer && !showActions;
 
   return (
     <>
@@ -134,7 +141,7 @@ const TopNav = ({
             }
           }}
         >
-          {renderDrawer && (
+          {showDrawer && (
             <IconButton
               edge="start"
               aria-label={menuButtonLabel}
@@ -168,11 +175,11 @@ const TopNav = ({
               </Box>
             )}
           </Typography>
-          {actions}
+          {showActions}
         </Toolbar>
       </AppBar>
       {/* Outside the AppBar so it scrolls away instead of staying pinned. */}
-      {subBar && (
+      {showSubBar && (
         <Toolbar
           variant="dense"
           sx={{
@@ -183,10 +190,10 @@ const TopNav = ({
             overflowX: "auto"
           }}
         >
-          {subBar}
+          {showSubBar}
         </Toolbar>
       )}
-      {renderDrawer && (
+      {showDrawer && (
         <Drawer
           anchor="left"
           open={open}
@@ -210,7 +217,7 @@ const TopNav = ({
             role="presentation"
             sx={{ width: DRAWER_WIDTH, overflowY: "auto", pb: 3 }}
           >
-            {renderDrawer({ closeDrawer })}
+            {showDrawer({ closeDrawer })}
           </Box>
         </Drawer>
       )}
@@ -232,6 +239,8 @@ TopNav.propTypes = {
    * neither the burger button nor the drawer is rendered.
    */
   renderDrawer: PropTypes.func,
+  /** When false, the actions, sub bar and drawer are all suppressed. */
+  isLoggedUser: PropTypes.bool,
   /** Accessible name for the burger button; supply it with `renderDrawer`. */
   menuButtonLabel: PropTypes.string,
   /** Style overrides merged into the app bar. */
@@ -244,6 +253,7 @@ TopNav.defaultProps = {
   actions: null,
   subBar: null,
   renderDrawer: null,
+  isLoggedUser: true,
   menuButtonLabel: null,
   sx: null
 };
