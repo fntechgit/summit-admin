@@ -80,9 +80,6 @@ const EditEmailTemplatePage = ({
     : T.translate("general.add");
   const breadcrumb = entity.id ? entity.identifier : T.translate("general.new");
 
-  const handleJsonUpdate = (parsedJSON) =>
-    updateTemplateJsonData(parsedJSON).then(() => setShowJsonDialog(false));
-
   if (loadFailed) {
     return <Redirect to="/app/emails/templates" />;
   }
@@ -117,7 +114,7 @@ const EditEmailTemplatePage = ({
             <EmailTemplateJsonDialog
               jsonData={json_data}
               renderErrors={render_errors}
-              onUpdate={handleJsonUpdate}
+              onUpdate={updateTemplateJsonData}
               onClose={() => setShowJsonDialog(false)}
             />
           )}

@@ -11,9 +11,10 @@
  * limitations under the License.
  * */
 
-import React, { useState } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
+import { useFormik } from "formik";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -21,6 +22,7 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
+import InputLabel from "@mui/material/InputLabel";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeMirror from "@uiw/react-codemirror";
 import { json } from "@codemirror/lang-json";
@@ -33,25 +35,27 @@ const EmailTemplateJsonDialog = ({
   onUpdate,
   onClose
 }) => {
-  const [jsonPreview, setJsonPreview] = useState(
-    JSON.stringify(jsonData, null, DECIMAL_DIGITS)
-  );
-  const [invalidJson, setInvalidJson] = useState(false);
+  const formik = useFormik({
+    initialValues: { json: JSON.stringify(jsonData, null, DECIMAL_DIGITS) },
+    // validate on submit only, then live while the user fixes it
+    validateOnChange: false,
+    validateOnBlur: false,
+    validate: ({ json: value }) => {
+      try {
+        JSON.parse(value);
+        return {};
+      } catch {
+        return { json: T.translate("emails.invalid_json") };
+      }
+    },
+    onSubmit: ({ json: value }) =>
+      onUpdate(JSON.parse(value))
+        .then(() => onClose())
+        .catch(() => {})
+  });
 
   const handleJsonChange = (value) => {
-    setInvalidJson(false);
-    setJsonPreview(value);
-  };
-
-  const handleUpdate = () => {
-    let parsedJSON;
-    try {
-      parsedJSON = JSON.parse(jsonPreview);
-    } catch {
-      setInvalidJson(true);
-      return;
-    }
-    onUpdate(parsedJSON);
+    formik.setFieldValue("json", value, formik.submitCount > 0);
   };
 
   return (
@@ -78,12 +82,10 @@ const EmailTemplateJsonDialog = ({
         {renderErrors?.length > 0 && (
           <Box sx={{ color: "error.main", mb: 2 }}>{renderErrors}</Box>
         )}
-        {invalidJson && (
-          <Box sx={{ color: "error.main", mb: 2 }}>
-            {T.translate("emails.invalid_json")}
-          </Box>
+        {formik.errors.json && (
+          <Box sx={{ color: "error.main", mb: 2 }}>{formik.errors.json}</Box>
         )}
-        <label>
+        <InputLabel htmlFor="json_preview">
           {`${T.translate("emails.json")} `}
           <a
             href="https://jsonformatter.curiousconcept.com/"
@@ -92,10 +94,10 @@ const EmailTemplateJsonDialog = ({
           >
             {T.translate("emails.format")}
           </a>
-        </label>
+        </InputLabel>
         <CodeMirror
           id="json_preview"
-          value={jsonPreview}
+          value={formik.values.json}
           onChange={(value) => handleJsonChange(value)}
           theme={sublimeInit({
             settings: {
@@ -107,7 +109,11 @@ const EmailTemplateJsonDialog = ({
         />
       </DialogContent>
       <DialogActions>
-        <Button variant="contained" onClick={handleUpdate}>
+        <Button
+          variant="contained"
+          onClick={formik.handleSubmit}
+          disabled={formik.isSubmitting}
+        >
           {T.translate("emails.update")}
         </Button>
       </DialogActions>

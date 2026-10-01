@@ -14,12 +14,14 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import T from "i18n-react/dist/i18n-react";
 import debounce from "lodash/debounce";
+import { useFormik, FormikProvider } from "formik";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Grid2 from "@mui/material/Grid2";
-import TextField from "@mui/material/TextField";
+import InputLabel from "@mui/material/InputLabel";
 import CircularProgress from "@mui/material/CircularProgress";
 import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import CodeMirror from "@uiw/react-codemirror";
 import { sublimeInit } from "@uiw/codemirror-theme-sublime";
@@ -27,8 +29,9 @@ import { html } from "@codemirror/lang-html";
 import mjml2html from "mjml-browser";
 import showConfirmDialog from "../mui/showConfirmDialog";
 import EmailTemplateInput from "../inputs/email-template-input";
-import { scrollToError, shallowEqual, hasErrors } from "../../utils/methods";
+import useScrollToError from "../../hooks/useScrollToError";
 import {
+  DEBOUNCE_WAIT,
   EMAIL_TEMPLATE_TYPE_HTML,
   EMAIL_TEMPLATE_TYPE_MJML
 } from "../../utils/constants";
@@ -36,7 +39,7 @@ import {
 const TemplateModeToggle = ({ mjmlEditor, onDisplayMjml, onDisplayHtml }) =>
   mjmlEditor ? (
     <>
-      <label>
+      <InputLabel htmlFor="mjml_content">
         {`${T.translate("emails.mjml_content")} ${T.translate(
           "emails.using"
         )} `}
@@ -47,7 +50,7 @@ const TemplateModeToggle = ({ mjmlEditor, onDisplayMjml, onDisplayHtml }) =>
         >
           {T.translate("emails.mjml_format")}
         </a>
-      </label>
+      </InputLabel>
       <br />
       <Button variant="contained" onClick={onDisplayHtml}>
         {T.translate("emails.display_html")}
@@ -55,7 +58,7 @@ const TemplateModeToggle = ({ mjmlEditor, onDisplayMjml, onDisplayHtml }) =>
     </>
   ) : (
     <>
-      <label>
+      <InputLabel htmlFor="html_content">
         {`${T.translate("emails.html_content")} ${T.translate("emails.in")} `}
         <a
           target="_blank"
@@ -65,7 +68,7 @@ const TemplateModeToggle = ({ mjmlEditor, onDisplayMjml, onDisplayHtml }) =>
           {T.translate("emails.jinja_format")}
         </a>
         {" *"}
-      </label>
+      </InputLabel>
       <br />
       <Button variant="contained" onClick={onDisplayMjml}>
         {T.translate("emails.display_mjml")}
@@ -81,8 +84,9 @@ const VersionHistoryPicker = ({
 }) => (
   <Grid2 container spacing={1} sx={{ width: "66.66%" }}>
     <Grid2 size={11}>
-      <label>{T.translate("emails.previous_template")}</label>
-      <br />
+      <InputLabel htmlFor="history_version">
+        {T.translate("emails.previous_template")}
+      </InputLabel>
       <MuiDropdown
         id="history_version"
         size="small"
@@ -183,6 +187,10 @@ const default_mjml_content = `
 </mjml>
 `;
 
+// HTML-only templates open in the HTML editor, everything else in MJML
+const getInitialMjmlMode = (entity) =>
+  entity.mjml_content.length > 0 ? true : !entity.html_content;
+
 const EmailTemplateForm = ({
   entity,
   errors,
@@ -195,62 +203,62 @@ const EmailTemplateForm = ({
   templateJsonData,
   renderEmailTemplate
 }) => {
-  const [stateEntity, setStateEntity] = useState({ ...entity });
-  const [stateErrors, setStateErrors] = useState(errors);
   const [historyVersion, setHistoryVersion] = useState("");
   const [currentVersionExternalLink, setCurrentVersionExternalLink] =
     useState(null);
-  const [mjmlEditor, setMjmlEditor] = useState(null);
+  const [mjmlEditor, setMjmlEditor] = useState(() =>
+    getInitialMjmlMode(entity)
+  );
   const [codeOnly, setCodeOnly] = useState(false);
   const [previewOnly, setPreviewOnly] = useState(false);
   const [mobileView, setMobileView] = useState(false);
   const [scale, setScale] = useState(1);
   const [singleTab, setSingleTab] = useState(false);
-  const [templateLoaded, setTemplateLoaded] = useState(false);
   const [previewLoaded, setPreviewLoaded] = useState(false);
   const [mjmlWarning, setMjmlWarning] = useState(false);
   const [mjmlRenderError, setMjmlRenderError] = useState(null);
-  const [isSaving, setIsSaving] = useState(false);
 
   const previewRef = useRef(null);
-  // undefined so the very first run below is always treated as a new entity
-  const loadedEntityIdRef = useRef();
 
-  const style = mobileView
-    ? { width: "320px", height: "960px", transform: `scale(${scale})` }
-    : { width: "800px", height: "960px", transform: `scale(${scale})` };
+  // the server is the only validator (412 -> errors prop), so formik's own
+  // validation passes are turned off -- they would only wipe server errors
+  const formik = useFormik({
+    initialValues:
+      entity.id === 0
+        ? { ...entity, mjml_content: default_mjml_content }
+        : { ...entity },
+    enableReinitialize: true,
+    validateOnChange: false,
+    validateOnBlur: false,
+    onSubmit: (values) => Promise.resolve(onSubmit(values)).catch(() => {})
+  });
+  const { values } = formik;
+
+  useScrollToError(formik);
 
   useEffect(() => {
-    scrollToError(errors);
-
-    if (!shallowEqual(stateErrors, errors)) {
-      setStateErrors({ ...errors });
-    }
+    formik.setErrors(errors);
+    formik.setTouched(
+      Object.keys(errors).reduce((acc, key) => ({ ...acc, [key]: true }), {}),
+      false
+    );
   }, [errors]);
 
-  // kept apart from the errors effect: a failed save only updates errors,
-  // and resyncing from the store there would discard the unsaved edits
+  // a different template (or the id assigned right after a create) resets
+  // the editor mode; enableReinitialize already reseeds the values
   useEffect(() => {
-    const isNewEntity = loadedEntityIdRef.current !== entity.id;
-    loadedEntityIdRef.current = entity.id;
+    setMjmlEditor(getInitialMjmlMode(entity));
+  }, [entity.id]);
 
-    if (isNewEntity) {
-      // a fresh load, a route change to a different template, or the id the
-      // server assigns right after a successful create -- (re)seed local state
-      setStateEntity(
-        entity.id === 0
-          ? { ...entity, mjml_content: default_mjml_content }
-          : { ...entity }
-      );
-      setStateErrors({});
-      setMjmlEditor(
-        entity.mjml_content.length > 0 ? true : !entity.html_content
-      );
-      setTemplateLoaded(true);
-    } else if (!shallowEqual(stateEntity, entity)) {
-      setStateEntity({ ...entity });
-    }
-  }, [entity]);
+  const setFieldValue = (field, value) => {
+    formik.setFieldValue(field, value, false);
+    formik.setFieldError(field, undefined);
+  };
+
+  const handleFieldChange = (ev) => {
+    formik.handleChange(ev);
+    formik.setFieldError(ev.target.name, undefined);
+  };
 
   useEffect(() => {
     if (singleTab) {
@@ -261,7 +269,6 @@ const EmailTemplateForm = ({
     }
   }, [singleTab]);
 
-  const DEBOUNCE_MS = 500;
   const debouncedRenderTemplate = useRef(
     debounce(async (content, json_data, isMjml) => {
       renderEmailTemplate(json_data, content, isMjml)
@@ -270,28 +277,38 @@ const EmailTemplateForm = ({
           if (!previewLoaded) setPreviewLoaded(true);
         })
         .catch(() => {});
-    }, DEBOUNCE_MS)
+    }, DEBOUNCE_WAIT)
   ).current;
 
   // MJML mode sends raw mjml_content so the API runs Jinja -> official MJML CLI
   // (same pipeline as production); HTML mode sends html_content unchanged.
   // mjmlEditor is in the deps so a button-only mode switch re-fires this with
   // the other field's content.
-  const editorContent = mjmlEditor
-    ? stateEntity.mjml_content
-    : stateEntity.html_content;
+  const editorContent = mjmlEditor ? values.mjml_content : values.html_content;
 
   useEffect(() => {
-    if (templateLoaded)
-      debouncedRenderTemplate(editorContent, templateJsonData, mjmlEditor);
-  }, [editorContent, mjmlEditor, entity, templateJsonData, templateLoaded]);
+    debouncedRenderTemplate(editorContent, templateJsonData, mjmlEditor);
+  }, [editorContent, mjmlEditor, entity, templateJsonData]);
 
-  // pure compile step -- useMemo avoids re-running mjml2html on every render,
-  // the effect below only commits the already-computed result into state
+  // only compile what the user changed (an edit or a picked history version):
+  // the stored mjml was already validated by the API, and a child template's
+  // raw mjml ({% extends 'layout' %} + blocks) is never a full <mjml>
+  // document -- the API validates it after merging the parent, so the
+  // browser compiler can't judge it. Skipping returns a null error so a
+  // stale one doesn't keep Save disabled.
+  // mjmlEditor is deliberately not a dep: a bare mode switch with unchanged
+  // content must not compile
+  const mjmlEdited =
+    values.mjml_content !== formik.initialValues.mjml_content ||
+    historyVersion !== "";
+  const isChildTemplate = Boolean(values.parent?.id);
+
   const mjmlCompileResult = useMemo(() => {
     if (!mjmlEditor) return null;
+    if (!mjmlEdited || isChildTemplate)
+      return { htmlContent: null, error: null };
     try {
-      const htmlContent = mjml2html(stateEntity.mjml_content, {
+      const htmlContent = mjml2html(values.mjml_content, {
         validationLevel: "strict",
         keepComments: false,
         collapseWhitespace: true,
@@ -301,22 +318,23 @@ const EmailTemplateForm = ({
     } catch (err) {
       return { htmlContent: null, error: err };
     }
-  }, [stateEntity.mjml_content, historyVersion]);
+  }, [values.mjml_content, historyVersion, mjmlEdited, isChildTemplate]);
 
   useEffect(() => {
     if (!mjmlCompileResult) return;
     setMjmlRenderError(mjmlCompileResult.error);
     if (mjmlCompileResult.htmlContent !== null) {
-      setStateEntity({
-        ...stateEntity,
-        html_content: mjmlCompileResult.htmlContent
-      });
+      formik.setFieldValue(
+        "html_content",
+        mjmlCompileResult.htmlContent,
+        false
+      );
     }
   }, [mjmlCompileResult]);
 
   // gate the confirm dialog BEFORE flipping mjmlEditor -- flipping it first and
-  // asking after (the previous shape) let the preview/compile effects fire on
-  // the still-empty mjml_content while the dialog was still pending
+  // asking after let the preview/compile effects fire on the still-empty
+  // mjml_content while the dialog was still pending
   const handleDisplayMjml = () => {
     const needsMjmlWarning =
       entity.mjml_content.length === 0 &&
@@ -343,29 +361,7 @@ const EmailTemplateForm = ({
   };
 
   const handleCodeMirrorChange = (value) => {
-    const field = mjmlEditor ? "mjml_content" : "html_content";
-    setStateErrors({ ...stateErrors, [field]: "" });
-    setStateEntity({ ...stateEntity, [field]: value });
-  };
-
-  const handleChange = (ev) => {
-    let { value, id } = ev.target;
-
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
-
-    if (ev.target.type === "number") {
-      value = parseInt(ev.target.value);
-    }
-
-    setStateEntity({ ...stateEntity, [id]: value });
-    setStateErrors({ ...stateErrors, [id]: "" });
-  };
-
-  const handleClientsChange = (ev) => {
-    setStateEntity({ ...stateEntity, allowed_clients: ev.target.value });
-    setStateErrors({ ...stateErrors, allowed_clients: "" });
+    setFieldValue(mjmlEditor ? "mjml_content" : "html_content", value);
   };
 
   const handleJsonDataEdit = (ev) => {
@@ -377,12 +373,14 @@ const EmailTemplateForm = ({
   const MOBILE_PREVIEW_WIDTH = 320;
   const DESKTOP_PREVIEW_WIDTH = 800;
 
+  const style = {
+    width: `${mobileView ? MOBILE_PREVIEW_WIDTH : DESKTOP_PREVIEW_WIDTH}px`,
+    height: "960px",
+    transform: `scale(${scale})`
+  };
+
   const handleResizeWindow = () => {
-    if (window.innerWidth < SINGLE_TAB_BREAKPOINT) {
-      setSingleTab(true);
-    } else {
-      setSingleTab(false);
-    }
+    setSingleTab(window.innerWidth < SINGLE_TAB_BREAKPOINT);
     const currentPreviewWidth = previewRef?.current?.offsetWidth;
     if (!currentPreviewWidth) return;
     const targetWidth = mobileView
@@ -392,8 +390,7 @@ const EmailTemplateForm = ({
     // narrower than the target, but also grow back to 1 once there is room
     // again (a narrow measurement early in the mount sequence must not
     // permanently lock the preview at a reduced scale)
-    const newScale = Math.min(1, currentPreviewWidth / targetWidth);
-    setScale(newScale);
+    setScale(Math.min(1, currentPreviewWidth / targetWidth));
   };
 
   const handleTabChange = (ev) => {
@@ -423,44 +420,39 @@ const EmailTemplateForm = ({
     const { value } = ev.target;
     if (!value) {
       // restore original version
-      setStateEntity({
-        ...stateEntity,
-        html_content: stateEntity.original_html_content,
-        mjml_content: stateEntity.original_mjml_content
-      });
+      formik.setValues(
+        {
+          ...values,
+          html_content: values.original_html_content,
+          mjml_content: values.original_mjml_content
+        },
+        false
+      );
       setHistoryVersion("");
       setCurrentVersionExternalLink(null);
       return;
     }
 
-    const selectedHistory = stateEntity.versions.find((h) => h.sha === value);
+    const selectedHistory = values.versions.find((h) => h.sha === value);
     setHistoryVersion(selectedHistory.sha);
     setCurrentVersionExternalLink(selectedHistory.html_url);
     if (selectedHistory.type === EMAIL_TEMPLATE_TYPE_HTML) {
       setMjmlEditor(false);
-      setStateEntity({
-        ...stateEntity,
-        html_content: selectedHistory.content
-      });
+      setFieldValue("html_content", selectedHistory.content);
     }
     if (selectedHistory.type === EMAIL_TEMPLATE_TYPE_MJML) {
       setMjmlEditor(true);
-      setStateEntity({
-        ...stateEntity,
-        mjml_content: selectedHistory.content
-      });
+      setFieldValue("mjml_content", selectedHistory.content);
     }
   };
 
-  const isTemplateInvalid = () => mjmlEditor && mjmlRenderError !== null;
+  const isTemplateInvalid = mjmlEditor && mjmlRenderError !== null;
 
   // recompute whenever a layout-affecting toggle changes the preview
-  // container's rendered width (not just on an actual window resize) --
-  // templateLoaded matters too: the preview container doesn't exist to
-  // measure until that first flips true
+  // container's rendered width (not just on an actual window resize)
   useEffect(() => {
     handleResizeWindow();
-  }, [mobileView, templateLoaded, codeOnly, previewOnly, singleTab]);
+  }, [mobileView, codeOnly, previewOnly, singleTab]);
 
   // bind the native listener once; the ref keeps it pointed at the latest
   // closure so a real resize still sees current state without rebinding
@@ -475,21 +467,13 @@ const EmailTemplateForm = ({
     };
   }, []);
 
-  const handleSubmit = () => {
-    if (isSaving) return;
-    setIsSaving(true);
-    Promise.resolve(onSubmit(stateEntity))
-      .catch(() => {})
-      .finally(() => setIsSaving(false));
-  };
-
   const email_clients_ddl = clients
     ? clients.map((cli) => ({ label: cli.name, value: cli.id }))
     : [];
-  const versions_ddl = stateEntity.versions
+  const versions_ddl = values.versions
     ? [
         { value: "", label: T.translate("emails.current_version") },
-        ...stateEntity.versions.map((v) => ({
+        ...values.versions.map((v) => ({
           label: `${epochToMomentTimeZone(v.commit_date, "UTC").format(
             "YYYY-MM-DD HH:mm z"
           )} - ${v.sha} - ${v.commit_message}`,
@@ -540,216 +524,201 @@ const EmailTemplateForm = ({
     );
   };
 
+  const textField = (name, label) => (
+    <Grid2 size={{ xs: 12, md: 4 }}>
+      <InputLabel htmlFor={name}>{`${T.translate(label)} *`}</InputLabel>
+      <MuiFormikTextField
+        id={name}
+        name={name}
+        size="small"
+        margin="none"
+        fullWidth
+        onChange={handleFieldChange}
+      />
+    </Grid2>
+  );
+
   return (
-    <form className="email-template-form">
-      <input type="hidden" id="id" value={stateEntity.id} />
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <label> {T.translate("emails.name")} *</label>
-          <TextField
-            id="identifier"
-            fullWidth
-            size="small"
-            value={stateEntity.identifier}
-            onChange={handleChange}
-            error={!!hasErrors("identifier", stateErrors)}
-            helperText={hasErrors("identifier", stateErrors) || undefined}
-          />
+    <FormikProvider value={formik}>
+      <Box
+        component="form"
+        className="email-template-form"
+        onSubmit={formik.handleSubmit}
+        noValidate
+        autoComplete="off"
+      >
+        <input type="hidden" name="id" value={values.id} />
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          {textField("identifier", "emails.name")}
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="allowed_clients">
+              {`${T.translate("emails.client")} *`}
+            </InputLabel>
+            <MuiDropdown
+              id="allowed_clients"
+              size="small"
+              multiple
+              value={values.allowed_clients}
+              placeholder={T.translate("emails.placeholders.select_client")}
+              options={email_clients_ddl}
+              onChange={(ev) =>
+                setFieldValue("allowed_clients", ev.target.value)
+              }
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="parent">
+              {`${T.translate("emails.parent")} *`}
+            </InputLabel>
+            <EmailTemplateInput
+              id="parent"
+              value={values.parent}
+              ownerId={values.id}
+              placeholder={T.translate("emails.placeholders.select_parent")}
+              onChange={(ev) => setFieldValue("parent", ev.target.value)}
+            />
+          </Grid2>
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <label> {T.translate("emails.client")} *</label>
-          <MuiDropdown
-            id="allowed_clients"
-            size="small"
-            multiple
-            value={stateEntity.allowed_clients}
-            placeholder={T.translate("emails.placeholders.select_client")}
-            options={email_clients_ddl}
-            onChange={handleClientsChange}
-          />
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          {textField("from_email", "emails.from_email")}
+          {textField("subject", "emails.subject")}
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="max_retries">
+              {`${T.translate("emails.max_retries")} *`}
+            </InputLabel>
+            <MuiFormikTextField
+              id="max_retries"
+              name="max_retries"
+              type="number"
+              size="small"
+              margin="none"
+              fullWidth
+              onChange={handleFieldChange}
+            />
+          </Grid2>
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <label> {T.translate("emails.parent")} *</label>
-          <EmailTemplateInput
-            id="parent"
-            value={stateEntity.parent}
-            ownerId={stateEntity.id}
-            placeholder={T.translate("emails.placeholders.select_parent")}
-            onChange={handleChange}
-          />
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={12} sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button variant="contained" onClick={handleJsonDataEdit}>
+              {T.translate("emails.edit_json")}
+            </Button>
+          </Grid2>
         </Grid2>
-      </Grid2>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <label> {T.translate("emails.from_email")} *</label>
-          <TextField
-            id="from_email"
-            fullWidth
-            size="small"
-            value={stateEntity.from_email}
-            onChange={handleChange}
-            error={!!hasErrors("from_email", stateErrors)}
-            helperText={hasErrors("from_email", stateErrors) || undefined}
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <label> {T.translate("emails.subject")} *</label>
-          <TextField
-            id="subject"
-            fullWidth
-            size="small"
-            value={stateEntity.subject}
-            onChange={handleChange}
-            error={!!hasErrors("subject", stateErrors)}
-            helperText={hasErrors("subject", stateErrors) || undefined}
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <label> {T.translate("emails.max_retries")} *</label>
-          <TextField
-            id="max_retries"
-            type="number"
-            fullWidth
-            size="small"
-            value={stateEntity.max_retries}
-            onChange={handleChange}
-            error={!!hasErrors("max_retries", stateErrors)}
-            helperText={hasErrors("max_retries", stateErrors) || undefined}
-          />
-        </Grid2>
-      </Grid2>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={12} sx={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button variant="contained" onClick={handleJsonDataEdit}>
-            {T.translate("emails.edit_json")}
-          </Button>
-        </Grid2>
-      </Grid2>
-      <Grid2 container spacing={2}>
-        <Grid2 size={12}>
-          {templateLoaded ? (
-            <Box sx={{ height: "960px", mb: "50px" }}>
-              <Box sx={toolbarSx}>
-                {showCodeEditor && (
-                  <div style={{ width: codeWidth }}>
-                    <div>
-                      <TemplateModeToggle
-                        mjmlEditor={mjmlEditor}
-                        onDisplayMjml={handleDisplayMjml}
-                        onDisplayHtml={() => setMjmlEditor(false)}
-                      />
-                    </div>
-                    {entity.id > 0 && stateEntity.versions.length > 0 && (
-                      <VersionHistoryPicker
-                        historyVersion={historyVersion}
-                        versionsDdl={versions_ddl}
-                        currentVersionExternalLink={currentVersionExternalLink}
-                        onChange={handleVersionChange}
-                      />
-                    )}
-                  </div>
-                )}
-                {showPreview && (
-                  <div style={{ width: previewWidth }}>
-                    <label>{T.translate("emails.preview_title")}</label>
-                    <br />
-                    <Button
-                      variant="contained"
-                      onClick={() => setMobileView(!mobileView)}
-                    >
-                      {mobileView
-                        ? T.translate("emails.display_desktop")
-                        : T.translate("emails.display_mobile")}
-                    </Button>
-                  </div>
-                )}
-              </Box>
-              <br />
-              <Box
-                sx={{ display: "flex", flexDirection: "row", height: "100%" }}
-              >
-                {showCodeEditor && (
-                  <CodeEditorPane
-                    width={codeWidth}
-                    id={mjmlEditor ? "mjml_content" : "html_content"}
-                    value={editorContent}
-                    onChange={handleCodeMirrorChange}
+        <Box sx={{ height: "960px", mb: "50px" }}>
+          <Box sx={toolbarSx}>
+            {showCodeEditor && (
+              <div style={{ width: codeWidth }}>
+                <div>
+                  <TemplateModeToggle
+                    mjmlEditor={mjmlEditor}
+                    onDisplayMjml={handleDisplayMjml}
+                    onDisplayHtml={() => setMjmlEditor(false)}
+                  />
+                </div>
+                {entity.id > 0 && values.versions.length > 0 && (
+                  <VersionHistoryPicker
+                    historyVersion={historyVersion}
+                    versionsDdl={versions_ddl}
+                    currentVersionExternalLink={currentVersionExternalLink}
+                    onChange={handleVersionChange}
                   />
                 )}
-                <Box
-                  sx={{
-                    width: codeOnly || previewOnly ? "20px" : "30px",
-                    display: "flex",
-                    "& > button": paneToggleButtonSx
-                  }}
+              </div>
+            )}
+            {showPreview && (
+              <div style={{ width: previewWidth }}>
+                <InputLabel>{T.translate("emails.preview_title")}</InputLabel>
+                <Button
+                  variant="contained"
+                  onClick={() => setMobileView(!mobileView)}
                 >
-                  {showPreview && (
-                    <button
-                      type="button"
-                      id="code"
-                      onClick={(ev) => handleTabChange(ev)}
-                    >
-                      <i className="fa fa-chevron-right" />
-                    </button>
-                  )}
-                  {showCodeEditor && (
-                    <button
-                      type="button"
-                      id="preview"
-                      onClick={(ev) => handleTabChange(ev)}
-                    >
-                      <i className="fa fa-chevron-left" />
-                    </button>
-                  )}
-                </Box>
-                {showPreview && (
+                  {mobileView
+                    ? T.translate("emails.display_desktop")
+                    : T.translate("emails.display_mobile")}
+                </Button>
+              </div>
+            )}
+          </Box>
+          <br />
+          <Box sx={{ display: "flex", flexDirection: "row", height: "100%" }}>
+            {showCodeEditor && (
+              <CodeEditorPane
+                width={codeWidth}
+                id={mjmlEditor ? "mjml_content" : "html_content"}
+                value={editorContent}
+                onChange={handleCodeMirrorChange}
+              />
+            )}
+            <Box
+              sx={{
+                width: codeOnly || previewOnly ? "20px" : "30px",
+                display: "flex",
+                "& > button": paneToggleButtonSx
+              }}
+            >
+              {showPreview && (
+                <button
+                  type="button"
+                  id="code"
+                  onClick={(ev) => handleTabChange(ev)}
+                >
+                  <i className="fa fa-chevron-right" />
+                </button>
+              )}
+              {showCodeEditor && (
+                <button
+                  type="button"
+                  id="preview"
+                  onClick={(ev) => handleTabChange(ev)}
+                >
+                  <i className="fa fa-chevron-left" />
+                </button>
+              )}
+            </Box>
+            {showPreview && (
+              <Box
+                ref={previewRef}
+                sx={{
+                  width: previewWidth,
+                  minWidth: "50%",
+                  position: "relative",
+                  "& > iframe": {
+                    border: "none",
+                    display: "block",
+                    margin: "0 auto",
+                    transformOrigin: "top left"
+                  }
+                }}
+              >
+                {templateLoading && (
                   <Box
-                    ref={previewRef}
                     sx={{
-                      width: previewWidth,
-                      minWidth: "50%",
-                      position: "relative",
-                      "& > iframe": {
-                        border: "none",
-                        display: "block",
-                        margin: "0 auto",
-                        transformOrigin: "top left"
-                      }
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      zIndex: 1
                     }}
                   >
-                    {templateLoading && (
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          top: "50%",
-                          left: "50%",
-                          transform: "translate(-50%, -50%)",
-                          zIndex: 1
-                        }}
-                      >
-                        <CircularProgress size={120} />
-                      </Box>
-                    )}
-                    {renderPreviewBody()}
+                    <CircularProgress size={120} />
                   </Box>
                 )}
+                {renderPreviewBody()}
               </Box>
-            </Box>
-          ) : (
-            <div>{T.translate("emails.loading_template")}</div>
-          )}
-        </Grid2>
-      </Grid2>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-          disabled={isSaving || isTemplateInvalid()}
-        >
-          {T.translate("general.save")}
-        </Button>
+            )}
+          </Box>
+        </Box>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={formik.isSubmitting || isTemplateInvalid}
+          >
+            {T.translate("general.save")}
+          </Button>
+        </Box>
       </Box>
-    </form>
+    </FormikProvider>
   );
 };
 

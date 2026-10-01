@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
@@ -27,20 +27,12 @@ const EmailTemplateInput = ({
   placeholder,
   error,
   plainValue,
-  defaultOptions,
-  isClearable,
-  cacheOptions
+  isClearable
 }) => {
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const optionsCacheRef = useRef(new Map());
 
   const fetchOptions = (input) => {
-    if (cacheOptions && optionsCacheRef.current.has(input)) {
-      setOptions(optionsCacheRef.current.get(input));
-      return;
-    }
-
     setLoading(true);
     queryTemplates(input, (templates) => {
       const filtered = ownerId
@@ -50,22 +42,17 @@ const EmailTemplateInput = ({
         value: plainValue ? t.identifier : t.id.toString(),
         label: t.identifier
       }));
-      if (cacheOptions) optionsCacheRef.current.set(input, mappedOptions);
       setOptions(mappedOptions);
       setLoading(false);
     });
   };
-
-  useEffect(() => {
-    if (defaultOptions) fetchOptions("");
-  }, []);
 
   const handleInputChange = (ev, input, reason) => {
     // Autocomplete also fires this for "selectOption"/"reset" (the input text
     // set programmatically) -- only a real keystroke or a clear should re-search.
     if (reason !== "input" && reason !== "clear") return;
 
-    if (!input && !defaultOptions) {
+    if (!input) {
       setOptions([]);
       return;
     }
@@ -148,9 +135,7 @@ EmailTemplateInput.propTypes = {
   placeholder: PropTypes.string,
   error: PropTypes.string,
   plainValue: PropTypes.bool,
-  defaultOptions: PropTypes.bool,
-  isClearable: PropTypes.bool,
-  cacheOptions: PropTypes.bool
+  isClearable: PropTypes.bool
 };
 
 EmailTemplateInput.defaultProps = {
@@ -160,9 +145,7 @@ EmailTemplateInput.defaultProps = {
   placeholder: "",
   error: "",
   plainValue: false,
-  defaultOptions: false,
-  isClearable: false,
-  cacheOptions: false
+  isClearable: false
 };
 
 export default EmailTemplateInput;
