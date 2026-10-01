@@ -94,6 +94,8 @@
     "to": "To",
     "from": "From",
     "add_new": "Add new",
+    "read_more": "read more",
+    "read_less": "read less",
     "placeholders": {
       "search": "Search...",
       "search_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id",

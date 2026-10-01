@@ -4,8 +4,8 @@ import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-i
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
   GridFilter,
-  useGridFilter,
-  OPERATORS
+  OPERATORS,
+  useGridFilter
 } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import { queryMembers } from "openstack-uicore-foundation/lib/utils/query-actions";
 import CustomAlert from "openstack-uicore-foundation/lib/components/mui/custom-alert";
@@ -16,6 +16,7 @@ import {
   getAuditLog as getAuditLogAction
 } from "../../actions/audit-log-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+import ExpandText from "../mui/ExpandText";
 
 const FILTER_ID = "audit_log_list";
 
@@ -81,14 +82,14 @@ const AuditLogs = ({
     {
       columnKey: "created",
       header: T.translate("audit_log.date"),
+      cellSx: { minWidth: 140 },
       sortable: true
     },
     {
       columnKey: "action_description",
       header: T.translate("audit_log.action"),
       sortable: false,
-      width: 600,
-      truncateText: true
+      render: (row) => <ExpandText>{row.action_description}</ExpandText>
     },
     {
       columnKey: "event_id",
