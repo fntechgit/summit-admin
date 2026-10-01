@@ -1015,7 +1015,7 @@ export const getTicketType = (ticketTypeId) => async (dispatch, getState) => {
     createAction(RECEIVE_TICKET_TYPE),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/ticket-types/${ticketTypeId}`,
     snackbarErrorHandler
-  )(params)(dispatch).then(() => {
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
