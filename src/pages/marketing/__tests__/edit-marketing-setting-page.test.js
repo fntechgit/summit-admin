@@ -77,6 +77,9 @@ jest.mock("../../../components/forms/marketing-setting-form", () => {
           {touched.key && errors.key && (
             <p data-testid="key-error">{errors.key}</p>
           )}
+          {touched.value && errors.value && (
+            <p data-testid="value-error">{errors.value}</p>
+          )}
         </div>
       );
     }
@@ -282,7 +285,36 @@ describe("EditMarketingSettingPage", () => {
     expect(mockHistory.push).not.toHaveBeenCalled();
   });
 
-  it("surfaces a server-side field validation error without a submit", () => {
+  it("keeps typed values and shows the error when client validation blocks the save", async () => {
+    renderWithRedux(
+      <EditMarketingSettingPage
+        history={mockHistory}
+        match={{ params: {}, url: "/x" }}
+      />,
+      { initialState: buildInitialState() }
+    );
+
+    fireEvent.change(screen.getByTestId("key-input"), {
+      target: { value: "my-key" }
+    });
+    fireEvent.change(screen.getByTestId("type-input"), {
+      target: { value: "TEXT" }
+    });
+
+    await act(async () => {
+      clickSave().click();
+      await flushPromises();
+    });
+
+    expect(saveMarketingSetting).not.toHaveBeenCalled();
+    expect(screen.getByTestId("key-input")).toHaveValue("my-key");
+    expect(screen.getByTestId("type-input")).toHaveValue("TEXT");
+    expect(screen.getByTestId("value-error")).toHaveTextContent(
+      "validation.required"
+    );
+  });
+
+  it("surfaces a server-side field validation error without a submit", async () => {
     renderWithRedux(
       <EditMarketingSettingPage
         history={mockHistory}
@@ -295,6 +327,11 @@ describe("EditMarketingSettingPage", () => {
         )
       }
     );
+
+    // let any async validation settle so it can't silently wipe the server error
+    await act(async () => {
+      await flushPromises();
+    });
 
     expect(screen.getByTestId("key-error")).toHaveTextContent(
       "marketing.key_already_exists"
