@@ -32,8 +32,6 @@ import {
 } from "../../actions/summit-actions";
 import { buildSpeakersSubmittersList } from "../utils/methods";
 
-
-
 const DEFAULT_STATE = {
   items: [],
   term: null,

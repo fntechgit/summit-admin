@@ -33,36 +33,38 @@ export const getGlobalItems = () => [
     ]
   },
   {
-    name: "companies",
-    linkUrl: "companies",
-    accessRoute: "companies"
-  },
-  {
-    name: "sponsors_inventory",
+    name: "sponsors_services",
     accessRoute: "inventory",
     subItems: [
       {
-        name: "inventory",
-        linkUrl: "inventory"
+        name: "commercial_offerings",
+        isGroup: true,
+        subItems: [
+          { name: "inventory", linkUrl: "inventory" },
+          { name: "form_templates", linkUrl: "form-templates" }
+        ]
       },
+      { name: "page_templates", linkUrl: "page-templates" },
+      { name: "add_on_types", linkUrl: "add-on-types" },
       {
-        name: "form_templates",
-        linkUrl: "form-templates"
-      },
-      {
-        name: "page_templates",
-        linkUrl: "page-templates"
-      },
-      {
-        name: "add_on_types",
-        linkUrl: "add-on-types"
+        name: "sponsorship_types",
+        linkUrl: "sponsorship-types",
+        accessRoute: "sponsorship-types"
       }
     ]
   },
   {
-    name: "sponsorship_types",
-    linkUrl: "sponsorship-types",
-    accessRoute: "sponsorship-types"
+    name: "emails",
+    accessRoute: "emails",
+    subItems: [
+      { name: "email_templates", linkUrl: "emails/templates" },
+      { name: "email_logs", linkUrl: "emails/log" }
+    ]
+  },
+  {
+    name: "companies",
+    linkUrl: "companies",
+    accessRoute: "companies"
   },
   {
     name: "tags",
@@ -74,14 +76,6 @@ export const getGlobalItems = () => [
     linkUrl: "sponsored-projects",
     accessRoute: "sponsored-projects",
     exclusive: "sponsored-projects"
-  },
-  {
-    name: "emails",
-    accessRoute: "emails",
-    subItems: [
-      { name: "email_templates", linkUrl: "emails/templates" },
-      { name: "email_logs", linkUrl: "emails/log" }
-    ]
   },
   {
     name: "admin_access",
@@ -97,109 +91,239 @@ export const getGlobalItems = () => [
 
 export const getSummitItems = (summitId) => [
   {
-    name: "audit_log",
-    linkUrl: `summits/${summitId}/audit-log`,
-    accessRoute: "audit-log"
-  },
-  {
     name: "dashboard",
     linkUrl: `summits/${summitId}/dashboard`,
     accessRoute: "general"
   },
   {
-    name: "selection_plans",
-    linkUrl: `summits/${summitId}/selection-plans`,
-    accessRoute: "selection_plans"
-  },
-  {
-    name: "events",
-    accessRoute: "events",
+    name: "program_management",
     subItems: [
-      { name: "new_event", linkUrl: `summits/${summitId}/events/new` },
-      { name: "event_list", linkUrl: `summits/${summitId}/events` },
-      { name: "schedule", linkUrl: `summits/${summitId}/events/schedule` },
-      { name: "event_types", linkUrl: `summits/${summitId}/event-types` },
       {
-        name: "event_categories",
-        linkUrl: `summits/${summitId}/event-categories`
+        name: "events",
+        isGroup: true,
+        subItems: [
+          {
+            name: "new_event",
+            linkUrl: `summits/${summitId}/events/new`,
+            accessRoute: "events"
+          },
+          {
+            name: "event_list",
+            linkUrl: `summits/${summitId}/events`,
+            accessRoute: "events"
+          },
+          {
+            name: "event_types",
+            linkUrl: `summits/${summitId}/event-types`,
+            accessRoute: "events"
+          },
+          {
+            name: "event_categories",
+            linkUrl: `summits/${summitId}/event-categories`,
+            accessRoute: "events"
+          },
+          {
+            name: "event_category_groups",
+            linkUrl: `summits/${summitId}/event-category-groups`,
+            accessRoute: "events"
+          }
+        ]
       },
       {
-        name: "event_category_groups",
-        linkUrl: `summits/${summitId}/event-category-groups`
+        name: "track_chairs",
+        isGroup: true,
+        subItems: [
+          {
+            name: "track_chair_list",
+            linkUrl: `summits/${summitId}/track-chairs`,
+            accessRoute: "track-chairs"
+          },
+          {
+            name: "progress_flags",
+            linkUrl: `summits/${summitId}/track-chairs/progress-flags`,
+            accessRoute: "progress-flags"
+          },
+          {
+            name: "track_timeframes",
+            linkUrl: `summits/${summitId}/track-chairs/track-timeframes`,
+            accessRoute: "track-timeframes"
+          },
+          {
+            name: "track_chair_team_lists",
+            linkUrl: `summits/${summitId}/track-chairs/team-lists`,
+            accessRoute: "team-lists"
+          }
+        ]
+      },
+      {
+        name: "summit_speakers",
+        isGroup: true,
+        subItems: [
+          {
+            name: "summit_speaker_list",
+            linkUrl: `summits/${summitId}/speakers`,
+            accessRoute: "speakers"
+          },
+          {
+            name: "submission_invitations",
+            linkUrl: `summits/${summitId}/submission-invitations`,
+            accessRoute: "speakers"
+          },
+          {
+            name: "speaker_attendance",
+            linkUrl: `summits/${summitId}/speaker-attendances`,
+            accessRoute: "speakers"
+          },
+          {
+            name: "featured_speakers",
+            linkUrl: `summits/${summitId}/featured-speakers`,
+            accessRoute: "speakers"
+          }
+        ]
+      },
+      {
+        name: "selection_plans",
+        linkUrl: `summits/${summitId}/selection-plans`,
+        accessRoute: "selection_plans"
+      },
+      {
+        name: "schedule",
+        linkUrl: `summits/${summitId}/events/schedule`,
+        accessRoute: "events"
       },
       {
         name: "voteable_presentations",
-        linkUrl: `summits/${summitId}/voteable-presentations`
+        linkUrl: `summits/${summitId}/voteable-presentations`,
+        accessRoute: "events"
       },
       {
         name: "media_uploads",
-        linkUrl: `summits/${summitId}/media-uploads`
+        linkUrl: `summits/${summitId}/media-uploads`,
+        accessRoute: "events"
       }
     ]
   },
   {
-    name: "attendees",
-    accessRoute: "attendees",
+    name: "attendee_operations",
     subItems: [
       {
-        name: "attendee-list",
-        linkUrl: `summits/${summitId}/attendees`,
-        accessRoute: "attendees"
+        name: "attendees",
+        isGroup: true,
+        subItems: [
+          {
+            name: "attendee-list",
+            linkUrl: `summits/${summitId}/attendees`,
+            accessRoute: "attendees"
+          },
+          {
+            name: "badge_checkin",
+            linkUrl: `summits/${summitId}/attendees/checkin`,
+            accessRoute: "attendees"
+          }
+        ]
       },
       {
-        name: "badge_checkin",
-        linkUrl: `summits/${summitId}/attendees/checkin`
+        name: "badges",
+        isGroup: true,
+        subItems: [
+          {
+            name: "badge_feature_list",
+            linkUrl: `summits/${summitId}/badge-features`,
+            accessRoute: "badges"
+          },
+          {
+            name: "access_level_list",
+            linkUrl: `summits/${summitId}/access-levels`,
+            accessRoute: "badges"
+          },
+          {
+            name: "view_type_list",
+            linkUrl: `summits/${summitId}/view-types`,
+            accessRoute: "badges"
+          },
+          {
+            name: "badge_type_list",
+            linkUrl: `summits/${summitId}/badge-types`,
+            accessRoute: "badges"
+          },
+          {
+            name: "badge_settings",
+            linkUrl: `summits/${summitId}/badge-settings`,
+            accessRoute: "badges"
+          }
+        ]
       }
     ]
   },
   {
-    name: "summit_speakers",
-    accessRoute: "events",
+    name: "registration",
     subItems: [
       {
-        name: "submission_invitations",
-        linkUrl: `summits/${summitId}/submission-invitations`,
-        accessRoute: "speakers"
+        name: "purchase_orders",
+        isGroup: true,
+        subItems: [
+          {
+            name: "purchase_order_list",
+            linkUrl: `summits/${summitId}/purchase-orders`,
+            accessRoute: "purchase-orders"
+          },
+          {
+            name: "ticket_list",
+            linkUrl: `summits/${summitId}/tickets`,
+            accessRoute: "purchase-orders"
+          },
+          {
+            name: "order_extra_questions",
+            linkUrl: `summits/${summitId}/order-extra-questions`,
+            accessRoute: "purchase-orders"
+          },
+          {
+            name: "registration_stats",
+            linkUrl: `summits/${summitId}/registration-stats`,
+            accessRoute: "purchase-orders"
+          }
+        ]
       },
       {
-        name: "speakers",
-        linkUrl: `summits/${summitId}/speakers`,
-        accessRoute: "speakers"
-      },
-      {
-        name: "speaker_attendance",
-        linkUrl: `summits/${summitId}/speaker-attendances`,
-        accessRoute: "speakers"
-      },
-      {
-        name: "featured_speakers",
-        linkUrl: `summits/${summitId}/featured-speakers`,
-        accessRoute: "speakers"
-      }
-    ]
-  },
-  {
-    name: "track_chairs",
-    accessRoute: "track-chairs",
-    subItems: [
-      {
-        name: "track_chair_list",
-        linkUrl: `summits/${summitId}/track-chairs`
-      },
-      {
-        name: "progress_flags",
-        linkUrl: `summits/${summitId}/track-chairs/progress-flags`,
-        accessRoute: "progress-flags"
-      },
-      {
-        name: "track_timeframes",
-        linkUrl: `summits/${summitId}/track-chairs/track-timeframes`,
-        accessRoute: "track-timeframes"
-      },
-      {
-        name: "track_chair_team_lists",
-        linkUrl: `summits/${summitId}/track-chairs/team-lists`,
-        accessRoute: "team-lists"
+        name: "tickets",
+        isGroup: true,
+        subItems: [
+          {
+            name: "registration_invitation_list",
+            linkUrl: `summits/${summitId}/registration-invitations`,
+            accessRoute: "tickets"
+          },
+          {
+            name: "ticket_type_list",
+            linkUrl: `summits/${summitId}/ticket-types`,
+            accessRoute: "tickets"
+          },
+          {
+            name: "promocode_list",
+            linkUrl: `summits/${summitId}/promocodes`,
+            accessRoute: "tickets"
+          },
+          {
+            name: "tax_type_list",
+            linkUrl: `summits/${summitId}/tax-types`,
+            accessRoute: "tickets"
+          },
+          {
+            name: "refund_policy_list",
+            linkUrl: `summits/${summitId}/refund-policies`,
+            accessRoute: "tickets"
+          },
+          {
+            name: "payment_profiles_list",
+            linkUrl: `summits/${summitId}/payment-profiles`,
+            accessRoute: "tickets"
+          },
+          {
+            name: "registration_companies_list",
+            linkUrl: `summits/${summitId}/registration-companies`,
+            accessRoute: "tickets"
+          }
+        ]
       }
     ]
   },
@@ -260,144 +384,95 @@ export const getSummitItems = (summitId) => [
     ]
   },
   {
-    name: "locations",
-    linkUrl: `summits/${summitId}/locations`,
-    accessRoute: "locations"
-  },
-  {
-    name: "signage",
-    linkUrl: `summits/${summitId}/signage`,
-    accessRoute: "signage"
-  },
-  {
-    name: "purchase_orders",
-    accessRoute: "purchase-orders",
+    name: "venue_schedule",
     subItems: [
       {
-        name: "purchase_order_list",
-        linkUrl: `summits/${summitId}/purchase-orders`
-      },
-      { name: "ticket_list", linkUrl: `summits/${summitId}/tickets` },
-      {
-        name: "order_extra_questions",
-        linkUrl: `summits/${summitId}/order-extra-questions`
+        name: "locations",
+        linkUrl: `summits/${summitId}/locations`,
+        accessRoute: "locations"
       },
       {
-        name: "registration_stats",
-        linkUrl: `summits/${summitId}/registration-stats`
+        name: "signage",
+        linkUrl: `summits/${summitId}/signage`,
+        accessRoute: "signage"
+      },
+      {
+        name: "room_bookings",
+        linkUrl: `summits/${summitId}/room-bookings`,
+        accessRoute: "room-bookings",
+        exclusive: "room-bookings"
+      },
+      {
+        name: "room_occupancy",
+        linkUrl: `summits/${summitId}/room-occupancy`,
+        accessRoute: "room-occupancy"
       }
     ]
   },
   {
-    name: "tickets",
-    accessRoute: "tickets",
+    name: "communications",
     subItems: [
       {
-        name: "registration_invitation_list",
-        linkUrl: `summits/${summitId}/registration-invitations`
+        name: "email_flow_events",
+        isGroup: true,
+        subItems: [
+          {
+            name: "email_flow_overrides",
+            linkUrl: `summits/${summitId}/email-flow-events`,
+            accessRoute: "email-flow-events"
+          },
+          {
+            name: "email_flow_settings",
+            linkUrl: `summits/${summitId}/email-flow-events-settings`,
+            accessRoute: "email-flow-events"
+          }
+        ]
       },
       {
-        name: "ticket_type_list",
-        linkUrl: `summits/${summitId}/ticket-types`
-      },
-      {
-        name: "promocode_list",
-        linkUrl: `summits/${summitId}/promocodes`
-      },
-      { name: "tax_type_list", linkUrl: `summits/${summitId}/tax-types` },
-      {
-        name: "refund_policy_list",
-        linkUrl: `summits/${summitId}/refund-policies`
-      },
-      {
-        name: "payment_profiles_list",
-        linkUrl: `summits/${summitId}/payment-profiles`
-      },
-      {
-        name: "registration_companies_list",
-        linkUrl: `summits/${summitId}/registration-companies`
+        name: "push_notifications",
+        linkUrl: `summits/${summitId}/push-notifications`,
+        accessRoute: "push-notifications"
       }
     ]
   },
   {
-    name: "badges",
-    accessRoute: "badges",
+    name: "event_administration",
     subItems: [
       {
-        name: "badge_feature_list",
-        linkUrl: `summits/${summitId}/badge-features`
+        name: "settings",
+        isGroup: true,
+        subItems: [
+          {
+            name: "marketing",
+            linkUrl: `summits/${summitId}/marketing`,
+            accessRoute: "settings"
+          },
+          {
+            name: "schedule_settings",
+            linkUrl: `summits/${summitId}/schedule-settings`,
+            accessRoute: "settings"
+          }
+        ]
       },
       {
-        name: "access_level_list",
-        linkUrl: `summits/${summitId}/access-levels`
+        name: "reports",
+        linkUrl: `summits/${summitId}/reports`,
+        accessRoute: "reports"
       },
       {
-        name: "view_type_list",
-        linkUrl: `summits/${summitId}/view-types`
+        name: "summitdocs",
+        linkUrl: `summits/${summitId}/summitdocs`,
+        accessRoute: "summitdocs"
       },
       {
-        name: "badge_type_list",
-        linkUrl: `summits/${summitId}/badge-types`
+        name: "tag_groups",
+        linkUrl: `summits/${summitId}/tag-groups`,
+        accessRoute: "tag-groups"
       },
       {
-        name: "badge_settings",
-        linkUrl: `summits/${summitId}/badge-settings`
-      }
-    ]
-  },
-  {
-    name: "room_bookings",
-    linkUrl: `summits/${summitId}/room-bookings`,
-    accessRoute: "room-bookings",
-    exclusive: "room-bookings"
-  },
-  {
-    name: "push_notifications",
-    linkUrl: `summits/${summitId}/push-notifications`,
-    accessRoute: "push-notifications"
-  },
-  {
-    name: "room_occupancy",
-    linkUrl: `summits/${summitId}/room-occupancy`,
-    accessRoute: "room-occupancy"
-  },
-  {
-    name: "tag_groups",
-    linkUrl: `summits/${summitId}/tag-groups`,
-    accessRoute: "tag-groups"
-  },
-  {
-    name: "reports",
-    linkUrl: `summits/${summitId}/reports`,
-    accessRoute: "reports"
-  },
-  {
-    name: "summitdocs",
-    linkUrl: `summits/${summitId}/summitdocs`,
-    accessRoute: "summitdocs"
-  },
-  {
-    name: "email_flow_events",
-    accessRoute: "email-flow-events",
-    subItems: [
-      {
-        name: "email_flow_overrides",
-        linkUrl: `summits/${summitId}/email-flow-events`
-      },
-      {
-        name: "email_flow_settings",
-        linkUrl: `summits/${summitId}/email-flow-events-settings`
-      }
-    ]
-  },
-  {
-    name: "settings",
-    accessRoute: "settings",
-    subItems: [
-      { name: "marketing", linkUrl: `summits/${summitId}/marketing` },
-      {
-        name: "schedule_settings",
-        linkUrl: `summits/${summitId}/schedule-settings`
+        name: "audit_log",
+        linkUrl: `summits/${summitId}/audit-log`,
+        accessRoute: "audit-log"
       }
     ]
   }

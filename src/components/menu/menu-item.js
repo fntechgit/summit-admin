@@ -16,15 +16,28 @@ import T from "i18n-react/dist/i18n-react";
 import Exclusive from "openstack-uicore-foundation/lib/components/exclusive-wrapper";
 import ListItemButton from "@mui/material/ListItemButton";
 import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
-const MenuItem = ({ name, onClick, exclusive, nested, selected }) => {
+const NESTED_PL = 4;
+const TOP_LEVEL_PL = 2;
+const INFO_ICON_ML = 0.5;
+
+const MenuItem = ({
+  name,
+  onClick,
+  exclusive,
+  nested,
+  selected,
+  pl,
+  infoKey
+}) => {
   const itemHtml = (
     <ListItemButton
       id={`${name}-menu`}
       onClick={onClick}
       selected={selected}
-      // eslint-disable-next-line no-magic-numbers
-      sx={{ pl: nested ? 4 : 2, py: 1 }}
+      sx={{ pl: pl ?? (nested ? NESTED_PL : TOP_LEVEL_PL), py: 1 }}
     >
       <Typography
         variant="body1"
@@ -32,6 +45,15 @@ const MenuItem = ({ name, onClick, exclusive, nested, selected }) => {
       >
         {T.translate(`menu.${name}`)}
       </Typography>
+      {infoKey && (
+        <Tooltip title={T.translate(`menu.${infoKey}`)}>
+          <InfoOutlinedIcon
+            fontSize="small"
+            sx={{ ml: INFO_ICON_ML, color: "text.secondary" }}
+            onClick={(ev) => ev.stopPropagation()}
+          />
+        </Tooltip>
+      )}
     </ListItemButton>
   );
 

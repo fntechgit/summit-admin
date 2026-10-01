@@ -374,13 +374,13 @@ class SummitSpeakersListPage extends React.Component {
     ev.stopPropagation();
     ev.preventDefault();
     const { currentPromocodeSpecification } = this.props;
-    const { promoCodeStrategy, testRecipient, source } = this.state;    
+    const { promoCodeStrategy, testRecipient, source } = this.state;
     const isSpeakerMode = source === sources.speakers;
     const excerptRecipient = this.ingestEmailRef.value;
     const shouldSendCopy2Submitter =
-      isSpeakerMode && this.shouldSendCopy2SubmitterRef.checked;    
+      isSpeakerMode && this.shouldSendCopy2SubmitterRef.checked;
     const shouldResend = this.shouldResendRef.checked;
-    const { term } = this.getSubjectProps();    
+    const { term } = this.getSubjectProps();
 
     this.props.validateSpecs(
       promoCodeStrategy,
