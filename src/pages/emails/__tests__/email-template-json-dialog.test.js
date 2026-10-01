@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import EmailTemplateJsonDialog from "../email-template-json-dialog";
@@ -21,41 +21,40 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 }));
 
 describe("EmailTemplateJsonDialog", () => {
-  it("seeds the editor with the formatted jsonData on mount", () => {
-    render(
-      <EmailTemplateJsonDialog
-        jsonData={{ foo: "bar" }}
-        renderErrors={[]}
-        onUpdate={jest.fn()}
-        onClose={jest.fn()}
-      />
-    );
+  it.each([
+    ["resolves", true],
+    ["rejects", false]
+  ])(
+    "seeds the formatted JSON, sends the parsed edit, and closes only when the update %s",
+    async (_outcome, closes) => {
+      const onUpdate = jest.fn(() =>
+        closes ? Promise.resolve() : Promise.reject(new Error("failed"))
+      );
+      const onClose = jest.fn();
+      render(
+        <EmailTemplateJsonDialog
+          jsonData={{ foo: "bar" }}
+          renderErrors={[]}
+          onUpdate={onUpdate}
+          onClose={onClose}
+        />
+      );
 
-    expect(screen.getByTestId("json-editor")).toHaveValue(
-      JSON.stringify({ foo: "bar" }, null, 2)
-    );
-  });
+      const editor = screen.getByTestId("json-editor");
+      expect(editor).toHaveValue(JSON.stringify({ foo: "bar" }, null, 2));
 
-  it("calls onUpdate with the parsed object when the JSON is valid", async () => {
-    const onUpdate = jest.fn();
-    render(
-      <EmailTemplateJsonDialog
-        jsonData={{ foo: "bar" }}
-        renderErrors={[]}
-        onUpdate={onUpdate}
-        onClose={jest.fn()}
-      />
-    );
+      fireEvent.change(editor, {
+        target: { value: JSON.stringify({ baz: 1 }) }
+      });
+      await userEvent.click(
+        screen.getByRole("button", { name: "emails.update" })
+      );
 
-    fireEvent.change(screen.getByTestId("json-editor"), {
-      target: { value: JSON.stringify({ baz: 1 }) }
-    });
-    await userEvent.click(
-      screen.getByRole("button", { name: "emails.update" })
-    );
-
-    expect(onUpdate).toHaveBeenCalledWith({ baz: 1 });
-  });
+      await waitFor(() => expect(onUpdate).toHaveBeenCalledWith({ baz: 1 }));
+      if (closes) await waitFor(() => expect(onClose).toHaveBeenCalled());
+      else expect(onClose).not.toHaveBeenCalled();
+    }
+  );
 
   it("shows an inline error and does not call onUpdate when the JSON is invalid", async () => {
     const onUpdate = jest.fn();
@@ -75,7 +74,7 @@ describe("EmailTemplateJsonDialog", () => {
       screen.getByRole("button", { name: "emails.update" })
     );
 
+    expect(await screen.findByText("emails.invalid_json")).toBeInTheDocument();
     expect(onUpdate).not.toHaveBeenCalled();
-    expect(screen.getByText("emails.invalid_json")).toBeInTheDocument();
   });
 });

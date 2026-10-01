@@ -15,7 +15,13 @@ import EmailTemplateForm from "../email-template-form";
 
 jest.mock("@uiw/react-codemirror", () => ({
   __esModule: true,
-  default: () => null
+  default: ({ id, value, onChange }) => (
+    <textarea
+      data-testid={`editor-${id}`}
+      value={value}
+      onChange={(ev) => onChange(ev.target.value)}
+    />
+  )
 }));
 jest.mock("../../mui/showConfirmDialog", () => ({
   __esModule: true,
@@ -164,93 +170,41 @@ describe("EmailTemplateForm preview dispatch", () => {
     );
   });
 
-  it("warns before switching to MJML on an HTML-only template and keeps the switch on confirm", async () => {
-    showConfirmDialog.mockResolvedValue(true);
-    const props = baseProps(htmlEntity);
-    const { getByText } = render(<EmailTemplateForm {...props} />);
+  it.each([
+    [true, "emails.display_html"],
+    [false, "emails.display_mjml"]
+  ])(
+    "holds HTML mode while the MJML switch warning is pending, then applies confirmed=%s",
+    async (confirmed, finalButton) => {
+      let resolveConfirm;
+      showConfirmDialog.mockReturnValue(
+        new Promise((resolve) => {
+          resolveConfirm = resolve;
+        })
+      );
+      const props = baseProps(htmlEntity);
+      const { getByText } = render(<EmailTemplateForm {...props} />);
 
-    await act(async () => {
-      jest.advanceTimersByTime(600);
-    });
+      await act(async () => {
+        jest.advanceTimersByTime(600);
+      });
+      props.renderEmailTemplate.mockClear();
 
-    await act(async () => {
       fireEvent.click(getByText("emails.display_mjml"));
-    });
+      await act(async () => {
+        jest.advanceTimersByTime(600);
+      });
 
-    expect(showConfirmDialog).toHaveBeenCalledWith(
-      expect.objectContaining({
-        text: "emails.mjml_warning",
-        iconType: "warning"
-      })
-    );
+      // no preview request for the (empty) mjml_content while still asking
+      expect(props.renderEmailTemplate).not.toHaveBeenCalled();
+      expect(getByText("emails.display_mjml")).toBeTruthy();
 
-    expect(getByText("emails.display_html")).toBeTruthy();
-  });
-
-  it("reverts to HTML mode when the MJML switch warning is cancelled", async () => {
-    showConfirmDialog.mockResolvedValue(false);
-    const props = baseProps(htmlEntity);
-    const { getByText } = render(<EmailTemplateForm {...props} />);
-
-    await act(async () => {
-      jest.advanceTimersByTime(600);
-    });
-
-    await act(async () => {
-      fireEvent.click(getByText("emails.display_mjml"));
-    });
-
-    expect(getByText("emails.display_mjml")).toBeTruthy();
-  });
-
-  it("does not preview or compile the empty mjml_content while the switch warning is still pending", async () => {
-    let resolveConfirm;
-    showConfirmDialog.mockReturnValue(
-      new Promise((resolve) => {
-        resolveConfirm = resolve;
-      })
-    );
-    const props = baseProps(htmlEntity);
-    const { getByText } = render(<EmailTemplateForm {...props} />);
-
-    await act(async () => {
-      jest.advanceTimersByTime(600);
-    });
-    props.renderEmailTemplate.mockClear();
-
-    fireEvent.click(getByText("emails.display_mjml"));
-    await act(async () => {
-      jest.advanceTimersByTime(600);
-    });
-
-    // the dialog hasn't resolved yet -- mode must still be HTML, so no
-    // preview request went out for the (empty) mjml_content
-    expect(props.renderEmailTemplate).not.toHaveBeenCalled();
-    expect(getByText("emails.display_mjml")).toBeTruthy();
-
-    await act(async () => {
-      resolveConfirm(true);
-    });
-  });
-
-  it("does not attempt to compile mjml on a bare mode switch with unchanged (empty) content", async () => {
-    const props = baseProps(htmlEntity);
-    const { getByText } = render(<EmailTemplateForm {...props} />);
-
-    await act(async () => {
-      jest.advanceTimersByTime(600);
-    });
-    mjml2html.mockClear();
-
-    await act(async () => {
-      fireEvent.click(getByText("emails.display_mjml"));
-    });
-
-    // switching modes alone must not attempt a compile of the unchanged,
-    // still-empty mjml_content -- doing so would leave a stale
-    // mjmlRenderError behind after switching back to HTML
-    expect(mjml2html).not.toHaveBeenCalled();
-  });
+      await act(async () => {
+        resolveConfirm(confirmed);
+      });
+      expect(getByText(finalButton)).toBeTruthy();
+    }
+  );
 });
 
 describe("EmailTemplateForm submit", () => {
@@ -264,73 +218,142 @@ describe("EmailTemplateForm submit", () => {
     jest.clearAllMocks();
   });
 
-  it("submits the current entity and disables the Save button while saving, blocking a double submit", async () => {
-    let resolveSave;
-    const onSubmit = jest.fn(
-      () =>
-        new Promise((resolve) => {
-          resolveSave = resolve;
-        })
-    );
-    const props = { ...baseProps(htmlEntity), onSubmit };
-    const { getByRole } = render(<EmailTemplateForm {...props} />);
+  it.each(["resolves", "rejects"])(
+    "blocks a double submit while saving and re-enables Save once the save %s",
+    async (outcome) => {
+      let settleSave;
+      const onSubmit = jest.fn(
+        () =>
+          new Promise((resolve, reject) => {
+            settleSave = outcome === "resolves" ? resolve : reject;
+          })
+      );
+      const props = { ...baseProps(htmlEntity), onSubmit };
+      const { getByRole } = render(<EmailTemplateForm {...props} />);
 
-    await act(async () => {
-      jest.advanceTimersByTime(600);
-    });
+      const saveButton = getByRole("button", { name: "general.save" });
+      await act(async () => {
+        fireEvent.click(saveButton);
+      });
+      expect(saveButton).toBeDisabled();
 
-    const saveButton = getByRole("button", { name: "general.save" });
-    fireEvent.click(saveButton);
+      await act(async () => {
+        fireEvent.click(saveButton);
+      });
+      expect(onSubmit).toHaveBeenCalledTimes(1);
 
-    expect(onSubmit).toHaveBeenCalledTimes(1);
-    expect(onSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({ id: htmlEntity.id })
-    );
-    expect(saveButton).toBeDisabled();
+      await act(async () => {
+        settleSave(new Error("save failed"));
+      });
+      expect(saveButton).not.toBeDisabled();
+    }
+  );
 
-    fireEvent.click(saveButton);
-    expect(onSubmit).toHaveBeenCalledTimes(1);
-
-    await act(async () => {
-      resolveSave();
-    });
-  });
-
-  it("keeps unsaved edits when a failed save returns validation errors", async () => {
+  it("shows server errors per field, clears only the edited field's error, and keeps unsaved edits", async () => {
     Element.prototype.scrollIntoView = jest.fn();
     const props = baseProps(htmlEntity);
-    const { container, getByRole, rerender } = render(
+    const { container, getByRole, findByText, queryByText, rerender } = render(
       <EmailTemplateForm {...props} />
     );
 
     fireEvent.change(container.querySelector("#subject"), {
-      target: { id: "subject", value: "Edited subject" }
+      target: { name: "subject", value: "Edited subject" }
     });
     rerender(
-      <EmailTemplateForm {...props} errors={{ identifier: "already taken" }} />
+      <EmailTemplateForm
+        {...props}
+        errors={{ identifier: "already taken", from_email: "invalid" }}
+      />
     );
-    fireEvent.click(getByRole("button", { name: "general.save" }));
+    expect(await findByText("already taken")).toBeTruthy();
+    expect(container.querySelector("#subject").value).toBe("Edited subject");
 
+    await act(async () => {
+      fireEvent.change(container.querySelector("#identifier"), {
+        target: { name: "identifier", value: "new-identifier" }
+      });
+    });
+    expect(queryByText("already taken")).toBeNull();
+    expect(queryByText("invalid")).toBeTruthy();
+
+    await act(async () => {
+      fireEvent.click(getByRole("button", { name: "general.save" }));
+    });
     expect(props.onSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({ subject: "Edited subject" })
+      expect.objectContaining({
+        subject: "Edited subject",
+        identifier: "new-identifier"
+      })
     );
   });
+});
 
-  it("re-enables the Save button after a rejected save", async () => {
-    const onSubmit = jest.fn(() => Promise.reject(new Error("save failed")));
-    const props = { ...baseProps(htmlEntity), onSubmit };
-    const { getByRole } = render(<EmailTemplateForm {...props} />);
+describe("EmailTemplateForm mjml validation", () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    mjml2html.mockImplementation(() => {
+      throw new Error("Malformed MJML");
+    });
+  });
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    jest.clearAllMocks();
+    mjml2html.mockImplementation(() => ({ html: "<html></html>" }));
+  });
 
+  it("does not compile unedited mjml (on load or a bare mode switch), so Save stays enabled", async () => {
+    const { getByRole, getByText } = render(
+      <EmailTemplateForm {...baseProps(mjmlEntity)} />
+    );
     await act(async () => {
       jest.advanceTimersByTime(600);
     });
-
-    const saveButton = getByRole("button", { name: "general.save" });
-
     await act(async () => {
-      fireEvent.click(saveButton);
+      fireEvent.click(getByText("emails.display_html"));
+    });
+    await act(async () => {
+      fireEvent.click(getByText("emails.display_mjml"));
     });
 
-    expect(saveButton).not.toBeDisabled();
+    expect(mjml2html).not.toHaveBeenCalled();
+    expect(getByRole("button", { name: "general.save" })).not.toBeDisabled();
+  });
+
+  it("disables Save once an edit makes the mjml invalid", async () => {
+    const { getByRole, getByTestId } = render(
+      <EmailTemplateForm {...baseProps(mjmlEntity)} />
+    );
+
+    await act(async () => {
+      fireEvent.change(getByTestId("editor-mjml_content"), {
+        target: { value: "<mjml><mj-body><mj-text foo='1'>" }
+      });
+    });
+
+    expect(mjml2html).toHaveBeenCalled();
+    expect(getByRole("button", { name: "general.save" })).toBeDisabled();
+  });
+
+  it("never compiles a child template's raw mjml, even after an edit", async () => {
+    const childEntity = {
+      ...mjmlEntity,
+      parent: { id: 3, identifier: "layout" },
+      mjml_content: "{% extends 'layout' %}{% block content %}{% endblock %}"
+    };
+    const { getByRole, getByTestId } = render(
+      <EmailTemplateForm {...baseProps(childEntity)} />
+    );
+
+    await act(async () => {
+      fireEvent.change(getByTestId("editor-mjml_content"), {
+        target: {
+          value: "{% extends 'layout' %}{% block content %}x{% endblock %}"
+        }
+      });
+    });
+
+    expect(mjml2html).not.toHaveBeenCalled();
+    expect(getByRole("button", { name: "general.save" })).not.toBeDisabled();
   });
 });

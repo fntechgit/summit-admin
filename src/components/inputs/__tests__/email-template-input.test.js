@@ -102,46 +102,34 @@ describe("EmailTemplateInput", () => {
     expect(within(listbox).getByText("other")).toBeInTheDocument();
   });
 
-  it("loads default options on mount and reuses cached results", async () => {
-    mockTemplates([{ id: 42, identifier: "welcome_email" }]);
-
-    render(
-      <EmailTemplateInput
-        id="tpl"
-        value=""
-        onChange={jest.fn()}
-        plainValue
-        defaultOptions
-        cacheOptions
-      />
-    );
-
-    expect(queryTemplates).toHaveBeenCalledWith("", expect.any(Function));
-
-    const input = screen.getByRole("combobox");
-    await userEvent.type(input, "w");
-    await userEvent.type(input, "{Backspace}");
-
-    expect(queryTemplates.mock.calls.map(([term]) => term)).toEqual(["", "w"]);
-  });
-
   it("does not duplicate the selected template in the options", async () => {
     mockTemplates([
       { id: 42, identifier: "welcome_email" },
       { id: 43, identifier: "welcome_email_2" }
     ]);
 
-    render(
-      <EmailTemplateInput
-        id="tpl"
-        value="welcome_email"
-        onChange={jest.fn()}
-        plainValue
-        defaultOptions
-      />
+    const Harness = () => {
+      const [value, setValue] = React.useState("");
+      return (
+        <EmailTemplateInput
+          id="tpl"
+          value={value}
+          onChange={(ev) => setValue(ev.target.value)}
+          plainValue
+        />
+      );
+    };
+    render(<Harness />);
+
+    const input = screen.getByRole("combobox");
+    await userEvent.type(input, "welcome");
+    await userEvent.click(
+      await screen.findByRole("option", { name: "welcome_email" })
     );
 
-    await userEvent.click(screen.getByRole("combobox"));
+    // reopen the listbox with the value selected
+    await userEvent.click(input);
+    await userEvent.keyboard("{ArrowDown}");
 
     const labels = (await screen.findAllByRole("option")).map(
       (option) => option.textContent

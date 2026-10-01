@@ -115,15 +115,8 @@ describe("getEmailTemplate - stale response guard", () => {
 
   const isTemplateFetchUrl = (url) => /\/mail-templates\/[^/]+$/.test(url);
 
-  beforeEach(() => {
-    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  it("drops an older template's response after a newer template's response already landed", async () => {
+  // each template fetch stays in flight until the test calls resolvers[id]()
+  const mockDeferredTemplateFetches = () => {
     const resolvers = {};
     getRequest.mockImplementation(
       (requestActionCreator, receiveActionCreator, url) => () => (dispatch) => {
@@ -141,6 +134,19 @@ describe("getEmailTemplate - stale response guard", () => {
         return Promise.resolve();
       }
     );
+    return resolvers;
+  };
+
+  beforeEach(() => {
+    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("drops an older template's response after a newer template's response already landed", async () => {
+    const resolvers = mockDeferredTemplateFetches();
 
     const store = mockStore({});
 
@@ -165,23 +171,7 @@ describe("getEmailTemplate - stale response guard", () => {
   });
 
   it("drops a template's response that lands after resetTemplateForm supersedes it", async () => {
-    const resolvers = {};
-    getRequest.mockImplementation(
-      (requestActionCreator, receiveActionCreator, url) => () => (dispatch) => {
-        if (isTemplateFetchUrl(url)) {
-          const id = Number(url.split("/").pop());
-          return new Promise((resolve) => {
-            resolvers[id] = () => {
-              dispatch(receiveActionCreator({ response: { id } }));
-              resolve();
-            };
-          });
-        }
-        if (requestActionCreator) dispatch(requestActionCreator({}));
-        dispatch(receiveActionCreator({ response: {} }));
-        return Promise.resolve();
-      }
-    );
+    const resolvers = mockDeferredTemplateFetches();
 
     const store = mockStore({});
 
@@ -198,6 +188,9 @@ describe("getEmailTemplate - stale response guard", () => {
 
     expect(actionTypes).not.toContain("RECEIVE_TEMPLATE");
     expect(actionTypes).toContain("RESET_TEMPLATE_FORM");
+    expect(actionTypes.lastIndexOf("STOP_LOADING")).toBeGreaterThan(
+      actionTypes.indexOf("START_LOADING")
+    );
   });
 });
 

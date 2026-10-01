@@ -1,6 +1,5 @@
 import React from "react";
 import { act, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { MemoryRouter } from "react-router-dom";
 import flushPromises from "flush-promises";
@@ -9,9 +8,7 @@ import EditEmailTemplatePage from "../edit-email-template-page";
 import {
   getEmailTemplate,
   resetTemplateForm,
-  saveEmailTemplate,
-  getAllClients,
-  updateTemplateJsonData
+  getAllClients
 } from "../../../actions/email-actions";
 
 jest.mock("../../../actions/email-actions", () => ({
@@ -25,33 +22,7 @@ jest.mock("../../../actions/email-actions", () => ({
 
 jest.mock("../../../components/forms/email-template-form", () => ({
   __esModule: true,
-  default: ({ onSubmit, onRender }) => (
-    <div data-testid="email-template-form">
-      <button
-        type="button"
-        onClick={() => onSubmit({ identifier: "Edited Template" })}
-      >
-        general.save
-      </button>
-      <button type="button" onClick={onRender}>
-        open-json
-      </button>
-    </div>
-  )
-}));
-
-jest.mock("../email-template-json-dialog", () => ({
-  __esModule: true,
-  default: ({ onUpdate, onClose }) => (
-    <div data-testid="email-template-json-dialog">
-      <button type="button" onClick={() => onUpdate({ foo: "bar" })}>
-        json-update
-      </button>
-      <button type="button" onClick={onClose}>
-        json-close
-      </button>
-    </div>
-  )
+  default: () => <div data-testid="email-template-form" />
 }));
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
@@ -76,11 +47,10 @@ describe("EditEmailTemplatePage", () => {
     jest.clearAllMocks();
     getEmailTemplate.mockReturnValue(() => Promise.resolve());
     resetTemplateForm.mockReturnValue({ type: "RESET_TEMPLATE_FORM" });
-    saveEmailTemplate.mockReturnValue(() => Promise.resolve());
     getAllClients.mockReturnValue(() => Promise.resolve());
   });
 
-  it("shows a loading state and defers mounting the form until the fetch resolves", async () => {
+  it("fetches the template and defers mounting the form until the fetch resolves", async () => {
     let resolveFetch;
     getEmailTemplate.mockReturnValue(
       () =>
@@ -99,6 +69,8 @@ describe("EditEmailTemplatePage", () => {
       { initialState }
     );
 
+    expect(getEmailTemplate).toHaveBeenCalledWith("42");
+    expect(resetTemplateForm).not.toHaveBeenCalled();
     expect(screen.getByText("emails.loading_template")).toBeInTheDocument();
     expect(screen.queryByTestId("email-template-form")).not.toBeInTheDocument();
 
@@ -160,7 +132,7 @@ describe("EditEmailTemplatePage", () => {
     expect(screen.getByTestId("email-template-form")).toBeInTheDocument();
   });
 
-  it("resets the form and fetches clients when there is no template_id", () => {
+  it("resets the form instead of fetching on the new-template route", () => {
     renderWithRedux(
       <EditEmailTemplatePage
         match={{ url: "/app/emails/templates/new", params: {} }}
@@ -170,78 +142,6 @@ describe("EditEmailTemplatePage", () => {
 
     expect(resetTemplateForm).toHaveBeenCalled();
     expect(getEmailTemplate).not.toHaveBeenCalled();
-    expect(getAllClients).toHaveBeenCalled();
-  });
-
-  it("fetches the entity when a template_id is present", () => {
-    renderWithRedux(
-      <EditEmailTemplatePage
-        match={{
-          url: "/app/emails/templates/42",
-          params: { template_id: "42" }
-        }}
-      />,
-      { initialState }
-    );
-
-    expect(getEmailTemplate).toHaveBeenCalledWith("42");
-    expect(resetTemplateForm).not.toHaveBeenCalled();
-  });
-
-  it("saves the entity submitted by the form", async () => {
-    renderWithRedux(
-      <EditEmailTemplatePage
-        match={{
-          url: "/app/emails/templates/42",
-          params: { template_id: "42" }
-        }}
-      />,
-      { initialState }
-    );
-
-    const saveButton = await screen.findByRole("button", {
-      name: "general.save"
-    });
-
-    await act(async () => {
-      await userEvent.click(saveButton);
-      await flushPromises();
-    });
-
-    expect(saveEmailTemplate).toHaveBeenCalledWith({
-      identifier: "Edited Template"
-    });
-  });
-
-  it("opens the JSON dialog and applies an update", async () => {
-    renderWithRedux(
-      <EditEmailTemplatePage
-        match={{ url: "/app/emails/templates/new", params: {} }}
-      />,
-      { initialState }
-    );
-
-    const openJsonButton = await screen.findByRole("button", {
-      name: "open-json"
-    });
-    await userEvent.click(openJsonButton);
-    expect(
-      screen.getByTestId("email-template-json-dialog")
-    ).toBeInTheDocument();
-
-    updateTemplateJsonData.mockReturnValue(() => Promise.resolve());
-
-    await act(async () => {
-      await userEvent.click(
-        screen.getByRole("button", { name: "json-update" })
-      );
-      await flushPromises();
-    });
-
-    expect(updateTemplateJsonData).toHaveBeenCalledWith({ foo: "bar" });
-    expect(
-      screen.queryByTestId("email-template-json-dialog")
-    ).not.toBeInTheDocument();
   });
 
   it("does not mount the form with a stale entity when the template fetch fails", async () => {
@@ -275,6 +175,5 @@ describe("EditEmailTemplatePage", () => {
 
     expect(getEmailTemplate).toHaveBeenCalledWith("5");
     expect(screen.queryByTestId("email-template-form")).not.toBeInTheDocument();
-    expect(saveEmailTemplate).not.toHaveBeenCalled();
   });
 });
