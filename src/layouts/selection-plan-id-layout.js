@@ -35,14 +35,16 @@ const SelectionPlanIdLayout = ({
     if (!selectionPlanId) {
       resetSelectionPlanForm();
     } else {
-      getSelectionPlan(selectionPlanId).then(() =>
-        getMarketingSettingsBySelectionPlan(
-          selectionPlanId,
-          null,
-          1,
-          MAX_PER_PAGE
+      getSelectionPlan(selectionPlanId)
+        .then(() =>
+          getMarketingSettingsBySelectionPlan(
+            selectionPlanId,
+            null,
+            1,
+            MAX_PER_PAGE
+          )
         )
-      );
+        .catch(() => {});
     }
   }, [selectionPlanId]);
 

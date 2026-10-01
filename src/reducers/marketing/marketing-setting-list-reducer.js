@@ -9,8 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_SETTINGS,
   REQUEST_SETTINGS,
@@ -18,7 +19,6 @@ import {
 } from "../../actions/marketing-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
   settings: [],
@@ -39,32 +39,30 @@ const marketingSettingListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SETTINGS: {
-      let { order, orderDir, term } = payload;
+      const { order, orderDir, term, currentPage, perPage } = payload;
 
-      return { ...state, order, orderDir, term };
+      return { ...state, order, orderDir, term, currentPage, perPage };
     }
     case RECEIVE_SETTINGS: {
-      let { total, last_page, current_page } = payload.response;
-      let settings = payload.response.data.map((s) => {
-        return {
+      const { total, last_page, current_page } = payload.response;
+      const settings = payload.response.data.map((s) => ({
           id: s.id,
           key: s.key,
           type: s.type,
           value: s.value,
           selection_plan_id: s.selection_plan_id ? s.selection_plan_id : "N/A"
-        };
-      });
+        }));
 
       return {
         ...state,
-        settings: settings,
+        settings,
         currentPage: current_page,
         totalSettings: total,
         lastPage: last_page
       };
     }
     case SETTING_DELETED: {
-      let { settingId } = payload;
+      const { settingId } = payload;
       return {
         ...state,
         settings: state.settings.filter((s) => s.id !== settingId)
