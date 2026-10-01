@@ -16,10 +16,10 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
-import Table from "openstack-uicore-foundation/lib/components/table"
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input";
+import Table from "openstack-uicore-foundation/lib/components/table";
 import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input";
 import { getSummitById } from "../../actions/summit-actions";
 import {
@@ -35,7 +35,7 @@ import {
   TRIM_TEXT_LENGTH_50,
   TRIM_TEXT_LENGTH_40
 } from "../../utils/constants";
-import { trim } from "../../utils/methods";
+import { truncateText } from "../../utils/methods";
 
 const fieldNames = [
   { columnKey: "class_name", value: "type" },
@@ -393,10 +393,14 @@ class PromocodeListPage extends React.Component {
       ...p,
       owner_email: (
         <abbr title={p.owner_email}>
-          {trim(p?.owner_email, TRIM_TEXT_LENGTH_40)}
+          {truncateText(p?.owner_email, TRIM_TEXT_LENGTH_40)}
         </abbr>
       ),
-      owner: <abbr title={p.owner}>{trim(p?.owner, TRIM_TEXT_LENGTH_40)}</abbr>
+      owner: (
+        <abbr title={p.owner}>
+          {truncateText(p?.owner, TRIM_TEXT_LENGTH_40)}
+        </abbr>
+      )
     }));
 
     return (
