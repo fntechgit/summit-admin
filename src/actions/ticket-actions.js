@@ -1014,7 +1014,7 @@ export const getTicketType = (ticketTypeId) => async (dispatch, getState) => {
     null,
     createAction(RECEIVE_TICKET_TYPE),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/ticket-types/${ticketTypeId}`,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -1038,47 +1038,52 @@ export const saveTicketType = (entity) => async (dispatch, getState) => {
   const normalizedEntity = normalizeEntity(entity);
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_TICKET_TYPE),
       createAction(TICKET_TYPE_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/ticket-types/${entity.id}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(
-        showSuccessMessage(T.translate("edit_ticket_type.ticket_type_saved"))
-      );
-    });
-  } else {
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_ticket_type.ticket_type_created"),
-      type: "success"
-    };
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_ticket_type.ticket_type_saved")
+          })
+        );
+      })
+      .catch(() => {})
+      .finally(() => dispatch(stopLoading()));
+  }
 
-    postRequest(
-      createAction(UPDATE_TICKET_TYPE),
-      createAction(TICKET_TYPE_ADDED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/ticket-types`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then((payload) => {
+  return postRequest(
+    createAction(UPDATE_TICKET_TYPE),
+    createAction(TICKET_TYPE_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/ticket-types`,
+    normalizedEntity,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch)
+    .then((payload) => {
       dispatch(
         createAction(TICKET_TYPES_CURRENCY_UPDATED)({
           currency: payload.response.currency
         })
       );
       dispatch(
-        showMessage(success_message, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/ticket-types/${payload.response.id}`
-          );
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_ticket_type.ticket_type_created")
         })
       );
-    });
-  }
+      history.push(
+        `/app/summits/${currentSummit.id}/ticket-types/${payload.response.id}`
+      );
+    })
+    .catch(() => {})
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const deleteTicketType =

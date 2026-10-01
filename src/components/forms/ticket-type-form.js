@@ -11,351 +11,402 @@
  * limitations under the License.
  */
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
+import {
+  Box,
+  Button,
+  Checkbox,
+  Divider,
+  FormControlLabel,
+  FormHelperText,
+  Grid2,
+  InputLabel,
+  TextField,
+  Tooltip
+} from "@mui/material";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
-import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
-import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
-import TextAreaInputWithCounter from "../inputs/text-area-input-with-counter";
-import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
+import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
+import { hasErrors, scrollToError, shallowEqual } from "../../utils/methods";
+import { TEXT_MAX_LENGTH_255 } from "../../utils/constants";
 
-class TicketTypeForm extends React.Component {
-  constructor(props) {
-    super(props);
+const InfoTooltip = ({ title }) => (
+  <Tooltip title={title}>
+    <InfoOutlinedIcon
+      fontSize="small"
+      sx={{ ml: 0.5, verticalAlign: "middle", color: "text.secondary" }}
+    />
+  </Tooltip>
+);
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors
-    };
+const TicketTypeForm = ({
+  entity: propsEntity,
+  errors: propsErrors,
+  currentSummit,
+  isSaving,
+  onSubmit
+}) => {
+  const [entity, setEntity] = useState({ ...propsEntity });
+  const [errors, setErrors] = useState(propsErrors);
+  const prevEntityRef = useRef(propsEntity);
+  const prevErrorsRef = useRef(propsErrors);
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+  useEffect(() => {
+    scrollToError(propsErrors);
+  }, [propsErrors]);
 
-  componentDidUpdate(prevProps) {
-    const newState = {};
-    const { errors, entity } = this.props;
-    scrollToError(errors);
-
-    if (!shallowEqual(prevProps.entity, entity)) {
-      newState.entity = { ...entity };
-      newState.errors = {};
+  useEffect(() => {
+    if (!shallowEqual(prevEntityRef.current, propsEntity)) {
+      setEntity({ ...propsEntity });
+      setErrors({});
     }
+    prevEntityRef.current = propsEntity;
+  }, [propsEntity]);
 
-    if (!shallowEqual(prevProps.errors, errors)) {
-      newState.errors = { ...errors };
+  useEffect(() => {
+    if (!shallowEqual(prevErrorsRef.current, propsErrors)) {
+      setErrors({ ...propsErrors });
     }
+    prevErrorsRef.current = propsErrors;
+  }, [propsErrors]);
 
-    if (!isEmpty(newState)) {
-      this.setState((prevState) => ({ ...prevState, ...newState }));
+  const setField = (field, value) => {
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+    setEntity((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleChange = (ev) => {
+    const { name, type, checked } = ev.target;
+    const value = type === "checkbox" ? checked : ev.target.value;
+    setField(name, value);
+  };
+
+  const handleDateChange = (field) => (value) => {
+    if (value === null) {
+      setField(field, 0);
+    } else if (value.isValid()) {
+      setField(field, value.unix());
     }
-  }
+  };
 
-  handleChange(ev) {
-    const { entity: currentEntity, errors: currentErrors } = this.state;
-    const entity = { ...currentEntity };
-    const errors = { ...currentErrors };
-    const { id } = ev.target;
-    let { value } = ev.target;
-
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
-
-    if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_TO_SECONDS;
-    }
-
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ entity, errors });
-  }
-
-  handleSubmit(ev) {
-    const { onSubmit } = this.props;
-    const { entity } = this.state;
+  const handleSubmit = (ev) => {
     ev.preventDefault();
-
     onSubmit(entity);
-  }
+  };
 
-  hasErrors(field) {
-    const { errors } = this.state;
-    if (field in errors) {
-      return errors[field];
+  const fieldError = (field) => {
+    const error = hasErrors(field, errors);
+    return { error: !!error, helperText: error || undefined };
+  };
+
+  const currency_ddl = currentSummit.supported_currencies.map((i) => ({
+    label: i,
+    value: i
+  }));
+  const badge_type_ddl = currentSummit.badge_types
+    ? currentSummit.badge_types.map((bt) => ({
+        label: bt.name,
+        value: bt.id
+      }))
+    : [];
+
+  const audience_ddl = [
+    { label: "With Invitation", value: "WithInvitation" },
+    { label: "Without Invitation", value: "WithoutInvitation" },
+    { label: "All", value: "All" },
+    // Additive audience added with the domain-authorized promo code feature.
+    // See sds/promo-codes-for-early-registration-access-summit-admin.md.
+    {
+      label: T.translate("edit_ticket_type.audience_with_promo_code"),
+      value: "WithPromoCode"
     }
+  ];
 
-    return "";
-  }
+  const description = entity.description || "";
 
-  render() {
-    const { entity } = this.state;
-    const { currentSummit } = this.props;
-    const currency_ddl = currentSummit.supported_currencies.map((i) => ({
-      label: i,
-      value: i
-    }));
-    const badge_type_ddl = currentSummit.badge_types
-      ? currentSummit.badge_types.map((bt) => ({
-          label: bt.name,
-          value: bt.id
-        }))
-      : [];
+  return (
+    <Box component="form" noValidate>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <InputLabel htmlFor="name">
+            {T.translate("edit_ticket_type.name")} *
+          </InputLabel>
+          <TextField
+            id="name"
+            name="name"
+            value={entity.name}
+            onChange={handleChange}
+            size="small"
+            fullWidth
+            {...fieldError("name")}
+          />
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <InputLabel htmlFor="external_id">
+            {T.translate("edit_ticket_type.external_id")}
+          </InputLabel>
+          <TextField
+            id="external_id"
+            name="external_id"
+            value={entity.external_id}
+            onChange={handleChange}
+            size="small"
+            fullWidth
+            {...fieldError("external_id")}
+          />
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <InputLabel id="badge_type_id-label" htmlFor="badge_type_id">
+            {T.translate("edit_ticket_type.badge_type_id")}
+          </InputLabel>
+          <MuiDropdown
+            id="badge_type_id"
+            name="badge_type_id"
+            value={entity.badge_type_id || ""}
+            onChange={handleChange}
+            options={badge_type_ddl}
+            placeholder={T.translate(
+              "edit_ticket_type.placeholders.select_badge_type"
+            )}
+            size="small"
+            SelectDisplayProps={{ id: "badge_type_id" }}
+          />
+        </Grid2>
+      </Grid2>
 
-    const audience_ddl = [
-      { label: "With Invitation", value: "WithInvitation" },
-      { label: "Without Invitation", value: "WithoutInvitation" },
-      { label: "All", value: "All" },
-      // Additive audience added with the domain-authorized promo code feature.
-      // See sds/promo-codes-for-early-registration-access-summit-admin.md.
-      {
-        label: T.translate("edit_ticket_type.audience_with_promo_code"),
-        value: "WithPromoCode"
-      }
-    ];
-
-    return (
-      <form className="ticket-type-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label htmlFor="name">
-              {" "}
-              {T.translate("edit_ticket_type.name")} *
-            </label>
-            <Input
-              id="name"
-              className="form-control"
-              error={this.hasErrors("name")}
-              onChange={this.handleChange}
-              value={entity.name}
-            />
-          </div>
-          <div className="col-md-4">
-            <label htmlFor="external_id">
-              {" "}
-              {T.translate("edit_ticket_type.external_id")}
-            </label>
-            <Input
-              className="form-control"
-              error={this.hasErrors("external_id")}
-              id="external_id"
-              value={entity.external_id}
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="col-md-4">
-            <label htmlFor="badge_type_id">
-              {" "}
-              {T.translate("edit_ticket_type.badge_type_id")}
-            </label>
-            <Dropdown
-              id="badge_type_id"
-              value={entity.badge_type_id}
-              onChange={this.handleChange}
-              options={badge_type_ddl}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-8">
-            <label htmlFor="description">
-              {" "}
-              {T.translate("edit_ticket_type.description")}
-            </label>
-            <TextAreaInputWithCounter
-              id="description"
-              value={entity.description}
-              onChange={this.handleChange}
-              className="form-control"
-              rows={4}
-              maxLength={255}
-            />
-          </div>
-          <div className="col-md-4">
-            <label htmlFor="audience">
-              {" "}
-              {T.translate("edit_ticket_type.audience")}
-              {entity.audience === "WithPromoCode" && (
-                <>
-                  &nbsp;
-                  <i
-                    className="fa fa-info-circle"
-                    aria-hidden="true"
-                    title={T.translate(
-                      "edit_ticket_type.info_audience_with_promo_code"
-                    )}
-                  />
-                </>
-              )}
-            </label>
-            <Dropdown
-              id="audience"
-              value={entity.audience}
-              onChange={this.handleChange}
-              placeholder={T.translate(
-                "edit_ticket_type.placeholders.select_audience"
-              )}
-              options={audience_ddl}
-              error={this.hasErrors("audience")}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label htmlFor="cost">
-              {" "}
-              {T.translate("edit_ticket_type.cost")}
-            </label>
-            <Input
-              id="cost"
-              className="form-control"
-              error={this.hasErrors("cost")}
-              onChange={this.handleChange}
-              value={entity.cost}
-            />
-          </div>
-          <div className="col-md-4">
-            <label htmlFor="currency">
-              {" "}
-              {T.translate("edit_ticket_type.currency")}
-            </label>
-            <Dropdown
-              id="currency"
-              value={entity.currency}
-              onChange={this.handleChange}
-              placeholder={T.translate(
-                "edit_ticket_type.placeholders.select_currency"
-              )}
-              options={currency_ddl}
-              error={this.hasErrors("currency")}
-            />
-          </div>
-          <div className="col-md-4 checkboxes-div">
-            <div className="form-check abc-checkbox">
-              <input
-                type="checkbox"
-                id="allows_to_delegate"
-                checked={entity.allows_to_delegate}
-                onChange={this.handleChange}
-                className="form-check-input"
+      <Grid2 container spacing={2} sx={{ mb: 4 }}>
+        <Grid2 size={{ xs: 12, md: 8 }}>
+          <InputLabel htmlFor="description">
+            {T.translate("edit_ticket_type.description")}
+          </InputLabel>
+          <TextField
+            id="description"
+            name="description"
+            value={description}
+            onChange={handleChange}
+            multiline
+            rows={4}
+            fullWidth
+            helperText={`${description.length}/${TEXT_MAX_LENGTH_255}`}
+            slotProps={{
+              htmlInput: { maxLength: TEXT_MAX_LENGTH_255 },
+              formHelperText: { sx: { right: 0 } }
+            }}
+          />
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 4 }} sx={{ position: "relative" }}>
+          <InputLabel id="audience-label" htmlFor="audience">
+            {T.translate("edit_ticket_type.audience")}
+            {entity.audience === "WithPromoCode" && (
+              <InfoTooltip
+                title={T.translate(
+                  "edit_ticket_type.info_audience_with_promo_code"
+                )}
               />
-              <label className="form-check-label" htmlFor="allows_to_delegate">
-                {T.translate("edit_ticket_type.allows_to_delegate")}&nbsp;
-                <i
-                  className="fa fa-info-circle"
-                  aria-hidden="true"
-                  title={T.translate(
-                    "edit_ticket_type.allows_to_delegate_info"
-                  )}
+            )}
+          </InputLabel>
+          <MuiDropdown
+            id="audience"
+            name="audience"
+            value={entity.audience || ""}
+            onChange={handleChange}
+            options={audience_ddl}
+            placeholder={T.translate(
+              "edit_ticket_type.placeholders.select_audience"
+            )}
+            size="small"
+            error={!!hasErrors("audience", errors)}
+            SelectDisplayProps={{ id: "audience" }}
+          />
+          {hasErrors("audience", errors) && (
+            <FormHelperText error>
+              {hasErrors("audience", errors)}
+            </FormHelperText>
+          )}
+        </Grid2>
+      </Grid2>
+
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <InputLabel htmlFor="cost">
+            {T.translate("edit_ticket_type.cost")}
+          </InputLabel>
+          <TextField
+            id="cost"
+            name="cost"
+            value={entity.cost}
+            onChange={handleChange}
+            size="small"
+            fullWidth
+            {...fieldError("cost")}
+          />
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 4 }} sx={{ position: "relative" }}>
+          <InputLabel id="currency-label" htmlFor="currency">
+            {T.translate("edit_ticket_type.currency")}
+          </InputLabel>
+          <MuiDropdown
+            id="currency"
+            name="currency"
+            value={entity.currency || ""}
+            onChange={handleChange}
+            options={currency_ddl}
+            placeholder={T.translate(
+              "edit_ticket_type.placeholders.select_currency"
+            )}
+            size="small"
+            error={!!hasErrors("currency", errors)}
+            SelectDisplayProps={{ id: "currency" }}
+          />
+          {hasErrors("currency", errors) && (
+            <FormHelperText error>
+              {hasErrors("currency", errors)}
+            </FormHelperText>
+          )}
+        </Grid2>
+        <Grid2
+          size={{ xs: 12, md: 4 }}
+          sx={{ display: "flex", alignItems: "flex-end" }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  id="allows_to_delegate"
+                  name="allows_to_delegate"
+                  checked={!!entity.allows_to_delegate}
+                  onChange={handleChange}
                 />
-              </label>
-            </div>
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label htmlFor="quantity_2_sell">
-              {" "}
-              {T.translate("edit_ticket_type.quantity_to_sell")}
-            </label>
-            <Input
-              id="quantity_2_sell"
-              type="number"
-              className="form-control"
-              error={this.hasErrors("quantity_2_sell")}
-              onChange={this.handleChange}
-              value={entity.quantity_2_sell}
+              }
+              label={T.translate("edit_ticket_type.allows_to_delegate")}
+              sx={{ mr: 0, mb: 0 }}
             />
-          </div>
-          <div className="col-md-4">
-            <label htmlFor="max_quantity_per_order">
-              {" "}
-              {T.translate("edit_ticket_type.max_quantity_to_sell_per_order")}
-            </label>
-            <Input
-              id="max_quantity_per_order"
-              type="number"
-              className="form-control"
-              error={this.hasErrors("max_quantity_per_order")}
-              onChange={this.handleChange}
-              value={entity.max_quantity_per_order}
+            <InfoTooltip
+              title={T.translate("edit_ticket_type.allows_to_delegate_info")}
             />
-          </div>
-          <div className="col-md-4 checkboxes-div">
-            <div className="form-check abc-checkbox">
-              <input
-                type="checkbox"
-                id="allows_to_reassign"
-                checked={entity.allows_to_reassign}
-                onChange={this.handleChange}
-                className="form-check-input"
-              />
-              <label className="form-check-label" htmlFor="allows_to_reassign">
-                {T.translate("edit_ticket_type.allows_to_reassign")}&nbsp;
-                <i
-                  className="fa fa-info-circle"
-                  aria-hidden="true"
-                  title={T.translate(
-                    "edit_ticket_type.allows_to_reassign_info"
-                  )}
+          </Box>
+        </Grid2>
+      </Grid2>
+
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <InputLabel htmlFor="quantity_2_sell">
+            {T.translate("edit_ticket_type.quantity_to_sell")}
+          </InputLabel>
+          <TextField
+            id="quantity_2_sell"
+            name="quantity_2_sell"
+            type="number"
+            value={entity.quantity_2_sell}
+            onChange={handleChange}
+            size="small"
+            fullWidth
+            {...fieldError("quantity_2_sell")}
+          />
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <InputLabel htmlFor="max_quantity_per_order">
+            {T.translate("edit_ticket_type.max_quantity_to_sell_per_order")}
+          </InputLabel>
+          <TextField
+            id="max_quantity_per_order"
+            name="max_quantity_per_order"
+            type="number"
+            value={entity.max_quantity_per_order}
+            onChange={handleChange}
+            size="small"
+            fullWidth
+            {...fieldError("max_quantity_per_order")}
+          />
+        </Grid2>
+        <Grid2
+          size={{ xs: 12, md: 4 }}
+          sx={{ display: "flex", alignItems: "flex-end" }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  id="allows_to_reassign"
+                  name="allows_to_reassign"
+                  checked={!!entity.allows_to_reassign}
+                  onChange={handleChange}
                 />
-              </label>
-            </div>
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label htmlFor="sales_start_date">
-              {" "}
-              {T.translate("edit_ticket_type.sales_start_date")}
-            </label>
-            <DateTimePicker
-              id="sales_start_date"
-              onChange={this.handleChange}
-              format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-              timezone={currentSummit.time_zone_id}
-              value={epochToMomentTimeZone(
+              }
+              label={T.translate("edit_ticket_type.allows_to_reassign")}
+              sx={{ mr: 0, mb: 0 }}
+            />
+            <InfoTooltip
+              title={T.translate("edit_ticket_type.allows_to_reassign_info")}
+            />
+          </Box>
+        </Grid2>
+      </Grid2>
+
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <InputLabel htmlFor="sales_start_date">
+            {T.translate("edit_ticket_type.sales_start_date")}
+          </InputLabel>
+          <DateTimePicker
+            value={
+              epochToMomentTimeZone(
                 entity.sales_start_date,
                 currentSummit.time_zone_id
-              )}
-            />
-          </div>
-          <div className="col-md-4">
-            <label htmlFor="sales_end_date">
-              {" "}
-              {T.translate("edit_ticket_type.sales_end_date")}
-            </label>
-            <DateTimePicker
-              id="sales_end_date"
-              onChange={this.handleChange}
-              format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-              timezone={currentSummit.time_zone_id}
-              value={epochToMomentTimeZone(
+              ) || null
+            }
+            onChange={handleDateChange("sales_start_date")}
+            timezone={currentSummit.time_zone_id}
+            format="YYYY-MM-DD HH:mm"
+            ampm={false}
+            slotProps={{
+              textField: {
+                id: "sales_start_date",
+                size: "small",
+                fullWidth: true
+              },
+              field: { clearable: true }
+            }}
+          />
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <InputLabel htmlFor="sales_end_date">
+            {T.translate("edit_ticket_type.sales_end_date")}
+          </InputLabel>
+          <DateTimePicker
+            value={
+              epochToMomentTimeZone(
                 entity.sales_end_date,
                 currentSummit.time_zone_id
-              )}
-            />
-          </div>
-        </div>
+              ) || null
+            }
+            onChange={handleDateChange("sales_end_date")}
+            timezone={currentSummit.time_zone_id}
+            format="YYYY-MM-DD HH:mm"
+            ampm={false}
+            slotProps={{
+              textField: {
+                id: "sales_end_date",
+                size: "small",
+                fullWidth: true
+              },
+              field: { clearable: true }
+            }}
+          />
+        </Grid2>
+      </Grid2>
 
-        <hr />
+      <Divider sx={{ my: 2 }} />
 
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
-        </div>
-      </form>
-    );
-  }
-}
+      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        <Button variant="contained" onClick={handleSubmit} disabled={isSaving}>
+          {T.translate("general.save")}
+        </Button>
+      </Box>
+    </Box>
+  );
+};
 
 export default TicketTypeForm;

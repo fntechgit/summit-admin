@@ -1973,6 +1973,7 @@
     "info_audience_with_promo_code": "Hidden from public listings. Only visible when a qualifying promo code includes this ticket type in its Allowed Ticket Types.",
     "placeholders": {
       "select_currency": "Select currency",
+      "select_badge_type": "Select Badge Type",
       "select_ticket_type": "Select Ticket Type",
       "select_audience": "Select Audience"
     }
