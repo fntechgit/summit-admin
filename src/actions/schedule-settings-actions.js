@@ -1,4 +1,4 @@
-/**
+/* *
  * Copyright 2021 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -9,8 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import T from "i18n-react";
 import {
   getRequest,
   createAction,
@@ -23,10 +24,9 @@ import {
   showMessage,
   showSuccessMessage
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { getAccessTokenSafely } from "../utils/methods";
 
+import { getAccessTokenSafely } from "../utils/methods";
 import history from "../history";
-import T from "i18n-react";
 
 export const REQUEST_ALL_SCHEDULE_SETTINGS = "REQUEST_ALL_SCHEDULE_SETTINGS";
 export const RECEIVE_ALL_SCHEDULE_SETTINGS = "RECEIVE_ALL_SCHEDULE_SETTINGS";
@@ -56,11 +56,10 @@ export const FILTER_TYPES = {
 };
 
 export const seedDefaultScheduleSettings = () => async (dispatch, getState) => {
+  dispatch(startLoading());
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
-
-  dispatch(startLoading());
 
   const params = {
     access_token: accessToken
@@ -72,19 +71,20 @@ export const seedDefaultScheduleSettings = () => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/schedule-settings/seed`,
     {},
     authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+  )(params)(dispatch)
+    .finally(() => {
+      dispatch(stopLoading());
+    })
+    .catch(() => {});
 };
 
 export const getAllScheduleSettings =
   (order = "key", orderDir = 1) =>
   async (dispatch, getState) => {
+    dispatch(startLoading());
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-
-    dispatch(startLoading());
 
     const params = {
       page: 1,
@@ -95,7 +95,7 @@ export const getAllScheduleSettings =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -104,17 +104,19 @@ export const getAllScheduleSettings =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/schedule-settings`,
       authErrorHandler,
       { order, orderDir }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .finally(() => {
+        dispatch(stopLoading());
+      })
+      .catch(() => {});
   };
 
 export const getScheduleSetting =
   (scheduleSettingId) => async (dispatch, getState) => {
+    dispatch(startLoading());
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
     const accessToken = await getAccessTokenSafely();
-    dispatch(startLoading());
 
     const params = {
       access_token: accessToken,
@@ -127,13 +129,16 @@ export const getScheduleSetting =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/schedule-settings/${scheduleSettingId}`,
       authErrorHandler,
       {}
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .finally(() => {
+        dispatch(stopLoading());
+      })
+      .catch(() => {});
   };
 
 export const deleteScheduleSetting =
   (scheduleSettingId) => async (dispatch, getState) => {
+    dispatch(startLoading());
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
@@ -148,16 +153,19 @@ export const deleteScheduleSetting =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/schedule-settings/${scheduleSettingId}`,
       null,
       authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .finally(() => {
+        dispatch(stopLoading());
+      })
+      .catch(() => {});
   };
 
-export const resetScheduleSettingsForm = () => (dispatch, getState) => {
+export const resetScheduleSettingsForm = () => (dispatch) => {
   dispatch(createAction(RESET_SCHEDULE_SETTINGS_FORM)({}));
 };
 
 export const saveScheduleSettings = (entity) => async (dispatch, getState) => {
+  dispatch(startLoading());
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
@@ -168,34 +176,38 @@ export const saveScheduleSettings = (entity) => async (dispatch, getState) => {
 
   const normalizedEntity = normalizeEntity(entity);
 
-  dispatch(startLoading());
-
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_SCHEDULE_SETTINGS),
       createAction(SCHEDULE_SETTINGS_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/schedule-settings/${entity.id}`,
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
-      dispatch(showSuccessMessage(T.translate("edit_schedule_settings.saved")));
-    });
-  } else {
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_schedule_settings.created"),
-      type: "success"
-    };
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          showSuccessMessage(T.translate("edit_schedule_settings.saved"))
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
+  }
 
-    postRequest(
-      createAction(UPDATE_SCHEDULE_SETTINGS),
-      createAction(SCHEDULE_SETTINGS_ADDED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/schedule-settings/`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then((payload) => {
+  const success_message = {
+    title: T.translate("general.done"),
+    html: T.translate("edit_schedule_settings.created"),
+    type: "success"
+  };
+
+  return postRequest(
+    createAction(UPDATE_SCHEDULE_SETTINGS),
+    createAction(SCHEDULE_SETTINGS_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/schedule-settings/`,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )(params)(dispatch)
+    .then((payload) => {
       dispatch(
         showMessage(success_message, () => {
           history.push(
@@ -203,8 +215,8 @@ export const saveScheduleSettings = (entity) => async (dispatch, getState) => {
           );
         })
       );
-    });
-  }
+    })
+    .finally(() => dispatch(stopLoading()));
 };
 
 const normalizeEntity = (entity) => {
@@ -217,7 +229,7 @@ const normalizeEntity = (entity) => {
     is_enabled: f.is_enabled
   }));
   normalized.pre_filters = entity.pre_filters.map((pf) => {
-    let values = pf.values;
+    let {values} = pf;
     if (pf.type === FILTER_TYPES.company) {
       values = values.map((v) => v.id);
     }
