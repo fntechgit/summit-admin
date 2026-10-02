@@ -14,10 +14,11 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, TextField, Tooltip } from "@mui/material";
+import { Box, Button, Divider, TextField, Tooltip } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   DataGrid,
   GridActionsCellItem,
@@ -80,6 +81,48 @@ const renderEditor = (col, editRow, onChange) => {
   );
 };
 
+// search icon that expands into the grid's quick filter; starts open when a
+// search term is already applied, and collapses again when left empty
+const ExpandableQuickFilter = ({ placeholder, term }) => {
+  const [expanded, setExpanded] = useState(!!term);
+
+  if (!expanded) {
+    return (
+      <Tooltip title={T.translate("general.search")}>
+        <Button
+          size="small"
+          startIcon={<SearchIcon />}
+          onClick={() => setExpanded(true)}
+          aria-label={T.translate("general.search")}
+          sx={ICON_ONLY_BUTTON_SX}
+        />
+      </Tooltip>
+    );
+  }
+
+  return (
+    <GridToolbarQuickFilter
+      autoFocus
+      placeholder={placeholder}
+      quickFilterParser={(input) => (input ? [input] : [])}
+      quickFilterFormatter={(values) => values.join(" ")}
+      onBlur={(ev) => {
+        if (!ev.target.value) setExpanded(false);
+      }}
+    />
+  );
+};
+
+ExpandableQuickFilter.propTypes = {
+  placeholder: PropTypes.string,
+  term: PropTypes.string
+};
+
+ExpandableQuickFilter.defaultProps = {
+  placeholder: "",
+  term: ""
+};
+
 const Toolbar = ({
   filter,
   onExport,
@@ -93,29 +136,6 @@ const Toolbar = ({
   <GridToolbarContainer
     sx={{ p: 1, gap: 1, borderBottom: 1, borderColor: "divider" }}
   >
-    {searchProps && (
-      <GridToolbarQuickFilter
-        placeholder={searchProps.placeholder}
-        quickFilterParser={(input) => (input ? [input] : [])}
-        quickFilterFormatter={(values) => values.join(" ")}
-      />
-    )}
-    <Box sx={{ flex: 1 }} />
-    <GridToolbarColumnsButton
-      slotProps={{ button: { sx: ICON_ONLY_BUTTON_SX } }}
-    />
-    {filter}
-    {onExport && (
-      <Tooltip title={T.translate("general.export")}>
-        <Button
-          size="small"
-          startIcon={<FileDownloadIcon />}
-          onClick={onExport}
-          aria-label={T.translate("general.export")}
-          sx={ICON_ONLY_BUTTON_SX}
-        />
-      </Tooltip>
-    )}
     {editEnabled ? (
       <>
         <Button size="small" variant="contained" onClick={onApply}>
@@ -135,6 +155,34 @@ const Toolbar = ({
         {T.translate("general.edit_selected")}
         {selectedCount > 0 ? ` (${selectedCount})` : ""}
       </Button>
+    )}
+    <Box sx={{ flex: 1 }} />
+    <GridToolbarColumnsButton
+      slotProps={{ button: { sx: ICON_ONLY_BUTTON_SX } }}
+    />
+    {filter}
+    {onExport && (
+      <>
+        <Divider orientation="vertical" flexItem />
+        <Tooltip title={T.translate("general.export")}>
+          <Button
+            size="small"
+            startIcon={<FileDownloadIcon />}
+            onClick={onExport}
+            aria-label={T.translate("general.export")}
+            sx={ICON_ONLY_BUTTON_SX}
+          />
+        </Tooltip>
+      </>
+    )}
+    {searchProps && (
+      <>
+        <Divider orientation="vertical" flexItem />
+        <ExpandableQuickFilter
+          placeholder={searchProps.placeholder}
+          term={searchProps.term}
+        />
+      </>
     )}
   </GridToolbarContainer>
 );
@@ -170,7 +218,10 @@ Footer.propTypes = {
 Toolbar.propTypes = {
   filter: PropTypes.node,
   onExport: PropTypes.func,
-  searchProps: PropTypes.shape({ placeholder: PropTypes.string }),
+  searchProps: PropTypes.shape({
+    placeholder: PropTypes.string,
+    term: PropTypes.string
+  }),
   editEnabled: PropTypes.bool.isRequired,
   selectedCount: PropTypes.number.isRequired,
   onEditSelected: PropTypes.func.isRequired,
