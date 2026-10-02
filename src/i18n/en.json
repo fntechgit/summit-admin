@@ -1285,7 +1285,6 @@
     "media_uploads": "Media Uploads",
     "edit_selected": "Edit Selected",
     "placeholders": {
-      "search_events": "Search by Id, Title, Abstract, Speaker Title",
       "event_type": "Filter by Activity Type",
       "select_fields": "Select data to display"
     }
