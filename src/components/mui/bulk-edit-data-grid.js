@@ -162,7 +162,8 @@ const Toolbar = ({
   selectedCount,
   onEditSelected,
   onApply,
-  onCancel
+  onCancel,
+  setColumnsButtonEl
 }) => (
   <GridToolbarContainer
     sx={{ p: 1, gap: 1, borderBottom: 1, borderColor: "divider" }}
@@ -220,6 +221,7 @@ const Toolbar = ({
       <Divider orientation="vertical" flexItem />
     )}
     <GridToolbarColumnsButton
+      ref={setColumnsButtonEl}
       slotProps={{ button: { sx: ICON_ONLY_BUTTON_SX } }}
     />
     {filter}
@@ -267,7 +269,8 @@ Toolbar.propTypes = {
   selectedCount: PropTypes.number.isRequired,
   onEditSelected: PropTypes.func.isRequired,
   onApply: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired
+  onCancel: PropTypes.func.isRequired,
+  setColumnsButtonEl: PropTypes.func.isRequired
 };
 
 Toolbar.defaultProps = {
@@ -316,6 +319,9 @@ const BulkEditDataGrid = ({
   // the list always has a default order; only show the sort arrow once the
   // user has sorted a column themselves
   const [hasUserSorted, setHasUserSorted] = useState(false);
+  // the columns panel anchors to the column headers by default; anchor it to
+  // its toolbar button instead
+  const [columnsButtonEl, setColumnsButtonEl] = useState(null);
 
   const reset = () => {
     setSelectedIds([]);
@@ -525,6 +531,14 @@ const BulkEditDataGrid = ({
           hideFooter
           slots={{ toolbar: Toolbar, columnMenu: ColumnMenu }}
           slotProps={{
+            panel: { anchorEl: columnsButtonEl, placement: "bottom-end" },
+            // bootstrap 3 sets box-sizing: border-box on input[type="search"],
+            // which squeezes MUI's padding into the input's fixed height
+            columnsManagement: {
+              searchInputProps: {
+                sx: { "& .MuiInputBase-input": { boxSizing: "content-box" } }
+              }
+            },
             toolbar: {
               views,
               onAdd,
@@ -538,7 +552,8 @@ const BulkEditDataGrid = ({
               selectedCount: selectedIds.length,
               onEditSelected: enterEditMode,
               onApply: handleApply,
-              onCancel: reset
+              onCancel: reset,
+              setColumnsButtonEl
             }
           }}
           sx={{ "& .MuiDataGrid-cell": { py: 1 } }}
