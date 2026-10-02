@@ -127,6 +127,7 @@ ExpandableQuickFilter.defaultProps = {
 };
 
 const Toolbar = ({
+  views,
   onAdd,
   addLabel,
   importItems,
@@ -163,6 +164,7 @@ const Toolbar = ({
         {selectedCount > 0 ? ` (${selectedCount})` : ""}
       </Button>
     )}
+    {views}
     <Box sx={{ flex: 1 }} />
     {onAdd && (
       <Tooltip title={addLabel}>
@@ -223,6 +225,7 @@ const Toolbar = ({
 );
 
 Toolbar.propTypes = {
+  views: PropTypes.node,
   onAdd: PropTypes.func,
   addLabel: PropTypes.string,
   importItems: PropTypes.arrayOf(
@@ -243,6 +246,7 @@ Toolbar.propTypes = {
 };
 
 Toolbar.defaultProps = {
+  views: null,
   onAdd: null,
   addLabel: "",
   importItems: [],
@@ -270,6 +274,7 @@ const BulkEditDataGrid = ({
   deleteDialogBody,
   columnVisibilityModel,
   onColumnVisibilityModelChange,
+  views,
   onAdd,
   addLabel,
   importItems,
@@ -481,6 +486,7 @@ const BulkEditDataGrid = ({
           slots={{ toolbar: Toolbar }}
           slotProps={{
             toolbar: {
+              views,
               onAdd,
               addLabel,
               importItems,
@@ -533,6 +539,8 @@ BulkEditDataGrid.propTypes = {
   deleteDialogBody: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
   columnVisibilityModel: PropTypes.objectOf(PropTypes.bool),
   onColumnVisibilityModelChange: PropTypes.func,
+  // rendered next to "Edit Selected", e.g. a <SavedViews /> dropdown
+  views: PropTypes.node,
   onAdd: PropTypes.func,
   // tooltip / aria-label of the add (+) button
   addLabel: PropTypes.string,
@@ -558,6 +566,7 @@ BulkEditDataGrid.propTypes = {
 };
 
 BulkEditDataGrid.defaultProps = {
+  views: null,
   idKey: "id",
   totalRows: 0,
   perPage: DEFAULT_PER_PAGE,

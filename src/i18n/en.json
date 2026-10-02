@@ -3947,6 +3947,13 @@
     "no_extra_questions": "No extra questions found.",
     "remove_warning": "Are you sure you want to remove question "
   },
+  "saved_views": {
+    "title": "Saved Views",
+    "name": "Name",
+    "save_current": "Save current view",
+    "clear": "Clear view",
+    "no_views": "No saved views"
+  },
   "save_filter_criteria": {
     "save_as": "Save As",
     "visible_to": "Visible to",
