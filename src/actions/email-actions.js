@@ -28,8 +28,11 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
 import debounce from "lodash/debounce";
-import history from "../history";
-import { checkOrFilter, getAccessTokenSafely } from "../utils/methods";
+import {
+  checkOrFilter,
+  getAccessTokenSafely,
+  sequenced
+} from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";
 import {
   DEBOUNCE_WAIT,
@@ -109,19 +112,6 @@ export const getEmailTemplates =
 // with the wrong template's data, and EmailTemplateForm's loadedEntityIdRef
 // check would silently reseed the visible form with it. guardedDispatch
 // drops the RECEIVE/loading dispatches from a superseded call.
-const sequenced = () => {
-  let seq = 0;
-  return (dispatch) => {
-    seq += 1;
-    const mySeq = seq;
-    return {
-      isCurrent: () => mySeq === seq,
-      guardedDispatch: (action) => {
-        if (mySeq === seq) dispatch(action);
-      }
-    };
-  };
-};
 const getEmailTemplateSeq = sequenced();
 
 export const getEmailTemplate = (templateId) => async (dispatch) => {
@@ -189,14 +179,13 @@ export const saveEmailTemplate =
       snackbarErrorHandler,
       entity
     )(params)(dispatch)
-      .then((payload) => {
+      .then(() => {
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),
             html: T.translate("emails.template_created")
           })
         );
-        history.push(`/app/emails/templates/${payload.response.id}`);
       })
       .finally(() => {
         dispatch(stopLoading());
