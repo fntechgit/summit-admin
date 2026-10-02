@@ -23,7 +23,8 @@ jest.mock(
   () =>
     function BulkEditDataGridMock(props) {
       mockEditableTableSpy(props);
-      return null;
+      // the saved views dropdown is rendered inside the grid toolbar
+      return props.views;
     }
 );
 
@@ -65,12 +66,12 @@ jest.mock(
   })
 );
 
-// Stubs the real popup: exposes a button that calls onSave with a fixed
-// "save this filter" payload, mirroring how the real dialog invokes onSave.
+// Stubs the saved views dropdown: exposes a button that calls onSave with a
+// fixed "save this filter" payload, mirroring how its save dialog invokes it.
 jest.mock(
-  "../../../components/filters/save-filter-criteria",
+  "../../../components/filters/saved-views",
   () =>
-    function SaveFilterCriteriaMock({ onSave }) {
+    function SavedViewsMock({ onSave }) {
       return (
         <button
           type="button"
@@ -86,10 +87,6 @@ jest.mock(
         </button>
       );
     }
-);
-jest.mock(
-  "../../../components/filters/select-filter-criteria",
-  () => () => null
 );
 
 // Mutable shared state so tests can seed the GridFilter's current

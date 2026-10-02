@@ -35,8 +35,7 @@ import {
   HIGH_Z_INDEX,
   MAX_PER_PAGE
 } from "../../../utils/constants";
-import SaveFilterCriteria from "../../../components/filters/save-filter-criteria";
-import SelectFilterCriteria from "../../../components/filters/select-filter-criteria";
+import SavedViews from "../../../components/filters/saved-views";
 import {
   deleteFilterCriteria,
   saveFilterCriteria
@@ -177,7 +176,15 @@ const SummitEventListPage = ({
       visibility
     };
 
-    saveFilterCriteria(filterToSave);
+    return saveFilterCriteria(filterToSave).then(() => {
+      // keep the active view in sync with what was just saved over it
+      if (id) {
+        setSelectedFilterCriteria((current) => ({
+          ...current,
+          ...filterToSave
+        }));
+      }
+    });
   };
 
   const optionalColumns = getOptionalColumns(
@@ -208,11 +215,14 @@ const SummitEventListPage = ({
     setSelectedFilterCriteria(filterCriteria);
   };
 
-  const handleFilterCriteriaDelete = (filterCriteriaId) => {
+  // any view can be deleted from the list, so only clear the filters when
+  // the active one goes
+  const handleFilterCriteriaDelete = (filterCriteriaId) =>
     deleteFilterCriteria(filterCriteriaId).then(() => {
-      setSelectedFilterCriteria(null);
+      if (selectedFilterCriteria?.id === filterCriteriaId) {
+        setSelectedFilterCriteria(null);
+      }
     });
-  };
 
   const eventTypeOptions = buildNameIdDDL(currentSummit.event_types);
 
@@ -287,21 +297,6 @@ const SummitEventListPage = ({
         {T.translate("event_list.event_list")} ({totalEvents})
       </h3>
       <hr />
-      <div>
-        <SelectFilterCriteria
-          summitId={currentSummit.id}
-          context={CONTEXT_ACTIVITIES}
-          onDelete={handleFilterCriteriaDelete}
-          selectedFilterCriteria={selectedFilterCriteria}
-          onChange={handleFilterCriteriaChange}
-        />
-        <SaveFilterCriteria
-          onSave={handleFilterCriteriaSave}
-          selectedFilterCriteria={selectedFilterCriteria}
-        />
-      </div>
-
-      <hr />
       <div className="summit-event-list-table-wrapper">
         <BulkEditDataGrid
           options={tableOptions}
@@ -313,6 +308,16 @@ const SummitEventListPage = ({
             <GridFilter
               id={FILTER_ID}
               criterias={getCriterias(currentSummit, mediaUploadTypes)}
+            />
+          }
+          views={
+            <SavedViews
+              summitId={currentSummit.id}
+              context={CONTEXT_ACTIVITIES}
+              selectedView={selectedFilterCriteria}
+              onChange={handleFilterCriteriaChange}
+              onSave={handleFilterCriteriaSave}
+              onDelete={handleFilterCriteriaDelete}
             />
           }
           onAdd={handleNewEvent}
