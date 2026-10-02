@@ -40,6 +40,7 @@ import T from "i18n-react/dist/i18n-react";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import ChipList from "../../mui/chip-list";
 import {
+  AdditionalFields,
   Destination,
   LineStatusPill,
   PER_PAGE_OPTIONS,
@@ -258,6 +259,8 @@ const CONTRIB_HEADERS = [
   { key: "col_form_code" },
   { key: "col_destination" },
   { key: "col_checkout_at" },
+  { key: "col_notes" },
+  { key: "col_additional_fields" },
   { key: "col_used_rate" },
   { key: "col_status" },
   { key: "col_quantity", align: "right" },
@@ -467,6 +470,10 @@ const ItemTable = ({
                               </TableCell>
                               <TableCell>
                                 {formatCheckoutTime(c.checkoutAt)}
+                              </TableCell>
+                              <TableCell>{c.notes}</TableCell>
+                              <TableCell>
+                                <AdditionalFields fields={c.additionalFields} />
                               </TableCell>
                               <TableCell>{c.rateName}</TableCell>
                               <TableCell>
