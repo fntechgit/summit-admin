@@ -240,7 +240,13 @@ const Toolbar = ({
           startIcon={<AddIcon />}
           onClick={onAdd}
           aria-label={addLabel}
-          sx={ICON_ONLY_BUTTON_SX}
+          sx={{
+            ...ICON_ONLY_BUTTON_SX,
+            // the plus glyph is thinner than the import/export icons; scale it
+            // up visually (18px -> 24px) without growing the button, so its
+            // spacing matches the other toolbar buttons
+            "& .MuiButton-startIcon > svg": { transform: "scale(1.33)" }
+          }}
         />
       </Tooltip>
     )}
