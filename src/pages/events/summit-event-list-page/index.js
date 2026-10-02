@@ -293,12 +293,13 @@ const SummitEventListPage = ({
 
   return (
     <div className="container summit-event-list-filters">
-      <h3>
-        {T.translate("event_list.event_list")} ({totalEvents})
-      </h3>
-      <hr />
       <div className="summit-event-list-table-wrapper">
         <BulkEditDataGrid
+          title={
+            <h3>
+              {T.translate("event_list.event_list")} ({totalEvents})
+            </h3>
+          }
           options={tableOptions}
           data={tableData}
           columns={tableColumns}

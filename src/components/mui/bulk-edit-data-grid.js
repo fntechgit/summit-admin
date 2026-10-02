@@ -274,6 +274,7 @@ const BulkEditDataGrid = ({
   deleteDialogBody,
   columnVisibilityModel,
   onColumnVisibilityModelChange,
+  title,
   views,
   onAdd,
   addLabel,
@@ -441,15 +442,24 @@ const BulkEditDataGrid = ({
 
   return (
     <Box sx={{ width: "100%" }}>
-      {/* top copy has no range text and is hidden on phones, as in BulkEditTable */}
-      <Box sx={{ display: { xs: "none", sm: "block" } }}>
-        <CustomTablePagination
-          totalRows={totalRows}
-          perPage={perPage}
-          currentPage={currentPage}
-          onPageChange={onPageChange}
-          onPerPageChange={onPerPageChange}
-        />
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 2
+        }}
+      >
+        {title}
+        {/* top copy has no range text and is hidden on phones, as in BulkEditTable */}
+        <Box sx={{ display: { xs: "none", sm: "block" }, ml: "auto" }}>
+          <CustomTablePagination
+            totalRows={totalRows}
+            perPage={perPage}
+            currentPage={currentPage}
+            onPageChange={onPageChange}
+            onPerPageChange={onPerPageChange}
+          />
+        </Box>
       </Box>
       {/* flex parent + maxHeight: the grid fits its rows, and once they
           outgrow the viewport it scrolls internally, keeping the column
@@ -539,6 +549,8 @@ BulkEditDataGrid.propTypes = {
   deleteDialogBody: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
   columnVisibilityModel: PropTypes.objectOf(PropTypes.bool),
   onColumnVisibilityModelChange: PropTypes.func,
+  // page heading, shown on the same row as the top pagination
+  title: PropTypes.node,
   // rendered next to "Edit Selected", e.g. a <SavedViews /> dropdown
   views: PropTypes.node,
   onAdd: PropTypes.func,
@@ -566,6 +578,7 @@ BulkEditDataGrid.propTypes = {
 };
 
 BulkEditDataGrid.defaultProps = {
+  title: null,
   views: null,
   idKey: "id",
   totalRows: 0,
