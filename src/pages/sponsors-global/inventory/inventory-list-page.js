@@ -103,14 +103,14 @@ const InventoryListPage = ({
     );
   };
 
-  const handleShowArchivedForms = (ev) => {
+  const handleShowArchivedForms = (archived) => {
     getInventoryItems(
       term,
       DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,
-      ev.target.checked
+      archived
     );
   };
 
@@ -209,10 +209,9 @@ const InventoryListPage = ({
             "inventory_item_list.placeholders.search_inventory_items"
           )
         }}
-        checkboxProps={{
-          checked: showArchived,
-          onChange: handleShowArchivedForms,
-          label: T.translate("inventory_item_list.show_archived")
+        archiveToggleProps={{
+          showArchived,
+          onChange: handleShowArchivedForms
         }}
       >
         <Button
