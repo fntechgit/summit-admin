@@ -25,24 +25,18 @@ import {
   GridToolbarContainer,
   GridToolbarQuickFilter
 } from "@mui/x-data-grid";
+import CustomTablePagination from "openstack-uicore-foundation/lib/components/mui/table/custom-table-pagination";
 import showConfirmDialog from "./showConfirmDialog";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
-  DEFAULT_PER_PAGE,
-  FIFTY_PER_PAGE,
-  TWENTY_PER_PAGE
+  DEFAULT_PER_PAGE
 } from "../../utils/constants";
 
 // MUI DataGrid version of uicore's BulkEditTable: same props and the same
 // select -> "Edit Selected" -> Apply flow, so callers can swap one for the
 // other. Kept self-contained so it can move to Core UI later.
 
-const BASE_PER_PAGE_OPTIONS = [
-  DEFAULT_PER_PAGE,
-  TWENTY_PER_PAGE,
-  FIFTY_PER_PAGE
-];
 const COLUMN_MIN_WIDTH = 150;
 const EDIT_COLUMN_MIN_WIDTH = 250;
 const DESC_ORDER_DIR = -1;
@@ -142,6 +136,34 @@ const Toolbar = ({
     )}
   </GridToolbarContainer>
 );
+
+// replaces the grid's footer with the uicore pagination BulkEditTable uses
+const Footer = ({
+  totalRows,
+  perPage,
+  currentPage,
+  onPageChange,
+  onPerPageChange
+}) => (
+  <Box sx={{ px: 2, borderTop: 1, borderColor: "divider" }}>
+    <CustomTablePagination
+      totalRows={totalRows}
+      perPage={perPage}
+      currentPage={currentPage}
+      onPageChange={onPageChange}
+      onPerPageChange={onPerPageChange}
+      showRange
+    />
+  </Box>
+);
+
+Footer.propTypes = {
+  totalRows: PropTypes.number.isRequired,
+  perPage: PropTypes.number.isRequired,
+  currentPage: PropTypes.number.isRequired,
+  onPageChange: PropTypes.func.isRequired,
+  onPerPageChange: PropTypes.func.isRequired
+};
 
 Toolbar.propTypes = {
   filter: PropTypes.node,
@@ -305,18 +327,6 @@ const BulkEditDataGrid = ({
     });
   }
 
-  const pageSizeOptions = BASE_PER_PAGE_OPTIONS.includes(perPage)
-    ? BASE_PER_PAGE_OPTIONS
-    : [...BASE_PER_PAGE_OPTIONS, perPage].sort((a, b) => a - b);
-
-  const handlePaginationModelChange = ({ page, pageSize }) => {
-    if (pageSize !== perPage) {
-      onPerPageChange(pageSize);
-    } else {
-      onPageChange(page + 1);
-    }
-  };
-
   const sortModel =
     hasUserSorted && options.sortCol
       ? [
@@ -351,49 +361,63 @@ const BulkEditDataGrid = ({
   };
 
   return (
-    <DataGrid
-      autoHeight
-      rows={data}
-      columns={gridColumns}
-      getRowId={(row) => row[idKey]}
-      getRowHeight={() => "auto"}
-      checkboxSelection
-      disableRowSelectionOnClick
-      rowSelectionModel={selectedIds}
-      onRowSelectionModelChange={setSelectedIds}
-      isRowSelectable={() => !editEnabled}
-      columnVisibilityModel={columnVisibilityModel}
-      onColumnVisibilityModelChange={onColumnVisibilityModelChange}
-      disableColumnFilter
-      paginationMode="server"
-      rowCount={totalRows}
-      paginationModel={{ page: currentPage - 1, pageSize: perPage }}
-      pageSizeOptions={pageSizeOptions}
-      onPaginationModelChange={handlePaginationModelChange}
-      sortingMode="server"
-      sortingOrder={["asc", "desc"]}
-      sortModel={sortModel}
-      onSortModelChange={handleSortModelChange}
-      disableColumnSorting={editEnabled}
-      filterMode="server"
-      filterModel={filterModel}
-      onFilterModelChange={searchProps ? handleFilterModelChange : undefined}
-      localeText={{ toolbarColumns: "", ...(noRowsLabel && { noRowsLabel }) }}
-      slots={{ toolbar: Toolbar }}
-      slotProps={{
-        toolbar: {
-          filter,
-          onExport,
-          searchProps,
-          editEnabled,
-          selectedCount: selectedIds.length,
-          onEditSelected: enterEditMode,
-          onApply: handleApply,
-          onCancel: reset
-        }
-      }}
-      sx={{ "& .MuiDataGrid-cell": { py: 1 } }}
-    />
+    <Box sx={{ width: "100%" }}>
+      {/* top copy has no range text and is hidden on phones, as in BulkEditTable */}
+      <Box sx={{ display: { xs: "none", sm: "block" } }}>
+        <CustomTablePagination
+          totalRows={totalRows}
+          perPage={perPage}
+          currentPage={currentPage}
+          onPageChange={onPageChange}
+          onPerPageChange={onPerPageChange}
+        />
+      </Box>
+      <DataGrid
+        autoHeight
+        rows={data}
+        columns={gridColumns}
+        getRowId={(row) => row[idKey]}
+        getRowHeight={() => "auto"}
+        checkboxSelection
+        disableRowSelectionOnClick
+        rowSelectionModel={selectedIds}
+        onRowSelectionModelChange={setSelectedIds}
+        isRowSelectable={() => !editEnabled}
+        columnVisibilityModel={columnVisibilityModel}
+        onColumnVisibilityModelChange={onColumnVisibilityModelChange}
+        disableColumnFilter
+        sortingMode="server"
+        sortingOrder={["asc", "desc"]}
+        sortModel={sortModel}
+        onSortModelChange={handleSortModelChange}
+        disableColumnSorting={editEnabled}
+        filterMode="server"
+        filterModel={filterModel}
+        onFilterModelChange={searchProps ? handleFilterModelChange : undefined}
+        localeText={{ toolbarColumns: "", ...(noRowsLabel && { noRowsLabel }) }}
+        slots={{ toolbar: Toolbar, footer: Footer }}
+        slotProps={{
+          footer: {
+            totalRows,
+            perPage,
+            currentPage,
+            onPageChange,
+            onPerPageChange
+          },
+          toolbar: {
+            filter,
+            onExport,
+            searchProps,
+            editEnabled,
+            selectedCount: selectedIds.length,
+            onEditSelected: enterEditMode,
+            onApply: handleApply,
+            onCancel: reset
+          }
+        }}
+        sx={{ "& .MuiDataGrid-cell": { py: 1 } }}
+      />
+    </Box>
   );
 };
 
