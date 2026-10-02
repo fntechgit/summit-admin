@@ -109,9 +109,14 @@ describe("BulkEditDataGrid", () => {
     const onPageChange = jest.fn();
     renderGrid({ onPageChange });
 
-    await userEvent.click(
-      screen.getByRole("button", { name: /go to next page/i })
-    );
+    // top and bottom paginations both page the list
+    const [topNext, bottomNext] = screen.getAllByRole("button", {
+      name: "mui_table.next_page"
+    });
+    await userEvent.click(topNext);
+    expect(onPageChange).toHaveBeenLastCalledWith(2);
+
+    await userEvent.click(bottomNext);
 
     expect(onPageChange).toHaveBeenCalledWith(2);
   });
