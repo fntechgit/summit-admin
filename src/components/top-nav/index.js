@@ -21,6 +21,15 @@ import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import MenuIcon from "@mui/icons-material/Menu";
+import T from "i18n-react/dist/i18n-react";
+import { Breadcrumbs } from "react-breadcrumbs";
+import {
+  initLogOut,
+  getIdToken
+} from "openstack-uicore-foundation/lib/security/methods";
+import IdTokenVerifier from "idtoken-verifier";
+import AuthButton from "../auth-button";
+import Menu from "../menu";
 
 const DRAWER_WIDTH = 260;
 const CLOSE_DELAY_MS = 200;
@@ -33,31 +42,24 @@ const SHORT_VIEWPORT_MAX_HEIGHT = 500;
 /**
  * Application top bar with an optional slide-out navigation drawer.
  *
- * Self-contained and app-agnostic: it holds the drawer's open state itself and
- * takes every string, action and piece of navigation content as a prop, so it
- * carries no dependency on any particular app's store, router or i18n. The
- * caller supplies the drawer's contents through `renderDrawer`, which receives
- * `closeDrawer` so a navigation item can dismiss the drawer after it acts.
+ * Summit-admin's nav bar: the sign-out button,
+ * breadcrumbs and app menu are rendered here directly. It holds the drawer's
+ * open state itself and hands `closeDrawer` to the menu so a navigation item
+ * can dismiss the drawer after it acts.
  *
  * On devices that support hovering, the burger opens the drawer on hover and
  * closes it a moment after the pointer leaves; the delay keeps the drawer open
  * while the pointer crosses the gap between the button and the panel. Devices
  * without hover get click-to-toggle only.
  */
-const TopNav = ({
-  title,
-  contextLabel,
-  actions,
-  subBar,
-  renderDrawer,
-  isLoggedUser,
-  menuButtonLabel,
-  sx
-}) => {
+const TopNav = ({ isLoggedUser, currentSummit, member }) => {
   const [open, setOpen] = useState(false);
   const [openedByHover, setOpenedByHover] = useState(false);
   const closeTimeout = useRef(null);
   const lastHoverOpen = useRef(0);
+
+  // The current summit's name, shown next to the title behind a divider.
+  const contextLabel = currentSummit?.id > 0 ? currentSummit.name : null;
 
   const canHover = useMediaQuery("(hover: hover) and (pointer: fine)");
 
@@ -108,15 +110,23 @@ const TopNav = ({
     ? { onMouseEnter: cancelClose, onMouseLeave: scheduleClose }
     : {};
 
-  // With nothing on either side of it, the title reads as a banner rather than
-  // as the left-hand item of a bar.
-  // Signed out, the bar carries nothing but the title, so the three
-  // authenticated regions are suppressed in one place.
-  const showActions = isLoggedUser ? actions : null;
-  const showSubBar = isLoggedUser ? subBar : null;
-  const showDrawer = isLoggedUser ? renderDrawer : null;
+  // Signed out, the bar carries nothing but the title, which then reads as a
+  // banner rather than as the left-hand item of a bar.
+  const titleCentered = !isLoggedUser;
 
-  const titleCentered = !showDrawer && !showActions;
+  const idToken = getIdToken();
+
+  // get user pic from idtoken claims (IDP)
+  let picture = "";
+
+  if (idToken) {
+    const verifier = new IdTokenVerifier({
+      issuer: window.IDP_BASE_URL,
+      audience: window.OAUTH2_CLIENT_ID
+    });
+    const jwt = verifier.decode(idToken);
+    picture = jwt.payload.picture;
+  }
 
   return (
     <>
@@ -126,9 +136,7 @@ const TopNav = ({
         sx={{
           bgcolor: "background.paper",
           color: "text.primary",
-          borderBottom: 1,
-          borderColor: "divider",
-          ...sx
+          borderBottom: "1px solid #b3b3b3"
         }}
       >
         <Toolbar
@@ -141,10 +149,10 @@ const TopNav = ({
             }
           }}
         >
-          {showDrawer && (
+          {isLoggedUser && (
             <IconButton
               edge="start"
-              aria-label={menuButtonLabel}
+              aria-label={T.translate("menu.toggle_navigation")}
               aria-expanded={open}
               onClick={toggleDrawer}
               {...hoverHandlers}
@@ -158,7 +166,7 @@ const TopNav = ({
             component="div"
             sx={{ flexGrow: 1, ...(titleCentered && { textAlign: "center" }) }}
           >
-            {title}
+            {T.translate("landing.os_summit_admin")}
             {contextLabel && (
               <Box
                 component="span"
@@ -175,11 +183,17 @@ const TopNav = ({
               </Box>
             )}
           </Typography>
-          {showActions}
+          {isLoggedUser && (
+            <AuthButton
+              isLoggedUser
+              picture={picture}
+              initLogOut={initLogOut}
+            />
+          )}
         </Toolbar>
       </AppBar>
       {/* Outside the AppBar so it scrolls away instead of staying pinned. */}
-      {showSubBar && (
+      {isLoggedUser && (
         <Toolbar
           variant="dense"
           sx={{
@@ -190,10 +204,10 @@ const TopNav = ({
             overflowX: "auto"
           }}
         >
-          {showSubBar}
+          <Breadcrumbs className="breadcrumbs-wrapper" separator="/" />
         </Toolbar>
       )}
-      {showDrawer && (
+      {isLoggedUser && (
         <Drawer
           anchor="left"
           open={open}
@@ -217,7 +231,11 @@ const TopNav = ({
             role="presentation"
             sx={{ width: DRAWER_WIDTH, overflowY: "auto", pb: 3 }}
           >
-            {showDrawer({ closeDrawer })}
+            <Menu
+              currentSummit={currentSummit}
+              member={member}
+              onNavigate={closeDrawer}
+            />
           </Box>
         </Drawer>
       )}
@@ -226,36 +244,19 @@ const TopNav = ({
 };
 
 TopNav.propTypes = {
-  /** Brand or application name shown at the left of the bar. */
-  title: PropTypes.node.isRequired,
-  /** Optional secondary label shown next to the title, behind a divider. */
-  contextLabel: PropTypes.node,
-  /** Right-aligned bar content, e.g. an account or sign-out button. */
-  actions: PropTypes.node,
-  /** Content for a slim secondary bar below the app bar, e.g. breadcrumbs. */
-  subBar: PropTypes.node,
-  /**
-   * `({ closeDrawer }) => node` — the navigation drawer's contents. Omit it and
-   * neither the burger button nor the drawer is rendered.
-   */
-  renderDrawer: PropTypes.func,
-  /** When false, the actions, sub bar and drawer are all suppressed. */
+  /** When false, the sign-out button, breadcrumbs and drawer are suppressed. */
   isLoggedUser: PropTypes.bool,
-  /** Accessible name for the burger button; supply it with `renderDrawer`. */
-  menuButtonLabel: PropTypes.string,
-  /** Style overrides merged into the app bar. */
+  /** Its name labels the bar; also passed through to the drawer's menu. */
   // eslint-disable-next-line react/forbid-prop-types
-  sx: PropTypes.object
+  currentSummit: PropTypes.object,
+  // eslint-disable-next-line react/forbid-prop-types
+  member: PropTypes.object
 };
 
 TopNav.defaultProps = {
-  contextLabel: null,
-  actions: null,
-  subBar: null,
-  renderDrawer: null,
   isLoggedUser: true,
-  menuButtonLabel: null,
-  sx: null
+  currentSummit: null,
+  member: null
 };
 
 export default TopNav;

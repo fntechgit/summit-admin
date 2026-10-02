@@ -25,19 +25,14 @@ import {
 } from "openstack-uicore-foundation/lib/security/actions";
 import {
   initLogOut,
-  doLoginBasicLogin,
-  getIdToken
+  doLoginBasicLogin
 } from "openstack-uicore-foundation/lib/security/methods";
-import IdTokenVerifier from "idtoken-verifier";
-import T from "i18n-react";
-import { Breadcrumbs } from "react-breadcrumbs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 // eslint-disable-next-line
 import * as Sentry from "@sentry/react";
 import exclusiveSections from "./exclusive-sections.yml";
 import TopNav from "./components/top-nav";
-import Menu from "./components/menu";
 import CustomErrorPage from "./pages/custom-error-page";
 import history from "./history";
 import PrimaryLayout from "./layouts/primary-layout";
@@ -182,20 +177,6 @@ class App extends React.PureComponent {
       member
     } = this.props;
 
-    const idToken = getIdToken();
-
-    // get user pic from idtoken claims (IDP)
-    let profile_pic = "";
-
-    if (idToken) {
-      const verifier = new IdTokenVerifier({
-        issuer: window.IDP_BASE_URL,
-        audience: window.OAUTH2_CLIENT_ID
-      });
-      const jwt = verifier.decode(idToken);
-      profile_pic = jwt.payload.picture;
-    }
-
     return (
       <Sentry.ErrorBoundary
         fallback={SentryFallbackFunction({ componentName: "Summit Admin App" })}
@@ -205,34 +186,13 @@ class App extends React.PureComponent {
             <div>
               <AjaxLoader show={loading} size={120} />
               <TopNav
-                sx={{ borderBottom: "1px solid #b3b3b3" }}
-                title={T.translate("landing.os_summit_admin")}
-                contextLabel={currentSummit?.id > 0 ? currentSummit.name : null}
-                menuButtonLabel={T.translate("menu.toggle_navigation")}
                 isLoggedUser={isLoggedUser}
-                actions={
-                  <AuthButton
-                    isLoggedUser={isLoggedUser}
-                    picture={profile_pic}
-                    doLogin={this.onClickLogin}
-                    initLogOut={initLogOut}
-                  />
-                }
-                subBar={
-                  <Breadcrumbs className="breadcrumbs-wrapper" separator="/" />
-                }
-                renderDrawer={({ closeDrawer }) => (
-                  <Menu
-                    currentSummit={currentSummit}
-                    member={member}
-                    onNavigate={closeDrawer}
-                  />
-                )}
+                currentSummit={currentSummit}
+                member={member}
               />
               {!isLoggedUser && (
                 <AuthButton
                   isLoggedUser={isLoggedUser}
-                  picture={profile_pic}
                   doLogin={this.onClickLogin}
                   initLogOut={initLogOut}
                 />

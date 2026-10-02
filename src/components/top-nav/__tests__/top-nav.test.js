@@ -3,6 +3,23 @@ import { render, screen, fireEvent, act } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import TopNav from "../index";
 
+jest.mock("i18n-react/dist/i18n-react", () => ({
+  translate: (key) => key
+}));
+jest.mock("openstack-uicore-foundation/lib/security/methods", () => ({
+  initLogOut: jest.fn(),
+  getIdToken: () => null
+}));
+jest.mock("react-breadcrumbs", () => ({
+  Breadcrumbs: () => <span>crumbs</span>
+}));
+// Stands in for the app menu: a navigation item that dismisses the drawer.
+jest.mock("../../menu", () => ({ onNavigate }) => (
+  <button type="button" onClick={onNavigate}>
+    drawer contents
+  </button>
+));
+
 const setCanHover = (matches) => {
   window.matchMedia = (query) => ({
     matches,
@@ -18,18 +35,10 @@ const setCanHover = (matches) => {
 
 const DRAWER_TEXT = "drawer contents";
 
-const renderNav = (props = {}) =>
-  render(
-    <TopNav
-      title="Admin"
-      menuButtonLabel="Toggle navigation menu"
-      renderDrawer={() => <div>{DRAWER_TEXT}</div>}
-      {...props}
-    />
-  );
+const renderNav = (props = {}) => render(<TopNav {...props} />);
 
 const burger = () =>
-  screen.getByRole("button", { name: "Toggle navigation menu" });
+  screen.getByRole("button", { name: "menu.toggle_navigation" });
 
 // keepMounted leaves the drawer in the DOM when closed, so presence proves
 // nothing — visibility is the signal.
@@ -123,14 +132,8 @@ describe("TopNav", () => {
       expect(drawer()).toBeVisible();
     });
 
-    test("closeDrawer handed to renderDrawer closes the drawer", () => {
-      renderNav({
-        renderDrawer: ({ closeDrawer }) => (
-          <button type="button" onClick={closeDrawer}>
-            {DRAWER_TEXT}
-          </button>
-        )
-      });
+    test("navigating from the menu closes the drawer", () => {
+      renderNav();
 
       fireEvent.click(burger());
       settle();
@@ -145,52 +148,30 @@ describe("TopNav", () => {
   describe("composition", () => {
     beforeEach(() => setCanHover(false));
 
-    test("renders no burger and no drawer without renderDrawer", () => {
-      renderNav({ renderDrawer: null });
+    test("renders title, summit name, sign out and breadcrumbs", () => {
+      renderNav({ currentSummit: { id: 1, name: "Summit 2026" } });
 
-      expect(
-        screen.queryByRole("button", { name: "Toggle navigation menu" })
-      ).not.toBeInTheDocument();
-      expect(screen.queryByText(DRAWER_TEXT)).not.toBeInTheDocument();
-    });
-
-    test("renders title, context label, actions and sub bar", () => {
-      renderNav({
-        contextLabel: "Summit 2026",
-        actions: <button type="button">sign out</button>,
-        subBar: <span>crumbs</span>
-      });
-
-      expect(screen.getByText("Admin")).toBeInTheDocument();
+      expect(screen.getByText("landing.os_summit_admin")).toBeInTheDocument();
       expect(screen.getByText("Summit 2026")).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: "sign out" })
+        screen.getByRole("button", { name: "landing.sign_out" })
       ).toBeInTheDocument();
       expect(screen.getByText("crumbs")).toBeInTheDocument();
     });
 
-    test("isLoggedUser={false} suppresses actions, sub bar and drawer", () => {
-      renderNav({
-        isLoggedUser: false,
-        actions: <button type="button">sign out</button>,
-        subBar: <span>crumbs</span>
-      });
+    test("isLoggedUser={false} suppresses sign out, breadcrumbs and drawer", () => {
+      renderNav({ isLoggedUser: false });
 
       expect(
-        screen.queryByRole("button", { name: "Toggle navigation menu" })
+        screen.queryByRole("button", { name: "menu.toggle_navigation" })
       ).not.toBeInTheDocument();
       expect(screen.queryByText(DRAWER_TEXT)).not.toBeInTheDocument();
       expect(screen.queryByText("crumbs")).not.toBeInTheDocument();
       expect(
-        screen.queryByRole("button", { name: "sign out" })
+        screen.queryByRole("button", { name: "landing.sign_out" })
       ).not.toBeInTheDocument();
       // The title still renders; it is the only thing left on the bar.
-      expect(screen.getByText("Admin")).toBeInTheDocument();
-    });
-
-    test("omits the sub bar when none is supplied", () => {
-      renderNav();
-      expect(screen.queryByText("crumbs")).not.toBeInTheDocument();
+      expect(screen.getByText("landing.os_summit_admin")).toBeInTheDocument();
     });
   });
 });
