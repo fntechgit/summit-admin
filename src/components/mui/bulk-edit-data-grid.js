@@ -24,6 +24,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import {
   DataGrid,
   GridActionsCellItem,
+  GridColumnMenu,
+  GridColumnMenuHideItem,
   GridToolbarColumnsButton,
   GridToolbarContainer,
   GridToolbarQuickFilter
@@ -124,6 +126,27 @@ ExpandableQuickFilter.propTypes = {
 ExpandableQuickFilter.defaultProps = {
   placeholder: "",
   term: ""
+};
+
+// the column menu's columns item is "Hide column" + "Manage columns"; keep
+// only hide (the toolbar has the columns panel), and drop the item entirely
+// for columns that can't be hidden so their menu has no empty section
+const ColumnMenu = (props) => {
+  const { colDef } = props;
+  return (
+    <GridColumnMenu
+      // eslint-disable-next-line react/jsx-props-no-spreading
+      {...props}
+      slots={{
+        columnMenuColumnsItem:
+          colDef.hideable === false ? null : GridColumnMenuHideItem
+      }}
+    />
+  );
+};
+
+ColumnMenu.propTypes = {
+  colDef: PropTypes.shape({ hideable: PropTypes.bool }).isRequired
 };
 
 const Toolbar = ({
@@ -420,7 +443,13 @@ const BulkEditDataGrid = ({
       : [];
 
   const handleSortModelChange = (model) => {
-    if (model.length === 0) return;
+    // "Unsort" (menu item or third header click): back to the API's default
+    // order, reported as onSort(-1, null, null)
+    if (model.length === 0) {
+      setHasUserSorted(false);
+      onSort(-1, null, null);
+      return;
+    }
     setHasUserSorted(true);
     const { field, sort } = model[0];
     onSort(
@@ -481,7 +510,6 @@ const BulkEditDataGrid = ({
           onColumnVisibilityModelChange={onColumnVisibilityModelChange}
           disableColumnFilter
           sortingMode="server"
-          sortingOrder={["asc", "desc"]}
           sortModel={sortModel}
           onSortModelChange={handleSortModelChange}
           disableColumnSorting={editEnabled}
@@ -495,7 +523,7 @@ const BulkEditDataGrid = ({
             ...(noRowsLabel && { noRowsLabel })
           }}
           hideFooter
-          slots={{ toolbar: Toolbar }}
+          slots={{ toolbar: Toolbar, columnMenu: ColumnMenu }}
           slotProps={{
             toolbar: {
               views,

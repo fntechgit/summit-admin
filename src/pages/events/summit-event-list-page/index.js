@@ -81,6 +81,9 @@ const SummitEventListPage = ({
   const [showImportModal, setShowImportModal] = useState(false);
   const [showImportFromMUXModal, setShowImportFromMUXModal] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState(extraColumns ?? []);
+  // selection status is the one fixed column that can be hidden
+  const [isSelectionStatusVisible, setIsSelectionStatusVisible] =
+    useState(true);
   const [selectedFilterCriteria, setSelectedFilterCriteria] = useState(null);
   const { parsedFilter, resetFilters, filterValues, setFilters, joinOperator } =
     useGridFilter(FILTER_ID);
@@ -194,16 +197,20 @@ const SummitEventListPage = ({
     currentSummit.id
   );
 
-  const columnVisibilityModel = Object.fromEntries(
-    optionalColumns.map((oc) => [
-      oc.columnKey,
-      selectedColumns.includes(oc.columnKey)
-    ])
-  );
+  const columnVisibilityModel = {
+    selection_status: isSelectionStatusVisible,
+    ...Object.fromEntries(
+      optionalColumns.map((oc) => [
+        oc.columnKey,
+        selectedColumns.includes(oc.columnKey)
+      ])
+    )
+  };
 
   // the grid omits columns from the model when they're visible (e.g. after
   // "Show all"), so only an explicit false hides one
   const handleColumnVisibilityModelChange = (model) => {
+    setIsSelectionStatusVisible(model.selection_status !== false);
     setSelectedColumns(
       optionalColumns
         .map((oc) => oc.columnKey)
@@ -272,7 +279,6 @@ const SummitEventListPage = ({
       columnKey: "selection_status",
       label: T.translate("event_list.selection_status"),
       sortable: true,
-      hideable: false,
       render: (status, row) =>
         status === "unaccepted" && row.is_published === true
           ? "accepted"

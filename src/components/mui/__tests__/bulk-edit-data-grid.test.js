@@ -105,6 +105,58 @@ describe("BulkEditDataGrid", () => {
     ).toBeDisabled();
   });
 
+  test("column menu offers hiding a column but not managing columns", async () => {
+    renderGrid();
+
+    // the header menu button stays visually hidden until the header is
+    // hovered, so find it by its aria-label rather than by role
+    await userEvent.click(screen.getByLabelText("Title column menu"));
+
+    expect(
+      await screen.findByRole("menuitem", { name: /hide column/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("menuitem", { name: /manage columns/i })
+    ).not.toBeInTheDocument();
+  });
+
+  test("column menu of a column that can't be hidden has no empty hide section", async () => {
+    renderGrid({
+      columns: [
+        { columnKey: "id", label: "Id", sortable: true, hideable: false },
+        { columnKey: "title", label: "Title", sortable: true }
+      ]
+    });
+
+    await userEvent.click(screen.getByLabelText("Id column menu"));
+
+    expect(
+      await screen.findByRole("menuitem", { name: /sort by asc/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("menuitem", { name: /hide column/i })
+    ).not.toBeInTheDocument();
+    // no divider left dangling under the sort items
+    expect(
+      within(screen.getByRole("menu")).queryAllByRole("separator")
+    ).toHaveLength(0);
+  });
+
+  test("unsorting goes back to the default order", async () => {
+    const onSort = jest.fn();
+    renderGrid({ onSort, options: { sortCol: "title", sortDir: 1 } });
+
+    await userEvent.click(screen.getByRole("columnheader", { name: "Title" }));
+    expect(onSort).toHaveBeenLastCalledWith(1, "title", 1);
+
+    await userEvent.click(screen.getByLabelText("Title column menu"));
+    await userEvent.click(
+      await screen.findByRole("menuitem", { name: /unsort/i })
+    );
+
+    expect(onSort).toHaveBeenLastCalledWith(-1, null, null);
+  });
+
   test("reports 1-based pages to onPageChange", async () => {
     const onPageChange = jest.fn();
     renderGrid({ onPageChange });
