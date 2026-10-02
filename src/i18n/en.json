@@ -377,6 +377,7 @@
     "virtual_attendees": "Virtual Attendees"
   },
   "edit_summit": {
+    "required_field_note": "Required field",
     "name": "Name",
     "external_summit_id": "External Id",
     "max_submission_allowed_per_user": "Max. Submissions per User",
