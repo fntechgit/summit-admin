@@ -90,7 +90,9 @@ const Toolbar = ({
   onApply,
   onCancel
 }) => (
-  <GridToolbarContainer sx={{ p: 1, gap: 1 }}>
+  <GridToolbarContainer
+    sx={{ p: 1, gap: 1, borderBottom: 1, borderColor: "divider" }}
+  >
     {searchProps && (
       <GridToolbarQuickFilter
         placeholder={searchProps.placeholder}
@@ -372,51 +374,60 @@ const BulkEditDataGrid = ({
           onPerPageChange={onPerPageChange}
         />
       </Box>
-      <DataGrid
-        autoHeight
-        rows={data}
-        columns={gridColumns}
-        getRowId={(row) => row[idKey]}
-        getRowHeight={() => "auto"}
-        checkboxSelection
-        disableRowSelectionOnClick
-        rowSelectionModel={selectedIds}
-        onRowSelectionModelChange={setSelectedIds}
-        isRowSelectable={() => !editEnabled}
-        columnVisibilityModel={columnVisibilityModel}
-        onColumnVisibilityModelChange={onColumnVisibilityModelChange}
-        disableColumnFilter
-        sortingMode="server"
-        sortingOrder={["asc", "desc"]}
-        sortModel={sortModel}
-        onSortModelChange={handleSortModelChange}
-        disableColumnSorting={editEnabled}
-        filterMode="server"
-        filterModel={filterModel}
-        onFilterModelChange={searchProps ? handleFilterModelChange : undefined}
-        localeText={{ toolbarColumns: "", ...(noRowsLabel && { noRowsLabel }) }}
-        slots={{ toolbar: Toolbar, footer: Footer }}
-        slotProps={{
-          footer: {
-            totalRows,
-            perPage,
-            currentPage,
-            onPageChange,
-            onPerPageChange
-          },
-          toolbar: {
-            filter,
-            onExport,
-            searchProps,
-            editEnabled,
-            selectedCount: selectedIds.length,
-            onEditSelected: enterEditMode,
-            onApply: handleApply,
-            onCancel: reset
+      {/* flex parent + maxHeight: the grid fits its rows, and once they
+          outgrow the viewport it scrolls internally, keeping the column
+          headers in view */}
+      <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "80vh" }}>
+        <DataGrid
+          rows={data}
+          columns={gridColumns}
+          getRowId={(row) => row[idKey]}
+          getRowHeight={() => "auto"}
+          checkboxSelection
+          disableRowSelectionOnClick
+          rowSelectionModel={selectedIds}
+          onRowSelectionModelChange={setSelectedIds}
+          isRowSelectable={() => !editEnabled}
+          columnVisibilityModel={columnVisibilityModel}
+          onColumnVisibilityModelChange={onColumnVisibilityModelChange}
+          disableColumnFilter
+          sortingMode="server"
+          sortingOrder={["asc", "desc"]}
+          sortModel={sortModel}
+          onSortModelChange={handleSortModelChange}
+          disableColumnSorting={editEnabled}
+          filterMode="server"
+          filterModel={filterModel}
+          onFilterModelChange={
+            searchProps ? handleFilterModelChange : undefined
           }
-        }}
-        sx={{ "& .MuiDataGrid-cell": { py: 1 } }}
-      />
+          localeText={{
+            toolbarColumns: "",
+            ...(noRowsLabel && { noRowsLabel })
+          }}
+          slots={{ toolbar: Toolbar, footer: Footer }}
+          slotProps={{
+            footer: {
+              totalRows,
+              perPage,
+              currentPage,
+              onPageChange,
+              onPerPageChange
+            },
+            toolbar: {
+              filter,
+              onExport,
+              searchProps,
+              editEnabled,
+              selectedCount: selectedIds.length,
+              onEditSelected: enterEditMode,
+              onApply: handleApply,
+              onCancel: reset
+            }
+          }}
+          sx={{ "& .MuiDataGrid-cell": { py: 1 } }}
+        />
+      </Box>
     </Box>
   );
 };
