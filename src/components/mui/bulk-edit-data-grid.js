@@ -187,34 +187,6 @@ const Toolbar = ({
   </GridToolbarContainer>
 );
 
-// replaces the grid's footer with the uicore pagination BulkEditTable uses
-const Footer = ({
-  totalRows,
-  perPage,
-  currentPage,
-  onPageChange,
-  onPerPageChange
-}) => (
-  <Box sx={{ px: 2, borderTop: 1, borderColor: "divider" }}>
-    <CustomTablePagination
-      totalRows={totalRows}
-      perPage={perPage}
-      currentPage={currentPage}
-      onPageChange={onPageChange}
-      onPerPageChange={onPerPageChange}
-      showRange
-    />
-  </Box>
-);
-
-Footer.propTypes = {
-  totalRows: PropTypes.number.isRequired,
-  perPage: PropTypes.number.isRequired,
-  currentPage: PropTypes.number.isRequired,
-  onPageChange: PropTypes.func.isRequired,
-  onPerPageChange: PropTypes.func.isRequired
-};
-
 Toolbar.propTypes = {
   filter: PropTypes.node,
   onExport: PropTypes.func,
@@ -456,15 +428,9 @@ const BulkEditDataGrid = ({
             toolbarColumns: "",
             ...(noRowsLabel && { noRowsLabel })
           }}
-          slots={{ toolbar: Toolbar, footer: Footer }}
+          hideFooter
+          slots={{ toolbar: Toolbar }}
           slotProps={{
-            footer: {
-              totalRows,
-              perPage,
-              currentPage,
-              onPageChange,
-              onPerPageChange
-            },
             toolbar: {
               filter,
               onExport,
@@ -479,6 +445,14 @@ const BulkEditDataGrid = ({
           sx={{ "& .MuiDataGrid-cell": { py: 1 } }}
         />
       </Box>
+      <CustomTablePagination
+        totalRows={totalRows}
+        perPage={perPage}
+        currentPage={currentPage}
+        onPageChange={onPageChange}
+        onPerPageChange={onPerPageChange}
+        showRange
+      />
     </Box>
   );
 };
