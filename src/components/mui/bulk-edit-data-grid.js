@@ -184,12 +184,14 @@ const Toolbar = ({
         menuItems={importItems}
         size="small"
         aria-label={importLabel}
+        // same startIcon slot as Export so both icons render at the same size
+        startIcon={
+          <Tooltip title={importLabel}>
+            <FileUploadIcon />
+          </Tooltip>
+        }
         sx={ICON_ONLY_BUTTON_SX}
-      >
-        <Tooltip title={importLabel}>
-          <FileUploadIcon fontSize="small" />
-        </Tooltip>
-      </MenuButton>
+      />
     )}
     {(onAdd || importItems.length > 0) && (
       <Divider orientation="vertical" flexItem />
