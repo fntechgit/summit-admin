@@ -243,10 +243,9 @@ const FormTemplateListPage = ({
             "inventory_item_list.placeholders.search_inventory_items"
           )
         }}
-        checkboxProps={{
-          checked: showArchived,
-          onChange: (ev) => handleShowArchivedForms(ev.target.checked),
-          label: T.translate("form_template_list.show_archived")
+        archiveToggleProps={{
+          showArchived,
+          onChange: handleShowArchivedForms
         }}
       >
         <Button

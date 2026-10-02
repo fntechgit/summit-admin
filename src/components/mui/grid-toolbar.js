@@ -1,27 +1,36 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Checkbox, FormControlLabel, FormGroup, Grid2 } from "@mui/material";
+import { Grid2 } from "@mui/material";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import ArchiveToggle from "./archive-toggle";
 
-const GridToolbar = ({ searchProps, checkboxProps, children, splitAt }) => {
+const GridToolbar = ({
+  searchProps,
+  archiveToggleProps,
+  filter,
+  children,
+  splitAt
+}) => {
   const hasSearch = !!searchProps;
-  const hasCheckbox = !!checkboxProps;
+  // the archive toggle and a page's own filter share the same cell
+  const hasFilter = !!archiveToggleProps || !!filter;
 
   let searchSize;
-  let checkboxSize;
+  let filterSize;
   let actionsSize;
 
-  if (hasSearch && hasCheckbox) {
-    searchSize = { xs: 12, sm: 6, md: 4 };
-    checkboxSize = { xs: 12, sm: 6, md: 2 };
+  if (hasSearch && hasFilter) {
+    // md gives the filter a third column (the archive toggle doesn't fit in two); from lg it fits again
+    searchSize = { xs: 12, sm: 6, md: 3, lg: 4 };
+    filterSize = { xs: 12, sm: 6, md: 3, lg: 2 };
     actionsSize = { xs: 12, md: 6 };
   } else if (hasSearch) {
-    // has search but no checkbox
+    // has search but no filter
     searchSize = { xs: 12, [splitAt]: 4 };
     actionsSize = { xs: 12, [splitAt]: 8 };
-  } else if (hasCheckbox) {
-    // has checkbox but no search
-    checkboxSize = { xs: 12, [splitAt]: 4 };
+  } else if (hasFilter) {
+    // has filter but no search
+    filterSize = { xs: 12, [splitAt]: 4 };
     actionsSize = { xs: 12, [splitAt]: 8 };
   } else {
     actionsSize = { xs: 12 };
@@ -32,7 +41,7 @@ const GridToolbar = ({ searchProps, checkboxProps, children, splitAt }) => {
   // to nowrap, so children don't get squeezed once actionsSize starts
   // sharing a row with a sibling
   const actionsWidthBreakpoint =
-    hasSearch && hasCheckbox ? "md" : hasSearch || hasCheckbox ? splitAt : "xs";
+    hasSearch && hasFilter ? "md" : hasSearch || hasFilter ? splitAt : "xs";
 
   // children go natural (auto) width starting at actionsWidthBreakpoint,
   // never earlier than sm; between sm and that point (only a real window
@@ -48,23 +57,13 @@ const GridToolbar = ({ searchProps, checkboxProps, children, splitAt }) => {
           <SearchInput {...searchProps} />
         </Grid2>
       )}
-      {hasCheckbox && (
-        <Grid2 size={checkboxSize}>
-          <FormGroup sx={{ flexShrink: 0 }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={checkboxProps.checked}
-                  onChange={checkboxProps.onChange}
-                  inputProps={{
-                    "aria-label": checkboxProps.ariaLabel ?? checkboxProps.label
-                  }}
-                />
-              }
-              label={checkboxProps.label}
-              sx={{ whiteSpace: "nowrap" }}
-            />
-          </FormGroup>
+      {hasFilter && (
+        <Grid2 size={filterSize}>
+          {archiveToggleProps ? (
+            <ArchiveToggle {...archiveToggleProps} />
+          ) : (
+            filter
+          )}
         </Grid2>
       )}
       <Grid2
@@ -105,20 +104,22 @@ GridToolbar.propTypes = {
     placeholder: PropTypes.string,
     debounced: PropTypes.bool
   }),
-  checkboxProps: PropTypes.shape({
-    checked: PropTypes.bool,
-    onChange: PropTypes.func,
-    label: PropTypes.node,
-    ariaLabel: PropTypes.string
+  // renders the Active/Archived segmented control
+  archiveToggleProps: PropTypes.shape({
+    showArchived: PropTypes.bool,
+    onChange: PropTypes.func.isRequired
   }),
-  // breakpoint where search/checkbox split from the actions row into their
+  // a page's own filter control, for one-offs (ignored when archiveToggleProps is set)
+  filter: PropTypes.node,
+  // breakpoint where search/filter split from the actions row into their
   // compact ratio — raise it (e.g. "lg") when actions holds a lot of children
   splitAt: PropTypes.oneOf(["xs", "sm", "md", "lg", "xl"])
 };
 
 GridToolbar.defaultProps = {
   searchProps: null,
-  checkboxProps: null,
+  archiveToggleProps: null,
+  filter: null,
   splitAt: "sm"
 };
 
