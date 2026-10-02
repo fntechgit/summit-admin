@@ -170,7 +170,9 @@ describe("groupLinesBySponsorItem", () => {
       isCanceled: true,
       isPartiallyCanceled: false,
       syncedAt: null,
-      sourceUpdatedAt: null
+      sourceUpdatedAt: null,
+      notes: "dock B",
+      additionalFields: null
     });
   });
 
@@ -181,6 +183,38 @@ describe("groupLinesBySponsorItem", () => {
     const [c] = g.items[0].contributors;
     expect(c.syncedAt).toBe(1755561600);
     expect(c.sourceUpdatedAt).toBe(1755558000);
+  });
+
+  it("carries the line's notes and additional fields into its own contributor", () => {
+    const fields = [
+      { label: "Plug Type", value: "L6-30R" },
+      { label: "Location", value: "Back wall" }
+    ];
+    const [g] = groupLinesBySponsorItem([
+      line({ notes: "run to back left", additional_fields: fields }),
+      line({
+        purchase: { id: 5002, number: "OCP-2", status: "Paid" },
+        notes: null,
+        additional_fields: [{ label: "Plug Type", value: "L5-20R" }]
+      })
+    ]);
+    const [first, second] = g.items[0].contributors;
+    expect(first.notes).toBe("run to back left");
+    expect(first.additionalFields).toEqual(fields);
+    // per line, never merged across the item's lines
+    expect(second.notes).toBeNull();
+    expect(second.additionalFields).toEqual([
+      { label: "Plug Type", value: "L5-20R" }
+    ]);
+  });
+
+  it("normalises an absent notes / additional_fields to null", () => {
+    const row = line();
+    delete row.notes;
+    delete row.additional_fields;
+    const [c] = groupLinesBySponsorItem([row])[0].items[0].contributors;
+    expect(c.notes).toBeNull();
+    expect(c.additionalFields).toBeNull();
   });
 
   it("EXCLUDES canceled lines from qty/money/purchasedCount/Σqty but keeps them as contributors", () => {
@@ -326,6 +360,19 @@ describe("partial cancellation", () => {
 });
 
 describe("groupLinesByItem", () => {
+  it("carries each line's notes and additional fields in the all-sponsors layout too", () => {
+    const [it0] = groupLinesByItem([
+      line({
+        notes: "dock B",
+        additional_fields: [{ label: "Color", value: "Black" }]
+      })
+    ]);
+    expect(it0.contributors[0].notes).toBe("dock B");
+    expect(it0.contributors[0].additionalFields).toEqual([
+      { label: "Color", value: "Black" }
+    ]);
+  });
+
   it("merges an item_code ACROSS sponsors into one row and names each sponsor in the drill-down", () => {
     const rows = [
       line({ sponsor: { id: 1, name: "Intel" }, quantity: 10 }),

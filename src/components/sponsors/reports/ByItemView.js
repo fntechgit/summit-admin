@@ -116,6 +116,8 @@ const accumulateRow = (itemMap, row) => {
     addOnName: row.add_on_name ?? null,
     sponsorBooth: row.sponsor_booth ?? null,
     checkoutAt: row.purchase?.checkout_at ?? null,
+    notes: row.notes ?? null,
+    additionalFields: row.additional_fields ?? null,
     rateName: row.rate_name ?? "",
     status: lineStatus(row),
     // Struck-through rows show what was ordered, not 0.
