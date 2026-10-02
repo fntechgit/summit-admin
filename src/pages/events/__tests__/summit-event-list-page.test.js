@@ -428,4 +428,61 @@ describe("SummitEventListPage", () => {
       { criteria: "type", operator: "==", value: "1" }
     ]);
   });
+
+  test("keeps Selection Status hidden once hidden, and shows it again with Show all", async () => {
+    renderWithRedux(<SummitEventListPage />, {
+      initialState: {
+        currentSummitState: {
+          currentSummit: {
+            id: 12,
+            time_zone: { name: "UTC" },
+            time_zone_id: "UTC",
+            selection_plans: [],
+            tracks: [],
+            event_types: [],
+            locations: [],
+            presentation_action_types: []
+          }
+        },
+        mediaUploadListState: {
+          media_uploads: []
+        },
+        currentEventListState: {
+          events: [],
+          lastPage: 1,
+          currentPage: 1,
+          order: "id",
+          orderDir: 1,
+          totalEvents: 0,
+          term: "",
+          filters: {},
+          extraColumns: [],
+          perPage: 10
+        }
+      }
+    });
+
+    const latestGridProps = () =>
+      mockEditableTableSpy.mock.calls[
+        mockEditableTableSpy.mock.calls.length - 1
+      ][0];
+
+    expect(latestGridProps().columnVisibilityModel.selection_status).toBe(true);
+
+    act(() => {
+      latestGridProps().onColumnVisibilityModelChange({
+        ...latestGridProps().columnVisibilityModel,
+        selection_status: false
+      });
+    });
+    expect(latestGridProps().columnVisibilityModel.selection_status).toBe(
+      false
+    );
+
+    // "Show all" reports visible columns by leaving them out of the model
+    act(() => {
+      latestGridProps().onColumnVisibilityModelChange({});
+    });
+    expect(latestGridProps().columnVisibilityModel.selection_status).toBe(true);
+  });
 });
