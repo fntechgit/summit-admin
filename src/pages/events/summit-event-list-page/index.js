@@ -14,16 +14,15 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button } from "@mui/material";
+import { Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
-import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
 import {
   GridFilter,
   useGridFilter
 } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
-import BulkEditTable from "openstack-uicore-foundation/lib/components/mui/bulk-edit-table";
 import GridToolbar from "../../../components/mui/grid-toolbar";
+import BulkEditDataGrid from "../../../components/mui/bulk-edit-data-grid";
 import {
   bulkUpdateEvents,
   deleteEvent,
@@ -33,7 +32,6 @@ import {
   importMP4AssetsFromMUX
 } from "../../../actions/event-actions";
 import { getMediaUploads } from "../../../actions/media-upload-actions";
-import { handleDDLSortByLabel } from "../../../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_Z_INDEX,
@@ -197,54 +195,21 @@ const SummitEventListPage = ({
     currentSummit.id
   );
 
-  const columnDDLOptions = [
-    ...optionalColumns.map((oc) => ({ value: oc.columnKey, label: oc.label })),
-    {
-      value: "all_companies",
-      label: T.translate("event_list.all_companies")
-    },
-    {
-      value: "all",
-      label: T.translate("general.all")
-    }
-  ];
+  const columnVisibilityModel = Object.fromEntries(
+    optionalColumns.map((oc) => [
+      oc.columnKey,
+      selectedColumns.includes(oc.columnKey)
+    ])
+  );
 
-  const handleColumnsChange = (ev) => {
-    const { value: newColumns } = ev.target;
-
-    if (newColumns.includes("all")) {
-      setSelectedColumns(
-        columnDDLOptions.map((opt) => opt.value).filter((v) => v !== "all")
-      );
-      return;
-    }
-
-    const allCompanies = ["submitter_company", "speaker_company", "sponsor"];
-    const hadAllCompanies = selectedColumns.includes("all_companies");
-    const hasAllCompanies = newColumns.includes("all_companies");
-
-    if (hadAllCompanies && !hasAllCompanies) {
-      setSelectedColumns(newColumns.filter((c) => !allCompanies.includes(c)));
-      return;
-    }
-
-    if (hasAllCompanies) {
-      const selectedCompanies = allCompanies.filter((c) =>
-        selectedColumns.includes(c)
-      ).length;
-      const newCompanies = allCompanies.filter((c) =>
-        newColumns.includes(c)
-      ).length;
-
-      setSelectedColumns(
-        newCompanies < selectedCompanies
-          ? newColumns.filter((c) => c !== "all_companies")
-          : [...new Set([...newColumns, ...allCompanies])]
-      );
-      return;
-    }
-
-    setSelectedColumns(newColumns);
+  // the grid omits columns from the model when they're visible (e.g. after
+  // "Show all"), so only an explicit false hides one
+  const handleColumnVisibilityModelChange = (model) => {
+    setSelectedColumns(
+      optionalColumns
+        .map((oc) => oc.columnKey)
+        .filter((columnKey) => model[columnKey] !== false)
+    );
   };
 
   const handleFilterCriteriaChange = (filterCriteria) => {
@@ -260,11 +225,17 @@ const SummitEventListPage = ({
   const eventTypeOptions = buildNameIdDDL(currentSummit.event_types);
 
   const fixedColumns = [
-    { columnKey: "id", label: T.translate("general.id"), sortable: true },
+    {
+      columnKey: "id",
+      label: T.translate("general.id"),
+      sortable: true,
+      hideable: false
+    },
     {
       columnKey: "type",
       label: T.translate("event_list.type"),
       sortable: true,
+      hideable: false,
       // eslint-disable-next-line react/no-unstable-nested-components
       editableField: (extraProps) => (
         <Dropdown
@@ -291,6 +262,7 @@ const SummitEventListPage = ({
       columnKey: "title",
       label: T.translate("event_list.title"),
       sortable: true,
+      hideable: false,
       editableField: true,
       placeholder: T.translate("bulk_actions_page.placeholders.event_title")
     },
@@ -298,6 +270,7 @@ const SummitEventListPage = ({
       columnKey: "selection_status",
       label: T.translate("event_list.selection_status"),
       sortable: true,
+      hideable: false,
       render: (status, row) =>
         status === "unaccepted" && row.is_published === true
           ? "accepted"
@@ -310,11 +283,7 @@ const SummitEventListPage = ({
     sortDir: orderDir
   };
 
-  const selectedOptionalColumns = optionalColumns.filter((c) =>
-    selectedColumns.includes(c.columnKey)
-  );
-
-  const tableColumns = [...fixedColumns, ...selectedOptionalColumns];
+  const tableColumns = [...fixedColumns, ...optionalColumns];
 
   if (!currentSummit.id) return <div />;
 
@@ -325,18 +294,7 @@ const SummitEventListPage = ({
       <h3>
         {T.translate("event_list.event_list")} ({totalEvents})
       </h3>
-      <GridToolbar
-        splitAt="lg"
-        searchProps={{
-          term,
-          placeholder: T.translate("event_list.placeholders.search_events"),
-          onSearch: handleSearch
-        }}
-      >
-        <GridFilter
-          id={FILTER_ID}
-          criterias={getCriterias(currentSummit, mediaUploadTypes)}
-        />
+      <GridToolbar>
         <Button
           variant="contained"
           onClick={handleNewEvent}
@@ -344,9 +302,6 @@ const SummitEventListPage = ({
           sx={{ whiteSpace: "nowrap", flexShrink: 0, minWidth: 140 }}
         >
           {T.translate("event_list.add_event")}
-        </Button>
-        <Button variant="outlined" onClick={handleExport}>
-          {T.translate("general.export")}
         </Button>
         <Button
           variant="outlined"
@@ -375,43 +330,41 @@ const SummitEventListPage = ({
       </div>
 
       <hr />
-      <Box sx={{ mb: 2 }}>
-        <MuiDropdown
-          id="select_fields"
-          label={T.translate("event_list.select_fields")}
-          placeholder={T.translate("event_list.placeholders.select_fields")}
-          value={selectedColumns}
-          onChange={handleColumnsChange}
-          options={handleDDLSortByLabel(columnDDLOptions)}
-          multiple
+      <div className="summit-event-list-table-wrapper">
+        <BulkEditDataGrid
+          options={tableOptions}
+          data={tableData}
+          columns={tableColumns}
+          columnVisibilityModel={columnVisibilityModel}
+          onColumnVisibilityModelChange={handleColumnVisibilityModelChange}
+          filter={
+            <GridFilter
+              id={FILTER_ID}
+              criterias={getCriterias(currentSummit, mediaUploadTypes)}
+            />
+          }
+          onExport={handleExport}
+          searchProps={{
+            term,
+            placeholder: T.translate("event_list.placeholders.search_events"),
+            onSearch: handleSearch
+          }}
+          noRowsLabel={T.translate("event_list.no_events")}
+          onSort={handleSort}
+          onUpdate={bulkUpdateEvents}
+          totalRows={totalEvents}
+          perPage={perPage}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onEdit={handleEdit}
+          onDelete={deleteEvent}
+          getName={(row) => row.title}
+          deleteDialogBody={(name) =>
+            `${T.translate("event_list.delete_event_warning")} ${name}`
+          }
         />
-      </Box>
-
-      {events.length === 0 && <div>{T.translate("event_list.no_events")}</div>}
-
-      {events.length > 0 && (
-        <div className="summit-event-list-table-wrapper">
-          <BulkEditTable
-            options={tableOptions}
-            data={tableData}
-            columns={tableColumns}
-            onSort={handleSort}
-            onUpdate={bulkUpdateEvents}
-            totalRows={totalEvents}
-            perPage={perPage}
-            currentPage={currentPage}
-            onPageChange={handlePageChange}
-            onPerPageChange={handlePerPageChange}
-            onEdit={handleEdit}
-            onDelete={deleteEvent}
-            getName={(row) => row.title}
-            deleteDialogBody={(name) =>
-              `${T.translate("event_list.delete_event_warning")} ${name}`
-            }
-            showPageJump
-          />
-        </div>
-      )}
+      </div>
 
       <ImportModal
         show={showImportModal}
