@@ -41,6 +41,7 @@
     "@fontsource/roboto": "^5.1.1",
     "@mui/icons-material": "^6.4.3",
     "@mui/material": "^6.4.3",
+    "@mui/x-data-grid": "^7.29.13",
     "@mui/x-date-pickers": "^7.26.0",
     "@react-pdf/renderer": "^4.4.1",
     "@sentry/react": "^8.32.0",

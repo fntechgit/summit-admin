@@ -19,13 +19,12 @@ jest.mock("../../../actions/filter-criteria-actions", () => ({
 }));
 
 jest.mock(
-  "openstack-uicore-foundation/lib/components/mui/bulk-edit-table",
+  "../../../components/mui/bulk-edit-data-grid",
   () =>
-    function BulkEditTableMock(props) {
+    function BulkEditDataGridMock(props) {
       mockEditableTableSpy(props);
       return null;
-    },
-  { virtual: true }
+    }
 );
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
