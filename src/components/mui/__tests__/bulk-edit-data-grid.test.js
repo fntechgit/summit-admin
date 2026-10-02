@@ -142,6 +142,25 @@ describe("BulkEditDataGrid", () => {
     ).toHaveLength(0);
   });
 
+  test("clicking the columns button again closes the columns panel", async () => {
+    renderGrid();
+    const columnsButton = screen.getByRole("button", {
+      name: "Select columns"
+    });
+
+    await userEvent.click(columnsButton);
+    expect(
+      await screen.findByRole("checkbox", { name: "Title" })
+    ).toBeInTheDocument();
+
+    await userEvent.click(columnsButton);
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("checkbox", { name: "Title" })
+      ).not.toBeInTheDocument()
+    );
+  });
+
   test("unsorting goes back to the default order", async () => {
     const onSort = jest.fn();
     renderGrid({ onSort, options: { sortCol: "title", sortDir: 1 } });

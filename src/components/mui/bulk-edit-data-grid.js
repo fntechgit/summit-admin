@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { Box, Button, Divider, TextField, Tooltip } from "@mui/material";
@@ -26,9 +26,13 @@ import {
   GridActionsCellItem,
   GridColumnMenu,
   GridColumnMenuHideItem,
+  GridPreferencePanelsValue,
   GridToolbarColumnsButton,
   GridToolbarContainer,
-  GridToolbarQuickFilter
+  GridToolbarQuickFilter,
+  gridPreferencePanelStateSelector,
+  useGridApiContext,
+  useGridSelector
 } from "@mui/x-data-grid";
 import CustomTablePagination from "openstack-uicore-foundation/lib/components/mui/table/custom-table-pagination";
 import MenuButton from "./menu-button";
@@ -149,6 +153,45 @@ ColumnMenu.propTypes = {
   colDef: PropTypes.shape({ hideable: PropTypes.bool }).isRequired
 };
 
+// clicking the button while its panel is open should close it, but React 16
+// runs the button's handlers on document, next to the panel's click-away
+// listener, so the button can't stop it: the panel closes on pointerup and the
+// button's click reopens it. Remember whether it was open when the press
+// started and close it again after the click.
+const ColumnsButton = ({ buttonRef }) => {
+  const apiRef = useGridApiContext();
+  const preferencePanel = useGridSelector(
+    apiRef,
+    gridPreferencePanelStateSelector
+  );
+  const wasOpenRef = useRef(false);
+
+  return (
+    <GridToolbarColumnsButton
+      ref={buttonRef}
+      slotProps={{
+        button: {
+          sx: ICON_ONLY_BUTTON_SX,
+          onPointerDown: () => {
+            wasOpenRef.current =
+              preferencePanel.open &&
+              preferencePanel.openedPanelValue ===
+                GridPreferencePanelsValue.columns;
+          },
+          onClick: () => {
+            if (wasOpenRef.current) apiRef.current.hidePreferences();
+            wasOpenRef.current = false;
+          }
+        }
+      }}
+    />
+  );
+};
+
+ColumnsButton.propTypes = {
+  buttonRef: PropTypes.func.isRequired
+};
+
 const Toolbar = ({
   views,
   onAdd,
@@ -220,10 +263,7 @@ const Toolbar = ({
     {(onAdd || importItems.length > 0) && (
       <Divider orientation="vertical" flexItem />
     )}
-    <GridToolbarColumnsButton
-      ref={setColumnsButtonEl}
-      slotProps={{ button: { sx: ICON_ONLY_BUTTON_SX } }}
-    />
+    <ColumnsButton buttonRef={setColumnsButtonEl} />
     {filter}
     {onExport && (
       <>
