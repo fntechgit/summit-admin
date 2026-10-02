@@ -31,15 +31,20 @@ const PieGraph = ({
     () => colors || getRandomColors(data.length, colorPalette),
     [colors, data.length]
   );
-  const height = Math.max(600, labels.length * 68);
+  const layoutPadding = isMobile
+    ? { top: 10, left: 10, right: 10, bottom: 30 }
+    : { top: 80, left: 30, right: 30, bottom: 80 };
+    
+  // take into account the padding that is unavailable when legend is rendered
+  const height = Math.max(
+    600,
+    labels.length * 68 + layoutPadding.top + layoutPadding.bottom
+  );
   const graphSize = isMobile
     ? { width: 400, height: height }
     : { width: 600, height: height };
   const legendPos = isMobile ? "bottom" : "right";
   const legendAlign = isMobile ? "start" : "center";
-  const layoutPadding = isMobile
-    ? { top: 10, left: 10, right: 10, bottom: 30 }
-    : { top: 80, left: 30, right: 30, bottom: 80 };
   const titlePadding = isMobile ? { top: 10, left: 0, right: 0, bottom: 0 } : 0;
 
   const chartData = {
