@@ -25,16 +25,14 @@ import {
 } from "openstack-uicore-foundation/lib/security/actions";
 import {
   initLogOut,
-  doLoginBasicLogin,
-  getIdToken
+  doLoginBasicLogin
 } from "openstack-uicore-foundation/lib/security/methods";
-import IdTokenVerifier from "idtoken-verifier";
-import T from "i18n-react";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 // eslint-disable-next-line
 import * as Sentry from "@sentry/react";
 import exclusiveSections from "./exclusive-sections.yml";
+import TopNav from "./components/top-nav";
 import CustomErrorPage from "./pages/custom-error-page";
 import history from "./history";
 import PrimaryLayout from "./layouts/primary-layout";
@@ -146,6 +144,7 @@ class App extends React.PureComponent {
   constructor(props) {
     super(props);
     props.resetLoading();
+    this.onClickLogin = this.onClickLogin.bind(this);
   }
 
   onClickLogin() {
@@ -154,6 +153,16 @@ class App extends React.PureComponent {
 
   componentDidMount() {
     this.props.getTimezones();
+    // A client-side route change does not reset scroll, so navigating from a
+    // scrolled list used to land mid-page. POP is excluded so back/forward
+    // keeps the position the browser restores.
+    this.unlistenHistory = history.listen((location, action) => {
+      if (action === "PUSH") window.scrollTo(0, 0);
+    });
+  }
+
+  componentWillUnmount() {
+    if (this.unlistenHistory) this.unlistenHistory();
   }
 
   render() {
@@ -163,22 +172,10 @@ class App extends React.PureComponent {
       doLogout,
       getUserInfo,
       backUrl,
-      loading
+      loading,
+      currentSummit,
+      member
     } = this.props;
-
-    const idToken = getIdToken();
-
-    // get user pic from idtoken claims (IDP)
-    let profile_pic = "";
-
-    if (idToken) {
-      const verifier = new IdTokenVerifier({
-        issuer: window.IDP_BASE_URL,
-        audience: window.OAUTH2_CLIENT_ID
-      });
-      const jwt = verifier.decode(idToken);
-      profile_pic = jwt.payload.picture;
-    }
 
     return (
       <Sentry.ErrorBoundary
@@ -188,17 +185,18 @@ class App extends React.PureComponent {
           <Router history={history}>
             <div>
               <AjaxLoader show={loading} size={120} />
-              <div className="header" id="page-header">
-                <div className="header-title">
-                  {T.translate("landing.os_summit_admin")}
-                  <AuthButton
-                    isLoggedUser={isLoggedUser}
-                    picture={profile_pic}
-                    doLogin={this.onClickLogin.bind(this)}
-                    initLogOut={initLogOut}
-                  />
-                </div>
-              </div>
+              <TopNav
+                isLoggedUser={isLoggedUser}
+                currentSummit={currentSummit}
+                member={member}
+              />
+              {!isLoggedUser && (
+                <AuthButton
+                  isLoggedUser={isLoggedUser}
+                  doLogin={this.onClickLogin}
+                  initLogOut={initLogOut}
+                />
+              )}
               <Switch>
                 <AuthorizedRoute
                   isLoggedUser={isLoggedUser}
@@ -225,11 +223,16 @@ class App extends React.PureComponent {
   }
 }
 
-const mapStateToProps = ({ loggedUserState, baseState }) => ({
+const mapStateToProps = ({
+  loggedUserState,
+  baseState,
+  currentSummitState
+}) => ({
   isLoggedUser: loggedUserState.isLoggedUser,
   backUrl: loggedUserState.backUrl,
   member: loggedUserState.member,
-  loading: baseState.loading
+  loading: baseState.loading,
+  currentSummit: currentSummitState.currentSummit
 });
 
 export default connect(mapStateToProps, {

@@ -11,33 +11,24 @@
  * limitations under the License.
  * */
 
-import React, { useState } from "react";
+import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { withRouter } from "react-router-dom";
-import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import SubMenuItem from "./sub-menu-item";
 import MenuItem from "./menu-item";
 import ExpandableItem from "./expandable-item";
 import Member from "../../models/member";
 import { getGlobalItems, getSummitItems } from "./menu-definition";
 
-import styles from "./menu.module.less";
-
-const Menu = ({ currentSummit, member, history }) => {
-  const [menuOpen, setMenuOpen] = useState(false);
+const Menu = ({ currentSummit, member, history, onNavigate }) => {
   const memberObj = new Member(member);
   const globalItems = getGlobalItems();
   const summitItems = currentSummit ? getSummitItems(currentSummit.id) : [];
 
-  const closeMenu = () => setMenuOpen(false);
-
   const onMenuItemClick = (ev, url) => {
     ev.preventDefault();
-    closeMenu();
+    if (onNavigate) onNavigate();
     history.push(`/app/${url}`);
   };
 
@@ -74,50 +65,18 @@ const Menu = ({ currentSummit, member, history }) => {
 
   return (
     <>
-      {menuOpen && (
-        <Box
-          sx={{ position: "fixed", inset: 0, zIndex: 99998 }}
-          onClick={closeMenu}
-          onTouchStart={closeMenu}
-        />
+      <ExpandableItem label={T.translate("menu.general")} isHeader>
+        {globalItems.map(drawMenuItem)}
+      </ExpandableItem>
+
+      {!!currentSummit?.id && (
+        <>
+          <Divider sx={{ my: 2 }} />
+          <ExpandableItem label={currentSummit.name} isHeader>
+            {summitItems.map(drawMenuItem)}
+          </ExpandableItem>
+        </>
       )}
-      <Box
-        className={`${styles.wrapper} ${
-          styles[menuOpen ? "opened" : "closed"]
-        }`}
-      >
-        <Box className={styles.burgerButton}>
-          <IconButton
-            onClick={() => (menuOpen ? closeMenu() : setMenuOpen(true))}
-          >
-            <MenuIcon sx={{ fontSize: "2.5rem", color: "#555555" }} />
-          </IconButton>
-        </Box>
-        <Box
-          className={styles.menuWrapper}
-          onMouseEnter={() => setMenuOpen(true)}
-          onMouseLeave={() => setMenuOpen(false)}
-        >
-          <Box className={styles.expandButton}>
-            <ChevronRightIcon sx={{ fontSize: "2em", color: "#555555" }} />
-          </Box>
-
-          <Box className={styles.menuItemsWrapper}>
-            <ExpandableItem label={T.translate("menu.general")} isHeader>
-              {globalItems.map(drawMenuItem)}
-            </ExpandableItem>
-
-            {!!currentSummit?.id && (
-              <>
-                <Divider sx={{ my: 2 }} />
-                <ExpandableItem label={currentSummit.name} isHeader>
-                  {summitItems.map(drawMenuItem)}
-                </ExpandableItem>
-              </>
-            )}
-          </Box>
-        </Box>
-      </Box>
     </>
   );
 };

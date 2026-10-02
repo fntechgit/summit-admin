@@ -144,7 +144,7 @@ const SummitIdLayout = ({ currentSummit, loading, match, ...props }) => {
     return null;
 
   return (
-    <div>
+    <div className="summit-scope">
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
       <Suspense fallback={<AjaxLoader show relative size={120} />}>
         <Switch>
