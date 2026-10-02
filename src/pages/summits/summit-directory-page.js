@@ -19,6 +19,8 @@ import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import AddIcon from "@mui/icons-material/Add";
 import GridToolbar from "../../components/mui/grid-toolbar";
 import {
@@ -164,11 +166,18 @@ const SummitDirectoryPage = ({
           onSearch: handleSearch,
           placeholder: T.translate("directory.placeholders.search")
         }}
-        checkboxProps={{
-          checked: hidePastEvents,
-          onChange: handleHidePastEventsChange,
-          label: T.translate("directory.hide_past_events")
-        }}
+        filter={
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={hidePastEvents}
+                onChange={handleHidePastEventsChange}
+              />
+            }
+            label={T.translate("directory.hide_past_events")}
+            sx={{ whiteSpace: "nowrap" }}
+          />
+        }
       >
         {canAddSummits && (
           <Button

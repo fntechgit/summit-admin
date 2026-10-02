@@ -116,14 +116,14 @@ const SponsorFormsListPage = ({
       ? unarchiveSponsorForm(item.id)
       : archiveSponsorForm(item.id);
 
-  const handleShowArchivedForms = (ev) => {
+  const handleShowArchivedForms = (archived) => {
     getSponsorForms(
       term,
       DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,
-      ev.target.checked
+      archived
     );
   };
 
@@ -215,6 +215,7 @@ const SponsorFormsListPage = ({
       columnKey: "tiers",
       header: T.translate("sponsor_forms.tiers_column_label"),
       sortable: false,
+      cellSx: { maxWidth: 300 },
       render: (row) => {
         const cellStyle = {
           display: "block"
@@ -272,7 +273,7 @@ const SponsorFormsListPage = ({
                 cursor: "pointer",
                 textDecoration: "underline dotted",
                 display: "block",
-                whiteSpace: "nowrap",
+                textOverflow: "break-word",
                 verticalAlign: "middle"
               }}
               title={label}
@@ -344,10 +345,9 @@ const SponsorFormsListPage = ({
           onSearch: handleSearch,
           placeholder: T.translate("sponsor_forms.placeholders.search")
         }}
-        checkboxProps={{
-          checked: showArchived,
-          onChange: handleShowArchivedForms,
-          label: T.translate("sponsor_forms.show_archived")
+        archiveToggleProps={{
+          showArchived,
+          onChange: handleShowArchivedForms
         }}
       >
         <Button
