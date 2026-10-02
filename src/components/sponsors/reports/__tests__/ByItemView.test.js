@@ -170,7 +170,9 @@ describe("groupLinesBySponsorItem", () => {
       isCanceled: true,
       isPartiallyCanceled: false,
       syncedAt: null,
-      sourceUpdatedAt: null
+      sourceUpdatedAt: null,
+      notes: "dock B",
+      additionalFields: null
     });
   });
 
@@ -181,6 +183,28 @@ describe("groupLinesBySponsorItem", () => {
     const [c] = g.items[0].contributors;
     expect(c.syncedAt).toBe(1755561600);
     expect(c.sourceUpdatedAt).toBe(1755558000);
+  });
+
+  it("carries the line's notes and additional fields into its own contributor", () => {
+    const fields = [
+      { label: "Plug Type", value: "L6-30R" },
+      { label: "Location", value: "Back wall" }
+    ];
+    const [g] = groupLinesBySponsorItem([
+      line({ notes: "run to back left", additional_fields: fields }),
+      line({
+        purchase: { id: 5002, number: "OCP-2", status: "Paid" },
+        notes: null,
+        additional_fields: [{ label: "Plug Type", value: "L5-20R" }]
+      })
+    ]);
+    const [first, second] = g.items[0].contributors;
+    expect(first.notes).toBe("run to back left");
+    expect(first.additionalFields).toEqual(fields);
+    expect(second.notes).toBeNull();
+    expect(second.additionalFields).toEqual([
+      { label: "Plug Type", value: "L5-20R" }
+    ]);
   });
 
   it("EXCLUDES canceled lines from qty/money/purchasedCount/Σqty but keeps them as contributors", () => {
@@ -657,6 +681,55 @@ describe("ByItemView", () => {
     fireEvent.click(screen.getByRole("option", { name: "20" }));
     expect(onPerPageChange).toHaveBeenCalledWith(20);
   });
+
+  it("shows each order's own notes and additional fields under their headers", () => {
+    const [first, second] = item().contributors;
+    renderView({
+      groups: [
+        group({
+          items: [
+            item({
+              contributors: [
+                {
+                  ...first,
+                  notes: "run to back left",
+                  additionalFields: [
+                    { label: "Plug Type", value: "L6-30R" },
+                    { label: "Location", value: "Back wall" }
+                  ]
+                },
+                {
+                  ...second,
+                  notes: "dock B",
+                  additionalFields: [{ label: "Plug Type", value: "L5-20R" }]
+                }
+              ]
+            })
+          ]
+        })
+      ]
+    });
+    fireEvent.click(screen.getByText("AV1"));
+    const table = screen.getByText("OCP-1").closest("table");
+    const headers = within(table)
+      .getAllByRole("columnheader")
+      .map((th) => th.textContent);
+    const cellsOf = (orderNo) =>
+      within(screen.getByText(orderNo).closest("tr")).getAllByRole("cell");
+    const notesAt = headers.indexOf("sponsor_reports_page.col_notes");
+    const fieldsAt = headers.indexOf(
+      "sponsor_reports_page.col_additional_fields"
+    );
+    const first1 = cellsOf("OCP-1");
+    expect(first1[notesAt]).toHaveTextContent("run to back left");
+    expect(first1[fieldsAt]).toHaveTextContent("Plug Type: L6-30R");
+    expect(first1[fieldsAt]).toHaveTextContent("Location: Back wall");
+    expect(first1[fieldsAt]).not.toHaveTextContent("L5-20R");
+    const second2 = cellsOf("OCP-2");
+    expect(second2[notesAt]).toHaveTextContent("dock B");
+    expect(second2[fieldsAt]).toHaveTextContent("Plug Type: L5-20R");
+    expect(second2[fieldsAt]).not.toHaveTextContent("L6-30R");
+  });
 });
 
 describe("byitem_sponsor_items_chip copy", () => {
@@ -1044,8 +1117,8 @@ describe("ByItemView all-sponsors layout", () => {
   // the outer item table has its own separate ITEM_HEADERS and expansion
   // colSpan that must not be counted here.
   it.each([
-    ["by-sponsor", 10, () => renderView()],
-    ["all-sponsors", 11, () => renderAll()]
+    ["by-sponsor", 12, () => renderView()],
+    ["all-sponsors", 13, () => renderAll()]
   ])(
     "the %s drill-down has %i headers matching that many cells per row",
     (_name, count, mount) => {

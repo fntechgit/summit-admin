@@ -82,7 +82,7 @@ export const Destination = ({ name, booth }) => {
 
 // Values arrive display-ready from the API; reformatting here would desync the
 // screen from the CSV.
-const AdditionalFields = ({ fields }) => (
+export const AdditionalFields = ({ fields }) => (
   <>
     {(fields ?? []).map((field, idx) => (
       <Box
