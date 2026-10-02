@@ -15,9 +15,11 @@ import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { Box, Button, Divider, TextField, Tooltip } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   DataGrid,
@@ -27,6 +29,7 @@ import {
   GridToolbarQuickFilter
 } from "@mui/x-data-grid";
 import CustomTablePagination from "openstack-uicore-foundation/lib/components/mui/table/custom-table-pagination";
+import MenuButton from "./menu-button";
 import showConfirmDialog from "./showConfirmDialog";
 import {
   DEFAULT_CURRENT_PAGE,
@@ -124,6 +127,10 @@ ExpandableQuickFilter.defaultProps = {
 };
 
 const Toolbar = ({
+  onAdd,
+  addLabel,
+  importItems,
+  importLabel,
   filter,
   onExport,
   searchProps,
@@ -157,6 +164,34 @@ const Toolbar = ({
       </Button>
     )}
     <Box sx={{ flex: 1 }} />
+    {onAdd && (
+      <Tooltip title={addLabel}>
+        <Button
+          size="small"
+          startIcon={<AddIcon />}
+          onClick={onAdd}
+          aria-label={addLabel}
+          sx={ICON_ONLY_BUTTON_SX}
+        />
+      </Tooltip>
+    )}
+    {importItems.length > 0 && (
+      <MenuButton
+        buttonId="bulk-edit-data-grid-import-button"
+        menuId="bulk-edit-data-grid-import-menu"
+        menuItems={importItems}
+        size="small"
+        aria-label={importLabel}
+        sx={ICON_ONLY_BUTTON_SX}
+      >
+        <Tooltip title={importLabel}>
+          <FileUploadIcon fontSize="small" />
+        </Tooltip>
+      </MenuButton>
+    )}
+    {(onAdd || importItems.length > 0) && (
+      <Divider orientation="vertical" flexItem />
+    )}
     <GridToolbarColumnsButton
       slotProps={{ button: { sx: ICON_ONLY_BUTTON_SX } }}
     />
@@ -188,6 +223,12 @@ const Toolbar = ({
 );
 
 Toolbar.propTypes = {
+  onAdd: PropTypes.func,
+  addLabel: PropTypes.string,
+  importItems: PropTypes.arrayOf(
+    PropTypes.shape({ label: PropTypes.string, onClick: PropTypes.func })
+  ),
+  importLabel: PropTypes.string,
   filter: PropTypes.node,
   onExport: PropTypes.func,
   searchProps: PropTypes.shape({
@@ -202,6 +243,10 @@ Toolbar.propTypes = {
 };
 
 Toolbar.defaultProps = {
+  onAdd: null,
+  addLabel: "",
+  importItems: [],
+  importLabel: "",
   filter: null,
   onExport: null,
   searchProps: null
@@ -225,6 +270,10 @@ const BulkEditDataGrid = ({
   deleteDialogBody,
   columnVisibilityModel,
   onColumnVisibilityModelChange,
+  onAdd,
+  addLabel,
+  importItems,
+  importLabel,
   filter,
   onExport,
   searchProps,
@@ -432,6 +481,10 @@ const BulkEditDataGrid = ({
           slots={{ toolbar: Toolbar }}
           slotProps={{
             toolbar: {
+              onAdd,
+              addLabel,
+              importItems,
+              importLabel,
               filter,
               onExport,
               searchProps,
@@ -480,6 +533,18 @@ BulkEditDataGrid.propTypes = {
   deleteDialogBody: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
   columnVisibilityModel: PropTypes.objectOf(PropTypes.bool),
   onColumnVisibilityModelChange: PropTypes.func,
+  onAdd: PropTypes.func,
+  // tooltip / aria-label of the add (+) button
+  addLabel: PropTypes.string,
+  // options listed by the import icon's menu
+  importItems: PropTypes.arrayOf(
+    PropTypes.shape({
+      label: PropTypes.string.isRequired,
+      onClick: PropTypes.func.isRequired
+    })
+  ),
+  // tooltip / aria-label of the import icon
+  importLabel: PropTypes.string,
   // rendered in the grid toolbar, e.g. a uicore <GridFilter />
   filter: PropTypes.node,
   onExport: PropTypes.func,
@@ -505,6 +570,10 @@ BulkEditDataGrid.defaultProps = {
   deleteDialogBody: null,
   columnVisibilityModel: undefined,
   onColumnVisibilityModelChange: undefined,
+  onAdd: null,
+  addLabel: "",
+  importItems: [],
+  importLabel: "",
   filter: null,
   onExport: null,
   searchProps: null,

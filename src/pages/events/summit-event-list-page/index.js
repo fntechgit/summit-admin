@@ -14,14 +14,11 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Button } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import {
   GridFilter,
   useGridFilter
 } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
-import GridToolbar from "../../../components/mui/grid-toolbar";
 import BulkEditDataGrid from "../../../components/mui/bulk-edit-data-grid";
 import {
   bulkUpdateEvents,
@@ -137,11 +134,6 @@ const SummitEventListPage = ({
   useEffect(() => {
     setSelectedColumns(extraColumns ?? []);
   }, [extraColumns]);
-
-  const handleMUXImport = (ev) => {
-    ev.preventDefault();
-    setShowImportFromMUXModal(true);
-  };
 
   const handleEdit = (row) => {
     history.push(`/app/summits/${currentSummit.id}/events/${row.id}`);
@@ -294,26 +286,6 @@ const SummitEventListPage = ({
       <h3>
         {T.translate("event_list.event_list")} ({totalEvents})
       </h3>
-      <GridToolbar>
-        <Button
-          variant="contained"
-          onClick={handleNewEvent}
-          startIcon={<AddIcon />}
-          sx={{ whiteSpace: "nowrap", flexShrink: 0, minWidth: 140 }}
-        >
-          {T.translate("event_list.add_event")}
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={handleMUXImport}
-          sx={{ whiteSpace: "nowrap", flexShrink: 0, minWidth: 190 }}
-        >
-          {T.translate("event_list.mux_import")}
-        </Button>
-        <Button variant="outlined" onClick={() => setShowImportModal(true)}>
-          {T.translate("event_list.import")}
-        </Button>
-      </GridToolbar>
       <hr />
       <div>
         <SelectFilterCriteria
@@ -343,6 +315,19 @@ const SummitEventListPage = ({
               criterias={getCriterias(currentSummit, mediaUploadTypes)}
             />
           }
+          onAdd={handleNewEvent}
+          addLabel={T.translate("event_list.add_event")}
+          importItems={[
+            {
+              label: T.translate("event_list.mux_import"),
+              onClick: () => setShowImportFromMUXModal(true)
+            },
+            {
+              label: T.translate("event_list.import"),
+              onClick: () => setShowImportModal(true)
+            }
+          ]}
+          importLabel={T.translate("event_list.import")}
           onExport={handleExport}
           searchProps={{
             term,
