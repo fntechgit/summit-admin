@@ -698,7 +698,11 @@ describe("ByItemView", () => {
                     { label: "Location", value: "Back wall" }
                   ]
                 },
-                second
+                {
+                  ...second,
+                  notes: "dock B",
+                  additionalFields: [{ label: "Plug Type", value: "L5-20R" }]
+                }
               ]
             })
           ]
@@ -710,16 +714,21 @@ describe("ByItemView", () => {
     const headers = within(table)
       .getAllByRole("columnheader")
       .map((th) => th.textContent);
-    const cells = within(screen.getByText("OCP-1").closest("tr")).getAllByRole(
-      "cell"
+    const cellsOf = (orderNo) =>
+      within(screen.getByText(orderNo).closest("tr")).getAllByRole("cell");
+    const notesAt = headers.indexOf("sponsor_reports_page.col_notes");
+    const fieldsAt = headers.indexOf(
+      "sponsor_reports_page.col_additional_fields"
     );
-    expect(
-      cells[headers.indexOf("sponsor_reports_page.col_notes")]
-    ).toHaveTextContent("run to back left");
-    const fieldsCell =
-      cells[headers.indexOf("sponsor_reports_page.col_additional_fields")];
-    expect(fieldsCell).toHaveTextContent("Plug Type: L6-30R");
-    expect(fieldsCell).toHaveTextContent("Location: Back wall");
+    const first1 = cellsOf("OCP-1");
+    expect(first1[notesAt]).toHaveTextContent("run to back left");
+    expect(first1[fieldsAt]).toHaveTextContent("Plug Type: L6-30R");
+    expect(first1[fieldsAt]).toHaveTextContent("Location: Back wall");
+    expect(first1[fieldsAt]).not.toHaveTextContent("L5-20R");
+    const second2 = cellsOf("OCP-2");
+    expect(second2[notesAt]).toHaveTextContent("dock B");
+    expect(second2[fieldsAt]).toHaveTextContent("Plug Type: L5-20R");
+    expect(second2[fieldsAt]).not.toHaveTextContent("L6-30R");
   });
 });
 
