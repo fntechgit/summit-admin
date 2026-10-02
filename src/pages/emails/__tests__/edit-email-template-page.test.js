@@ -1,5 +1,5 @@
 import React from "react";
-import { act, screen } from "@testing-library/react";
+import { act, fireEvent, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { MemoryRouter } from "react-router-dom";
 import flushPromises from "flush-promises";
@@ -8,6 +8,7 @@ import EditEmailTemplatePage from "../edit-email-template-page";
 import {
   getEmailTemplate,
   resetTemplateForm,
+  saveEmailTemplate,
   getAllClients
 } from "../../../actions/email-actions";
 
@@ -22,7 +23,13 @@ jest.mock("../../../actions/email-actions", () => ({
 
 jest.mock("../../../components/forms/email-template-form", () => ({
   __esModule: true,
-  default: () => <div data-testid="email-template-form" />
+  default: ({ onSubmit }) => (
+    <button
+      type="button"
+      data-testid="email-template-form"
+      onClick={() => onSubmit({ id: 42 }).catch(() => {})}
+    />
+  )
 }));
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
@@ -176,4 +183,46 @@ describe("EditEmailTemplatePage", () => {
     expect(getEmailTemplate).toHaveBeenCalledWith("5");
     expect(screen.queryByTestId("email-template-form")).not.toBeInTheDocument();
   });
+
+  it.each([
+    { outcome: "succeeds", result: () => Promise.resolve(), redirects: true },
+    {
+      outcome: "fails",
+      result: () => Promise.reject(new Error("412")),
+      redirects: false
+    }
+  ])(
+    "redirects to the list only when the save $outcome",
+    async ({ result, redirects }) => {
+      saveEmailTemplate.mockReturnValue(result);
+      const history = { push: jest.fn() };
+
+      renderWithRedux(
+        <EditEmailTemplatePage
+          match={{
+            url: "/app/emails/templates/42",
+            params: { template_id: "42" }
+          }}
+          history={history}
+        />,
+        { initialState }
+      );
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId("email-template-form"));
+        await flushPromises();
+      });
+
+      expect(saveEmailTemplate).toHaveBeenCalledWith({ id: 42 });
+      if (redirects) {
+        expect(history.push).toHaveBeenCalledWith("/app/emails/templates");
+      } else {
+        expect(history.push).not.toHaveBeenCalled();
+      }
+    }
+  );
 });

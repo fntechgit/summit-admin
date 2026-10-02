@@ -31,6 +31,7 @@ import {
 
 const EditEmailTemplatePage = ({
   match,
+  history,
   entity,
   templateLoading,
   errors,
@@ -101,7 +102,11 @@ const EditEmailTemplatePage = ({
             entity={entity}
             clients={clients}
             errors={errors}
-            onSubmit={saveEmailTemplate}
+            onSubmit={(values) =>
+              saveEmailTemplate(values).then(() =>
+                history.push("/app/emails/templates")
+              )
+            }
             onRender={() => setShowJsonDialog(true)}
             preview={preview}
             renderErrors={render_errors}

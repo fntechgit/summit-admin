@@ -11,7 +11,8 @@ import pLimit from "p-limit";
 import {
   getAccessTokenSafely,
   isPositiveIntId,
-  escapeFilterValue
+  escapeFilterValue,
+  sequenced
 } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
@@ -64,35 +65,6 @@ export const SET_PURCHASE_DETAILS_BY_ITEM_SORT =
 // line for one item together — the shape the warehouse pull sheet needs.
 export const LINES_ORDER_BY_ITEM = "item_code";
 
-// Per-thunk sequence-token factory guarding against stale-response commits.
-// Two concurrent invocations of the same thunk (different filters/page/sponsor)
-// carry different getRequest abort keys (only access_token is stripped from the
-// key), so they never cancel each other and whichever response lands LAST would
-// win — even the older one. Each begin(dispatch) bumps the thunk's counter and
-// returns helpers scoped to that invocation:
-//   isCurrent()        — false once a newer invocation has begun
-//   guardedDispatch(a) — forwards to dispatch only while current, so a
-//                        superseded invocation cannot mutate state at all
-//                        (REQUEST, RECEIVE, error handlers, start/stopLoading).
-// The newest invocation is always current, so the overlay is always cleared by
-// whichever call finishes last. A STALE call's 401 re-login is also dropped
-// (uicore authErrorHandler reaches doLogin by dispatching a thunk through the
-// dispatch it is given) — safe: the fresh call carries the same token, so it
-// 401s too and drives the re-login, and uicore's isClearingSessionState guard
-// dedupes concurrent attempts.
-const sequenced = () => {
-  let seq = 0;
-  return (dispatch) => {
-    seq += 1;
-    const mySeq = seq;
-    return {
-      isCurrent: () => mySeq === seq,
-      guardedDispatch: (action) => {
-        if (mySeq === seq) dispatch(action);
-      }
-    };
-  };
-};
 // One sequence per thunk that commits fetched data to the store.
 const purchaseDetailsSeq = sequenced();
 const purchaseLinesSeq = sequenced();
