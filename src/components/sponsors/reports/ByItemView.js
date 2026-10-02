@@ -40,6 +40,7 @@ import T from "i18n-react/dist/i18n-react";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import ChipList from "../../mui/chip-list";
 import {
+  AdditionalFields,
   Destination,
   LineStatusPill,
   PER_PAGE_OPTIONS,
@@ -116,6 +117,8 @@ const accumulateRow = (itemMap, row) => {
     addOnName: row.add_on_name ?? null,
     sponsorBooth: row.sponsor_booth ?? null,
     checkoutAt: row.purchase?.checkout_at ?? null,
+    notes: row.notes ?? null,
+    additionalFields: row.additional_fields ?? null,
     rateName: row.rate_name ?? "",
     status: lineStatus(row),
     // Struck-through rows show what was ordered, not 0.
@@ -256,6 +259,8 @@ const CONTRIB_HEADERS = [
   { key: "col_form_code" },
   { key: "col_destination" },
   { key: "col_checkout_at" },
+  { key: "col_notes" },
+  { key: "col_additional_fields" },
   { key: "col_used_rate" },
   { key: "col_status" },
   { key: "col_quantity", align: "right" },
@@ -465,6 +470,10 @@ const ItemTable = ({
                               </TableCell>
                               <TableCell>
                                 {formatCheckoutTime(c.checkoutAt)}
+                              </TableCell>
+                              <TableCell>{c.notes}</TableCell>
+                              <TableCell>
+                                <AdditionalFields fields={c.additionalFields} />
                               </TableCell>
                               <TableCell>{c.rateName}</TableCell>
                               <TableCell>
