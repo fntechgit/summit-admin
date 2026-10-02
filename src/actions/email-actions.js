@@ -11,9 +11,7 @@
  * limitations under the License.
  * */
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
 import {
-  VALIDATE,
   getRequest,
   putRequest,
   postRequest,
@@ -21,21 +19,24 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  showSuccessMessage,
   authErrorHandler,
+  snackbarErrorHandler,
+  snackbarSuccessHandler,
   fetchResponseHandler,
   fetchErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
 import debounce from "lodash/debounce";
-import history from "../history";
-import { checkOrFilter, getAccessTokenSafely } from "../utils/methods";
+import {
+  checkOrFilter,
+  getAccessTokenSafely,
+  sequenced
+} from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";
 import {
   DEBOUNCE_WAIT,
   DEFAULT_PER_PAGE,
-  ERROR_CODE_412,
   HUNDRED_PER_PAGE
 } from "../utils/constants";
 
@@ -97,17 +98,30 @@ export const getEmailTemplates =
       createAction(REQUEST_TEMPLATES),
       createAction(RECEIVE_TEMPLATES),
       `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { order, orderDir, term, page, perPage }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
 
+// Sequence-guard (see sequenced()): EditEmailTemplatePage dispatches a fresh
+// getEmailTemplate(id) on every route param change, and concurrent calls for
+// different template ids never abort each other - a stale response landing
+// after a newer one (or after a reset) would overwrite the store's entity
+// with the wrong template's data, and EmailTemplateForm's loadedEntityIdRef
+// check would silently reseed the visible form with it. guardedDispatch
+// drops the RECEIVE/loading dispatches from a superseded call.
+const getEmailTemplateSeq = sequenced();
+
 export const getEmailTemplate = (templateId) => async (dispatch) => {
+  const { isCurrent, guardedDispatch } = getEmailTemplateSeq(dispatch);
   const accessToken = await getAccessTokenSafely();
 
-  dispatch(startLoading());
+  // Superseded while awaiting the token -> don't fire a request at all.
+  if (!isCurrent()) return Promise.resolve();
+
+  guardedDispatch(startLoading());
 
   const params = { access_token: accessToken, expand: "parent,versions" };
 
@@ -115,13 +129,13 @@ export const getEmailTemplate = (templateId) => async (dispatch) => {
     null,
     createAction(RECEIVE_TEMPLATE),
     `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/${templateId}`,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+    snackbarErrorHandler
+  )(params)(guardedDispatch).finally(() => guardedDispatch(stopLoading()));
 };
 
 export const resetTemplateForm = () => (dispatch) => {
+  getEmailTemplateSeq(dispatch); // invalidates any in-flight getEmailTemplate
+  dispatch(stopLoading());
   dispatch(createAction(RESET_TEMPLATE_FORM)({}));
 };
 
@@ -141,12 +155,17 @@ export const saveEmailTemplate =
         createAction(TEMPLATE_UPDATED),
         `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/${entity.id}`,
         normalizedEntity,
-        customErrorHandler,
+        snackbarErrorHandler,
         entity
       )(params)(dispatch)
         .then(() => {
           if (!noAlert)
-            dispatch(showSuccessMessage(T.translate("emails.template_saved")));
+            dispatch(
+              snackbarSuccessHandler({
+                title: T.translate("general.success"),
+                html: T.translate("emails.template_saved")
+              })
+            );
         })
         .finally(() => {
           dispatch(stopLoading());
@@ -157,12 +176,16 @@ export const saveEmailTemplate =
       createAction(TEMPLATE_ADDED),
       `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates`,
       normalizedEntity,
-      customErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch)
-      .then((payload) => {
-        dispatch(showSuccessMessage(T.translate("emails.template_created")));
-        history.push(`/app/emails/templates/${payload.response.id}`);
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("emails.template_created")
+          })
+        );
       })
       .finally(() => {
         dispatch(stopLoading());
@@ -181,7 +204,7 @@ export const deleteEmailTemplate = (templateId) => async (dispatch) => {
     createAction(TEMPLATE_DELETED)({ templateId }),
     `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/${templateId}`,
     null,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -351,7 +374,7 @@ export const getSentEmails =
       createAction(REQUEST_EMAILS),
       createAction(RECEIVE_EMAILS),
       `${window.EMAIL_API_BASE_URL}/api/v1/mails`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { order, orderDir, term, page, perPage, filters }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -380,7 +403,7 @@ export const getAllClients = () => async (dispatch) => {
     createAction(REQUEST_EMAIL_CLIENTS),
     createAction(RECEIVE_EMAIL_CLIENTS),
     `${window.EMAIL_API_BASE_URL}/api/v1/clients`,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -436,43 +459,6 @@ export const saveMarketingEmailSettings =
         return dispatch(saveMarketingSetting(email_setting, file));
       })
     );
-
-export const customErrorHandler = (err, res) => (dispatch) => {
-  const code = err.status;
-  let msg = "";
-
-  dispatch(stopLoading());
-
-  switch (code) {
-    case ERROR_CODE_412:
-      if (Array.isArray(err.response.body)) {
-        err.response.body.forEach((er) => {
-          msg += `${er}<br>`;
-        });
-      } else {
-        for (const [key, value] of Object.entries(err.response.body)) {
-          if (isNaN(key)) {
-            msg += `${key}: `;
-          }
-
-          msg += `${value}<br>`;
-        }
-      }
-
-      Swal.fire("Validation error", msg, "warning");
-
-      if (err.response.body.errors) {
-        dispatch({
-          type: VALIDATE,
-          payload: { errors: err.response.body }
-        });
-      }
-
-      break;
-    default:
-      dispatch(authErrorHandler(err, res));
-  }
-};
 
 const parseFilters = (filters) => {
   let filter = {};
