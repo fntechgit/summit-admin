@@ -166,6 +166,32 @@ describe("BulkEditDataGrid", () => {
     ).toBeInTheDocument();
   });
 
+  test("adds from the + button and lists every import option under the import icon", async () => {
+    const onAdd = jest.fn();
+    const onMuxImport = jest.fn();
+    renderGrid({
+      onAdd,
+      addLabel: "add activity",
+      importLabel: "import",
+      importItems: [
+        { label: "import from mux", onClick: onMuxImport },
+        { label: "import csv", onClick: jest.fn() }
+      ]
+    });
+
+    await userEvent.click(screen.getByRole("button", { name: "add activity" }));
+    expect(onAdd).toHaveBeenCalledTimes(1);
+
+    await userEvent.click(screen.getByRole("button", { name: "import" }));
+    expect(
+      screen.getByRole("menuitem", { name: "import csv" })
+    ).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("menuitem", { name: "import from mux" })
+    );
+    expect(onMuxImport).toHaveBeenCalledTimes(1);
+  });
+
   const clickDelete = (rowName) =>
     userEvent.click(
       within(screen.getByRole("row", { name: new RegExp(rowName) })).getByRole(
