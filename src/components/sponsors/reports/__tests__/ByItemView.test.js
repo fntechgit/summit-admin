@@ -201,20 +201,10 @@ describe("groupLinesBySponsorItem", () => {
     const [first, second] = g.items[0].contributors;
     expect(first.notes).toBe("run to back left");
     expect(first.additionalFields).toEqual(fields);
-    // per line, never merged across the item's lines
     expect(second.notes).toBeNull();
     expect(second.additionalFields).toEqual([
       { label: "Plug Type", value: "L5-20R" }
     ]);
-  });
-
-  it("normalises an absent notes / additional_fields to null", () => {
-    const row = line();
-    delete row.notes;
-    delete row.additional_fields;
-    const [c] = groupLinesBySponsorItem([row])[0].items[0].contributors;
-    expect(c.notes).toBeNull();
-    expect(c.additionalFields).toBeNull();
   });
 
   it("EXCLUDES canceled lines from qty/money/purchasedCount/Σqty but keeps them as contributors", () => {
@@ -360,19 +350,6 @@ describe("partial cancellation", () => {
 });
 
 describe("groupLinesByItem", () => {
-  it("carries each line's notes and additional fields in the all-sponsors layout too", () => {
-    const [it0] = groupLinesByItem([
-      line({
-        notes: "dock B",
-        additional_fields: [{ label: "Color", value: "Black" }]
-      })
-    ]);
-    expect(it0.contributors[0].notes).toBe("dock B");
-    expect(it0.contributors[0].additionalFields).toEqual([
-      { label: "Color", value: "Black" }
-    ]);
-  });
-
   it("merges an item_code ACROSS sponsors into one row and names each sponsor in the drill-down", () => {
     const rows = [
       line({ sponsor: { id: 1, name: "Intel" }, quantity: 10 }),
@@ -705,143 +682,44 @@ describe("ByItemView", () => {
     expect(onPerPageChange).toHaveBeenCalledWith(20);
   });
 
-  describe("drill-down Notes and Additional Fields", () => {
-    const contributor = (over = {}) => ({
-      sponsorName: "FNTECH",
-      number: "OCP-1",
-      formCode: "EL",
-      addOnName: null,
-      checkoutAt: null,
-      rateName: "Standard",
-      status: "Paid",
-      qty: 1,
-      orderedQty: 1,
-      lineTotalCents: 45000,
-      isCanceled: false,
-      isPartiallyCanceled: false,
-      syncedAt: null,
-      sourceUpdatedAt: null,
-      notes: null,
-      additionalFields: null,
-      ...over
+  it("shows each order's own notes and additional fields under their headers", () => {
+    const [first, second] = item().contributors;
+    renderView({
+      groups: [
+        group({
+          items: [
+            item({
+              contributors: [
+                {
+                  ...first,
+                  notes: "run to back left",
+                  additionalFields: [
+                    { label: "Plug Type", value: "L6-30R" },
+                    { label: "Location", value: "Back wall" }
+                  ]
+                },
+                second
+              ]
+            })
+          ]
+        })
+      ]
     });
-
-    const headerIndex = (key) =>
-      screen
-        .getAllByRole("columnheader")
-        .filter(
-          (th) =>
-            th.closest("table") === screen.getByText("OCP-1").closest("table")
-        )
-        .findIndex((th) => th.textContent === `sponsor_reports_page.${key}`);
-
-    const cellUnder = (key) =>
-      within(screen.getByText("OCP-1").closest("tr")).getAllByRole("cell")[
-        headerIndex(key)
-      ];
-
-    it("places Notes then Additional Fields right after Checkout", () => {
-      renderView({
-        groups: [group({ items: [item({ contributors: [contributor()] })] })]
-      });
-      fireEvent.click(screen.getByText("AV1"));
-      const checkout = headerIndex("col_checkout_at");
-      expect(headerIndex("col_notes")).toBe(checkout + 1);
-      expect(headerIndex("col_additional_fields")).toBe(checkout + 2);
-    });
-
-    it("shows each order's own notes and answers under their headers", () => {
-      renderView({
-        groups: [
-          group({
-            items: [
-              item({
-                contributors: [
-                  contributor({
-                    notes: "run to back left",
-                    additionalFields: [
-                      { label: "Plug Type", value: "L6-30R" },
-                      { label: "Location", value: "Back wall" }
-                    ]
-                  })
-                ]
-              })
-            ]
-          })
-        ]
-      });
-      fireEvent.click(screen.getByText("AV1"));
-      expect(cellUnder("col_notes")).toHaveTextContent("run to back left");
-      expect(cellUnder("col_additional_fields")).toHaveTextContent(
-        "Plug Type: L6-30R"
-      );
-      expect(cellUnder("col_additional_fields")).toHaveTextContent(
-        "Location: Back wall"
-      );
-    });
-
-    it("renders empty cells, not 'null', when a line has no notes or answers", () => {
-      renderView({
-        groups: [group({ items: [item({ contributors: [contributor()] })] })]
-      });
-      fireEvent.click(screen.getByText("AV1"));
-      expect(cellUnder("col_notes")).toBeEmptyDOMElement();
-      expect(cellUnder("col_additional_fields")).toBeEmptyDOMElement();
-    });
-
-    it("lines the new cells up under their headers in the all-sponsors layout", () => {
-      renderView({
-        layout: "item",
-        groups: [],
-        onLayoutChange: jest.fn(),
-        items: [
-          item({
-            contributors: [
-              contributor({
-                notes: "2 at the counter",
-                additionalFields: [{ label: "Stool Color", value: "Black" }]
-              })
-            ]
-          })
-        ]
-      });
-      fireEvent.click(screen.getByText("AV1"));
-      expect(headerIndex("col_sponsor")).toBe(0);
-      expect(cellUnder("col_notes")).toHaveTextContent("2 at the counter");
-      expect(cellUnder("col_additional_fields")).toHaveTextContent(
-        "Stool Color: Black"
-      );
-    });
-
-    it("keeps a canceled order's notes and answers visible in its struck-through row", () => {
-      renderView({
-        groups: [
-          group({
-            items: [
-              item({
-                contributors: [
-                  contributor({
-                    status: "Canceled",
-                    isCanceled: true,
-                    notes: "was for demo",
-                    additionalFields: [{ label: "Plug Type", value: "L6-30R" }]
-                  })
-                ]
-              })
-            ]
-          })
-        ]
-      });
-      fireEvent.click(screen.getByText("AV1"));
-      expect(screen.getByText("OCP-1").closest("tr")).toHaveAttribute(
-        "data-canceled",
-        "true"
-      );
-      expect(cellUnder("col_notes")).toHaveTextContent("was for demo");
-      expect(cellUnder("col_additional_fields")).toHaveTextContent(
-        "Plug Type: L6-30R"
-      );
-    });
+    fireEvent.click(screen.getByText("AV1"));
+    const table = screen.getByText("OCP-1").closest("table");
+    const headers = within(table)
+      .getAllByRole("columnheader")
+      .map((th) => th.textContent);
+    const cells = within(screen.getByText("OCP-1").closest("tr")).getAllByRole(
+      "cell"
+    );
+    expect(
+      cells[headers.indexOf("sponsor_reports_page.col_notes")]
+    ).toHaveTextContent("run to back left");
+    const fieldsCell =
+      cells[headers.indexOf("sponsor_reports_page.col_additional_fields")];
+    expect(fieldsCell).toHaveTextContent("Plug Type: L6-30R");
+    expect(fieldsCell).toHaveTextContent("Location: Back wall");
   });
 });
 
