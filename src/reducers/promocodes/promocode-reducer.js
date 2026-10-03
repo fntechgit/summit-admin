@@ -172,7 +172,8 @@ const promocodeReducer = (state = DEFAULT_STATE, action) => {
         "MEMBER_DISCOUNT_CODE",
         "SUMMIT_DISCOUNT_CODE",
         "SPEAKERS_DISCOUNT_CODE",
-        "DOMAIN_AUTHORIZED_DISCOUNT_CODE"
+        "DOMAIN_AUTHORIZED_DISCOUNT_CODE",
+        "PRE_PAID_DISCOUNT_CODE"
       ];
 
       if (discount_classes.includes(entity.class_name)) {

@@ -181,4 +181,34 @@ describe("RECEIVE_PROMOCODE apply_to_all_tix derivation", () => {
     });
     expect(state.entity.apply_to_all_tix).toBe(DEFAULT_ENTITY.apply_to_all_tix);
   });
+
+  it("derives apply_to_all_tix=false for PRE_PAID_DISCOUNT_CODE with populated ticket_types_rules", () => {
+    const state = promocodeReducer(undefined, {
+      type: RECEIVE_PROMOCODE,
+      payload: {
+        response: {
+          id: 4,
+          class_name: "PRE_PAID_DISCOUNT_CODE",
+          allowed_email_domains: [],
+          ticket_types_rules: [{ id: 718, ticket_type_id: 204, rate: 50 }]
+        }
+      }
+    });
+    expect(state.entity.apply_to_all_tix).toBe(false);
+  });
+
+  it("derives apply_to_all_tix=true for PRE_PAID_DISCOUNT_CODE with empty ticket_types_rules", () => {
+    const state = promocodeReducer(undefined, {
+      type: RECEIVE_PROMOCODE,
+      payload: {
+        response: {
+          id: 5,
+          class_name: "PRE_PAID_DISCOUNT_CODE",
+          allowed_email_domains: [],
+          ticket_types_rules: []
+        }
+      }
+    });
+    expect(state.entity.apply_to_all_tix).toBe(true);
+  });
 });
