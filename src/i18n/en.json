@@ -2190,7 +2190,7 @@
     "name": "Name",
     "description": "Description",
     "access_levels": "Access Levels",
-    "remove_warning": "Are you sure you want to delete badge type "
+    "remove_warning": "Are you sure you want to delete badge type {name}"
   },
   "edit_badge_type": {
     "badge_type": "Badge Type",
