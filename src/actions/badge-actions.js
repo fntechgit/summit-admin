@@ -24,6 +24,7 @@ import {
   showSuccessMessage,
   escapeFilterValue,
   authErrorHandler,
+  snackbarErrorHandler,
   fetchResponseHandler,
   fetchErrorHandler,
   getCSV
@@ -489,11 +490,13 @@ export const getViewTypes =
       createAction(REQUEST_VIEW_TYPES),
       createAction(RECEIVE_VIEW_TYPES),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types`,
-      authErrorHandler,
-      { order, orderDir, term }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+      snackbarErrorHandler,
+      { order, orderDir, perPage, term }
+    )(params)(dispatch)
+      .finally(() => {
+        dispatch(stopLoading());
+      })
+      .catch(() => {});
   };
 
 export const getViewType = (viewTypeId) => async (dispatch, getState) => {
@@ -511,10 +514,12 @@ export const getViewType = (viewTypeId) => async (dispatch, getState) => {
     null,
     createAction(RECEIVE_VIEW_TYPE),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types/${viewTypeId}`,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .finally(() => {
+      dispatch(stopLoading());
+    })
+    .catch(() => {});
 };
 
 export const resetViewTypeForm = () => (dispatch) => {
@@ -578,6 +583,8 @@ export const deleteViewType = (viewTypeId) => async (dispatch, getState) => {
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
 
+  dispatch(startLoading());
+
   const params = {
     access_token: accessToken
   };
@@ -587,8 +594,8 @@ export const deleteViewType = (viewTypeId) => async (dispatch, getState) => {
     createAction(VIEW_TYPE_DELETED)({ viewTypeId }),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types/${viewTypeId}`,
     null,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
+    snackbarErrorHandler
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
