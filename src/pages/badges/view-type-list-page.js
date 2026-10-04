@@ -85,7 +85,7 @@ const ViewTypeListPage = ({
     sortDir: orderDir
   };
 
-  if (!currentSummit.id) return <div />;
+  if (!currentSummit?.id) return <div />;
 
   return (
     <div className="container">
