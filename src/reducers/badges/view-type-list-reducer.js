@@ -9,7 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 import {
   RECEIVE_VIEW_TYPES,
@@ -19,11 +21,9 @@ import {
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-
 const DEFAULT_STATE = {
   viewTypes: [],
-  term: null,
+  term: "",
   order: "name",
   orderDir: 1,
   currentPage: 1,
@@ -36,42 +36,34 @@ const viewTypeListReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
     case SET_CURRENT_SUMMIT:
-    case LOGOUT_USER:
-      {
-        return DEFAULT_STATE;
-      }
-      break;
-    case REQUEST_VIEW_TYPES:
-      {
-        let { order, orderDir, term } = payload;
+    case LOGOUT_USER: {
+      return DEFAULT_STATE;
+    }
+    case REQUEST_VIEW_TYPES: {
+      const { order, orderDir, perPage, term } = payload;
 
-        return { ...state, order, orderDir, term };
-      }
-      break;
-    case RECEIVE_VIEW_TYPES:
-      {
-        let { total, current_page, last_page } = payload.response;
-        let viewTypes = payload.response.data;
+      return { ...state, order, orderDir, perPage, term };
+    }
+    case RECEIVE_VIEW_TYPES: {
+      const { total, current_page, last_page } = payload.response;
+      const viewTypes = payload.response.data;
 
-        return {
-          ...state,
-          viewTypes,
-          totalViewTypes: total,
-          currentPage: current_page,
-          lastPage: last_page
-        };
-      }
-      break;
-    case VIEW_TYPE_DELETED:
-      {
-        let { viewTypeId } = payload;
-        return {
-          ...state,
-          viewTypes: state.viewTypes.filter((t) => t.id !== viewTypeId),
-          totalViewTypes: state.totalViewTypes - 1
-        };
-      }
-      break;
+      return {
+        ...state,
+        viewTypes,
+        totalViewTypes: total,
+        currentPage: current_page,
+        lastPage: last_page
+      };
+    }
+    case VIEW_TYPE_DELETED: {
+      const { viewTypeId } = payload;
+      return {
+        ...state,
+        viewTypes: state.viewTypes.filter((t) => t.id !== viewTypeId),
+        totalViewTypes: state.totalViewTypes - 1
+      };
+    }
     default:
       return state;
   }

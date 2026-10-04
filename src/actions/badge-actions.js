@@ -490,10 +490,12 @@ export const getViewTypes =
       createAction(RECEIVE_VIEW_TYPES),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types`,
       snackbarErrorHandler,
-      { order, orderDir, term }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+      { order, orderDir, perPage, term }
+    )(params)(dispatch)
+      .catch(() => {})
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 export const getViewType = (viewTypeId) => async (dispatch, getState) => {
@@ -512,9 +514,11 @@ export const getViewType = (viewTypeId) => async (dispatch, getState) => {
     createAction(RECEIVE_VIEW_TYPE),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types/${viewTypeId}`,
     snackbarErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+  )(params)(dispatch)
+    .catch(() => {})
+    .finally(() => {
+      dispatch(stopLoading());
+    });
 };
 
 export const resetViewTypeForm = () => (dispatch) => {
@@ -578,6 +582,8 @@ export const deleteViewType = (viewTypeId) => async (dispatch, getState) => {
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
 
+  dispatch(startLoading());
+
   const params = {
     access_token: accessToken
   };
@@ -588,7 +594,7 @@ export const deleteViewType = (viewTypeId) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types/${viewTypeId}`,
     null,
     snackbarErrorHandler
-  )(params)(dispatch).then(() => {
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
