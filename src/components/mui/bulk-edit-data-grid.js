@@ -15,7 +15,6 @@ import React, { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { Box, Button, Divider, TextField, Tooltip } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
@@ -251,21 +250,9 @@ const Toolbar = ({
     {views}
     <Box sx={{ flex: 1 }} />
     {onAdd && (
-      <Tooltip title={addLabel}>
-        <Button
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={onAdd}
-          aria-label={addLabel}
-          sx={{
-            ...ICON_ONLY_BUTTON_SX,
-            // the plus glyph is thinner than the import/export icons; scale it
-            // up visually (18px -> 24px) without growing the button, so its
-            // spacing matches the other toolbar buttons
-            "& .MuiButton-startIcon > svg": { transform: "scale(1.33)" }
-          }}
-        />
-      </Tooltip>
+      <Button size="small" onClick={onAdd}>
+        {addLabel}
+      </Button>
     )}
     {importItems.length > 0 && (
       <MenuButton
@@ -648,7 +635,7 @@ BulkEditDataGrid.propTypes = {
   // rendered next to "Edit Selected", e.g. a <SavedViews /> dropdown
   views: PropTypes.node,
   onAdd: PropTypes.func,
-  // tooltip / aria-label of the add (+) button
+  // text of the add button
   addLabel: PropTypes.string,
   // options listed by the import icon's menu
   importItems: PropTypes.arrayOf(

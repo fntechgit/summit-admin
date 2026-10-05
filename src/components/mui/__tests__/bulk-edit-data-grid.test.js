@@ -256,7 +256,7 @@ describe("BulkEditDataGrid", () => {
     ).toBeInTheDocument();
   });
 
-  test("adds from the + button and lists every import option under the import icon", async () => {
+  test("adds from the add button and lists every import option under the import icon", async () => {
     const onAdd = jest.fn();
     const onMuxImport = jest.fn();
     renderGrid({
