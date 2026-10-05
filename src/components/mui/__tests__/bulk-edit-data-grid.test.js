@@ -161,6 +161,21 @@ describe("BulkEditDataGrid", () => {
     );
   });
 
+  test("columns panel does not list the actions column", async () => {
+    renderGrid({ onEdit: jest.fn() });
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Select columns" })
+    );
+
+    expect(
+      await screen.findByRole("checkbox", { name: "Title" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("checkbox", { name: "general.actions" })
+    ).not.toBeInTheDocument();
+  });
+
   test("unsorting goes back to the default order", async () => {
     const onSort = jest.fn();
     renderGrid({ onSort, options: { sortCol: "title", sortDir: 1 } });
