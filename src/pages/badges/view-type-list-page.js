@@ -40,7 +40,7 @@ const ViewTypeListPage = ({
     if (currentSummit) {
       getViewTypes();
     }
-  }, []);
+  }, [currentSummit?.id]);
 
   const handleEdit = (viewType) =>
     history.push(`/app/summits/${currentSummit.id}/view-types/${viewType.id}`);
@@ -87,8 +87,6 @@ const ViewTypeListPage = ({
     sortCol: order,
     sortDir: orderDir
   };
-
-  if (!currentSummit?.id) return <div />;
 
   return (
     <div className="container">
