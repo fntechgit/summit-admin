@@ -514,7 +514,7 @@ export const getViewType = (viewTypeId) => async (dispatch, getState) => {
     null,
     createAction(RECEIVE_VIEW_TYPE),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types/${viewTypeId}`,
-    snackbarErrorHandler
+    authErrorHandler
   )(params)(dispatch)
     .finally(() => {
       dispatch(stopLoading());
