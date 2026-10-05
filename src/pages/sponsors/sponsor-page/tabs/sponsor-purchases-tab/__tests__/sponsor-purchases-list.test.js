@@ -19,25 +19,53 @@ import React from "react";
 import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import flushPromises from "flush-promises";
+import { formatEpoch } from "openstack-uicore-foundation/lib/utils/methods";
 import { renderWithRedux } from "../../../../../../utils/test-utils";
 import SponsorPurchasesTab from "../index";
 import {
   getSponsorPurchases,
   approveSponsorPurchase,
   rejectSponsorPurchase,
-  downloadSponsorInvoice
+  downloadSponsorInvoice,
+  changePurchasePaymentMethod
 } from "../../../../../../actions/sponsor-purchases-actions";
+import { getSponsorCart } from "../../../../../../actions/sponsor-cart-actions";
+import showConfirmDialog from "../../../../../../components/mui/showConfirmDialog";
+import history from "../../../../../../history";
 import {
   PURCHASE_METHODS,
   PURCHASE_STATUS
 } from "../../../../../../utils/constants";
+
+// echo the key, plus the params so interpolated values can be asserted
+jest.mock("i18n-react/dist/i18n-react", () => ({
+  __esModule: true,
+  default: {
+    translate: (key, params) =>
+      params ? `${key} ${Object.values(params).join(" ")}` : key
+  }
+}));
+
+jest.mock("../../../../../../components/mui/showConfirmDialog", () =>
+  jest.fn()
+);
+
+jest.mock("../../../../../../history", () => ({
+  __esModule: true,
+  default: { push: jest.fn() }
+}));
+
+jest.mock("../../../../../../actions/sponsor-cart-actions", () => ({
+  getSponsorCart: jest.fn(() => () => Promise.resolve({ response: {} }))
+}));
 
 jest.mock("../../../../../../actions/sponsor-purchases-actions", () => ({
   ...jest.requireActual("../../../../../../actions/sponsor-purchases-actions"),
   getSponsorPurchases: jest.fn(() => () => Promise.resolve()),
   approveSponsorPurchase: jest.fn(() => () => Promise.resolve()),
   rejectSponsorPurchase: jest.fn(() => () => Promise.resolve()),
-  downloadSponsorInvoice: jest.fn(() => () => Promise.resolve())
+  downloadSponsorInvoice: jest.fn(() => () => Promise.resolve()),
+  changePurchasePaymentMethod: jest.fn(() => () => Promise.resolve())
 }));
 
 jest.mock(
@@ -80,7 +108,8 @@ const DEFAULT_PURCHASE_LIST_STATE = {
   lastPage: 1,
   perPage: 10,
   totalCount: 0,
-  term: ""
+  term: "",
+  filters: {}
 };
 
 const createInitialState = (overrides = {}) => {
@@ -408,7 +437,14 @@ describe("SponsorPurchasesTab", () => {
         await userEvent.type(screen.getByTestId("search-input"), "john{Enter}");
       });
 
-      expect(getSponsorPurchases).toHaveBeenCalledWith("john");
+      expect(getSponsorPurchases).toHaveBeenCalledWith(
+        "john",
+        1, // DEFAULT_CURRENT_PAGE
+        10, // perPage
+        "order",
+        1, // orderDir
+        {} // filters
+      );
     });
 
     it("calls getSponsorPurchases with the next page number when next-page is clicked", async () => {
@@ -428,7 +464,8 @@ describe("SponsorPurchasesTab", () => {
         2, // page 1 + 1
         expect.anything(), // perPage
         expect.anything(), // order
-        expect.anything() // orderDir
+        expect.anything(), // orderDir
+        expect.anything() // filters
       );
     });
 
@@ -455,7 +492,8 @@ describe("SponsorPurchasesTab", () => {
         1, // DEFAULT_CURRENT_PAGE — always reset on perPage change
         expect.anything(), // new perPage value (20)
         expect.anything(), // order
-        expect.anything() // orderDir
+        expect.anything(), // orderDir
+        expect.anything() // filters
       );
     });
 
@@ -480,7 +518,8 @@ describe("SponsorPurchasesTab", () => {
         expect.anything(), // currentPage
         expect.anything(), // perPage
         "number", // columnKey
-        -1 // sortDir (1) * -1
+        -1, // sortDir (1) * -1
+        expect.anything() // filters
       );
     });
   });
@@ -548,6 +587,232 @@ describe("SponsorPurchasesTab", () => {
 
       expect(downloadSponsorInvoice).toHaveBeenCalledTimes(1);
       expect(getDownloadButton()).toBeInTheDocument();
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Pay by Card
+  // -----------------------------------------------------------------------
+
+  describe("Pay by Card", () => {
+    const renderWithPurchase = (purchase) =>
+      renderWithRedux(<SponsorPurchasesTab />, {
+        initialState: createInitialState({
+          purchases: [purchase],
+          totalCount: 1
+        })
+      });
+    const openRowDropdown = async () => {
+      await act(async () => {
+        await userEvent.click(withinTableBody().getByRole("combobox"));
+      });
+    };
+    const selectPayByCard = async () => {
+      await openRowDropdown();
+      await act(async () => {
+        await userEvent.click(
+          screen.getByRole("option", {
+            name: "sponsor_show_purchases.pay_by_card"
+          })
+        );
+      });
+    };
+
+    it("is offered after the statuses on a pending invoice row", async () => {
+      renderWithPurchase(createPurchase({ net_amount: 10000 }));
+
+      await openRowDropdown();
+
+      expect(screen.getAllByRole("option").map((o) => o.textContent)).toEqual([
+        PURCHASE_STATUS.PENDING,
+        PURCHASE_STATUS.PAID,
+        PURCHASE_STATUS.CANCELLED,
+        "sponsor_show_purchases.pay_by_card"
+      ]);
+    });
+
+    it("is not offered when the net amount is 0", async () => {
+      renderWithPurchase(createPurchase({ net_amount: 0 }));
+
+      await openRowDropdown();
+
+      expect(
+        screen.queryByRole("option", {
+          name: "sponsor_show_purchases.pay_by_card"
+        })
+      ).not.toBeInTheDocument();
+    });
+
+    it("sends no request and stays on Pending when the confirm dialog is cancelled", async () => {
+      showConfirmDialog.mockResolvedValue(false);
+      renderWithPurchase(createPurchase({ net_amount: 10000 }));
+
+      await selectPayByCard();
+
+      expect(changePurchasePaymentMethod).not.toHaveBeenCalled();
+      expect(withinTableBody().getByRole("combobox")).toHaveTextContent(
+        PURCHASE_STATUS.PENDING
+      );
+    });
+
+    it("on confirm uses the current sponsor, loads its cart and opens the card payment screen", async () => {
+      showConfirmDialog.mockResolvedValue(true);
+      renderWithPurchase(createPurchase({ id: 7, net_amount: 10000 }));
+
+      await selectPayByCard();
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(changePurchasePaymentMethod).toHaveBeenCalledTimes(1);
+      expect(changePurchasePaymentMethod).toHaveBeenCalledWith(123, 7);
+      expect(getSponsorCart).toHaveBeenCalledWith("", 123);
+      expect(history.push).toHaveBeenCalledWith("cart/payment");
+    });
+
+    it("does not navigate when the API rejects the change", async () => {
+      showConfirmDialog.mockResolvedValue(true);
+      changePurchasePaymentMethod.mockImplementationOnce(
+        () => () => Promise.reject(new Error("412"))
+      );
+      renderWithPurchase(createPurchase({ net_amount: 10000 }));
+
+      await selectPayByCard();
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getSponsorCart).not.toHaveBeenCalled();
+      expect(history.push).not.toHaveBeenCalled();
+    });
+
+    it("does not navigate when the cart fails to load", async () => {
+      showConfirmDialog.mockResolvedValue(true);
+      // getSponsorCart swallows request errors and resolves without a response
+      getSponsorCart.mockImplementationOnce(() => () => Promise.resolve());
+      renderWithPurchase(createPurchase({ net_amount: 10000 }));
+
+      await selectPayByCard();
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getSponsorCart).toHaveBeenCalledTimes(1);
+      expect(history.push).not.toHaveBeenCalled();
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Card enabled indicator
+  // -----------------------------------------------------------------------
+
+  describe("Card enabled indicator", () => {
+    const ENABLED_AT = 1767225600;
+
+    it("shows the date and the user who enabled card payment", () => {
+      renderWithRedux(<SponsorPurchasesTab />, {
+        initialState: createInitialState({
+          purchases: [
+            createPurchase({
+              payment_method: PURCHASE_METHODS.CARD,
+              card_payment_enabled_at: ENABLED_AT,
+              card_payment_enabled_by_full_name: "Jane Admin"
+            })
+          ],
+          totalCount: 1
+        })
+      });
+
+      expect(
+        withinTableBody().getByLabelText(
+          `sponsor_show_purchases.card_enabled_tooltip ${formatEpoch(
+            ENABLED_AT,
+            "YYYY/MM/DD HH:mm a"
+          )} Jane Admin`
+        )
+      ).toBeInTheDocument();
+    });
+
+    it("shows nothing on orders that never had card payment enabled", () => {
+      renderWithRedux(<SponsorPurchasesTab />, {
+        initialState: createInitialState({
+          purchases: [createPurchase()],
+          totalCount: 1
+        })
+      });
+
+      expect(
+        withinTableBody().queryByLabelText(
+          /sponsor_show_purchases\.card_enabled_tooltip/
+        )
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Filters
+  // -----------------------------------------------------------------------
+
+  describe("Filters", () => {
+    it("reloads page 1 with the new filter, keeping the term, page size, sort and the other filters", async () => {
+      renderWithRedux(<SponsorPurchasesTab />, {
+        initialState: createInitialState({
+          term: "acme",
+          currentPage: 2,
+          perPage: 20,
+          totalCount: 100,
+          filters: { status: PURCHASE_STATUS.PENDING }
+        })
+      });
+
+      await act(async () => {
+        await userEvent.click(
+          screen.getByRole("combobox", {
+            name: /sponsor_show_purchases\.filters\.payment_method/
+          })
+        );
+      });
+      await act(async () => {
+        await userEvent.click(
+          screen.getByRole("option", {
+            name: "sponsor_show_purchases.filters.payment_method_options.card"
+          })
+        );
+      });
+
+      expect(getSponsorPurchases).toHaveBeenLastCalledWith(
+        "acme",
+        1,
+        20,
+        "order",
+        1,
+        {
+          status: PURCHASE_STATUS.PENDING,
+          paymentMethod: PURCHASE_METHODS.CARD
+        }
+      );
+    });
+
+    it("keeps the filters when paging", async () => {
+      const filters = { cardEnabled: true };
+      renderWithRedux(<SponsorPurchasesTab />, {
+        initialState: createInitialState({ totalCount: 25, filters })
+      });
+
+      await act(async () => {
+        await userEvent.click(
+          screen.getAllByRole("button", { name: "mui_table.next_page" })[0]
+        );
+      });
+
+      expect(getSponsorPurchases).toHaveBeenLastCalledWith(
+        "",
+        2,
+        10,
+        "order",
+        1,
+        filters
+      );
     });
   });
 });

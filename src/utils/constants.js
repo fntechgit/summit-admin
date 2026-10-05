@@ -298,6 +298,9 @@ export const PURCHASE_METHODS = {
   INVOICE: "Invoice"
 };
 
+// purchases filter option for any payment method other than card or invoice
+export const PURCHASE_METHOD_FILTER_OTHER = "other";
+
 export const PURCHASE_TYPES = {
   ONLINE: "Online",
   OFFLINE: "Offline"
@@ -352,6 +355,7 @@ export const SPONSOR_FORMS_METAFIELD_CLASS = {
 
 export const SPONSOR_CART_STATUS = {
   PENDING_PAYMENT: "PendingPayment",
+  NEW: "New",
   OPEN: "Open",
   CHECKED_OUT: "CheckedOut"
 };
