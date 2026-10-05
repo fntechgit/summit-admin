@@ -29,12 +29,12 @@ import {
   GridPreferencePanelsValue,
   GridToolbarColumnsButton,
   GridToolbarContainer,
-  GridToolbarQuickFilter,
   gridPreferencePanelStateSelector,
   useGridApiContext,
   useGridSelector
 } from "@mui/x-data-grid";
 import CustomTablePagination from "openstack-uicore-foundation/lib/components/mui/table/custom-table-pagination";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import MenuButton from "./menu-button";
 import showConfirmDialog from "./showConfirmDialog";
 import {
@@ -49,6 +49,7 @@ import {
 
 const COLUMN_MIN_WIDTH = 150;
 const EDIT_COLUMN_MIN_WIDTH = 250;
+const SEARCH_WIDTH = 250;
 const DESC_ORDER_DIR = -1;
 
 // the grid uses arrows/space for cell navigation and row selection, which
@@ -90,10 +91,20 @@ const renderEditor = (col, editRow, onChange) => {
   );
 };
 
-// search icon that expands into the grid's quick filter; starts open when a
-// search term is already applied, and collapses again when left empty
-const ExpandableQuickFilter = ({ placeholder, term }) => {
+// search icon that expands into uicore's SearchInput
+const ExpandableQuickFilter = ({ placeholder, term, onSearch }) => {
   const [expanded, setExpanded] = useState(!!term);
+  const searchRef = useRef(null);
+  const focusOnOpenRef = useRef(false);
+
+  // SearchInput takes no autoFocus, so focus its input once opened from the
+  // icon (but not when it starts open with a term)
+  useEffect(() => {
+    if (expanded && focusOnOpenRef.current) {
+      searchRef.current.querySelector("input").focus();
+      focusOnOpenRef.current = false;
+    }
+  }, [expanded]);
 
   if (!expanded) {
     return (
@@ -101,7 +112,10 @@ const ExpandableQuickFilter = ({ placeholder, term }) => {
         <Button
           size="small"
           startIcon={<SearchIcon />}
-          onClick={() => setExpanded(true)}
+          onClick={() => {
+            focusOnOpenRef.current = true;
+            setExpanded(true);
+          }}
           aria-label={T.translate("general.search")}
           sx={ICON_ONLY_BUTTON_SX}
         />
@@ -110,21 +124,25 @@ const ExpandableQuickFilter = ({ placeholder, term }) => {
   }
 
   return (
-    <GridToolbarQuickFilter
-      autoFocus
-      placeholder={placeholder}
-      quickFilterParser={(input) => (input ? [input] : [])}
-      quickFilterFormatter={(values) => values.join(" ")}
+    <Box
+      ref={searchRef}
+      sx={{ width: SEARCH_WIDTH }}
+      // SearchInput takes no onBlur either; collapse once focus leaves both
+      // its input and its clear button with nothing typed
       onBlur={(ev) => {
-        if (!ev.target.value) setExpanded(false);
+        if (ev.currentTarget.contains(ev.relatedTarget)) return;
+        if (!ev.currentTarget.querySelector("input").value) setExpanded(false);
       }}
-    />
+    >
+      <SearchInput term={term} placeholder={placeholder} onSearch={onSearch} />
+    </Box>
   );
 };
 
 ExpandableQuickFilter.propTypes = {
   placeholder: PropTypes.string,
-  term: PropTypes.string
+  term: PropTypes.string,
+  onSearch: PropTypes.func.isRequired
 };
 
 ExpandableQuickFilter.defaultProps = {
@@ -291,6 +309,7 @@ const Toolbar = ({
         <ExpandableQuickFilter
           placeholder={searchProps.placeholder}
           term={searchProps.term}
+          onSearch={searchProps.onSearch}
         />
       </>
     )}
@@ -309,7 +328,8 @@ Toolbar.propTypes = {
   onExport: PropTypes.func,
   searchProps: PropTypes.shape({
     placeholder: PropTypes.string,
-    term: PropTypes.string
+    term: PropTypes.string,
+    onSearch: PropTypes.func.isRequired
   }),
   editEnabled: PropTypes.bool.isRequired,
   selectedCount: PropTypes.number.isRequired,
@@ -510,18 +530,6 @@ const BulkEditDataGrid = ({
     );
   };
 
-  const filterModel = searchProps
-    ? {
-        items: [],
-        quickFilterValues: searchProps.term ? [searchProps.term] : []
-      }
-    : undefined;
-
-  const handleFilterModelChange = (model) => {
-    const newTerm = (model.quickFilterValues ?? []).join(" ");
-    if (newTerm !== (searchProps.term ?? "")) searchProps.onSearch(newTerm);
-  };
-
   return (
     <Box sx={{ width: "100%" }}>
       <Box
@@ -564,11 +572,6 @@ const BulkEditDataGrid = ({
           sortModel={sortModel}
           onSortModelChange={handleSortModelChange}
           disableColumnSorting={editEnabled}
-          filterMode="server"
-          filterModel={filterModel}
-          onFilterModelChange={
-            searchProps ? handleFilterModelChange : undefined
-          }
           localeText={{
             toolbarColumns: "",
             ...(noRowsLabel && { noRowsLabel })
