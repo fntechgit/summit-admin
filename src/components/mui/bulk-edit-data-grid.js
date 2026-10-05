@@ -66,7 +66,7 @@ const renderEditor = (col, editRow, onChange) => {
     return (
       <TextField
         id={col.columnKey}
-        placeholder={col.placeholder || T.translate("placeholders.text")}
+        placeholder={col.placeholder}
         multiline
         minRows={2}
         fullWidth
@@ -404,8 +404,6 @@ const BulkEditDataGrid = ({
   const handleApply = () => {
     Promise.resolve(onUpdate(Object.values(editRows)))
       .then(() => reset())
-      // the action's error handler reports the failure; keep the edits so
-      // the user can retry
       .catch(() => {});
   };
 
