@@ -640,7 +640,7 @@ BulkEditDataGrid.propTypes = {
   onEdit: PropTypes.func,
   onDelete: PropTypes.func,
   getName: PropTypes.func,
-  deleteDialogBody: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
+  deleteDialogBody: PropTypes.func,
   columnVisibilityModel: PropTypes.objectOf(PropTypes.bool),
   onColumnVisibilityModelChange: PropTypes.func,
   // page heading, shown on the same row as the top pagination
