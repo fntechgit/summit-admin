@@ -69,14 +69,13 @@ const customErrorHandler =
     }
   };
 
+// sponsorId: for callers outside the sponsor page, where currentSponsorState can be another sponsor
 export const getSponsorCart =
-  (term = "") =>
+  (term = "", sponsorId = null) =>
   async (dispatch, getState) => {
     const { currentSummitState, currentSponsorState } = getState();
     const { currentSummit } = currentSummitState;
-    const {
-      entity: { id: sponsorId }
-    } = currentSponsorState;
+    const cartSponsorId = sponsorId ?? currentSponsorState.entity.id;
     const accessToken = await getAccessTokenSafely();
     const summitTZ = currentSummit.time_zone.name;
     const filter = [];
@@ -101,7 +100,7 @@ export const getSponsorCart =
     return getRequest(
       createAction(REQUEST_SPONSOR_CART),
       createAction(RECEIVE_SPONSOR_CART),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/carts/current`,
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${cartSponsorId}/carts/current`,
       customErrorHandler,
       { term, summitTZ }
     )(params)(dispatch)

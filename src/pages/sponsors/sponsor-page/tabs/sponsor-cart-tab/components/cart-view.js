@@ -20,6 +20,7 @@ import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LockClosedIcon from "@mui/icons-material/Lock";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import { TotalRow } from "openstack-uicore-foundation/lib/components/mui/table/extra-rows";
+import InfoNote from "openstack-uicore-foundation/lib/components/mui/info-note";
 import GridToolbar from "../../../../../../components/mui/grid-toolbar";
 import history from "../../../../../../history";
 import {
@@ -57,6 +58,13 @@ const CartView = ({
   const cartIsPendingPayment =
     cart?.status === SPONSOR_CART_STATUS.PENDING_PAYMENT;
   const cartIsCheckedOut = cart?.status === SPONSOR_CART_STATUS.CHECKED_OUT;
+  // checkout again would recalculate rates, and the API rejects it on a cart paid by card
+  const skipCheckout = cartIsPendingPayment || cartIsCheckedOut;
+  const isCardPaymentCart = !!cart?.card_payment_purchase_id;
+  // the API only allows editing forms and notes on a New or Open cart
+  const cartIsEditable =
+    !cart ||
+    [SPONSOR_CART_STATUS.NEW, SPONSOR_CART_STATUS.OPEN].includes(cart.status);
 
   useEffect(() => {
     getSponsorCart();
@@ -102,7 +110,7 @@ const CartView = ({
 
   const handlePayCreditCard = async () => {
     try {
-      if (!cartIsPendingPayment) await checkoutCart();
+      if (!skipCheckout) await checkoutCart();
       history.push("cart/payment");
     } catch (err) {
       console.error("Failed to checkout cart for credit card payment:", err);
@@ -111,7 +119,7 @@ const CartView = ({
 
   const handlePayInvoice = async () => {
     try {
-      if (!cartIsPendingPayment) await checkoutCart();
+      if (!skipCheckout) await checkoutCart();
       await payWithInvoice();
       history.push("cart/invoice");
     } catch (err) {
@@ -141,22 +149,26 @@ const CartView = ({
       columnKey: "item_count",
       header: T.translate("edit_sponsor.cart_tab.items")
     },
-    {
-      columnKey: "manage_items",
-      header: "",
-      width: 100,
-      align: "center",
-      render: (row) => (
-        <Button
-          variant="text"
-          color="inherit"
-          size="small"
-          onClick={() => handleManageItems(row)}
-        >
-          {T.translate("edit_sponsor.cart_tab.manage_items")}
-        </Button>
-      )
-    },
+    ...(cartIsEditable
+      ? [
+          {
+            columnKey: "manage_items",
+            header: "",
+            width: 100,
+            align: "center",
+            render: (row) => (
+              <Button
+                variant="text"
+                color="inherit"
+                size="small"
+                onClick={() => handleManageItems(row)}
+              >
+                {T.translate("edit_sponsor.cart_tab.manage_items")}
+              </Button>
+            )
+          }
+        ]
+      : []),
     {
       columnKey: "discount",
       header: T.translate("edit_sponsor.cart_tab.discount")
@@ -169,6 +181,7 @@ const CartView = ({
     {
       columnKey: "lock",
       header: "",
+      align: "right",
       render: (row) => (
         <IconButton size="large" onClick={() => handleLock(row)}>
           {row.is_locked ? (
@@ -190,9 +203,15 @@ const CartView = ({
           placeholder: T.translate("edit_sponsor.placeholders.search")
         }}
       >
-        <Button variant="contained" onClick={onAddForm} startIcon={<AddIcon />}>
-          {T.translate("edit_sponsor.cart_tab.add_form")}
-        </Button>
+        {cartIsEditable && (
+          <Button
+            variant="contained"
+            onClick={onAddForm}
+            startIcon={<AddIcon />}
+          >
+            {T.translate("edit_sponsor.cart_tab.add_form")}
+          </Button>
+        )}
       </GridToolbar>
       {!cart && (
         <Typography variant="h6" textAlign="center" sx={{ mb: 2, mt: 4 }}>
@@ -207,8 +226,8 @@ const CartView = ({
               columns={tableColumns}
               data={cartData}
               options={{ responsive: false }}
-              onEdit={handleEditForm}
-              onDelete={handleDelete}
+              onEdit={cartIsEditable ? handleEditForm : undefined}
+              onDelete={cartIsEditable ? handleDelete : undefined}
               deleteDialogBody={(formName) =>
                 T.translate("edit_sponsor.cart_tab.delete_form_confirm", {
                   form: formName ?? ""
@@ -216,18 +235,32 @@ const CartView = ({
               }
               confirmButtonColor="error"
             >
-              <TotalRow total={cart?.total} colGap={5} trailing={3} />
+              {/* gap skips manage items when hidden, trailing covers lock (+ edit, delete) */}
+              {cartIsEditable ? (
+                <TotalRow total={cart?.total} colGap={5} trailing={3} />
+              ) : (
+                <TotalRow total={cart?.total} colGap={4} trailing={1} />
+              )}
             </MuiTable>
+            {isCardPaymentCart && (
+              <InfoNote
+                message={T.translate(
+                  "edit_sponsor.cart_tab.card_payment_cart_note"
+                )}
+                sx={{ mt: 4, pr: 2, justifyContent: "flex-end" }}
+              />
+            )}
             <Box
               sx={{
                 display: "flex",
                 justifyContent: "flex-end",
                 mt: 4,
                 pb: 4,
+                pr: 2,
                 gap: "10px"
               }}
             >
-              {(cartIsPendingPayment || cartIsCheckedOut) && (
+              {skipCheckout && !isCardPaymentCart && (
                 <Button
                   onClick={handleReopenCart}
                   variant="outlined"
@@ -250,39 +283,44 @@ const CartView = ({
                 variant="contained"
                 color="primary"
                 style={{ minWidth: 250 }}
+                disabled={cart?.net_amount === 0}
                 onClick={handlePayInvoice}
               >
                 {T.translate("edit_sponsor.cart_tab.pay_invoice")}
               </Button>
             </Box>
           </Paper>
-          <CartNote
-            title={T.translate("edit_sponsor.cart_tab.sponsor_note.title")}
-            notes={cart?.notes.filter(
-              (n) => n.type === SPONSOR_CART_NOTE_TYPES.SPONSOR
-            )}
-            placeholder={T.translate(
-              "edit_sponsor.cart_tab.sponsor_note.placeholder"
-            )}
-            onSave={(note) =>
-              saveSponsorCartNote(note, SPONSOR_CART_NOTE_TYPES.SPONSOR)
-            }
-            onDelete={deleteSponsorCartNote}
-          />
-          <CartNote
-            title={T.translate("edit_sponsor.cart_tab.order_note.title")}
-            notes={cart?.notes.filter(
-              (n) => n.type === SPONSOR_CART_NOTE_TYPES.INTERNAL
-            )}
-            placeholder={T.translate(
-              "edit_sponsor.cart_tab.order_note.placeholder"
-            )}
-            onSave={(note) =>
-              saveSponsorCartNote(note, SPONSOR_CART_NOTE_TYPES.INTERNAL)
-            }
-            onDelete={deleteSponsorCartNote}
-            multiple
-          />
+          {cartIsEditable && (
+            <>
+              <CartNote
+                title={T.translate("edit_sponsor.cart_tab.sponsor_note.title")}
+                notes={cart?.notes.filter(
+                  (n) => n.type === SPONSOR_CART_NOTE_TYPES.SPONSOR
+                )}
+                placeholder={T.translate(
+                  "edit_sponsor.cart_tab.sponsor_note.placeholder"
+                )}
+                onSave={(note) =>
+                  saveSponsorCartNote(note, SPONSOR_CART_NOTE_TYPES.SPONSOR)
+                }
+                onDelete={deleteSponsorCartNote}
+              />
+              <CartNote
+                title={T.translate("edit_sponsor.cart_tab.order_note.title")}
+                notes={cart?.notes.filter(
+                  (n) => n.type === SPONSOR_CART_NOTE_TYPES.INTERNAL
+                )}
+                placeholder={T.translate(
+                  "edit_sponsor.cart_tab.order_note.placeholder"
+                )}
+                onSave={(note) =>
+                  saveSponsorCartNote(note, SPONSOR_CART_NOTE_TYPES.INTERNAL)
+                }
+                onDelete={deleteSponsorCartNote}
+                multiple
+              />
+            </>
+          )}
         </>
       )}
     </>

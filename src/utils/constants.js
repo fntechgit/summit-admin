@@ -352,6 +352,7 @@ export const SPONSOR_FORMS_METAFIELD_CLASS = {
 
 export const SPONSOR_CART_STATUS = {
   PENDING_PAYMENT: "PendingPayment",
+  NEW: "New",
   OPEN: "Open",
   CHECKED_OUT: "CheckedOut"
 };
