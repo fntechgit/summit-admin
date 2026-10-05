@@ -43,9 +43,8 @@ import {
   DEFAULT_PER_PAGE
 } from "../../utils/constants";
 
-// MUI DataGrid version of uicore's BulkEditTable: same props and the same
-// select -> "Edit Selected" -> Apply flow, so callers can swap one for the
-// other. Kept self-contained so it can move to Core UI later.
+// MUI DataGrid version of uicore's BulkEditTable:
+// same select -> "Edit Selected" -> Apply flow
 
 const COLUMN_MIN_WIDTH = 150;
 const EDIT_COLUMN_MIN_WIDTH = 250;
@@ -382,9 +381,6 @@ const BulkEditDataGrid = ({
   const [selectedIds, setSelectedIds] = useState([]);
   const [editRows, setEditRows] = useState({});
   const [editEnabled, setEditEnabled] = useState(false);
-  // the list always has a default order; only show the sort arrow once the
-  // user has sorted a column themselves
-  const [hasUserSorted, setHasUserSorted] = useState(false);
   // the columns panel anchors to the column headers by default; anchor it to
   // its toolbar button instead
   const [columnsButtonEl, setColumnsButtonEl] = useState(null);
@@ -503,25 +499,24 @@ const BulkEditDataGrid = ({
     });
   }
 
-  const sortModel =
-    hasUserSorted && options.sortCol
-      ? [
-          {
-            field: options.sortCol,
-            sort: options.sortDir === DESC_ORDER_DIR ? "desc" : "asc"
-          }
-        ]
-      : [];
+  // like the other list grids, show the current order (kept in redux, so it
+  // survives leaving the page) on its column
+  const sortModel = options.sortCol
+    ? [
+        {
+          field: options.sortCol,
+          sort: options.sortDir === DESC_ORDER_DIR ? "desc" : "asc"
+        }
+      ]
+    : [];
 
   const handleSortModelChange = (model) => {
     // "Unsort" (menu item or third header click): back to the API's default
     // order, reported as onSort(-1, null, null)
     if (model.length === 0) {
-      setHasUserSorted(false);
       onSort(-1, null, null);
       return;
     }
-    setHasUserSorted(true);
     const { field, sort } = model[0];
     onSort(
       columns.findIndex((col) => col.columnKey === field),

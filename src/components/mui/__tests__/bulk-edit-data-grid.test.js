@@ -130,8 +130,9 @@ describe("BulkEditDataGrid", () => {
 
     await userEvent.click(screen.getByLabelText("Id column menu"));
 
+    // Id is the current (ascending) order, so its menu offers descending
     expect(
-      await screen.findByRole("menuitem", { name: /sort by asc/i })
+      await screen.findByRole("menuitem", { name: /sort by desc/i })
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("menuitem", { name: /hide column/i })
@@ -181,7 +182,7 @@ describe("BulkEditDataGrid", () => {
     renderGrid({ onSort, options: { sortCol: "title", sortDir: 1 } });
 
     await userEvent.click(screen.getByRole("columnheader", { name: "Title" }));
-    expect(onSort).toHaveBeenLastCalledWith(1, "title", 1);
+    expect(onSort).toHaveBeenLastCalledWith(1, "title", -1);
 
     await userEvent.click(screen.getByLabelText("Title column menu"));
     await userEvent.click(
@@ -207,12 +208,12 @@ describe("BulkEditDataGrid", () => {
     expect(onPageChange).toHaveBeenCalledWith(2);
   });
 
-  test("does not mark the default order as a user sort", () => {
-    renderGrid({ options: { sortCol: "id", sortDir: 1 } });
+  test("shows a remembered order on its column", () => {
+    renderGrid({ options: { sortCol: "title", sortDir: -1 } });
 
-    expect(screen.getByRole("columnheader", { name: "Id" })).toHaveAttribute(
+    expect(screen.getByRole("columnheader", { name: "Title" })).toHaveAttribute(
       "aria-sort",
-      "none"
+      "descending"
     );
   });
 
