@@ -62,7 +62,7 @@ describe("BulkEditDataGrid", () => {
     await userEvent.clear(titleInput);
     await userEvent.type(titleInput, "Renamed");
     await userEvent.click(
-      screen.getByRole("button", { name: "general.apply_changes" })
+      screen.getByRole("button", { name: "bulk_edit_table.apply_changes" })
     );
 
     expect(onUpdate).toHaveBeenCalledWith([{ id: 2, title: "Renamed" }]);
@@ -81,7 +81,7 @@ describe("BulkEditDataGrid", () => {
       screen.getByRole("button", { name: "general.edit_selected (1)" })
     );
     expect(
-      screen.getByRole("button", { name: "general.apply_changes" })
+      screen.getByRole("button", { name: "bulk_edit_table.apply_changes" })
     ).toBeInTheDocument();
 
     rerender(
@@ -98,7 +98,7 @@ describe("BulkEditDataGrid", () => {
     );
 
     expect(
-      screen.queryByRole("button", { name: "general.apply_changes" })
+      screen.queryByRole("button", { name: "bulk_edit_table.apply_changes" })
     ).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "general.edit_selected" })

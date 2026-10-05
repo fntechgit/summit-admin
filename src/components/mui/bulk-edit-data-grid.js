@@ -40,7 +40,8 @@ import showConfirmDialog from "./showConfirmDialog";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
-  DEFAULT_PER_PAGE
+  DEFAULT_PER_PAGE,
+  SORT_DESCENDING
 } from "../../utils/constants";
 
 // MUI DataGrid version of uicore's BulkEditTable:
@@ -49,7 +50,6 @@ import {
 const COLUMN_MIN_WIDTH = 150;
 const EDIT_COLUMN_MIN_WIDTH = 250;
 const SEARCH_WIDTH = 250;
-const DESC_ORDER_DIR = -1;
 
 // the grid uses arrows/space for cell navigation and row selection, which
 // would otherwise swallow typing inside the bulk-edit inputs
@@ -231,7 +231,7 @@ const Toolbar = ({
     {editEnabled ? (
       <>
         <Button size="small" variant="contained" onClick={onApply}>
-          {T.translate("general.apply_changes")}
+          {T.translate("bulk_edit_table.apply_changes")}
         </Button>
         <Button size="small" variant="outlined" onClick={onCancel}>
           {T.translate("general.cancel")}
@@ -505,7 +505,7 @@ const BulkEditDataGrid = ({
     ? [
         {
           field: options.sortCol,
-          sort: options.sortDir === DESC_ORDER_DIR ? "desc" : "asc"
+          sort: options.sortDir === SORT_DESCENDING ? "desc" : "asc"
         }
       ]
     : [];
@@ -521,7 +521,7 @@ const BulkEditDataGrid = ({
     onSort(
       columns.findIndex((col) => col.columnKey === field),
       field,
-      sort === "desc" ? DESC_ORDER_DIR : DEFAULT_ORDER_DIR
+      sort === "desc" ? SORT_DESCENDING : DEFAULT_ORDER_DIR
     );
   };
 

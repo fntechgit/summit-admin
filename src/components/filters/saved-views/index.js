@@ -37,6 +37,7 @@ import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/f
 import MuiFormikRadioGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/radio-group";
 import showConfirmDialog from "../../mui/showConfirmDialog";
 import { queryFilterCriterias } from "../../../actions/filter-criteria-actions";
+import { requiredStringValidation } from "../../../utils/yup";
 import {
   VISIBILITY_OPTION_EVERYONE,
   VISIBILITY_OPTION_ME
@@ -49,8 +50,8 @@ const SaveViewDialog = ({ selectedView, onSave, onClose }) => {
       visibility: selectedView?.visibility ?? ""
     },
     validationSchema: yup.object({
-      name: yup.string().trim().required(T.translate("validation.required")),
-      visibility: yup.string().required(T.translate("validation.required"))
+      name: requiredStringValidation().trim(),
+      visibility: requiredStringValidation()
     }),
     // keeps the id of the active view so saving updates it instead of
     // creating a new one
