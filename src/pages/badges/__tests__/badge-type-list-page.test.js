@@ -2,6 +2,7 @@ import React from "react";
 import { act, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import flushPromises from "flush-promises";
 import { renderWithRedux, createMockSummit } from "../../../utils/test-utils";
 import BadgeTypeListPage from "../badge-type-list-page";
 import { getBadgeTypes, deleteBadgeType } from "../../../actions/badge-actions";
@@ -61,14 +62,27 @@ describe("BadgeTypeListPage", () => {
     expect(getBadgeTypes).toHaveBeenLastCalledWith("name", -1);
   });
 
-  it("deletes the confirmed row by id (confirm is handled inside MuiTable)", async () => {
+  it("refetches with the current sort after a delete, but not when the delete fails", async () => {
     renderWithRedux(<BadgeTypeListPage />, { initialState });
+
+    getBadgeTypes.mockClear();
+    deleteBadgeType.mockReturnValueOnce(() =>
+      Promise.reject(new Error("boom"))
+    );
+    await act(async () => {
+      await userEvent.click(screen.getByRole("button", { name: "delete-row" }));
+    });
+    await flushPromises();
+
+    expect(deleteBadgeType).toHaveBeenCalledWith(7);
+    expect(getBadgeTypes).not.toHaveBeenCalled();
 
     await act(async () => {
       await userEvent.click(screen.getByRole("button", { name: "delete-row" }));
     });
+    await flushPromises();
 
-    expect(deleteBadgeType).toHaveBeenCalledTimes(1);
-    expect(deleteBadgeType).toHaveBeenCalledWith(7);
+    expect(getBadgeTypes).toHaveBeenCalledTimes(1);
+    expect(getBadgeTypes).toHaveBeenCalledWith("name", 1);
   });
 });

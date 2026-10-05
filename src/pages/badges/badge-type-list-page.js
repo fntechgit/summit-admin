@@ -39,7 +39,10 @@ const BadgeTypeListPage = ({
       `/app/summits/${currentSummit.id}/badge-types/${badge_type.id}`
     );
 
-  const handleDelete = (badgeTypeId) => deleteBadgeType(badgeTypeId);
+  const handleDelete = (badgeTypeId) =>
+    deleteBadgeType(badgeTypeId)
+      .then(() => getBadgeTypes(order, orderDir))
+      .catch(() => {});
 
   const handleSort = (key, dir) => getBadgeTypes(key, dir);
 
