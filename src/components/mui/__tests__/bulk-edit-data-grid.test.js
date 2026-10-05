@@ -225,28 +225,31 @@ describe("BulkEditDataGrid", () => {
     expect(onSort).toHaveBeenCalledWith(1, "title", 1);
   });
 
-  test("sends the quick filter text to onSearch", async () => {
+  test("searches only when Enter is pressed, not while typing", async () => {
     const onSearch = jest.fn();
     renderGrid({ searchProps: { term: "", onSearch } });
 
     await userEvent.click(
       screen.getByRole("button", { name: "general.search" })
     );
-    await userEvent.type(screen.getByRole("searchbox"), "keynote");
+    // opening the search focuses its input
+    await userEvent.keyboard("keynote");
+    expect(onSearch).not.toHaveBeenCalled();
 
-    await waitFor(() => expect(onSearch).toHaveBeenCalledWith("keynote"));
+    await userEvent.keyboard("{Enter}");
+    expect(onSearch).toHaveBeenCalledWith("keynote");
   });
 
   test("shows the search box open when a search term is applied, and collapses it when left empty", async () => {
     renderGrid({ searchProps: { term: "keynote", onSearch: jest.fn() } });
 
-    const searchbox = screen.getByRole("searchbox");
+    const searchbox = screen.getByRole("textbox");
     expect(searchbox).toHaveValue("keynote");
 
     await userEvent.clear(searchbox);
     await userEvent.tab();
 
-    expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "general.search" })
     ).toBeInTheDocument();
