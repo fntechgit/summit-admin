@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
@@ -19,7 +19,6 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import MenuIcon from "@mui/icons-material/Menu";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumbs } from "react-breadcrumbs";
@@ -32,8 +31,6 @@ import AuthButton from "../auth-button";
 import Menu from "../menu";
 
 const DRAWER_WIDTH = 260;
-const CLOSE_DELAY_MS = 200;
-const HOVER_CLICK_GRACE_MS = 300;
 const COMPACT_BAR_HEIGHT = 48;
 const REGULAR_BAR_HEIGHT = 56;
 const SUB_BAR_HEIGHT = 36;
@@ -46,69 +43,15 @@ const SHORT_VIEWPORT_MAX_HEIGHT = 500;
  * breadcrumbs and app menu are rendered here directly. It holds the drawer's
  * open state itself and hands `closeDrawer` to the menu so a navigation item
  * can dismiss the drawer after it acts.
- *
- * On devices that support hovering, the burger opens the drawer on hover and
- * closes it a moment after the pointer leaves; the delay keeps the drawer open
- * while the pointer crosses the gap between the button and the panel. Devices
- * without hover get click-to-toggle only.
  */
 const TopNav = ({ isLoggedUser, currentSummit, member }) => {
   const [open, setOpen] = useState(false);
-  const [openedByHover, setOpenedByHover] = useState(false);
-  const closeTimeout = useRef(null);
-  const lastHoverOpen = useRef(0);
 
   // The current summit's name, shown next to the title behind a divider.
   const contextLabel = currentSummit?.id > 0 ? currentSummit.name : null;
 
-  const canHover = useMediaQuery("(hover: hover) and (pointer: fine)");
-
-  const cancelClose = useCallback(() => {
-    if (closeTimeout.current) {
-      clearTimeout(closeTimeout.current);
-      closeTimeout.current = null;
-    }
-  }, []);
-
-  const closeDrawer = useCallback(() => {
-    cancelClose();
-    setOpen(false);
-    setOpenedByHover(false);
-  }, [cancelClose]);
-
-  const toggleDrawer = useCallback(() => {
-    cancelClose();
-    // A hover-open is followed by the click the same gesture produces on a fine
-    // pointer; without this window that click would toggle the drawer shut
-    // again the instant it opened.
-    if (Date.now() - lastHoverOpen.current < HOVER_CLICK_GRACE_MS) return;
-    setOpen((prev) => !prev);
-    setOpenedByHover(false);
-  }, [cancelClose]);
-
-  const openByHover = useCallback(() => {
-    cancelClose();
-    lastHoverOpen.current = Date.now();
-    setOpen(true);
-    setOpenedByHover(true);
-  }, [cancelClose]);
-
-  const scheduleClose = useCallback(() => {
-    cancelClose();
-    closeTimeout.current = setTimeout(() => {
-      setOpen(false);
-      setOpenedByHover(false);
-    }, CLOSE_DELAY_MS);
-  }, [cancelClose]);
-
-  useEffect(() => cancelClose, [cancelClose]);
-
-  const hoverHandlers = canHover
-    ? { onMouseEnter: openByHover, onMouseLeave: scheduleClose }
-    : {};
-  const drawerHoverHandlers = canHover
-    ? { onMouseEnter: cancelClose, onMouseLeave: scheduleClose }
-    : {};
+  const closeDrawer = useCallback(() => setOpen(false), []);
+  const toggleDrawer = useCallback(() => setOpen((prev) => !prev), []);
 
   // Signed out, the bar carries nothing but the title, which then reads as a
   // banner rather than as the left-hand item of a bar.
@@ -155,7 +98,6 @@ const TopNav = ({ isLoggedUser, currentSummit, member }) => {
               aria-label={T.translate("menu.toggle_navigation")}
               aria-expanded={open}
               onClick={toggleDrawer}
-              {...hoverHandlers}
               sx={{ mr: 2 }}
             >
               <MenuIcon sx={{ fontSize: "1.75rem", color: "text.secondary" }} />
@@ -215,15 +157,10 @@ const TopNav = ({ isLoggedUser, currentSummit, member }) => {
           slotProps={{
             root: {
               keepMounted: true,
-              // A drawer the pointer merely hovered over should not steal focus
-              // from whatever the user was doing.
-              disableAutoFocus: openedByHover,
-              disableEnforceFocus: openedByHover,
               disableScrollLock: true
             },
             paper: {
-              sx: { width: DRAWER_WIDTH },
-              ...drawerHoverHandlers
+              sx: { width: DRAWER_WIDTH }
             }
           }}
         >

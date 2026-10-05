@@ -20,19 +20,6 @@ jest.mock("../../menu", () => ({ onNavigate }) => (
   </button>
 ));
 
-const setCanHover = (matches) => {
-  window.matchMedia = (query) => ({
-    matches,
-    media: query,
-    onchange: null,
-    addListener: () => {},
-    removeListener: () => {},
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => false
-  });
-};
-
 const DRAWER_TEXT = "drawer contents";
 
 const renderNav = (props = {}) => render(<TopNav {...props} />);
@@ -59,72 +46,7 @@ describe("TopNav", () => {
     jest.clearAllMocks();
   });
 
-  describe("fine pointer (hover available)", () => {
-    beforeEach(() => setCanHover(true));
-
-    test("hover alone opens the drawer", () => {
-      renderNav();
-      fireEvent.mouseOver(burger());
-      settle();
-      expect(drawer()).toBeVisible();
-    });
-
-    test("a click arriving during a hover-open is ignored", () => {
-      renderNav();
-      // Held across the open: once the Modal mounts it marks the rest of the
-      // app aria-hidden, so the burger is no longer reachable by role.
-      const button = burger();
-      expect(drawer()).not.toBeVisible();
-
-      // React 16 derives onMouseEnter from the top-level mouseover event. No
-      // settle() here: advancing the clock would take us past the grace
-      // window, which is exactly the condition under test.
-      fireEvent.mouseOver(button);
-      expect(drawer()).toBeVisible();
-
-      fireEvent.click(button);
-      settle();
-      expect(drawer()).toBeVisible();
-    });
-
-    test("a click after the grace window still closes the drawer", () => {
-      renderNav();
-      const button = burger();
-
-      fireEvent.mouseOver(button);
-      expect(drawer()).toBeVisible();
-
-      act(() => {
-        jest.advanceTimersByTime(400);
-      });
-      fireEvent.click(button);
-      settle();
-      expect(drawer()).not.toBeVisible();
-    });
-
-    test("leaving the burger closes the drawer after the grace delay", () => {
-      renderNav();
-      const button = burger();
-
-      fireEvent.mouseOver(button);
-      expect(drawer()).toBeVisible();
-
-      fireEvent.mouseOut(button);
-      settle();
-      expect(drawer()).not.toBeVisible();
-    });
-  });
-
-  describe("coarse pointer (no hover)", () => {
-    beforeEach(() => setCanHover(false));
-
-    test("hover does not open the drawer", () => {
-      renderNav();
-      fireEvent.mouseOver(burger());
-      settle();
-      expect(drawer()).not.toBeVisible();
-    });
-
+  describe("drawer", () => {
     test("a single click opens the drawer", () => {
       renderNav();
       fireEvent.click(burger());
@@ -146,8 +68,6 @@ describe("TopNav", () => {
   });
 
   describe("composition", () => {
-    beforeEach(() => setCanHover(false));
-
     test("renders title, summit name, sign out and breadcrumbs", () => {
       renderNav({ currentSummit: { id: 1, name: "Summit 2026" } });
 
