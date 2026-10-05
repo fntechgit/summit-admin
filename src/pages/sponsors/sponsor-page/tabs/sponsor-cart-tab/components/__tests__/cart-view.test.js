@@ -124,7 +124,7 @@ describe("CartView", () => {
       expect(payWithInvoice).toHaveBeenCalledTimes(1);
     });
 
-    it("disables both pay buttons when the cart total is 0", () => {
+    it("disables only the Pay CC button when the cart total is 0", () => {
       renderCartView(createCart({ net_amount: 0 }));
 
       expect(
@@ -134,7 +134,7 @@ describe("CartView", () => {
         screen.getByRole("button", {
           name: "edit_sponsor.cart_tab.pay_invoice"
         })
-      ).toBeDisabled();
+      ).toBeEnabled();
     });
   });
 

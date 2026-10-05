@@ -128,7 +128,10 @@ const SponsorPurchasesTab = ({
     changePurchasePaymentMethod(sponsor.id, purchase.id)
       // PaymentView uses the cart in state, which can be missing, another sponsor's or outdated
       .then(() => getSponsorCart("", sponsor.id))
-      .then(() => history.push("cart/payment"))
+      // getSponsorCart swallows errors and resolves without a response on failure
+      .then((res) => {
+        if (res?.response) history.push("cart/payment");
+      })
       .catch(() => {}); // error already shown by snackbarErrorHandler
   };
 

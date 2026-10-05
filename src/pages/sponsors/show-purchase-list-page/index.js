@@ -135,7 +135,10 @@ const ShowPurchaseListPage = ({
     changePurchasePaymentMethod(purchase.sponsor_id, purchase.id)
       // PaymentView uses the cart in state, which can be missing, another sponsor's or outdated
       .then(() => getSponsorCart("", purchase.sponsor_id))
-      .then(() => history.push(`${purchase.sponsor_id}/cart/payment`))
+      // getSponsorCart swallows errors and resolves without a response on failure
+      .then((res) => {
+        if (res?.response) history.push(`${purchase.sponsor_id}/cart/payment`);
+      })
       .catch(() => {}); // error already shown by snackbarErrorHandler
   };
 

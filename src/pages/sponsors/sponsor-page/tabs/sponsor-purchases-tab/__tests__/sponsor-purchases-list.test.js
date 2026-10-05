@@ -56,7 +56,7 @@ jest.mock("../../../../../../history", () => ({
 }));
 
 jest.mock("../../../../../../actions/sponsor-cart-actions", () => ({
-  getSponsorCart: jest.fn(() => () => Promise.resolve())
+  getSponsorCart: jest.fn(() => () => Promise.resolve({ response: {} }))
 }));
 
 jest.mock("../../../../../../actions/sponsor-purchases-actions", () => ({
@@ -683,6 +683,21 @@ describe("SponsorPurchasesTab", () => {
       });
 
       expect(getSponsorCart).not.toHaveBeenCalled();
+      expect(history.push).not.toHaveBeenCalled();
+    });
+
+    it("does not navigate when the cart fails to load", async () => {
+      showConfirmDialog.mockResolvedValue(true);
+      // getSponsorCart swallows request errors and resolves without a response
+      getSponsorCart.mockImplementationOnce(() => () => Promise.resolve());
+      renderWithPurchase(createPurchase({ net_amount: 10000 }));
+
+      await selectPayByCard();
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getSponsorCart).toHaveBeenCalledTimes(1);
       expect(history.push).not.toHaveBeenCalled();
     });
   });

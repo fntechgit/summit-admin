@@ -54,7 +54,7 @@ jest.mock("../../../../history", () => ({
 }));
 
 jest.mock("../../../../actions/sponsor-cart-actions", () => ({
-  getSponsorCart: jest.fn(() => () => Promise.resolve())
+  getSponsorCart: jest.fn(() => () => Promise.resolve({ response: {} }))
 }));
 
 jest.mock("react-breadcrumbs", () => ({
@@ -326,6 +326,21 @@ describe("ShowPurchaseListPage", () => {
       expect(withinTableBody().getByRole("combobox")).toHaveTextContent(
         PURCHASE_STATUS.PENDING
       );
+    });
+
+    it("does not navigate when the cart fails to load", async () => {
+      showConfirmDialog.mockResolvedValue(true);
+      // getSponsorCart swallows request errors and resolves without a response
+      getSponsorCart.mockImplementationOnce(() => () => Promise.resolve());
+      renderPage({ purchases: [createPurchase()], totalCount: 1 });
+
+      await selectPayByCard();
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getSponsorCart).toHaveBeenCalledTimes(1);
+      expect(history.push).not.toHaveBeenCalled();
     });
 
     it("selecting Paid approves with the row's sponsor and payment ids, without a confirm dialog", async () => {

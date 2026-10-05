@@ -594,7 +594,6 @@ export const refundSponsorOrder =
         );
         dispatch(getSponsorOrder(orderId));
       })
-      .catch(() => {})
       .finally(() => {
         dispatch(stopLoading());
       });
