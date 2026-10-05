@@ -23,6 +23,7 @@ import {
   showMessage,
   showSuccessMessage,
   escapeFilterValue,
+  snackbarErrorHandler,
   authErrorHandler,
   fetchResponseHandler,
   fetchErrorHandler,
@@ -635,11 +636,13 @@ export const getBadgeTypes =
       createAction(REQUEST_BADGE_TYPES),
       createAction(RECEIVE_BADGE_TYPES),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { order, orderDir }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .finally(() => {
+        dispatch(stopLoading());
+      })
+      .catch(() => {});
   };
 
 export const getBadgeType = (badgeTypeId) => async (dispatch, getState) => {
@@ -728,6 +731,8 @@ export const deleteBadgeType = (badgeTypeId) => async (dispatch, getState) => {
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
 
+  dispatch(startLoading());
+
   const params = {
     access_token: accessToken
   };
@@ -737,10 +742,12 @@ export const deleteBadgeType = (badgeTypeId) => async (dispatch, getState) => {
     createAction(BADGE_TYPE_DELETED)({ badgeTypeId }),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}`,
     null,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .finally(() => {
+      dispatch(stopLoading());
+    })
+    .catch(() => {});
 };
 
 export const addAccessLevelToBadgeType =
