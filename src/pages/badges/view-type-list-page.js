@@ -76,7 +76,10 @@ const ViewTypeListPage = ({
     {
       columnKey: "is_default",
       header: T.translate("view_type_list.is_default"),
-      render: (vt) => (vt.is_default === true ? "Yes" : "No")
+      render: (vt) =>
+        vt.is_default === true
+          ? T.translate("general.yes")
+          : T.translate("general.no")
     }
   ];
 
