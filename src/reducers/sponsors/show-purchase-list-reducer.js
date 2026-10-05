@@ -31,7 +31,8 @@ const DEFAULT_STATE = {
   lastPage: 1,
   perPage: 10,
   totalCount: 0,
-  term: ""
+  term: "",
+  filters: {}
 };
 
 const showPurchaseListReducer = (state = DEFAULT_STATE, action) => {
@@ -43,7 +44,7 @@ const showPurchaseListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_ALL_SPONSOR_PURCHASES: {
-      const { order, orderDir, page, perPage, term } = payload;
+      const { order, orderDir, page, perPage, term, filters } = payload;
 
       return {
         ...state,
@@ -52,7 +53,8 @@ const showPurchaseListReducer = (state = DEFAULT_STATE, action) => {
         forms: [],
         currentPage: page,
         perPage,
-        term
+        term,
+        filters
       };
     }
     case RECEIVE_ALL_SPONSOR_PURCHASES: {

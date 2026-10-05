@@ -20,19 +20,14 @@ const TabNav = ({ currentSummit, sponsor, member, history, location }) => {
   });
   const selectedTab = routeMatch?.params?.tab || tabs[0].value;
 
-  const handleTabChange = (value) => {
-    const tab = tabs.find((t) => t.value === value);
-    history.push(
-      `/app/summits/${currentSummit.id}/sponsors/${sponsor.id}${tab.path}`
-    );
+  // onClick, not Tabs' onChange: MUI skips onChange on the selected tab, so purchases/:id couldn't go back
+  const handleTabClick = (tab) => {
+    const url = `/app/summits/${currentSummit.id}/sponsors/${sponsor.id}${tab.path}`;
+    if (location.pathname !== url) history.push(url);
   };
 
   return (
-    <Tabs
-      value={selectedTab}
-      onChange={(ev, val) => handleTabChange(val)}
-      sx={{ minHeight: "36px" }}
-    >
+    <Tabs value={selectedTab} sx={{ minHeight: "36px" }}>
       {tabs
         .filter((t) => memberObj.hasAccess(t.accessRoute))
         .map((tab) => (
@@ -40,6 +35,7 @@ const TabNav = ({ currentSummit, sponsor, member, history, location }) => {
             key={tab.value}
             label={tab.label}
             value={tab.value}
+            onClick={() => handleTabClick(tab)}
             sx={{
               fontSize: "1.4rem",
               lineHeight: "1.8rem",

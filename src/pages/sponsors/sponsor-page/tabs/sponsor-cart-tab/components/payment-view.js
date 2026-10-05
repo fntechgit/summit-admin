@@ -14,7 +14,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Card, CardContent, Typography } from "@mui/material";
+import { Box, Card, CardContent, Link, Typography } from "@mui/material";
 import OrderSummary from "openstack-uicore-foundation/lib/components/mui/order-summary";
 import StripePayment from "openstack-uicore-foundation/lib/components/mui/stripe-payment";
 import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
@@ -23,6 +23,7 @@ import history from "../../../../../../history";
 import {
   confirmPayment,
   getPaymentProfile,
+  payWithInvoice,
   updatePaymentIntent
 } from "../../../../../../actions/sponsor-cart-actions";
 import { getMemberByExternalId } from "../../../../../../actions/member-actions";
@@ -38,7 +39,8 @@ const PaymentView = ({
   getPaymentProfile,
   getMemberByExternalId,
   updatePaymentIntent,
-  confirmPayment
+  confirmPayment,
+  payWithInvoice
 }) => {
   const { errorMessage } = useSnackbarMessage();
   const [client, setClient] = useState({});
@@ -50,16 +52,25 @@ const PaymentView = ({
     }
   }, [cart]);
 
-  if (
-    !currentSummit ||
-    !sponsor?.company ||
-    !paymentProfile ||
-    !paymentIntent ||
-    !cart
-  )
-    return null;
+  if (!currentSummit || !sponsor?.company || !cart) return null;
 
-  const redirectUrl = `/app/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases`;
+  const sponsorUrl = `/app/summits/${currentSummit.id}/sponsors/${sponsor.id}`;
+  const redirectUrl = `${sponsorUrl}/purchases`;
+
+  const handlePayWithInvoice = () =>
+    payWithInvoice()
+      .then(() => history.push(`${sponsorUrl}/cart/invoice`))
+      .catch(() => {}); // error already shown by snackbarErrorHandler
+
+  const payWithInvoiceLink = !!cart.card_payment_purchase_id && (
+    <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+      <Link component="button" onClick={handlePayWithInvoice}>
+        {T.translate(
+          "edit_sponsor.cart_tab.payment_view.pay_with_invoice_instead"
+        )}
+      </Link>
+    </Box>
+  );
 
   const handlePaymentSuccess = () =>
     confirmPayment().then((purchase) => {
@@ -72,58 +83,79 @@ const PaymentView = ({
 
   return (
     <>
-      <Box sx={{ width: "100%" }}>
-        <Card sx={{ borderRadius: "10px", height: "100%" }} variant="outlined">
-          <CardContent>
-            <SponsorOrderGrid order={cart} />
-          </CardContent>
-        </Card>
-      </Box>
+      {/* without a payment the link renders alone: the only way back when creating the card payment fails */}
+      {!paymentProfile || !paymentIntent ? (
+        payWithInvoiceLink
+      ) : (
+        <>
+          <Box sx={{ width: "100%" }}>
+            <Card
+              sx={{ borderRadius: "10px", height: "100%" }}
+              variant="outlined"
+            >
+              <CardContent>
+                <SponsorOrderGrid order={cart} />
+              </CardContent>
+            </Card>
+          </Box>
 
-      <Box
-        sx={{ display: "flex", justifyContent: "center", mt: 3, gap: 3, pb: 6 }}
-      >
-        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
-          <Card sx={{ borderRadius: "10px" }} variant="outlined">
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                {T.translate("edit_sponsor.cart_tab.payment_view.billing_info")}
-              </Typography>
-              <ClientForm initialValues={cartOwner} onChange={setClient} />
-            </CardContent>
-          </Card>
-          <Card
-            sx={{ borderRadius: "10px", flex: 1, maxHeight: 170 }}
-            variant="outlined"
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              mt: 3,
+              gap: 3,
+              pb: 6
+            }}
           >
-            <OrderSummary
-              amount={paymentIntent?.total_amount}
-              dueDate={paymentIntent?.due_date}
-              toName={client?.full_name}
-              fromName="FNTECH"
-            />
-          </Card>
-        </Box>
+            <Box
+              sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}
+            >
+              <Card sx={{ borderRadius: "10px" }} variant="outlined">
+                <CardContent>
+                  <Typography variant="h6" sx={{ mb: 2 }}>
+                    {T.translate(
+                      "edit_sponsor.cart_tab.payment_view.billing_info"
+                    )}
+                  </Typography>
+                  <ClientForm initialValues={cartOwner} onChange={setClient} />
+                </CardContent>
+              </Card>
+              <Card
+                sx={{ borderRadius: "10px", flex: 1, maxHeight: 170 }}
+                variant="outlined"
+              >
+                <OrderSummary
+                  amount={paymentIntent?.total_amount}
+                  dueDate={paymentIntent?.due_date}
+                  toName={client?.full_name}
+                  fromName="FNTECH"
+                />
+              </Card>
+            </Box>
 
-        <Card
-          sx={{ flex: 1, borderRadius: "10px", height: "100%" }}
-          variant="outlined"
-        >
-          <CardContent>
-            <StripePayment
-              paymentIntent={paymentIntent}
-              paymentProfile={paymentProfile}
-              client={client}
-              showBilling
-              redirectUrl={redirectUrl}
-              stripeFormTitle={false}
-              updatePaymentIntent={updatePaymentIntent}
-              onPaymentSuccess={handlePaymentSuccess}
-              onPaymentError={handlePaymentError}
-            />
-          </CardContent>
-        </Card>
-      </Box>
+            <Card
+              sx={{ flex: 1, borderRadius: "10px", height: "100%" }}
+              variant="outlined"
+            >
+              <CardContent>
+                <StripePayment
+                  paymentIntent={paymentIntent}
+                  paymentProfile={paymentProfile}
+                  client={client}
+                  showBilling
+                  redirectUrl={redirectUrl}
+                  stripeFormTitle={false}
+                  updatePaymentIntent={updatePaymentIntent}
+                  onPaymentSuccess={handlePaymentSuccess}
+                  onPaymentError={handlePaymentError}
+                />
+                {payWithInvoiceLink}
+              </CardContent>
+            </Card>
+          </Box>
+        </>
+      )}
     </>
   );
 };
@@ -142,5 +174,6 @@ export default connect(mapStateToProps, {
   getPaymentProfile,
   getMemberByExternalId,
   updatePaymentIntent,
-  confirmPayment
+  confirmPayment,
+  payWithInvoice
 })(PaymentView);

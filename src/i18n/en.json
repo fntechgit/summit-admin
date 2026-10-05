@@ -2712,8 +2712,10 @@
         "total": "Total",
         "rate": "Rate",
         "billing_info": "Billing Information",
-        "payment_success": "Payment successful"
-      }
+        "payment_success": "Payment successful",
+        "pay_with_invoice_instead": "Pay with invoice instead"
+      },
+      "card_payment_cart_note": "This cart belongs to an order that is changing its payment method, so it can no longer be edited. You can only choose how to pay for it."
     },
     "purchase_tab": {
       "order": "Order",
@@ -2978,7 +2980,26 @@
     "status": "Status",
     "amount": "Amount",
     "details": "Details",
-    "purchases": "Purchases"
+    "purchases": "Purchases",
+    "pay_by_card": "Pay by Card",
+    "pay_by_card_warning": "This order will go to the card payment screen. No forms can be added to this sponsor's cart until it is paid or sent back to invoice.",
+    "card_enabled_tooltip": "Card payment enabled on {date} by {user}",
+    "filters": {
+      "all": "All",
+      "status": "Status",
+      "payment_method": "Payment Method",
+      "card_enabled": "Card Enabled",
+      "status_options": {
+        "pending": "Pending",
+        "paid": "Paid",
+        "cancelled": "Canceled"
+      },
+      "payment_method_options": {
+        "card": "Card",
+        "invoice": "Invoice",
+        "other": "Other"
+      }
+    }
   },
   "sponsor_users": {
     "users": "Users",

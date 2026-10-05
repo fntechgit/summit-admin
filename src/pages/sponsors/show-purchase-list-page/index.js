@@ -20,16 +20,18 @@ import {
   Button,
   CircularProgress,
   Grid2,
-  IconButton,
-  MenuItem,
-  Select
+  IconButton
 } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import history from "../../../history";
+import { getSponsorCart } from "../../../actions/sponsor-cart-actions";
+import PurchaseStatusCell from "../components/purchase-status-cell";
+import PurchaseFilters from "../components/purchase-filters";
 import {
   approveSponsorPurchase,
+  changePurchasePaymentMethod,
   downloadSponsorInvoice,
   exportAllSponsorPurchases,
   getAllSponsorPurchases,
@@ -37,7 +39,6 @@ import {
 } from "../../../actions/sponsor-purchases-actions";
 import {
   DEFAULT_CURRENT_PAGE,
-  PURCHASE_METHODS,
   PURCHASE_STATUS
 } from "../../../utils/constants";
 
@@ -45,6 +46,7 @@ const ShowPurchaseListPage = ({
   match,
   purchases,
   term,
+  filters,
   order,
   orderDir,
   currentPage,
@@ -54,20 +56,29 @@ const ShowPurchaseListPage = ({
   downloadSponsorInvoice,
   exportAllSponsorPurchases,
   approveSponsorPurchase,
-  rejectSponsorPurchase
+  rejectSponsorPurchase,
+  changePurchasePaymentMethod,
+  getSponsorCart
 }) => {
   useEffect(() => {
-    getAllSponsorPurchases();
+    getAllSponsorPurchases(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      filters
+    );
   }, []);
 
   const [downloadingOrderId, setDownloadingOrderId] = useState(null);
 
   const handlePageChange = (page) => {
-    getAllSponsorPurchases(term, page, perPage, order, orderDir);
+    getAllSponsorPurchases(term, page, perPage, order, orderDir, filters);
   };
 
   const handleSort = (key, dir) => {
-    getAllSponsorPurchases(term, currentPage, perPage, key, dir);
+    getAllSponsorPurchases(term, currentPage, perPage, key, dir, filters);
   };
 
   const handlePerPageChange = (newPerPage) => {
@@ -76,16 +87,35 @@ const ShowPurchaseListPage = ({
       DEFAULT_CURRENT_PAGE,
       newPerPage,
       order,
-      orderDir
+      orderDir,
+      filters
     );
   };
 
   const handleExport = () => {
-    exportAllSponsorPurchases(term, order, orderDir);
+    exportAllSponsorPurchases(term, order, orderDir, filters);
   };
 
   const handleSearch = (searchTerm) => {
-    getAllSponsorPurchases(searchTerm);
+    getAllSponsorPurchases(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      filters
+    );
+  };
+
+  const handleFilterChange = (newFilters) => {
+    getAllSponsorPurchases(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      newFilters
+    );
   };
 
   const handleDetails = (item) => {
@@ -105,6 +135,17 @@ const ShowPurchaseListPage = ({
       approveSponsorPurchase(sponsorId, purchaseId);
     if (newStatus === PURCHASE_STATUS.CANCELLED)
       rejectSponsorPurchase(sponsorId, purchaseId);
+  };
+
+  const handlePayByCard = (purchase) => {
+    changePurchasePaymentMethod(purchase.sponsor_id, purchase.id)
+      // PaymentView uses the cart in state, which can be missing, another sponsor's or outdated
+      .then(() => getSponsorCart("", purchase.sponsor_id))
+      // getSponsorCart swallows errors and resolves without a response on failure
+      .then((res) => {
+        if (res?.response) history.push(`${purchase.sponsor_id}/cart/payment`);
+      })
+      .catch(() => {}); // error already shown by snackbarErrorHandler
   };
 
   const tableColumns = [
@@ -133,35 +174,15 @@ const ShowPurchaseListPage = ({
       columnKey: "status",
       header: T.translate("sponsor_show_purchases.status"),
       sortable: true,
-      render: (row) => {
-        if (
-          row.payment_method === PURCHASE_METHODS.INVOICE &&
-          row.status === PURCHASE_STATUS.PENDING
-        ) {
-          return (
-            <Select
-              fullWidth
-              variant="outlined"
-              value={row.status}
-              onChange={(ev) =>
-                handleStatusChange(
-                  row.sponsor_id,
-                  row.payment_id,
-                  ev.target.value
-                )
-              }
-            >
-              {Object.values(PURCHASE_STATUS).map((s) => (
-                <MenuItem key={`purchase-status-${s}`} value={s}>
-                  {s}
-                </MenuItem>
-              ))}
-            </Select>
-          );
-        }
-
-        return row.status;
-      }
+      render: (row) => (
+        <PurchaseStatusCell
+          purchase={row}
+          onStatusChange={(newStatus) =>
+            handleStatusChange(row.sponsor_id, row.payment_id, newStatus)
+          }
+          onPayByCard={() => handlePayByCard(row)}
+        />
+      )
     },
     {
       columnKey: "amount",
@@ -232,7 +253,10 @@ const ShowPurchaseListPage = ({
             {T.translate("sponsor_show_purchases.purchases").toLowerCase()}
           </Box>
         </Grid2>
-        <Grid2 size={2} offset={6}>
+        <Grid2 size={6}>
+          <PurchaseFilters filters={filters} onChange={handleFilterChange} />
+        </Grid2>
+        <Grid2 size={2}>
           <SearchInput
             term={term}
             onSearch={handleSearch}
@@ -271,5 +295,7 @@ export default connect(mapStateToProps, {
   downloadSponsorInvoice,
   exportAllSponsorPurchases,
   approveSponsorPurchase,
-  rejectSponsorPurchase
+  rejectSponsorPurchase,
+  changePurchasePaymentMethod,
+  getSponsorCart
 })(ShowPurchaseListPage);

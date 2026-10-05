@@ -74,6 +74,7 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
       return {
         ...state,
         cart: null,
+        paymentIntent: null,
         term,
         summitTZ
       };

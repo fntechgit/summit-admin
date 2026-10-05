@@ -32,6 +32,8 @@ import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_PER_PAGE,
   DUMMY_ACTION,
+  PURCHASE_METHOD_FILTER_OTHER,
+  PURCHASE_METHODS,
   PURCHASE_STATUS
 } from "../utils/constants";
 import logoInvoice from "../assets/fn-invoice-header.png";
@@ -50,13 +52,28 @@ export const SPONSOR_CLIENT_UPDATED = "SPONSOR_CLIENT_UPDATED";
 const ORDER_DETAIL_EXPAND =
   "forms,forms.items,forms.items.meta_fields,forms.items.type,forms.items.cancellations,refunds,payments,notes,fees";
 
+const buildPurchaseFilters = ({ status, paymentMethod, cardEnabled } = {}) => {
+  const filter = [];
+  if (status) filter.push(`status==${status}`);
+  if (paymentMethod === PURCHASE_METHOD_FILTER_OTHER) {
+    filter.push(
+      `payment_method_not_in==${PURCHASE_METHODS.CARD}&&${PURCHASE_METHODS.INVOICE}`
+    );
+  } else if (paymentMethod) {
+    filter.push(`payment_method==${paymentMethod}`);
+  }
+  if (cardEnabled != null) filter.push(`card_payment_enabled==${cardEnabled}`);
+  return filter;
+};
+
 export const getAllSponsorPurchases =
   (
     term = "",
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "created",
-    orderDir = -1
+    orderDir = -1,
+    filters = {}
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
@@ -73,6 +90,8 @@ export const getAllSponsorPurchases =
       );
     }
 
+    filter.push(...buildPurchaseFilters(filters));
+
     const params = {
       page,
       per_page: perPage,
@@ -80,7 +99,7 @@ export const getAllSponsorPurchases =
       expand: "sponsor",
       relations: "sponsor",
       fields:
-        "id,number,payment_id,purchased_date,sponsor.id,sponsor.company_name,payment_method,status,net_amount"
+        "id,number,payment_id,purchased_date,sponsor.id,sponsor.company_name,payment_method,status,net_amount,card_payment_enabled_at,card_payment_enabled_by_full_name"
     };
 
     if (filter.length > 0) {
@@ -110,14 +129,16 @@ export const getAllSponsorPurchases =
       createAction(RECEIVE_ALL_SPONSOR_PURCHASES),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/purchases`,
       authErrorHandler,
-      { order, orderDir, page, perPage, term }
-    )(params)(dispatch).finally(() => {
-      dispatch(stopLoading());
-    });
+      { order, orderDir, page, perPage, term, filters }
+    )(params)(dispatch)
+      .catch(() => {})
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 export const exportAllSponsorPurchases =
-  (term = null, order, orderDir) =>
+  (term, order, orderDir, filters = {}) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -131,6 +152,8 @@ export const exportAllSponsorPurchases =
         `number==${escapedTerm},sponsor_company_name=@${escapedTerm},purchased_by_email=@${escapedTerm},purchased_by_full_name=@${escapedTerm}`
       );
     }
+
+    filter.push(...buildPurchaseFilters(filters));
 
     const params = {
       access_token: accessToken,
@@ -177,7 +200,8 @@ export const getSponsorPurchases =
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "created",
-    orderDir = -1
+    orderDir = -1,
+    filters = {}
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState, currentSponsorState } = getState();
@@ -194,6 +218,8 @@ export const getSponsorPurchases =
         `number==${escapedTerm},purchased_by_email=@${escapedTerm},purchased_by_full_name=@${escapedTerm}`
       );
     }
+
+    filter.push(...buildPurchaseFilters(filters));
 
     const params = {
       page,
@@ -225,10 +251,12 @@ export const getSponsorPurchases =
       createAction(RECEIVE_SPONSOR_PURCHASES),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases`,
       authErrorHandler,
-      { order, orderDir, page, perPage, term }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+      { order, orderDir, page, perPage, term, filters }
+    )(params)(dispatch)
+      .catch(() => {})
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 export const approveSponsorPurchase =
@@ -303,6 +331,31 @@ export const rejectSponsorPurchase =
       });
   };
 
+export const changePurchasePaymentMethod =
+  (sponsorId, purchaseId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+
+    dispatch(startLoading());
+
+    const accessToken = await getAccessTokenSafely();
+
+    const params = {
+      access_token: accessToken
+    };
+
+    // rejects on error (e.g. 412) so the caller only navigates on success
+    return putRequest(
+      null,
+      createAction(DUMMY_ACTION),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/purchases/${purchaseId}/change-payment-method`,
+      {},
+      snackbarErrorHandler
+    )(params)(dispatch).finally(() => {
+      dispatch(stopLoading());
+    });
+  };
+
 export const getSponsorOrder = (orderId) => async (dispatch, getState) => {
   const { currentSummitState, currentSponsorState } = getState();
   const { currentSummit } = currentSummitState;
@@ -321,9 +374,11 @@ export const getSponsorOrder = (orderId) => async (dispatch, getState) => {
     createAction(RECEIVE_SPONSOR_ORDER),
     `${window.PURCHASES_API_URL}/api/v2/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases/${orderId}`,
     authErrorHandler
-  )(params)(dispatch).finally(() => {
-    dispatch(stopLoading());
-  });
+  )(params)(dispatch)
+    .catch(() => {})
+    .finally(() => {
+      dispatch(stopLoading());
+    });
 };
 
 export const clearSponsorOrder = () => async (dispatch) => {
@@ -401,6 +456,7 @@ export const updateClientAddress =
           })
         );
       })
+      .catch(() => {})
       .finally(() => {
         dispatch(stopLoading());
       });
@@ -436,6 +492,7 @@ export const updateClientInfo =
           })
         );
       })
+      .catch(() => {})
       .finally(() => {
         dispatch(stopLoading());
       });
@@ -473,6 +530,7 @@ export const cancelSponsorForm =
           })
         );
       })
+      .catch(() => {})
       .finally(() => {
         dispatch(stopLoading());
       });
@@ -499,6 +557,7 @@ export const undoCancelSponsorForm =
       snackbarErrorHandler
     )(params)(dispatch)
       .then(() => dispatch(getSponsorOrder(orderId)))
+      .catch(() => {})
       .finally(() => {
         dispatch(stopLoading());
       });
