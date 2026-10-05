@@ -47,6 +47,7 @@
     "remove": "Remove",
     "row_remove_warning": "Are you sure you want to delete row ",
     "delete": "Delete",
+    "actions": "Actions",
     "clone": "Clone",
     "new": "New",
     "new_summit": "New Event",

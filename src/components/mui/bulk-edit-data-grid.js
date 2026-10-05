@@ -462,6 +462,7 @@ const BulkEditDataGrid = ({
     gridColumns.push({
       field: "actions",
       type: "actions",
+      headerName: T.translate("general.actions"),
       getActions: ({ row }) =>
         [
           onEdit && (
@@ -581,6 +582,12 @@ const BulkEditDataGrid = ({
             // bootstrap 3 sets box-sizing: border-box on input[type="search"],
             // which squeezes MUI's padding into the input's fixed height
             columnsManagement: {
+              // the actions column should always be shown, so leave it out
+              // of the list (and out of Show/Hide All)
+              getTogglableColumns: (cols) =>
+                cols
+                  .filter((col) => col.field !== "actions")
+                  .map((col) => col.field),
               searchInputProps: {
                 sx: { "& .MuiInputBase-input": { boxSizing: "content-box" } }
               }
