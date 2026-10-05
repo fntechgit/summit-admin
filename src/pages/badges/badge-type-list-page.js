@@ -32,7 +32,7 @@ const BadgeTypeListPage = ({
 }) => {
   useEffect(() => {
     if (currentSummit?.id) getBadgeTypes();
-  }, []);
+  }, [currentSummit?.id]);
 
   const handleEdit = (badge_type) =>
     history.push(
