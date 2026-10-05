@@ -745,11 +745,9 @@ export const deleteBadgeType = (badgeTypeId) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}`,
     null,
     snackbarErrorHandler
-  )(params)(dispatch)
-    .finally(() => {
-      dispatch(stopLoading());
-    })
-    .catch(() => {});
+  )(params)(dispatch).finally(() => {
+    dispatch(stopLoading());
+  });
 };
 
 export const addAccessLevelToBadgeType =
