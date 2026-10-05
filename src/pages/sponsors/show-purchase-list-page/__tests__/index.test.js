@@ -31,7 +31,11 @@ import {
 import { getSponsorCart } from "../../../../actions/sponsor-cart-actions";
 import showConfirmDialog from "../../../../components/mui/showConfirmDialog";
 import history from "../../../../history";
-import { PURCHASE_METHODS, PURCHASE_STATUS } from "../../../../utils/constants";
+import {
+  PURCHASE_METHOD_FILTER_OTHER,
+  PURCHASE_METHODS,
+  PURCHASE_STATUS
+} from "../../../../utils/constants";
 
 // echo the key, plus the params so interpolated values can be asserted
 jest.mock("i18n-react/dist/i18n-react", () => ({
@@ -456,6 +460,24 @@ describe("ShowPurchaseListPage", () => {
         "created",
         -1,
         { cardEnabled: false }
+      );
+    });
+
+    it("offers Other as a payment method filter", async () => {
+      renderPage();
+
+      await selectFilterOption(
+        "sponsor_show_purchases.filters.payment_method",
+        "sponsor_show_purchases.filters.payment_method_options.other"
+      );
+
+      expect(getAllSponsorPurchases).toHaveBeenLastCalledWith(
+        "",
+        1,
+        10,
+        "created",
+        -1,
+        { paymentMethod: PURCHASE_METHOD_FILTER_OTHER }
       );
     });
 

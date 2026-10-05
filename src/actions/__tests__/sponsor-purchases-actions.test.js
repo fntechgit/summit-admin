@@ -29,6 +29,10 @@ import {
   getSponsorPurchases
 } from "../sponsor-purchases-actions";
 import * as methods from "../../utils/methods";
+import {
+  PURCHASE_METHOD_FILTER_OTHER,
+  PURCHASE_METHODS
+} from "../../utils/constants";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   __esModule: true,
@@ -129,7 +133,7 @@ describe("purchase list filters", () => {
   const mockStore = configureStore(middlewares);
   const FILTERS = {
     status: "Paid",
-    paymentMethod: "Invoice",
+    paymentMethod: PURCHASE_METHODS.INVOICE,
     cardEnabled: true
   };
   let capturedParams;
@@ -164,7 +168,7 @@ describe("purchase list filters", () => {
     expect(capturedParams["filter[]"]).toEqual([
       "number==acme,sponsor_company_name=@acme,purchased_by_email=@acme,purchased_by_full_name=@acme",
       "status==Paid",
-      "payment_method==Invoice",
+      `payment_method==${PURCHASE_METHODS.INVOICE}`,
       "card_payment_enabled==true"
     ]);
   });
@@ -175,6 +179,18 @@ describe("purchase list filters", () => {
     );
 
     expect(capturedParams["filter[]"]).toEqual(["card_payment_enabled==false"]);
+  });
+
+  it("sends not card and not invoice when filtering by other payment methods", async () => {
+    await buildStore().dispatch(
+      getAllSponsorPurchases("", 1, 10, "created", -1, {
+        paymentMethod: PURCHASE_METHOD_FILTER_OTHER
+      })
+    );
+
+    expect(capturedParams["filter[]"]).toEqual([
+      `payment_method_not_in==${PURCHASE_METHODS.CARD}&&${PURCHASE_METHODS.INVOICE}`
+    ]);
   });
 
   it("sends no filter when none is set", async () => {
@@ -201,7 +217,7 @@ describe("purchase list filters", () => {
 
     expect(capturedParams["filter[]"]).toEqual([
       "status==Paid",
-      "payment_method==Invoice",
+      `payment_method==${PURCHASE_METHODS.INVOICE}`,
       "card_payment_enabled==true"
     ]);
   });
@@ -215,7 +231,7 @@ describe("purchase list filters", () => {
     expect(csvParams["filter[]"]).toEqual([
       "number==acme,sponsor_company_name=@acme,purchased_by_email=@acme,purchased_by_full_name=@acme",
       "status==Paid",
-      "payment_method==Invoice",
+      `payment_method==${PURCHASE_METHODS.INVOICE}`,
       "card_payment_enabled==true"
     ]);
   });

@@ -2981,7 +2981,8 @@
       },
       "payment_method_options": {
         "card": "Card",
-        "invoice": "Invoice"
+        "invoice": "Invoice",
+        "other": "Other"
       }
     }
   },

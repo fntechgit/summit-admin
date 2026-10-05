@@ -298,6 +298,9 @@ export const PURCHASE_METHODS = {
   INVOICE: "Invoice"
 };
 
+// purchases filter option for any payment method other than card or invoice
+export const PURCHASE_METHOD_FILTER_OTHER = "other";
+
 export const PURCHASE_TYPES = {
   ONLINE: "Online",
   OFFLINE: "Offline"

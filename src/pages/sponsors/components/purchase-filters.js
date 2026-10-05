@@ -16,7 +16,11 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { Box } from "@mui/material";
 import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
-import { PURCHASE_METHODS, PURCHASE_STATUS } from "../../../utils/constants";
+import {
+  PURCHASE_METHOD_FILTER_OTHER,
+  PURCHASE_METHODS,
+  PURCHASE_STATUS
+} from "../../../utils/constants";
 
 const PurchaseFilters = ({ filters, onChange, sx }) => {
   const { status, paymentMethod, cardEnabled } = filters;
@@ -62,7 +66,13 @@ const PurchaseFilters = ({ filters, onChange, sx }) => {
               label: T.translate(
                 `sponsor_show_purchases.filters.payment_method_options.${key.toLowerCase()}`
               )
-            }))
+            })),
+            {
+              value: PURCHASE_METHOD_FILTER_OTHER,
+              label: T.translate(
+                "sponsor_show_purchases.filters.payment_method_options.other"
+              )
+            }
           ]}
           onChange={(ev) => handleChange("paymentMethod", ev.target.value)}
         />

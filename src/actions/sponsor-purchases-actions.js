@@ -32,6 +32,8 @@ import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_PER_PAGE,
   DUMMY_ACTION,
+  PURCHASE_METHOD_FILTER_OTHER,
+  PURCHASE_METHODS,
   PURCHASE_STATUS
 } from "../utils/constants";
 import logoInvoice from "../assets/fn-invoice-header.png";
@@ -53,7 +55,13 @@ const ORDER_DETAIL_EXPAND =
 const buildPurchaseFilters = ({ status, paymentMethod, cardEnabled } = {}) => {
   const filter = [];
   if (status) filter.push(`status==${status}`);
-  if (paymentMethod) filter.push(`payment_method==${paymentMethod}`);
+  if (paymentMethod === PURCHASE_METHOD_FILTER_OTHER) {
+    filter.push(
+      `payment_method_not_in==${PURCHASE_METHODS.CARD}&&${PURCHASE_METHODS.INVOICE}`
+    );
+  } else if (paymentMethod) {
+    filter.push(`payment_method==${paymentMethod}`);
+  }
   if (cardEnabled != null) filter.push(`card_payment_enabled==${cardEnabled}`);
   return filter;
 };
