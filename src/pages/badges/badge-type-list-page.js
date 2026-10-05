@@ -76,8 +76,6 @@ const BadgeTypeListPage = ({
     sortDir: orderDir
   };
 
-  if (!currentSummit.id) return <div />;
-
   return (
     <div className="container">
       <h3> {T.translate("badge_type_list.badge_type_list")}</h3>
