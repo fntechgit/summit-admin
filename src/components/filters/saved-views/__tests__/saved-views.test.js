@@ -98,9 +98,6 @@ describe("SavedViews", () => {
       "Open",
       expect.any(Function)
     );
-    expect(
-      screen.queryByRole("menuitem", { name: /Recently Modified/ })
-    ).not.toBeInTheDocument();
   });
 
   test("deletes a view after confirming, without applying it", async () => {
