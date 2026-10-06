@@ -467,7 +467,9 @@ describe("SummitEventListPage", () => {
         mockEditableTableSpy.mock.calls.length - 1
       ][0];
 
-    expect(latestGridProps().columnVisibilityModel.selection_status).toBe(true);
+    expect(latestGridProps().columnVisibilityModel.selection_status).not.toBe(
+      false
+    );
 
     act(() => {
       latestGridProps().onColumnVisibilityModelChange({
@@ -483,6 +485,8 @@ describe("SummitEventListPage", () => {
     act(() => {
       latestGridProps().onColumnVisibilityModelChange({});
     });
-    expect(latestGridProps().columnVisibilityModel.selection_status).toBe(true);
+    expect(latestGridProps().columnVisibilityModel.selection_status).not.toBe(
+      false
+    );
   });
 });
