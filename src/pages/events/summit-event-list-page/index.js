@@ -81,9 +81,9 @@ const SummitEventListPage = ({
   const [showImportModal, setShowImportModal] = useState(false);
   const [showImportFromMUXModal, setShowImportFromMUXModal] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState(extraColumns ?? []);
-  // selection status is the one fixed column that can be hidden
-  const [isSelectionStatusVisible, setIsSelectionStatusVisible] =
-    useState(true);
+  // the grid's last column visibility; only the optional columns are
+  // remembered (selectedColumns), the default ones reset each visit
+  const [gridColumnVisibility, setGridColumnVisibility] = useState({});
   const [selectedFilterCriteria, setSelectedFilterCriteria] = useState(null);
   const { parsedFilter, resetFilters, filterValues, setFilters, joinOperator } =
     useGridFilter(FILTER_ID);
@@ -198,7 +198,7 @@ const SummitEventListPage = ({
   );
 
   const columnVisibilityModel = {
-    selection_status: isSelectionStatusVisible,
+    ...gridColumnVisibility,
     ...Object.fromEntries(
       optionalColumns.map((oc) => [
         oc.columnKey,
@@ -210,7 +210,7 @@ const SummitEventListPage = ({
   // the grid omits columns from the model when they're visible (e.g. after
   // "Show all"), so only an explicit false hides one
   const handleColumnVisibilityModelChange = (model) => {
-    setIsSelectionStatusVisible(model.selection_status !== false);
+    setGridColumnVisibility(model);
     setSelectedColumns(
       optionalColumns
         .map((oc) => oc.columnKey)
@@ -237,14 +237,12 @@ const SummitEventListPage = ({
     {
       columnKey: "id",
       label: T.translate("general.id"),
-      sortable: true,
-      hideable: false
+      sortable: true
     },
     {
       columnKey: "type",
       label: T.translate("event_list.type"),
       sortable: true,
-      hideable: false,
       // eslint-disable-next-line react/no-unstable-nested-components
       editableField: (extraProps) => (
         <Dropdown
@@ -271,7 +269,6 @@ const SummitEventListPage = ({
       columnKey: "title",
       label: T.translate("event_list.title"),
       sortable: true,
-      hideable: false,
       editableField: true,
       placeholder: T.translate("bulk_actions_page.placeholders.event_title")
     },
