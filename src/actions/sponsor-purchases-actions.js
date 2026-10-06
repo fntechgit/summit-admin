@@ -251,7 +251,7 @@ export const getSponsorPurchases =
       createAction(RECEIVE_SPONSOR_PURCHASES),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases`,
       authErrorHandler,
-      { order, orderDir, page, perPage, term, filters }
+      { order, orderDir, page, perPage, term, filters, sponsorId: sponsor.id }
     )(params)(dispatch)
       .catch(() => {})
       .finally(() => {

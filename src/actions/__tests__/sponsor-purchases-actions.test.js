@@ -222,6 +222,13 @@ describe("purchase list filters", () => {
     ]);
   });
 
+  it("getSponsorPurchases tags the request with the sponsor, so the list can be cleared on a sponsor change", async () => {
+    await buildStore().dispatch(getSponsorPurchases());
+
+    const [, , , , requestPayload] = getRequest.mock.calls[0];
+    expect(requestPayload).toEqual(expect.objectContaining({ sponsorId: 123 }));
+  });
+
   it("exportAllSponsorPurchases sends the same filters as the list", async () => {
     await buildStore().dispatch(
       exportAllSponsorPurchases("acme", "created", -1, FILTERS)

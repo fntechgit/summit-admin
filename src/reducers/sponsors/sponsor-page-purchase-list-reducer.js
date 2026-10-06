@@ -25,6 +25,7 @@ import {
   SPONSOR_PURCHASE_STATUS_UPDATED
 } from "../../actions/sponsor-purchases-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { RECEIVE_SPONSOR } from "../../actions/sponsor-actions";
 import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
 import { normalizeOrder } from "../../pages/sponsors/sponsor-page/utils";
 
@@ -38,7 +39,8 @@ const DEFAULT_STATE = {
   totalCount: 0,
   term: "",
   filters: {},
-  currentOrder: null
+  currentOrder: null,
+  sponsorId: null
 };
 
 const sponsorPagePurchaseListReducer = (state = DEFAULT_STATE, action) => {
@@ -49,8 +51,14 @@ const sponsorPagePurchaseListReducer = (state = DEFAULT_STATE, action) => {
     case LOGOUT_USER: {
       return DEFAULT_STATE;
     }
+    // persisted state belongs to one sponsor: keep it on a refresh, clear it on a sponsor change
+    case RECEIVE_SPONSOR: {
+      if (payload.response.id === state.sponsorId) return state;
+      return DEFAULT_STATE;
+    }
     case REQUEST_SPONSOR_PURCHASES: {
-      const { order, orderDir, page, perPage, term, filters } = payload;
+      const { order, orderDir, page, perPage, term, filters, sponsorId } =
+        payload;
 
       return {
         ...state,
@@ -60,7 +68,8 @@ const sponsorPagePurchaseListReducer = (state = DEFAULT_STATE, action) => {
         currentPage: page,
         perPage,
         term,
-        filters
+        filters,
+        sponsorId
       };
     }
     case RECEIVE_SPONSOR_PURCHASES: {
