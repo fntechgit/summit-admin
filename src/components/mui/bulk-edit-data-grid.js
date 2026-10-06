@@ -54,7 +54,7 @@ const SEARCH_WIDTH = 250;
 // would otherwise swallow typing inside the bulk-edit inputs
 const stopGridKeyDown = (ev) => ev.stopPropagation();
 
-// toolbar buttons show only their icon; the label stays as tooltip/aria-label
+// icon-only toolbar buttons; the label stays as tooltip/aria-label
 const ICON_ONLY_BUTTON_SX = {
   minWidth: 0,
   "& .MuiButton-startIcon": { m: 0 }
