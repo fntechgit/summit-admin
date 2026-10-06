@@ -65,7 +65,7 @@ const renderEditor = (col, editRow, onChange) => {
     return (
       <TextField
         id={col.columnKey}
-        placeholder={col.placeholder}
+        placeholder={col.placeholder || T.translate("placeholders.text")}
         multiline
         minRows={2}
         fullWidth
