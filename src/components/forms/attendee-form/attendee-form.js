@@ -13,6 +13,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
+import Swal from "sweetalert2";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input";
 import AttendeeInput from "openstack-uicore-foundation/lib/components/inputs/attendee-input";
@@ -28,6 +29,7 @@ import RsvpComponent from "./rsvp-component";
 import { AffiliationsTable } from "../../tables/affiliationstable";
 import { scrollToError, shallowEqual } from "../../../utils/methods";
 import NotesPanel from "../../notes/notes-panel";
+import CheckInLogPanel from "./check-in-log-panel";
 import CopyClipboard from "../../buttons/copy-clipboard";
 import { MILLISECONDS_IN_SECOND } from "../../../utils/constants";
 
@@ -72,6 +74,7 @@ const AttendeeForm = ({
   const [errors, setErrors] = useState(errorsProp);
   const [openSections, setOpenSections] = useState({
     admin_notes: false,
+    check_in_log: false,
     extra_questions: false
   });
   const formRef = useRef(null);
@@ -102,9 +105,50 @@ const AttendeeForm = ({
     );
   };
 
+  const askCheckOutReason = async () => {
+    const { value, isConfirmed } = await Swal.fire({
+      title: T.translate("edit_attendee.check_out_reason_title"),
+      input: "textarea",
+      inputPlaceholder: T.translate(
+        "edit_attendee.check_out_reason_placeholder"
+      ),
+      inputAttributes: { maxlength: 1024 },
+      showCancelButton: true,
+      inputValidator: (reason) =>
+        !reason?.trim() &&
+        T.translate("edit_attendee.check_out_reason_required")
+    });
+
+    return isConfirmed ? value.trim() : null;
+  };
+
+  const handleCheckedInChange = async (value) => {
+    if (!value && originalEntity.summit_hall_checked_in) {
+      // checking out requires a reason, if cancelled the dropdown stays as is
+      const reason = await askCheckOutReason();
+      if (reason === null) return;
+      setEntity((prev) => ({
+        ...prev,
+        summit_hall_checked_in: value,
+        check_out_reason: reason
+      }));
+    } else {
+      setEntity((prev) => {
+        const { check_out_reason, ...rest } = prev;
+        return { ...rest, summit_hall_checked_in: value };
+      });
+    }
+    setErrors({});
+  };
+
   const handleChange = (ev) => {
     const updatedEntity = { ...entity };
     let { value, id } = ev.target;
+
+    if (id === "summit_hall_checked_in") {
+      handleCheckedInChange(value);
+      return;
+    }
 
     if (ev.target.type === "checkbox") {
       value = ev.target.checked;
@@ -405,6 +449,16 @@ const AttendeeForm = ({
               open={openSections.admin_notes}
               onToggle={(ev) => toggleSection("admin_notes", ev)}
               onOpen={handleOpenNotes}
+            />
+          )}
+
+          {entity.id !== 0 && (
+            <CheckInLogPanel
+              key={entity.id}
+              attendeeId={entity.id}
+              refreshKey={`${entity.summit_hall_checked_in}-${entity.last_edited}`}
+              open={openSections.check_in_log}
+              onToggle={(ev) => toggleSection("check_in_log", ev)}
             />
           )}
 

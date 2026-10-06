@@ -756,6 +756,11 @@ const normalizeEntity = (entity) => {
     delete normalizedEntity.email;
   }
 
+  if (normalizedEntity.check_out_reason) {
+    normalizedEntity.reason = normalizedEntity.check_out_reason;
+  }
+  delete normalizedEntity.check_out_reason;
+
   delete normalizedEntity.summit_hall_checked_in_date;
   delete normalizedEntity.member;
   delete normalizedEntity.manager;

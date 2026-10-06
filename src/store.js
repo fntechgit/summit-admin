@@ -151,6 +151,7 @@ import currentRegFeedMetadataListReducer from "./reducers/summits/reg-feed-metad
 import currentRegFeedMetadataReducer from "./reducers/summits/reg-feed-metadata-reducer";
 import badgePrintReducer from "./reducers/tickets/badge-print-reducer";
 import notesReducer from "./reducers/notes/notes-reducer";
+import attendeeCheckInLogReducer from "./reducers/attendees/attendee-check-in-log-reducer";
 import emailFlowEventSettingsReducer from "./reducers/email_flow_events/email-flows-event-settings-reducer";
 import badgeScanReducer from "./reducers/sponsors/badge-scan-reducer";
 import inventoryItemReducer from "./reducers/sponsors_inventory/inventory-item-reducer";
@@ -194,7 +195,8 @@ const config = {
     "sponsorReportsPurchaseDetailsLinesState",
     "sponsorReportsPurchaseDetailsByItemState",
     "sponsorReportsSponsorAssetState",
-    "sponsorReportsDrilldownState"
+    "sponsorReportsDrilldownState",
+    "attendeeCheckInLogState"
   ]
 };
 
@@ -345,6 +347,7 @@ const reducers = persistCombineReducers(config, {
   summitStatsState: summitStatsReducer,
   auditLogState: auditLogReducer,
   notesState: notesReducer,
+  attendeeCheckInLogState: attendeeCheckInLogReducer,
   signageState: signageReducer,
   trackTimeframesListState: trackTimeframesListReducer,
   trackTimeframeState: trackTimeframeReducer,
@@ -368,7 +371,7 @@ const reducers = persistCombineReducers(config, {
   sponsorReportsSponsorAssetState: sponsorReportsSponsorAssetReducer,
   sponsorReportsDrilldownState: sponsorReportsDrilldownReducer,
   currentAddOnTypesListState: addOnTypesListReducer,
-  currentAddOnTypeState: addOnTypeReducer,
+  currentAddOnTypeState: addOnTypeReducer
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
