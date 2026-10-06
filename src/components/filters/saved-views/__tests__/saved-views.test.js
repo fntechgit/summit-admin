@@ -65,6 +65,24 @@ describe("SavedViews", () => {
     expect(onChange).toHaveBeenCalledWith(VIEWS[1]);
   });
 
+  test("says there are no saved views only once they've loaded empty", async () => {
+    let resolveViews;
+    queryFilterCriterias.mockImplementation((summitId, context, input, cb) => {
+      resolveViews = cb;
+    });
+    renderViews();
+
+    await openMenu();
+    expect(
+      screen.queryByRole("menuitem", { name: "saved_views.no_views" })
+    ).not.toBeInTheDocument();
+
+    act(() => resolveViews([]));
+    expect(
+      screen.getByRole("menuitem", { name: "saved_views.no_views" })
+    ).toBeInTheDocument();
+  });
+
   test("searches views by name", async () => {
     renderViews();
 
