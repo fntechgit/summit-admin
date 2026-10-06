@@ -38,6 +38,8 @@ const RowActions = ({ rowId, inlineActions, menuActions }) => {
   return (
     <Box
       component="span"
+      // Keep action clicks from triggering the table's row click.
+      onClick={(ev) => ev.stopPropagation()}
       sx={{
         display: "inline-flex",
         alignItems: "center",

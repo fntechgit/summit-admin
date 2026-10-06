@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
+import Box from "@mui/material/Box";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import showConfirmDialog from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
 import EditIcon from "@mui/icons-material/Edit";
@@ -17,16 +18,20 @@ const COLUMN_PADDING = 16;
  *
  * uicore renders Edit, Archive, Delete and Select as four separate icon cells,
  * which puts the destructive action between two safe ones. This forwards none
- * of those props to uicore and appends its own trailing column instead, so the
- * row reads `edit / select / overflow` with Delete inside the overflow menu.
+ * of those props to uicore and renders its own columns instead: a leading
+ * overflow menu holding Delete, and trailing icons for edit / archive / select.
  *
  * The prop contract is uicore's, unchanged: pages keep passing `onEdit`,
  * `onDelete`, `onSelect`, `canDelete`, `deleteDialogBody` and friends exactly
  * as before, and only swap their import. That keeps the arrangement in one
  * file for every table, and makes this trivial to delete if uicore adopts it.
+ * `onRowClick` is the one addition: uicore's rows take no click handler.
  */
 const Table = ({
   columns,
+  data,
+  tableSx,
+  onRowClick,
   onEdit,
   onArchive,
   onDelete,
@@ -103,12 +108,18 @@ const Table = ({
         }
     ].filter(Boolean);
 
-  const hasActions = Boolean(onEdit || onArchive || onDelete || onSelect);
-
   // Width is static, so size it from the actions the table was given rather
   // than the ones a particular row happens to show.
-  const slotCount =
-    [onEdit, onArchive, onSelect].filter(Boolean).length + (onDelete ? 1 : 0);
+  const slotCount = [onEdit, onArchive, onSelect].filter(Boolean).length;
+
+  const menuColumn = {
+    columnKey: "row-menu",
+    header: "",
+    width: BUTTON_SLOT_WIDTH + COLUMN_PADDING,
+    render: (row) => (
+      <RowActions rowId={row.id} menuActions={buildMenuActions(row)} />
+    )
+  };
 
   const actionsColumn = {
     columnKey: "row-actions",
@@ -116,25 +127,46 @@ const Table = ({
     align: "right",
     width: slotCount * BUTTON_SLOT_WIDTH + COLUMN_PADDING,
     render: (row) => (
-      <RowActions
-        rowId={row.id}
-        inlineActions={buildInlineActions(row)}
-        menuActions={buildMenuActions(row)}
-      />
+      <RowActions rowId={row.id} inlineActions={buildInlineActions(row)} />
     )
   };
 
+  const handleRowClick = (ev) => {
+    const tr = ev.target.closest("tbody tr");
+    const row = tr && data[tr.sectionRowIndex];
+    if (row && !isRowDisabled(row)) onRowClick(row);
+  };
+
+  // Only data rows; empty-state and extra rows follow them in tbody.
+  const rowHoverSx = {
+    [`& tbody tr:nth-of-type(-n+${data.length}):hover`]: {
+      cursor: "pointer",
+      bgcolor: "action.hover"
+    }
+  };
+
   return (
-    <MuiTable
-      {...rest}
-      options={options}
-      columns={hasActions ? [...columns, actionsColumn] : columns}
-    />
+    <Box onClick={onRowClick ? handleRowClick : undefined}>
+      <MuiTable
+        {...rest}
+        data={data}
+        options={options}
+        tableSx={onRowClick ? { ...tableSx, ...rowHoverSx } : tableSx}
+        columns={[
+          ...(onDelete ? [menuColumn] : []),
+          ...columns,
+          ...(slotCount ? [actionsColumn] : [])
+        ]}
+      />
+    </Box>
   );
 };
 
 Table.propTypes = {
   columns: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  data: PropTypes.arrayOf(PropTypes.shape({})),
+  tableSx: PropTypes.shape({}),
+  onRowClick: PropTypes.func,
   onEdit: PropTypes.func,
   onArchive: PropTypes.func,
   onDelete: PropTypes.func,
@@ -149,6 +181,9 @@ Table.propTypes = {
 };
 
 Table.defaultProps = {
+  data: [],
+  tableSx: {},
+  onRowClick: undefined,
   onEdit: undefined,
   onArchive: undefined,
   onDelete: undefined,
