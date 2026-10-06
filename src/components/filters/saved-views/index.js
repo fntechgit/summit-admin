@@ -150,7 +150,8 @@ const SavedViews = ({
   onDelete
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const [views, setViews] = useState([]);
+  // null until the views load, so "No saved views" isn't shown while loading
+  const [views, setViews] = useState(null);
   const [search, setSearch] = useState("");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
 
@@ -160,6 +161,8 @@ const SavedViews = ({
   const handleOpen = (ev) => {
     setAnchorEl(ev.currentTarget);
     setSearch("");
+    // don't show the list from the last time it was opened while reloading
+    setViews(null);
     loadViews("");
   };
 
@@ -231,10 +234,10 @@ const SavedViews = ({
             inputProps={{ "aria-label": T.translate("general.search") }}
           />
         </Box>
-        {views.length === 0 && (
+        {views?.length === 0 && (
           <MenuItem disabled>{T.translate("saved_views.no_views")}</MenuItem>
         )}
-        {views.map((view) => (
+        {(views ?? []).map((view) => (
           <MenuItem
             key={view.id}
             selected={view.id === selectedView?.id}
