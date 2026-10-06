@@ -185,7 +185,7 @@ describe("SavedViews", () => {
       screen.getByRole("menuitem", { name: "saved_views.save_current" })
     );
 
-    const name = screen.getByRole("textbox", { name: "saved_views.name" });
+    const name = screen.getByRole("textbox", { name: "general.name" });
     expect(name).toHaveValue("Open Activities");
     await userEvent.clear(name);
     await userEvent.type(name, "Open Keynotes");
@@ -216,7 +216,7 @@ describe("SavedViews", () => {
       screen.getByRole("menuitem", { name: "saved_views.save_current" })
     );
     await userEvent.type(
-      screen.getByRole("textbox", { name: "saved_views.name" }),
+      screen.getByRole("textbox", { name: "general.name" }),
       "Mine"
     );
     await userEvent.click(

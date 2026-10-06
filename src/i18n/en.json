@@ -3949,7 +3949,6 @@
   },
   "saved_views": {
     "title": "Saved Views",
-    "name": "Name",
     "save_current": "Save current view",
     "clear": "Clear view",
     "no_views": "No saved views"

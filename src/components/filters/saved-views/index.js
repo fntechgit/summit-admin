@@ -87,7 +87,7 @@ const SaveViewDialog = ({ selectedView, onSave, onClose }) => {
           <DialogContent>
             <MuiFormikTextField
               name="name"
-              label={T.translate("saved_views.name")}
+              label={T.translate("general.name")}
               fullWidth
               autoFocus
             />
