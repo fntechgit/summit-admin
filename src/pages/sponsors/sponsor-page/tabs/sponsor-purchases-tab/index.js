@@ -19,7 +19,10 @@ import DownloadIcon from "@mui/icons-material/Download";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import GridToolbar from "../../../../../components/mui/grid-toolbar";
 import history from "../../../../../history";
-import { getSponsorCart } from "../../../../../actions/sponsor-cart-actions";
+import {
+  getSponsorCart,
+  payWithInvoice
+} from "../../../../../actions/sponsor-cart-actions";
 import PurchaseStatusCell from "../../../components/purchase-status-cell";
 import PurchaseFilters from "../../../components/purchase-filters";
 import {
@@ -49,7 +52,8 @@ const SponsorPurchasesTab = ({
   approveSponsorPurchase,
   rejectSponsorPurchase,
   changePurchasePaymentMethod,
-  getSponsorCart
+  getSponsorCart,
+  payWithInvoice
 }) => {
   useEffect(() => {
     getSponsorPurchases(
@@ -135,6 +139,18 @@ const SponsorPurchasesTab = ({
       .catch(() => {}); // error already shown by snackbarErrorHandler
   };
 
+  const reloadPurchases = () =>
+    getSponsorPurchases(term, currentPage, perPage, order, orderDir, filters);
+
+  const handleBackToInvoice = () => {
+    // payWithInvoice posts for the cart in state, so load this sponsor's first
+    getSponsorCart("", sponsor.id)
+      .then((res) =>
+        res?.response ? payWithInvoice(sponsor.id).then(reloadPurchases) : null
+      )
+      .catch(() => {}); // error already shown by snackbarErrorHandler
+  };
+
   const tableColumns = [
     {
       columnKey: "number",
@@ -162,6 +178,7 @@ const SponsorPurchasesTab = ({
             handleStatusChange(row.payment_id, newStatus)
           }
           onPayByCard={() => handlePayByCard(row)}
+          onBackToInvoice={handleBackToInvoice}
         />
       )
     },
@@ -253,5 +270,6 @@ export default connect(mapStateToProps, {
   approveSponsorPurchase,
   rejectSponsorPurchase,
   changePurchasePaymentMethod,
-  getSponsorCart
+  getSponsorCart,
+  payWithInvoice
 })(SponsorPurchasesTab);

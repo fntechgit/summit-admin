@@ -2968,6 +2968,9 @@
     "purchases": "Purchases",
     "pay_by_card": "Pay by Card",
     "pay_by_card_warning": "This order will go to the card payment screen. No forms can be added to this sponsor's cart until it is paid or sent back to invoice.",
+    "resume_checkout": "Resume checkout",
+    "back_to_invoice": "Back to Invoice",
+    "back_to_invoice_warning": "This order will go back to being paid by invoice.",
     "card_enabled_tooltip": "Card payment enabled on {date} by {user}",
     "filters": {
       "all": "All",

@@ -199,13 +199,14 @@ describe("purchase list filters", () => {
     expect(capturedParams["filter[]"]).toBeUndefined();
   });
 
-  it("requests the card payment enabled fields for the indicator", async () => {
+  it("requests the card payment enabled fields and the payment status for the status cell", async () => {
     await buildStore().dispatch(getAllSponsorPurchases());
 
     expect(capturedParams.fields.split(",")).toEqual(
       expect.arrayContaining([
         "card_payment_enabled_at",
-        "card_payment_enabled_by_full_name"
+        "card_payment_enabled_by_full_name",
+        "payment_status"
       ])
     );
   });
