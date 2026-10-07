@@ -29,6 +29,11 @@ jest.mock("../../../notes/notes-panel", () => ({
   default: () => null
 }));
 
+jest.mock("../check-in-log-panel", () => ({
+  __esModule: true,
+  default: () => null
+}));
+
 const SUMMIT = { id: 1, time_zone_id: "UTC" };
 
 const defaultEntity = {

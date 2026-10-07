@@ -994,6 +994,9 @@
     "affiliation_current": "Current",
     "shared_contact_info": "Share Contact Info?",
     "checked_in": "Checked In?",
+    "check_out_reason_title": "Why are you checking this user out?",
+    "check_out_reason_placeholder": "Reason for the check out",
+    "check_out_reason_required": "A reason is required to check out an attendee.",
     "tickets": "Tickets",
     "orders": "Orders",
     "rsvp": "RSVP",
@@ -3961,6 +3964,32 @@
     "remove_warning": "Are you sure you want to delete note",
     "placeholders": {
       "search": "Search by content or author"
+    }
+  },
+  "check_in_log_panel": {
+    "title": "Check In / Check Out Log",
+    "no_entries": "No check in / check out records found.",
+    "action": "Action",
+    "source": "Source",
+    "actor": "Actor",
+    "reason": "Reason",
+    "ip_address": "IP Address",
+    "date": "Date",
+    "apply_filters": "Apply Filters",
+    "actions": {
+      "CHECKED_IN": "Checked In",
+      "CHECKED_OUT": "Checked Out"
+    },
+    "sources": {
+      "ADMIN_UI": "Admin UI",
+      "BADGE_SCAN": "Badge Scan",
+      "BADGE_PRINT": "Badge Print"
+    },
+    "placeholders": {
+      "search": "Search by actor email",
+      "action_filter": "Filter by action",
+      "date_from": "From",
+      "date_to": "To"
     }
   },
   "generic_extra_question_list": {

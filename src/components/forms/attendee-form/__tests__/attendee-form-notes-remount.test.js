@@ -31,6 +31,11 @@ jest.mock(
   () => ({ __esModule: true, default: () => null })
 );
 
+jest.mock("../check-in-log-panel", () => ({
+  __esModule: true,
+  default: () => null
+}));
+
 jest.mock("../../../../actions/notes-actions", () => ({
   __esModule: true,
   getNotes: jest.fn(() => () => Promise.resolve()),
