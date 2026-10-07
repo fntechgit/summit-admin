@@ -221,7 +221,7 @@ export const resetOrderExtraQuestionForm = () => (dispatch) => {
 };
 
 export const saveOrderExtraQuestion =
-  (entity) => async (dispatch, getState) => {
+  (entity, continueAdding) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
@@ -248,6 +248,11 @@ export const saveOrderExtraQuestion =
             T.translate("edit_order_extra_question.order_extra_question_saved")
           )
         );
+        if (continueAdding) {
+          history.push(
+            `/app/summits/${currentSummit.id}/order-extra-questions/new`
+          );
+        }
       });
     }
 
