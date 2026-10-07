@@ -11,12 +11,11 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
 import BadgeTypeForm from "../../components/forms/badge-type-form";
-import { getSummitById } from "../../actions/summit-actions";
 import {
   getAccessLevels,
   getBadgeFeatures,
@@ -31,86 +30,82 @@ import {
   addViewTypeToBadgeType,
   removeViewTypeFromBadgeType
 } from "../../actions/badge-actions";
-import AddNewButton from "../../components/buttons/add-new-button";
+import AddNewButtonMUI from "../../components/buttons/add-new-button-mui";
+import { DEFAULT_CURRENT_PAGE, HUNDRED_PER_PAGE } from "../../utils/constants";
 
-class EditBadgeTypePage extends React.Component {
-  constructor(props) {
-    const { currentSummit, match } = props;
-    const badgeTypeId = match.params.badge_type_id;
-    super(props);
+const EditBadgeTypePage = ({
+  currentSummit,
+  entity,
+  errors,
+  match,
+  getBadgeFeatures,
+  getAccessLevels,
+  getViewTypes,
+  resetBadgeTypeForm,
+  getBadgeType,
+  addAccessLevelToBadgeType,
+  removeAccessLevelFromBadgeType,
+  addFeatureToBadgeType,
+  removeFeatureFromBadgeType,
+  addViewTypeToBadgeType,
+  removeViewTypeFromBadgeType,
+  saveBadgeType
+}) => {
+  const badgeTypeId = match.params.badge_type_id;
+  const title = entity.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
+  const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
+  useEffect(() => {
+    if (!currentSummit.badge_features) getBadgeFeatures();
+    if (!currentSummit.badge_access_level_types) getAccessLevels();
+    if (!currentSummit.badge_view_types)
+      getViewTypes(null, DEFAULT_CURRENT_PAGE, HUNDRED_PER_PAGE);
+  }, []);
+
+  useEffect(() => {
     if (!badgeTypeId) {
-      props.resetBadgeTypeForm();
+      resetBadgeTypeForm();
     } else {
-      props.getBadgeType(badgeTypeId);
+      getBadgeType(badgeTypeId);
     }
+  }, [badgeTypeId]);
 
-    if (!currentSummit.badge_features) props.getBadgeFeatures();
-    if (!currentSummit.badge_access_level_types) props.getAccessLevels();
-    if (!currentSummit.view_types) props.getViewTypes();
-  }
+  return (
+    <div className="container">
+      <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+      <h3>
+        {title} {T.translate("edit_badge_type.badge_type")}
+        <AddNewButtonMUI entity={entity} />
+      </h3>
+      <hr />
+      {currentSummit &&
+        currentSummit.badge_features &&
+        currentSummit.badge_access_level_types && (
+          <BadgeTypeForm
+            entity={entity}
+            currentSummit={currentSummit}
+            errors={errors}
+            onAccessLevelLink={addAccessLevelToBadgeType}
+            onAccessLevelUnLink={removeAccessLevelFromBadgeType}
+            onFeatureLink={addFeatureToBadgeType}
+            onFeatureUnLink={removeFeatureFromBadgeType}
+            onViewTypeLink={addViewTypeToBadgeType}
+            onViewTypeUnLink={removeViewTypeFromBadgeType}
+            onSubmit={saveBadgeType}
+          />
+        )}
+    </div>
+  );
+};
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const oldId = prevProps.match.params.badge_type_id;
-    const newId = this.props.match.params.badge_type_id;
-
-    if (oldId !== newId) {
-      if (!newId) {
-        this.props.resetBadgeTypeForm();
-      } else {
-        this.props.getBadgeType(newId);
-      }
-    }
-  }
-
-  render() {
-    const { currentSummit, entity, errors, match, history } = this.props;
-    const title = entity.id
-      ? T.translate("general.edit")
-      : T.translate("general.add");
-    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
-
-    return (
-      <div className="container">
-        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-        <h3>
-          {title} {T.translate("edit_badge_type.badge_type")}
-          <AddNewButton entity={entity} />
-        </h3>
-        <hr />
-        {currentSummit &&
-          currentSummit.badge_features &&
-          currentSummit.badge_access_level_types && (
-            <BadgeTypeForm
-              entity={entity}
-              currentSummit={currentSummit}
-              errors={errors}
-              onAccessLevelLink={this.props.addAccessLevelToBadgeType}
-              onAccessLevelUnLink={this.props.removeAccessLevelFromBadgeType}
-              onFeatureLink={this.props.addFeatureToBadgeType}
-              onFeatureUnLink={this.props.removeFeatureFromBadgeType}
-              onViewTypeLink={this.props.addViewTypeToBadgeType}
-              onViewTypeUnLink={this.props.removeViewTypeFromBadgeType}
-              onSubmit={this.props.saveBadgeType}
-            />
-          )}
-      </div>
-    );
-  }
-}
-
-const mapStateToProps = ({
-  currentSummitState,
-  currentBadgeTypeState,
-  baseState
-}) => ({
+const mapStateToProps = ({ currentSummitState, currentBadgeTypeState }) => ({
   currentSummit: currentSummitState.currentSummit,
-  loading: baseState.loading,
   ...currentBadgeTypeState
 });
 
 export default connect(mapStateToProps, {
-  getSummitById,
   getAccessLevels,
   getViewTypes,
   getBadgeFeatures,
