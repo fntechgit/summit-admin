@@ -2213,7 +2213,7 @@
     "is_default": "Is Default ?",
     "description": "Description",
     "tag_name": "Tag Name",
-    "remove_warning": "Are you sure you want to delete view type ",
+    "remove_warning": "Are you sure you want to delete view type {name}",
     "placeholders": {
       "search_view_type": "Search by View Type Name"
     }

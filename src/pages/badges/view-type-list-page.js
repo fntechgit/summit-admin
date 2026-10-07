@@ -9,175 +9,138 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import { Pagination } from "react-bootstrap";
-import Table from "openstack-uicore-foundation/lib/components/table"
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import AddIcon from "@mui/icons-material/Add";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import GridToolbar from "../../components/mui/grid-toolbar";
 import { getSummitById } from "../../actions/summit-actions";
 import { getViewTypes, deleteViewType } from "../../actions/badge-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
-class ViewTypeListPage extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.handleEdit = this.handleEdit.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
-    this.handleSort = this.handleSort.bind(this);
-    this.handleSearch = this.handleSearch.bind(this);
-    this.handlePageChange = this.handlePageChange.bind(this);
-    this.handleNewViewType = this.handleNewViewType.bind(this);
-
-    this.state = {};
-  }
-
-  componentDidMount() {
-    const { currentSummit } = this.props;
+const ViewTypeListPage = ({
+  currentSummit,
+  history,
+  viewTypes,
+  totalViewTypes,
+  term,
+  perPage,
+  currentPage,
+  order,
+  orderDir,
+  getViewTypes,
+  deleteViewType
+}) => {
+  useEffect(() => {
     if (currentSummit) {
-      this.props.getViewTypes();
+      getViewTypes();
     }
-  }
+  }, [currentSummit?.id]);
 
-  handleEdit(view_type_id) {
-    const { currentSummit, history } = this.props;
-    history.push(`/app/summits/${currentSummit.id}/view-types/${view_type_id}`);
-  }
+  const handleEdit = (viewType) =>
+    history.push(`/app/summits/${currentSummit.id}/view-types/${viewType.id}`);
 
-  handleDelete(viewTypeId) {
-    const { deleteViewType, viewTypes } = this.props;
-    let viewType = viewTypes.find((t) => t.id === viewTypeId);
+  const handleDelete = (viewTypeId) =>
+    deleteViewType(viewTypeId)
+      .then(() =>
+        getViewTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+      )
+      .catch(() => {});
 
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: T.translate("view_type_list.remove_warning") + " " + viewType.name,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
-      if (result.value) {
-        deleteViewType(viewTypeId);
-      }
-    });
-  }
+  const handleSort = (key, dir) =>
+    getViewTypes(term, DEFAULT_CURRENT_PAGE, perPage, key, dir);
 
-  handleSort(index, key, dir, func) {
-    const { term, page, perPage } = this.props;
-    this.props.getViewTypes(term, page, perPage, key, dir);
-  }
+  const handlePageChange = (page) =>
+    getViewTypes(term, page, perPage, order, orderDir);
 
-  handlePageChange(page) {
-    const { term, order, orderDir, perPage } = this.props;
-    this.props.getViewTypes(term, page, perPage, order, orderDir);
-  }
+  const handlePerPageChange = (newPerPage) =>
+    getViewTypes(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
 
-  handleSearch(term) {
-    const { order, orderDir, page, perPage } = this.props;
-    this.props.getViewTypes(term, page, perPage, order, orderDir);
-  }
+  const handleSearch = (searchTerm) =>
+    getViewTypes(searchTerm, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
 
-  handleNewViewType(ev) {
-    const { currentSummit, history } = this.props;
+  const handleNewViewType = () =>
     history.push(`/app/summits/${currentSummit.id}/view-types/new`);
-  }
 
-  render() {
-    const {
-      currentSummit,
-      viewTypes,
-      term = "",
-      lastPage,
-      currentPage,
-      order,
-      orderDir,
-      totalViewTypes
-    } = this.props;
+  const columns = [
+    {
+      columnKey: "name",
+      header: T.translate("view_type_list.name"),
+      sortable: true
+    },
+    {
+      columnKey: "is_default",
+      header: T.translate("view_type_list.is_default"),
+      render: (vt) =>
+        vt.is_default === true
+          ? T.translate("general.yes")
+          : T.translate("general.no")
+    }
+  ];
 
-    const columns = [
-      {
-        columnKey: "name",
-        value: T.translate("view_type_list.name"),
-        sortable: true
-      },
-      {
-        columnKey: "is_default",
-        value: T.translate("view_type_list.is_default"),
-        render: (vt) => (vt.is_default === true ? "Yes" : "No")
-      }
-    ];
+  const table_options = {
+    sortCol: order,
+    sortDir: orderDir
+  };
 
-    const table_options = {
-      sortCol: order,
-      sortDir: orderDir,
-      actions: {
-        edit: { onClick: this.handleEdit },
-        delete: { onClick: this.handleDelete }
-      }
-    };
+  return (
+    <div className="container">
+      <h3> {T.translate("view_type_list.view_types")}</h3>
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate(
+            "view_type_list.placeholders.search_view_type"
+          )
+        }}
+      >
+        <Button
+          variant="contained"
+          onClick={handleNewViewType}
+          startIcon={<AddIcon />}
+        >
+          {T.translate("view_type_list.add_view_type")}
+        </Button>
+      </GridToolbar>
+      <Box sx={{ mb: 2 }}>
+        {totalViewTypes} {T.translate("view_type_list.view_types")}
+      </Box>
 
-    if (!currentSummit.id) return <div />;
+      {viewTypes.length === 0 && (
+        <div>{T.translate("view_type_list.no_view_type")}</div>
+      )}
 
-    return (
-      <div className="container">
-        <h3>
-          {" "}
-          {T.translate("view_type_list.view_types")} ({totalViewTypes})
-        </h3>
-        <div className={"row"}>
-          <div className={"col-md-6"}>
-            <FreeTextSearch
-              value={term ?? ""}
-              placeholder={T.translate(
-                "view_type_list.placeholders.search_view_type"
-              )}
-              onSearch={this.handleSearch}
-            />
-          </div>
-          <div className="col-md-6 text-right">
-            <button
-              className="btn btn-primary right-space"
-              onClick={this.handleNewViewType}
-            >
-              {T.translate("view_type_list.add_view_type")}
-            </button>
-          </div>
+      {viewTypes.length > 0 && (
+        <div>
+          <MuiTable
+            options={table_options}
+            data={viewTypes}
+            columns={columns}
+            perPage={perPage}
+            currentPage={currentPage}
+            totalRows={totalViewTypes}
+            onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
+            onSort={handleSort}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            getName={(row) => row.name}
+            deleteDialogBody={(name) =>
+              T.translate("view_type_list.remove_warning", { name })
+            }
+            confirmButtonColor="error"
+          />
         </div>
-
-        {viewTypes.length === 0 && (
-          <div>{T.translate("view_type_list.no_view_type")}</div>
-        )}
-
-        {viewTypes.length > 0 && (
-          <>
-            <Table
-              options={table_options}
-              data={viewTypes}
-              columns={columns}
-              onSort={this.handleSort}
-            />
-            <Pagination
-              bsSize="medium"
-              prev
-              next
-              first
-              last
-              ellipsis
-              boundaryLinks
-              maxButtons={10}
-              items={lastPage}
-              activePage={currentPage}
-              onSelect={this.handlePageChange}
-            />
-          </>
-        )}
-      </div>
-    );
-  }
-}
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({ currentSummitState, currentViewTypeListState }) => ({
   currentSummit: currentSummitState.currentSummit,
