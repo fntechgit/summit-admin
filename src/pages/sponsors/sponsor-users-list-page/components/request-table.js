@@ -63,7 +63,7 @@ const RequestTable = ({ requests, term, getRequests, onRequestDelete }) => {
       align: "center",
       render: (row) => (
         <IconButton size="large" onClick={() => handleProcessRequest(row)}>
-          <ArrowForwardIcon fontSize="large" />
+          <ArrowForwardIcon />
         </IconButton>
       ),
       dottedBorder: true

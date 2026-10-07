@@ -74,7 +74,7 @@ const UsersTable = ({
       align: "center",
       render: (row) => (
         <IconButton size="large" onClick={() => handleSendEmail(row)}>
-          <MailOutlineIcon fontSize="large" />
+          <MailOutlineIcon />
         </IconButton>
       ),
       dottedBorder: true

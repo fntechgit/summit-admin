@@ -148,7 +148,7 @@ const SelectPageTemplateDialog = ({
           {T.translate("show_pages.global_page_popup.title")}
         </Typography>
         <IconButton size="large" sx={{ p: 0 }} onClick={() => handleClose()}>
-          <CloseIcon fontSize="large" />
+          <CloseIcon />
         </IconButton>
       </DialogTitle>
       <Divider />

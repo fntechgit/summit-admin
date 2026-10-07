@@ -9,7 +9,9 @@ function SummitDashboardStat({ label, value }) {
       <Typography variant="body2" color="text.secondary" gutterBottom>
         {label}
       </Typography>
-      <Typography variant="h3">{value}</Typography>
+      <Typography variant="body1" sx={{ fontSize: "2rem", lineHeight: "1rem" }}>
+        {value}
+      </Typography>
     </Box>
   );
 }

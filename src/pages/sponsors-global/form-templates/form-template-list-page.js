@@ -192,9 +192,6 @@ const FormTemplateListPage = ({
           size="small"
           onClick={() => handleManageItems(row)}
           sx={{
-            fontSize: "1.3rem",
-            fontWeight: 500,
-            lineHeight: "2.2rem",
             padding: "4px 5px"
           }}
         >

@@ -203,7 +203,7 @@ const SponsorMediaUploadTab = ({
               disabled={viewDisabled}
               onClick={() => handleView(row)}
             >
-              <VisibilityIcon fontSize="large" />
+              <VisibilityIcon />
             </IconButton>
           );
         }
@@ -219,7 +219,7 @@ const SponsorMediaUploadTab = ({
             disabled={row.mu_type === "text" || !row.media_upload}
             onClick={() => handleDownload(row)}
           >
-            <DownloadIcon fontSize="large" />
+            <DownloadIcon />
           </IconButton>
         )
       },
@@ -232,13 +232,13 @@ const SponsorMediaUploadTab = ({
           if (row.media_upload) {
             return (
               <IconButton size="large" onClick={() => handleDelete(row)}>
-                <DeleteIcon fontSize="large" />
+                <DeleteIcon />
               </IconButton>
             );
           }
           return (
             <IconButton size="large" onClick={() => handleUpload(row)}>
-              <ArrowUpwardIcon fontSize="large" />
+              <ArrowUpwardIcon />
             </IconButton>
           );
         }

@@ -90,7 +90,7 @@ const Menu = ({ currentSummit, member, history }) => {
           <IconButton
             onClick={() => (menuOpen ? closeMenu() : setMenuOpen(true))}
           >
-            <MenuIcon sx={{ fontSize: "2.5rem", color: "#555555" }} />
+            <MenuIcon sx={{ fontSize: "1.5rem", color: "#555555" }} />
           </IconButton>
         </Box>
         <Box

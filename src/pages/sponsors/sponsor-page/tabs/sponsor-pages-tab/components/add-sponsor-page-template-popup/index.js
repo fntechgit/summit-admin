@@ -204,7 +204,7 @@ const AddSponsorPageTemplatePopup = ({
       disableEscapeKeyDown={isSaving}
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1.5rem">
+        <Typography fontSize="1rem">
           {T.translate("edit_sponsor.pages_tab.add_page_using_template")}
         </Typography>
         <IconButton
@@ -271,7 +271,7 @@ const AddSponsorPageTemplatePopup = ({
                       }
                     ]}
                   >
-                    <SwapVertIcon fontSize="large" sx={{ mr: 1 }} />{" "}
+                    <SwapVertIcon sx={{ mr: 1 }} />{" "}
                     {T.translate("general.sort_by")}
                   </MenuButton>
                 </Grid2>

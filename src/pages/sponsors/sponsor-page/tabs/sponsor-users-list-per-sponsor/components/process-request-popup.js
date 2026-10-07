@@ -85,7 +85,7 @@ const ProcessRequestPopup = ({
           {T.translate("sponsor_users.process_request.title")}
         </Typography>
         <IconButton size="large" sx={{ p: 0 }} onClick={handleClose}>
-          <CloseIcon fontSize="large" />
+          <CloseIcon />
         </IconButton>
       </DialogTitle>
       <Divider />

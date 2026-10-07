@@ -47,7 +47,7 @@ const EditUserPopup = ({
           {T.translate("sponsor_users.edit_user.title")}
         </Typography>
         <IconButton size="large" sx={{ p: 0 }} onClick={handleClose}>
-          <CloseIcon fontSize="large" />
+          <CloseIcon />
         </IconButton>
       </DialogTitle>
       <Divider />
