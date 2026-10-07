@@ -126,7 +126,6 @@ const Sponsorship = ({
           onClick={() => handleOpenManageAddonsPopup(row)}
           sx={{
             fontSize: "0.875rem",
-            fontWeight: 500,
             lineHeight: "1.375rem",
             padding: "4px 5px"
           }}

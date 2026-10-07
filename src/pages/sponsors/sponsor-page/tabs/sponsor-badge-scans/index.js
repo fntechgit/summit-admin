@@ -182,9 +182,7 @@ const SponsorBadgeScans = ({
           startIcon={<AddIcon />}
           sx={{
             padding: "6px 16px",
-            fontSize: "0.875rem",
-            lineHeight: "1.5rem",
-            letterSpacing: "0.4px"
+            lineHeight: "1.5rem"
           }}
         >
           {T.translate("sponsor_badge_scans.add_manual_scan")}
@@ -195,9 +193,7 @@ const SponsorBadgeScans = ({
           startIcon={<DownloadIcon />}
           sx={{
             padding: "6px 16px",
-            fontSize: "0.875rem",
-            lineHeight: "1.5rem",
-            letterSpacing: "0.4px"
+            lineHeight: "1.5rem"
           }}
         >
           {T.translate("sponsor_badge_scans.export")}
