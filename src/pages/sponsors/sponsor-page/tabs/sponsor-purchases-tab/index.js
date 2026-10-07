@@ -19,7 +19,10 @@ import DownloadIcon from "@mui/icons-material/Download";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import GridToolbar from "../../../../../components/mui/grid-toolbar";
 import history from "../../../../../history";
-import { getSponsorCart } from "../../../../../actions/sponsor-cart-actions";
+import {
+  getSponsorCart,
+  payWithInvoice
+} from "../../../../../actions/sponsor-cart-actions";
 import PurchaseStatusCell from "../../../components/purchase-status-cell";
 import PurchaseFilters from "../../../components/purchase-filters";
 import {
@@ -49,7 +52,8 @@ const SponsorPurchasesTab = ({
   approveSponsorPurchase,
   rejectSponsorPurchase,
   changePurchasePaymentMethod,
-  getSponsorCart
+  getSponsorCart,
+  payWithInvoice
 }) => {
   useEffect(() => {
     getSponsorPurchases(
@@ -135,6 +139,21 @@ const SponsorPurchasesTab = ({
       .catch(() => {}); // error already shown by snackbarErrorHandler
   };
 
+  const reloadPurchases = () =>
+    getSponsorPurchases(term, currentPage, perPage, order, orderDir, filters);
+
+  const handleBackToInvoice = (purchase) => {
+    // payWithInvoice posts for the cart in state, so load this sponsor's first
+    getSponsorCart("", sponsor.id)
+      // a stale row can point at a cart that's no longer this purchase's, so only pay if it matches
+      .then((res) =>
+        res?.response?.card_payment_purchase_id === purchase.id
+          ? payWithInvoice(sponsor.id).then(reloadPurchases)
+          : reloadPurchases()
+      )
+      .catch(() => {}); // error already shown by snackbarErrorHandler
+  };
+
   const tableColumns = [
     {
       columnKey: "number",
@@ -162,6 +181,7 @@ const SponsorPurchasesTab = ({
             handleStatusChange(row.payment_id, newStatus)
           }
           onPayByCard={() => handlePayByCard(row)}
+          onBackToInvoice={() => handleBackToInvoice(row)}
         />
       )
     },
@@ -253,5 +273,6 @@ export default connect(mapStateToProps, {
   approveSponsorPurchase,
   rejectSponsorPurchase,
   changePurchasePaymentMethod,
-  getSponsorCart
+  getSponsorCart,
+  payWithInvoice
 })(SponsorPurchasesTab);

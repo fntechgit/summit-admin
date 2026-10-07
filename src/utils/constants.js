@@ -301,6 +301,14 @@ export const PURCHASE_METHODS = {
 // purchases filter option for any payment method other than card or invoice
 export const PURCHASE_METHOD_FILTER_OTHER = "other";
 
+// status of a purchase's active payment
+export const PAYMENT_STATUS = {
+  NEW: "New",
+  PENDING: "Pending",
+  ERROR: "Error",
+  CONFIRMED: "Confirmed"
+};
+
 export const PURCHASE_TYPES = {
   ONLINE: "Online",
   OFFLINE: "Offline"

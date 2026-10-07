@@ -28,7 +28,10 @@ import {
   downloadSponsorInvoice,
   rejectSponsorPurchase
 } from "../../../../actions/sponsor-purchases-actions";
-import { getSponsorCart } from "../../../../actions/sponsor-cart-actions";
+import {
+  getSponsorCart,
+  payWithInvoice
+} from "../../../../actions/sponsor-cart-actions";
 import showConfirmDialog from "../../../../components/mui/showConfirmDialog";
 import history from "../../../../history";
 import {
@@ -54,7 +57,8 @@ jest.mock("../../../../history", () => ({
 }));
 
 jest.mock("../../../../actions/sponsor-cart-actions", () => ({
-  getSponsorCart: jest.fn(() => () => Promise.resolve({ response: {} }))
+  getSponsorCart: jest.fn(() => () => Promise.resolve({ response: {} })),
+  payWithInvoice: jest.fn(() => () => Promise.resolve())
 }));
 
 jest.mock("react-breadcrumbs", () => ({
@@ -372,6 +376,193 @@ describe("ShowPurchaseListPage", () => {
 
       expect(rejectSponsorPurchase).toHaveBeenCalledWith(456, 101);
       expect(changePurchasePaymentMethod).not.toHaveBeenCalled();
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Resume a card payment opened from Pay by Card
+  // -----------------------------------------------------------------------
+
+  describe("Resume card payment", () => {
+    const createCardAttempt = (overrides = {}) =>
+      createPurchase({
+        payment_method: "card",
+        card_payment_enabled_at: 1767225600,
+        payment_status: "Pending",
+        ...overrides
+      });
+
+    const rowDropdown = () => withinTableBody().queryByRole("combobox");
+    const selectOption = async (name) => {
+      await act(async () => {
+        await userEvent.click(rowDropdown());
+      });
+      await act(async () => {
+        await userEvent.click(screen.getByRole("option", { name }));
+      });
+      await act(async () => {
+        await flushPromises();
+      });
+    };
+
+    it.each(["New", "Pending", "Error"])(
+      "offers Pending, Resume checkout and Back to Invoice when the card payment is %s",
+      async (paymentStatus) => {
+        renderPage({
+          purchases: [createCardAttempt({ payment_status: paymentStatus })],
+          totalCount: 1
+        });
+
+        await act(async () => {
+          await userEvent.click(rowDropdown());
+        });
+
+        expect(screen.getAllByRole("option").map((o) => o.textContent)).toEqual(
+          [
+            PURCHASE_STATUS.PENDING,
+            "sponsor_show_purchases.resume_checkout",
+            "sponsor_show_purchases.back_to_invoice"
+          ]
+        );
+      }
+    );
+
+    it("offers nothing while the payment is confirmed and awaiting approval", () => {
+      renderPage({
+        purchases: [createCardAttempt({ payment_status: "Confirmed" })],
+        totalCount: 1
+      });
+
+      expect(rowDropdown()).not.toBeInTheDocument();
+    });
+
+    it("offers nothing on a card order that never went through Pay by Card", () => {
+      renderPage({
+        purchases: [createCardAttempt({ card_payment_enabled_at: null })],
+        totalCount: 1
+      });
+
+      expect(rowDropdown()).not.toBeInTheDocument();
+    });
+
+    it("offers nothing when the net amount is 0", () => {
+      renderPage({
+        purchases: [createCardAttempt({ net_amount: 0 })],
+        totalCount: 1
+      });
+
+      expect(rowDropdown()).not.toBeInTheDocument();
+    });
+
+    it("Resume checkout goes through change-payment-method and back to the card payment screen", async () => {
+      showConfirmDialog.mockResolvedValue(true);
+      renderPage({
+        purchases: [createCardAttempt({ id: 7, sponsor_id: 456 })],
+        totalCount: 1
+      });
+
+      await selectOption("sponsor_show_purchases.resume_checkout");
+
+      expect(changePurchasePaymentMethod).toHaveBeenCalledWith(456, 7);
+      expect(getSponsorCart).toHaveBeenCalledWith("", 456);
+      expect(history.push).toHaveBeenCalledWith("456/cart/payment");
+    });
+
+    it("Resume checkout stays put when the API rejects it (the sponsor paid meanwhile)", async () => {
+      showConfirmDialog.mockResolvedValue(true);
+      changePurchasePaymentMethod.mockImplementationOnce(
+        () => () => Promise.reject(new Error("412"))
+      );
+      renderPage({ purchases: [createCardAttempt()], totalCount: 1 });
+
+      await selectOption("sponsor_show_purchases.resume_checkout");
+
+      expect(getSponsorCart).not.toHaveBeenCalled();
+      expect(history.push).not.toHaveBeenCalled();
+    });
+
+    it("Back to Invoice loads the row's sponsor cart, pays it by invoice and reloads the list", async () => {
+      showConfirmDialog.mockResolvedValue(true);
+      getSponsorCart.mockImplementationOnce(
+        () => () =>
+          Promise.resolve({ response: { card_payment_purchase_id: 7 } })
+      );
+      renderPage({
+        purchases: [createCardAttempt({ id: 7, sponsor_id: 456 })],
+        totalCount: 1
+      });
+      getAllSponsorPurchases.mockClear();
+
+      await selectOption("sponsor_show_purchases.back_to_invoice");
+
+      expect(showConfirmDialog).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: "sponsor_show_purchases.back_to_invoice_warning"
+        })
+      );
+      expect(getSponsorCart).toHaveBeenCalledWith("", 456);
+      expect(payWithInvoice).toHaveBeenCalledWith(456);
+      expect(changePurchasePaymentMethod).not.toHaveBeenCalled();
+      expect(getAllSponsorPurchases).toHaveBeenCalledTimes(1);
+    });
+
+    it("Back to Invoice does not pay a cart that belongs to another purchase and reloads the list", async () => {
+      showConfirmDialog.mockResolvedValue(true);
+      // the row is stale: the sponsor already paid it and started a new cart
+      getSponsorCart.mockImplementationOnce(
+        () => () =>
+          Promise.resolve({ response: { card_payment_purchase_id: 99 } })
+      );
+      renderPage({
+        purchases: [createCardAttempt({ id: 7, sponsor_id: 456 })],
+        totalCount: 1
+      });
+      getAllSponsorPurchases.mockClear();
+
+      await selectOption("sponsor_show_purchases.back_to_invoice");
+
+      expect(getSponsorCart).toHaveBeenCalledWith("", 456);
+      expect(payWithInvoice).not.toHaveBeenCalled();
+      expect(getAllSponsorPurchases).toHaveBeenCalledTimes(1);
+    });
+
+    it("Back to Invoice sends nothing when the confirm dialog is cancelled", async () => {
+      showConfirmDialog.mockResolvedValue(false);
+      renderPage({ purchases: [createCardAttempt()], totalCount: 1 });
+
+      await selectOption("sponsor_show_purchases.back_to_invoice");
+
+      expect(getSponsorCart).not.toHaveBeenCalled();
+      expect(payWithInvoice).not.toHaveBeenCalled();
+    });
+
+    it("Back to Invoice does not pay when the cart fails to load", async () => {
+      showConfirmDialog.mockResolvedValue(true);
+      // getSponsorCart swallows request errors and resolves without a response
+      getSponsorCart.mockImplementationOnce(() => () => Promise.resolve());
+      renderPage({ purchases: [createCardAttempt()], totalCount: 1 });
+
+      await selectOption("sponsor_show_purchases.back_to_invoice");
+
+      expect(payWithInvoice).not.toHaveBeenCalled();
+    });
+
+    it("Back to Invoice does not reload the list when paying by invoice fails", async () => {
+      showConfirmDialog.mockResolvedValue(true);
+      getSponsorCart.mockImplementationOnce(
+        () => () =>
+          Promise.resolve({ response: { card_payment_purchase_id: 1 } })
+      );
+      payWithInvoice.mockImplementationOnce(
+        () => () => Promise.reject(new Error("412"))
+      );
+      renderPage({ purchases: [createCardAttempt()], totalCount: 1 });
+      getAllSponsorPurchases.mockClear();
+
+      await selectOption("sponsor_show_purchases.back_to_invoice");
+
+      expect(payWithInvoice).toHaveBeenCalledTimes(1);
+      expect(getAllSponsorPurchases).not.toHaveBeenCalled();
     });
   });
 
