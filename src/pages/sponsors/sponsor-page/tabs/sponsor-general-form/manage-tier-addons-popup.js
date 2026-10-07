@@ -168,10 +168,10 @@ const ManageTierAddonsPopup = ({
 
   return (
     <Dialog open onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="2.4rem">
-          {T.translate("edit_sponsor.manage_addons")}
-        </Typography>
+      <DialogTitle
+        sx={{ display: "flex", justifyContent: "space-between", p: 2 }}
+      >
+        {T.translate("edit_sponsor.manage_addons")}
         <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
           <CloseIcon fontSize="small" />
         </IconButton>
@@ -188,10 +188,8 @@ const ManageTierAddonsPopup = ({
             <Typography
               sx={{
                 py: 2,
-                fontSize: "2rem",
-                fontWeight: "500",
-                lineHeight: "1.6rem",
-                letterSpacing: "0.15px"
+                fontSize: "1rem",
+                fontWeight: "500"
               }}
             >
               {`${sponsorship.tier} ${T.translate("edit_sponsor.sponsorship")}`}

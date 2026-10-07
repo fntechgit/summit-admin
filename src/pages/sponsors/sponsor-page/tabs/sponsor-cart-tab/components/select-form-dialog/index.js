@@ -116,7 +116,7 @@ const SelectFormDialog = ({
           {T.translate("edit_sponsor.cart_tab.add_form_to_cart")}
         </Typography>
         <IconButton size="large" sx={{ p: 0 }} onClick={handleClose}>
-          <CloseIcon fontSize="large" />
+          <CloseIcon />
         </IconButton>
       </DialogTitle>
       <Divider />

@@ -122,8 +122,8 @@ const SponsorExtraQuestions = ({
               sx={{
                 fontWeight: "500",
                 letterSpacing: "0.15px",
-                fontSize: "2rem",
-                lineHeight: "1.6rem"
+                fontSize: "1.25rem",
+                lineHeight: "1rem"
               }}
             >
               {T.translate("edit_sponsor.extra_questions")}
@@ -140,8 +140,8 @@ const SponsorExtraQuestions = ({
             <Box
               sx={{
                 p: 2,
-                fontSize: "1.2rem",
-                lineHeight: "1.5rem",
+                fontSize: "0.75rem",
+                lineHeight: "1rem",
                 color: "#1E88E5",
                 backgroundColor: "#03A9F41A"
               }}
@@ -160,7 +160,7 @@ const SponsorExtraQuestions = ({
               sx={{
                 fontWeight: "400",
                 letterSpacing: "0.15px",
-                fontSize: "1.6rem",
+                fontSize: "1rem",
                 lineHeight: "150%",
                 textTransform: "lowercase"
               }}

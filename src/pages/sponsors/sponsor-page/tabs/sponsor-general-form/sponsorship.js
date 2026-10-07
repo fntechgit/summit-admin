@@ -125,9 +125,9 @@ const Sponsorship = ({
           size="small"
           onClick={() => handleOpenManageAddonsPopup(row)}
           sx={{
-            fontSize: "1.3rem",
+            fontSize: "0.875rem",
             fontWeight: 500,
-            lineHeight: "2.2rem",
+            lineHeight: "1.375rem",
             padding: "4px 5px"
           }}
         >
@@ -151,8 +151,8 @@ const Sponsorship = ({
               sx={{
                 fontWeight: "500",
                 letterSpacing: "0.15px",
-                fontSize: "2rem",
-                lineHeight: "1.6rem"
+                fontSize: "1.25rem",
+                lineHeight: "1rem"
               }}
             >
               {T.translate("edit_sponsor.sponsorship")}

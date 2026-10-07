@@ -49,14 +49,14 @@ const MuiFormikDatetimepicker = ({
           },
           day: {
             sx: {
-              fontSize: "1.2rem",
+              fontSize: "0.75rem",
               fontWeight: 600
             }
           },
           layout: {
             sx: {
               "& .MuiDayCalendar-weekDayLabel": {
-                fontSize: "1rem"
+                fontSize: "0.625rem"
               }
             }
           }

@@ -70,7 +70,7 @@ const AddTierPopup = ({ sponsor, onClose, onSubmit, summitId }) => {
   return (
     <Dialog open onClose={handleClose} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1.5rem">
+        <Typography fontSize="1rem">
           {T.translate("edit_sponsor.add_tier")}
         </Typography>
         <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>

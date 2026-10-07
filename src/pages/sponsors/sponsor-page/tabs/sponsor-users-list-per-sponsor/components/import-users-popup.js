@@ -92,7 +92,7 @@ const ImportUsersPopup = ({
           {T.translate("sponsor_users.import_users.title")}
         </Typography>
         <IconButton size="large" sx={{ p: 0 }} onClick={handleClose}>
-          <CloseIcon fontSize="large" />
+          <CloseIcon />
         </IconButton>
       </DialogTitle>
       <Divider />

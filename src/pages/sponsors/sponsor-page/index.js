@@ -60,7 +60,7 @@ const SponsorPage = ({
   return (
     <Box>
       <Container maxWidth="lg" sx={{ position: "relative" }}>
-        <Typography fontSize="3.4rem" variant="h4">
+        <Typography fontSize="2.125rem" variant="h4">
           {entity.company?.name}
         </Typography>
         <Box sx={{ borderBottom: 1, borderColor: "divider", mt: 2 }}>

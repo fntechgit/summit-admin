@@ -28,11 +28,7 @@ const CardEnabledIndicator = ({ purchase }) => {
 
   return (
     <Tooltip title={label}>
-      <CreditCardIcon
-        fontSize="large"
-        sx={{ color: "primary.main" }}
-        aria-label={label}
-      />
+      <CreditCardIcon sx={{ color: "primary.main" }} aria-label={label} />
     </Tooltip>
   );
 };

@@ -181,7 +181,7 @@ const AddSponsorFormTemplatePopup = ({
       disableRestoreFocus
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1.5rem">
+        <Typography fontSize="1rem">
           {T.translate("edit_sponsor.forms_tab.add_form_using_template")}
         </Typography>
         <IconButton
@@ -241,7 +241,7 @@ const AddSponsorFormTemplatePopup = ({
                       }
                     ]}
                   >
-                    <SwapVertIcon fontSize="large" sx={{ mr: 1 }} />{" "}
+                    <SwapVertIcon sx={{ mr: 1 }} />{" "}
                     {T.translate("general.sort_by")}
                   </MenuButton>
                 </Grid2>

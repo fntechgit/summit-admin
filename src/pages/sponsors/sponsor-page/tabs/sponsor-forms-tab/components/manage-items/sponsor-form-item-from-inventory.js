@@ -182,7 +182,7 @@ const SponsorFormItemFromInventoryPopup = ({
           )}
         </Typography>
         <IconButton size="large" sx={{ p: 0 }} onClick={() => handleClose()}>
-          <CloseIcon fontSize="large" />
+          <CloseIcon />
         </IconButton>
       </DialogTitle>
       <Divider />
@@ -213,8 +213,7 @@ const SponsorFormItemFromInventoryPopup = ({
                 }
               ]}
             >
-              <SwapVertIcon fontSize="large" sx={{ mr: 1 }} />{" "}
-              {T.translate("general.sort_by")}
+              <SwapVertIcon sx={{ mr: 1 }} /> {T.translate("general.sort_by")}
             </MenuButton>
           </GridToolbar>
           <Box>

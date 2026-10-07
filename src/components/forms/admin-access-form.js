@@ -106,7 +106,7 @@ const AdminAccessForm = ({
               multi
             />
             {formik.touched.members && formik.errors.members && (
-              <Typography color="error" sx={{ fontSize: "1.2rem", mt: 0.5 }}>
+              <Typography color="error" sx={{ fontSize: "0.75rem", mt: 0.5 }}>
                 {formik.errors.members}
               </Typography>
             )}
@@ -129,7 +129,7 @@ const AdminAccessForm = ({
               multi
             />
             {formik.touched.summits && formik.errors.summits && (
-              <Typography color="error" sx={{ fontSize: "1.2rem", mt: 0.5 }}>
+              <Typography color="error" sx={{ fontSize: "0.75rem", mt: 0.5 }}>
                 {formik.errors.summits}
               </Typography>
             )}

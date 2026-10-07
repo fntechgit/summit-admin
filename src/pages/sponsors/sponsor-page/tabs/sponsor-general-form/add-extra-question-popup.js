@@ -297,7 +297,7 @@ const AddSponsorExtraQuestionPopup = ({
   return (
     <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1.5rem">
+        <Typography fontSize="1rem">
           {extraQuestion.id
             ? T.translate("edit_sponsor.edit_extra_question")
             : T.translate("edit_sponsor.add_extra_question")}
@@ -496,7 +496,7 @@ const AddSponsorExtraQuestionPopup = ({
                         formik.submitCount > 0 && (
                           <Typography
                             color="error"
-                            fontSize="1.2rem"
+                            fontSize="0.75rem"
                             sx={{ mt: 0.5, ml: 2 }}
                           >
                             {formik.errors.values}
@@ -579,8 +579,8 @@ const AddSponsorExtraQuestionPopup = ({
                           sx: {
                             fontFamily: "Roboto",
                             fontWeight: 400,
-                            fontSize: "1.2rem",
-                            lineHeight: "1.6rem",
+                            fontSize: "0.75rem",
+                            lineHeight: "1rem",
                             letterSpacing: "0%",
                             textAlign: "center",
                             display: "flex",
@@ -596,9 +596,8 @@ const AddSponsorExtraQuestionPopup = ({
                     >
                       <IconButton size="small" disableRipple>
                         <InfoIcon
+                          size="small"
                           sx={{
-                            width: 20,
-                            height: 20,
                             "&:hover": {
                               color: "#2196F3"
                             }

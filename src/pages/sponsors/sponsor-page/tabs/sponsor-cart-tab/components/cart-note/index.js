@@ -151,7 +151,7 @@ const CartNote = ({
                   onClick={() => handleEdit(notes?.[0])}
                   disabled={!canEdit}
                 >
-                  <EditIcon fontSize="large" />
+                  <EditIcon />
                 </IconButton>
               )}
               <IconButton
@@ -159,7 +159,7 @@ const CartNote = ({
                 disabled={!canDelete || !onDelete}
                 onClick={() => handleDelete(note.id)}
               >
-                <DeleteIcon fontSize="large" />
+                <DeleteIcon />
               </IconButton>
             </Box>
           </Card>
