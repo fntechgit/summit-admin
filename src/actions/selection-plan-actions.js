@@ -33,9 +33,13 @@ import {
   getAccessTokenSafely,
   escapeFilterValue,
   fetchResponseHandler,
-  fetchErrorHandler
+  fetchErrorHandler,
+  sequenced
 } from "../utils/methods";
-import { saveMarketingSetting } from "./marketing-actions";
+import {
+  invalidateSelectionPlanSettings,
+  saveMarketingSetting
+} from "./marketing-actions";
 import {
   DEBOUNCE_WAIT,
   DEFAULT_CURRENT_PAGE,
@@ -122,19 +126,6 @@ export const getSelectionPlans =
 // which the layout's render guard can never recover from on its own (it only
 // compares the store id against the URL id; nothing re-triggers a fetch).
 // guardedDispatch drops the RECEIVE/loading dispatches from a superseded call.
-const sequenced = () => {
-  let seq = 0;
-  return (dispatch) => {
-    seq += 1;
-    const mySeq = seq;
-    return {
-      isCurrent: () => mySeq === seq,
-      guardedDispatch: (action) => {
-        if (mySeq === seq) dispatch(action);
-      }
-    };
-  };
-};
 const getSelectionPlanSeq = sequenced();
 
 export const getSelectionPlan =
@@ -164,11 +155,15 @@ export const getSelectionPlan =
       .then(async () => {
         // Superseded while the entity was in flight -> skip the follow-up
         // requests entirely rather than let them write stale data too.
+        // The follow-ups are invoked with guardedDispatch (not dispatched
+        // through the store, which would hand them the raw dispatch) so a
+        // response landing after this call is superseded is dropped as well.
         if (!isCurrent()) return;
-        await dispatch(getAllowedMembers(selectionPlanId));
+        await getAllowedMembers(selectionPlanId)(guardedDispatch, getState);
         if (!isCurrent()) return;
-        await dispatch(
-          getSelectionPlanProgressFlags(currentSummit.id, selectionPlanId)
+        await getSelectionPlanProgressFlags(currentSummit.id, selectionPlanId)(
+          guardedDispatch,
+          getState
         );
       })
       .finally(() => guardedDispatch(stopLoading()));
@@ -176,6 +171,7 @@ export const getSelectionPlan =
 
 export const resetSelectionPlanForm = () => (dispatch) => {
   getSelectionPlanSeq(dispatch); // invalidates any in-flight getSelectionPlan
+  invalidateSelectionPlanSettings(); // invalidate  any in-flight settings fetch
   dispatch(createAction(RESET_SELECTION_PLAN_FORM)({}));
 };
 

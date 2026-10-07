@@ -38,6 +38,9 @@ const SelectionPlanIdLayout = ({
     : T.translate("general.new");
 
   useEffect(() => {
+    // Set on cleanup (param change / unmount): getSelectionPlan resolves even
+    // when superseded, so a stale effect must not chain the settings fetch.
+    let ignore = false;
     setHasLoaded(false);
     setHasError(false);
     if (!selectionPlanId) {
@@ -46,16 +49,25 @@ const SelectionPlanIdLayout = ({
     } else {
       getSelectionPlan(selectionPlanId)
         .then(() =>
-          getMarketingSettingsBySelectionPlan(
-            selectionPlanId,
-            null,
-            1,
-            MAX_PER_PAGE
-          )
+          ignore
+            ? null
+            : getMarketingSettingsBySelectionPlan(
+                selectionPlanId,
+                null,
+                1,
+                MAX_PER_PAGE
+              )
         )
-        .then(() => setHasLoaded(true))
-        .catch(() => setHasError(true));
+        .then(() => {
+          if (!ignore) setHasLoaded(true);
+        })
+        .catch(() => {
+          if (!ignore) setHasError(true);
+        });
     }
+    return () => {
+      ignore = true;
+    };
   }, [selectionPlanId]);
 
   if (hasError) {

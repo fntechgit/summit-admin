@@ -13,6 +13,7 @@ import {
 import {
   deleteSetting,
   getMarketingSettingsBySelectionPlan,
+  invalidateSelectionPlanSettings,
   saveMarketingSetting
 } from "../marketing-actions";
 import { MARKETING_SETTING_TYPE_FILE } from "../../utils/constants";
@@ -187,5 +188,34 @@ describe("getMarketingSettingsBySelectionPlan - stale response guard", () => {
       .map((a) => a.payload.response.id);
 
     expect(receivedIds).toEqual(["8"]);
+  });
+
+  it("drops an in-flight settings response after invalidateSelectionPlanSettings", async () => {
+    let resolvePending;
+    getRequest.mockImplementation(
+      (requestActionCreator, receiveActionCreator) => (params) => (dispatch) =>
+        new Promise((resolve) => {
+          resolvePending = () => {
+            dispatch(
+              receiveActionCreator({
+                response: { id: params.selection_plan_id }
+              })
+            );
+            resolve();
+          };
+        })
+    );
+
+    const store = mockStore(storeState);
+
+    // Plan 5's settings are in flight when the form is reset for a new plan.
+    store.dispatch(getMarketingSettingsBySelectionPlan("5"));
+    await flushPromises();
+    invalidateSelectionPlanSettings();
+    resolvePending();
+    await flushPromises();
+
+    const actionTypes = store.getActions().map((a) => a.type);
+    expect(actionTypes).not.toContain("RECEIVE_SELECTION_PLAN_SETTINGS");
   });
 });
