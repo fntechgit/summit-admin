@@ -111,9 +111,7 @@ const SponsorListPage = ({
       render: (row) =>
         row.sponsorships.map((s) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Typography
-              sx={{ fontSize: "0.875rem", mr: "15px", lineHeight: "1.25rem" }}
-            >
+            <Typography sx={{ mr: "15px", lineHeight: "1.25rem" }}>
               {s.type?.type?.name}
             </Typography>
             <Tooltip

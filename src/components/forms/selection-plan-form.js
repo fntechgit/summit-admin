@@ -52,8 +52,6 @@ const buildInitialValues = (entity, timezone) => {
 };
 
 const TAB_SX = {
-  fontSize: "0.875rem",
-  lineHeight: "1.125rem",
   minHeight: "36px",
   px: 2,
   py: 1

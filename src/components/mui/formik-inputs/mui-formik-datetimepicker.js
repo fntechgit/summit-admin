@@ -49,7 +49,6 @@ const MuiFormikDatetimepicker = ({
           },
           day: {
             sx: {
-              fontSize: "0.75rem",
               fontWeight: 600
             }
           },

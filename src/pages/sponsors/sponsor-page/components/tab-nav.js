@@ -37,8 +37,6 @@ const TabNav = ({ currentSummit, sponsor, member, history, location }) => {
             value={tab.value}
             onClick={() => handleTabClick(tab)}
             sx={{
-              fontSize: "0.875rem",
-              lineHeight: "1.125rem",
               height: "36px",
               minHeight: "36px",
               px: 2,
