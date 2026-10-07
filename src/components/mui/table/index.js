@@ -14,18 +14,9 @@ const BUTTON_SLOT_WIDTH = 44;
 const COLUMN_PADDING = 16;
 
 /**
- * Wrapper around uicore's MuiTable that owns the row-action layout.
- *
- * uicore renders Edit, Archive, Delete and Select as four separate icon cells,
- * which puts the destructive action between two safe ones. This forwards none
- * of those props to uicore and renders its own columns instead: a leading
- * overflow menu holding Delete, and trailing icons for edit / archive / select.
- *
- * The prop contract is uicore's, unchanged: pages keep passing `onEdit`,
- * `onDelete`, `onSelect`, `canDelete`, `deleteDialogBody` and friends exactly
- * as before, and only swap their import. That keeps the arrangement in one
- * file for every table, and makes this trivial to delete if uicore adopts it.
- * `onRowClick` is the one addition: uicore's rows take no click handler.
+ * Wraps uicore's MuiTable to own the row actions: Delete in a leading overflow
+ * menu, edit / archive / select as trailing icons. Takes uicore's props
+ * unchanged, plus `onRowClick`, which uicore rows lack.
  */
 const Table = ({
   columns,
@@ -108,8 +99,7 @@ const Table = ({
         }
     ].filter(Boolean);
 
-  // Width is static, so size it from the actions the table was given rather
-  // than the ones a particular row happens to show.
+  // Size from the table's actions, not each row's, so the width stays fixed.
   const slotCount = [onEdit, onArchive, onSelect].filter(Boolean).length;
 
   const menuColumn = {

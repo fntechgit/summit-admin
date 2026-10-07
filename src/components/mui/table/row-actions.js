@@ -16,12 +16,8 @@ const actionShape = {
 };
 
 /**
- * The action group rendered in a row's trailing cell.
- *
- * Routine actions stay inline as icon buttons; destructive ones move into the
- * overflow menu, where they get a text label and error color instead of a bare
- * glyph sitting next to Edit. Same split MUI X Data Grid expresses with
- * `showInMenu` on `GridActionsCellItem`.
+ * A row's action cell: inline icon buttons and/or an overflow menu, where
+ * destructive actions get a text label and error color.
  */
 const RowActions = ({ rowId, inlineActions, menuActions }) => {
   const [anchorEl, setAnchorEl] = useState(null);
