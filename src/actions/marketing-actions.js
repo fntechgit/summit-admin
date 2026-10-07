@@ -24,7 +24,11 @@ import {
   putRequest,
   setSnackbarMessage
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { getAccessTokenSafely, isHexColorSetting } from "../utils/methods";
+import {
+  getAccessTokenSafely,
+  isHexColorSetting,
+  sequenced
+} from "../utils/methods";
 import {
   DEFAULT_PER_PAGE,
   ERROR_CODE_412,
@@ -155,20 +159,13 @@ export const getMarketingSettingsForPrintApp =
 // merge the wrong plan's settings into whatever entity is current at that
 // moment. guardedDispatch drops the REQUEST/RECEIVE/loading dispatches from
 // a superseded call.
-const sequenced = () => {
-  let seq = 0;
-  return (dispatch) => {
-    seq += 1;
-    const mySeq = seq;
-    return {
-      isCurrent: () => mySeq === seq,
-      guardedDispatch: (action) => {
-        if (mySeq === seq) dispatch(action);
-      }
-    };
-  };
-};
 const selectionPlanSettingsSeq = sequenced();
+
+// Advances the sequence without issuing a request, so any settings response
+// still in flight is dropped (e.g. when the form is reset for a new plan).
+export const invalidateSelectionPlanSettings = () => {
+  selectionPlanSettingsSeq(() => {});
+};
 
 export const getMarketingSettingsBySelectionPlan =
   (
