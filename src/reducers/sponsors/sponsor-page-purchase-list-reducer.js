@@ -54,7 +54,7 @@ const sponsorPagePurchaseListReducer = (state = DEFAULT_STATE, action) => {
     // persisted state belongs to one sponsor: keep it on a refresh, clear it on a sponsor change
     case RECEIVE_SPONSOR: {
       if (payload.response.id === state.sponsorId) return state;
-      return DEFAULT_STATE;
+      return { ...DEFAULT_STATE, currentOrder: state.currentOrder };
     }
     case REQUEST_SPONSOR_PURCHASES: {
       const { order, orderDir, page, perPage, term, filters, sponsorId } =

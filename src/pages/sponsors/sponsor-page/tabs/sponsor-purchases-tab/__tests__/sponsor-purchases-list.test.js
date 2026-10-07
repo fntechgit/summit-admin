@@ -690,6 +690,10 @@ describe("SponsorPurchasesTab", () => {
 
     it("Back to Invoice pays the current sponsor's cart by invoice and reloads the list", async () => {
       showConfirmDialog.mockResolvedValue(true);
+      getSponsorCart.mockImplementationOnce(
+        () => () =>
+          Promise.resolve({ response: { card_payment_purchase_id: 7 } })
+      );
       renderWithPurchase(createCardAttempt());
       getSponsorPurchases.mockClear();
 
@@ -697,6 +701,23 @@ describe("SponsorPurchasesTab", () => {
 
       expect(getSponsorCart).toHaveBeenCalledWith("", 123);
       expect(payWithInvoice).toHaveBeenCalledWith(123);
+      expect(getSponsorPurchases).toHaveBeenCalledTimes(1);
+    });
+
+    it("Back to Invoice does not pay a cart that belongs to another purchase and reloads the list", async () => {
+      showConfirmDialog.mockResolvedValue(true);
+      // the row is stale: the sponsor already paid it and started a new cart
+      getSponsorCart.mockImplementationOnce(
+        () => () =>
+          Promise.resolve({ response: { card_payment_purchase_id: 99 } })
+      );
+      renderWithPurchase(createCardAttempt());
+      getSponsorPurchases.mockClear();
+
+      await selectRowOption("sponsor_show_purchases.back_to_invoice");
+
+      expect(getSponsorCart).toHaveBeenCalledWith("", 123);
+      expect(payWithInvoice).not.toHaveBeenCalled();
       expect(getSponsorPurchases).toHaveBeenCalledTimes(1);
     });
 

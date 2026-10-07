@@ -483,6 +483,10 @@ describe("ShowPurchaseListPage", () => {
 
     it("Back to Invoice loads the row's sponsor cart, pays it by invoice and reloads the list", async () => {
       showConfirmDialog.mockResolvedValue(true);
+      getSponsorCart.mockImplementationOnce(
+        () => () =>
+          Promise.resolve({ response: { card_payment_purchase_id: 7 } })
+      );
       renderPage({
         purchases: [createCardAttempt({ id: 7, sponsor_id: 456 })],
         totalCount: 1
@@ -499,6 +503,26 @@ describe("ShowPurchaseListPage", () => {
       expect(getSponsorCart).toHaveBeenCalledWith("", 456);
       expect(payWithInvoice).toHaveBeenCalledWith(456);
       expect(changePurchasePaymentMethod).not.toHaveBeenCalled();
+      expect(getAllSponsorPurchases).toHaveBeenCalledTimes(1);
+    });
+
+    it("Back to Invoice does not pay a cart that belongs to another purchase and reloads the list", async () => {
+      showConfirmDialog.mockResolvedValue(true);
+      // the row is stale: the sponsor already paid it and started a new cart
+      getSponsorCart.mockImplementationOnce(
+        () => () =>
+          Promise.resolve({ response: { card_payment_purchase_id: 99 } })
+      );
+      renderPage({
+        purchases: [createCardAttempt({ id: 7, sponsor_id: 456 })],
+        totalCount: 1
+      });
+      getAllSponsorPurchases.mockClear();
+
+      await selectOption("sponsor_show_purchases.back_to_invoice");
+
+      expect(getSponsorCart).toHaveBeenCalledWith("", 456);
+      expect(payWithInvoice).not.toHaveBeenCalled();
       expect(getAllSponsorPurchases).toHaveBeenCalledTimes(1);
     });
 
@@ -525,6 +549,10 @@ describe("ShowPurchaseListPage", () => {
 
     it("Back to Invoice does not reload the list when paying by invoice fails", async () => {
       showConfirmDialog.mockResolvedValue(true);
+      getSponsorCart.mockImplementationOnce(
+        () => () =>
+          Promise.resolve({ response: { card_payment_purchase_id: 1 } })
+      );
       payWithInvoice.mockImplementationOnce(
         () => () => Promise.reject(new Error("412"))
       );

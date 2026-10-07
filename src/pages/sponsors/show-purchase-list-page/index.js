@@ -159,10 +159,11 @@ const ShowPurchaseListPage = ({
   const handleBackToInvoice = (purchase) => {
     // payWithInvoice posts for the cart in state, so load this sponsor's first
     getSponsorCart("", purchase.sponsor_id)
+      // a stale row can point at a cart that's no longer this purchase's, so only pay if it matches
       .then((res) =>
-        res?.response
+        res?.response?.card_payment_purchase_id === purchase.id
           ? payWithInvoice(purchase.sponsor_id).then(reloadPurchases)
-          : null
+          : reloadPurchases()
       )
       .catch(() => {}); // error already shown by snackbarErrorHandler
   };

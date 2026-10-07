@@ -142,11 +142,14 @@ const SponsorPurchasesTab = ({
   const reloadPurchases = () =>
     getSponsorPurchases(term, currentPage, perPage, order, orderDir, filters);
 
-  const handleBackToInvoice = () => {
+  const handleBackToInvoice = (purchase) => {
     // payWithInvoice posts for the cart in state, so load this sponsor's first
     getSponsorCart("", sponsor.id)
+      // a stale row can point at a cart that's no longer this purchase's, so only pay if it matches
       .then((res) =>
-        res?.response ? payWithInvoice(sponsor.id).then(reloadPurchases) : null
+        res?.response?.card_payment_purchase_id === purchase.id
+          ? payWithInvoice(sponsor.id).then(reloadPurchases)
+          : reloadPurchases()
       )
       .catch(() => {}); // error already shown by snackbarErrorHandler
   };
@@ -178,7 +181,7 @@ const SponsorPurchasesTab = ({
             handleStatusChange(row.payment_id, newStatus)
           }
           onPayByCard={() => handlePayByCard(row)}
-          onBackToInvoice={handleBackToInvoice}
+          onBackToInvoice={() => handleBackToInvoice(row)}
         />
       )
     },
