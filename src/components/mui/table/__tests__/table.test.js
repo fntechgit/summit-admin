@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import showConfirmDialog from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
+import showConfirmDialog from "../../showConfirmDialog";
 import Table from "..";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
@@ -10,10 +10,10 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
   default: { translate: (key) => key }
 }));
 
-jest.mock(
-  "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog",
-  () => ({ __esModule: true, default: jest.fn() })
-);
+jest.mock("../../showConfirmDialog", () => ({
+  __esModule: true,
+  default: jest.fn()
+}));
 
 const ROWS = [
   { id: 1, name: "Summit One" },

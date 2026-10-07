@@ -3,8 +3,8 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import Box from "@mui/material/Box";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import showConfirmDialog from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import showConfirmDialog from "../showConfirmDialog";
 import RowActions from "./row-actions";
 
 const BUTTON_SLOT_WIDTH = 44;
