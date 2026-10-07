@@ -273,7 +273,7 @@ const SponsorFormsListPage = ({
                 cursor: "pointer",
                 textDecoration: "underline dotted",
                 display: "block",
-                textOverflow: "break-word",
+                overflowWrap: "break-word",
                 verticalAlign: "middle"
               }}
               title={label}
