@@ -176,9 +176,9 @@ const SummitDirectoryPage = ({
         currentPage={currentPage}
         onPageChange={handlePageChange}
         onPerPageChange={handlePerPageChange}
-        onRowClick={handleSelectSummit}
-        onEdit={canEditSummit ? handleEditSummit : undefined}
+        onRowClick={canEditSummit ? handleEditSummit : undefined}
         onDelete={canDeleteSummits ? (id) => deleteSummit(id) : undefined}
+        onSelect={handleSelectSummit}
         deleteDialogBody={(name) =>
           `${T.translate("directory.remove_warning")} ${name}`
         }
