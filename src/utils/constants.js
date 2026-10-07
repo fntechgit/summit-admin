@@ -379,4 +379,5 @@ export const DEFAULT_REOPEN_HOURS = 24;
 export const REOPEN_PRESET_HOURS_48 = 48;
 export const REOPEN_PRESET_HOURS_72 = 72;
 
+export const TEXT_MAX_LENGTH_255 = 255;
 export const TEXT_MAX_LENGTH_1024 = 1024;
