@@ -216,14 +216,14 @@ const SponsorFormsTab = ({
     });
   };
 
-  const handleShowArchivedForms = (ev) => {
+  const handleShowArchivedForms = (archived) => {
     getSponsorManagedForms(
       term,
       DEFAULT_CURRENT_PAGE,
       managedForms.perPage,
       managedForms.order,
       managedForms.orderDir,
-      ev.target.checked
+      archived
     );
     getSponsorCustomizedForms(
       term,
@@ -231,7 +231,7 @@ const SponsorFormsTab = ({
       customizedForms.perPage,
       customizedForms.order,
       customizedForms.orderDir,
-      ev.target.checked
+      archived
     );
   };
 
@@ -429,10 +429,9 @@ const SponsorFormsTab = ({
           onSearch: handleSearch,
           placeholder: T.translate("edit_sponsor.placeholders.search")
         }}
-        checkboxProps={{
-          checked: showArchived,
-          onChange: handleShowArchivedForms,
-          label: T.translate("edit_sponsor.forms_tab.show_archived")
+        archiveToggleProps={{
+          showArchived,
+          onChange: handleShowArchivedForms
         }}
       >
         <Button
