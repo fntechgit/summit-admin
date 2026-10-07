@@ -513,39 +513,45 @@ export const reopenCart = () => async (dispatch, getState) => {
   });
 };
 
-export const payWithInvoice = () => async (dispatch, getState) => {
-  const { currentSummitState, currentSponsorState, sponsorPageCartListState } =
-    getState();
-  const { currentSummit } = currentSummitState;
-  const { entity: sponsor } = currentSponsorState;
-  const { cart } = sponsorPageCartListState;
-  const accessToken = await getAccessTokenSafely();
+// sponsorId: for callers outside the sponsor page, where currentSponsorState can be another sponsor
+export const payWithInvoice =
+  (sponsorId = null) =>
+  async (dispatch, getState) => {
+    const {
+      currentSummitState,
+      currentSponsorState,
+      sponsorPageCartListState
+    } = getState();
+    const { currentSummit } = currentSummitState;
+    const cartSponsorId = sponsorId ?? currentSponsorState.entity.id;
+    const { cart } = sponsorPageCartListState;
+    const accessToken = await getAccessTokenSafely();
 
-  dispatch(startLoading());
+    dispatch(startLoading());
 
-  const params = {
-    access_token: accessToken
+    const params = {
+      access_token: accessToken
+    };
+
+    const payload = {
+      type: "Offline",
+      cart_id: cart?.id
+    };
+
+    return postRequest(
+      null,
+      createAction(OFFLINE_PAYMENT_CREATED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${cartSponsorId}/payments`,
+      payload,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        getSponsorCart("", sponsorId)(dispatch, getState);
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
-
-  const payload = {
-    type: "Offline",
-    cart_id: cart?.id
-  };
-
-  return postRequest(
-    null,
-    createAction(OFFLINE_PAYMENT_CREATED),
-    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/payments`,
-    payload,
-    snackbarErrorHandler
-  )(params)(dispatch)
-    .then(() => {
-      getSponsorCart()(dispatch, getState);
-    })
-    .finally(() => {
-      dispatch(stopLoading());
-    });
-};
 
 const createPaymentIntent = () => async (dispatch, getState) => {
   const { currentSummitState, currentSponsorState, sponsorPageCartListState } =

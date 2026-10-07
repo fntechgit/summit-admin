@@ -26,7 +26,10 @@ import DownloadIcon from "@mui/icons-material/Download";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import history from "../../../history";
-import { getSponsorCart } from "../../../actions/sponsor-cart-actions";
+import {
+  getSponsorCart,
+  payWithInvoice
+} from "../../../actions/sponsor-cart-actions";
 import PurchaseStatusCell from "../components/purchase-status-cell";
 import PurchaseFilters from "../components/purchase-filters";
 import {
@@ -58,7 +61,8 @@ const ShowPurchaseListPage = ({
   approveSponsorPurchase,
   rejectSponsorPurchase,
   changePurchasePaymentMethod,
-  getSponsorCart
+  getSponsorCart,
+  payWithInvoice
 }) => {
   useEffect(() => {
     getAllSponsorPurchases(
@@ -148,6 +152,28 @@ const ShowPurchaseListPage = ({
       .catch(() => {}); // error already shown by snackbarErrorHandler
   };
 
+  const reloadPurchases = () =>
+    getAllSponsorPurchases(
+      term,
+      currentPage,
+      perPage,
+      order,
+      orderDir,
+      filters
+    );
+
+  const handleBackToInvoice = (purchase) => {
+    // payWithInvoice posts for the cart in state, so load this sponsor's first
+    getSponsorCart("", purchase.sponsor_id)
+      // a stale row can point at a cart that's no longer this purchase's, so only pay if it matches
+      .then((res) =>
+        res?.response?.card_payment_purchase_id === purchase.id
+          ? payWithInvoice(purchase.sponsor_id).then(reloadPurchases)
+          : reloadPurchases()
+      )
+      .catch(() => {}); // error already shown by snackbarErrorHandler
+  };
+
   const tableColumns = [
     {
       columnKey: "number",
@@ -181,6 +207,7 @@ const ShowPurchaseListPage = ({
             handleStatusChange(row.sponsor_id, row.payment_id, newStatus)
           }
           onPayByCard={() => handlePayByCard(row)}
+          onBackToInvoice={() => handleBackToInvoice(row)}
         />
       )
     },
@@ -297,5 +324,6 @@ export default connect(mapStateToProps, {
   approveSponsorPurchase,
   rejectSponsorPurchase,
   changePurchasePaymentMethod,
-  getSponsorCart
+  getSponsorCart,
+  payWithInvoice
 })(ShowPurchaseListPage);

@@ -99,7 +99,7 @@ export const getAllSponsorPurchases =
       expand: "sponsor",
       relations: "sponsor",
       fields:
-        "id,number,payment_id,purchased_date,sponsor.id,sponsor.company_name,payment_method,status,net_amount,card_payment_enabled_at,card_payment_enabled_by_full_name"
+        "id,number,payment_id,purchased_date,sponsor.id,sponsor.company_name,payment_method,status,net_amount,card_payment_enabled_at,card_payment_enabled_by_full_name,payment_status"
     };
 
     if (filter.length > 0) {
@@ -251,7 +251,7 @@ export const getSponsorPurchases =
       createAction(RECEIVE_SPONSOR_PURCHASES),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases`,
       authErrorHandler,
-      { order, orderDir, page, perPage, term, filters }
+      { order, orderDir, page, perPage, term, filters, sponsorId: sponsor.id }
     )(params)(dispatch)
       .catch(() => {})
       .finally(() => {

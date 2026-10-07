@@ -199,13 +199,14 @@ describe("purchase list filters", () => {
     expect(capturedParams["filter[]"]).toBeUndefined();
   });
 
-  it("requests the card payment enabled fields for the indicator", async () => {
+  it("requests the card payment enabled fields and the payment status for the status cell", async () => {
     await buildStore().dispatch(getAllSponsorPurchases());
 
     expect(capturedParams.fields.split(",")).toEqual(
       expect.arrayContaining([
         "card_payment_enabled_at",
-        "card_payment_enabled_by_full_name"
+        "card_payment_enabled_by_full_name",
+        "payment_status"
       ])
     );
   });
@@ -220,6 +221,13 @@ describe("purchase list filters", () => {
       `payment_method==${PURCHASE_METHODS.INVOICE}`,
       "card_payment_enabled==true"
     ]);
+  });
+
+  it("getSponsorPurchases tags the request with the sponsor, so the list can be cleared on a sponsor change", async () => {
+    await buildStore().dispatch(getSponsorPurchases());
+
+    const [, , , , requestPayload] = getRequest.mock.calls[0];
+    expect(requestPayload).toEqual(expect.objectContaining({ sponsorId: 123 }));
   });
 
   it("exportAllSponsorPurchases sends the same filters as the list", async () => {
