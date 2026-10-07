@@ -226,7 +226,7 @@ const PageTemplatePopup = ({
       disableEscapeKeyDown={isSaving}
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1.5rem">{popupTitle}</Typography>
+        <Typography fontSize="1rem">{popupTitle}</Typography>
         <IconButton
           size="small"
           onClick={handleClose}

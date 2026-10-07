@@ -141,7 +141,7 @@ const EditTierDialog = ({
       disableEscapeKeyDown={isSaving}
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1.5rem">
+        <Typography fontSize="1rem">
           {`${initialEntity.id ? "Edit" : "Add"} ${T.translate(
             "edit_summit_sponsorship.tier"
           )}`}

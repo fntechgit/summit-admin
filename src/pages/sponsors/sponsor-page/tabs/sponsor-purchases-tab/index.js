@@ -222,7 +222,7 @@ const SponsorPurchasesTab = ({
             aria-label={T.translate("general.download_invoice")}
             disabled={downloadingOrderId !== null}
           >
-            <DownloadIcon fontSize="large" />
+            <DownloadIcon />
           </IconButton>
         )
     }

@@ -341,7 +341,7 @@ const SponsorPagesTab = ({
           onClick={() => handleManagedEdit(row)}
         >
           {T.translate("edit_sponsor.forms_tab.customize")}
-          <ArrowForwardIcon fontSize="large" sx={{ marginLeft: 1 }} />
+          <ArrowForwardIcon sx={{ marginLeft: 1 }} />
         </Button>
       ),
       dottedBorder: true

@@ -182,8 +182,8 @@ const SponsorBadgeScans = ({
           startIcon={<AddIcon />}
           sx={{
             padding: "6px 16px",
-            fontSize: "1.4rem",
-            lineHeight: "2.4rem",
+            fontSize: "0.875rem",
+            lineHeight: "1.5rem",
             letterSpacing: "0.4px"
           }}
         >
@@ -195,8 +195,8 @@ const SponsorBadgeScans = ({
           startIcon={<DownloadIcon />}
           sx={{
             padding: "6px 16px",
-            fontSize: "1.4rem",
-            lineHeight: "2.4rem",
+            fontSize: "0.875rem",
+            lineHeight: "1.5rem",
             letterSpacing: "0.4px"
           }}
         >

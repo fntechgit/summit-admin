@@ -36,9 +36,9 @@ const InfoTooltip = ({ title }) => (
   <Tooltip
     title={title}
     placement="top"
-    componentsProps={{ tooltip: { sx: { fontSize: "1rem" } } }}
+    componentsProps={{ tooltip: { sx: { fontSize: "0.625rem" } } }}
   >
-    <InfoIcon sx={{ ml: 0.5, verticalAlign: "middle" }} />
+    <InfoIcon fontSize="small" sx={{ ml: 0.5, verticalAlign: "middle" }} />
   </Tooltip>
 );
 
@@ -448,7 +448,7 @@ const PaymentProfileDialog = ({
                           onClick={handleNewFeeType}
                           startIcon={<AddIcon />}
                           sx={{
-                            lineHeight: "2.4rem",
+                            lineHeight: "1.5rem",
                             letterSpacing: "0.4px"
                           }}
                         >
@@ -638,7 +638,7 @@ const PaymentProfileDialog = ({
                             variant="outlined"
                             onClick={handleCancelFeeType}
                             sx={{
-                              lineHeight: "2.4rem",
+                              lineHeight: "1.5rem",
                               letterSpacing: "0.4px"
                             }}
                           >
@@ -649,7 +649,7 @@ const PaymentProfileDialog = ({
                             onClick={feeTypeFormik.handleSubmit}
                             disabled={isSaving}
                             sx={{
-                              lineHeight: "2.4rem",
+                              lineHeight: "1.5rem",
                               letterSpacing: "0.4px"
                             }}
                           >

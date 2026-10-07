@@ -6,7 +6,6 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import IconButton from "@mui/material/IconButton";
 import Divider from "@mui/material/Divider";
-import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import TaxTypeForm from "../../../components/forms/tax-type-form";
 
@@ -47,9 +46,7 @@ const TaxTypePopup = ({
       fullWidth
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1.8rem">
-          {title} {T.translate("edit_tax_type.tax_type")}
-        </Typography>
+        {title} {T.translate("edit_tax_type.tax_type")}
         <IconButton size="small" onClick={handleClose} disabled={isSaving}>
           <CloseIcon fontSize="small" />
         </IconButton>
