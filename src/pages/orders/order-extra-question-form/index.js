@@ -28,7 +28,6 @@ import MuiFormikDropdownCheckbox from "openstack-uicore-foundation/lib/component
 import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
 import DragAndDropList from "../../../components/mui/dnd-list";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
-import AddNewButton from "../../../components/buttons/add-new-button";
 import useScrollToError from "../../../hooks/useScrollToError";
 import history from "../../../history";
 import {
@@ -464,7 +463,16 @@ const OrderExtraQuestionForm = ({
                 mt: 3
               }}
             >
-              <AddNewButton entity={entity} />
+              {!isNew && (
+                <Button
+                  variant="outlined"
+                  onClick={() =>
+                    onSubmit({ ...entity, ...formik.values }, true)
+                  }
+                >
+                  {T.translate("general.save_and_add_next")}
+                </Button>
+              )}
               <Button type="submit" variant="contained">
                 {T.translate("general.save")}
               </Button>
