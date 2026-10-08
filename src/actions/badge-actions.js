@@ -520,9 +520,7 @@ export const getViewType = (viewTypeId) => async (dispatch, getState) => {
     snackbarErrorHandler
   )(params)(dispatch)
     .catch(() => {})
-    .finally(() => {
-      dispatch(stopLoading());
-    });
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const resetViewTypeForm = () => (dispatch) => {
@@ -550,18 +548,18 @@ export const saveViewType = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       snackbarErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(
-        showSuccessMessage(T.translate("edit_view_type.view_type_saved"))
-      );
-    });
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_view_type.view_type_saved")
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()))
+      .catch(() => {});
   } else {
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_view_type.view_type_created"),
-      type: "success"
-    };
-
     postRequest(
       createAction(UPDATE_VIEW_TYPE),
       createAction(VIEW_TYPE_ADDED),
@@ -569,15 +567,20 @@ export const saveViewType = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       snackbarErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
-      dispatch(
-        showMessage(success_message, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/view-types/${payload.response.id}`
-          );
-        })
-      );
-    });
+    )(params)(dispatch)
+      .then((payload) => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_view_type.view_type_created")
+          })
+        );
+        history.push(
+          `/app/summits/${currentSummit.id}/view-types/${payload.response.id}`
+        );
+      })
+      .finally(() => dispatch(stopLoading()))
+      .catch(() => {});
   }
 };
 
