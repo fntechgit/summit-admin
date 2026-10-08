@@ -98,6 +98,13 @@ const OPTION_GRID = {
   columnGap: 1
 };
 
+// Enter inside the question's <form> would otherwise also submit the question
+const onEnter = (fn) => (ev) => {
+  if (ev.key !== "Enter") return;
+  ev.preventDefault();
+  fn(ev);
+};
+
 // Options persist one at a time through the values endpoints, exactly as the
 // legacy modal did — the only change is that blur replaces a Save button.
 const OptionRow = ({ option, onSave, onDelete }) => {
@@ -120,7 +127,11 @@ const OptionRow = ({ option, onSave, onDelete }) => {
       <Tooltip title={T.translate("question_form.default_label")}>
         <IconButton
           aria-label={T.translate("question_form.default_label")}
-          onClick={() => onSave({ ...option, is_default: !option.is_default })}
+          // keep focus so the field's blur doesn't send a competing save
+          onMouseDown={(ev) => ev.preventDefault()}
+          onClick={() =>
+            onSave({ ...option, label, value, is_default: !option.is_default })
+          }
         >
           {option.is_default ? (
             <StarIcon color="primary" />
@@ -139,6 +150,7 @@ const OptionRow = ({ option, onSave, onDelete }) => {
         value={value}
         onChange={(ev) => setValue(ev.target.value)}
         onBlur={saveIfChanged}
+        onKeyDown={onEnter((ev) => ev.target.blur())}
         fullWidth
       />
       <TextField
@@ -151,6 +163,7 @@ const OptionRow = ({ option, onSave, onDelete }) => {
         value={label}
         onChange={(ev) => setLabel(ev.target.value)}
         onBlur={saveIfChanged}
+        onKeyDown={onEnter((ev) => ev.target.blur())}
         fullWidth
       />
       <Tooltip title={T.translate("general.delete")}>
@@ -191,7 +204,7 @@ const AddOptionRow = ({ onAdd }) => {
         }}
         value={value}
         onChange={(ev) => setValue(ev.target.value)}
-        onKeyDown={(ev) => ev.key === "Enter" && commit()}
+        onKeyDown={onEnter(commit)}
         fullWidth
         sx={{ gridColumn: 3 }}
       />
@@ -205,7 +218,7 @@ const AddOptionRow = ({ onAdd }) => {
         }}
         value={label}
         onChange={(ev) => setLabel(ev.target.value)}
-        onKeyDown={(ev) => ev.key === "Enter" && commit()}
+        onKeyDown={onEnter(commit)}
         fullWidth
       />
       <Tooltip title={T.translate("question_form.add_option")}>

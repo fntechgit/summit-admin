@@ -321,6 +321,25 @@ describe("OrderExtraQuestionForm", () => {
       );
     });
 
+    // A blur save from the text field would otherwise race the star's save.
+    it("should keep an unsaved text edit when the default flag is toggled", async () => {
+      const handlers = valueHandlers();
+      renderForm(withOptions(), jest.fn(), handlers);
+
+      await userEvent.clear(labelFields()[0]);
+      await userEvent.type(labelFields()[0], "Tiny");
+      await userEvent.click(
+        screen.getAllByRole("button", {
+          name: "question_form.default_label"
+        })[0]
+      );
+
+      expect(handlers.onValueSave).toHaveBeenCalledTimes(1);
+      expect(handlers.onValueSave).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 1, label: "Tiny", is_default: true })
+      );
+    });
+
     it("should delete the option that was clicked", async () => {
       const handlers = valueHandlers();
       renderForm(withOptions(), jest.fn(), handlers);
@@ -361,6 +380,23 @@ describe("OrderExtraQuestionForm", () => {
         label: "Large"
       });
       expect(addLabel).toHaveValue("");
+    });
+
+    // The rows sit inside the question's <form>, where Enter means submit.
+    it("should add the option on Enter without saving the question", async () => {
+      const handlers = valueHandlers();
+      const onSubmit = renderForm(withOptions(), jest.fn(), handlers);
+
+      await userEvent.type(
+        screen.getAllByLabelText("question_form.option_identifier").pop(),
+        "l{Enter}"
+      );
+
+      expect(handlers.onValueSave).toHaveBeenCalledWith({
+        value: "l",
+        label: ""
+      });
+      expect(onSubmit).not.toHaveBeenCalled();
     });
   });
 });
