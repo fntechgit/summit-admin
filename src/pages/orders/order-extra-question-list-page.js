@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -19,8 +19,6 @@ import {
   Button,
   Card,
   CardContent,
-  Collapse,
-  Divider,
   IconButton,
   Tooltip,
   Typography
@@ -32,12 +30,10 @@ import DragAndDropList from "../../components/mui/dnd-list";
 import showConfirmDialog from "../../components/mui/showConfirmDialog";
 import { getSummitById } from "../../actions/summit-actions";
 import {
-  getOrderExtraQuestion,
   getOrderExtraQuestions,
   deleteOrderExtraQuestion,
   updateOrderExtraQuestionOrder
 } from "../../actions/order-actions";
-import EditOrderExtraQuestionPage from "./edit-order-extra-question-page";
 import { INT_BASE } from "../../utils/constants";
 
 // "CheckBoxList" -> "Check Box List"
@@ -56,18 +52,8 @@ const OrderExtraQuestionListPage = ({
 
   const questionsUrl = `/app/summits/${currentSummit.id}/order-extra-questions`;
 
-  // One card open at a time: the form reads currentOrderExtraQuestionState,
-  // which holds a single entity, so a second expansion would fight the first.
-  const [expandedId, setExpandedId] = useState(null);
-
-  const handleToggle = (questionId) => {
-    if (expandedId === questionId) {
-      setExpandedId(null);
-      return;
-    }
-    props.getOrderExtraQuestion(questionId);
-    setExpandedId(questionId);
-  };
+  const handleEdit = (questionId) =>
+    history.push(`${questionsUrl}/${questionId}`);
 
   const handleAdd = () => history.push(`${questionsUrl}/new`);
 
@@ -135,7 +121,7 @@ const OrderExtraQuestionListPage = ({
                 />
               </Box>
               <CardContent
-                onClick={() => handleToggle(question.id)}
+                onClick={() => handleEdit(question.id)}
                 sx={{
                   display: "flex",
                   alignItems: "center",
@@ -167,11 +153,6 @@ const OrderExtraQuestionListPage = ({
                   </IconButton>
                 </Tooltip>
               </CardContent>
-              {/* unmountOnExit so only the open card pays for a Jodit editor */}
-              <Collapse in={expandedId === question.id} unmountOnExit>
-                <Divider />
-                <EditOrderExtraQuestionPage inline />
-              </Collapse>
             </Card>
           )}
         />
@@ -190,7 +171,6 @@ const mapStateToProps = ({
 
 export default connect(mapStateToProps, {
   getSummitById,
-  getOrderExtraQuestion,
   getOrderExtraQuestions,
   updateOrderExtraQuestionOrder,
   deleteOrderExtraQuestion
