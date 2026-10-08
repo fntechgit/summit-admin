@@ -110,6 +110,7 @@ const OrderExtraQuestionListPage = ({
                   alignItems: "center",
                   gap: 2,
                   cursor: "pointer",
+                  "&:hover": { bgcolor: "action.hover" },
                   "&:last-child": { pb: 2 }
                 }}
               >
