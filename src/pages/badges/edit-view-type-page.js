@@ -11,92 +11,55 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import { getSummitById } from "../../actions/summit-actions";
 import ViewTypeForm from "../../components/forms/view-type-form";
-
 import {
   getViewType,
   resetViewTypeForm,
   saveViewType
 } from "../../actions/badge-actions";
-import AddNewButton from "../../components/buttons/add-new-button";
+import AddNewButtonMUI from "../../components/buttons/add-new-button-mui";
 
-class EditViewPagePage extends React.Component {
-  constructor(props) {
-    const viewTypeId = props.match.params.view_type_id;
-    super(props);
+const EditViewTypePage = ({
+  currentSummit,
+  entity,
+  errors,
+  match,
+  getViewType,
+  resetViewTypeForm,
+  saveViewType
+}) => {
+  const viewTypeId = match.params.view_type_id;
+  const title = entity.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
+  const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
+  useEffect(() => {
     if (!viewTypeId) {
-      props.resetViewTypeForm();
+      resetViewTypeForm();
     } else {
-      props.getViewType(viewTypeId);
+      getViewType(viewTypeId);
     }
+  }, [viewTypeId]);
 
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const oldId = prevProps.match.params.view_type_id;
-    const newId = this.props.match.params.view_type_id;
-
-    if (oldId !== newId) {
-      if (!newId) {
-        this.props.resetViewTypeForm();
-      } else {
-        this.props.getViewType(newId);
-      }
-    }
-  }
-
-  handleSubmit(entity) {
-    this.props.saveViewType(entity);
-  }
-
-  render() {
-    const { currentSummit, entity, errors, match, history } = this.props;
-    const title = entity.id
-      ? T.translate("general.edit")
-      : T.translate("general.add");
-    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
-
-    const fields = [
-      { type: "text", name: "name", label: T.translate("edit_view_type.name") },
-      {
-        type: "textarea",
-        name: "description",
-        label: T.translate("edit_view_type.description")
-      },
-      {
-        type: "checkbox",
-        name: "is_default",
-        label: T.translate("edit_view_type.is_default")
-      }
-    ];
-
-    return (
-      <div className="container">
-        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-        <h3>
-          {title} {T.translate("edit_view_type.view_type")}
-          <AddNewButton entity={entity} />
-        </h3>
-        <hr />
-        {currentSummit && (
-          <ViewTypeForm
-            history={this.props.history}
-            entity={entity}
-            errors={errors}
-            onSubmit={this.props.saveViewType}
-          />
-        )}
-      </div>
-    );
-  }
-}
+  return (
+    <div className="container">
+      <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+      <h3>
+        {title} {T.translate("edit_view_type.view_type")}
+        <AddNewButtonMUI entity={entity} />
+      </h3>
+      <hr />
+      {currentSummit && (
+        <ViewTypeForm entity={entity} errors={errors} onSubmit={saveViewType} />
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({ currentSummitState, currentViewTypeState }) => ({
   currentSummit: currentSummitState.currentSummit,
@@ -104,8 +67,7 @@ const mapStateToProps = ({ currentSummitState, currentViewTypeState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  getSummitById,
   getViewType,
   resetViewTypeForm,
   saveViewType
-})(EditViewPagePage);
+})(EditViewTypePage);
