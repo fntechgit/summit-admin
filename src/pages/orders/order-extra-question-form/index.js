@@ -211,8 +211,7 @@ const OrderExtraQuestionForm = ({
   onValueDelete,
   updateQuestionValueOrder,
   onRuleDelete,
-  updateSubQuestionRuleOrder,
-  inline = false
+  updateSubQuestionRuleOrder
 }) => {
   const formik = useFormik({
     initialValues: {
@@ -296,8 +295,7 @@ const OrderExtraQuestionForm = ({
   return (
     <FormikProvider value={formik}>
       <Card
-        elevation={inline ? 0 : CARD_ELEVATION}
-        square={inline}
+        elevation={CARD_ELEVATION}
         sx={{
           border: "none",
           borderLeft: 4,

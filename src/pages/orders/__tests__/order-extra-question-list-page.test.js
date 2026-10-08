@@ -1,12 +1,11 @@
 import React from "react";
-import { screen, waitFor } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { renderWithRedux } from "../../../utils/test-utils";
 import showConfirmDialog from "../../../components/mui/showConfirmDialog";
 import {
   deleteOrderExtraQuestion,
-  getOrderExtraQuestion,
   getOrderExtraQuestions
 } from "../../../actions/order-actions";
 import OrderExtraQuestionListPage from "../order-extra-question-list-page";
@@ -25,14 +24,8 @@ jest.mock("../../../actions/order-actions", () => ({
   __esModule: true,
   ...jest.requireActual("../../../actions/order-actions"),
   getOrderExtraQuestions: jest.fn(() => ({ type: "TEST_GET" })),
-  getOrderExtraQuestion: jest.fn(() => ({ type: "TEST_GET_ONE" })),
   deleteOrderExtraQuestion: jest.fn(() => ({ type: "TEST_DELETE" })),
   updateOrderExtraQuestionOrder: jest.fn(() => ({ type: "TEST_REORDER" }))
-}));
-
-jest.mock("../edit-order-extra-question-page", () => ({
-  __esModule: true,
-  default: () => <div data-testid="inline-editor" />
 }));
 
 const SUMMIT_ID = 3;
@@ -82,25 +75,11 @@ describe("OrderExtraQuestionListPage", () => {
     expect(screen.getByText(/tshirt_size/)).toBeInTheDocument();
   });
 
-  it("should expand the clicked question inline and fetch its detail", async () => {
-    renderPage();
-    expect(screen.queryByTestId("inline-editor")).not.toBeInTheDocument();
-
+  it("should open the clicked question's edit page", async () => {
+    const history = renderPage();
     await userEvent.click(screen.getByText("Company name"));
-
-    expect(getOrderExtraQuestion).toHaveBeenCalledWith(12);
-    expect(screen.getByTestId("inline-editor")).toBeInTheDocument();
-  });
-
-  it("should collapse the question when it is clicked again", async () => {
-    renderPage();
-    await userEvent.click(screen.getByText("Company name"));
-    expect(screen.getByTestId("inline-editor")).toBeInTheDocument();
-
-    await userEvent.click(screen.getByText("Company name"));
-    // Collapse unmounts its child only once the exit transition finishes.
-    await waitFor(() =>
-      expect(screen.queryByTestId("inline-editor")).not.toBeInTheDocument()
+    expect(history.push).toHaveBeenCalledWith(
+      `/app/summits/${SUMMIT_ID}/order-extra-questions/12`
     );
   });
 
