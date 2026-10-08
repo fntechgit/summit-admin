@@ -260,13 +260,11 @@ describe("OrderExtraQuestionForm", () => {
 
     // DOM order: one field per saved option, then the add row's field last.
     const labelFields = () =>
-      screen.getAllByLabelText("question_form.visible_option");
+      screen.getAllByLabelText("question_form.option_text");
 
     it("should stay hidden for a type the API returns no values for", () => {
       renderForm(baseEntity({ id: 9, type: "Text" }));
-      expect(
-        screen.queryByLabelText("question_form.visible_option")
-      ).toBeNull();
+      expect(screen.queryByLabelText("question_form.option_text")).toBeNull();
     });
 
     // Options post to /{id}/values, so they cannot exist before the question does.
@@ -314,7 +312,7 @@ describe("OrderExtraQuestionForm", () => {
 
       await userEvent.click(
         screen.getAllByRole("button", {
-          name: "question_form.is_default"
+          name: "question_form.default_label"
         })[0]
       );
 
@@ -348,7 +346,9 @@ describe("OrderExtraQuestionForm", () => {
 
       const fields = labelFields();
       const addLabel = fields[fields.length - 1];
-      const addValue = screen.getAllByLabelText("question_form.value").pop();
+      const addValue = screen
+        .getAllByLabelText("question_form.option_identifier")
+        .pop();
 
       await userEvent.type(addLabel, "Large");
       await userEvent.type(addValue, "l");

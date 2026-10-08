@@ -89,6 +89,15 @@ const humanizeType = (type) => type.split(/(?=[A-Z])/).join(" ");
 const toIds = (collection = []) =>
   collection.map((item) => (item?.id !== undefined ? item.id : item));
 
+// Shared by the header, option rows and add row so their columns line up:
+// drag · default · hidden value · visible option · delete/add
+const OPTION_GRID = {
+  display: "grid",
+  gridTemplateColumns: "40px 40px minmax(0, 1fr) minmax(0, 1fr) 40px",
+  alignItems: "center",
+  columnGap: 1
+};
+
 // Options persist one at a time through the values endpoints, exactly as the
 // legacy modal did — the only change is that blur replaces a Save button.
 const OptionRow = ({ option, onSave, onDelete }) => {
@@ -106,7 +115,7 @@ const OptionRow = ({ option, onSave, onDelete }) => {
   };
 
   return (
-    <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.5 }}>
+    <Box sx={{ ...OPTION_GRID, py: 0.5 }}>
       <DragIndicatorIcon sx={{ color: "text.disabled" }} />
       <Tooltip title={T.translate("question_form.default_label")}>
         <IconButton
@@ -122,19 +131,27 @@ const OptionRow = ({ option, onSave, onDelete }) => {
       </Tooltip>
       <TextField
         variant="standard"
-        fullWidth
-        label={T.translate("question_form.visible_option")}
-        value={label}
-        onChange={(ev) => setLabel(ev.target.value)}
-        onBlur={saveIfChanged}
-      />
-      <TextField
-        variant="standard"
-        label={T.translate("question_form.value")}
+        slotProps={{
+          htmlInput: {
+            "aria-label": T.translate("question_form.option_identifier")
+          }
+        }}
         value={value}
         onChange={(ev) => setValue(ev.target.value)}
         onBlur={saveIfChanged}
-        sx={{ width: "30%" }}
+        fullWidth
+      />
+      <TextField
+        variant="standard"
+        slotProps={{
+          htmlInput: {
+            "aria-label": T.translate("question_form.option_text")
+          }
+        }}
+        value={label}
+        onChange={(ev) => setLabel(ev.target.value)}
+        onBlur={saveIfChanged}
+        fullWidth
       />
       <Tooltip title={T.translate("general.delete")}>
         <IconButton
@@ -144,7 +161,7 @@ const OptionRow = ({ option, onSave, onDelete }) => {
           <CloseIcon />
         </IconButton>
       </Tooltip>
-    </Stack>
+    </Box>
   );
 };
 
@@ -163,27 +180,33 @@ const AddOptionRow = ({ onAdd }) => {
   };
 
   return (
-    <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.5 }}>
-      <DragIndicatorIcon sx={{ visibility: "hidden" }} />
-      <IconButton sx={{ visibility: "hidden" }}>
-        <StarBorderIcon />
-      </IconButton>
+    <Box sx={{ ...OPTION_GRID, py: 0.5 }}>
       <TextField
         variant="standard"
-        fullWidth
-        placeholder={T.translate("question_form.add_option")}
-        label={T.translate("question_form.visible_option")}
-        value={label}
-        onChange={(ev) => setLabel(ev.target.value)}
-        onKeyDown={(ev) => ev.key === "Enter" && commit()}
-      />
-      <TextField
-        variant="standard"
-        label={T.translate("question_form.value")}
+        placeholder={T.translate("question_form.option_identifier")}
+        slotProps={{
+          htmlInput: {
+            "aria-label": T.translate("question_form.option_identifier")
+          }
+        }}
         value={value}
         onChange={(ev) => setValue(ev.target.value)}
         onKeyDown={(ev) => ev.key === "Enter" && commit()}
-        sx={{ width: "30%" }}
+        fullWidth
+        sx={{ gridColumn: 3 }}
+      />
+      <TextField
+        variant="standard"
+        placeholder={T.translate("question_form.option_text")}
+        slotProps={{
+          htmlInput: {
+            "aria-label": T.translate("question_form.option_text")
+          }
+        }}
+        value={label}
+        onChange={(ev) => setLabel(ev.target.value)}
+        onKeyDown={(ev) => ev.key === "Enter" && commit()}
+        fullWidth
       />
       <Tooltip title={T.translate("question_form.add_option")}>
         <span>
@@ -196,7 +219,7 @@ const AddOptionRow = ({ onAdd }) => {
           </IconButton>
         </span>
       </Tooltip>
-    </Stack>
+    </Box>
   );
 };
 
@@ -378,6 +401,22 @@ const OrderExtraQuestionForm = ({
                 </Typography>
               ) : (
                 <>
+                  <Box sx={OPTION_GRID}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ gridColumn: 3, fontWeight: 500 }}
+                    >
+                      {T.translate("question_form.option_identifier")}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ fontWeight: 500 }}
+                    >
+                      {T.translate("question_form.option_text")}
+                    </Typography>
+                  </Box>
                   <DragAndDropList
                     items={options}
                     onReorder={handleOptionReorder}
@@ -408,30 +447,28 @@ const OrderExtraQuestionForm = ({
                 name="mandatory"
                 label={T.translate("question_form.mandatory_label")}
               />
-            </Grid2>
-            <Grid2 size={{ xs: 12, md: 6 }}>
               <MuiFormikSwitch
                 name="printable"
                 label={T.translate("question_form.printable_label")}
               />
             </Grid2>
             <Grid2 size={{ xs: 12, md: 6 }}>
-              <MuiFormikDropdownCheckbox
-                name="allowed_ticket_types"
-                label={T.translate("question_form.allowed_ticket_types")}
-                placeholder={T.translate("question_form.no_restriction")}
-                options={ticketTypeOptions}
-              />
-            </Grid2>
-            <Grid2 size={{ xs: 12, md: 6 }}>
-              <MuiFormikDropdownCheckbox
-                name="allowed_badge_features_types"
-                label={T.translate(
-                  "question_form.allowed_badge_features_types"
-                )}
-                placeholder={T.translate("question_form.no_restriction")}
-                options={badgeFeatureOptions}
-              />
+              <Stack spacing={3}>
+                <MuiFormikDropdownCheckbox
+                  name="allowed_ticket_types"
+                  label={T.translate("question_form.allowed_ticket_types")}
+                  placeholder={T.translate("question_form.no_restriction")}
+                  options={ticketTypeOptions}
+                />
+                <MuiFormikDropdownCheckbox
+                  name="allowed_badge_features_types"
+                  label={T.translate(
+                    "question_form.allowed_badge_features_types"
+                  )}
+                  placeholder={T.translate("question_form.no_restriction")}
+                  options={badgeFeatureOptions}
+                />
+              </Stack>
             </Grid2>
           </Grid2>
 

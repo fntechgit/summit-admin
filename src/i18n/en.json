@@ -1626,6 +1626,8 @@
     "mandatory_label": "Required",
     "printable_label": "Printable",
     "default_label": "Default",
+    "option_identifier": "Option Identifier",
+    "option_text": "Option Text",
     "save_to_add_values": "Save the question to add options.",
     "question_type": "Question Type",
     "question_id": "Question Identifier",
