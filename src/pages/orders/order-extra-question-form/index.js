@@ -4,8 +4,6 @@ import { FormikProvider, useFormik } from "formik";
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   Divider,
   FormControlLabel,
   Grid2,
@@ -83,8 +81,6 @@ const JODIT_CONFIG = {
 
   placeholder: required(T.translate("question_form.visible_question"))
 };
-
-const CARD_ELEVATION = 2;
 
 const PLACEHOLDER_TYPES = ["Text", "TextArea"];
 
@@ -294,235 +290,227 @@ const OrderExtraQuestionForm = ({
 
   return (
     <FormikProvider value={formik}>
-      <Card
-        elevation={CARD_ELEVATION}
+      <Box
         sx={{
-          border: "none",
-          borderLeft: 4,
-          borderColor: "primary.main",
           "& .MuiInputLabel-root": { fontSize: "1.25rem", fontWeight: 500 }
         }}
       >
-        <CardContent>
-          <form onSubmit={formik.handleSubmit}>
-            <Box sx={{ mb: 3 }}>
-              <FormikTextEditor name="label" options={JODIT_CONFIG} />
-            </Box>
-            <Grid2 container spacing={3}>
-              <Grid2 size={{ xs: 12, md: 4 }}>
-                <MuiFormikSelect
-                  name="type"
-                  label={required(T.translate("question_form.question_type"))}
-                  placeholder={T.translate(
-                    "question_form.placeholders.select_type"
-                  )}
-                  disabled={!isNew}
-                  renderValue={(value) => (value ? humanizeType(value) : "")}
-                >
-                  {allClasses.map((questionType) => (
-                    <MenuItem key={questionType.type} value={questionType.type}>
-                      {humanizeType(questionType.type)}
-                    </MenuItem>
-                  ))}
-                </MuiFormikSelect>
-              </Grid2>
-              <Grid2 size={{ xs: 12, md: 4 }}>
+        <form onSubmit={formik.handleSubmit}>
+          <Box sx={{ mb: 3 }}>
+            <FormikTextEditor name="label" options={JODIT_CONFIG} />
+          </Box>
+          <Grid2 container spacing={3}>
+            <Grid2 size={{ xs: 12, md: 4 }}>
+              <MuiFormikSelect
+                name="type"
+                label={required(T.translate("question_form.question_type"))}
+                placeholder={T.translate(
+                  "question_form.placeholders.select_type"
+                )}
+                disabled={!isNew}
+                renderValue={(value) => (value ? humanizeType(value) : "")}
+              >
+                {allClasses.map((questionType) => (
+                  <MenuItem key={questionType.type} value={questionType.type}>
+                    {humanizeType(questionType.type)}
+                  </MenuItem>
+                ))}
+              </MuiFormikSelect>
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 4 }}>
+              <MuiFormikTextField
+                name="name"
+                label={required(T.translate("question_form.question_id"))}
+                {...OUTLINED_FIELD}
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 4 }}>
+              <MuiFormikSelect
+                name="usage"
+                label={required(T.translate("question_form.usage"))}
+                placeholder={T.translate(
+                  "question_form.placeholders.select_usage"
+                )}
+              >
+                {QUESTION_USAGES.map((usage) => (
+                  <MenuItem key={usage} value={usage}>
+                    {usage}
+                  </MenuItem>
+                ))}
+              </MuiFormikSelect>
+            </Grid2>
+
+            {showsPlaceholder && (
+              <Grid2 size={12}>
                 <MuiFormikTextField
-                  name="name"
-                  label={required(T.translate("question_form.question_id"))}
+                  name="placeholder"
+                  label={T.translate("question_form.hint")}
                   {...OUTLINED_FIELD}
                 />
               </Grid2>
-              <Grid2 size={{ xs: 12, md: 4 }}>
-                <MuiFormikSelect
-                  name="usage"
-                  label={required(T.translate("question_form.usage"))}
-                  placeholder={T.translate(
-                    "question_form.placeholders.select_usage"
-                  )}
-                >
-                  {QUESTION_USAGES.map((usage) => (
-                    <MenuItem key={usage} value={usage}>
-                      {usage}
-                    </MenuItem>
-                  ))}
-                </MuiFormikSelect>
-              </Grid2>
-
-              {showsPlaceholder && (
-                <Grid2 size={12}>
-                  <MuiFormikTextField
-                    name="placeholder"
-                    label={T.translate("question_form.hint")}
-                    {...OUTLINED_FIELD}
-                  />
-                </Grid2>
-              )}
-
-              {showsMaxSelected && (
-                <Grid2 size={{ xs: 12, md: 4 }}>
-                  <MuiFormikTextField
-                    name="max_selected_values"
-                    type="number"
-                    label={T.translate("question_form.max_selected_values")}
-                    {...OUTLINED_FIELD}
-                  />
-                </Grid2>
-              )}
-            </Grid2>
-
-            {typeHasOptions && (
-              <Box sx={{ mt: 3 }}>
-                <Divider sx={{ mb: 2 }} />
-                {isNew ? (
-                  <Typography color="text.secondary">
-                    {T.translate("question_form.save_to_add_values")}
-                  </Typography>
-                ) : (
-                  <>
-                    <DragAndDropList
-                      items={options}
-                      onReorder={handleOptionReorder}
-                      droppableId="question-options"
-                      renderItem={(option) => (
-                        <OptionRow
-                          option={option}
-                          onSave={onValueSave}
-                          onDelete={onValueDelete}
-                        />
-                      )}
-                    />
-                    <AddOptionRow onAdd={onValueSave} />
-                  </>
-                )}
-              </Box>
             )}
 
-            <Divider sx={{ my: 3 }} />
-
-            <Typography color="text.secondary" sx={{ mb: 2, fontWeight: 500 }}>
-              {T.translate("question_form.advanced")}
-            </Typography>
-
-            <Grid2 container spacing={3}>
-              <Grid2 size={{ xs: 12, md: 6 }}>
-                <FormControlLabel
-                  labelPlacement="start"
-                  sx={{ ml: 0 }}
-                  label={T.translate("question_form.mandatory_label")}
-                  control={
-                    <Switch
-                      name="mandatory"
-                      checked={formik.values.mandatory}
-                      onChange={formik.handleChange}
-                    />
-                  }
+            {showsMaxSelected && (
+              <Grid2 size={{ xs: 12, md: 4 }}>
+                <MuiFormikTextField
+                  name="max_selected_values"
+                  type="number"
+                  label={T.translate("question_form.max_selected_values")}
+                  {...OUTLINED_FIELD}
                 />
               </Grid2>
-              <Grid2 size={{ xs: 12, md: 6 }}>
-                <FormControlLabel
-                  labelPlacement="start"
-                  sx={{ ml: 0 }}
-                  label={T.translate("question_form.printable_label")}
-                  control={
-                    <Switch
-                      name="printable"
-                      checked={formik.values.printable}
-                      onChange={formik.handleChange}
-                    />
-                  }
-                />
-              </Grid2>
-              <Grid2 size={{ xs: 12, md: 6 }}>
-                <MuiFormikDropdownCheckbox
-                  name="allowed_ticket_types"
-                  label={T.translate("question_form.allowed_ticket_types")}
-                  placeholder={T.translate("question_form.no_restriction")}
-                  options={ticketTypeOptions}
-                />
-              </Grid2>
-              <Grid2 size={{ xs: 12, md: 6 }}>
-                <MuiFormikDropdownCheckbox
-                  name="allowed_badge_features_types"
-                  label={T.translate(
-                    "question_form.allowed_badge_features_types"
-                  )}
-                  placeholder={T.translate("question_form.no_restriction")}
-                  options={badgeFeatureOptions}
-                />
-              </Grid2>
-            </Grid2>
+            )}
+          </Grid2>
 
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: 2,
-                mt: 3
-              }}
-            >
-              {!isNew && (
-                <Button
-                  variant="outlined"
-                  onClick={() =>
-                    onSubmit({ ...entity, ...formik.values }, true)
-                  }
-                >
-                  {T.translate("general.save_and_add_next")}
-                </Button>
-              )}
-              <Button type="submit" variant="contained">
-                {T.translate("general.save")}
-              </Button>
-            </Box>
-          </form>
-
-          {showsSubRules && (
-            <Box>
-              <Divider sx={{ my: 3 }} />
-
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-                sx={{ mb: 2 }}
-              >
-                <Typography color="text.secondary" sx={{ fontWeight: 500 }}>
-                  {T.translate("question_form.sub_questions_rules")}
-                </Typography>
-                <Button
-                  variant="outlined"
-                  onClick={() => history.push(`${subRulesUrl}/new`)}
-                >
-                  {T.translate("question_form.sub_questions_rules_add")}
-                </Button>
-              </Stack>
-
-              {entity.sub_question_rules.length === 0 ? (
+          {typeHasOptions && (
+            <Box sx={{ mt: 3 }}>
+              <Divider sx={{ mb: 2 }} />
+              {isNew ? (
                 <Typography color="text.secondary">
-                  {T.translate("question_form.no_sub_questions_rules")}
+                  {T.translate("question_form.save_to_add_values")}
                 </Typography>
               ) : (
-                <SortableTable
-                  options={{
-                    actions: {
-                      edit: {
-                        onClick: (ruleId) =>
-                          history.push(`${subRulesUrl}/${ruleId}`)
-                      },
-                      delete: { onClick: onRuleDelete }
-                    }
-                  }}
-                  data={entity.sub_question_rules}
-                  columns={subRuleColumns}
-                  dropCallback={updateSubQuestionRuleOrder}
-                  orderField="order"
-                />
+                <>
+                  <DragAndDropList
+                    items={options}
+                    onReorder={handleOptionReorder}
+                    droppableId="question-options"
+                    renderItem={(option) => (
+                      <OptionRow
+                        option={option}
+                        onSave={onValueSave}
+                        onDelete={onValueDelete}
+                      />
+                    )}
+                  />
+                  <AddOptionRow onAdd={onValueSave} />
+                </>
               )}
             </Box>
           )}
-        </CardContent>
-      </Card>
+
+          <Divider sx={{ my: 3 }} />
+
+          <Typography color="text.secondary" sx={{ mb: 2, fontWeight: 500 }}>
+            {T.translate("question_form.advanced")}
+          </Typography>
+
+          <Grid2 container spacing={3}>
+            <Grid2 size={{ xs: 12, md: 6 }}>
+              <FormControlLabel
+                labelPlacement="start"
+                sx={{ ml: 0 }}
+                label={T.translate("question_form.mandatory_label")}
+                control={
+                  <Switch
+                    name="mandatory"
+                    checked={formik.values.mandatory}
+                    onChange={formik.handleChange}
+                  />
+                }
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 6 }}>
+              <FormControlLabel
+                labelPlacement="start"
+                sx={{ ml: 0 }}
+                label={T.translate("question_form.printable_label")}
+                control={
+                  <Switch
+                    name="printable"
+                    checked={formik.values.printable}
+                    onChange={formik.handleChange}
+                  />
+                }
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 6 }}>
+              <MuiFormikDropdownCheckbox
+                name="allowed_ticket_types"
+                label={T.translate("question_form.allowed_ticket_types")}
+                placeholder={T.translate("question_form.no_restriction")}
+                options={ticketTypeOptions}
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 6 }}>
+              <MuiFormikDropdownCheckbox
+                name="allowed_badge_features_types"
+                label={T.translate(
+                  "question_form.allowed_badge_features_types"
+                )}
+                placeholder={T.translate("question_form.no_restriction")}
+                options={badgeFeatureOptions}
+              />
+            </Grid2>
+          </Grid2>
+
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 2,
+              mt: 3
+            }}
+          >
+            {!isNew && (
+              <Button
+                variant="outlined"
+                onClick={() => onSubmit({ ...entity, ...formik.values }, true)}
+              >
+                {T.translate("general.save_and_add_next")}
+              </Button>
+            )}
+            <Button type="submit" variant="contained">
+              {T.translate("general.save")}
+            </Button>
+          </Box>
+        </form>
+
+        {showsSubRules && (
+          <Box>
+            <Divider sx={{ my: 3 }} />
+
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{ mb: 2 }}
+            >
+              <Typography color="text.secondary" sx={{ fontWeight: 500 }}>
+                {T.translate("question_form.sub_questions_rules")}
+              </Typography>
+              <Button
+                variant="outlined"
+                onClick={() => history.push(`${subRulesUrl}/new`)}
+              >
+                {T.translate("question_form.sub_questions_rules_add")}
+              </Button>
+            </Stack>
+
+            {entity.sub_question_rules.length === 0 ? (
+              <Typography color="text.secondary">
+                {T.translate("question_form.no_sub_questions_rules")}
+              </Typography>
+            ) : (
+              <SortableTable
+                options={{
+                  actions: {
+                    edit: {
+                      onClick: (ruleId) =>
+                        history.push(`${subRulesUrl}/${ruleId}`)
+                    },
+                    delete: { onClick: onRuleDelete }
+                  }
+                }}
+                data={entity.sub_question_rules}
+                columns={subRuleColumns}
+                dropCallback={updateSubQuestionRuleOrder}
+                orderField="order"
+              />
+            )}
+          </Box>
+        )}
+      </Box>
     </FormikProvider>
   );
 };
