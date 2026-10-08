@@ -660,7 +660,9 @@ export const getBadgeType = (badgeTypeId) => async (dispatch, getState) => {
     createAction(RECEIVE_BADGE_TYPE),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}`,
     snackbarErrorHandler
-  )(params)(dispatch).finally(() => dispatch(stopLoading()));
+  )(params)(dispatch)
+    .finally(() => dispatch(stopLoading()))
+    .catch(() => {});
 };
 
 export const resetBadgeTypeForm = () => (dispatch) => {
@@ -700,7 +702,8 @@ export const saveBadgeType = (entity) => async (dispatch, getState) => {
           })
         );
       })
-      .finally(() => dispatch(stopLoading()));
+      .finally(() => dispatch(stopLoading()))
+      .catch(() => {});
   } else {
     postRequest(
       createAction(UPDATE_BADGE_TYPE),
@@ -721,7 +724,8 @@ export const saveBadgeType = (entity) => async (dispatch, getState) => {
           `/app/summits/${currentSummit.id}/badge-types/${payload.response.id}`
         );
       })
-      .finally(() => dispatch(stopLoading()));
+      .finally(() => dispatch(stopLoading()))
+      .catch(() => {});
   }
 };
 
@@ -763,7 +767,9 @@ export const addAccessLevelToBadgeType =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}/access-levels/${accessLevel.id}`,
       {},
       snackbarErrorHandler
-    )(params)(dispatch).finally(() => dispatch(stopLoading()));
+    )(params)(dispatch)
+      .finally(() => dispatch(stopLoading()))
+      .catch(() => {});
   };
 
 export const removeAccessLevelFromBadgeType =
@@ -784,7 +790,9 @@ export const removeAccessLevelFromBadgeType =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}/access-levels/${accessLevelId}`,
       null,
       snackbarErrorHandler
-    )(params)(dispatch).finally(() => dispatch(stopLoading()));
+    )(params)(dispatch)
+      .finally(() => dispatch(stopLoading()))
+      .catch(() => {});
   };
 
 export const addFeatureToBadgeType =
@@ -805,7 +813,9 @@ export const addFeatureToBadgeType =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}/features/${feature.id}`,
       {},
       snackbarErrorHandler
-    )(params)(dispatch).finally(() => dispatch(stopLoading()));
+    )(params)(dispatch)
+      .finally(() => dispatch(stopLoading()))
+      .catch(() => {});
   };
 
 export const removeFeatureFromBadgeType =
@@ -826,7 +836,9 @@ export const removeFeatureFromBadgeType =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}/features/${featureId}`,
       null,
       snackbarErrorHandler
-    )(params)(dispatch).finally(() => dispatch(stopLoading()));
+    )(params)(dispatch)
+      .finally(() => dispatch(stopLoading()))
+      .catch(() => {});
   };
 
 export const addViewTypeToBadgeType =
@@ -847,7 +859,9 @@ export const addViewTypeToBadgeType =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}/view-types/${viewType.id}`,
       {},
       snackbarErrorHandler
-    )(params)(dispatch).finally(() => dispatch(stopLoading()));
+    )(params)(dispatch)
+      .finally(() => dispatch(stopLoading()))
+      .catch(() => {});
   };
 
 export const removeViewTypeFromBadgeType =
@@ -868,7 +882,9 @@ export const removeViewTypeFromBadgeType =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}/view-types/${viewTypeId}`,
       null,
       snackbarErrorHandler
-    )(params)(dispatch).finally(() => dispatch(stopLoading()));
+    )(params)(dispatch)
+      .finally(() => dispatch(stopLoading()))
+      .catch(() => {});
   };
 
 const normalizeBadgeType = (entity) => {
