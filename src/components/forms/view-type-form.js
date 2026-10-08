@@ -11,129 +11,107 @@
  * limitations under the License.
  * */
 
-import React from "react";
-import T from "i18n-react";
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
+import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import T from "i18n-react/dist/i18n-react";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Grid2 from "@mui/material/Grid2";
+import InputLabel from "@mui/material/InputLabel";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
-import {
-  hasErrors,
-  isEmpty,
-  scrollToError,
-  shallowEqual
-} from "../../utils/methods";
+import { hasErrors, scrollToError } from "../../utils/methods";
 
-class ViewTypeForm extends React.Component {
-  constructor(props) {
-    super(props);
+const ViewTypeForm = ({ entity: entityProp, errors: errorsProp, onSubmit }) => {
+  const [entity, setEntity] = useState({ ...entityProp });
+  const [errors, setErrors] = useState(errorsProp);
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors
-    };
+  useEffect(() => {
+    setEntity({ ...entityProp });
+    setErrors({});
+  }, [entityProp]);
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+  useEffect(() => {
+    setErrors({ ...errorsProp });
+    scrollToError(errorsProp);
+  }, [errorsProp]);
 
-  componentDidUpdate(prevProps) {
-    const state = {};
-    scrollToError(this.props.errors);
+  const handleChange = (ev) => {
+    const { id, type, checked } = ev.target;
+    const value = type === "checkbox" ? checked : ev.target.value;
 
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
-    }
+    setErrors({ ...errors, [id]: "" });
+    setEntity({ ...entity, [id]: value });
+  };
 
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
-    }
-
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
-    }
-  }
-
-  handleChange(ev) {
-    const entity = { ...this.state.entity };
-    const errors = { ...this.state.errors };
-    let { value, id } = ev.target;
-
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
-
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ entity, errors });
-  }
-
-  handleSubmit(ev) {
+  const handleSubmit = (ev) => {
     ev.preventDefault();
-    this.props.onSubmit(this.state.entity);
-  }
+    onSubmit(entity);
+  };
 
-  render() {
-    const { entity, errors } = this.state;
+  const nameError = hasErrors("name", errors);
 
-    return (
-      <form className="badge-feature-type-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label> {T.translate("edit_view_type.name")} *</label>
-            <Input
-              id="name"
-              className="form-control"
-              error={hasErrors("name", errors)}
-              onChange={this.handleChange}
-              value={entity.name}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label> {T.translate("edit_view_type.description")}</label>
-            <TextEditorV3
-              id="description"
-              value={entity.description}
-              onChange={this.handleChange}
-              error={hasErrors("description", errors)}
-              license={process.env.JODIT_LICENSE_KEY}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-12">
-            <div className="form-check abc-checkbox">
-              <input
-                type="checkbox"
+  return (
+    <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit}>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={12}>
+          <TextField
+            id="name"
+            label={T.translate("edit_view_type.name")}
+            value={entity.name}
+            onChange={handleChange}
+            error={!!nameError}
+            helperText={nameError}
+            required
+            fullWidth
+          />
+        </Grid2>
+        <Grid2 size={12}>
+          <InputLabel htmlFor="description">
+            {T.translate("edit_view_type.description")}
+          </InputLabel>
+          <TextEditorV3
+            id="description"
+            value={entity.description}
+            onChange={handleChange}
+            error={hasErrors("description", errors)}
+            license={process.env.JODIT_LICENSE_KEY}
+          />
+        </Grid2>
+        <Grid2 size={12}>
+          <FormControlLabel
+            control={
+              <Checkbox
                 id="is_default"
-                checked={entity.is_default}
-                onChange={this.handleChange}
-                className="form-check-input"
+                checked={!!entity.is_default}
+                onChange={handleChange}
               />
-              <label className="form-check-label" htmlFor="is_default">
-                {T.translate("edit_view_type.is_default")}
-              </label>
-            </div>
-          </div>
-        </div>
+            }
+            label={T.translate("edit_view_type.is_default")}
+          />
+        </Grid2>
+      </Grid2>
 
-        <hr />
+      <Stack direction="row" justifyContent="flex-end">
+        <Button variant="contained" onClick={handleSubmit}>
+          {T.translate("general.save")}
+        </Button>
+      </Stack>
+    </Box>
+  );
+};
 
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
-        </div>
-      </form>
-    );
-  }
-}
+ViewTypeForm.propTypes = {
+  entity: PropTypes.object.isRequired,
+  errors: PropTypes.object,
+  onSubmit: PropTypes.func.isRequired
+};
+
+ViewTypeForm.defaultProps = {
+  errors: {}
+};
 
 export default ViewTypeForm;
