@@ -75,7 +75,7 @@ const BadgeTypeForm = ({
   const nameError = hasErrors("name", errors);
 
   return (
-    <Box component="form" noValidate autoComplete="off">
+    <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit}>
       <Grid2 container spacing={2} sx={{ mb: 2, alignItems: "center" }}>
         <Grid2 size={{ xs: 12, md: 4 }}>
           <TextField
