@@ -379,6 +379,8 @@ export const saveOrderExtraQuestionValue =
  */
 export const updateOrderExtraQuestionValueOrder =
   (values, valueId, newOrder) => async (dispatch, getState) => {
+    dispatch(createAction(QUESTION_VALUE_ORDER_UPDATED)(values));
+
     const { currentOrderExtraQuestionState } = getState();
     const accessToken = await getAccessTokenSafely();
     const {
