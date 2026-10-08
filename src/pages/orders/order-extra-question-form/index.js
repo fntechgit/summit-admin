@@ -5,12 +5,10 @@ import {
   Box,
   Button,
   Divider,
-  FormControlLabel,
   Grid2,
   IconButton,
   MenuItem,
   Stack,
-  Switch,
   TextField,
   Tooltip,
   Typography
@@ -23,6 +21,7 @@ import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
 import MuiFormikDropdownCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/dropdown-checkbox";
+import MuiFormikSwitch from "openstack-uicore-foundation/lib/components/mui/formik-inputs/switch";
 import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
 import DragAndDropList from "../../../components/mui/dnd-list";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
@@ -109,6 +108,18 @@ const OptionRow = ({ option, onSave, onDelete }) => {
   return (
     <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.5 }}>
       <DragIndicatorIcon sx={{ color: "text.disabled" }} />
+      <Tooltip title={T.translate("question_form.default_label")}>
+        <IconButton
+          aria-label={T.translate("question_form.default_label")}
+          onClick={() => onSave({ ...option, is_default: !option.is_default })}
+        >
+          {option.is_default ? (
+            <StarIcon color="primary" />
+          ) : (
+            <StarBorderIcon />
+          )}
+        </IconButton>
+      </Tooltip>
       <TextField
         variant="standard"
         fullWidth
@@ -125,18 +136,6 @@ const OptionRow = ({ option, onSave, onDelete }) => {
         onBlur={saveIfChanged}
         sx={{ width: "30%" }}
       />
-      <Tooltip title={T.translate("question_form.is_default")}>
-        <IconButton
-          aria-label={T.translate("question_form.is_default")}
-          onClick={() => onSave({ ...option, is_default: !option.is_default })}
-        >
-          {option.is_default ? (
-            <StarIcon color="primary" />
-          ) : (
-            <StarBorderIcon />
-          )}
-        </IconButton>
-      </Tooltip>
       <Tooltip title={T.translate("general.delete")}>
         <IconButton
           aria-label={T.translate("general.delete")}
@@ -166,6 +165,9 @@ const AddOptionRow = ({ onAdd }) => {
   return (
     <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.5 }}>
       <DragIndicatorIcon sx={{ visibility: "hidden" }} />
+      <IconButton sx={{ visibility: "hidden" }}>
+        <StarBorderIcon />
+      </IconButton>
       <TextField
         variant="standard"
         fullWidth
@@ -292,7 +294,12 @@ const OrderExtraQuestionForm = ({
     <FormikProvider value={formik}>
       <Box
         sx={{
-          "& .MuiInputLabel-root": { fontSize: "1.25rem", fontWeight: 500 }
+          "& .MuiInputLabel-root": { fontSize: "16px", fontWeight: 500 },
+          // keeps the outline's notch as wide as the larger label
+          "& .MuiOutlinedInput-notchedOutline": {
+            fontSize: "16px",
+            fontWeight: 500
+          }
         }}
       >
         <form onSubmit={formik.handleSubmit}>
@@ -391,37 +398,21 @@ const OrderExtraQuestionForm = ({
 
           <Divider sx={{ my: 3 }} />
 
-          <Typography color="text.secondary" sx={{ mb: 2, fontWeight: 500 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
             {T.translate("question_form.advanced")}
           </Typography>
 
           <Grid2 container spacing={3}>
             <Grid2 size={{ xs: 12, md: 6 }}>
-              <FormControlLabel
-                labelPlacement="start"
-                sx={{ ml: 0 }}
+              <MuiFormikSwitch
+                name="mandatory"
                 label={T.translate("question_form.mandatory_label")}
-                control={
-                  <Switch
-                    name="mandatory"
-                    checked={formik.values.mandatory}
-                    onChange={formik.handleChange}
-                  />
-                }
               />
             </Grid2>
             <Grid2 size={{ xs: 12, md: 6 }}>
-              <FormControlLabel
-                labelPlacement="start"
-                sx={{ ml: 0 }}
+              <MuiFormikSwitch
+                name="printable"
                 label={T.translate("question_form.printable_label")}
-                control={
-                  <Switch
-                    name="printable"
-                    checked={formik.values.printable}
-                    onChange={formik.handleChange}
-                  />
-                }
               />
             </Grid2>
             <Grid2 size={{ xs: 12, md: 6 }}>
@@ -476,7 +467,7 @@ const OrderExtraQuestionForm = ({
               justifyContent="space-between"
               sx={{ mb: 2 }}
             >
-              <Typography color="text.secondary" sx={{ fontWeight: 500 }}>
+              <Typography variant="h6">
                 {T.translate("question_form.sub_questions_rules")}
               </Typography>
               <Button
