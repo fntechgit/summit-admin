@@ -11,273 +11,187 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
-import SimpleLinkList from "openstack-uicore-foundation/lib/components/simple-link-list";
-import {
-  isEmpty,
-  scrollToError,
-  shallowEqual,
-  hasErrors
-} from "../../utils/methods";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Grid2 from "@mui/material/Grid2";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import MuiLinkList from "../mui/link-list";
+import { hasErrors, scrollToError } from "../../utils/methods";
 
-class BadgeTypeForm extends React.Component {
-  constructor(props) {
-    super(props);
+const DESCRIPTION_MAX_LENGTH = 500;
+const DESCRIPTION_ROWS = 6;
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors
-    };
+const linkedColumns = [
+  { columnKey: "name", header: T.translate("edit_badge_type.name") }
+];
 
-    this.handleAccessLevelLink = this.handleAccessLevelLink.bind(this);
-    this.handleAccessLevelUnLink = this.handleAccessLevelUnLink.bind(this);
-    this.queryAccessLevels = this.queryAccessLevels.bind(this);
-    this.handleFeatureLink = this.handleFeatureLink.bind(this);
-    this.handleFeatureUnLink = this.handleFeatureUnLink.bind(this);
-    this.queryFeatures = this.queryFeatures.bind(this);
-    this.handleViewTypeLink = this.handleViewTypeLink.bind(this);
-    this.handleViewTypeUnLink = this.handleViewTypeUnLink.bind(this);
-    this.queryViewTypes = this.queryViewTypes.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+const unlinkDialogBody = (name) =>
+  T.translate("edit_badge_type.unlink_warning", { name });
 
-  componentDidUpdate(prevProps) {
-    const state = {};
-    scrollToError(this.props.errors);
+const BadgeTypeForm = ({
+  entity: entityProp,
+  currentSummit,
+  errors: errorsProp,
+  onAccessLevelLink,
+  onAccessLevelUnLink,
+  onFeatureLink,
+  onFeatureUnLink,
+  onViewTypeLink,
+  onViewTypeUnLink,
+  onSubmit
+}) => {
+  const [entity, setEntity] = useState({ ...entityProp });
+  const [errors, setErrors] = useState(errorsProp);
 
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
-    }
+  useEffect(() => {
+    setEntity({ ...entityProp });
+    setErrors({});
+  }, [entityProp]);
 
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
-    }
+  useEffect(() => {
+    setErrors({ ...errorsProp });
+    scrollToError(errorsProp);
+  }, [errorsProp]);
 
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
-    }
-  }
+  const handleChange = (ev) => {
+    const { id, type, checked } = ev.target;
+    const value = type === "checkbox" ? checked : ev.target.value;
 
-  handleChange(ev) {
-    const entity = { ...this.state.entity };
-    const errors = { ...this.state.errors };
-    let { value, id } = ev.target;
+    setErrors({ ...errors, [id]: "" });
+    setEntity({ ...entity, [id]: value });
+  };
 
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
-
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ entity, errors });
-  }
-
-  handleSubmit(ev) {
+  const handleSubmit = (ev) => {
     ev.preventDefault();
-    this.props.onSubmit(this.state.entity);
-  }
+    onSubmit(entity);
+  };
 
-  handleAccessLevelLink(accessLevel) {
-    const { entity } = this.state;
-    this.props.onAccessLevelLink(entity.id, accessLevel);
-  }
+  const nameError = hasErrors("name", errors);
 
-  handleAccessLevelUnLink(accessLevelId) {
-    const { entity } = this.state;
-    this.props.onAccessLevelUnLink(entity.id, accessLevelId);
-  }
-
-  queryAccessLevels(input, callback) {
-    const { currentSummit } = this.props;
-    const accessLevels = currentSummit.badge_access_level_types.filter(
-      (f) => f.name.toLowerCase().indexOf(input.toLowerCase()) !== -1
-    );
-    callback(accessLevels);
-  }
-
-  handleFeatureLink(feature) {
-    const { entity } = this.state;
-    this.props.onFeatureLink(entity.id, feature);
-  }
-
-  handleFeatureUnLink(featureId) {
-    const { entity } = this.state;
-    this.props.onFeatureUnLink(entity.id, featureId);
-  }
-
-  queryFeatures(input, callback) {
-    const { currentSummit } = this.props;
-    const features = currentSummit.badge_features.filter(
-      (f) => f.name.toLowerCase().indexOf(input.toLowerCase()) !== -1
-    );
-    callback(features);
-  }
-
-  handleViewTypeLink(viewType) {
-    const { entity } = this.state;
-    this.props.onViewTypeLink(entity.id, viewType);
-  }
-
-  handleViewTypeUnLink(viewType) {
-    const { entity } = this.state;
-    this.props.onViewTypeUnLink(entity.id, viewType);
-  }
-
-  queryViewTypes(input, callback) {
-    const { currentSummit } = this.props;
-    const ViewTypes = currentSummit.badge_view_types.filter(
-      (f) => f.name.toLowerCase().indexOf(input.toLowerCase()) !== -1
-    );
-    callback(ViewTypes);
-  }
-
-  render() {
-    const { entity, errors } = this.state;
-    const accessLevelColumns = [
-      { columnKey: "name", value: T.translate("edit_badge_type.name") }
-    ];
-
-    const accessLevelOptions = {
-      title: T.translate("edit_badge_type.access_levels"),
-      valueKey: "name",
-      labelKey: "name",
-      defaultOptions: true,
-      actions: {
-        search: this.queryAccessLevels,
-        delete: { onClick: this.handleAccessLevelUnLink },
-        add: { onClick: this.handleAccessLevelLink }
-      }
-    };
-
-    const featuresColumns = [
-      { columnKey: "name", value: T.translate("edit_badge_type.name") }
-    ];
-
-    const featuresOptions = {
-      title: T.translate("edit_badge_type.badge_features"),
-      valueKey: "name",
-      labelKey: "name",
-      defaultOptions: true,
-      actions: {
-        search: this.queryFeatures,
-        delete: { onClick: this.handleFeatureUnLink },
-        add: { onClick: this.handleFeatureLink }
-      }
-    };
-
-    const viewTypesColumns = [
-      { columnKey: "name", value: T.translate("edit_badge_type.name") }
-    ];
-
-    const viewTypesOptions = {
-      title: T.translate("edit_badge_type.view_types"),
-      valueKey: "name",
-      labelKey: "name",
-      defaultOptions: true,
-      actions: {
-        search: this.queryViewTypes,
-        delete: { onClick: this.handleViewTypeUnLink },
-        add: { onClick: this.handleViewTypeLink }
-      }
-    };
-
-    return (
-      <form className="badge-type-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("edit_badge_type.name")} *</label>
-            <Input
-              id="name"
-              className="form-control"
-              error={hasErrors("name", errors)}
-              onChange={this.handleChange}
-              value={entity.name}
-            />
-          </div>
-          <div className="col-md-4 checkboxes-div">
-            <div className="form-check abc-checkbox">
-              <input
-                type="checkbox"
+  return (
+    <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit}>
+      <Grid2 container spacing={2} sx={{ mb: 2, alignItems: "center" }}>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <TextField
+            id="name"
+            label={T.translate("edit_badge_type.name")}
+            value={entity.name}
+            onChange={handleChange}
+            error={!!nameError}
+            helperText={nameError}
+            required
+            fullWidth
+          />
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <FormControlLabel
+            control={
+              <Checkbox
                 id="is_default"
-                checked={entity.is_default}
-                onChange={this.handleChange}
-                className="form-check-input"
+                checked={!!entity.is_default}
+                onChange={handleChange}
               />
-              <label className="form-check-label" htmlFor="is_default">
-                {T.translate("edit_badge_type.default")}
-              </label>
-            </div>
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-10">
-            <label> {T.translate("edit_badge_type.description")} *</label>
-            <textarea
-              id="description"
-              value={entity.description}
-              onChange={this.handleChange}
-              rows={6}
-              maxLength={500}
-              className="form-control"
-            />
-            <span className="character-counter">{`${entity.description?.length}/500`}</span>
-          </div>
-        </div>
+            }
+            label={T.translate("edit_badge_type.default")}
+          />
+        </Grid2>
+      </Grid2>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, md: 10 }}>
+          <TextField
+            id="description"
+            label={T.translate("edit_badge_type.description")}
+            value={entity.description}
+            onChange={handleChange}
+            helperText={`${
+              entity.description?.length ?? 0
+            }/${DESCRIPTION_MAX_LENGTH}`}
+            slotProps={{ htmlInput: { maxLength: DESCRIPTION_MAX_LENGTH } }}
+            required
+            multiline
+            rows={DESCRIPTION_ROWS}
+            fullWidth
+          />
+        </Grid2>
+      </Grid2>
 
-        {entity.id !== 0 && (
-          <>
-            <hr />
-            <SimpleLinkList
-              values={entity.access_levels}
-              columns={accessLevelColumns}
-              options={accessLevelOptions}
-            />
-          </>
-        )}
+      {entity.id !== 0 && (
+        <>
+          <Box sx={{ pt: 2 }} />
+          <MuiLinkList
+            title={T.translate("edit_badge_type.access_levels")}
+            placeholder={T.translate(
+              "edit_badge_type.placeholders.select_access_level"
+            )}
+            values={entity.access_levels}
+            options={currentSummit.badge_access_level_types}
+            columns={linkedColumns}
+            deleteDialogBody={unlinkDialogBody}
+            onLink={(accessLevel) => onAccessLevelLink(entity.id, accessLevel)}
+            onUnLink={(accessLevelId) =>
+              onAccessLevelUnLink(entity.id, accessLevelId)
+            }
+          />
+          <Box sx={{ pt: 2 }} />
+          <MuiLinkList
+            title={T.translate("edit_badge_type.badge_features")}
+            placeholder={T.translate(
+              "edit_badge_type.placeholders.select_badge_feature"
+            )}
+            values={entity.badge_features}
+            options={currentSummit.badge_features}
+            columns={linkedColumns}
+            deleteDialogBody={unlinkDialogBody}
+            onLink={(feature) => onFeatureLink(entity.id, feature)}
+            onUnLink={(featureId) => onFeatureUnLink(entity.id, featureId)}
+          />
+          <Box sx={{ pt: 2 }} />
+          <MuiLinkList
+            title={T.translate("edit_badge_type.view_types")}
+            placeholder={T.translate(
+              "edit_badge_type.placeholders.select_view_type"
+            )}
+            values={entity.allowed_view_types}
+            options={currentSummit.badge_view_types ?? []}
+            columns={linkedColumns}
+            deleteDialogBody={unlinkDialogBody}
+            onLink={(viewType) => onViewTypeLink(entity.id, viewType)}
+            onUnLink={(viewTypeId) => onViewTypeUnLink(entity.id, viewTypeId)}
+          />
+        </>
+      )}
 
-        {entity.id !== 0 && (
-          <>
-            <hr />
-            <SimpleLinkList
-              values={entity.badge_features}
-              columns={featuresColumns}
-              options={featuresOptions}
-            />
-          </>
-        )}
+      <Box sx={{ pt: 2 }} />
+      <Stack direction="row" justifyContent="flex-end">
+        <Button variant="contained" onClick={handleSubmit}>
+          {T.translate("general.save")}
+        </Button>
+      </Stack>
+    </Box>
+  );
+};
 
-        {entity.id !== 0 && (
-          <>
-            <hr />
-            <SimpleLinkList
-              values={entity.allowed_view_types}
-              columns={viewTypesColumns}
-              options={viewTypesOptions}
-            />
-          </>
-        )}
+BadgeTypeForm.propTypes = {
+  entity: PropTypes.object.isRequired,
+  currentSummit: PropTypes.object.isRequired,
+  errors: PropTypes.object,
+  onAccessLevelLink: PropTypes.func.isRequired,
+  onAccessLevelUnLink: PropTypes.func.isRequired,
+  onFeatureLink: PropTypes.func.isRequired,
+  onFeatureUnLink: PropTypes.func.isRequired,
+  onViewTypeLink: PropTypes.func.isRequired,
+  onViewTypeUnLink: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired
+};
 
-        <hr />
-
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
-        </div>
-      </form>
-    );
-  }
-}
+BadgeTypeForm.defaultProps = {
+  errors: {}
+};
 
 export default BadgeTypeForm;

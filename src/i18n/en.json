@@ -2202,7 +2202,13 @@
     "view_types": "View Types",
     "badge_features": "Badge Features",
     "badge_type_saved": "Badge Type saved successfully",
-    "badge_type_created": "Badge Type created successfully"
+    "badge_type_created": "Badge Type created successfully",
+    "placeholders": {
+      "select_access_level": "Select an access level",
+      "select_badge_feature": "Select a badge feature",
+      "select_view_type": "Select a view type"
+    },
+    "unlink_warning": "Are you sure you want to unlink {name}?"
   },
   "view_type_list": {
     "view_types": "View Types",
