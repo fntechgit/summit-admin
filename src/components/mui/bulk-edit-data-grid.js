@@ -22,6 +22,7 @@ import FileUploadIcon from "@mui/icons-material/FileUpload";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   DataGrid,
+  GRID_STRING_COL_DEF,
   GridActionsCellItem,
   GridColumnMenu,
   GridColumnMenuHideItem,
@@ -30,6 +31,7 @@ import {
   GridToolbarContainer,
   gridPreferencePanelStateSelector,
   useGridApiContext,
+  useGridApiRef,
   useGridSelector
 } from "@mui/x-data-grid";
 import CustomTablePagination from "openstack-uicore-foundation/lib/components/mui/table/custom-table-pagination";
@@ -46,7 +48,6 @@ import {
 // MUI DataGrid version of uicore's BulkEditTable:
 // same select -> "Edit Selected" -> Apply flow
 
-const COLUMN_MIN_WIDTH = 150;
 const EDIT_COLUMN_MIN_WIDTH = 250;
 const SEARCH_WIDTH = 250;
 
@@ -371,6 +372,25 @@ const BulkEditDataGrid = ({
   // the columns panel anchors to the column headers by default; anchor it to
   // its toolbar button instead
   const [columnsButtonEl, setColumnsButtonEl] = useState(null);
+  const apiRef = useGridApiRef();
+  // resized widths; the grid drops them whenever it gets new columns
+  const [columnWidths, setColumnWidths] = useState({});
+
+  // flex until a resize starts, then freeze widths so the others don't stretch
+  useEffect(
+    () =>
+      apiRef.current.subscribeEvent("columnResizeStart", () =>
+        setColumnWidths((current) => ({
+          ...Object.fromEntries(
+            apiRef.current
+              .getVisibleColumns()
+              .map((col) => [col.field, col.computedWidth])
+          ),
+          ...current
+        }))
+      ),
+    []
+  );
 
   const reset = () => {
     setSelectedIds([]);
@@ -428,16 +448,21 @@ const BulkEditDataGrid = ({
   const gridColumns = columns.map((col) => {
     const customMinWidth = parseFloat(col.customStyle?.minWidth);
     const minWidth = Math.max(
-      Number.isNaN(customMinWidth) ? COLUMN_MIN_WIDTH : customMinWidth,
+      Number.isNaN(customMinWidth)
+        ? GRID_STRING_COL_DEF.minWidth
+        : customMinWidth,
       editEnabled && col.editableField ? EDIT_COLUMN_MIN_WIDTH : 0
     );
+    // a saved or page-given width is fixed; otherwise flex by the page's weight
+    const width = columnWidths[col.columnKey] ?? col.width;
 
     return {
       field: col.columnKey,
       headerName: col.header ?? col.label ?? col.value,
       sortable: !!col.sortable,
       hideable: col.hideable ?? true,
-      flex: 1,
+      flex: width ? 0 : col.flex ?? 1,
+      width,
       minWidth,
       renderCell: ({ row }) => {
         const rowId = row[idKey];
@@ -538,10 +563,12 @@ const BulkEditDataGrid = ({
           headers in view */}
       <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "80vh" }}>
         <DataGrid
+          apiRef={apiRef}
           rows={data}
           columns={gridColumns}
           getRowId={(row) => row[idKey]}
-          getRowHeight={() => "auto"}
+          // rows truncate at MUI's default height; only rows being edited grow
+          getRowHeight={({ id }) => (editRows[id] ? "auto" : null)}
           checkboxSelection
           disableRowSelectionOnClick
           rowSelectionModel={selectedIds}
@@ -549,6 +576,12 @@ const BulkEditDataGrid = ({
           isRowSelectable={() => !editEnabled}
           columnVisibilityModel={columnVisibilityModel}
           onColumnVisibilityModelChange={onColumnVisibilityModelChange}
+          onColumnWidthChange={({ colDef, width }) =>
+            setColumnWidths((current) => ({
+              ...current,
+              [colDef.field]: width
+            }))
+          }
           disableColumnFilter
           sortingMode="server"
           sortModel={sortModel}
@@ -592,7 +625,9 @@ const BulkEditDataGrid = ({
               setColumnsButtonEl
             }
           }}
-          sx={{ "& .MuiDataGrid-cell": { py: 1 } }}
+          sx={{
+            "& .MuiDataGrid-row--dynamicHeight > .MuiDataGrid-cell": { py: 1 }
+          }}
         />
       </Box>
       <CustomTablePagination
@@ -613,7 +648,11 @@ BulkEditDataGrid.propTypes = {
     sortDir: PropTypes.number
   }).isRequired,
   columns: PropTypes.arrayOf(
-    PropTypes.shape({ columnKey: PropTypes.string.isRequired })
+    PropTypes.shape({
+      columnKey: PropTypes.string.isRequired,
+      width: PropTypes.number,
+      flex: PropTypes.number
+    })
   ).isRequired,
   data: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   onSort: PropTypes.func.isRequired,
