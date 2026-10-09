@@ -21,6 +21,7 @@ import {
   MAX_PER_PAGE
 } from "../../../../../utils/constants";
 import AddSponsorExtraQuestionPopup from "./add-extra-question-popup";
+import ForceDeleteExtraQuestionPopup from "./force-delete-extra-question-popup";
 
 const SponsorExtraQuestions = ({
   sponsorId,
@@ -31,11 +32,15 @@ const SponsorExtraQuestions = ({
   saveSponsorExtraQuestionValue,
   resetSponsorExtraQuestionForm,
   onExtraQuestionReOrder,
-  onExtraQuestionDelete
+  onExtraQuestionDelete,
+  canForceDelete = false,
+  getSponsorExtraQuestionUsage,
+  onExtraQuestionForceDelete
 }) => {
   const [tableData, setTableData] = useState(extraQuestions);
   const [showAddExtraQuestionPopup, setShowAddExtraQuestionPopup] =
     useState(false);
+  const [questionToForceDelete, setQuestionToForceDelete] = useState(null);
 
   useEffect(() => {
     const sortedExtraQuestions = extraQuestions.sort(
@@ -67,6 +72,9 @@ const SponsorExtraQuestions = ({
   const handleDeleteExtraQuestion = (extraQuestionId) => {
     onExtraQuestionDelete(sponsorId, extraQuestionId);
   };
+
+  const handleForceDeleteExtraQuestion = (extraQuestionId, options) =>
+    onExtraQuestionForceDelete(sponsorId, extraQuestionId, options);
 
   const handleSubmitExtraQuestion = (extraQuestion) => {
     const { valuesToSave, ...extraQuestionToSave } = extraQuestion;
@@ -106,7 +114,26 @@ const SponsorExtraQuestions = ({
     {
       columnKey: "name",
       header: T.translate("generic_extra_question_list.question_id")
-    }
+    },
+    // sponsors can't delete questions, only admins can force it
+    ...(canForceDelete
+      ? [
+          {
+            columnKey: "force_delete",
+            header: "",
+            align: "right",
+            render: (c) => (
+              <Button
+                size="small"
+                color="error"
+                onClick={() => setQuestionToForceDelete(c)}
+              >
+                {T.translate("edit_sponsor.force_delete")}
+              </Button>
+            )
+          }
+        ]
+      : [])
   ];
 
   return (
@@ -206,6 +233,16 @@ const SponsorExtraQuestions = ({
           )}
         </Grid2>
       </Box>
+      {questionToForceDelete && (
+        <ForceDeleteExtraQuestionPopup
+          extraQuestion={questionToForceDelete}
+          getUsage={(questionId) =>
+            getSponsorExtraQuestionUsage(sponsorId, questionId)
+          }
+          onConfirm={handleForceDeleteExtraQuestion}
+          onClose={() => setQuestionToForceDelete(null)}
+        />
+      )}
       {showAddExtraQuestionPopup && (
         <AddSponsorExtraQuestionPopup
           summit={summit}
