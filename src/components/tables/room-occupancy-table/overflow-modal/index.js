@@ -55,7 +55,7 @@ function OverflowModal({
                   className="form-check-input"
                 />
                 <label className="form-check-label" htmlFor="is_secure">
-                  Is Secure ?
+                  Secure stream
                 </label>
               </div>
             </div>
