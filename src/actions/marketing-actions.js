@@ -24,7 +24,11 @@ import {
   putRequest,
   setSnackbarMessage
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { getAccessTokenSafely, isHexColorSetting } from "../utils/methods";
+import {
+  getAccessTokenSafely,
+  isHexColorSetting,
+  sequenced
+} from "../utils/methods";
 import {
   DEFAULT_PER_PAGE,
   ERROR_CODE_412,
@@ -147,6 +151,22 @@ export const getMarketingSettingsForPrintApp =
       .catch(() => {});
   };
 
+// Sequence-guard (see sequenced()): SelectionPlanIdLayout dispatches a fresh
+// getMarketingSettingsBySelectionPlan(id) on every route param change, and
+// concurrent calls for different plan ids never abort each other (the
+// selection_plan_id lives in the query, and uicore's getRequest only aborts
+// an identical URL+query) - a stale response landing after a newer one would
+// merge the wrong plan's settings into whatever entity is current at that
+// moment. guardedDispatch drops the REQUEST/RECEIVE/loading dispatches from
+// a superseded call.
+const selectionPlanSettingsSeq = sequenced();
+
+// Advances the sequence without issuing a request, so any settings response
+// still in flight is dropped (e.g. when the form is reset for a new plan).
+export const invalidateSelectionPlanSettings = () => {
+  selectionPlanSettingsSeq(() => {});
+};
+
 export const getMarketingSettingsBySelectionPlan =
   (
     selectionPlanId,
@@ -159,8 +179,9 @@ export const getMarketingSettingsBySelectionPlan =
   (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
+    const { guardedDispatch } = selectionPlanSettingsSeq(dispatch);
 
-    dispatch(startLoading());
+    guardedDispatch(startLoading());
 
     const params = {
       page,
@@ -184,8 +205,8 @@ export const getMarketingSettingsBySelectionPlan =
       `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
       snackbarErrorHandler,
       { order, orderDir, term }
-    )(params)(dispatch).finally(() => {
-      dispatch(stopLoading());
+    )(params)(guardedDispatch).finally(() => {
+      guardedDispatch(stopLoading());
     });
   };
 

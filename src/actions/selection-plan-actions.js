@@ -33,9 +33,13 @@ import {
   getAccessTokenSafely,
   escapeFilterValue,
   fetchResponseHandler,
-  fetchErrorHandler
+  fetchErrorHandler,
+  sequenced
 } from "../utils/methods";
-import { saveMarketingSetting } from "./marketing-actions";
+import {
+  invalidateSelectionPlanSettings,
+  saveMarketingSetting
+} from "./marketing-actions";
 import {
   DEBOUNCE_WAIT,
   DEFAULT_CURRENT_PAGE,
@@ -115,13 +119,26 @@ export const getSelectionPlans =
     });
   };
 
+// Sequence-guard (see sequenced()): SelectionPlanIdLayout dispatches a fresh
+// getSelectionPlan(id) on every route param change, and concurrent calls for
+// different plan ids never abort each other - a stale response landing after
+// a newer one would overwrite the store's entity with the wrong plan's data,
+// which the layout's render guard can never recover from on its own (it only
+// compares the store id against the URL id; nothing re-triggers a fetch).
+// guardedDispatch drops the RECEIVE/loading dispatches from a superseded call.
+const getSelectionPlanSeq = sequenced();
+
 export const getSelectionPlan =
   (selectionPlanId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
+    const { isCurrent, guardedDispatch } = getSelectionPlanSeq(dispatch);
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
 
-    dispatch(startLoading());
+    // Superseded while awaiting the token -> don't fire a request at all.
+    if (!isCurrent()) return Promise.resolve();
+
+    guardedDispatch(startLoading());
 
     const params = {
       access_token: accessToken,
@@ -134,16 +151,27 @@ export const getSelectionPlan =
       createAction(RECEIVE_SELECTION_PLAN),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}`,
       snackbarErrorHandler
-    )(params)(dispatch).then(async () => {
-      await dispatch(getAllowedMembers(selectionPlanId));
-      await dispatch(
-        getSelectionPlanProgressFlags(currentSummit.id, selectionPlanId)
-      );
-      dispatch(stopLoading());
-    });
+    )(params)(guardedDispatch)
+      .then(async () => {
+        // Superseded while the entity was in flight -> skip the follow-up
+        // requests entirely rather than let them write stale data too.
+        // The follow-ups are invoked with guardedDispatch (not dispatched
+        // through the store, which would hand them the raw dispatch) so a
+        // response landing after this call is superseded is dropped as well.
+        if (!isCurrent()) return;
+        await getAllowedMembers(selectionPlanId)(guardedDispatch, getState);
+        if (!isCurrent()) return;
+        await getSelectionPlanProgressFlags(currentSummit.id, selectionPlanId)(
+          guardedDispatch,
+          getState
+        );
+      })
+      .finally(() => guardedDispatch(stopLoading()));
   };
 
 export const resetSelectionPlanForm = () => (dispatch) => {
+  getSelectionPlanSeq(dispatch); // invalidates any in-flight getSelectionPlan
+  invalidateSelectionPlanSettings(); // invalidate  any in-flight settings fetch
   dispatch(createAction(RESET_SELECTION_PLAN_FORM)({}));
 };
 

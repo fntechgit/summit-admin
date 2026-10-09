@@ -6,20 +6,28 @@ import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
 import {
   postRequest,
-  putRequest
+  putRequest,
+  getRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { saveSelectionPlan } from "../selection-plan-actions";
+import {
+  saveSelectionPlan,
+  getSelectionPlan,
+  resetSelectionPlanForm
+} from "../selection-plan-actions";
+import { invalidateSelectionPlanSettings } from "../marketing-actions";
 import * as methods from "../../utils/methods";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   __esModule: true,
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
   postRequest: jest.fn(),
-  putRequest: jest.fn()
+  putRequest: jest.fn(),
+  getRequest: jest.fn()
 }));
 
 jest.mock("../marketing-actions", () => ({
-  saveMarketingSetting: jest.fn()
+  saveMarketingSetting: jest.fn(),
+  invalidateSelectionPlanSettings: jest.fn()
 }));
 
 const requestMock =
@@ -135,5 +143,171 @@ describe("saveSelectionPlan", () => {
         code: 200
       });
     });
+  });
+});
+
+describe("getSelectionPlan - stale response guard", () => {
+  const middlewares = [thunk];
+  const mockStore = configureStore(middlewares);
+
+  // Only the primary "/selection-plans/{id}" fetch is held open (its
+  // resolution order is controlled from the test); the allowed-members and
+  // progress-flags follow-up calls resolve immediately so `await`s in
+  // getSelectionPlan don't hang.
+  const isPrimaryFetchUrl = (url) => /\/selection-plans\/[^/]+$/.test(url);
+
+  beforeEach(() => {
+    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("drops an older plan's response after a newer plan's response already landed", async () => {
+    const resolvers = {};
+    getRequest.mockImplementation(
+      (requestActionCreator, receiveActionCreator, url) => () => (dispatch) => {
+        if (isPrimaryFetchUrl(url)) {
+          const id = Number(url.split("/").pop());
+          return new Promise((resolve) => {
+            resolvers[id] = () => {
+              dispatch(receiveActionCreator({ response: { id } }));
+              resolve();
+            };
+          });
+        }
+        if (requestActionCreator) dispatch(requestActionCreator({}));
+        dispatch(receiveActionCreator({ response: {} }));
+        return Promise.resolve();
+      }
+    );
+
+    const store = mockStore(storeState);
+
+    // User opens plan 5, then quickly navigates to plan 8 before plan 5's
+    // fetch settles - both requests are genuinely in flight when plan 8's
+    // response lands first.
+    store.dispatch(getSelectionPlan("5"));
+    await flushPromises();
+    store.dispatch(getSelectionPlan("8"));
+    await flushPromises();
+
+    // The newer request (plan 8) resolves first...
+    resolvers[8]();
+    await flushPromises();
+
+    // ...then the older, superseded request (plan 5) resolves late.
+    resolvers[5]();
+    await flushPromises();
+
+    const receivedIds = store
+      .getActions()
+      .filter((a) => a.type === "RECEIVE_SELECTION_PLAN")
+      .map((a) => a.payload.response.id);
+
+    // Plan 5's stale response must never reach the store - only plan 8's.
+    expect(receivedIds).toEqual([8]);
+  });
+
+  it("drops a plan's response that lands after resetSelectionPlanForm supersedes it", async () => {
+    const resolvers = {};
+    getRequest.mockImplementation(
+      (requestActionCreator, receiveActionCreator, url) => () => (dispatch) => {
+        if (isPrimaryFetchUrl(url)) {
+          const id = Number(url.split("/").pop());
+          return new Promise((resolve) => {
+            resolvers[id] = () => {
+              dispatch(receiveActionCreator({ response: { id } }));
+              resolve();
+            };
+          });
+        }
+        if (requestActionCreator) dispatch(requestActionCreator({}));
+        dispatch(receiveActionCreator({ response: {} }));
+        return Promise.resolve();
+      }
+    );
+
+    const store = mockStore(storeState);
+
+    // User opens plan 5, then navigates back to the list and clicks
+    // "Add new" before plan 5's fetch settles.
+    store.dispatch(getSelectionPlan("5"));
+    await flushPromises();
+    store.dispatch(resetSelectionPlanForm());
+    await flushPromises();
+    resolvers[5]();
+    await flushPromises();
+
+    const actionTypes = store.getActions().map((a) => a.type);
+
+    expect(actionTypes).not.toContain("RECEIVE_SELECTION_PLAN");
+    expect(actionTypes).toContain("RESET_SELECTION_PLAN_FORM");
+    // ...and an in-flight settings fetch for plan 5 is invalidated too, so it
+    // can't merge plan 5's config values into the new plan's form.
+    expect(invalidateSelectionPlanSettings).toHaveBeenCalled();
+  });
+
+  it("drops a superseded plan's allowed-members and progress-flags responses", async () => {
+    // Plan 5's follow-up requests are held open; everything else (both
+    // primary fetches and plan 8's follow-ups) resolves immediately.
+    const pending = [];
+    getRequest.mockImplementation(
+      (requestActionCreator, receiveActionCreator, url) => () => (dispatch) => {
+        const respond = () => {
+          if (requestActionCreator) dispatch(requestActionCreator({}));
+          dispatch(receiveActionCreator({ response: { id: url, data: [] } }));
+        };
+        if (
+          /selection-plans\/5\/(allowed-members|allowed-presentation-action-types)$/.test(
+            url
+          )
+        ) {
+          return new Promise((resolve) => {
+            pending.push(() => {
+              respond();
+              resolve();
+            });
+          });
+        }
+        respond();
+        return Promise.resolve();
+      }
+    );
+
+    const store = mockStore(storeState);
+
+    // Plan 5's entity lands and its allowed-members request goes out...
+    store.dispatch(getSelectionPlan("5"));
+    await flushPromises();
+    expect(pending).toHaveLength(1);
+
+    // ...then the user switches to plan 8, which loads completely.
+    store.dispatch(getSelectionPlan("8"));
+    await flushPromises();
+
+    // Plan 5's allowed-members response lands late.
+    pending.shift()();
+    await flushPromises();
+
+    const followUpUrls = store
+      .getActions()
+      .filter((a) =>
+        [
+          "RECEIVE_ALLOWED_MEMBERS",
+          "RECEIVE_SELECTION_PLAN_PROGRESS_FLAGS"
+        ].includes(a.type)
+      )
+      .map((a) => a.payload.response.id);
+
+    expect(followUpUrls.some((u) => u.includes("/selection-plans/5/"))).toBe(
+      false
+    );
+    expect(followUpUrls.some((u) => u.includes("/selection-plans/8/"))).toBe(
+      true
+    );
+    // Superseded -> plan 5 never even requests its progress flags.
+    expect(pending).toHaveLength(0);
   });
 });
