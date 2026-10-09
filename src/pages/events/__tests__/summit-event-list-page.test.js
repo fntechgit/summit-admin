@@ -429,7 +429,7 @@ describe("SummitEventListPage", () => {
     ]);
   });
 
-  test("keeps Selection Status hidden once hidden, and shows it again with Show all", async () => {
+  test("keeps Activity Type hidden once hidden, and shows it again with Show all", async () => {
     renderWithRedux(<SummitEventListPage />, {
       initialState: {
         currentSummitState: {
@@ -467,26 +467,20 @@ describe("SummitEventListPage", () => {
         mockEditableTableSpy.mock.calls.length - 1
       ][0];
 
-    expect(latestGridProps().columnVisibilityModel.selection_status).not.toBe(
-      false
-    );
+    expect(latestGridProps().columnVisibilityModel.type).not.toBe(false);
 
     act(() => {
       latestGridProps().onColumnVisibilityModelChange({
         ...latestGridProps().columnVisibilityModel,
-        selection_status: false
+        type: false
       });
     });
-    expect(latestGridProps().columnVisibilityModel.selection_status).toBe(
-      false
-    );
+    expect(latestGridProps().columnVisibilityModel.type).toBe(false);
 
     // "Show all" reports visible columns by leaving them out of the model
     act(() => {
       latestGridProps().onColumnVisibilityModelChange({});
     });
-    expect(latestGridProps().columnVisibilityModel.selection_status).not.toBe(
-      false
-    );
+    expect(latestGridProps().columnVisibilityModel.type).not.toBe(false);
   });
 });
