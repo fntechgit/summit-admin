@@ -130,8 +130,20 @@ const ForceDeleteExtraQuestionPopup = ({
     );
   };
 
+  const handleClose = () => {
+    // don't let ESC or a backdrop click dismiss the dialog while the delete request runs
+    if (submitting) return;
+    onClose();
+  };
+
   return (
-    <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open
+      onClose={handleClose}
+      disableEscapeKeyDown={submitting}
+      maxWidth="sm"
+      fullWidth
+    >
       <DialogTitle>
         {T.translate("edit_sponsor.force_delete_title")}
       </DialogTitle>
@@ -246,7 +258,7 @@ const ForceDeleteExtraQuestionPopup = ({
       </DialogContent>
       <Divider />
       <DialogActions>
-        <Button onClick={onClose} disabled={submitting}>
+        <Button onClick={handleClose} disabled={submitting}>
           {T.translate("general.cancel")}
         </Button>
         <Button

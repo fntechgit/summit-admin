@@ -168,6 +168,32 @@ describe("ForceDeleteExtraQuestionPopup", () => {
     await waitFor(() => expect(forceDeleteButton()).toBeEnabled());
   });
 
+  it("can't be dismissed while the delete request runs", async () => {
+    const onConfirm = jest.fn(() => new Promise(() => {}));
+    const { onClose } = renderPopup({ onConfirm });
+    await screen.findByTestId("force-delete-reason");
+
+    await tickChecklist();
+    await typeReason("sponsor insists");
+    await userEvent.click(forceDeleteButton());
+    expect(onConfirm).toHaveBeenCalled();
+
+    await userEvent.keyboard("{Escape}");
+    await userEvent.click(document.querySelector(".MuiBackdrop-root"));
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("closes on ESC when nothing is being deleted", async () => {
+    const { onClose } = renderPopup();
+    await screen.findByTestId("force-delete-reason");
+
+    await userEvent.keyboard("{Escape}");
+
+    expect(onClose).toHaveBeenCalled();
+  });
+
   it("closes without deleting on cancel", async () => {
     const { onConfirm, onClose } = renderPopup();
     await screen.findByTestId("force-delete-reason");
