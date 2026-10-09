@@ -61,7 +61,8 @@ describe("EventForm reopen notification control", () => {
         is_enabled: true,
         submission_end_date: moment().subtract(7, "days").unix(),
         allowed_presentation_questions: [],
-        track_groups: []
+        track_groups: [],
+        event_types: []
       }
     ],
     rsvpTemplateOpts: [],

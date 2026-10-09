@@ -1152,9 +1152,41 @@ class EventForm extends React.Component {
       }
     };
 
-    const tracks_ddl = trackOpts
-      .filter((track) => track.subtracks.length === 0)
-      .map((t) => ({ label: t.name, value: t.id }));
+    // a selection plan only accepts its own activity types and track groups
+    const plansForType = selectionPlansOpts.filter((sp) =>
+      sp.event_types.includes(entity.type_id)
+    );
+    const isTrackInPlan = (track, sp) =>
+      sp.track_groups.some((gr) => track.track_groups.includes(gr));
+
+    const leafTracks = trackOpts.filter(
+      (track) => track.subtracks.length === 0
+    );
+    const toTrackOption = (t) => ({ label: t.name, value: t.id });
+    const tracksWithPlans = leafTracks.filter((t) =>
+      plansForType.some((sp) => isTrackInPlan(t, sp))
+    );
+    let tracks_ddl = leafTracks.map(toTrackOption);
+    const selectedTrack =
+      tracks_ddl.find((t) => t.value === entity.track_id) ?? null;
+
+    if (tracksWithPlans.length > 0) {
+      const type = typeOpts.find((t) => t.id === entity.type_id);
+      tracks_ddl = [
+        {
+          label: T.translate("edit_event.tracks_with_selection_plans", {
+            type: type.name
+          }),
+          options: tracksWithPlans.map(toTrackOption)
+        },
+        {
+          label: T.translate("edit_event.tracks_without_selection_plans"),
+          options: leafTracks
+            .filter((t) => !tracksWithPlans.includes(t))
+            .map(toTrackOption)
+        }
+      ].filter((group) => group.options.length > 0);
+    }
 
     const venues = locationOpts
       .filter((v) => v.class_name === "SummitVenue")
@@ -1174,11 +1206,17 @@ class EventForm extends React.Component {
 
     if (entity.track_id) {
       const track = trackOpts.find((t) => t.id === entity.track_id);
-      selection_plans_ddl = selectionPlansOpts
-        .filter((sp) =>
-          sp.track_groups.some((gr) => track.track_groups.includes(gr))
-        )
+      selection_plans_ddl = plansForType
+        .filter((sp) => isTrackInPlan(track, sp))
         .map((sp) => ({ label: sp.name, value: sp.id }));
+    }
+
+    let selectionPlanPlaceholder =
+      "edit_event.placeholders.select_selection_plan";
+    if (!entity.track_id) {
+      selectionPlanPlaceholder = "edit_event.placeholders.select_track_first";
+    } else if (selection_plans_ddl.length === 0) {
+      selectionPlanPlaceholder = "edit_event.placeholders.no_selection_plans";
     }
 
     const rsvp_types_ddl = [
@@ -1545,6 +1583,17 @@ class EventForm extends React.Component {
           )}
         </div>
         <div className="row form-group">
+          <div className="col-md-4">
+            <label> {T.translate("edit_event.track")} *</label>
+            <Dropdown
+              id="track_id"
+              value={selectedTrack}
+              onChange={this.handleChange}
+              placeholder={T.translate("edit_event.placeholders.select_track")}
+              options={tracks_ddl}
+              error={hasErrors("track_id", errors)}
+            />
+          </div>
           {this.isEventType(EVENT_TYPE_PRESENTATION) && (
             <div className="col-md-4">
               <label> {T.translate("edit_event.selection_plan")} </label>
@@ -1552,25 +1601,12 @@ class EventForm extends React.Component {
                 id="selection_plan_id"
                 value={entity.selection_plan_id}
                 onChange={this.handleChangeSelectionPlan}
-                placeholder={T.translate(
-                  "edit_event.placeholders.select_selection_plan"
-                )}
+                placeholder={T.translate(selectionPlanPlaceholder)}
                 isClearable
                 options={selection_plans_ddl}
               />
             </div>
           )}
-          <div className="col-md-4">
-            <label> {T.translate("edit_event.track")} *</label>
-            <Dropdown
-              id="track_id"
-              value={entity.track_id}
-              onChange={this.handleChange}
-              placeholder={T.translate("edit_event.placeholders.select_track")}
-              options={tracks_ddl}
-              error={hasErrors("track_id", errors)}
-            />
-          </div>
           {this.isEventType(EVENT_TYPE_PRESENTATION) &&
             this.shouldShowField("allow_custom_ordering") && (
               <div className="col-md-4">

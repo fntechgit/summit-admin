@@ -36,7 +36,8 @@ describe("EventForm", () => {
         is_enabled: true,
         submission_end_date: moment().subtract(7, "days").unix(),
         allowed_presentation_questions: [],
-        track_groups: []
+        track_groups: [],
+        event_types: []
       }
     ],
     rsvpTemplateOpts: [],
@@ -513,5 +514,38 @@ describe("EventForm", () => {
 
     const dayBeforeSummitStart = getDayBeforeSummitStartCell(container);
     expect(dayBeforeSummitStart).not.toHaveClass("rdtDisabled");
+  });
+
+  describe("selection plan matching", () => {
+    // 930 is "Presentation"; 36473 is a leaf track in track group 69
+    const presentationEntity = {
+      ...baseEntity,
+      type_id: 930,
+      track_id: 36473
+    };
+    const matchingPlan = planWith({
+      id: 100,
+      name: "Matching Plan",
+      track_groups: [69],
+      event_types: [930]
+    });
+
+    it("groups categories by whether a selection plan accepts them for the activity type", () => {
+      const { container } = renderEventForm({
+        entity: { ...presentationEntity, selection_plan_id: 100 },
+        selectionPlansOpts: [matchingPlan]
+      });
+
+      fireEvent.keyDown(container.querySelector("#track_id input"), {
+        keyCode: 40
+      });
+
+      expect(
+        screen.getByText("edit_event.tracks_with_selection_plans")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("edit_event.tracks_without_selection_plans")
+      ).toBeInTheDocument();
+    });
   });
 });
