@@ -10,10 +10,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * */
-import React from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import SelectionPlanForm from "../../components/forms/selection-plan-form";
 import {
   addAllowedMemberToSelectionPlan,
@@ -28,6 +30,8 @@ import {
   importAllowedMembersCSV,
   removeAllowedMemberFromSelectionPlan,
   removeTrackGroupFromSelectionPlan,
+  saveSelectionPlan,
+  saveSelectionPlanSettings,
   unassignProgressFlagFromSelectionPlan,
   updateProgressFlagOrder,
   updateRatingTypeOrder,
@@ -39,7 +43,6 @@ const EditSelectionPlanPage = ({
   entity,
   allowedMembers,
   errors,
-  onSave,
   history,
   extraQuestionsOrder,
   extraQuestionsOrderDir,
@@ -51,6 +54,8 @@ const EditSelectionPlanPage = ({
   updateProgressFlagOrder,
   addTrackGroupToSelectionPlan,
   removeTrackGroupFromSelectionPlan,
+  saveSelectionPlan,
+  saveSelectionPlanSettings,
   addAllowedMemberToSelectionPlan,
   addEventTypeSelectionPlan,
   assignExtraQuestion2SelectionPlan,
@@ -60,6 +65,33 @@ const EditSelectionPlanPage = ({
   importAllowedMembersCSV,
   removeAllowedMemberFromSelectionPlan
 }) => {
+  const [isSaving, setIsSaving] = useState(false);
+
+  const title = entity.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
+
+  const handleSave = (values) => {
+    if (isSaving) return Promise.resolve();
+    setIsSaving(true);
+    return saveSelectionPlan(values)
+      .then((savedEntity) =>
+        saveSelectionPlanSettings(
+          values.marketing_settings ?? {},
+          savedEntity.id
+        ).then(() => savedEntity)
+      )
+      .finally(() => setIsSaving(false))
+      .then((savedEntity) => {
+        if (!values.id) {
+          history.push(
+            `/app/summits/${currentSummit.id}/selection-plans/${savedEntity.id}`
+          );
+        }
+      })
+      .catch(() => {});
+  };
+
   const onDeleteExtraQuestion = (questionId) => {
     const extraQuestion = entity.extra_questions.find(
       (t) => t.id === questionId
@@ -176,37 +208,53 @@ const EditSelectionPlanPage = ({
   };
 
   return (
-    <SelectionPlanForm
-      entity={entity}
-      allowedMembers={allowedMembers}
-      currentSummit={currentSummit}
-      errors={errors}
-      onSave={onSave}
-      extraQuestionsOrder={extraQuestionsOrder}
-      extraQuestionsOrderDir={extraQuestionsOrderDir}
-      onTrackGroupLink={addTrackGroupToSelectionPlan}
-      onTrackGroupUnLink={removeTrackGroupFromSelectionPlan}
-      updateExtraQuestionOrder={onUpdateExtraQuestionOrder}
-      onAddNewExtraQuestion={onAddNewExtraQuestion}
-      onDeleteExtraQuestion={onDeleteExtraQuestion}
-      onAddEventType={addEventTypeSelectionPlan}
-      onDeleteEventType={deleteEventTypeSelectionPlan}
-      onEditExtraQuestion={onEditExtraQuestion}
-      onAddRatingType={onAddRatingType}
-      onEditRatingType={onEditRatingType}
-      onUpdateRatingTypeOrder={onUpdateRatingTypeOrder}
-      onDeleteRatingType={onDeleteRatingType}
-      onAssignExtraQuestion2SelectionPlan={assignExtraQuestion2SelectionPlan}
-      onAddProgressFlag={onAddProgressFlag}
-      onEditProgressFlag={onEditProgressFlag}
-      onAssignProgressFlag2SelectionPlan={assignProgressFlag2SelectionPlan}
-      onUnassignProgressFlag={onUnassignProgressFlag}
-      onUpdateProgressFlagOrder={onUpdateProgressFlagOrder}
-      onAllowedMemberAdd={addAllowedMemberToSelectionPlan}
-      onAllowedMemberDelete={removeAllowedMemberFromSelectionPlan}
-      onAllowedMembersPageChange={getAllowedMembers}
-      onImportAllowedMembers={importAllowedMembersCSV}
-    />
+    <div className="container">
+      <h3>
+        {title} {T.translate("edit_selection_plan.selection_plan")}
+      </h3>
+      <hr />
+      <SelectionPlanForm
+        entity={entity}
+        allowedMembers={allowedMembers}
+        currentSummit={currentSummit}
+        errors={errors}
+        onSave={handleSave}
+        extraQuestionsOrder={extraQuestionsOrder}
+        extraQuestionsOrderDir={extraQuestionsOrderDir}
+        onTrackGroupLink={addTrackGroupToSelectionPlan}
+        onTrackGroupUnLink={removeTrackGroupFromSelectionPlan}
+        updateExtraQuestionOrder={onUpdateExtraQuestionOrder}
+        onAddNewExtraQuestion={onAddNewExtraQuestion}
+        onDeleteExtraQuestion={onDeleteExtraQuestion}
+        onAddEventType={addEventTypeSelectionPlan}
+        onDeleteEventType={deleteEventTypeSelectionPlan}
+        onEditExtraQuestion={onEditExtraQuestion}
+        onAddRatingType={onAddRatingType}
+        onEditRatingType={onEditRatingType}
+        onUpdateRatingTypeOrder={onUpdateRatingTypeOrder}
+        onDeleteRatingType={onDeleteRatingType}
+        onAssignExtraQuestion2SelectionPlan={assignExtraQuestion2SelectionPlan}
+        onAddProgressFlag={onAddProgressFlag}
+        onEditProgressFlag={onEditProgressFlag}
+        onAssignProgressFlag2SelectionPlan={assignProgressFlag2SelectionPlan}
+        onUnassignProgressFlag={onUnassignProgressFlag}
+        onUpdateProgressFlagOrder={onUpdateProgressFlagOrder}
+        onAllowedMemberAdd={addAllowedMemberToSelectionPlan}
+        onAllowedMemberDelete={removeAllowedMemberFromSelectionPlan}
+        onAllowedMembersPageChange={getAllowedMembers}
+        onImportAllowedMembers={importAllowedMembersCSV}
+      />
+      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        <Button
+          type="submit"
+          form="selection-plan-form"
+          variant="contained"
+          disabled={isSaving}
+        >
+          {T.translate("general.save")}
+        </Button>
+      </Box>
+    </div>
   );
 };
 
@@ -221,6 +269,8 @@ const mapStateToProps = ({
 export default connect(mapStateToProps, {
   addTrackGroupToSelectionPlan,
   removeTrackGroupFromSelectionPlan,
+  saveSelectionPlan,
+  saveSelectionPlanSettings,
   addEventTypeSelectionPlan,
   deleteEventTypeSelectionPlan,
   updateSelectionPlanExtraQuestionOrder,
