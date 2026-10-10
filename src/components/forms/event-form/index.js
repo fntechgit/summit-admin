@@ -1552,6 +1552,33 @@ class EventForm extends React.Component {
               error={hasErrors("type_id", errors)}
             />
           </div>
+          <div className="col-md-4">
+            <label> {T.translate("edit_event.track")} *</label>
+            <Dropdown
+              id="track_id"
+              value={selectedTrack}
+              onChange={this.handleChange}
+              placeholder={T.translate("edit_event.placeholders.select_track")}
+              options={tracks_ddl}
+              error={hasErrors("track_id", errors)}
+            />
+          </div>
+          {this.isEventType(EVENT_TYPE_PRESENTATION) && (
+            <div className="col-md-4">
+              <label> {T.translate("edit_event.selection_plan")} </label>
+              <Dropdown
+                id="selection_plan_id"
+                value={entity.selection_plan_id}
+                onChange={this.handleChangeSelectionPlan}
+                placeholder={T.translate(selectionPlanPlaceholder)}
+                disabled={!entity.track_id}
+                isClearable
+                options={selection_plans_ddl}
+              />
+            </div>
+          )}
+        </div>
+        <div className="row form-group">
           {this.shouldShowField("allows_location") && (
             <div className="col-md-4">
               <label> {T.translate("edit_event.location")} </label>
@@ -1578,32 +1605,6 @@ class EventForm extends React.Component {
                   "edit_event.placeholders.select_level"
                 )}
                 options={levels_ddl}
-              />
-            </div>
-          )}
-        </div>
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("edit_event.track")} *</label>
-            <Dropdown
-              id="track_id"
-              value={selectedTrack}
-              onChange={this.handleChange}
-              placeholder={T.translate("edit_event.placeholders.select_track")}
-              options={tracks_ddl}
-              error={hasErrors("track_id", errors)}
-            />
-          </div>
-          {this.isEventType(EVENT_TYPE_PRESENTATION) && (
-            <div className="col-md-4">
-              <label> {T.translate("edit_event.selection_plan")} </label>
-              <Dropdown
-                id="selection_plan_id"
-                value={entity.selection_plan_id}
-                onChange={this.handleChangeSelectionPlan}
-                placeholder={T.translate(selectionPlanPlaceholder)}
-                isClearable
-                options={selection_plans_ddl}
               />
             </div>
           )}
