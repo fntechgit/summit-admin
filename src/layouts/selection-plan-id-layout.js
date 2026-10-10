@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { Breadcrumb } from "react-breadcrumbs";
@@ -11,6 +11,9 @@ import {
 import { getMarketingSettingsBySelectionPlan } from "../actions/marketing-actions";
 import { MAX_PER_PAGE } from "../utils/constants";
 
+const EditSelectionPlanPage = React.lazy(() =>
+  import("../pages/selection-plans/edit-selection-plan-page")
+);
 const SelectionPlanExtraQuestionsLayout = React.lazy(() =>
   import("./selection-plan-extra-questions-layout")
 );
@@ -30,10 +33,14 @@ const SelectionPlanIdLayout = ({
   const breadcrumb = selectionPlanId
     ? currentSelectionPlan.name
     : T.translate("general.new");
+  // form reads its initial values once, so mount it only after everything loaded
+  const [loadedId, setLoadedId] = useState(null);
+  const isLoaded = loadedId === (selectionPlanId ?? "new");
 
   useEffect(() => {
     if (!selectionPlanId) {
       resetSelectionPlanForm();
+      setLoadedId("new");
     } else {
       getSelectionPlan(selectionPlanId)
         .then(() =>
@@ -44,6 +51,7 @@ const SelectionPlanIdLayout = ({
             MAX_PER_PAGE
           )
         )
+        .then(() => setLoadedId(selectionPlanId))
         .catch(() => {});
     }
   }, [selectionPlanId]);
@@ -53,6 +61,14 @@ const SelectionPlanIdLayout = ({
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
       <Suspense fallback={<AjaxLoader show relative size={120} />}>
         <Switch>
+          <Route
+            strict
+            exact
+            path={`${match.url}`}
+            render={({ history }) =>
+              isLoaded && <EditSelectionPlanPage history={history} />
+            }
+          />
           <Route
             path={`${match.url}/extra-questions`}
             component={SelectionPlanExtraQuestionsLayout}
