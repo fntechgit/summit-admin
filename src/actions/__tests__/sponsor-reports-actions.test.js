@@ -36,7 +36,10 @@ import {
   getPurchaseDetailsByItemRows,
   REQUEST_PURCHASE_DETAILS_BY_ITEM,
   RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS,
-  PURCHASE_DETAILS_BY_ITEM_READ_ERROR
+  PURCHASE_DETAILS_BY_ITEM_READ_ERROR,
+  getUnpaidCharges,
+  REQUEST_UNPAID_CHARGES,
+  RECEIVE_UNPAID_CHARGES
 } from "../sponsor-reports-actions";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
@@ -1468,6 +1471,97 @@ describe("sponsor-reports-actions", () => {
         .filter((a) => a.type === RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS);
       expect(receives).toHaveLength(1);
       expect(receives[0].payload.response.data).toEqual([{ id: "fresh" }]);
+    });
+  });
+
+  describe("getUnpaidCharges", () => {
+    beforeEach(() => {
+      window.PURCHASES_API_URL = "https://purchases.example.com";
+    });
+    afterEach(() => {
+      delete window.PURCHASES_API_URL;
+    });
+
+    it("calls purchases-api with paging, order, plain search and the admin-only filter", async () => {
+      const store = mockStore(MOCK_STATE);
+      await store.dispatch(
+        getUnpaidCharges("Acme, Inc", 2, 50, "total", -1, { adminOnly: true })
+      );
+      expect(capturedUrl).toBe(
+        "https://purchases.example.com/api/v1/summits/42/unpaid-charges"
+      );
+      expect(capturedParams).toEqual({
+        access_token: "TOKEN",
+        page: 2,
+        per_page: 50,
+        order: "-total",
+        search: "Acme, Inc",
+        "filter[]": ["added_by_admin==true"]
+      });
+    });
+
+    it("records the controls and shows loading before the token resolves", async () => {
+      let resolveToken;
+      jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue(
+        new Promise((resolve) => {
+          resolveToken = resolve;
+        })
+      );
+      const store = mockStore(MOCK_STATE);
+      const pending = store.dispatch(
+        getUnpaidCharges("acme", 3, 25, "total", -1, { adminOnly: false })
+      );
+      await flushPromises();
+      expect(
+        store.getActions().find((a) => a.type === REQUEST_UNPAID_CHARGES)
+          ?.payload
+      ).toEqual({
+        term: "acme",
+        page: 3,
+        perPage: 25,
+        order: "total",
+        orderDir: -1,
+        filters: { adminOnly: false }
+      });
+      // REQUEST clears the balances, so the overlay must already cover the page.
+      expect(store.getActions().map((a) => a.type)).toContain(START_LOADING);
+      resolveToken("TOKEN");
+      await pending;
+    });
+
+    it("omits filter[] when there is no search and admin-only is off", async () => {
+      const store = mockStore(MOCK_STATE);
+      await store.dispatch(
+        getUnpaidCharges("", 1, 10, "sponsor_name", 1, { adminOnly: false })
+      );
+      expect(capturedParams["filter[]"]).toBeUndefined();
+      expect(capturedParams.search).toBeUndefined();
+      expect(capturedParams.order).toBe("sponsor_name");
+    });
+
+    it("drops a stale RECEIVE_UNPAID_CHARGES when a newer call supersedes it", async () => {
+      let resolveFirst;
+      getRequest.mockImplementationOnce(
+        (req, receive) => () => (dispatch) =>
+          new Promise((resolve) => {
+            resolveFirst = () => {
+              dispatch(receive({ response: { data: [{ id: "stale" }] } }));
+              resolve();
+            };
+          })
+      );
+      const store = mockStore(MOCK_STATE);
+      const stale = store.dispatch(getUnpaidCharges("a"));
+      await flushPromises();
+      await store.dispatch(getUnpaidCharges("ab"));
+      resolveFirst();
+      await stale;
+
+      const receives = store
+        .getActions()
+        .filter((a) => a.type === RECEIVE_UNPAID_CHARGES);
+      expect(receives).toHaveLength(1);
+      expect(receives[0].payload.response.data).toEqual([]);
     });
   });
 });

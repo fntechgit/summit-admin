@@ -19,6 +19,7 @@ import Restrict from "../routes/restrict";
 import PurchaseDetailsReportPage from "../pages/sponsors/sponsor-reports/purchase-details-report-page";
 import SponsorAssetDrilldownPage from "../pages/sponsors/sponsor-reports/sponsor-asset-drilldown-page";
 import SponsorAssetReportPage from "../pages/sponsors/sponsor-reports/sponsor-asset-report-page";
+import UnpaidChargesReportPage from "../pages/sponsors/sponsor-reports/unpaid-charges-report-page";
 import ReportsLandingPage from "../pages/sponsors/sponsor-reports/reports-landing-page";
 import NoMatchPage from "../pages/no-match-page";
 
@@ -73,6 +74,14 @@ const SponsorReportsLayout = ({ match }) => (
         render={withCrumb(
           SponsorAssetReportPage,
           "sponsor_reports_page.sponsor_assets_title"
+        )}
+      />
+      <Route
+        exact
+        path={`${match.url}/unpaid-charges`}
+        render={withCrumb(
+          UnpaidChargesReportPage,
+          "sponsor_reports_page.unpaid_charges_title"
         )}
       />
       <Route exact path={match.url} component={ReportsLandingPage} />

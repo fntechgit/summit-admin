@@ -15,6 +15,7 @@ import {
 } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
+  DEFAULT_PER_PAGE,
   HUNDRED_PER_PAGE,
   TEN,
   ERROR_CODE_401,
@@ -41,6 +42,10 @@ export const RECEIVE_SPONSOR_ASSET_PAGE = "RECEIVE_SPONSOR_ASSET_PAGE"; // throw
 export const REQUEST_SPONSOR_DRILLDOWN = "REQUEST_SPONSOR_DRILLDOWN";
 export const RECEIVE_SPONSOR_DRILLDOWN = "RECEIVE_SPONSOR_DRILLDOWN";
 export const SPONSOR_DRILLDOWN_READ_ERROR = "SPONSOR_DRILLDOWN_READ_ERROR";
+
+export const REQUEST_UNPAID_CHARGES = "REQUEST_UNPAID_CHARGES";
+export const RECEIVE_UNPAID_CHARGES = "RECEIVE_UNPAID_CHARGES";
+export const UNPAID_CHARGES_READ_ERROR = "UNPAID_CHARGES_READ_ERROR";
 
 export const REQUEST_PURCHASE_DETAILS_LINES = "REQUEST_PURCHASE_DETAILS_LINES";
 export const RECEIVE_PURCHASE_DETAILS_LINES = "RECEIVE_PURCHASE_DETAILS_LINES";
@@ -98,6 +103,7 @@ const purchaseDetailsSeq = sequenced();
 const purchaseLinesSeq = sequenced();
 const purchaseFiltersSeq = sequenced();
 const sponsorAssetRowsSeq = sequenced();
+const unpaidChargesSeq = sequenced();
 const assetFiltersSeq = sequenced();
 const sponsorDrilldownSeq = sequenced();
 const purchaseByItemSeq = sequenced();
@@ -687,6 +693,60 @@ export const getSponsorAssetSponsor =
         onReadError: createAction(SPONSOR_DRILLDOWN_READ_ERROR)
       })
     )({ access_token: accessToken })(guardedDispatch)
+      .catch(() => {})
+      .finally(() => guardedDispatch(stopLoading()));
+  };
+
+// Unpaid Charges reads live carts and Pending purchases from purchases-api (the
+// reports API holds synced purchases only, no carts).
+export const getUnpaidCharges =
+  (
+    term = "",
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "sponsor_name",
+    orderDir = 1,
+    filters = { adminOnly: true }
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummit } = getState().currentSummitState;
+    if (!currentSummit?.id) return Promise.resolve();
+    const { isCurrent, guardedDispatch } = unpaidChargesSeq(dispatch);
+    // Record the controls before the token await so a follow-up control change
+    // (built from these reducer props) never reads stale values. REQUEST clears
+    // the balances, so the overlay goes up with it; a superseding call clears it.
+    guardedDispatch(
+      createAction(REQUEST_UNPAID_CHARGES)({
+        term,
+        page,
+        perPage,
+        order,
+        orderDir,
+        filters
+      })
+    );
+    guardedDispatch(startLoading());
+    const accessToken = await getAccessTokenSafely();
+    if (!isCurrent()) return Promise.resolve();
+
+    const params = {
+      access_token: accessToken,
+      page,
+      per_page: perPage,
+      order: toOrderParam(order, orderDir)
+    };
+    // Plain `search`, not filter[]: base-api-utils splits filter[] on commas.
+    if (term) params.search = term;
+    if (filters.adminOnly) params["filter[]"] = ["added_by_admin==true"];
+
+    return getRequest(
+      null,
+      createAction(RECEIVE_UNPAID_CHARGES),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/unpaid-charges`,
+      reportReadErrorHandler({
+        onReadError: createAction(UNPAID_CHARGES_READ_ERROR)
+      })
+    )(params)(guardedDispatch)
       .catch(() => {})
       .finally(() => guardedDispatch(stopLoading()));
   };

@@ -32,6 +32,11 @@ const CARDS = [
     id: "sponsor-assets",
     titleKey: "sponsor_reports_page.sponsor_assets_title",
     descKey: "sponsor_reports_page.sponsor_assets_desc"
+  },
+  {
+    id: "unpaid-charges",
+    titleKey: "sponsor_reports_page.unpaid_charges_title",
+    descKey: "sponsor_reports_page.unpaid_charges_desc"
   }
 ];
 
