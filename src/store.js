@@ -178,6 +178,7 @@ import sponsorReportsPurchaseDetailsReducer from "./reducers/sponsors/sponsor-re
 import sponsorReportsPurchaseDetailsLinesReducer from "./reducers/sponsors/sponsor-reports-purchase-details-lines-reducer";
 import sponsorReportsSponsorAssetReducer from "./reducers/sponsors/sponsor-reports-sponsor-asset-reducer";
 import sponsorReportsDrilldownReducer from "./reducers/sponsors/sponsor-reports-drilldown-reducer";
+import sponsorReportsUnpaidChargesReducer from "./reducers/sponsors/sponsor-reports-unpaid-charges-reducer";
 import sponsorReportsPurchaseDetailsByItemReducer from "./reducers/sponsors/sponsor-reports-purchase-details-by-item-reducer";
 import addOnTypeReducer from "./reducers/sponsors_inventory/add-on-type-reducer.js";
 import addOnTypesListReducer from "./reducers/sponsors_inventory/add-on-types-list-reducer.js";
@@ -193,7 +194,8 @@ const config = {
     "sponsorReportsPurchaseDetailsLinesState",
     "sponsorReportsPurchaseDetailsByItemState",
     "sponsorReportsSponsorAssetState",
-    "sponsorReportsDrilldownState"
+    "sponsorReportsDrilldownState",
+    "sponsorReportsUnpaidChargesState"
   ]
 };
 
@@ -365,8 +367,9 @@ const reducers = persistCombineReducers(config, {
     sponsorReportsPurchaseDetailsByItemReducer,
   sponsorReportsSponsorAssetState: sponsorReportsSponsorAssetReducer,
   sponsorReportsDrilldownState: sponsorReportsDrilldownReducer,
+  sponsorReportsUnpaidChargesState: sponsorReportsUnpaidChargesReducer,
   currentAddOnTypesListState: addOnTypesListReducer,
-  currentAddOnTypeState: addOnTypeReducer,
+  currentAddOnTypeState: addOnTypeReducer
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
