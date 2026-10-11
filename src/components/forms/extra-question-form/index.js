@@ -14,9 +14,9 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
-import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
+import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
 import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import { Modal } from "react-bootstrap";
@@ -244,7 +244,8 @@ class ExtraQuestionForm extends React.Component {
     const value_options = {
       actions: {
         edit: { onClick: this.handleEditValue },
-        delete: { onClick: onValueDelete },
+        // the table renders the trash whenever the action exists, leave it out to hide it
+        ...(onValueDelete && { delete: { onClick: onValueDelete } }),
         save: { onClick: this.handleAddNewValue }
       }
     };

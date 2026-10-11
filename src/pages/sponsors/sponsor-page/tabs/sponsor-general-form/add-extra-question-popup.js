@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { FieldArray, FormikProvider, useFormik } from "formik";
@@ -32,19 +32,30 @@ import useScrollToError from "../../../../../hooks/useScrollToError";
 import DragAndDropList from "../../../../../components/mui/dnd-list";
 import {
   deleteSponsorExtraQuestionValue,
+  getSponsorExtraQuestionValueUsage,
   updateSponsorExtraQuestionValueOrder
 } from "../../../../../actions/sponsor-actions";
 import { ExtraQuestionsTypeAllowSubQuestion } from "../../../../../utils/constants";
+import Member from "../../../../../models/member";
+import DeleteExtraQuestionPopup from "./delete-extra-question-popup";
 
 const AddSponsorExtraQuestionPopup = ({
   entity: extraQuestion,
   summit,
+  member,
   onClose,
   onSubmit,
   allClasses,
   deleteSponsorExtraQuestionValue,
+  getSponsorExtraQuestionValueUsage,
   updateSponsorExtraQuestionValueOrder
 }) => {
+  const [valueToDelete, setValueToDelete] = useState(null);
+  // sponsors can't delete saved options, same as questions: the X is only for admins
+  const canDeleteValues = new Member(member).hasAccess(
+    "sponsors-extra-questions-delete"
+  );
+
   const formik = useFormik({
     initialValues: {
       id: extraQuestion?.id,
@@ -190,6 +201,17 @@ const AddSponsorExtraQuestionPopup = ({
     }
   };
 
+  // the option leaves the form only once the server deleted it; it is matched by id because the
+  // reducer drops it too and the form may have been reinitialized meanwhile
+  const handleConfirmDeleteValue = (valueId, options) =>
+    deleteSponsorExtraQuestionValue(formik.values.id, valueId, options).then(
+      () =>
+        formik.setValues((prev) => ({
+          ...prev,
+          values: prev.values.filter((v) => v.id !== valueId)
+        }))
+    );
+
   const areExtraQuestionsIncomplete = () => {
     if (Array.isArray(formik.errors.values)) return true;
     return formik.values.values.some(
@@ -257,20 +279,21 @@ const AddSponsorExtraQuestionPopup = ({
           alignItems: "center"
         }}
       >
-        <IconButton
-          onClick={() => {
-            const valueToRemove = formik.values.values[index];
-            if (valueToRemove.id) {
-              deleteSponsorExtraQuestionValue(
-                formik.values.id,
-                valueToRemove.id
-              );
-            }
-            remove(index);
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
+        {/* an option not saved yet is only in the form, anyone can drop it */}
+        {(!valueItem.id || canDeleteValues) && (
+          <IconButton
+            data-testid={`remove-value-${index}`}
+            onClick={() => {
+              if (valueItem.id) {
+                setValueToDelete(valueItem);
+                return;
+              }
+              remove(index);
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        )}
       </Grid2>
       <Grid2
         size={0.5}
@@ -645,12 +668,27 @@ const AddSponsorExtraQuestionPopup = ({
           </DialogActions>
         </Box>
       </FormikProvider>
+      {valueToDelete && (
+        <DeleteExtraQuestionPopup
+          extraQuestion={extraQuestion}
+          extraQuestionValue={valueToDelete}
+          getUsage={(valueId) =>
+            getSponsorExtraQuestionValueUsage(formik.values.id, valueId)
+          }
+          onConfirm={handleConfirmDeleteValue}
+          onClose={() => setValueToDelete(null)}
+        />
+      )}
     </Dialog>
   );
 };
 
-const mapStateToProps = ({ currentSponsorExtraQuestionState }) => ({
-  ...currentSponsorExtraQuestionState
+const mapStateToProps = ({
+  currentSponsorExtraQuestionState,
+  loggedUserState
+}) => ({
+  ...currentSponsorExtraQuestionState,
+  member: loggedUserState.member
 });
 
 AddSponsorExtraQuestionPopup.propTypes = {
@@ -660,5 +698,6 @@ AddSponsorExtraQuestionPopup.propTypes = {
 
 export default connect(mapStateToProps, {
   deleteSponsorExtraQuestionValue,
+  getSponsorExtraQuestionValueUsage,
   updateSponsorExtraQuestionValueOrder
 })(AddSponsorExtraQuestionPopup);

@@ -76,6 +76,10 @@ export const RECEIVE_SPONSOR_EXTRA_QUESTION_META =
 export const SPONSOR_EXTRA_QUESTION_ORDER_UPDATED =
   "SPONSOR_EXTRA_QUESTION_ORDER_UPDATED";
 export const SPONSOR_EXTRA_QUESTION_DELETED = "SPONSOR_EXTRA_QUESTION_DELETED";
+export const RECEIVE_SPONSOR_EXTRA_QUESTION_USAGE =
+  "RECEIVE_SPONSOR_EXTRA_QUESTION_USAGE";
+export const RECEIVE_SPONSOR_EXTRA_QUESTION_VALUE_USAGE =
+  "RECEIVE_SPONSOR_EXTRA_QUESTION_VALUE_USAGE";
 export const RECEIVE_SPONSOR_EXTRA_QUESTION = "RECEIVE_SPONSOR_EXTRA_QUESTION";
 export const UPDATE_SPONSOR_EXTRA_QUESTION = "UPDATE_SPONSOR_EXTRA_QUESTION";
 export const SPONSOR_EXTRA_QUESTION_UPDATED = "SPONSOR_EXTRA_QUESTION_UPDATED";
@@ -835,7 +839,11 @@ export const updateExtraQuestionOrder =
     });
   };
 
-export const deleteExtraQuestion =
+/**
+ * What deleting the question affects: collected answers on the server and the sponsor's
+ * badge scan activity per rep. It does not prove devices have nothing pending.
+ */
+export const getSponsorExtraQuestionUsage =
   (sponsorId, questionId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -845,11 +853,38 @@ export const deleteExtraQuestion =
       access_token: accessToken
     };
 
+    return getRequest(
+      null,
+      createAction(RECEIVE_SPONSOR_EXTRA_QUESTION_USAGE),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${questionId}/usage`,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(({ response }) => response)
+      .finally(() => dispatch(stopLoading()));
+  };
+
+/**
+ * Admin only. Sponsors can't delete questions (devices may hold answers the server has not seen),
+ * an admin who checked the devices can delete one with a reason. delete_answers is always sent:
+ * when the server holds collected answers, true confirms they are destroyed.
+ */
+export const deleteExtraQuestion =
+  (sponsorId, questionId, { reason, deleteAnswers = false }) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    const params = {
+      access_token: accessToken,
+      delete_answers: deleteAnswers
+    };
+
     return deleteRequest(
       null,
       createAction(SPONSOR_EXTRA_QUESTION_DELETED)({ questionId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${questionId}`,
-      null,
+      { reason },
       snackbarErrorHandler
     )(params)(dispatch)
       .then(() => {
@@ -1038,7 +1073,12 @@ export const updateSponsorExtraQuestionValueOrder =
     });
   };
 
-export const deleteSponsorExtraQuestionValue =
+/**
+ * What deleting the option affects: collected answers that selected it (answers_to_delete when it
+ * was their only selection, answers_to_modify when they only lose it) and the sponsor's badge scan
+ * activity per rep. It does not prove devices have nothing pending.
+ */
+export const getSponsorExtraQuestionValueUsage =
   (questionId, valueId) => async (dispatch, getState) => {
     const { currentSummitState, currentSponsorState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -1051,15 +1091,52 @@ export const deleteSponsorExtraQuestionValue =
       access_token: accessToken
     };
 
+    return getRequest(
+      null,
+      createAction(RECEIVE_SPONSOR_EXTRA_QUESTION_VALUE_USAGE),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${questionId}/values/${valueId}/usage`,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(({ response }) => response)
+      .finally(() => dispatch(stopLoading()));
+  };
+
+/**
+ * Admin only, like deleting the question: an admin who checked the devices deletes the option with
+ * a reason. delete_answers is always sent: when collected answers use the option, true confirms
+ * they are changed (deleted when it was their only selection, otherwise they only lose it).
+ */
+export const deleteSponsorExtraQuestionValue =
+  (questionId, valueId, { reason, deleteAnswers = false }) =>
+  async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+
+    const params = {
+      access_token: accessToken,
+      delete_answers: deleteAnswers
+    };
+
     return deleteRequest(
       null,
       createAction(SPONSOR_EXTRA_QUESTION_VALUE_DELETED)({ valueId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${questionId}/values/${valueId}`,
-      null,
+      { reason },
       snackbarErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.done"),
+            html: T.translate("edit_sponsor.extra_question_value_deleted")
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
   };
 
 /** ****************  SPONSORSHIPS *************************************** */
