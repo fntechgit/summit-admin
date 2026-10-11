@@ -89,13 +89,16 @@ const renderLayout = (groups, url = REPORTS_URL, extraState = {}) => {
 };
 
 describe("SponsorReportsLayout", () => {
-  it("renders the reports landing page (two cards) for an administrator", () => {
+  it("renders the reports landing page cards for an administrator", () => {
     renderLayout([{ code: "administrators" }]);
     expect(
       screen.getByTestId("report-card-purchase-details")
     ).toBeInTheDocument();
     expect(
       screen.getByTestId("report-card-sponsor-assets")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("report-card-unpaid-charges")
     ).toBeInTheDocument();
   });
 
