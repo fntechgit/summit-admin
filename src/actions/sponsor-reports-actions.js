@@ -712,6 +712,18 @@ export const getUnpaidCharges =
     const { currentSummit } = getState().currentSummitState;
     if (!currentSummit?.id) return Promise.resolve();
     const { isCurrent, guardedDispatch } = unpaidChargesSeq(dispatch);
+    // Record the controls before the token await so a follow-up control change
+    // (built from these reducer props) never reads stale values.
+    guardedDispatch(
+      createAction(REQUEST_UNPAID_CHARGES)({
+        term,
+        page,
+        perPage,
+        order,
+        orderDir,
+        filters
+      })
+    );
     const accessToken = await getAccessTokenSafely();
     if (!isCurrent()) return Promise.resolve();
     guardedDispatch(startLoading());
@@ -727,13 +739,12 @@ export const getUnpaidCharges =
     if (filters.adminOnly) params["filter[]"] = ["added_by_admin==true"];
 
     return getRequest(
-      createAction(REQUEST_UNPAID_CHARGES),
+      null,
       createAction(RECEIVE_UNPAID_CHARGES),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/unpaid-charges`,
       reportReadErrorHandler({
         onReadError: createAction(UNPAID_CHARGES_READ_ERROR)
-      }),
-      { term, page, perPage, order, orderDir, filters }
+      })
     )(params)(guardedDispatch)
       .catch(() => {})
       .finally(() => guardedDispatch(stopLoading()));

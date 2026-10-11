@@ -1500,20 +1500,22 @@ describe("sponsor-reports-actions", () => {
       });
     });
 
-    it("records the request state the reducer needs as the REQUEST payload", async () => {
-      let requestPayload;
-      getRequest.mockImplementationOnce(
-        (req, receive, url, errorHandler, payload) => () => (dispatch) => {
-          requestPayload = payload;
-          dispatch(req(payload));
-          return Promise.resolve();
-        }
+    it("records the controls as REQUEST before the token resolves", async () => {
+      let resolveToken;
+      jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue(
+        new Promise((resolve) => {
+          resolveToken = resolve;
+        })
       );
       const store = mockStore(MOCK_STATE);
-      await store.dispatch(
+      const pending = store.dispatch(
         getUnpaidCharges("acme", 3, 25, "total", -1, { adminOnly: false })
       );
-      expect(requestPayload).toEqual({
+      await flushPromises();
+      expect(
+        store.getActions().find((a) => a.type === REQUEST_UNPAID_CHARGES)
+          ?.payload
+      ).toEqual({
         term: "acme",
         page: 3,
         perPage: 25,
@@ -1521,10 +1523,8 @@ describe("sponsor-reports-actions", () => {
         orderDir: -1,
         filters: { adminOnly: false }
       });
-      expect(
-        store.getActions().find((a) => a.type === REQUEST_UNPAID_CHARGES)
-          .payload
-      ).toEqual(requestPayload);
+      resolveToken("TOKEN");
+      await pending;
     });
 
     it("omits filter[] when there is no search and admin-only is off", async () => {
