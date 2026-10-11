@@ -713,7 +713,8 @@ export const getUnpaidCharges =
     if (!currentSummit?.id) return Promise.resolve();
     const { isCurrent, guardedDispatch } = unpaidChargesSeq(dispatch);
     // Record the controls before the token await so a follow-up control change
-    // (built from these reducer props) never reads stale values.
+    // (built from these reducer props) never reads stale values. REQUEST clears
+    // the balances, so the overlay goes up with it; a superseding call clears it.
     guardedDispatch(
       createAction(REQUEST_UNPAID_CHARGES)({
         term,
@@ -724,9 +725,9 @@ export const getUnpaidCharges =
         filters
       })
     );
+    guardedDispatch(startLoading());
     const accessToken = await getAccessTokenSafely();
     if (!isCurrent()) return Promise.resolve();
-    guardedDispatch(startLoading());
 
     const params = {
       access_token: accessToken,

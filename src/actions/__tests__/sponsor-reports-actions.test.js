@@ -1500,7 +1500,7 @@ describe("sponsor-reports-actions", () => {
       });
     });
 
-    it("records the controls as REQUEST before the token resolves", async () => {
+    it("records the controls and shows loading before the token resolves", async () => {
       let resolveToken;
       jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue(
         new Promise((resolve) => {
@@ -1523,6 +1523,8 @@ describe("sponsor-reports-actions", () => {
         orderDir: -1,
         filters: { adminOnly: false }
       });
+      // REQUEST clears the balances, so the overlay must already cover the page.
+      expect(store.getActions().map((a) => a.type)).toContain(START_LOADING);
       resolveToken("TOKEN");
       await pending;
     });
