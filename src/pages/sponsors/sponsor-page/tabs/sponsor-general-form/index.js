@@ -14,6 +14,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Box } from "@mui/material";
+import Member from "../../../../../models/member";
 import SponsorHeader from "./sponsor-header";
 import Sponsorship from "./sponsorship";
 import BadgeScanSettings from "./badge-scan-settings";
@@ -22,6 +23,7 @@ import {
   addTierToSponsor,
   deleteExtraQuestion,
   getSponsorExtraQuestion,
+  getSponsorExtraQuestionUsage,
   getSponsorLeadReportSettingsMeta,
   getSponsorSponsorships,
   removeAddonToSponsorship,
@@ -53,6 +55,7 @@ const SponsorGeneralForm = ({
   saveSponsorExtraQuestionValue,
   resetSponsorExtraQuestionForm,
   deleteExtraQuestion,
+  getSponsorExtraQuestionUsage,
   updateExtraQuestionOrder,
   saveSponsor
 }) => {
@@ -90,6 +93,10 @@ const SponsorGeneralForm = ({
         saveSponsorExtraQuestionValue={saveSponsorExtraQuestionValue}
         onExtraQuestionDelete={deleteExtraQuestion}
         onExtraQuestionReOrder={updateExtraQuestionOrder}
+        canDelete={new Member(member).hasAccess(
+          "sponsors-extra-questions-delete"
+        )}
+        getSponsorExtraQuestionUsage={getSponsorExtraQuestionUsage}
       />
     </Box>
   );
@@ -119,6 +126,7 @@ export default connect(mapStateToProps, {
   saveSponsorExtraQuestionValue,
   resetSponsorExtraQuestionForm,
   deleteExtraQuestion,
+  getSponsorExtraQuestionUsage,
   updateExtraQuestionOrder,
   saveSponsor
 })(SponsorGeneralForm);

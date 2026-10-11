@@ -21,6 +21,7 @@ import {
   MAX_PER_PAGE
 } from "../../../../../utils/constants";
 import AddSponsorExtraQuestionPopup from "./add-extra-question-popup";
+import DeleteExtraQuestionPopup from "./delete-extra-question-popup";
 
 const SponsorExtraQuestions = ({
   sponsorId,
@@ -31,11 +32,14 @@ const SponsorExtraQuestions = ({
   saveSponsorExtraQuestionValue,
   resetSponsorExtraQuestionForm,
   onExtraQuestionReOrder,
-  onExtraQuestionDelete
+  onExtraQuestionDelete,
+  canDelete = false,
+  getSponsorExtraQuestionUsage
 }) => {
   const [tableData, setTableData] = useState(extraQuestions);
   const [showAddExtraQuestionPopup, setShowAddExtraQuestionPopup] =
     useState(false);
+  const [questionToDelete, setQuestionToDelete] = useState(null);
 
   useEffect(() => {
     const sortedExtraQuestions = extraQuestions.sort(
@@ -64,9 +68,15 @@ const SponsorExtraQuestions = ({
     );
   };
 
+  // the table confirms first, then the dialog shows what is at stake and asks for the reason
   const handleDeleteExtraQuestion = (extraQuestionId) => {
-    onExtraQuestionDelete(sponsorId, extraQuestionId);
+    setQuestionToDelete(
+      extraQuestions.find((q) => q.id === extraQuestionId) || null
+    );
   };
+
+  const handleConfirmDelete = (extraQuestionId, options) =>
+    onExtraQuestionDelete(sponsorId, extraQuestionId, options);
 
   const handleSubmitExtraQuestion = (extraQuestion) => {
     const { valuesToSave, ...extraQuestionToSave } = extraQuestion;
@@ -195,7 +205,8 @@ const SponsorExtraQuestions = ({
               currentPage={DEFAULT_CURRENT_PAGE}
               perPage={MAX_PER_PAGE}
               onEdit={handleEditExtraQuestion}
-              onDelete={handleDeleteExtraQuestion}
+              // sponsors can't delete questions, the trash is only for admins
+              onDelete={canDelete ? handleDeleteExtraQuestion : undefined}
               onReorder={handleReorder}
               deleteDialogBody={(name) =>
                 T.translate("edit_sponsor.extra_question_remove_warning", {
@@ -206,6 +217,16 @@ const SponsorExtraQuestions = ({
           )}
         </Grid2>
       </Box>
+      {questionToDelete && (
+        <DeleteExtraQuestionPopup
+          extraQuestion={questionToDelete}
+          getUsage={(questionId) =>
+            getSponsorExtraQuestionUsage(sponsorId, questionId)
+          }
+          onConfirm={handleConfirmDelete}
+          onClose={() => setQuestionToDelete(null)}
+        />
+      )}
       {showAddExtraQuestionPopup && (
         <AddSponsorExtraQuestionPopup
           summit={summit}
