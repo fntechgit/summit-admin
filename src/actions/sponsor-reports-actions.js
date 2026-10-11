@@ -15,7 +15,6 @@ import {
 } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
-  DEFAULT_PER_PAGE,
   HUNDRED_PER_PAGE,
   TEN,
   ERROR_CODE_401,
@@ -44,8 +43,11 @@ export const RECEIVE_SPONSOR_DRILLDOWN = "RECEIVE_SPONSOR_DRILLDOWN";
 export const SPONSOR_DRILLDOWN_READ_ERROR = "SPONSOR_DRILLDOWN_READ_ERROR";
 
 export const REQUEST_UNPAID_CHARGES = "REQUEST_UNPAID_CHARGES";
+export const RECEIVE_UNPAID_CHARGES_PAGE = "RECEIVE_UNPAID_CHARGES_PAGE"; // throwaway per-page action
 export const RECEIVE_UNPAID_CHARGES = "RECEIVE_UNPAID_CHARGES";
 export const UNPAID_CHARGES_READ_ERROR = "UNPAID_CHARGES_READ_ERROR";
+export const SET_UNPAID_CHARGES_PAGING = "SET_UNPAID_CHARGES_PAGING";
+export const SET_UNPAID_CHARGES_SORT = "SET_UNPAID_CHARGES_SORT";
 
 export const REQUEST_PURCHASE_DETAILS_LINES = "REQUEST_PURCHASE_DETAILS_LINES";
 export const RECEIVE_PURCHASE_DETAILS_LINES = "RECEIVE_PURCHASE_DETAILS_LINES";
@@ -698,16 +700,11 @@ export const getSponsorAssetSponsor =
   };
 
 // Unpaid Charges reads live carts and Pending purchases from purchases-api (the
-// reports API holds synced purchases only, no carts).
+// reports API holds synced purchases only, no carts). The whole filtered set is
+// bulk-loaded (see getPurchaseDetailsByItemRows) because the page groups it by
+// sponsor client-side; rows commit atomically in ONE RECEIVE.
 export const getUnpaidCharges =
-  (
-    term = "",
-    page = DEFAULT_CURRENT_PAGE,
-    perPage = DEFAULT_PER_PAGE,
-    order = "sponsor_name",
-    orderDir = 1,
-    filters = { adminOnly: true }
-  ) =>
+  (term = "", filters = { adminOnly: true, stage: "" }) =>
   async (dispatch, getState) => {
     const { currentSummit } = getState().currentSummitState;
     if (!currentSummit?.id) return Promise.resolve();
@@ -715,41 +712,92 @@ export const getUnpaidCharges =
     // Record the controls before the token await so a follow-up control change
     // (built from these reducer props) never reads stale values. REQUEST clears
     // the balances, so the overlay goes up with it; a superseding call clears it.
-    guardedDispatch(
-      createAction(REQUEST_UNPAID_CHARGES)({
-        term,
-        page,
-        perPage,
-        order,
-        orderDir,
-        filters
-      })
-    );
+    guardedDispatch(createAction(REQUEST_UNPAID_CHARGES)({ term, filters }));
     guardedDispatch(startLoading());
-    const accessToken = await getAccessTokenSafely();
-    if (!isCurrent()) return Promise.resolve();
+    try {
+      const accessToken = await getAccessTokenSafely();
+      if (!isCurrent()) return Promise.resolve();
 
-    const params = {
-      access_token: accessToken,
-      page,
-      per_page: perPage,
-      order: toOrderParam(order, orderDir)
-    };
-    // Plain `search`, not filter[]: base-api-utils splits filter[] on commas.
-    if (term) params.search = term;
-    if (filters.adminOnly) params["filter[]"] = ["added_by_admin==true"];
+      const params = {
+        access_token: accessToken,
+        per_page: HUNDRED_PER_PAGE,
+        order: "sponsor_name"
+      };
+      // Plain `search`, not filter[]: base-api-utils splits filter[] on commas.
+      if (term) params.search = term;
+      const filter = [];
+      if (filters.adminOnly) filter.push("added_by_admin==true");
+      if (filters.stage) filter.push(`stage==${filters.stage}`);
+      if (filter.length) params["filter[]"] = filter;
 
-    return getRequest(
-      null,
-      createAction(RECEIVE_UNPAID_CHARGES),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/unpaid-charges`,
-      reportReadErrorHandler({
-        onReadError: createAction(UNPAID_CHARGES_READ_ERROR)
-      })
-    )(params)(guardedDispatch)
-      .catch(() => {})
-      .finally(() => guardedDispatch(stopLoading()));
+      const url = `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/unpaid-charges`;
+      const fetchPage = (page) =>
+        getRequest(
+          null,
+          createAction(RECEIVE_UNPAID_CHARGES_PAGE),
+          url,
+          reportReadErrorHandler({
+            onReadError: createAction(UNPAID_CHARGES_READ_ERROR)
+          })
+        )({ ...params, page })(guardedDispatch);
+
+      const { response } = await fetchPage(DEFAULT_CURRENT_PAGE);
+      const lastPage = response.last_page || DEFAULT_CURRENT_PAGE;
+      const limit = pLimit(TEN);
+      const restPages = Array.from(
+        { length: lastPage },
+        (_, i) => i + DEFAULT_CURRENT_PAGE
+      ).slice(DEFAULT_CURRENT_PAGE);
+      // Re-check the seq INSIDE the pool callback so a superseded load's queued
+      // jobs never fire.
+      const rest = await Promise.all(
+        restPages.map((p) =>
+          limit(() =>
+            isCurrent()
+              ? fetchPage(p)
+              : Promise.resolve({ response: { data: [] } })
+          )
+        )
+      );
+      if (
+        !isCurrent() ||
+        getState().currentSummitState.currentSummit?.id !== currentSummit.id
+      ) {
+        return Promise.resolve();
+      }
+      const allRows = rest.reduce(
+        (acc, r) => acc.concat(r.response.data),
+        response.data
+      );
+      guardedDispatch(
+        createAction(RECEIVE_UNPAID_CHARGES)({ response: { data: allRows } })
+      );
+    } catch (e) {
+      // HTTP errors already routed through reportReadErrorHandler; only a
+      // genuine non-HTTP Error lands here.
+      if (e instanceof Error) {
+        guardedDispatch(
+          createAction(UNPAID_CHARGES_READ_ERROR)({ message: e.message })
+        );
+      }
+    } finally {
+      guardedDispatch(stopLoading());
+    }
+    return Promise.resolve();
   };
+
+// Client-side paging over the derived sponsor groups, kept in redux so the
+// user's place survives navigation (cf. setPurchaseDetailsByItemPaging).
+export const setUnpaidChargesPaging =
+  ({ currentPage, perPage }) =>
+  (dispatch) => {
+    dispatch(createAction(SET_UNPAID_CHARGES_PAGING)({ currentPage, perPage }));
+  };
+
+// Client-side sort of the derived sponsor groups: "balance" or "name".
+export const setUnpaidChargesSort = (sort) => (dispatch) => {
+  dispatch(createAction(SET_UNPAID_CHARGES_SORT)({ sort }));
+};
 
 // Sponsor-asset CSV — flat export: drop grouping/order/pagination so the export
 // matches the active filters but not the grouped/paged view.
