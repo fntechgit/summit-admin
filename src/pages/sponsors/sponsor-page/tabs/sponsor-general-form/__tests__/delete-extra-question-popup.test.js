@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import ForceDeleteExtraQuestionPopup from "../force-delete-extra-question-popup";
+import DeleteExtraQuestionPopup from "../delete-extra-question-popup";
 
 const QUESTION = { id: 9, name: "FAVORITE_COLOR" };
 
@@ -28,7 +28,7 @@ const renderPopup = ({
   onClose = jest.fn()
 } = {}) => {
   render(
-    <ForceDeleteExtraQuestionPopup
+    <DeleteExtraQuestionPopup
       extraQuestion={QUESTION}
       getUsage={getUsage}
       onConfirm={onConfirm}
@@ -38,19 +38,19 @@ const renderPopup = ({
   return { getUsage, onConfirm, onClose };
 };
 
-const forceDeleteButton = () =>
-  screen.getByRole("button", { name: "edit_sponsor.force_delete" });
+const deleteButton = () =>
+  screen.getByRole("button", { name: "edit_sponsor.delete_question" });
 
 const tickChecklist = async () => {
-  await userEvent.click(screen.getByTestId("force-delete-check-devices"));
-  await userEvent.click(screen.getByTestId("force-delete-check-pending"));
-  await userEvent.click(screen.getByTestId("force-delete-check-third_party"));
+  await userEvent.click(screen.getByTestId("delete-check-devices"));
+  await userEvent.click(screen.getByTestId("delete-check-pending"));
+  await userEvent.click(screen.getByTestId("delete-check-third_party"));
 };
 
 const typeReason = (text) =>
-  userEvent.type(screen.getByTestId("force-delete-reason"), text);
+  userEvent.type(screen.getByTestId("delete-reason"), text);
 
-describe("ForceDeleteExtraQuestionPopup", () => {
+describe("DeleteExtraQuestionPopup", () => {
   it("loads the usage of the question and shows what is at stake", async () => {
     const { getUsage } = renderPopup({
       usage: buildUsage({ answers_count: 23 })
@@ -58,10 +58,10 @@ describe("ForceDeleteExtraQuestionPopup", () => {
 
     expect(getUsage).toHaveBeenCalledWith(9);
     expect(
-      await screen.findByText("edit_sponsor.force_delete_answers_count")
+      await screen.findByText("edit_sponsor.delete_question_answers_count")
     ).toBeInTheDocument();
     expect(
-      screen.getByText("edit_sponsor.force_delete_rep_activity")
+      screen.getByText("edit_sponsor.delete_question_rep_activity")
     ).toBeInTheDocument();
   });
 
@@ -69,58 +69,58 @@ describe("ForceDeleteExtraQuestionPopup", () => {
     renderPopup({ getUsage: jest.fn(() => new Promise(() => {})) });
 
     expect(
-      screen.getByText("edit_sponsor.force_delete_loading")
+      screen.getByText("edit_sponsor.delete_question_loading")
     ).toBeInTheDocument();
-    expect(forceDeleteButton()).toBeDisabled();
+    expect(deleteButton()).toBeDisabled();
   });
 
-  it("can't force delete when the usage can't be loaded", async () => {
+  it("can't delete when the usage can't be loaded", async () => {
     renderPopup({ getUsage: jest.fn(() => Promise.reject(new Error("403"))) });
 
     expect(
-      await screen.findByText("edit_sponsor.force_delete_usage_error")
+      await screen.findByText("edit_sponsor.delete_question_usage_error")
     ).toBeInTheDocument();
-    expect(forceDeleteButton()).toBeDisabled();
+    expect(deleteButton()).toBeDisabled();
   });
 
   it("needs every checklist item and a reason before the button enables", async () => {
     renderPopup();
-    await screen.findByTestId("force-delete-reason");
+    await screen.findByTestId("delete-reason");
 
-    expect(forceDeleteButton()).toBeDisabled();
+    expect(deleteButton()).toBeDisabled();
 
     await typeReason("0 pending uploads on each device");
-    expect(forceDeleteButton()).toBeDisabled();
+    expect(deleteButton()).toBeDisabled();
 
-    await userEvent.click(screen.getByTestId("force-delete-check-devices"));
-    await userEvent.click(screen.getByTestId("force-delete-check-pending"));
-    expect(forceDeleteButton()).toBeDisabled();
+    await userEvent.click(screen.getByTestId("delete-check-devices"));
+    await userEvent.click(screen.getByTestId("delete-check-pending"));
+    expect(deleteButton()).toBeDisabled();
 
-    await userEvent.click(screen.getByTestId("force-delete-check-third_party"));
-    expect(forceDeleteButton()).toBeEnabled();
+    await userEvent.click(screen.getByTestId("delete-check-third_party"));
+    expect(deleteButton()).toBeEnabled();
   });
 
   it("doesn't accept a blank reason", async () => {
     renderPopup();
-    await screen.findByTestId("force-delete-reason");
+    await screen.findByTestId("delete-reason");
 
     await tickChecklist();
     await typeReason("   ");
 
-    expect(forceDeleteButton()).toBeDisabled();
+    expect(deleteButton()).toBeDisabled();
   });
 
   it("deletes a question with no collected answers without asking to destroy any", async () => {
     const { onConfirm, onClose } = renderPopup();
-    await screen.findByTestId("force-delete-reason");
+    await screen.findByTestId("delete-reason");
 
     expect(
-      screen.queryByTestId("force-delete-delete-answers")
+      screen.queryByTestId("delete-delete-answers")
     ).not.toBeInTheDocument();
 
     await tickChecklist();
     await typeReason("  created by mistake  ");
-    await userEvent.click(forceDeleteButton());
+    await userEvent.click(deleteButton());
 
     expect(onConfirm).toHaveBeenCalledWith(9, {
       reason: "created by mistake",
@@ -133,21 +133,21 @@ describe("ForceDeleteExtraQuestionPopup", () => {
     const { onConfirm } = renderPopup({
       usage: buildUsage({ answers_count: 23 })
     });
-    await screen.findByTestId("force-delete-reason");
+    await screen.findByTestId("delete-reason");
 
     await tickChecklist();
     await typeReason("sponsor insists");
 
     // everything else is done but the collected answers are not confirmed
-    expect(forceDeleteButton()).toBeDisabled();
+    expect(deleteButton()).toBeDisabled();
     expect(
-      screen.getByText("edit_sponsor.force_delete_delete_answers_warning")
+      screen.getByText("edit_sponsor.delete_question_delete_answers_warning")
     ).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId("force-delete-delete-answers"));
-    expect(forceDeleteButton()).toBeEnabled();
+    await userEvent.click(screen.getByTestId("delete-delete-answers"));
+    expect(deleteButton()).toBeEnabled();
 
-    await userEvent.click(forceDeleteButton());
+    await userEvent.click(deleteButton());
     expect(onConfirm).toHaveBeenCalledWith(9, {
       reason: "sponsor insists",
       deleteAnswers: true
@@ -157,25 +157,25 @@ describe("ForceDeleteExtraQuestionPopup", () => {
   it("stays open when the delete fails so it can be retried or cancelled", async () => {
     const onConfirm = jest.fn(() => Promise.reject(new Error("412")));
     const { onClose } = renderPopup({ onConfirm });
-    await screen.findByTestId("force-delete-reason");
+    await screen.findByTestId("delete-reason");
 
     await tickChecklist();
     await typeReason("sponsor insists");
-    await userEvent.click(forceDeleteButton());
+    await userEvent.click(deleteButton());
 
     await waitFor(() => expect(onConfirm).toHaveBeenCalled());
     expect(onClose).not.toHaveBeenCalled();
-    await waitFor(() => expect(forceDeleteButton()).toBeEnabled());
+    await waitFor(() => expect(deleteButton()).toBeEnabled());
   });
 
   it("can't be dismissed while the delete request runs", async () => {
     const onConfirm = jest.fn(() => new Promise(() => {}));
     const { onClose } = renderPopup({ onConfirm });
-    await screen.findByTestId("force-delete-reason");
+    await screen.findByTestId("delete-reason");
 
     await tickChecklist();
     await typeReason("sponsor insists");
-    await userEvent.click(forceDeleteButton());
+    await userEvent.click(deleteButton());
     expect(onConfirm).toHaveBeenCalled();
 
     await userEvent.keyboard("{Escape}");
@@ -187,7 +187,7 @@ describe("ForceDeleteExtraQuestionPopup", () => {
 
   it("closes on ESC when nothing is being deleted", async () => {
     const { onClose } = renderPopup();
-    await screen.findByTestId("force-delete-reason");
+    await screen.findByTestId("delete-reason");
 
     await userEvent.keyboard("{Escape}");
 
@@ -196,7 +196,7 @@ describe("ForceDeleteExtraQuestionPopup", () => {
 
   it("closes without deleting on cancel", async () => {
     const { onConfirm, onClose } = renderPopup();
-    await screen.findByTestId("force-delete-reason");
+    await screen.findByTestId("delete-reason");
 
     await userEvent.click(
       screen.getByRole("button", { name: "general.cancel" })

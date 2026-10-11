@@ -837,36 +837,8 @@ export const updateExtraQuestionOrder =
     });
   };
 
-export const deleteExtraQuestion =
-  (sponsorId, questionId) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-
-    const params = {
-      access_token: accessToken
-    };
-
-    return deleteRequest(
-      null,
-      createAction(SPONSOR_EXTRA_QUESTION_DELETED)({ questionId }),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${questionId}`,
-      null,
-      snackbarErrorHandler
-    )(params)(dispatch)
-      .then(() => {
-        dispatch(
-          snackbarSuccessHandler({
-            title: T.translate("general.done"),
-            html: T.translate("edit_sponsor.extra_question_deleted")
-          })
-        );
-      })
-      .finally(() => dispatch(stopLoading()));
-  };
-
 /**
- * What a force delete of the question affects: collected answers on the server and the sponsor's
+ * What deleting the question affects: collected answers on the server and the sponsor's
  * badge scan activity per rep. It does not prove devices have nothing pending.
  */
 export const getSponsorExtraQuestionUsage =
@@ -891,10 +863,10 @@ export const getSponsorExtraQuestionUsage =
 
 /**
  * Admin only. Sponsors can't delete questions (devices may hold answers the server has not seen),
- * an admin who checked the devices can force it with a reason. When the server holds collected
- * answers, deleteAnswers confirms they are destroyed.
+ * an admin who checked the devices can delete one with a reason. delete_answers is always sent:
+ * when the server holds collected answers, true confirms they are destroyed.
  */
-export const forceDeleteExtraQuestion =
+export const deleteExtraQuestion =
   (sponsorId, questionId, { reason, deleteAnswers = false }) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
@@ -903,8 +875,7 @@ export const forceDeleteExtraQuestion =
 
     const params = {
       access_token: accessToken,
-      force: true,
-      ...(deleteAnswers ? { delete_answers: true } : {})
+      delete_answers: deleteAnswers
     };
 
     return deleteRequest(
@@ -918,7 +889,7 @@ export const forceDeleteExtraQuestion =
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.done"),
-            html: T.translate("edit_sponsor.extra_question_force_deleted")
+            html: T.translate("edit_sponsor.extra_question_deleted")
           })
         );
       })

@@ -9,7 +9,7 @@ import {
   getRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
 import {
-  forceDeleteExtraQuestion,
+  deleteExtraQuestion,
   getSponsorExtraQuestionUsage,
   SPONSOR_EXTRA_QUESTION_DELETED
 } from "../sponsor-actions";
@@ -25,7 +25,7 @@ jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
 const ENDPOINT =
   "http://api.test/api/v1/summits/7/sponsors/5/extra-questions/9";
 
-describe("sponsor extra question force delete actions", () => {
+describe("sponsor extra question delete actions", () => {
   const mockStore = configureStore([thunk]);
   let store;
 
@@ -40,7 +40,7 @@ describe("sponsor extra question force delete actions", () => {
     jest.resetAllMocks();
   });
 
-  describe("forceDeleteExtraQuestion", () => {
+  describe("deleteExtraQuestion", () => {
     // deleteRequest(request, receive, endpoint, payload, errorHandler)(params)(dispatch)
     const mockDelete = (outcome) => {
       const withDispatch = jest.fn(() => outcome);
@@ -49,11 +49,11 @@ describe("sponsor extra question force delete actions", () => {
       return withParams;
     };
 
-    it("sends force=true and the reason, without delete_answers when the server holds no answers", async () => {
+    it("sends the reason and delete_answers=false when the server holds no answers", async () => {
       const withParams = mockDelete(Promise.resolve({ response: {} }));
 
       await store.dispatch(
-        forceDeleteExtraQuestion(5, 9, { reason: "created by mistake" })
+        deleteExtraQuestion(5, 9, { reason: "created by mistake" })
       );
 
       expect(deleteRequest).toHaveBeenCalledWith(
@@ -65,15 +65,15 @@ describe("sponsor extra question force delete actions", () => {
       );
       expect(withParams).toHaveBeenCalledWith({
         access_token: "TOKEN",
-        force: true
+        delete_answers: false
       });
     });
 
-    it("sends delete_answers=true only when the answers were confirmed", async () => {
+    it("sends delete_answers=true when the answers were confirmed", async () => {
       const withParams = mockDelete(Promise.resolve({ response: {} }));
 
       await store.dispatch(
-        forceDeleteExtraQuestion(5, 9, {
+        deleteExtraQuestion(5, 9, {
           reason: "sponsor insists",
           deleteAnswers: true
         })
@@ -81,7 +81,6 @@ describe("sponsor extra question force delete actions", () => {
 
       expect(withParams).toHaveBeenCalledWith({
         access_token: "TOKEN",
-        force: true,
         delete_answers: true
       });
     });
@@ -89,7 +88,7 @@ describe("sponsor extra question force delete actions", () => {
     it("reports the success once the question is deleted", async () => {
       mockDelete(Promise.resolve({ response: {} }));
 
-      await store.dispatch(forceDeleteExtraQuestion(5, 9, { reason: "x" }));
+      await store.dispatch(deleteExtraQuestion(5, 9, { reason: "x" }));
       await flushPromises();
 
       // the reducer removes the question on the action given to the request
@@ -106,7 +105,7 @@ describe("sponsor extra question force delete actions", () => {
       mockDelete(Promise.reject(new Error("412")));
 
       await expect(
-        store.dispatch(forceDeleteExtraQuestion(5, 9, { reason: "x" }))
+        store.dispatch(deleteExtraQuestion(5, 9, { reason: "x" }))
       ).rejects.toThrow("412");
       expect(
         store.getActions().some((a) => a.type === "SET_SNACKBAR_MESSAGE")

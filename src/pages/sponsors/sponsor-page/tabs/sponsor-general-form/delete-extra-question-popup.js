@@ -31,24 +31,24 @@ import {
 } from "@mui/material";
 
 const CHECKLIST = [
-  { key: "devices", label: "edit_sponsor.force_delete_check_devices" },
-  { key: "pending", label: "edit_sponsor.force_delete_check_pending" },
+  { key: "devices", label: "edit_sponsor.delete_question_check_devices" },
+  { key: "pending", label: "edit_sponsor.delete_question_check_pending" },
   {
     key: "third_party",
-    label: "edit_sponsor.force_delete_check_third_party"
+    label: "edit_sponsor.delete_question_check_third_party"
   }
 ];
 
 const NO_CHECKS = { devices: false, pending: false, third_party: false };
 
 /**
- * Admin only confirmation to force delete a sponsor extra question.
+ * Admin only confirmation to delete a sponsor extra question.
  * Sponsors can't delete questions because devices may hold answers the server has not seen, only
  * an admin who checked the devices can tell a delete is safe: the dialog shows what is at stake,
  * asks to confirm the checklist and a reason, and a second confirmation when collected answers
  * will be destroyed.
  */
-const ForceDeleteExtraQuestionPopup = ({
+const DeleteExtraQuestionPopup = ({
   extraQuestion,
   getUsage,
   onConfirm,
@@ -103,16 +103,16 @@ const ForceDeleteExtraQuestionPopup = ({
     return (
       <Box sx={{ mt: 1 }}>
         <Typography sx={{ fontWeight: 500 }}>
-          {T.translate("edit_sponsor.force_delete_scan_activity")}
+          {T.translate("edit_sponsor.delete_question_scan_activity")}
         </Typography>
         {reps.length === 0 && (
           <Typography variant="body2">
-            {T.translate("edit_sponsor.force_delete_no_scans")}
+            {T.translate("edit_sponsor.delete_question_no_scans")}
           </Typography>
         )}
         {reps.map((rep) => (
           <Typography variant="body2" key={rep.member_id}>
-            {T.translate("edit_sponsor.force_delete_rep_activity", {
+            {T.translate("edit_sponsor.delete_question_rep_activity", {
               name: `${rep.first_name} ${rep.last_name}`.trim(),
               email: rep.email,
               scans: rep.scans_count,
@@ -124,7 +124,7 @@ const ForceDeleteExtraQuestionPopup = ({
           variant="caption"
           sx={{ display: "block", mt: 1, color: "text.secondary" }}
         >
-          {T.translate("edit_sponsor.force_delete_activity_note")}
+          {T.translate("edit_sponsor.delete_question_activity_note")}
         </Typography>
       </Box>
     );
@@ -145,15 +145,15 @@ const ForceDeleteExtraQuestionPopup = ({
       fullWidth
     >
       <DialogTitle>
-        {T.translate("edit_sponsor.force_delete_title")}
+        {T.translate("edit_sponsor.delete_question_title")}
       </DialogTitle>
       <Divider />
       <DialogContent>
         <Typography sx={{ mb: 1 }}>
-          {T.translate("edit_sponsor.force_delete_intro")}
+          {T.translate("edit_sponsor.delete_question_intro")}
         </Typography>
         <Typography sx={{ fontWeight: 500, mb: 2 }}>
-          {T.translate("edit_sponsor.force_delete_question", {
+          {T.translate("edit_sponsor.delete_question_question", {
             name: extraQuestion.name
           })}
         </Typography>
@@ -162,28 +162,28 @@ const ForceDeleteExtraQuestionPopup = ({
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
             <CircularProgress size={20} />
             <Typography variant="body2">
-              {T.translate("edit_sponsor.force_delete_loading")}
+              {T.translate("edit_sponsor.delete_question_loading")}
             </Typography>
           </Box>
         )}
 
         {usageFailed && (
           <Typography color="error" sx={{ mb: 2 }}>
-            {T.translate("edit_sponsor.force_delete_usage_error")}
+            {T.translate("edit_sponsor.delete_question_usage_error")}
           </Typography>
         )}
 
         {usage && (
           <>
             <Typography sx={{ fontWeight: 500 }}>
-              {T.translate("edit_sponsor.force_delete_answers_count", {
+              {T.translate("edit_sponsor.delete_question_answers_count", {
                 count: answersCount
               })}
             </Typography>
             {renderActivity()}
 
             <Typography sx={{ fontWeight: 500, mt: 2 }}>
-              {T.translate("edit_sponsor.force_delete_checklist")}
+              {T.translate("edit_sponsor.delete_question_checklist")}
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column" }}>
               {CHECKLIST.map(({ key, label }) => (
@@ -194,7 +194,7 @@ const ForceDeleteExtraQuestionPopup = ({
                       checked={checks[key]}
                       onChange={handleCheck(key)}
                       inputProps={{
-                        "data-testid": `force-delete-check-${key}`
+                        "data-testid": `delete-check-${key}`
                       }}
                     />
                   }
@@ -208,9 +208,9 @@ const ForceDeleteExtraQuestionPopup = ({
               fullWidth
               multiline
               minRows={2}
-              label={T.translate("edit_sponsor.force_delete_reason")}
+              label={T.translate("edit_sponsor.delete_question_reason")}
               placeholder={T.translate(
-                "edit_sponsor.force_delete_reason_placeholder"
+                "edit_sponsor.delete_question_reason_placeholder"
               )}
               value={reason}
               onChange={(ev) => setReason(ev.target.value)}
@@ -218,10 +218,10 @@ const ForceDeleteExtraQuestionPopup = ({
               error={reasonTouched && reasonMissing}
               helperText={
                 reasonTouched && reasonMissing
-                  ? T.translate("edit_sponsor.force_delete_reason_required")
+                  ? T.translate("edit_sponsor.delete_question_reason_required")
                   : ""
               }
-              inputProps={{ "data-testid": "force-delete-reason" }}
+              inputProps={{ "data-testid": "delete-reason" }}
               required
             />
 
@@ -229,7 +229,7 @@ const ForceDeleteExtraQuestionPopup = ({
               <Box sx={{ mt: 2, color: "error.main" }}>
                 <Typography variant="body2" sx={{ color: "error.main" }}>
                   {T.translate(
-                    "edit_sponsor.force_delete_delete_answers_warning"
+                    "edit_sponsor.delete_question_delete_answers_warning"
                   )}
                 </Typography>
                 <FormControlLabel
@@ -239,12 +239,12 @@ const ForceDeleteExtraQuestionPopup = ({
                       checked={deleteAnswers}
                       onChange={(ev) => setDeleteAnswers(ev.target.checked)}
                       inputProps={{
-                        "data-testid": "force-delete-delete-answers"
+                        "data-testid": "delete-delete-answers"
                       }}
                     />
                   }
                   label={T.translate(
-                    "edit_sponsor.force_delete_delete_answers",
+                    "edit_sponsor.delete_question_delete_answers",
                     {
                       count: answersCount
                     }
@@ -267,14 +267,14 @@ const ForceDeleteExtraQuestionPopup = ({
           disabled={!canSubmit}
           onClick={handleConfirm}
         >
-          {T.translate("edit_sponsor.force_delete")}
+          {T.translate("edit_sponsor.delete_question")}
         </Button>
       </DialogActions>
     </Dialog>
   );
 };
 
-ForceDeleteExtraQuestionPopup.propTypes = {
+DeleteExtraQuestionPopup.propTypes = {
   extraQuestion: PropTypes.shape({
     id: PropTypes.number.isRequired,
     name: PropTypes.string
@@ -284,4 +284,4 @@ ForceDeleteExtraQuestionPopup.propTypes = {
   onClose: PropTypes.func.isRequired
 };
 
-export default ForceDeleteExtraQuestionPopup;
+export default DeleteExtraQuestionPopup;

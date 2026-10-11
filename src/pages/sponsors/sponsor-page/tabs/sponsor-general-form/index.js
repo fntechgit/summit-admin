@@ -22,7 +22,6 @@ import SponsorExtraQuestions from "./extra-questions";
 import {
   addTierToSponsor,
   deleteExtraQuestion,
-  forceDeleteExtraQuestion,
   getSponsorExtraQuestion,
   getSponsorExtraQuestionUsage,
   getSponsorLeadReportSettingsMeta,
@@ -56,7 +55,6 @@ const SponsorGeneralForm = ({
   saveSponsorExtraQuestionValue,
   resetSponsorExtraQuestionForm,
   deleteExtraQuestion,
-  forceDeleteExtraQuestion,
   getSponsorExtraQuestionUsage,
   updateExtraQuestionOrder,
   saveSponsor
@@ -95,11 +93,10 @@ const SponsorGeneralForm = ({
         saveSponsorExtraQuestionValue={saveSponsorExtraQuestionValue}
         onExtraQuestionDelete={deleteExtraQuestion}
         onExtraQuestionReOrder={updateExtraQuestionOrder}
-        canForceDelete={new Member(member).hasAccess(
-          "sponsors-extra-questions-force-delete"
+        canDelete={new Member(member).hasAccess(
+          "sponsors-extra-questions-delete"
         )}
         getSponsorExtraQuestionUsage={getSponsorExtraQuestionUsage}
-        onExtraQuestionForceDelete={forceDeleteExtraQuestion}
       />
     </Box>
   );
@@ -129,7 +126,6 @@ export default connect(mapStateToProps, {
   saveSponsorExtraQuestionValue,
   resetSponsorExtraQuestionForm,
   deleteExtraQuestion,
-  forceDeleteExtraQuestion,
   getSponsorExtraQuestionUsage,
   updateExtraQuestionOrder,
   saveSponsor

@@ -21,7 +21,7 @@ import {
   MAX_PER_PAGE
 } from "../../../../../utils/constants";
 import AddSponsorExtraQuestionPopup from "./add-extra-question-popup";
-import ForceDeleteExtraQuestionPopup from "./force-delete-extra-question-popup";
+import DeleteExtraQuestionPopup from "./delete-extra-question-popup";
 
 const SponsorExtraQuestions = ({
   sponsorId,
@@ -33,14 +33,13 @@ const SponsorExtraQuestions = ({
   resetSponsorExtraQuestionForm,
   onExtraQuestionReOrder,
   onExtraQuestionDelete,
-  canForceDelete = false,
-  getSponsorExtraQuestionUsage,
-  onExtraQuestionForceDelete
+  canDelete = false,
+  getSponsorExtraQuestionUsage
 }) => {
   const [tableData, setTableData] = useState(extraQuestions);
   const [showAddExtraQuestionPopup, setShowAddExtraQuestionPopup] =
     useState(false);
-  const [questionToForceDelete, setQuestionToForceDelete] = useState(null);
+  const [questionToDelete, setQuestionToDelete] = useState(null);
 
   useEffect(() => {
     const sortedExtraQuestions = extraQuestions.sort(
@@ -69,12 +68,15 @@ const SponsorExtraQuestions = ({
     );
   };
 
+  // the table confirms first, then the dialog shows what is at stake and asks for the reason
   const handleDeleteExtraQuestion = (extraQuestionId) => {
-    onExtraQuestionDelete(sponsorId, extraQuestionId);
+    setQuestionToDelete(
+      extraQuestions.find((q) => q.id === extraQuestionId) || null
+    );
   };
 
-  const handleForceDeleteExtraQuestion = (extraQuestionId, options) =>
-    onExtraQuestionForceDelete(sponsorId, extraQuestionId, options);
+  const handleConfirmDelete = (extraQuestionId, options) =>
+    onExtraQuestionDelete(sponsorId, extraQuestionId, options);
 
   const handleSubmitExtraQuestion = (extraQuestion) => {
     const { valuesToSave, ...extraQuestionToSave } = extraQuestion;
@@ -114,26 +116,7 @@ const SponsorExtraQuestions = ({
     {
       columnKey: "name",
       header: T.translate("generic_extra_question_list.question_id")
-    },
-    // sponsors can't delete questions, only admins can force it
-    ...(canForceDelete
-      ? [
-          {
-            columnKey: "force_delete",
-            header: "",
-            align: "right",
-            render: (c) => (
-              <Button
-                size="small"
-                color="error"
-                onClick={() => setQuestionToForceDelete(c)}
-              >
-                {T.translate("edit_sponsor.force_delete")}
-              </Button>
-            )
-          }
-        ]
-      : [])
+    }
   ];
 
   return (
@@ -222,7 +205,8 @@ const SponsorExtraQuestions = ({
               currentPage={DEFAULT_CURRENT_PAGE}
               perPage={MAX_PER_PAGE}
               onEdit={handleEditExtraQuestion}
-              onDelete={handleDeleteExtraQuestion}
+              // sponsors can't delete questions, the trash is only for admins
+              onDelete={canDelete ? handleDeleteExtraQuestion : undefined}
               onReorder={handleReorder}
               deleteDialogBody={(name) =>
                 T.translate("edit_sponsor.extra_question_remove_warning", {
@@ -233,14 +217,14 @@ const SponsorExtraQuestions = ({
           )}
         </Grid2>
       </Box>
-      {questionToForceDelete && (
-        <ForceDeleteExtraQuestionPopup
-          extraQuestion={questionToForceDelete}
+      {questionToDelete && (
+        <DeleteExtraQuestionPopup
+          extraQuestion={questionToDelete}
           getUsage={(questionId) =>
             getSponsorExtraQuestionUsage(sponsorId, questionId)
           }
-          onConfirm={handleForceDeleteExtraQuestion}
-          onClose={() => setQuestionToForceDelete(null)}
+          onConfirm={handleConfirmDelete}
+          onClose={() => setQuestionToDelete(null)}
         />
       )}
       {showAddExtraQuestionPopup && (

@@ -1,7 +1,7 @@
 import Member from "../member";
 
 // The real access-routes data: with the yml transform stub (or a missing key) hasAccess()
-// always returns true, which would show the force delete to everybody.
+// always returns true, which would show the delete to everybody.
 jest.mock("../../access-routes.yml", () => {
   const fs = require("fs");
   const path = require("path");
@@ -14,8 +14,8 @@ jest.mock("../../access-routes.yml", () => {
 const memberWithGroups = (...codes) =>
   new Member({ groups: codes.map((code) => ({ code })) });
 
-describe("sponsors-extra-questions-force-delete access", () => {
-  const ROUTE = "sponsors-extra-questions-force-delete";
+describe("sponsors-extra-questions-delete access", () => {
+  const ROUTE = "sponsors-extra-questions-delete";
 
   it.each([
     "super-admins",

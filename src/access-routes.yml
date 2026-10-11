@@ -55,8 +55,8 @@ admin-sponsors:
   - administrators
   - summit-front-end-administrators
 
-# force delete of sponsor extra questions: summit-api only lets admins do it
-sponsors-extra-questions-force-delete:
+# delete of sponsor extra questions: summit-api only lets admins do it
+sponsors-extra-questions-delete:
   - super-admins
   - administrators
   - summit-front-end-administrators
