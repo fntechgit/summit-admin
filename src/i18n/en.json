@@ -139,6 +139,8 @@
     "not_logged_in": "You are not logged in. Please log in to continue:"
   },
   "menu": {
+    "open_menu": "Open menu",
+    "main_menu": "Main menu",
     "general": "General",
     "directory": "Directory",
     "dashboard": "Dashboard",
