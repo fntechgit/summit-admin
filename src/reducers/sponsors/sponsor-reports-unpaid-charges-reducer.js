@@ -51,6 +51,11 @@ const reducer = (state = DEFAULT_STATE, action) => {
         order,
         orderDir,
         filters,
+        // A late response from a prior summit must not survive into the next fetch.
+        rows: [],
+        totalCount: 0,
+        totalAmount: 0,
+        pricingErrorCount: 0,
         readError: null
       };
     }

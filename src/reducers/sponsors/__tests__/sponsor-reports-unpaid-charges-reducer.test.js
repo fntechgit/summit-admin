@@ -8,9 +8,16 @@ import {
 } from "../../../actions/sponsor-reports-actions";
 
 describe("sponsor-reports-unpaid-charges-reducer", () => {
-  it("keeps the requested controls and clears a previous error", () => {
+  it("keeps the requested controls and clears previous balances and error", () => {
     const state = reducer(
-      { ...DEFAULT_STATE, readError: { status: 500 } },
+      {
+        ...DEFAULT_STATE,
+        rows: [{ id: 1 }],
+        totalCount: 1,
+        totalAmount: 500,
+        pricingErrorCount: 1,
+        readError: { status: 500 }
+      },
       {
         type: REQUEST_UNPAID_CHARGES,
         payload: {
@@ -30,7 +37,11 @@ describe("sponsor-reports-unpaid-charges-reducer", () => {
       order: "total",
       orderDir: -1,
       filters: { adminOnly: false },
-      readError: null
+      readError: null,
+      rows: [],
+      totalCount: 0,
+      totalAmount: 0,
+      pricingErrorCount: 0
     });
   });
 
