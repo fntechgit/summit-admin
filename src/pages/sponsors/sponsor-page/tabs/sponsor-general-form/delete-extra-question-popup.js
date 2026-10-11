@@ -42,18 +42,22 @@ const CHECKLIST = [
 const NO_CHECKS = { devices: false, pending: false, third_party: false };
 
 /**
- * Admin only confirmation to delete a sponsor extra question.
- * Sponsors can't delete questions because devices may hold answers the server has not seen, only
+ * Admin only confirmation to delete a sponsor extra question, or one of its options when
+ * extraQuestionValue is given.
+ * Sponsors can't delete them because devices may hold answers the server has not seen, only
  * an admin who checked the devices can tell a delete is safe: the dialog shows what is at stake,
  * asks to confirm the checklist and a reason, and a second confirmation when collected answers
- * will be destroyed.
+ * will be destroyed (or, for an option, changed).
  */
 const DeleteExtraQuestionPopup = ({
   extraQuestion,
+  extraQuestionValue = null,
   getUsage,
   onConfirm,
   onClose
 }) => {
+  const isValue = !!extraQuestionValue;
+  const targetId = isValue ? extraQuestionValue.id : extraQuestion.id;
   const [usage, setUsage] = useState(null);
   const [usageFailed, setUsageFailed] = useState(false);
   const [checks, setChecks] = useState(NO_CHECKS);
@@ -64,7 +68,7 @@ const DeleteExtraQuestionPopup = ({
 
   useEffect(() => {
     let active = true;
-    getUsage(extraQuestion.id)
+    getUsage(targetId)
       .then((response) => {
         if (active) setUsage(response);
       })
@@ -74,7 +78,7 @@ const DeleteExtraQuestionPopup = ({
     return () => {
       active = false;
     };
-  }, [extraQuestion.id]);
+  }, [targetId]);
 
   const answersCount = usage?.answers_count ?? 0;
   const reasonMissing = reason.trim() === "";
@@ -89,7 +93,7 @@ const DeleteExtraQuestionPopup = ({
   const handleConfirm = () => {
     if (!canSubmit) return;
     setSubmitting(true);
-    onConfirm(extraQuestion.id, {
+    onConfirm(targetId, {
       reason: reason.trim(),
       deleteAnswers: answersCount > 0 && deleteAnswers
     })
@@ -145,18 +149,36 @@ const DeleteExtraQuestionPopup = ({
       fullWidth
     >
       <DialogTitle>
-        {T.translate("edit_sponsor.delete_question_title")}
+        {T.translate(
+          isValue
+            ? "edit_sponsor.delete_value_title"
+            : "edit_sponsor.delete_question_title"
+        )}
       </DialogTitle>
       <Divider />
       <DialogContent>
         <Typography sx={{ mb: 1 }}>
-          {T.translate("edit_sponsor.delete_question_intro")}
+          {T.translate(
+            isValue
+              ? "edit_sponsor.delete_value_intro"
+              : "edit_sponsor.delete_question_intro"
+          )}
         </Typography>
-        <Typography sx={{ fontWeight: 500, mb: 2 }}>
-          {T.translate("edit_sponsor.delete_question_question", {
-            name: extraQuestion.name
-          })}
-        </Typography>
+        <Box sx={{ mb: 2 }}>
+          <Typography sx={{ fontWeight: 500 }}>
+            {T.translate("edit_sponsor.delete_question_question", {
+              name: extraQuestion.name
+            })}
+          </Typography>
+          {isValue && (
+            <Typography sx={{ fontWeight: 500 }}>
+              {T.translate("edit_sponsor.delete_value_value", {
+                label: extraQuestionValue.label,
+                value: extraQuestionValue.value
+              })}
+            </Typography>
+          )}
+        </Box>
 
         {!usage && !usageFailed && (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
@@ -176,9 +198,15 @@ const DeleteExtraQuestionPopup = ({
         {usage && (
           <>
             <Typography sx={{ fontWeight: 500 }}>
-              {T.translate("edit_sponsor.delete_question_answers_count", {
-                count: answersCount
-              })}
+              {isValue
+                ? T.translate("edit_sponsor.delete_value_answers_count", {
+                    count: answersCount,
+                    to_delete: usage.answers_to_delete ?? 0,
+                    to_modify: usage.answers_to_modify ?? 0
+                  })
+                : T.translate("edit_sponsor.delete_question_answers_count", {
+                    count: answersCount
+                  })}
             </Typography>
             {renderActivity()}
 
@@ -229,7 +257,9 @@ const DeleteExtraQuestionPopup = ({
               <Box sx={{ mt: 2, color: "error.main" }}>
                 <Typography variant="body2" sx={{ color: "error.main" }}>
                   {T.translate(
-                    "edit_sponsor.delete_question_delete_answers_warning"
+                    isValue
+                      ? "edit_sponsor.delete_value_delete_answers_warning"
+                      : "edit_sponsor.delete_question_delete_answers_warning"
                   )}
                 </Typography>
                 <FormControlLabel
@@ -244,7 +274,9 @@ const DeleteExtraQuestionPopup = ({
                     />
                   }
                   label={T.translate(
-                    "edit_sponsor.delete_question_delete_answers",
+                    isValue
+                      ? "edit_sponsor.delete_value_delete_answers"
+                      : "edit_sponsor.delete_question_delete_answers",
                     {
                       count: answersCount
                     }
@@ -279,9 +311,18 @@ DeleteExtraQuestionPopup.propTypes = {
     id: PropTypes.number.isRequired,
     name: PropTypes.string
   }).isRequired,
+  extraQuestionValue: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    value: PropTypes.string,
+    label: PropTypes.string
+  }),
   getUsage: PropTypes.func.isRequired,
   onConfirm: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired
+};
+
+DeleteExtraQuestionPopup.defaultProps = {
+  extraQuestionValue: null
 };
 
 export default DeleteExtraQuestionPopup;

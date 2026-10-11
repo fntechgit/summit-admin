@@ -11,22 +11,24 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
 import {
   getSponsorExtraQuestion,
   saveSponsorExtraQuestion,
   resetSponsorExtraQuestionForm,
   getExtraQuestionMeta,
   deleteSponsorExtraQuestionValue,
+  getSponsorExtraQuestionValueUsage,
   saveSponsorExtraQuestionValue,
   updateSponsorExtraQuestionValueOrder
 } from "../../actions/sponsor-actions";
 import ExtraQuestionForm from "../../components/forms/extra-question-form";
 import AddNewButton from "../../components/buttons/add-new-button";
+import Member from "../../models/member";
+import DeleteExtraQuestionPopup from "./sponsor-page/tabs/sponsor-general-form/delete-extra-question-popup";
 
 function EditSponsorExtraQuestionPage({
   currentSummit,
@@ -34,13 +36,19 @@ function EditSponsorExtraQuestionPage({
   errors,
   match,
   allClasses,
+  member,
   ...props
 }) {
+  const [valueToDelete, setValueToDelete] = useState(null);
   const extraQuestionId = match.params.extra_question_id;
   const title = entity.id
     ? T.translate("general.edit")
     : T.translate("general.add");
   const breadcrumb = entity.id ? entity.name : T.translate("general.new");
+  // sponsors can't delete saved options, same as questions: the trash is only for admins
+  const canDeleteValues = new Member(member).hasAccess(
+    "sponsors-extra-questions-delete"
+  );
 
   useEffect(() => {
     props.getExtraQuestionMeta();
@@ -55,22 +63,7 @@ function EditSponsorExtraQuestionPage({
   }, [extraQuestionId]);
 
   const handleValueDelete = (valueId) => {
-    const value = entity.values.find((v) => v.id === valueId);
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("edit_sponsor.remove_value_warning")} ${
-        value.value
-      }`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        props.deleteSponsorExtraQuestionValue(entity.id, valueId);
-      }
-    });
+    setValueToDelete(entity.values.find((v) => v.id === valueId) || null);
   };
 
   const handleValueSave = (valueEntity) => {
@@ -95,7 +88,7 @@ function EditSponsorExtraQuestionPage({
           questionClasses={allClasses}
           entity={entity}
           errors={errors}
-          onValueDelete={handleValueDelete}
+          onValueDelete={canDeleteValues ? handleValueDelete : undefined}
           onValueSave={handleValueSave}
           onSubmit={props.saveSponsorExtraQuestion}
           updateQuestionValueOrder={props.updateSponsorExtraQuestionValueOrder}
@@ -104,16 +97,31 @@ function EditSponsorExtraQuestionPage({
           shouldHideAllowedFeatures
         />
       )}
+      {valueToDelete && (
+        <DeleteExtraQuestionPopup
+          extraQuestion={entity}
+          extraQuestionValue={valueToDelete}
+          getUsage={(valueId) =>
+            props.getSponsorExtraQuestionValueUsage(entity.id, valueId)
+          }
+          onConfirm={(valueId, options) =>
+            props.deleteSponsorExtraQuestionValue(entity.id, valueId, options)
+          }
+          onClose={() => setValueToDelete(null)}
+        />
+      )}
     </div>
   );
 }
 
 const mapStateToProps = ({
   currentSummitState,
-  currentSponsorExtraQuestionState
+  currentSponsorExtraQuestionState,
+  loggedUserState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
-  ...currentSponsorExtraQuestionState
+  ...currentSponsorExtraQuestionState,
+  member: loggedUserState.member
 });
 
 export default connect(mapStateToProps, {
@@ -122,6 +130,7 @@ export default connect(mapStateToProps, {
   getSponsorExtraQuestion,
   saveSponsorExtraQuestion,
   deleteSponsorExtraQuestionValue,
+  getSponsorExtraQuestionValueUsage,
   saveSponsorExtraQuestionValue,
   updateSponsorExtraQuestionValueOrder
 })(EditSponsorExtraQuestionPage);

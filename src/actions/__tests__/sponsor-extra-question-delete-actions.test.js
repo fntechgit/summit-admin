@@ -10,8 +10,11 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import {
   deleteExtraQuestion,
+  deleteSponsorExtraQuestionValue,
   getSponsorExtraQuestionUsage,
-  SPONSOR_EXTRA_QUESTION_DELETED
+  getSponsorExtraQuestionValueUsage,
+  SPONSOR_EXTRA_QUESTION_DELETED,
+  SPONSOR_EXTRA_QUESTION_VALUE_DELETED
 } from "../sponsor-actions";
 import * as methods from "../../utils/methods";
 
@@ -32,7 +35,11 @@ describe("sponsor extra question delete actions", () => {
   beforeEach(() => {
     window.API_BASE_URL = "http://api.test";
     jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
-    store = mockStore({ currentSummitState: { currentSummit: { id: 7 } } });
+    // the option actions read the sponsor from the state
+    store = mockStore({
+      currentSummitState: { currentSummit: { id: 7 } },
+      currentSponsorState: { entity: { id: 5 } }
+    });
   });
 
   afterEach(() => {
@@ -40,15 +47,15 @@ describe("sponsor extra question delete actions", () => {
     jest.resetAllMocks();
   });
 
-  describe("deleteExtraQuestion", () => {
-    // deleteRequest(request, receive, endpoint, payload, errorHandler)(params)(dispatch)
-    const mockDelete = (outcome) => {
-      const withDispatch = jest.fn(() => outcome);
-      const withParams = jest.fn(() => withDispatch);
-      deleteRequest.mockImplementation(() => withParams);
-      return withParams;
-    };
+  // deleteRequest(request, receive, endpoint, payload, errorHandler)(params)(dispatch)
+  const mockDelete = (outcome) => {
+    const withDispatch = jest.fn(() => outcome);
+    const withParams = jest.fn(() => withDispatch);
+    deleteRequest.mockImplementation(() => withParams);
+    return withParams;
+  };
 
+  describe("deleteExtraQuestion", () => {
     it("sends the reason and delete_answers=false when the server holds no answers", async () => {
       const withParams = mockDelete(Promise.resolve({ response: {} }));
 
@@ -138,6 +145,109 @@ describe("sponsor extra question delete actions", () => {
 
       await expect(
         store.dispatch(getSponsorExtraQuestionUsage(5, 9))
+      ).rejects.toThrow("403");
+    });
+  });
+
+  describe("deleteSponsorExtraQuestionValue", () => {
+    const VALUE_ENDPOINT = `${ENDPOINT}/values/31`;
+
+    it("sends the reason and delete_answers=false when no answers use the option", async () => {
+      const withParams = mockDelete(Promise.resolve({ response: {} }));
+
+      await store.dispatch(
+        deleteSponsorExtraQuestionValue(9, 31, { reason: "typo in label" })
+      );
+
+      expect(deleteRequest).toHaveBeenCalledWith(
+        null,
+        expect.anything(),
+        VALUE_ENDPOINT,
+        { reason: "typo in label" },
+        expect.any(Function)
+      );
+      expect(withParams).toHaveBeenCalledWith({
+        access_token: "TOKEN",
+        delete_answers: false
+      });
+    });
+
+    it("sends delete_answers=true when the changed answers were confirmed", async () => {
+      const withParams = mockDelete(Promise.resolve({ response: {} }));
+
+      await store.dispatch(
+        deleteSponsorExtraQuestionValue(9, 31, {
+          reason: "sponsor insists",
+          deleteAnswers: true
+        })
+      );
+
+      expect(withParams).toHaveBeenCalledWith({
+        access_token: "TOKEN",
+        delete_answers: true
+      });
+    });
+
+    it("removes the option and reports the success once it is deleted", async () => {
+      mockDelete(Promise.resolve({ response: {} }));
+
+      await store.dispatch(
+        deleteSponsorExtraQuestionValue(9, 31, { reason: "x" })
+      );
+      await flushPromises();
+
+      expect(deleteRequest.mock.calls[0][1]).toEqual({
+        type: SPONSOR_EXTRA_QUESTION_VALUE_DELETED,
+        payload: { valueId: 31 }
+      });
+      expect(
+        store.getActions().some((a) => a.type === "SET_SNACKBAR_MESSAGE")
+      ).toBe(true);
+    });
+
+    it("rejects and does not report success when the delete fails", async () => {
+      mockDelete(Promise.reject(new Error("412")));
+
+      await expect(
+        store.dispatch(deleteSponsorExtraQuestionValue(9, 31, { reason: "x" }))
+      ).rejects.toThrow("412");
+      expect(
+        store.getActions().some((a) => a.type === "SET_SNACKBAR_MESSAGE")
+      ).toBe(false);
+    });
+  });
+
+  describe("getSponsorExtraQuestionValueUsage", () => {
+    it("reads the usage of the option and resolves with it", async () => {
+      const usage = {
+        answers_count: 3,
+        answers_to_delete: 1,
+        answers_to_modify: 2,
+        reps_count: 0,
+        reps: []
+      };
+      getRequest.mockImplementation(
+        () => () => () => Promise.resolve({ response: usage })
+      );
+
+      await expect(
+        store.dispatch(getSponsorExtraQuestionValueUsage(9, 31))
+      ).resolves.toEqual(usage);
+      expect(getRequest).toHaveBeenCalledWith(
+        null,
+        expect.anything(),
+        `${ENDPOINT}/values/31/usage`,
+        expect.any(Function)
+      );
+    });
+
+    it("rejects when the usage can't be read", async () => {
+      getRequest.mockImplementation(
+        () => () => () => Promise.reject(new Error("403"))
+      );
+
+      await expect(
+        store.dispatch(getSponsorExtraQuestionValueUsage(9, 31))
       ).rejects.toThrow("403");
     });
   });

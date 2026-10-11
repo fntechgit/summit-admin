@@ -194,6 +194,74 @@ describe("DeleteExtraQuestionPopup", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  describe("for an option", () => {
+    const VALUE = { id: 31, value: "L", label: "Large" };
+
+    const renderValuePopup = ({
+      usage = buildUsage(),
+      onConfirm = jest.fn(() => Promise.resolve())
+    } = {}) => {
+      const getUsage = jest.fn(() => Promise.resolve(usage));
+      render(
+        <DeleteExtraQuestionPopup
+          extraQuestion={QUESTION}
+          extraQuestionValue={VALUE}
+          getUsage={getUsage}
+          onConfirm={onConfirm}
+          onClose={jest.fn()}
+        />
+      );
+      return { getUsage, onConfirm };
+    };
+
+    it("loads the usage of the option and shows the answers it changes", async () => {
+      const { getUsage } = renderValuePopup({
+        usage: buildUsage({
+          answers_count: 5,
+          answers_to_delete: 2,
+          answers_to_modify: 3
+        })
+      });
+
+      expect(getUsage).toHaveBeenCalledWith(31);
+      expect(
+        screen.getByText("edit_sponsor.delete_value_title")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("edit_sponsor.delete_value_value")
+      ).toBeInTheDocument();
+      expect(
+        await screen.findByText("edit_sponsor.delete_value_answers_count")
+      ).toBeInTheDocument();
+    });
+
+    it("confirms the changed answers before deleting the option", async () => {
+      const { onConfirm } = renderValuePopup({
+        usage: buildUsage({
+          answers_count: 5,
+          answers_to_delete: 2,
+          answers_to_modify: 3
+        })
+      });
+      await screen.findByTestId("delete-reason");
+
+      await tickChecklist();
+      await typeReason("typo in label");
+      expect(deleteButton()).toBeDisabled();
+      expect(
+        screen.getByText("edit_sponsor.delete_value_delete_answers_warning")
+      ).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId("delete-delete-answers"));
+      await userEvent.click(deleteButton());
+
+      expect(onConfirm).toHaveBeenCalledWith(31, {
+        reason: "typo in label",
+        deleteAnswers: true
+      });
+    });
+  });
+
   it("closes without deleting on cancel", async () => {
     const { onConfirm, onClose } = renderPopup();
     await screen.findByTestId("delete-reason");
