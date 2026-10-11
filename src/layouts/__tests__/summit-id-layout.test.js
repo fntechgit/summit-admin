@@ -46,13 +46,38 @@ jest.mock("../../pages/no-match-page", () => ({
   default: () => <div data-testid="no-match" />
 }));
 
-const renderAt = (path, currentSummit, loading = false) => {
+// Real access-routes data: the yml transform stub would make hasAccess() always true.
+jest.mock("../../access-routes.yml", () => {
+  const fs = require("fs");
+  const path = require("path");
+  const yaml = require("js-yaml");
+  return yaml.load(
+    fs.readFileSync(path.join(__dirname, "../../access-routes.yml"), "utf8")
+  );
+});
+
+jest.mock("../../pages/summits/edit-summit-page", () => ({
+  __esModule: true,
+  default: () => <div data-testid="edit-summit" />
+}));
+
+jest.mock("../../pages/summits/summit-dashboard-page", () => ({
+  __esModule: true,
+  default: () => <div data-testid="dashboard" />
+}));
+
+const renderAt = (path, currentSummit, loading = false, groups = []) => {
   const history = createMemoryHistory({ initialEntries: [path] });
   return renderWithRedux(
     <Router history={history}>
       <Route path="/app/summits/:summit_id" component={SummitIdLayout} />
     </Router>,
-    { initialState: { currentSummitState: { currentSummit, loading } } }
+    {
+      initialState: {
+        currentSummitState: { currentSummit, loading },
+        loggedUserState: { member: { groups } }
+      }
+    }
   );
 };
 
@@ -115,5 +140,20 @@ describe("SummitIdLayout summit gate", () => {
     renderAt("/app/summits/1/anything", { id: 1 });
     await settle();
     expect(gateOpen()).toBe(true);
+  });
+
+  it("renders the edit page at the summit root for users with summit-edit access", async () => {
+    renderAt("/app/summits/1", { id: 1 }, false, [{ code: "administrators" }]);
+    await settle();
+    expect(screen.queryByTestId("edit-summit")).not.toBeNull();
+  });
+
+  it("redirects room admins from the summit root to the dashboard", async () => {
+    renderAt("/app/summits/1", { id: 1 }, false, [
+      { code: "summit-room-administrators" }
+    ]);
+    await settle();
+    expect(screen.queryByTestId("edit-summit")).toBeNull();
+    expect(await screen.findByTestId("dashboard")).toBeInTheDocument();
   });
 });

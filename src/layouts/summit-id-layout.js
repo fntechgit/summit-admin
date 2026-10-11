@@ -13,11 +13,12 @@
 
 import React, { Suspense, useEffect } from "react";
 import { connect } from "react-redux";
-import { Route, Switch } from "react-router-dom";
+import { Redirect, Route, Switch } from "react-router-dom";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
 import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
 
+import Member from "../models/member";
 import { getSummitById } from "../actions/summit-actions";
 import { getUserRolesBySummit } from "../actions/user-chat-roles-actions";
 import {
@@ -126,10 +127,18 @@ const RegFeedMetadataLayout = React.lazy(() =>
   import("./reg-feed-metadata-layout")
 );
 
-const SummitIdLayout = ({ currentSummit, loading, match, ...props }) => {
+const SummitIdLayout = ({
+  currentSummit,
+  loading,
+  member,
+  match,
+  ...props
+}) => {
   const [hasLoaded, setHasLoaded] = React.useState(false);
   const summitId = parseInt(match.params.summit_id);
   const breadcrumb = currentSummit?.name || T.translate("general.new_summit");
+  // users without summit-edit (e.g. room admins) land on the dashboard instead
+  const canEditSummit = new Member(member).hasAccess("summit-edit");
 
   useEffect(() => {
     props.getSummitById(summitId).then(() => setHasLoaded(true));
@@ -158,9 +167,13 @@ const SummitIdLayout = ({ currentSummit, loading, match, ...props }) => {
             strict
             exact
             path={match.url}
-            render={(props) => (
-              <EditSummitPage {...props} summitId={match.params.summit_id} />
-            )}
+            render={(props) =>
+              canEditSummit ? (
+                <EditSummitPage {...props} summitId={match.params.summit_id} />
+              ) : (
+                <Redirect to={`${match.url}/dashboard`} />
+              )
+            }
           />
           <Route
             path={`${match.url}/room-booking-attributes`}
@@ -327,7 +340,8 @@ const SummitIdLayout = ({ currentSummit, loading, match, ...props }) => {
   );
 };
 
-const mapStateToProps = ({ currentSummitState }) => ({
+const mapStateToProps = ({ currentSummitState, loggedUserState }) => ({
+  member: loggedUserState.member,
   currentSummit: currentSummitState.currentSummit,
   loading: currentSummitState.loading
 });
