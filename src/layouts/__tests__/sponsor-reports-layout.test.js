@@ -17,6 +17,7 @@ import { Router, Route } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import { renderWithRedux } from "../../utils/test-utils";
 import SponsorReportsLayout from "../sponsor-reports-layout";
+import { DEFAULT_STATE as UNPAID_DEFAULT_STATE } from "../../reducers/sponsors/sponsor-reports-unpaid-charges-reducer";
 
 // Echo translation keys so UnAuthorizedPage's T.translate("errors.not_allowed") → "errors.not_allowed"
 jest.mock("i18n-react/dist/i18n-react", () => ({
@@ -55,6 +56,7 @@ jest.mock("../../actions/sponsor-reports-actions", () => ({
   getSponsorAssetFilters: jest.fn(() => ({
     type: "MOCK_GET_SPONSOR_ASSET_FILTERS"
   })),
+  getUnpaidCharges: jest.fn(() => ({ type: "MOCK_GET_UNPAID_CHARGES" })),
   getPurchaseDetailsReport: jest.fn(() => ({
     type: "MOCK_GET_PURCHASE_DETAILS"
   })),
@@ -76,13 +78,13 @@ const buildState = (groups) => ({
   }
 });
 
-const renderLayout = (groups) => {
-  const history = createMemoryHistory({ initialEntries: [REPORTS_URL] });
+const renderLayout = (groups, url = REPORTS_URL, extraState = {}) => {
+  const history = createMemoryHistory({ initialEntries: [url] });
   return renderWithRedux(
     <Router history={history}>
       <Route path={REPORTS_ROUTE} component={SponsorReportsLayout} />
     </Router>,
-    { initialState: buildState(groups) }
+    { initialState: { ...buildState(groups), ...extraState } }
   );
 };
 
@@ -104,5 +106,26 @@ describe("SponsorReportsLayout", () => {
     expect(
       screen.queryByTestId("report-card-purchase-details")
     ).not.toBeInTheDocument();
+  });
+
+  it("routes /unpaid-charges to the Unpaid Charges page with its crumb", () => {
+    renderLayout(
+      [{ code: "administrators" }],
+      `${REPORTS_URL}/unpaid-charges`,
+      {
+        currentSummitState: { currentSummit: { id: 1 } },
+        sponsorReportsUnpaidChargesState: UNPAID_DEFAULT_STATE
+      }
+    );
+    expect(
+      screen
+        .getAllByTestId("breadcrumb")
+        .map((crumb) => crumb.getAttribute("data-title"))
+    ).toContain("sponsor_reports_page.unpaid_charges_title");
+    expect(
+      screen.getByRole("heading", {
+        name: "sponsor_reports_page.unpaid_charges_title"
+      })
+    ).toBeInTheDocument();
   });
 });

@@ -49,4 +49,13 @@ describe("ReportsLandingPage", () => {
     expect(link).not.toBeNull();
     expect(link.getAttribute("href")).toBe(`${BASE}/sponsor-assets`);
   });
+
+  it("Unpaid Charges card links to .../unpaid-charges", () => {
+    renderLanding();
+    const link = screen
+      .getByText("sponsor_reports_page.unpaid_charges_title")
+      .closest("a");
+    expect(link).not.toBeNull();
+    expect(link.getAttribute("href")).toBe(`${BASE}/unpaid-charges`);
+  });
 });
