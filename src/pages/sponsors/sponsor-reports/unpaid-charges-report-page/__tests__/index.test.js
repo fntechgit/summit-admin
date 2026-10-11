@@ -109,6 +109,16 @@ describe("UnpaidChargesReportPage", () => {
     );
   });
 
+  it("falls back to the generic report error when the server sends no message", () => {
+    renderPage({ rows: [], readError: { status: 500, message: "" } });
+    expect(
+      screen.getByText("sponsor_reports_page.read_error")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/sponsor_reports_page.unpaid_read_error/)
+    ).not.toBeInTheDocument();
+  });
+
   it("shows an inline error and no totals when the read failed", () => {
     renderPage({
       rows: [],

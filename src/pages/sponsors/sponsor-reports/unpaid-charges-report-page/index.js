@@ -133,9 +133,11 @@ const UnpaidChargesReportPage = ({
       />
       {readError ? (
         <Alert severity="error">
-          {T.translate("sponsor_reports_page.unpaid_read_error", {
-            message: readError.message ?? readError.status
-          })}
+          {readError.message
+            ? T.translate("sponsor_reports_page.unpaid_read_error", {
+                message: readError.message
+              })
+            : T.translate("sponsor_reports_page.read_error")}
         </Alert>
       ) : (
         <>
