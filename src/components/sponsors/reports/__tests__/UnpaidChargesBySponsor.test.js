@@ -201,6 +201,35 @@ describe("UnpaidChargesBySponsor", () => {
     ).toBeVisible();
   });
 
+  it("labels the form columns and who added each form", async () => {
+    renderIt();
+    await openSponsor("Acme");
+    const cartRow = screen
+      .getByText("sponsor_reports_page.unpaid_cart_label 70")
+      .closest("tr");
+    await userEvent.click(
+      within(cartRow).getByRole("button", {
+        name: "sponsor_reports_page.unpaid_show_forms"
+      })
+    );
+    const formsTable = screen.getByText("Electrical").closest("table");
+    expect(
+      within(formsTable)
+        .getAllByRole("columnheader")
+        .map((th) => th.textContent)
+    ).toEqual([
+      "sponsor_reports_page.unpaid_col_form",
+      "sponsor_reports_page.unpaid_col_code",
+      "sponsor_reports_page.unpaid_col_added_by",
+      "sponsor_reports_page.unpaid_col_total"
+    ]);
+    expect(
+      within(screen.getByText("Electrical").closest("tr")).getByText(
+        "sponsor_reports_page.unpaid_added_by_admin"
+      )
+    ).toBeInTheDocument();
+  });
+
   it("expands an entry to its forms and flags the missing price on that form", async () => {
     renderIt();
     await openSponsor("Acme");

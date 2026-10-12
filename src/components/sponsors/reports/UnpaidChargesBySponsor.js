@@ -256,13 +256,23 @@ const EntryRow = ({ entry, summitId, expanded, onToggle }) => {
         <TableRow>
           <TableCell colSpan={6} sx={{ bgcolor: "grey.50", py: 1.5 }}>
             <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>{t("unpaid_col_form")}</TableCell>
+                  <TableCell>{t("unpaid_col_code")}</TableCell>
+                  <TableCell>{t("unpaid_col_added_by")}</TableCell>
+                  <TableCell align="right">{t("unpaid_col_total")}</TableCell>
+                </TableRow>
+              </TableHead>
               <TableBody>
                 {entry.forms.map((form) => (
                   <TableRow key={form.id}>
                     <TableCell>{form.form_name}</TableCell>
                     <TableCell>{form.form_code}</TableCell>
                     <TableCell>
-                      {!form.added_by_admin && t("unpaid_added_by_sponsor")}
+                      {form.added_by_admin
+                        ? t("unpaid_added_by_admin")
+                        : t("unpaid_added_by_sponsor")}
                     </TableCell>
                     <TableCell align="right">
                       {form.pricing_error || form.total == null ? (
