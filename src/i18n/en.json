@@ -5,7 +5,7 @@
     "session_expired": "Hold on. Your session expired!.",
     "empty_list": "there not are any {item} that match your criteria.",
     "server_error": "There was a problem with our server, please contact admin.",
-    "empty_list_schedule_events": "Please select a Day and a Location ...",
+    "empty_list_schedule_events": "Please select a Day and a Location...",
     "not_allowed": "You are not allowed here, please login with another user to access this page.",
     "not_found": "Not Found!",
     "entity_not_found": "The entity you are looking for was not found.",
@@ -239,15 +239,15 @@
     "apply_duration": "Apply duration",
     "duration": "Duration (minutes)",
     "placeholders": {
-      "select_presentation_selection_status": "Select a Selection Status ...",
-      "select_presentation_selection_plan": "Select a Selection Plan ...",
-      "search_unpublished": "Search for UnPublished Activities ...",
-      "search_published": "Search for Published Activities ...",
-      "select_order_by": "Select Order By ...",
-      "select_day": "Select an Activity Day ...",
-      "select_venue": "Select a Venue ...",
-      "select_event_type": "Select an Activity Type ...",
-      "select_track": "Select an Activity Category ...",
+      "select_presentation_selection_status": "Select a Selection Status...",
+      "select_presentation_selection_plan": "Select a Selection Plan...",
+      "search_unpublished": "Search for UnPublished Activities...",
+      "search_published": "Search for Published Activities...",
+      "select_order_by": "Select Order By...",
+      "select_day": "Select an Activity Day...",
+      "select_venue": "Select a Venue...",
+      "select_event_type": "Select an Activity Type...",
+      "select_track": "Select an Activity Category...",
       "selected_filters": "Enabled Filters",
       "selected_source": "Select Source"
     }
@@ -591,7 +591,7 @@
       "event_type_search": "Search activity types...",
       "allowed_presentation_questions": "Select questions to display...",
       "allowed_presentation_editable_questions": "Select questions to Edit...",
-      "cfp_presentation_edition_default_tab": "Select a landing tab ..."
+      "cfp_presentation_edition_default_tab": "Select a landing tab..."
     }
   },
   "edit_event": {
@@ -683,7 +683,7 @@
     "speaker_last_name": "Last Name",
     "speaker_company": "Company",
     "speaker_email": "Email",
-    "select_speaker": "Search a speaker to associate ...",
+    "select_speaker": "Search a speaker to associate...",
     "search_speakers": "Search speaker(s)",
     "assign_speaker": "Add speaker",
     "unassign_speaker": "Are you sure you want to unassign speaker ",
@@ -696,16 +696,16 @@
     "downgrade_message": "You can not change from Presentation Type to SummitEvent Type.",
     "invalid_material_url": "Invalid download link",
     "placeholders": {
-      "select_venue": "Select an Activity Venue ...",
+      "select_venue": "Select an Activity Venue...",
       "start_date": "Start Date",
       "end_date": "End Date",
-      "select_event_type": "Select an Activity Type ...",
-      "select_track": "Select an Activity Category ...",
-      "select_level": "Select a Level ...",
-      "select_rsvp_type": "Select a RSVP Type ...",
-      "select_rsvp_template": "Select a Template ...",
-      "select_selection_plan": "Select a Selection Plan ...",
-      "select_submitter": "Select Submitter ...",
+      "select_event_type": "Select an Activity Type...",
+      "select_track": "Select an Activity Category...",
+      "select_level": "Select a Level...",
+      "select_rsvp_type": "Select a RSVP Type...",
+      "select_rsvp_template": "Select a Template...",
+      "select_selection_plan": "Select a Selection Plan...",
+      "select_submitter": "Select Submitter...",
       "search_feedback": "Search by Author, Note",
       "search_comment": "Search by Comment, Creator ID",
       "allowed_ticket_types": "Select ticket types",
@@ -762,7 +762,7 @@
     "event_material_saved": "Material saved successfully.",
     "event_material_created": "Material created successfully.",
     "placeholders": {
-      "select_type": "Select a Type ..."
+      "select_type": "Select a Type..."
     }
   },
   "edit_event_comment": {
@@ -1803,17 +1803,17 @@
     "import_tickets_badge_features_text": ": a column per badge feature (name) with 0 (disabled) or 1 (enabled)",
     "placeholders": {
       "search_tickets": "Search by Ticket #, Buyer, Assignee, Promo Code, Promo Code Description",
-      "ticket_types": "Filter By Ticket Types ...",
-      "owner_first_name": "First name starts with ...",
-      "owner_last_name": "Last name starts with ...",
+      "ticket_types": "Filter By Ticket Types...",
+      "owner_first_name": "First name starts with...",
+      "owner_last_name": "Last name starts with...",
       "owner_company": "Select Company",
-      "view_types": "Filter by View Types ...",
-      "view_type": "Select a View Type ...",
-      "promocodes": "Select a Promo Code ...",
-      "promocodes_tags": "Select a Promo Code Tag ...",
+      "view_types": "Filter by View Types...",
+      "view_type": "Select a View Type...",
+      "promocodes": "Select a Promo Code...",
+      "promocodes_tags": "Select a Promo Code Tag...",
       "select_fields": "Select data to display",
       "badge_type": "Badge Type",
-      "access_level": "Select a Access Level ..."
+      "access_level": "Select a Access Level..."
     }
   },
   "edit_ticket": {
@@ -3421,7 +3421,7 @@
     "placeholders": {
       "search": "Search docs by name",
       "select_type": "Select Activity Type",
-      "selection_plan": "Select a Selection Plan ...",
+      "selection_plan": "Select a Selection Plan...",
       "web_link": "URL to files stored in external storage services (Eg: Digital Ocean)"
     }
   },

@@ -44,7 +44,7 @@ class ScheduleAdminEmptySpotsList extends React.Component {
       emptySpotsItems.push(
         <li key={idx}>
           <div
-            title="Click to navigate to empty spot ..."
+            title="Click to navigate to empty spot..."
             className="empty-spot"
             onClick={() => onClickSpot(spot)}
           >
