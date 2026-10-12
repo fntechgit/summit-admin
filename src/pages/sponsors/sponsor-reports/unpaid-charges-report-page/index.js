@@ -11,165 +11,146 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Alert, Box, Button } from "@mui/material";
-import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import { Alert, Box } from "@mui/material";
+import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import GridToolbar from "../../../../components/mui/grid-toolbar";
-import history from "../../../../history";
-import { getUnpaidCharges } from "../../../../actions/sponsor-reports-actions";
+import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
+import UnpaidChargesBySponsor, {
+  groupUnpaidCharges,
+  sortGroups,
+  STAGE_TONE,
+  summarizeGroups
+} from "../../../../components/sponsors/reports/UnpaidChargesBySponsor";
+import {
+  getUnpaidCharges,
+  setUnpaidChargesPaging,
+  setUnpaidChargesSort
+} from "../../../../actions/sponsor-reports-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
+
+const STAGES = Object.keys(STAGE_TONE);
+const SORTS = ["balance", "name"];
+
+const t = (key, params) => T.translate(`sponsor_reports_page.${key}`, params);
 
 const UnpaidChargesReportPage = ({
   currentSummit,
   rows,
   term,
-  order,
-  orderDir,
+  filters,
+  sort,
   currentPage,
   perPage,
-  totalCount,
-  totalAmount,
-  pricingErrorCount,
-  filters,
   readError,
-  getUnpaidCharges
+  getUnpaidCharges,
+  setUnpaidChargesPaging,
+  setUnpaidChargesSort
 }) => {
   useEffect(() => {
-    getUnpaidCharges(
-      term,
-      DEFAULT_CURRENT_PAGE,
-      perPage,
-      order,
-      orderDir,
-      filters
-    );
+    getUnpaidCharges(term, filters);
   }, []);
 
-  const fetchPage = (page, overrides = {}) => {
-    const next = { term, perPage, order, orderDir, filters, ...overrides };
-    getUnpaidCharges(
-      next.term,
-      page,
-      next.perPage,
-      next.order,
-      next.orderDir,
-      next.filters
-    );
-  };
+  const groups = useMemo(
+    () => sortGroups(groupUnpaidCharges(rows), sort),
+    [rows, sort]
+  );
+  const summary = useMemo(() => summarizeGroups(groups), [groups]);
 
-  const sponsorUrl = (row) =>
-    `/app/summits/${currentSummit.id}/sponsors/${row.sponsor_id}`;
-  const isOrder = (row) =>
-    row.stage === "invoiced" || row.stage === "processing";
-  const handleOpen = (row) =>
-    history.push(
-      isOrder(row)
-        ? `${sponsorUrl(row)}/purchases/${row.purchase_id}`
-        : `${sponsorUrl(row)}/cart`
-    );
-
-  const columns = [
+  const tiles = [
     {
-      columnKey: "sponsor_name",
-      header: T.translate("sponsor_reports_page.unpaid_col_sponsor"),
-      sortable: true
+      label: t("unpaid_tile_total"),
+      value: currencyAmountFromCents(summary.total)
     },
     {
-      columnKey: "stage",
-      header: T.translate("sponsor_reports_page.unpaid_col_cart"),
-      render: (row) =>
-        T.translate(`sponsor_reports_page.unpaid_stage_${row.stage}`)
+      label: t("unpaid_tile_open"),
+      value: currencyAmountFromCents(summary.open)
     },
     {
-      columnKey: "total",
-      header: T.translate("sponsor_reports_page.unpaid_col_total"),
-      sortable: true,
-      // a null total must never render as $0
-      render: (row) =>
-        row.pricing_error
-          ? T.translate("sponsor_reports_page.unpaid_price_missing")
-          : currencyAmountFromCents(row.total)
+      label: t("unpaid_tile_checked_out"),
+      value: currencyAmountFromCents(summary.checkedOut),
+      tone: "warning"
     },
-    {
-      columnKey: "form_name",
-      header: T.translate("sponsor_reports_page.unpaid_col_form")
-    },
-    {
-      columnKey: "link",
-      header: "",
-      render: (row) => (
-        <Button variant="text" size="small" onClick={() => handleOpen(row)}>
-          {T.translate(
-            isOrder(row)
-              ? "sponsor_reports_page.unpaid_open_order"
-              : "sponsor_reports_page.unpaid_open_cart"
-          )}
-        </Button>
-      )
-    }
+    { label: t("unpaid_tile_sponsors"), value: summary.sponsors }
   ];
 
   return (
     <div className="container">
-      <h3>{T.translate("sponsor_reports_page.unpaid_charges_title")}</h3>
+      <h3>{t("unpaid_charges_title")}</h3>
       <GridToolbar
         splitAt="lg"
         searchProps={{
           term,
-          onSearch: (value) => fetchPage(DEFAULT_CURRENT_PAGE, { term: value }),
+          onSearch: (value) => getUnpaidCharges(value, filters),
           placeholder: T.translate("general.placeholders.search")
         }}
         checkboxProps={{
           checked: !!filters.adminOnly,
-          label: T.translate("sponsor_reports_page.unpaid_admin_only"),
+          label: t("unpaid_admin_only"),
           onChange: (ev) =>
-            fetchPage(DEFAULT_CURRENT_PAGE, {
-              filters: { ...filters, adminOnly: ev.target.checked }
-            })
+            getUnpaidCharges(term, { ...filters, adminOnly: ev.target.checked })
         }}
-      />
+      >
+        <MuiDropdown
+          id="unpaid-filter-stage"
+          size="small"
+          placeholder={t("unpaid_filter_stage")}
+          SelectDisplayProps={{ "aria-label": t("unpaid_filter_stage") }}
+          value={filters.stage}
+          options={[
+            { value: "", label: t("unpaid_all_stages") },
+            ...STAGES.map((stage) => ({
+              value: stage,
+              label: t(`unpaid_stage_${stage}`)
+            }))
+          ]}
+          onChange={(e) =>
+            getUnpaidCharges(term, { ...filters, stage: e.target.value })
+          }
+        />
+        <MuiDropdown
+          id="unpaid-sort"
+          size="small"
+          placeholder={t("unpaid_sort")}
+          SelectDisplayProps={{ "aria-label": t("unpaid_sort") }}
+          value={sort}
+          options={SORTS.map((value) => ({
+            value,
+            label: t(`unpaid_sort_${value}`)
+          }))}
+          onChange={(e) => setUnpaidChargesSort(e.target.value)}
+        />
+      </GridToolbar>
       {readError ? (
         <Alert severity="error">
           {readError.message
-            ? T.translate("sponsor_reports_page.unpaid_read_error", {
-                message: readError.message
-              })
-            : T.translate("sponsor_reports_page.read_error")}
+            ? t("unpaid_read_error", { message: readError.message })
+            : t("read_error")}
         </Alert>
       ) : (
         <>
-          <Box sx={{ mb: 2 }}>
-            {T.translate("sponsor_reports_page.unpaid_summary", {
-              count: totalCount,
-              amount: currencyAmountFromCents(totalAmount)
-            })}
-            {pricingErrorCount > 0 && (
-              <Box component="span" sx={{ ml: 2, color: "warning.main" }}>
-                {T.translate(
-                  "sponsor_reports_page.unpaid_price_missing_count",
-                  {
-                    count: pricingErrorCount
-                  }
-                )}
-              </Box>
-            )}
-          </Box>
-          <MuiTable
-            columns={columns}
-            data={rows}
-            options={{ sortCol: order, sortDir: orderDir }}
-            perPage={perPage}
-            totalRows={totalCount}
+          <SummaryPanel tiles={tiles} />
+          {summary.missing > 0 && (
+            <Box sx={{ my: 2, color: "warning.main" }}>
+              {t("unpaid_price_missing_count", { count: summary.missing })}
+            </Box>
+          )}
+          <UnpaidChargesBySponsor
+            groups={groups}
+            summitId={currentSummit.id}
             currentPage={currentPage}
-            onPageChange={(page) => fetchPage(page)}
-            onPerPageChange={(value) =>
-              fetchPage(DEFAULT_CURRENT_PAGE, { perPage: value })
+            perPage={perPage}
+            onPageChange={(page) =>
+              setUnpaidChargesPaging({ currentPage: page, perPage })
             }
-            onSort={(key, dir) =>
-              fetchPage(DEFAULT_CURRENT_PAGE, { order: key, orderDir: dir })
+            onPerPageChange={(value) =>
+              setUnpaidChargesPaging({
+                currentPage: DEFAULT_CURRENT_PAGE,
+                perPage: value
+              })
             }
           />
         </>
@@ -186,6 +167,8 @@ const mapStateToProps = ({
   ...sponsorReportsUnpaidChargesState
 });
 
-export default connect(mapStateToProps, { getUnpaidCharges })(
-  UnpaidChargesReportPage
-);
+export default connect(mapStateToProps, {
+  getUnpaidCharges,
+  setUnpaidChargesPaging,
+  setUnpaidChargesSort
+})(UnpaidChargesReportPage);
