@@ -16,8 +16,9 @@ import PropTypes from "prop-types";
 import UploadInputV3 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v3";
 import UploadInputV4 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v4";
 
-// FILE_UPLOAD_USE_V4 selects direct-to-storage uploads; turning it off rolls
-// back to the chunked pipeline without a redeploy.
+// FILE_UPLOAD_USE_V4 selects direct-to-storage uploads. It is baked in at
+// build time: set it to anything but "true" and rebuild to roll back to the
+// chunked pipeline.
 const FileUploadInput = ({ parallelChunkUploads, ...rest }) => {
   if (window.FILE_UPLOAD_USE_V4 === "true") {
     return (
