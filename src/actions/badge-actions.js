@@ -552,13 +552,12 @@ export const saveViewType = (entity) => async (dispatch, getState) => {
       .then(() => {
         dispatch(
           snackbarSuccessHandler({
-            title: T.translate("general.success"),
             html: T.translate("edit_view_type.view_type_saved")
           })
         );
       })
-      .finally(() => dispatch(stopLoading()))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => dispatch(stopLoading()));
   } else {
     postRequest(
       createAction(UPDATE_VIEW_TYPE),
@@ -571,7 +570,6 @@ export const saveViewType = (entity) => async (dispatch, getState) => {
       .then((payload) => {
         dispatch(
           snackbarSuccessHandler({
-            title: T.translate("general.success"),
             html: T.translate("edit_view_type.view_type_created")
           })
         );
@@ -579,8 +577,8 @@ export const saveViewType = (entity) => async (dispatch, getState) => {
           `/app/summits/${currentSummit.id}/view-types/${payload.response.id}`
         );
       })
-      .finally(() => dispatch(stopLoading()))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => dispatch(stopLoading()));
   }
 };
 
