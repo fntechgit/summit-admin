@@ -522,6 +522,12 @@ describe("EventForm", () => {
     expect(dayBeforeSummitStart).not.toHaveClass("rdtDisabled");
   });
 
+  const pickOption = (container, fieldId, name) => {
+    const field = container.querySelector(`#${fieldId}`);
+    fireEvent.keyDown(field.querySelector("input"), { keyCode: 40 });
+    fireEvent.click(within(field).getByText(name));
+  };
+
   describe("selection plan matching", () => {
     // 930 is "Presentation"; 36473 is a leaf track in track group 69
     const presentationEntity = {
@@ -553,19 +559,64 @@ describe("EventForm", () => {
         screen.getByText("edit_event.tracks_without_selection_plans")
       ).toBeInTheDocument();
     });
+
+    // the reopen control only renders while the event has a selection plan
+    it("clears the selection plan when the new category isn't in it", async () => {
+      const { container } = renderEventForm({
+        entity: { ...presentationEntity, selection_plan_id: 100 },
+        selectionPlansOpts: [matchingPlan]
+      });
+
+      pickOption(container, "track_id", "Networking");
+
+      await waitFor(() =>
+        expect(
+          screen.queryByRole("button", {
+            name: "edit_event.reopen_submission"
+          })
+        ).not.toBeInTheDocument()
+      );
+    });
+
+    it("keeps the selection plan when the new category is in it", () => {
+      const { container } = renderEventForm({
+        entity: { ...presentationEntity, selection_plan_id: 100 },
+        selectionPlansOpts: [matchingPlan]
+      });
+
+      pickOption(container, "track_id", "FTS: AI / HPC");
+
+      expect(
+        screen.getByRole("button", { name: "edit_event.reopen_submission" })
+      ).toBeInTheDocument();
+    });
+
+    it("doesn't write into the errors prop when a plan is picked", async () => {
+      const errors = {};
+      const { container } = renderEventForm({
+        entity: { ...presentationEntity, selection_plan_id: null },
+        selectionPlansOpts: [matchingPlan],
+        errors
+      });
+
+      pickOption(container, "selection_plan_id", "Matching Plan");
+
+      await waitFor(() =>
+        expect(baseProps.fetchExtraQuestionsAnswers).toHaveBeenCalledWith(
+          currentSummitMock.id,
+          100,
+          presentationEntity.id
+        )
+      );
+      expect(errors).toEqual({});
+    });
   });
 
   describe("activity type kind changes", () => {
-    const pickType = (container, name) => {
-      const typeField = container.querySelector("#type_id");
-      fireEvent.keyDown(typeField.querySelector("input"), { keyCode: 40 });
-      fireEvent.click(within(typeField).getByText(name));
-    };
-
     it("doesn't let a saved presentation switch to a non-presentation type", async () => {
       const { container } = renderEventForm({ entity: baseEntity });
 
-      pickType(container, "Lunch");
+      pickOption(container, "type_id", "Lunch");
 
       await waitFor(() =>
         expect(
@@ -583,7 +634,7 @@ describe("EventForm", () => {
         }
       });
 
-      pickType(container, "Presentation");
+      pickOption(container, "type_id", "Presentation");
 
       expect(
         await screen.findByText(/edit_event\.upgrade_message/)

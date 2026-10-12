@@ -77,6 +77,9 @@ import { buildRecipientRows, toNotifyPayload } from "./utils";
 
 const REOPEN_DEADLINE_FORMAT = "MMMM DD, YYYY h:mm a";
 
+const isTrackInPlan = (track, sp) =>
+  sp.track_groups.some((gr) => track.track_groups.includes(gr));
+
 class EventForm extends React.Component {
   constructor(props) {
     super(props);
@@ -213,6 +216,23 @@ class EventForm extends React.Component {
     this.setState({ entity: newEntity }, () => {
       if (id === "type_id" && entity.id)
         this.handleEventTypeChange(entity, newEntity);
+      if (id === "track_id") this.clearSelectionPlanIfNotAllowed(newEntity);
+    });
+  }
+
+  // a plan that doesn't accept the type and category can't be saved with them
+  // so remove the selection
+  clearSelectionPlanIfNotAllowed(entity) {
+    const { trackOpts, selectionPlansOpts } = this.props;
+    const plan = selectionPlansOpts.find(
+      (sp) => sp.id === entity.selection_plan_id
+    );
+    if (!plan) return;
+    const track = trackOpts.find((t) => t.id === entity.track_id);
+    if (plan.event_types.includes(entity.type_id) && isTrackInPlan(track, plan))
+      return;
+    this.handleChangeSelectionPlan({
+      target: { id: "selection_plan_id", value: null }
     });
   }
 
@@ -372,11 +392,11 @@ class EventForm extends React.Component {
       }
     }
 
-    errors[id] = "";
+    const newErrors = { ...errors, [id]: "" };
     newEntity.selection_plan_id = value;
     newEntity.selection_plan = newSelectionPlan;
     newEntity.extra_questions = extraQuestionsAnswers;
-    this.setState({ entity: newEntity });
+    this.setState({ entity: newEntity, errors: newErrors });
   }
 
   handleChangeExtraQuestion(formValues) {
@@ -1159,8 +1179,6 @@ class EventForm extends React.Component {
     const plansForType = selectionPlansOpts.filter((sp) =>
       sp.event_types.includes(entity.type_id)
     );
-    const isTrackInPlan = (track, sp) =>
-      sp.track_groups.some((gr) => track.track_groups.includes(gr));
 
     const leafTracks = trackOpts.filter(
       (track) => track.subtracks.length === 0
