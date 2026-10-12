@@ -1126,12 +1126,15 @@ class EventForm extends React.Component {
     } = this.props;
 
     const event_types_ddl = typeOpts.map((t) => {
-      const disabled = entity.id ? !this.isEventType(t.class_name) : false;
+      // a saved presentation can't become a plain event; upgrades stay allowed
+      const isDisabled = entity.id
+        ? this.isPresentation() && t.class_name !== EVENT_TYPE_PRESENTATION
+        : false;
       return {
         label: t.name,
         value: t.id,
         type: t.class_name,
-        disabled
+        isDisabled
       };
     });
 

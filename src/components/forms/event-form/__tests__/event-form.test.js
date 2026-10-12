@@ -1,5 +1,11 @@
 import React from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  fireEvent,
+  within
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import moment from "moment-timezone";
 import EventForm from "../index";
@@ -545,6 +551,42 @@ describe("EventForm", () => {
       ).toBeInTheDocument();
       expect(
         screen.getByText("edit_event.tracks_without_selection_plans")
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe("activity type kind changes", () => {
+    const pickType = (container, name) => {
+      const typeField = container.querySelector("#type_id");
+      fireEvent.keyDown(typeField.querySelector("input"), { keyCode: 40 });
+      fireEvent.click(within(typeField).getByText(name));
+    };
+
+    it("doesn't let a saved presentation switch to a non-presentation type", async () => {
+      const { container } = renderEventForm({ entity: baseEntity });
+
+      pickType(container, "Lunch");
+
+      await waitFor(() =>
+        expect(
+          screen.queryByText("edit_event.downgrade_message")
+        ).not.toBeInTheDocument()
+      );
+    });
+
+    it("still lets a saved plain event upgrade to a presentation type", async () => {
+      const { container } = renderEventForm({
+        entity: {
+          ...baseProps.entity,
+          id: 42,
+          class_name: "SummitEvent"
+        }
+      });
+
+      pickType(container, "Presentation");
+
+      expect(
+        await screen.findByText(/edit_event\.upgrade_message/)
       ).toBeInTheDocument();
     });
   });
