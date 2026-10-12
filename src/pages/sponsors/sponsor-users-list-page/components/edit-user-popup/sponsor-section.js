@@ -30,7 +30,7 @@ const SponsorSection = ({
         <Typography variant="h6">
           {T.translate("sponsor_users.edit_user.sponsor")}
         </Typography>
-        <Box sx={{ mb: 1, mt: 1 }}>
+        <Box sx={{ mb: 2, mt: 1 }}>
           <MuiSponsorInput name={`${name}.sponsor`} summitId={summitId} />
         </Box>
         <Typography variant="h6">
