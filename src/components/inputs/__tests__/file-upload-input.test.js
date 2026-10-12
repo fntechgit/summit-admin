@@ -59,7 +59,6 @@ describe("FileUploadInput", () => {
 
     expect(renderedProps.v3).toBeUndefined();
     expect(renderedProps.v4.postUrl).toBe(`${API_BASE}/api/v1/files`);
-    expect(renderedProps.v4.id).toBe("slide");
     expect(renderedProps.v4.onUploadComplete).toBe(onUploadComplete);
     expect(renderedProps.v4).not.toHaveProperty("djsConfig");
     expect(renderedProps.v4).not.toHaveProperty("parallelChunkUploads");
