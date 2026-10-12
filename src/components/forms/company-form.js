@@ -23,11 +23,11 @@ import {
   MenuItem,
   Select
 } from "@mui/material";
-import UploadInputV3 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v3";
 import { getCountryList } from "openstack-uicore-foundation/lib/utils/query-actions";
 import Table from "openstack-uicore-foundation/lib/components/mui/table";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
+import FileUploadInput from "../inputs/file-upload-input";
 import useScrollToError from "../../hooks/useScrollToError";
 import FormikTextEditor from "../inputs/formik-text-editor";
 import MuiFormikAsyncAutocomplete from "../mui/formik-inputs/mui-formik-async-select";
@@ -370,7 +370,7 @@ const CompanyForm = ({
       <Grid2 container size={12} mt={2} mb={2}>
         <Grid2 size={6}>
           <InputLabel>{T.translate("edit_company.logo")}</InputLabel>
-          <UploadInputV3
+          <FileUploadInput
             id="logo"
             name="logo"
             value={getLogoValue(formik.values.logo)}
@@ -378,8 +378,6 @@ const CompanyForm = ({
             onUploadStart={() => setIsSaving(true)}
             onError={() => setIsSaving(false)}
             onRemove={handleLogoRemove("logo")}
-            postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
-            djsConfig={{ withCredentials: true }}
             maxFiles={1}
             canAdd={!formik.values.logo}
             mediaType={{
@@ -389,7 +387,7 @@ const CompanyForm = ({
         </Grid2>
         <Grid2 size={6}>
           <InputLabel>{T.translate("edit_company.big_logo")}</InputLabel>
-          <UploadInputV3
+          <FileUploadInput
             id="big_logo"
             name="big_logo"
             value={getLogoValue(formik.values.big_logo)}
@@ -397,8 +395,6 @@ const CompanyForm = ({
             onUploadStart={() => setIsSaving(true)}
             onError={() => setIsSaving(false)}
             onRemove={handleLogoRemove("big_logo")}
-            postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
-            djsConfig={{ withCredentials: true }}
             maxFiles={1}
             canAdd={!formik.values.big_logo}
             mediaType={{
