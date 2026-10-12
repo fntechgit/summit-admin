@@ -708,7 +708,7 @@
       "select_rsvp_template": "Select a Template ...",
       "select_selection_plan": "Select a Selection Plan ...",
       "select_track_first": "Select an Activity Category first",
-      "no_selection_plans": "No selection plan for this activity type and category",
+      "no_selection_plans": "No matching selection plan",
       "select_submitter": "Select Submitter ...",
       "search_feedback": "Search by Author, Note",
       "search_comment": "Search by Comment, Creator ID",
