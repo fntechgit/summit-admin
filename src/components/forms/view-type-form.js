@@ -11,96 +11,93 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import PropTypes from "prop-types";
+import { useFormik, FormikProvider } from "formik";
+import * as yup from "yup";
 import T from "i18n-react/dist/i18n-react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Checkbox from "@mui/material/Checkbox";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid2 from "@mui/material/Grid2";
 import InputLabel from "@mui/material/InputLabel";
 import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
-import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
-import { hasErrors, scrollToError } from "../../utils/methods";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
+import FormikTextEditor from "openstack-uicore-foundation/lib/components/mui/formik-inputs/texteditor";
+import useScrollToError from "../../hooks/useScrollToError";
+import { requiredStringValidation } from "../../utils/yup";
 
-const ViewTypeForm = ({ entity: entityProp, errors: errorsProp, onSubmit }) => {
-  const [entity, setEntity] = useState({ ...entityProp });
-  const [errors, setErrors] = useState(errorsProp);
+const validationSchema = yup.object({
+  name: requiredStringValidation()
+});
+
+const ViewTypeForm = ({ entity, errors, onSubmit }) => {
+  const formik = useFormik({
+    initialValues: {
+      name: entity.name || "",
+      description: entity.description || "",
+      is_default: !!entity.is_default
+    },
+    validationSchema,
+    enableReinitialize: true,
+    onSubmit: (values) => onSubmit({ ...entity, ...values })
+  });
+
+  useScrollToError(formik);
 
   useEffect(() => {
-    setEntity({ ...entityProp });
-    setErrors({});
-  }, [entityProp]);
-
-  useEffect(() => {
-    setErrors({ ...errorsProp });
-    scrollToError(errorsProp);
-  }, [errorsProp]);
-
-  const handleChange = (ev) => {
-    const { id, type, checked } = ev.target;
-    const value = type === "checkbox" ? checked : ev.target.value;
-
-    setErrors({ ...errors, [id]: "" });
-    setEntity({ ...entity, [id]: value });
-  };
-
-  const handleSubmit = (ev) => {
-    ev.preventDefault();
-    onSubmit(entity);
-  };
-
-  const nameError = hasErrors("name", errors);
+    const errorFields = Object.keys(errors || {});
+    formik.setErrors(errorFields.length > 0 ? errors : {});
+    if (errorFields.length > 0) {
+      formik.setTouched(
+        errorFields.reduce((acc, field) => ({ ...acc, [field]: true }), {}),
+        false
+      );
+    }
+  }, [errors]);
 
   return (
-    <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit}>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={12}>
-          <TextField
-            id="name"
-            label={T.translate("edit_view_type.name")}
-            value={entity.name}
-            onChange={handleChange}
-            error={!!nameError}
-            helperText={nameError}
-            required
-            fullWidth
-          />
+    <FormikProvider value={formik}>
+      <Box
+        component="form"
+        noValidate
+        autoComplete="off"
+        onSubmit={formik.handleSubmit}
+      >
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={12}>
+            <MuiFormikTextField
+              name="name"
+              label={T.translate("edit_view_type.name")}
+              required
+              fullWidth
+            />
+          </Grid2>
+          <Grid2 size={12}>
+            <InputLabel htmlFor="description">
+              {T.translate("edit_view_type.description")}
+            </InputLabel>
+            <FormikTextEditor name="description" />
+          </Grid2>
+          <Grid2 size={12}>
+            <MuiFormikCheckbox
+              name="is_default"
+              label={T.translate("edit_view_type.is_default")}
+            />
+          </Grid2>
         </Grid2>
-        <Grid2 size={12}>
-          <InputLabel htmlFor="description">
-            {T.translate("edit_view_type.description")}
-          </InputLabel>
-          <TextEditorV3
-            id="description"
-            value={entity.description}
-            onChange={handleChange}
-            error={hasErrors("description", errors)}
-            license={process.env.JODIT_LICENSE_KEY}
-          />
-        </Grid2>
-        <Grid2 size={12}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                id="is_default"
-                checked={!!entity.is_default}
-                onChange={handleChange}
-              />
-            }
-            label={T.translate("edit_view_type.is_default")}
-          />
-        </Grid2>
-      </Grid2>
 
-      <Stack direction="row" justifyContent="flex-end">
-        <Button variant="contained" onClick={handleSubmit}>
-          {T.translate("general.save")}
-        </Button>
-      </Stack>
-    </Box>
+        <Stack direction="row" justifyContent="flex-end">
+          <Button
+            variant="contained"
+            type="submit"
+            disabled={formik.isSubmitting}
+          >
+            {T.translate("general.save")}
+          </Button>
+        </Stack>
+      </Box>
+    </FormikProvider>
   );
 };
 

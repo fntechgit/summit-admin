@@ -21,7 +21,7 @@ import {
   resetViewTypeForm,
   saveViewType
 } from "../../actions/badge-actions";
-import AddNewButtonMUI from "../../components/buttons/add-new-button-mui";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 const EditViewTypePage = ({
   currentSummit,
@@ -51,7 +51,7 @@ const EditViewTypePage = ({
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
       <h3>
         {title} {T.translate("edit_view_type.view_type")}
-        <AddNewButtonMUI entity={entity} />
+        <AddNewButton entity={entity} />
       </h3>
       <hr />
       {currentSummit && (
