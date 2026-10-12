@@ -57,6 +57,12 @@ jest.mock("../../actions/sponsor-reports-actions", () => ({
     type: "MOCK_GET_SPONSOR_ASSET_FILTERS"
   })),
   getUnpaidCharges: jest.fn(() => ({ type: "MOCK_GET_UNPAID_CHARGES" })),
+  setUnpaidChargesPaging: jest.fn(() => ({
+    type: "MOCK_SET_UNPAID_CHARGES_PAGING"
+  })),
+  setUnpaidChargesSort: jest.fn(() => ({
+    type: "MOCK_SET_UNPAID_CHARGES_SORT"
+  })),
   getPurchaseDetailsReport: jest.fn(() => ({
     type: "MOCK_GET_PURCHASE_DETAILS"
   })),
