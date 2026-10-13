@@ -131,6 +131,7 @@ const UnpaidChargesReportPage = ({
           startIcon={<DownloadIcon />}
           variant="outlined"
           disabled={groups.length === 0}
+          sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
           onClick={() =>
             exportUnpaidChargesCsv(
               buildUnpaidChargesCsvRows(
