@@ -5,6 +5,7 @@ import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/m
 import { renderWithRedux } from "../../../../../utils/test-utils";
 import UnpaidChargesReportPage from "../index";
 import {
+  exportUnpaidChargesCsv,
   getUnpaidCharges,
   setUnpaidChargesSort
 } from "../../../../../actions/sponsor-reports-actions";
@@ -27,6 +28,7 @@ jest.mock("../../../../../history", () => ({
 }));
 jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
   ...jest.requireActual("../../../../../actions/sponsor-reports-actions"),
+  exportUnpaidChargesCsv: jest.fn(() => () => {}),
   getUnpaidCharges: jest.fn(() => () => Promise.resolve()),
   setUnpaidChargesPaging: jest.fn(() => () => Promise.resolve()),
   setUnpaidChargesSort: jest.fn(() => () => Promise.resolve())
@@ -185,5 +187,25 @@ describe("UnpaidChargesReportPage", () => {
     expect(
       screen.queryByText("sponsor_reports_page.unpaid_tile_total")
     ).not.toBeInTheDocument();
+  });
+
+  it("exports the grouped rows in the page's current sort with absolute links", async () => {
+    renderPage({ sort: "name" });
+    await userEvent.click(
+      screen.getByRole("button", { name: "sponsor_reports_page.export_csv" })
+    );
+    const [header, ...rows] = exportUnpaidChargesCsv.mock.calls[0][0];
+    expect(header).toHaveLength(14);
+    expect(rows.map((r) => r[0])).toEqual(["Acme", "Acme", "Acme", "Globex"]);
+    expect(rows[3][9]).toBe(
+      `${window.location.origin}/app/summits/73/sponsors/9/purchases/901`
+    );
+  });
+
+  it("disables export when there are no rows", () => {
+    renderPage({ rows: [] });
+    expect(
+      screen.getByRole("button", { name: "sponsor_reports_page.export_csv" })
+    ).toBeDisabled();
   });
 });

@@ -4,6 +4,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import UnpaidChargesBySponsor, {
+  buildUnpaidChargesCsvRows,
   groupUnpaidCharges,
   sortGroups,
   summarizeGroups
@@ -171,6 +172,119 @@ describe("groupUnpaidCharges", () => {
       sponsors: 5,
       missing: 2
     });
+  });
+});
+
+describe("buildUnpaidChargesCsvRows", () => {
+  const tr = (key, params) =>
+    params
+      ? `sponsor_reports_page.${key} ${Object.values(params).join(" ")}`
+      : `sponsor_reports_page.${key}`;
+  const MISSING = tr("unpaid_price_missing");
+  const ORIGIN = "https://admin.example";
+  const csvRows = () =>
+    buildUnpaidChargesCsvRows(
+      sortGroups(
+        groupUnpaidCharges([
+          row({ id: 1 }),
+          row({
+            id: 2,
+            form_code: "EL",
+            form_name: "Electrical",
+            total: null,
+            pricing_error: true
+          }),
+          row({
+            id: 3,
+            stage: "invoiced",
+            cart_id: 71,
+            purchase_id: 801,
+            purchase_number: "000801",
+            form_code: "L",
+            form_name: "Labor",
+            total: 500,
+            added_by_admin: false
+          }),
+          row({
+            id: 4,
+            sponsor_id: 9,
+            sponsor_name: "Globex",
+            cart_id: 90,
+            form_code: "SIGN",
+            form_name: "Signage",
+            total: null,
+            pricing_error: true
+          })
+        ]),
+        "balance"
+      ),
+      73,
+      ORIGIN
+    );
+
+  it("writes one row per form, in page order, with the page's values repeated", () => {
+    const [header, ...rows] = csvRows();
+    expect(header).toHaveLength(14);
+    const acmeStages = [
+      tr("unpaid_stage_count", { count: 1, stage: tr("unpaid_stage_open") }),
+      tr("unpaid_stage_count", { count: 1, stage: tr("unpaid_stage_invoiced") })
+    ].join("; ");
+    const acme = ["Acme", acmeStages, 1, "15.00"];
+    const cart = [
+      tr("unpaid_cart_label", { id: 70 }),
+      tr("unpaid_stage_open"),
+      "SHIP, EL",
+      "10.00",
+      1,
+      `${ORIGIN}/app/summits/73/sponsors/7/cart`
+    ];
+    expect(rows).toEqual([
+      [
+        ...acme,
+        ...cart,
+        "Shipping",
+        "SHIP",
+        tr("unpaid_added_by_admin"),
+        "10.00"
+      ],
+      [
+        ...acme,
+        ...cart,
+        "Electrical",
+        "EL",
+        tr("unpaid_added_by_admin"),
+        MISSING
+      ],
+      [
+        ...acme,
+        tr("unpaid_order_label", { number: "000801" }),
+        tr("unpaid_stage_invoiced"),
+        "L",
+        "5.00",
+        0,
+        `${ORIGIN}/app/summits/73/sponsors/7/purchases/801`,
+        "Labor",
+        "L",
+        tr("unpaid_added_by_sponsor"),
+        "5.00"
+      ],
+      [
+        "Globex",
+        tr("unpaid_stage_count", { count: 1, stage: tr("unpaid_stage_open") }),
+        1,
+        MISSING,
+        tr("unpaid_cart_label", { id: 90 }),
+        tr("unpaid_stage_open"),
+        "SIGN",
+        MISSING,
+        1,
+        `${ORIGIN}/app/summits/73/sponsors/9/cart`,
+        "Signage",
+        "SIGN",
+        tr("unpaid_added_by_admin"),
+        MISSING
+      ]
+    ]);
   });
 });
 

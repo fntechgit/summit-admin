@@ -33,7 +33,10 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import T from "i18n-react/dist/i18n-react";
-import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
+import {
+  amountFromCents,
+  currencyAmountFromCents
+} from "openstack-uicore-foundation/lib/utils/money";
 import history from "../../../history";
 import { PER_PAGE_OPTIONS } from "./LinesManifestView";
 
@@ -185,15 +188,89 @@ const Amount = ({ total, missingCount, allMissing }) => {
 
 const isCartLink = (stage) => stage === "open" || stage === "paying_by_card";
 
-const EntryRow = ({ entry, summitId, expanded, onToggle }) => {
-  const open = () => {
-    const base = `/app/summits/${summitId}/sponsors/${entry.sponsorId}`;
-    history.push(
-      isCartLink(entry.stage)
-        ? `${base}/cart`
-        : `${base}/purchases/${entry.purchaseId}`
+const entryPath = (entry, summitId) => {
+  const base = `/app/summits/${summitId}/sponsors/${entry.sponsorId}`;
+  return isCartLink(entry.stage)
+    ? `${base}/cart`
+    : `${base}/purchases/${entry.purchaseId}`;
+};
+
+const entryLabel = (entry) =>
+  entry.stage === "open"
+    ? t("unpaid_cart_label", { id: entry.cartId })
+    : t("unpaid_order_label", { number: entry.purchaseNumber });
+
+const addedByLabel = (form) =>
+  form.added_by_admin
+    ? t("unpaid_added_by_admin")
+    : t("unpaid_added_by_sponsor");
+
+// The CSV export: one row per form, in the order the page lists them, with the
+// sponsor and cart/order values the page shows repeated on every row. Totals
+// follow <Amount>: "Price missing" only when nothing in the bucket is priced.
+// Links are absolute because the file is opened outside show-admin.
+export const buildUnpaidChargesCsvRows = (groups, summitId, origin) => {
+  const csvAmount = (total, missingCount, formCount) =>
+    missingCount === formCount
+      ? t("unpaid_price_missing")
+      : amountFromCents(total);
+  const header = [
+    t("unpaid_csv_sponsor"),
+    t("unpaid_csv_sponsor_stages"),
+    t("unpaid_csv_sponsor_missing"),
+    t("unpaid_csv_sponsor_total"),
+    t("unpaid_col_cart_order"),
+    t("unpaid_col_stage"),
+    t("unpaid_col_forms"),
+    t("unpaid_csv_cart_order_total"),
+    t("unpaid_csv_cart_order_missing"),
+    t("unpaid_csv_link"),
+    t("unpaid_col_form"),
+    t("unpaid_col_code"),
+    t("unpaid_col_added_by"),
+    t("unpaid_csv_form_total")
+  ];
+  const rows = groups.flatMap((group) => {
+    const stages = Object.entries(group.stageCounts)
+      .map(([stage, count]) =>
+        t("unpaid_stage_count", { count, stage: t(`unpaid_stage_${stage}`) })
+      )
+      .join("; ");
+    const sponsorFormCount = group.entries.reduce(
+      (acc, e) => acc + e.forms.length,
+      0
     );
-  };
+    const sponsorTotal = csvAmount(
+      group.total,
+      group.missingCount,
+      sponsorFormCount
+    );
+    return group.entries.flatMap((entry) =>
+      entry.forms.map((form) => [
+        group.sponsorName || t("pivot_unknown_sponsor"),
+        stages,
+        group.missingCount,
+        sponsorTotal,
+        entryLabel(entry),
+        t(`unpaid_stage_${entry.stage}`),
+        entry.formCodes.join(", "),
+        csvAmount(entry.total, entry.missingCount, entry.forms.length),
+        entry.missingCount,
+        `${origin}${entryPath(entry, summitId)}`,
+        form.form_name,
+        form.form_code,
+        addedByLabel(form),
+        form.pricing_error || form.total == null
+          ? t("unpaid_price_missing")
+          : amountFromCents(form.total)
+      ])
+    );
+  });
+  return [header, ...rows];
+};
+
+const EntryRow = ({ entry, summitId, expanded, onToggle }) => {
+  const open = () => history.push(entryPath(entry, summitId));
   return (
     <>
       <TableRow
@@ -218,11 +295,7 @@ const EntryRow = ({ entry, summitId, expanded, onToggle }) => {
             )}
           </IconButton>
         </TableCell>
-        <TableCell>
-          {entry.stage === "open"
-            ? t("unpaid_cart_label", { id: entry.cartId })
-            : t("unpaid_order_label", { number: entry.purchaseNumber })}
-        </TableCell>
+        <TableCell>{entryLabel(entry)}</TableCell>
         <TableCell>
           <Chip
             size="small"
@@ -269,11 +342,7 @@ const EntryRow = ({ entry, summitId, expanded, onToggle }) => {
                   <TableRow key={form.id}>
                     <TableCell>{form.form_name}</TableCell>
                     <TableCell>{form.form_code}</TableCell>
-                    <TableCell>
-                      {form.added_by_admin
-                        ? t("unpaid_added_by_admin")
-                        : t("unpaid_added_by_sponsor")}
-                    </TableCell>
+                    <TableCell>{addedByLabel(form)}</TableCell>
                     <TableCell align="right">
                       {form.pricing_error || form.total == null ? (
                         <MissingLabel />
