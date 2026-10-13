@@ -11,21 +11,28 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import PropTypes from "prop-types";
+import { useFormik, FormikProvider } from "formik";
+import * as yup from "yup";
 import T from "i18n-react/dist/i18n-react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Checkbox from "@mui/material/Checkbox";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid2 from "@mui/material/Grid2";
 import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
 import MuiLinkList from "../mui/link-list";
-import { hasErrors, scrollToError } from "../../utils/methods";
+import useScrollToError from "../../hooks/useScrollToError";
+import { requiredStringValidation } from "../../utils/yup";
 
 const DESCRIPTION_MAX_LENGTH = 500;
 const DESCRIPTION_ROWS = 6;
+
+const validationSchema = yup.object({
+  name: requiredStringValidation(),
+  description: requiredStringValidation()
+});
 
 const linkedColumns = [
   { columnKey: "name", header: T.translate("edit_badge_type.name") }
@@ -35,9 +42,9 @@ const unlinkDialogBody = (name) =>
   T.translate("edit_badge_type.unlink_warning", { name });
 
 const BadgeTypeForm = ({
-  entity: entityProp,
+  entity,
   currentSummit,
-  errors: errorsProp,
+  errors,
   onAccessLevelLink,
   onAccessLevelUnLink,
   onFeatureLink,
@@ -46,134 +53,123 @@ const BadgeTypeForm = ({
   onViewTypeUnLink,
   onSubmit
 }) => {
-  const [entity, setEntity] = useState({ ...entityProp });
-  const [errors, setErrors] = useState(errorsProp);
+  const formik = useFormik({
+    initialValues: {
+      name: entity.name || "",
+      description: entity.description || "",
+      is_default: !!entity.is_default
+    },
+    validationSchema,
+    enableReinitialize: true,
+    onSubmit: (values) => onSubmit({ ...entity, ...values })
+  });
+
+  useScrollToError(formik);
 
   useEffect(() => {
-    setEntity({ ...entityProp });
-    setErrors({});
-  }, [entityProp]);
-
-  useEffect(() => {
-    setErrors({ ...errorsProp });
-    scrollToError(errorsProp);
-  }, [errorsProp]);
-
-  const handleChange = (ev) => {
-    const { id, type, checked } = ev.target;
-    const value = type === "checkbox" ? checked : ev.target.value;
-
-    setErrors({ ...errors, [id]: "" });
-    setEntity({ ...entity, [id]: value });
-  };
-
-  const handleSubmit = (ev) => {
-    ev.preventDefault();
-    onSubmit(entity);
-  };
-
-  const nameError = hasErrors("name", errors);
+    const errorFields = Object.keys(errors || {});
+    formik.setErrors(errorFields.length > 0 ? errors : {});
+    if (errorFields.length > 0) {
+      formik.setTouched(
+        errorFields.reduce((acc, field) => ({ ...acc, [field]: true }), {}),
+        false
+      );
+    }
+  }, [errors]);
 
   return (
-    <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit}>
-      <Grid2 container spacing={2} sx={{ mb: 2, alignItems: "center" }}>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <TextField
-            id="name"
-            label={T.translate("edit_badge_type.name")}
-            value={entity.name}
-            onChange={handleChange}
-            error={!!nameError}
-            helperText={nameError}
-            required
-            fullWidth
-          />
+    <FormikProvider value={formik}>
+      <Box>
+        <Grid2 container spacing={2} sx={{ mb: 2, alignItems: "center" }}>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <MuiFormikTextField
+              name="name"
+              label={T.translate("edit_badge_type.name")}
+              required
+              fullWidth
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <MuiFormikCheckbox
+              name="is_default"
+              label={T.translate("edit_badge_type.default")}
+            />
+          </Grid2>
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                id="is_default"
-                checked={!!entity.is_default}
-                onChange={handleChange}
-              />
-            }
-            label={T.translate("edit_badge_type.default")}
-          />
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 10 }}>
+            <MuiFormikTextField
+              name="description"
+              label={T.translate("edit_badge_type.description")}
+              maxLength={DESCRIPTION_MAX_LENGTH}
+              required
+              multiline
+              rows={DESCRIPTION_ROWS}
+              fullWidth
+            />
+          </Grid2>
         </Grid2>
-      </Grid2>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 10 }}>
-          <TextField
-            id="description"
-            label={T.translate("edit_badge_type.description")}
-            value={entity.description}
-            onChange={handleChange}
-            helperText={`${
-              entity.description?.length ?? 0
-            }/${DESCRIPTION_MAX_LENGTH}`}
-            slotProps={{ htmlInput: { maxLength: DESCRIPTION_MAX_LENGTH } }}
-            required
-            multiline
-            rows={DESCRIPTION_ROWS}
-            fullWidth
-          />
-        </Grid2>
-      </Grid2>
 
-      {entity.id !== 0 && (
-        <>
-          <Box sx={{ pt: 2 }} />
-          <MuiLinkList
-            title={T.translate("edit_badge_type.access_levels")}
-            placeholder={T.translate(
-              "edit_badge_type.placeholders.select_access_level"
-            )}
-            values={entity.access_levels}
-            options={currentSummit.badge_access_level_types}
-            columns={linkedColumns}
-            deleteDialogBody={unlinkDialogBody}
-            onLink={(accessLevel) => onAccessLevelLink(entity.id, accessLevel)}
-            onUnLink={(accessLevelId) =>
-              onAccessLevelUnLink(entity.id, accessLevelId)
-            }
-          />
-          <Box sx={{ pt: 2 }} />
-          <MuiLinkList
-            title={T.translate("edit_badge_type.badge_features")}
-            placeholder={T.translate(
-              "edit_badge_type.placeholders.select_badge_feature"
-            )}
-            values={entity.badge_features}
-            options={currentSummit.badge_features}
-            columns={linkedColumns}
-            deleteDialogBody={unlinkDialogBody}
-            onLink={(feature) => onFeatureLink(entity.id, feature)}
-            onUnLink={(featureId) => onFeatureUnLink(entity.id, featureId)}
-          />
-          <Box sx={{ pt: 2 }} />
-          <MuiLinkList
-            title={T.translate("edit_badge_type.view_types")}
-            placeholder={T.translate(
-              "edit_badge_type.placeholders.select_view_type"
-            )}
-            values={entity.allowed_view_types}
-            options={currentSummit.badge_view_types ?? []}
-            columns={linkedColumns}
-            deleteDialogBody={unlinkDialogBody}
-            onLink={(viewType) => onViewTypeLink(entity.id, viewType)}
-            onUnLink={(viewTypeId) => onViewTypeUnLink(entity.id, viewTypeId)}
-          />
-        </>
-      )}
+        {entity.id !== 0 && (
+          <>
+            <Box sx={{ pt: 2 }} />
+            <MuiLinkList
+              title={T.translate("edit_badge_type.access_levels")}
+              placeholder={T.translate(
+                "edit_badge_type.placeholders.select_access_level"
+              )}
+              values={entity.access_levels}
+              options={currentSummit.badge_access_level_types}
+              columns={linkedColumns}
+              deleteDialogBody={unlinkDialogBody}
+              onLink={(accessLevel) =>
+                onAccessLevelLink(entity.id, accessLevel)
+              }
+              onUnLink={(accessLevelId) =>
+                onAccessLevelUnLink(entity.id, accessLevelId)
+              }
+            />
+            <Box sx={{ pt: 2 }} />
+            <MuiLinkList
+              title={T.translate("edit_badge_type.badge_features")}
+              placeholder={T.translate(
+                "edit_badge_type.placeholders.select_badge_feature"
+              )}
+              values={entity.badge_features}
+              options={currentSummit.badge_features}
+              columns={linkedColumns}
+              deleteDialogBody={unlinkDialogBody}
+              onLink={(feature) => onFeatureLink(entity.id, feature)}
+              onUnLink={(featureId) => onFeatureUnLink(entity.id, featureId)}
+            />
+            <Box sx={{ pt: 2 }} />
+            <MuiLinkList
+              title={T.translate("edit_badge_type.view_types")}
+              placeholder={T.translate(
+                "edit_badge_type.placeholders.select_view_type"
+              )}
+              values={entity.allowed_view_types}
+              options={currentSummit.badge_view_types ?? []}
+              columns={linkedColumns}
+              deleteDialogBody={unlinkDialogBody}
+              onLink={(viewType) => onViewTypeLink(entity.id, viewType)}
+              onUnLink={(viewTypeId) => onViewTypeUnLink(entity.id, viewTypeId)}
+            />
+          </>
+        )}
 
-      <Box sx={{ pt: 2 }} />
-      <Stack direction="row" justifyContent="flex-end">
-        <Button variant="contained" onClick={handleSubmit}>
-          {T.translate("general.save")}
-        </Button>
-      </Stack>
-    </Box>
+        <Box sx={{ pt: 2 }} />
+        <Stack direction="row" justifyContent="flex-end">
+          <Button
+            variant="contained"
+            onClick={formik.handleSubmit}
+            disabled={formik.isSubmitting}
+          >
+            {T.translate("general.save")}
+          </Button>
+        </Stack>
+      </Box>
+    </FormikProvider>
   );
 };
 

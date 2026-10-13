@@ -687,7 +687,7 @@ export const saveBadgeType = (entity) => async (dispatch, getState) => {
   delete normalizedEntity.access_levels;
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_BADGE_TYPE),
       createAction(BADGE_TYPE_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${entity.id}`,
@@ -704,28 +704,27 @@ export const saveBadgeType = (entity) => async (dispatch, getState) => {
       })
       .catch(() => {})
       .finally(() => dispatch(stopLoading()));
-  } else {
-    postRequest(
-      createAction(UPDATE_BADGE_TYPE),
-      createAction(BADGE_TYPE_ADDED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types`,
-      normalizedEntity,
-      snackbarErrorHandler,
-      entity
-    )(params)(dispatch)
-      .then((payload) => {
-        dispatch(
-          snackbarSuccessHandler({
-            html: T.translate("edit_badge_type.badge_type_created")
-          })
-        );
-        history.push(
-          `/app/summits/${currentSummit.id}/badge-types/${payload.response.id}`
-        );
-      })
-      .catch(() => {})
-      .finally(() => dispatch(stopLoading()));
   }
+  return postRequest(
+    createAction(UPDATE_BADGE_TYPE),
+    createAction(BADGE_TYPE_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types`,
+    normalizedEntity,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch)
+    .then((payload) => {
+      dispatch(
+        snackbarSuccessHandler({
+          html: T.translate("edit_badge_type.badge_type_created")
+        })
+      );
+      history.push(
+        `/app/summits/${currentSummit.id}/badge-types/${payload.response.id}`
+      );
+    })
+    .catch(() => {})
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const deleteBadgeType = (badgeTypeId) => async (dispatch, getState) => {
