@@ -84,7 +84,7 @@ const SignagePage = ({
     const useTerm = newTerm === null ? term : newTerm;
     const usePage = newPage || page;
 
-    props.getSignEvents(useLocation, useTerm, usePage, ...rest);
+    return props.getSignEvents(useLocation, useTerm, usePage, ...rest);
   };
 
   const getBanners = (
@@ -97,14 +97,14 @@ const SignagePage = ({
     const useTerm = newTerm === null ? term : newTerm;
     const usePage = newPage || page;
 
-    props.getSignBanners(useLocation, useTerm, usePage, ...rest);
+    return props.getSignBanners(useLocation, useTerm, usePage, ...rest);
   };
 
-  const onChangeLocation = (newLocation) => {
-    getEvents(newLocation, "", 1);
-    getBanners(newLocation, "", 1);
-    props.getSign(newLocation);
-  };
+  // chained, not parallel: the global loading flag isn't ref-counted
+  const onChangeLocation = (newLocation) =>
+    getEvents(newLocation, "", 1)
+      .then(() => getBanners(newLocation, "", 1))
+      .then(() => props.getSign(newLocation));
 
   const onSearch = (newTerm) => {
     if (view === "activities") {
