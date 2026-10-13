@@ -322,6 +322,8 @@ export const publishTemplate = (templateFile) => async (dispatch, getState) => {
     if (res) {
       dispatch(showSuccessMessage(T.translate("signage.template_published")));
     }
+  } catch (e) {
+    // save failed, authErrorHandler already showed the error: don't publish
   } finally {
     dispatch(stopLoading());
   }
@@ -434,11 +436,9 @@ export const saveSignTemplate =
           authErrorHandler
         );
 
-    return request(params)(dispatch)
-      .catch(() => {})
-      .finally(() => {
-        dispatch(stopLoading());
-      });
+    return request(params)(dispatch).finally(() => {
+      dispatch(stopLoading());
+    });
   };
 
 /* *************************************************************************** */

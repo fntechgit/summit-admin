@@ -4,12 +4,18 @@ import {
   putRequest,
   postRequest,
   deleteRequest,
+  showSuccessMessage,
   START_LOADING,
   STOP_LOADING
 } from "openstack-uicore-foundation/lib/utils/actions";
 import * as methods from "../../utils/methods";
 import { publishToAblyChannel } from "../ably-actions";
-import { saveBanner, deleteBanner, publishDate } from "../signage-actions";
+import {
+  saveBanner,
+  deleteBanner,
+  publishDate,
+  publishTemplate
+} from "../signage-actions";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   __esModule: true,
@@ -102,6 +108,19 @@ describe("signage-actions", () => {
 
       await expect(store.dispatch(deleteBanner(5))).resolves.toBeUndefined();
       expect(actionTypes(store)).toEqual([START_LOADING, STOP_LOADING]);
+    });
+  });
+
+  describe("publishTemplate", () => {
+    it("does not publish to the sign when saving the template fails", async () => {
+      postRequest.mockImplementation(rejectingRequest);
+      const store = mockStore(MOCK_STATE);
+
+      await store.dispatch(publishTemplate("template.html"));
+
+      expect(publishToAblyChannel).not.toHaveBeenCalled();
+      expect(showSuccessMessage).not.toHaveBeenCalled();
+      expect(actionTypes(store)).toContain(STOP_LOADING);
     });
   });
 
