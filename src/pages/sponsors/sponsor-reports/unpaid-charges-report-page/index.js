@@ -14,18 +14,21 @@
 import React, { useEffect, useMemo } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Alert, Box } from "@mui/material";
+import { Alert, Box, Button } from "@mui/material";
+import DownloadIcon from "@mui/icons-material/Download";
 import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import GridToolbar from "../../../../components/mui/grid-toolbar";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
 import UnpaidChargesBySponsor, {
+  buildUnpaidChargesCsvRows,
   groupUnpaidCharges,
   sortGroups,
   STAGE_TONE,
   summarizeGroups
 } from "../../../../components/sponsors/reports/UnpaidChargesBySponsor";
 import {
+  exportUnpaidChargesCsv,
   getUnpaidCharges,
   setUnpaidChargesPaging,
   setUnpaidChargesSort
@@ -46,6 +49,7 @@ const UnpaidChargesReportPage = ({
   currentPage,
   perPage,
   readError,
+  exportUnpaidChargesCsv,
   getUnpaidCharges,
   setUnpaidChargesPaging,
   setUnpaidChargesSort
@@ -123,6 +127,22 @@ const UnpaidChargesReportPage = ({
           }))}
           onChange={(e) => setUnpaidChargesSort(e.target.value)}
         />
+        <Button
+          startIcon={<DownloadIcon />}
+          variant="outlined"
+          disabled={groups.length === 0}
+          onClick={() =>
+            exportUnpaidChargesCsv(
+              buildUnpaidChargesCsvRows(
+                groups,
+                currentSummit.id,
+                window.location.origin
+              )
+            )
+          }
+        >
+          {t("export_csv")}
+        </Button>
       </GridToolbar>
       {readError ? (
         <Alert severity="error">
@@ -168,6 +188,7 @@ const mapStateToProps = ({
 });
 
 export default connect(mapStateToProps, {
+  exportUnpaidChargesCsv,
   getUnpaidCharges,
   setUnpaidChargesPaging,
   setUnpaidChargesSort

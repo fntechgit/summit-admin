@@ -383,6 +383,17 @@ export const joinCVSChunks = (chunks) => {
   return `${header}\n${csv}`;
 };
 
+// RFC 4180: every field quoted, embedded quotes doubled, CRLF line endings.
+export const toCSV = (rows) =>
+  rows
+    .map((row) =>
+      row
+        .map((value) => `"${String(value ?? "").replace(/"/g, "\"\"")}"`)
+        .join(",")
+    )
+    .map((line) => `${line}\r\n`)
+    .join("");
+
 export const joinCVSChunksAndNormalizeHeaders = (csvFiles) => {
   function parseCsv(csv) {
     const [headerLine, ...lines] = csv.trim().split("\n");

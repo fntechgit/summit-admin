@@ -3,6 +3,7 @@ import {
   createAction,
   getRequest,
   getCSV,
+  downloadFileByContent,
   startLoading,
   stopLoading,
   authErrorHandler
@@ -11,7 +12,8 @@ import pLimit from "p-limit";
 import {
   getAccessTokenSafely,
   isPositiveIntId,
-  escapeFilterValue
+  escapeFilterValue,
+  toCSV
 } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
@@ -797,6 +799,35 @@ export const setUnpaidChargesPaging =
 // Client-side sort of the derived sponsor groups: "balance" or "name".
 export const setUnpaidChargesSort = (sort) => (dispatch) => {
   dispatch(createAction(SET_UNPAID_CHARGES_SORT)({ sort }));
+};
+
+// Unpaid Charges CSV, built in the browser from the rows the page already
+// holds: the sponsor totals, counts and balance sort are client-side
+// (UnpaidChargesBySponsor), so a server export could not match the screen.
+// `csvRows` comes from buildUnpaidChargesCsvRows; the filename records the
+// active filters because nothing inside the file does.
+export const exportUnpaidChargesCsv = (csvRows) => (dispatch, getState) => {
+  const { currentSummit } = getState().currentSummitState;
+  if (!currentSummit?.id) return;
+  const { term, filters } = getState().sponsorReportsUnpaidChargesState;
+  const searchSlug = (term || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const filename = [
+    `unpaid-charges-summit-${currentSummit.id}`,
+    filters.stage && filters.stage.replace(/_/g, "-"),
+    filters.adminOnly && "admin-only",
+    searchSlug && `search-${searchSlug}`
+  ]
+    .filter(Boolean)
+    .join("-");
+  // The BOM makes Excel read the file as UTF-8 (accented sponsor names).
+  downloadFileByContent(
+    `${filename}.csv`,
+    `\uFEFF${toCSV(csvRows)}`,
+    "text/csv;charset=utf-8"
+  );
 };
 
 // Sponsor-asset CSV — flat export: drop grouping/order/pagination so the export

@@ -4,7 +4,8 @@ import {
   isImageUrl,
   isPositiveIntId,
   normalizeSelectAllField,
-  getSafePageAfterRemove
+  getSafePageAfterRemove,
+  toCSV
 } from "../methods";
 
 const FIXED_NOW = 1_772_551_911_231;
@@ -222,5 +223,17 @@ describe("htmlToPlainText", () => {
   it("leaves malformed-case entities literal (DOMParser is case-sensitive)", () => {
     expect(htmlToPlainText("&Copy;")).toBe("&Copy;");
     expect(htmlToPlainText("x&NBSP;y")).toBe("x&NBSP;y");
+  });
+});
+
+describe("toCSV", () => {
+  it("quotes every field, doubles embedded quotes and ends rows with CRLF", () => {
+    expect(
+      toCSV([
+        ["Sponsor", "Total"],
+        ["Acme, \"The\" Inc", 12],
+        [null, undefined]
+      ])
+    ).toBe("\"Sponsor\",\"Total\"\r\n\"Acme, \"\"The\"\" Inc\",\"12\"\r\n\"\",\"\"\r\n");
   });
 });
