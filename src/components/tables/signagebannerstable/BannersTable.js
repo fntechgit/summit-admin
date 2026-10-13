@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
@@ -8,322 +8,300 @@ import { Tooltip } from "react-tooltip";
 import "./bannerstable.css";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import BannersActionsTableCell from "./BannersActionsTableCell";
+import showConfirmDialog from "../../mui/showConfirmDialog";
 import {
-  saveBanner,
   deleteBanner,
-  publishDate
+  publishDate,
+  saveBanner
 } from "../../../actions/signage-actions";
-import { shallowEqual } from "../../../utils/methods";
 import { MILLISECONDS_IN_SECOND, TWO } from "../../../utils/constants";
 
-const createRow = (row, actions, summitTz) => {
-  let cells = [];
-
-  if (row.is_edit) {
-    cells = [
-      <td key="id">{row.id}</td>,
-      <td key="title">
-        <input
-          id="title"
-          className="form-control"
-          value={row.title}
-          onChange={actions.handleChange.bind(this, row.id)}
-        />
-      </td>,
-      <td key="content">
-        <input
-          id="content"
-          className="form-control"
-          value={row.content}
-          onChange={actions.handleChange.bind(this, row.id)}
-        />
-      </td>,
-      <td key="type">{row.type}</td>,
-      <td key="location_id">{row.floor_loc}</td>,
-      <td key="start_date">
-        <DateTimePicker
-          id="start_date"
-          onChange={actions.handleChange.bind(this, row.id)}
-          format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-          timezone={summitTz}
-          value={epochToMomentTimeZone(row.start_date, summitTz)}
-        />
-      </td>,
-      <td key="end_date">
-        <DateTimePicker
-          id="end_date"
-          onChange={actions.handleChange.bind(this, row.id)}
-          format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-          timezone={summitTz}
-          value={epochToMomentTimeZone(row.end_date, summitTz)}
-        />
-      </td>
-    ];
-  } else {
-    cells = [
-      <td key="id">{row.id}</td>,
-      <td key="title">{row.title}</td>,
-      <td key="content">{row.content}</td>,
-      <td key="type">{row.type}</td>,
-      <td key="location_id">{row.floor_loc}</td>,
-      <td key="start_date">{row.start_date_str}</td>,
-      <td key="end_date">{row.end_date_str}</td>
-    ];
-  }
-
-  if (actions) {
-    cells.push(
-      <BannersActionsTableCell
-        key={`actions_${row.id}`}
-        id={row.id}
-        actions={actions}
-      />
-    );
-  }
-
-  return cells;
+const NEW_ROW = {
+  title: "",
+  content: "",
+  type: "Primary",
+  start_date: "",
+  end_date: "",
+  class_name: "ScheduledSummitLocationBanner",
+  enabled: true
 };
 
-const createNewRow = (row, actions, summitTz, roomName) => {
-  const cells = [
-    <td key="new_id">TBD</td>,
-    <td key="new_title">
+const BannerRow = ({
+  row,
+  rowClass,
+  summitTz,
+  disabled,
+  onChange,
+  onEdit,
+  onDelete,
+  onSave,
+  onJump,
+  onCancel
+}) => (
+  <tr id={row.id} role="row" className={rowClass}>
+    <td>{row.id}</td>
+    {row.is_edit ? (
+      <>
+        <td>
+          <input
+            id="title"
+            className="form-control"
+            value={row.title}
+            onChange={(ev) => onChange(ev, row.id)}
+          />
+        </td>
+        <td>
+          <input
+            id="content"
+            className="form-control"
+            value={row.content}
+            onChange={(ev) => onChange(ev, row.id)}
+          />
+        </td>
+        <td>{row.type}</td>
+        <td>{row.floor_loc}</td>
+        <td>
+          <DateTimePicker
+            id="start_date"
+            onChange={(ev) => onChange(ev, row.id)}
+            format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
+            timezone={summitTz}
+            value={epochToMomentTimeZone(row.start_date, summitTz)}
+          />
+        </td>
+        <td>
+          <DateTimePicker
+            id="end_date"
+            onChange={(ev) => onChange(ev, row.id)}
+            format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
+            timezone={summitTz}
+            value={epochToMomentTimeZone(row.end_date, summitTz)}
+          />
+        </td>
+      </>
+    ) : (
+      <>
+        <td>{row.title}</td>
+        <td>{row.content}</td>
+        <td>{row.type}</td>
+        <td>{row.floor_loc}</td>
+        <td>{row.start_date_str}</td>
+        <td>{row.end_date_str}</td>
+      </>
+    )}
+    <BannersActionsTableCell
+      id={row.id}
+      isEditing={!!row.is_edit}
+      disabled={disabled}
+      onEdit={onEdit}
+      onDelete={onDelete}
+      onSave={onSave}
+      onJump={onJump}
+      onCancel={onCancel}
+    />
+  </tr>
+);
+
+const NewBannerRow = ({
+  row,
+  onChange,
+  onSave,
+  summitTz,
+  roomName,
+  disabled
+}) => (
+  <tr id="new_row" className="odd">
+    <td>TBD</td>
+    <td>
       <input
         id="title"
         className="form-control"
         value={row.title}
-        onChange={actions.handleChange}
+        onChange={onChange}
       />
-    </td>,
-    <td key="new_content">
+    </td>
+    <td>
       <input
         id="content"
         className="form-control"
         value={row.content}
-        onChange={actions.handleChange}
+        onChange={onChange}
       />
-    </td>,
-    <td key="new_type">Primary</td>,
-    <td key="new_location_id">{roomName}</td>,
-    <td key="new_start_date">
+    </td>
+    <td>Primary</td>
+    <td>{roomName}</td>
+    <td>
       <DateTimePicker
         id="start_date"
-        onChange={actions.handleChange}
+        onChange={onChange}
         format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
         timezone={summitTz}
         value={epochToMomentTimeZone(row.start_date, summitTz)}
       />
-    </td>,
-    <td key="new_end_date">
+    </td>
+    <td>
       <DateTimePicker
         id="end_date"
-        onChange={actions.handleChange}
+        onChange={onChange}
         format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
         timezone={summitTz}
         value={epochToMomentTimeZone(row.end_date, summitTz)}
       />
     </td>
-  ];
-
-  cells.push(
-    <td key="add_new">
-      <button className="btn btn-default" onClick={actions.save}>
-        {" "}
-        Add{" "}
+    <td>
+      <button
+        type="button"
+        className="btn btn-default"
+        onClick={onSave}
+        disabled={disabled}
+      >
+        {T.translate("general.add")}
       </button>
     </td>
-  );
+  </tr>
+);
 
-  return cells;
+const getFieldValue = (ev) => {
+  const { value, type } = ev.target;
+  return type === "datetime" ? value.valueOf() / MILLISECONDS_IN_SECOND : value;
 };
 
-class BannersTable extends React.Component {
-  constructor(props) {
-    super(props);
+const BannersTable = ({
+  data,
+  room,
+  summitTz,
+  saveBanner,
+  deleteBanner,
+  publishDate
+}) => {
+  const [rows, setRows] = useState(data);
+  const [newRow, setNewRow] = useState(NEW_ROW);
+  const [editingRow, setEditingRow] = useState(null);
 
-    this.new_row = {
-      title: "",
-      content: "",
-      type: "Primary",
-      start_date: "",
-      end_date: "",
-      class_name: "ScheduledSummitLocationBanner",
-      enabled: true
-    };
+  useEffect(() => {
+    setRows(data);
+    setEditingRow(null);
+  }, [data]);
 
-    this.state = {
-      rows: props.data,
-      new_row: { ...this.new_row }
-    };
-
-    this.actions = {};
-    this.actions.edit = this.editRow.bind(this);
-    this.actions.save = this.saveRow.bind(this);
-    this.actions.delete = this.deleteClick.bind(this);
-    this.actions.handleChange = this.onChangeCell.bind(this);
-    this.actions.cancel = this.editRowCancel.bind(this);
-    this.actions.jump = this.jumpTo.bind(this);
-
-    this.newActions = {};
-    this.newActions.save = this.saveNewRow.bind(this);
-    this.newActions.handleChange = this.onChangeNewCell.bind(this);
-  }
-
-  componentDidUpdate(prevProps) {
-    if (!shallowEqual(this.props.data, prevProps.data)) {
-      this.setState({ rows: this.props.data });
-    }
-  }
-
-  saveRow(id) {
-    const { rows } = this.state;
-    const row = rows.find((r) => r.id === id);
-    row.is_edit = false;
-
-    this.editing_row = null;
-
-    this.setState({
-      rows
-    });
-
-    this.props.saveBanner(row);
-  }
-
-  deleteClick(id) {
-    this.props.deleteBanner(id);
-  }
-
-  editRow(id) {
-    const { rows } = this.state;
-    const row = rows.find((r) => r.id === id);
-
-    // save editing row for cancel
-    this.editing_row = { ...row };
-
-    row.is_edit = true;
-
-    this.setState({
-      rows
-    });
-  }
-
-  editRowCancel(id) {
-    const { rows } = this.state;
-    rows.forEach((r) => {
-      r.is_edit = false;
-    });
-
-    const rowIdx = rows.findIndex((r) => r.id === id);
-
-    rows[rowIdx] = this.editing_row;
-
-    this.setState({
-      rows
-    });
-  }
-
-  onChangeCell(id, ev) {
-    const { rows } = this.state;
-    const field = ev.target;
-    const row = rows.find((r) => r.id === id);
-    let {value} = field;
-
-    if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_IN_SECOND;
-    }
-
-    row[field.id] = value;
-
-    this.setState({
-      rows
-    });
-  }
-
-  onChangeNewCell(ev) {
-    const { new_row } = this.state;
-    const field = ev.target;
-    let {value} = field;
-
-    if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_IN_SECOND;
-    }
-
-    new_row[field.id] = value;
-
-    this.setState({
-      new_row
-    });
-  }
-
-  saveNewRow(ev) {
-    ev.preventDefault();
-    const new_row = { ...this.state.new_row };
-    this.setState({ new_row: { ...this.new_row } });
-
-    this.props.saveBanner(new_row);
-  }
-
-  jumpTo(id) {
-    const { rows } = this.state;
-    const row = rows.find((r) => r.id === id);
-    this.props.publishDate(row.start_date);
-  }
-
-  render() {
-    const { room, summitTz } = this.props;
-
-    return (
-      <div>
-        <table className="table table-striped table-bordered table-hover bannersTable">
-          <thead>
-            <tr>
-              <th style={{ width: "5%" }}>{T.translate("signage.id")}</th>
-              <th style={{ width: "15%" }}>{T.translate("signage.title")}</th>
-              <th style={{ width: "20%" }}>{T.translate("signage.content")}</th>
-              <th style={{ width: "10%" }}>{T.translate("signage.type")}</th>
-              <th style={{ width: "15%" }}>
-                {T.translate("signage.floor_loc")}
-              </th>
-              <th style={{ width: "15%" }}>
-                {T.translate("signage.start_date")}
-              </th>
-              <th style={{ width: "15%" }}>
-                {T.translate("signage.end_date")}
-              </th>
-              <th style={{ width: "5%" }}>&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.state.rows.map((row, i) => {
-              const rowClass = i % TWO === 0 ? "even" : "odd";
-
-              return (
-                <tr
-                  id={row.id}
-                  key={`row_${row.id}`}
-                  role="row"
-                  className={rowClass}
-                >
-                  {createRow(row, this.actions, summitTz)}
-                </tr>
-              );
-            })}
-
-            <tr id="new_row" key="new_row" className="odd">
-              {createNewRow(
-                this.state.new_row,
-                this.newActions,
-                summitTz,
-                room.name
-              )}
-            </tr>
-          </tbody>
-        </table>
-        <Tooltip delayShow={10} />
-      </div>
+  const updateRow = (id, changes) => {
+    setRows((prevRows) =>
+      prevRows.map((r) => (r.id === id ? { ...r, ...changes } : r))
     );
-  }
-}
+  };
+
+  const saveRow = (id) => {
+    const row = rows.find((r) => r.id === id);
+
+    saveBanner(row)
+      .then(() => {
+        setEditingRow(null);
+        updateRow(id, { is_edit: false });
+      })
+      .catch(() => {});
+  };
+
+  const deleteClick = async (id) => {
+    const row = rows.find((r) => r.id === id);
+    const isConfirmed = await showConfirmDialog({
+      title: T.translate("general.are_you_sure"),
+      text: `${T.translate("general.row_remove_warning")} ${row.title}`,
+      iconType: "warning",
+      confirmButtonText: T.translate("general.yes_delete"),
+      confirmButtonColor: "error"
+    });
+
+    if (isConfirmed) deleteBanner(id);
+  };
+
+  const editRow = (id) => {
+    // save editing row for cancel
+    setEditingRow(rows.find((r) => r.id === id));
+    updateRow(id, { is_edit: true });
+  };
+
+  const editRowCancel = (id) => {
+    setRows(rows.map((r) => (r.id === id ? editingRow : r)));
+    setEditingRow(null);
+  };
+
+  const onChangeCell = (ev, id) => {
+    updateRow(id, { [ev.target.id]: getFieldValue(ev) });
+  };
+
+  const onChangeNewCell = (ev) => {
+    setNewRow({ ...newRow, [ev.target.id]: getFieldValue(ev) });
+  };
+
+  const saveNewRow = (ev) => {
+    ev.preventDefault();
+
+    saveBanner(newRow)
+      .then(() => {
+        setNewRow(NEW_ROW);
+      })
+      .catch(() => {});
+  };
+
+  const jumpTo = async (id) => {
+    const row = rows.find((r) => r.id === id);
+    const isConfirmed = await showConfirmDialog({
+      title: T.translate("general.are_you_sure"),
+      text: T.translate("signage.jump_warning", { title: row.title }),
+      iconType: "warning",
+      confirmButtonText: T.translate("signage.yes_jump")
+    });
+
+    if (isConfirmed) publishDate(row.start_date);
+  };
+
+  return (
+    <div>
+      <table className="table table-striped table-bordered table-hover bannersTable">
+        <thead>
+          <tr>
+            <th style={{ width: "5%" }}>{T.translate("signage.id")}</th>
+            <th style={{ width: "15%" }}>{T.translate("signage.title")}</th>
+            <th style={{ width: "20%" }}>{T.translate("signage.content")}</th>
+            <th style={{ width: "10%" }}>{T.translate("signage.type")}</th>
+            <th style={{ width: "15%" }}>{T.translate("signage.floor_loc")}</th>
+            <th style={{ width: "15%" }}>
+              {T.translate("signage.start_date")}
+            </th>
+            <th style={{ width: "15%" }}>{T.translate("signage.end_date")}</th>
+            <th style={{ width: "5%" }}>&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => (
+            <BannerRow
+              key={`row_${row.id}`}
+              row={row}
+              rowClass={i % TWO === 0 ? "even" : "odd"}
+              summitTz={summitTz}
+              // only one row can be edited at a time, lock the rest
+              disabled={!!editingRow && editingRow.id !== row.id}
+              onChange={onChangeCell}
+              onEdit={editRow}
+              onDelete={deleteClick}
+              onSave={saveRow}
+              onJump={jumpTo}
+              onCancel={editRowCancel}
+            />
+          ))}
+          <NewBannerRow
+            row={newRow}
+            onChange={onChangeNewCell}
+            onSave={saveNewRow}
+            summitTz={summitTz}
+            roomName={room.name}
+            disabled={!!editingRow}
+          />
+        </tbody>
+      </table>
+      <Tooltip delayShow={10} />
+    </div>
+  );
+};
 
 const mapStateToProps = ({ currentSummitState }) => ({
   summitTz: currentSummitState.currentSummit.time_zone_id
