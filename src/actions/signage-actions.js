@@ -69,8 +69,9 @@ const buildOverflowUrl = (summit, event) =>
 
 export const getSign = (locationId) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
-  const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
+
+  const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
 
@@ -85,9 +86,11 @@ export const getSign = (locationId) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/signs`,
     authErrorHandler,
     {}
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+  )(params)(dispatch)
+    .catch(() => {})
+    .finally(() => {
+      dispatch(stopLoading());
+    });
 };
 
 export const getTemplates = () => async (dispatch, getState) => {
@@ -121,9 +124,10 @@ export const getSignEvents =
   (locationId, term = "", page = 1, order = "start_date", orderDir = 1) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const filter = [];
+
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -161,18 +165,21 @@ export const getSignEvents =
         locationId,
         summitTz: currentSummit.time_zone_id
       }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .catch(() => {})
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 export const getSignBanners =
   (locationId, term = "", page = 1, order = null, orderDir = 1) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const filter = [];
+
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -210,9 +217,11 @@ export const getSignBanners =
         locationId,
         summitTz: currentSummit.time_zone_id
       }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .catch(() => {})
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 /**
@@ -275,22 +284,22 @@ export const publishDate =
 
     dispatch(startLoading());
 
-    const channel = getAblyChannel(currentSummit.id, locationId);
-    const res = await dispatch(
-      publishToAblyChannel(channel, "JUMP_TIME", { timestamp: startDate })
-    );
+    try {
+      const channel = getAblyChannel(currentSummit.id, locationId);
+      const res = await dispatch(
+        publishToAblyChannel(channel, "JUMP_TIME", { timestamp: startDate })
+      );
 
-    if (res) {
-      const resynced = await publishOverflowState(
-        currentSummit,
-        locationId,
-        startDate
-      )(dispatch);
-      // on failure keep the error popup visible instead of covering it with the success one
-      if (resynced) dispatch(showSuccessMessage(T.translate(popupResource)));
-      else dispatch(stopLoading());
-    } else {
-      // the loader overlay sits above the "Publish failed" popup
+      if (res) {
+        const resynced = await publishOverflowState(
+          currentSummit,
+          locationId,
+          startDate
+        )(dispatch);
+        // on failure keep the error popup visible instead of covering it with the success one
+        if (resynced) dispatch(showSuccessMessage(T.translate(popupResource)));
+      }
+    } finally {
       dispatch(stopLoading());
     }
   };
@@ -302,16 +311,18 @@ export const publishTemplate = (templateFile) => async (dispatch, getState) => {
 
   dispatch(startLoading());
 
-  await saveSignTemplate(templateFile)(dispatch, getState);
+  try {
+    await saveSignTemplate(templateFile)(dispatch, getState);
 
-  const channel = getAblyChannel(currentSummit.id, locationId);
-  const res = await dispatch(
-    publishToAblyChannel(channel, "SET_TEMPLATE", { template: templateFile })
-  );
+    const channel = getAblyChannel(currentSummit.id, locationId);
+    const res = await dispatch(
+      publishToAblyChannel(channel, "SET_TEMPLATE", { template: templateFile })
+    );
 
-  if (res) {
-    dispatch(showSuccessMessage(T.translate("signage.template_published")));
-  } else {
+    if (res) {
+      dispatch(showSuccessMessage(T.translate("signage.template_published")));
+    }
+  } finally {
     dispatch(stopLoading());
   }
 };
@@ -323,39 +334,41 @@ export const publishReload = () => async (dispatch, getState) => {
 
   dispatch(startLoading());
 
-  const channel = getAblyChannel(currentSummit.id, locationId);
-  const res = await dispatch(publishToAblyChannel(channel, "RELOAD", {}));
+  try {
+    const channel = getAblyChannel(currentSummit.id, locationId);
+    const res = await dispatch(publishToAblyChannel(channel, "RELOAD", {}));
 
-  if (res) {
-    // the location reloaded now, even if the selection changes during the delay;
-    // a reload drops the sign's jump offset, so it is back on real time
-    setTimeout(
-      () =>
-        publishOverflowState(
-          currentSummit,
-          locationId,
-          moment().unix()
-        )(dispatch),
-      RELOAD_OVERFLOW_RESYNC_DELAY_MS
-    );
-    dispatch(showSuccessMessage(T.translate("signage.sign_reloaded")));
-  } else {
+    if (res) {
+      // the location reloaded now, even if the selection changes during the delay;
+      // a reload drops the sign's jump offset, so it is back on real time
+      setTimeout(
+        () =>
+          publishOverflowState(
+            currentSummit,
+            locationId,
+            moment().unix()
+          )(dispatch),
+        RELOAD_OVERFLOW_RESYNC_DELAY_MS
+      );
+      dispatch(showSuccessMessage(T.translate("signage.sign_reloaded")));
+    }
+  } finally {
     dispatch(stopLoading());
   }
 };
 
 export const saveStaticBanner = (entity) => async (dispatch, getState) => {
   const { currentSummitState, signageState } = getState();
-  const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
   const { locationId } = signageState;
 
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
   const params = {
     access_token: accessToken,
     expand: "type,location,location.floor"
   };
-
-  dispatch(startLoading());
 
   const normalizedEntity = normalizeBanner(entity);
   normalizedEntity.class_name = "SummitLocationBanner";
@@ -363,65 +376,69 @@ export const saveStaticBanner = (entity) => async (dispatch, getState) => {
   normalizedEntity.title = "Static Banner";
   normalizedEntity.type = "Primary";
 
-  if (entity.id) {
-    putRequest(
-      null,
-      createAction(SIGNAGE_STATIC_BANNER_UPDATED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/${locationId}/banners/${entity.id}`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then(() => {
+  const request = entity.id
+    ? putRequest(
+        null,
+        createAction(SIGNAGE_STATIC_BANNER_UPDATED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/${locationId}/banners/${entity.id}`,
+        normalizedEntity,
+        authErrorHandler,
+        entity
+      )
+    : postRequest(
+        null,
+        createAction(SIGNAGE_STATIC_BANNER_UPDATED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/${locationId}/banners`,
+        normalizedEntity,
+        authErrorHandler,
+        entity
+      );
+
+  return request(params)(dispatch)
+    .then(() => {
       dispatch(showSuccessMessage(T.translate("signage.static_saved")));
+    })
+    .catch(() => {})
+    .finally(() => {
+      dispatch(stopLoading());
     });
-  } else {
-    postRequest(
-      null,
-      createAction(SIGNAGE_STATIC_BANNER_UPDATED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/${locationId}/banners`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then(() => {
-      dispatch(showSuccessMessage(T.translate("signage.static_saved")));
-    });
-  }
 };
 
 export const saveSignTemplate =
   (templateFile) => async (dispatch, getState) => {
     const { currentSummitState, signageState } = getState();
-    const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const { sign, locationId } = signageState;
 
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
     const params = {
       access_token: accessToken
     };
+    const payload = { location_id: locationId, template: templateFile };
 
-    dispatch(startLoading());
+    const request = sign?.id
+      ? putRequest(
+          null,
+          createAction(SIGN_UPDATED),
+          `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/signs/${sign.id}`,
+          payload,
+          authErrorHandler
+        )
+      : postRequest(
+          null,
+          createAction(SIGN_ADDED),
+          `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/signs`,
+          payload,
+          authErrorHandler
+        );
 
-    if (sign?.id) {
-      putRequest(
-        null,
-        createAction(SIGN_UPDATED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/signs/${sign.id}`,
-        { location_id: locationId, template: templateFile },
-        authErrorHandler
-      )(params)(dispatch).then(() => {
+    return request(params)(dispatch)
+      .catch(() => {})
+      .finally(() => {
         dispatch(stopLoading());
       });
-    } else {
-      postRequest(
-        null,
-        createAction(SIGN_ADDED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/signs`,
-        { location_id: locationId, template: templateFile },
-        authErrorHandler
-      )(params)(dispatch).then(() => {
-        dispatch(stopLoading());
-      });
-    }
   };
 
 /* *************************************************************************** */
@@ -429,8 +446,9 @@ export const saveSignTemplate =
 /* *************************************************************************** */
 export const getLocations = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
-  const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
+
+  const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
 
@@ -446,23 +464,26 @@ export const getLocations = () => async (dispatch, getState) => {
     createAction(RECEIVE_SIGNAGE_LOCATIONS),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations`,
     authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+  )(params)(dispatch)
+    .catch(() => {})
+    .finally(() => {
+      dispatch(stopLoading());
+    });
 };
 
+// rejects on failure so the table can keep the row/draft for a retry
 export const saveBanner = (entity) => async (dispatch, getState) => {
   const { currentSummitState, signageState } = getState();
-  const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
   const { locationId } = signageState;
 
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
   const params = {
     access_token: accessToken,
     expand: "type,location,location.floor"
   };
-
-  dispatch(startLoading());
 
   const normalizedEntity = normalizeBanner(entity);
 
@@ -492,15 +513,15 @@ export const saveBanner = (entity) => async (dispatch, getState) => {
 
 export const deleteBanner = (bannerId) => async (dispatch, getState) => {
   const { currentSummitState, signageState } = getState();
-  const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
   const { locationId } = signageState;
 
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
   const params = {
     access_token: accessToken
   };
-
-  dispatch(startLoading());
 
   return deleteRequest(
     null,
@@ -508,9 +529,11 @@ export const deleteBanner = (bannerId) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/${locationId}/banners/${bannerId}`,
     null,
     authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+  )(params)(dispatch)
+    .catch(() => {})
+    .finally(() => {
+      dispatch(stopLoading());
+    });
 };
 
 const normalizeBanner = (entity) => {
