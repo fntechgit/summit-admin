@@ -21,13 +21,14 @@ import {
   resetViewTypeForm,
   saveViewType
 } from "../../actions/badge-actions";
-import AddNewButton from "../../components/buttons/add-new-button";
+import AddNewButton from "../../components/buttons/add-new-button-mui";
 
 const EditViewTypePage = ({
   currentSummit,
   entity,
   errors,
   match,
+  history,
   getViewType,
   resetViewTypeForm,
   saveViewType
@@ -51,7 +52,13 @@ const EditViewTypePage = ({
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
       <h3>
         {title} {T.translate("edit_view_type.view_type")}
-        <AddNewButton entity={entity} />
+        {entity.id > 0 && (
+          <AddNewButton
+            onClick={() =>
+              history.push(`/app/summits/${currentSummit.id}/view-types/new`)
+            }
+          />
+        )}
       </h3>
       <hr />
       {currentSummit && (
