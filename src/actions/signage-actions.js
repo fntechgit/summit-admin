@@ -45,9 +45,27 @@ export const SIGNAGE_BANNER_UPDATED = "SIGNAGE_BANNER_UPDATED";
 export const SIGNAGE_BANNER_ADDED = "SIGNAGE_BANNER_ADDED";
 export const SIGNAGE_BANNER_DELETED = "SIGNAGE_BANNER_DELETED";
 export const SIGNAGE_STATIC_BANNER_UPDATED = "SIGNAGE_STATIC_BANNER_UPDATED";
+export const RECEIVE_SIGNAGE_OVERFLOW_EVENTS =
+  "RECEIVE_SIGNAGE_OVERFLOW_EVENTS";
+
+// A RELOAD makes the sign do window.location.reload(); anything published before it
+// re-subscribes is lost, so the overflow re-sync waits for it to come back.
+export const RELOAD_OVERFLOW_RESYNC_DELAY_MS = 10000;
+
+const OVERFLOW_ENTITY_TYPE = "PresentationOverflow";
+// Same defaults summit-api uses in SummitEvent::getOverflowUrl (config overflow.path /
+// overflow.query_string_key); the API has no overrides for them.
+const OVERFLOW_PLAYER_PATH = "/a/overflow-player";
+const OVERFLOW_QUERY_STRING_KEY = "k";
 
 const getAblyChannel = (summitId, locationId) =>
   `SIGNAGE:${summitId}:${locationId}`;
+
+// Channel pub-api relays PresentationOverflow updates on; the signs subscribe to it.
+const getOverflowChannel = (summitId) => `${summitId}:OVERFLOW:*`;
+
+const buildOverflowUrl = (summit, event) =>
+  `${summit.marketing_site_url}${OVERFLOW_PLAYER_PATH}?${OVERFLOW_QUERY_STRING_KEY}=${event.overflow_stream_key}`;
 
 export const getSign = (locationId) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -197,6 +215,62 @@ export const getSignBanners =
     });
   };
 
+/**
+ * Re-sends the overflow state of the selected location's events on the OVERFLOW channel.
+ *
+ * A sign only learns an event's overflow_url from the realtime PresentationOverflow message
+ * pub-api relays when the overflow is set; the schedule it loads from the API does not carry
+ * it. A sign opened (or reloaded for the first time) after the overflow was set never gets
+ * it, so Jump/Reload replay the same message pub-api would have sent.
+ */
+export const publishOverflowState = () => async (dispatch, getState) => {
+  const { currentSummitState, signageState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const { locationId } = signageState;
+
+  // overflow_url is built on the marketing site; without it there is nothing valid to send
+  if (!currentSummit.marketing_site_url) return [];
+
+  const params = {
+    page: 1,
+    per_page: 100,
+    "filter[]": ["occupancy==OVERFLOW"],
+    access_token: accessToken
+  };
+
+  const { response } = await getRequest(
+    null,
+    createAction(RECEIVE_SIGNAGE_OVERFLOW_EVENTS),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/${locationId}/events/published`,
+    authErrorHandler
+  )(params)(dispatch);
+
+  const overflowEvents = (response?.data || []).filter(
+    (event) => event.overflow_stream_key
+  );
+
+  if (overflowEvents.length === 0) return [];
+
+  const channel = getOverflowChannel(currentSummit.id);
+  const createdAt = moment().unix();
+
+  await Promise.all(
+    overflowEvents.map((event) =>
+      publishToAblyChannel(channel, "EVENT", {
+        summit_id: currentSummit.id,
+        entity_type: OVERFLOW_ENTITY_TYPE,
+        entity_id: event.id,
+        entity_operator: "UPDATE",
+        created_at: createdAt,
+        params: { overflow_url: buildOverflowUrl(currentSummit, event) }
+      })
+    )
+  );
+
+  return overflowEvents;
+};
+
 export const publishDate =
   (startDate, popupResource = "signage.date_published") =>
   async (dispatch, getState) => {
@@ -212,6 +286,7 @@ export const publishDate =
     });
 
     if (res) {
+      await publishOverflowState()(dispatch, getState);
       dispatch(showSuccessMessage(T.translate(popupResource)));
     }
   };
@@ -246,6 +321,10 @@ export const publishReload = () => async (dispatch, getState) => {
   const res = await publishToAblyChannel(channel, "RELOAD", {});
 
   if (res) {
+    setTimeout(
+      () => publishOverflowState()(dispatch, getState),
+      RELOAD_OVERFLOW_RESYNC_DELAY_MS
+    );
     dispatch(showSuccessMessage(T.translate("signage.sign_reloaded")));
   }
 };

@@ -19,19 +19,22 @@ export const subscribeToAblyChannel = (channel, callback) => {
   return true;
 };
 
-export const publishToAblyChannel = (channel, key, message) => {
+export const publishToAblyChannel = async (channel, key, message) => {
   if (!realtimeAbly) {
     Swal.fire("Publish failed", "No Ably API key found", "warning");
     return false;
   }
 
+  // publish only: no implicit subscribe/attach, so the key needs just publish capability
   const ablyChannel = realtimeAbly.channels.get(channel);
 
-  ablyChannel.subscribe((msg) => {
-    console.log(`Received: ${JSON.stringify(msg.data)}`);
-  });
-
-  ablyChannel.publish(key, message);
+  try {
+    await ablyChannel.publish(key, message);
+  } catch (err) {
+    // e.g. the key has no publish capability on this channel
+    Swal.fire("Publish failed", `${channel}: ${err.message}`, "warning");
+    return false;
+  }
 
   return true;
 };
