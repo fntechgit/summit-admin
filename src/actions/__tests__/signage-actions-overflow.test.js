@@ -235,7 +235,7 @@ describe("signage overflow re-sync", () => {
         expect.objectContaining({ params: { overflow_url: "" } })
       );
 
-      publishToAblyChannel.mockResolvedValue(false);
+      publishToScheduleUpdatesChannel.mockResolvedValue(false);
       await store.dispatch(publishOverflowEnd(overflowEvent.id));
       expect(errorSpy).toHaveBeenCalledWith(
         `Overflow end for event ${overflowEvent.id} NOT published on ${summitId}:OVERFLOW:*`,
@@ -247,8 +247,8 @@ describe("signage overflow re-sync", () => {
       await store.dispatch(publishOverflowEnd(overflowEvent.id));
 
       expect(getRequest).not.toHaveBeenCalled();
-      expect(publishToAblyChannel).toHaveBeenCalledTimes(1);
-      expect(publishToAblyChannel).toHaveBeenCalledWith(
+      expect(publishToScheduleUpdatesChannel).toHaveBeenCalledTimes(1);
+      expect(publishToScheduleUpdatesChannel).toHaveBeenCalledWith(
         `${summitId}:OVERFLOW:*`,
         "EVENT",
         {
@@ -264,7 +264,7 @@ describe("signage overflow re-sync", () => {
     });
 
     it("stops loading without showing success when the publish fails", async () => {
-      publishToAblyChannel.mockResolvedValue(false);
+      publishToScheduleUpdatesChannel.mockResolvedValue(false);
 
       await store.dispatch(publishOverflowEnd(overflowEvent.id));
 
