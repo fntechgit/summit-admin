@@ -266,6 +266,34 @@ export const publishOverflowState =
       .catch(() => false);
   };
 
+/**
+ * Emergency stop: tells the overflow player and the signs to drop the event's
+ * overflow, the same message pub-api relays when summit-api clears it.
+ * Goes straight to Ably and leaves the event's occupancy in summit-api untouched.
+ */
+export const publishOverflowEnd = (eventId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const { currentSummit } = currentSummitState;
+
+  dispatch(startLoading());
+
+  const res = await publishToAblyChannel(
+    getOverflowChannel(currentSummit.id),
+    "EVENT",
+    {
+      summit_id: currentSummit.id,
+      entity_type: OVERFLOW_ENTITY_TYPE,
+      entity_id: eventId,
+      entity_operator: "UPDATE",
+      created_at: moment().unix(),
+      params: { overflow_url: "" }
+    }
+  );
+
+  if (res) dispatch(showSuccessMessage(T.translate("signage.overflow_ended")));
+  else dispatch(stopLoading());
+};
+
 export const publishDate =
   (startDate, popupResource = "signage.date_published") =>
   async (dispatch, getState) => {

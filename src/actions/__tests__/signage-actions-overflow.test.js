@@ -11,6 +11,7 @@ import {
 } from "../ably-actions";
 import {
   publishDate,
+  publishOverflowEnd,
   publishOverflowState,
   publishReload,
   RELOAD_OVERFLOW_RESYNC_DELAY_MS
@@ -210,6 +211,37 @@ describe("signage overflow re-sync", () => {
       );
 
       expect(result).toBe(false);
+    });
+  });
+
+  describe("publishOverflowEnd", () => {
+    it("sends the event's PresentationOverflow message with an empty overflow_url straight to Ably, without calling summit-api", async () => {
+      await store.dispatch(publishOverflowEnd(overflowEvent.id));
+
+      expect(getRequest).not.toHaveBeenCalled();
+      expect(publishToAblyChannel).toHaveBeenCalledTimes(1);
+      expect(publishToAblyChannel).toHaveBeenCalledWith(
+        `${summitId}:OVERFLOW:*`,
+        "EVENT",
+        {
+          summit_id: summitId,
+          entity_type: "PresentationOverflow",
+          entity_id: overflowEvent.id,
+          entity_operator: "UPDATE",
+          created_at: expect.any(Number),
+          params: { overflow_url: "" }
+        }
+      );
+      expect(showSuccessMessage).toHaveBeenCalledWith("signage.overflow_ended");
+    });
+
+    it("stops loading without showing success when the publish fails", async () => {
+      publishToAblyChannel.mockResolvedValue(false);
+
+      await store.dispatch(publishOverflowEnd(overflowEvent.id));
+
+      expect(showSuccessMessage).not.toHaveBeenCalled();
+      expect(store.getActions().map((a) => a.type)).toContain("STOP_LOADING");
     });
   });
 
