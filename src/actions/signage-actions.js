@@ -277,21 +277,31 @@ export const publishOverflowEnd = (eventId) => async (dispatch, getState) => {
 
   dispatch(startLoading());
 
-  const res = await publishToAblyChannel(
-    getOverflowChannel(currentSummit.id),
-    "EVENT",
-    {
-      summit_id: currentSummit.id,
-      entity_type: OVERFLOW_ENTITY_TYPE,
-      entity_id: eventId,
-      entity_operator: "UPDATE",
-      created_at: moment().unix(),
-      params: { overflow_url: "" }
-    }
-  );
+  const channel = getOverflowChannel(currentSummit.id);
+  const message = {
+    summit_id: currentSummit.id,
+    entity_type: OVERFLOW_ENTITY_TYPE,
+    entity_id: eventId,
+    entity_operator: "UPDATE",
+    created_at: moment().unix(),
+    params: { overflow_url: "" }
+  };
 
-  if (res) dispatch(showSuccessMessage(T.translate("signage.overflow_ended")));
-  else dispatch(stopLoading());
+  const res = await publishToAblyChannel(channel, "EVENT", message);
+
+  if (res) {
+    console.log(
+      `Overflow end for event ${eventId} published on ${channel}`,
+      message
+    );
+    dispatch(showSuccessMessage(T.translate("signage.overflow_ended")));
+  } else {
+    console.error(
+      `Overflow end for event ${eventId} NOT published on ${channel}`,
+      message
+    );
+    dispatch(stopLoading());
+  }
 };
 
 export const publishDate =

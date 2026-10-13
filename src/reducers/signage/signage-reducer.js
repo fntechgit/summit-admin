@@ -9,11 +9,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
   RECEIVE_SIGNAGE_EVENTS,
   REQUEST_SIGNAGE_EVENTS,
@@ -57,7 +57,7 @@ const signageReducer = (state = DEFAULT_STATE, action) => {
     case RECEIVE_SIGN: {
       const { data } = payload.response;
       const sign = data.length > 0 ? data[0] : null;
-      return { ...state, sign: sign };
+      return { ...state, sign };
     }
     case SIGN_ADDED:
     case SIGN_UPDATED: {
@@ -69,8 +69,7 @@ const signageReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, order, orderDir, term, locationId, summitTz };
     }
     case RECEIVE_SIGNAGE_EVENTS: {
-      const { current_page, total, last_page, data, summit_tz } =
-        payload.response;
+      const { current_page, total, last_page, data } = payload.response;
       const events = data.map((ev) => {
         const start_date_str = epochToMomentTimeZone(
           ev.start_date,
@@ -95,7 +94,8 @@ const signageReducer = (state = DEFAULT_STATE, action) => {
           start_date_str,
           end_date_str,
           start_date: ev.start_date,
-          end_date: ev.end_date
+          end_date: ev.end_date,
+          occupancy: ev.occupancy
         };
       });
       return {
@@ -111,7 +111,7 @@ const signageReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, order, orderDir, term, locationId, summitTz };
     }
     case RECEIVE_SIGNAGE_BANNERS: {
-      const { current_page, total, last_page, data } = payload.response;
+      const { current_page, last_page, data } = payload.response;
       const staticBanner = data.find(
         (ban) => ban.class_name === "SummitLocationBanner"
       ) || { content: "" };

@@ -201,7 +201,9 @@ const SignagePage = ({
           name: "end_overflow",
           tooltip: T.translate("signage.end_overflow"),
           icon: <i className="fa fa-stop-circle text-danger" />,
-          onClick: endOverflow
+          onClick: endOverflow,
+          display: (id) =>
+            events.find((ev) => ev.id === id)?.occupancy === "OVERFLOW"
         }
       ]
     }

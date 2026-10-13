@@ -215,6 +215,34 @@ describe("signage overflow re-sync", () => {
   });
 
   describe("publishOverflowEnd", () => {
+    let logSpy;
+    let errorSpy;
+
+    beforeEach(() => {
+      logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+      errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      logSpy.mockRestore();
+      errorSpy.mockRestore();
+    });
+
+    it("logs in the console whether the overflow end was published", async () => {
+      await store.dispatch(publishOverflowEnd(overflowEvent.id));
+      expect(logSpy).toHaveBeenCalledWith(
+        `Overflow end for event ${overflowEvent.id} published on ${summitId}:OVERFLOW:*`,
+        expect.objectContaining({ params: { overflow_url: "" } })
+      );
+
+      publishToAblyChannel.mockResolvedValue(false);
+      await store.dispatch(publishOverflowEnd(overflowEvent.id));
+      expect(errorSpy).toHaveBeenCalledWith(
+        `Overflow end for event ${overflowEvent.id} NOT published on ${summitId}:OVERFLOW:*`,
+        expect.objectContaining({ entity_id: overflowEvent.id })
+      );
+    });
+
     it("sends the event's PresentationOverflow message with an empty overflow_url straight to Ably, without calling summit-api", async () => {
       await store.dispatch(publishOverflowEnd(overflowEvent.id));
 
