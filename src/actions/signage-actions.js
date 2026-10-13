@@ -12,17 +12,17 @@
  * */
 
 import {
-  getRequest,
-  createAction,
-  stopLoading,
-  startLoading,
   authErrorHandler,
-  escapeFilterValue,
-  putRequest,
-  postRequest,
+  createAction,
   deleteRequest,
+  escapeFilterValue,
   fetchErrorHandler,
-  showSuccessMessage
+  getRequest,
+  postRequest,
+  putRequest,
+  showSuccessMessage,
+  startLoading,
+  stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react";
 import moment from "moment-timezone";
@@ -467,28 +467,27 @@ export const saveBanner = (entity) => async (dispatch, getState) => {
   const normalizedEntity = normalizeBanner(entity);
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_SIGNAGE_BANNER),
       createAction(SIGNAGE_BANNER_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/${locationId}/banners/${entity.id}`,
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  } else {
-    postRequest(
-      createAction(UPDATE_SIGNAGE_BANNER),
-      createAction(SIGNAGE_BANNER_ADDED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/${locationId}/banners`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   }
+  return postRequest(
+    createAction(UPDATE_SIGNAGE_BANNER),
+    createAction(SIGNAGE_BANNER_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/${locationId}/banners`,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )(params)(dispatch).finally(() => {
+    dispatch(stopLoading());
+  });
 };
 
 export const deleteBanner = (bannerId) => async (dispatch, getState) => {
