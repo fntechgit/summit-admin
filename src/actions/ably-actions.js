@@ -8,7 +8,7 @@ const realtimeAbly = createAblyClient(process.env.SIGNAGE_ABLY_API_KEY);
 // the signs listen to {summit}:OVERFLOW:* on the schedule updates app (where pub-api
 // publishes), not on the signage app: channels of different Ably apps never meet
 const scheduleUpdatesAbly = createAblyClient(
-  process.env.ABLY_SCHEDULE_UPDATES_SUBSCRIBER_API_KEY
+  process.env.ABLY_SCHEDULE_UPDATES_PUBLISHER_API_KEY
 );
 
 export const subscribeToAblyChannel = (channel, callback) => {

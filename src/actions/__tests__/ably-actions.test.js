@@ -34,7 +34,7 @@ const loadAblyActions = () => {
   jest.isolateModules(() => {
     // the clients are created at module load, from these env vars
     process.env.SIGNAGE_ABLY_API_KEY = signageKey;
-    process.env.ABLY_SCHEDULE_UPDATES_SUBSCRIBER_API_KEY = scheduleUpdatesKey;
+    process.env.ABLY_SCHEDULE_UPDATES_PUBLISHER_API_KEY = scheduleUpdatesKey;
     // eslint-disable-next-line global-require
     actions = require("../ably-actions");
   });
@@ -44,7 +44,7 @@ const loadAblyActions = () => {
 describe("publishToAblyChannel", () => {
   const originalKey = process.env.SIGNAGE_ABLY_API_KEY;
   const originalScheduleUpdatesKey =
-    process.env.ABLY_SCHEDULE_UPDATES_SUBSCRIBER_API_KEY;
+    process.env.ABLY_SCHEDULE_UPDATES_PUBLISHER_API_KEY;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -53,7 +53,7 @@ describe("publishToAblyChannel", () => {
 
   afterAll(() => {
     process.env.SIGNAGE_ABLY_API_KEY = originalKey;
-    process.env.ABLY_SCHEDULE_UPDATES_SUBSCRIBER_API_KEY =
+    process.env.ABLY_SCHEDULE_UPDATES_PUBLISHER_API_KEY =
       originalScheduleUpdatesKey;
   });
 
