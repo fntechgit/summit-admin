@@ -30,7 +30,7 @@ import {
   addViewTypeToBadgeType,
   removeViewTypeFromBadgeType
 } from "../../actions/badge-actions";
-import AddNewButtonMUI from "../../components/buttons/add-new-button-mui";
+import AddNewButton from "../../components/buttons/add-new-button-mui";
 import { DEFAULT_CURRENT_PAGE, HUNDRED_PER_PAGE } from "../../utils/constants";
 
 const EditBadgeTypePage = ({
@@ -38,6 +38,7 @@ const EditBadgeTypePage = ({
   entity,
   errors,
   match,
+  history,
   getBadgeFeatures,
   getAccessLevels,
   getViewTypes,
@@ -77,7 +78,13 @@ const EditBadgeTypePage = ({
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
       <h3>
         {title} {T.translate("edit_badge_type.badge_type")}
-        <AddNewButtonMUI entity={entity} />
+        {entity.id > 0 && (
+          <AddNewButton
+            onClick={() =>
+              history.push(`/app/summits/${currentSummit.id}/badge-types/new`)
+            }
+          />
+        )}
       </h3>
       <hr />
       {currentSummit &&
