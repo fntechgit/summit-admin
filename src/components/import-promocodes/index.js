@@ -55,7 +55,7 @@ const ImportPromocodesBtn = ({
                   delimited (optional)
                 </li>
                 <li>
-                  <b>allowed_tickets_types:</b> list of allowed ticket type ids
+                  <b>allowed_ticket_types:</b> list of allowed ticket type ids
                   pipe delimited (optional)
                 </li>
                 {showSpeakers && (
