@@ -427,6 +427,29 @@ export const joinCVSChunks = (chunks) => {
   return `${header}\n${csv}`;
 };
 
+// Spreadsheets run a text cell starting with one of these as a formula, even
+// when quoted; a leading apostrophe keeps it literal (OWASP CSV injection).
+const CSV_FORMULA_PREFIX = /^[=+\-@\t\r]/;
+
+// RFC 4180: every field quoted, embedded quotes doubled, CRLF line endings.
+// Text is formula-neutralized; numbers pass through unchanged.
+export const toCSV = (rows) =>
+  rows
+    .map((row) =>
+      row
+        .map((value) => {
+          const text = String(value ?? "");
+          const safe =
+            typeof value === "string" && CSV_FORMULA_PREFIX.test(text)
+              ? `'${text}`
+              : text;
+          return `"${safe.replace(/"/g, "\"\"")}"`;
+        })
+        .join(",")
+    )
+    .map((line) => `${line}\r\n`)
+    .join("");
+
 export const joinCVSChunksAndNormalizeHeaders = (csvFiles) => {
   function parseCsv(csv) {
     const [headerLine, ...lines] = csv.trim().split("\n");

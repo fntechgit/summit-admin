@@ -4,6 +4,7 @@ import flushPromises from "flush-promises";
 import {
   getRequest,
   getCSV,
+  downloadFileByContent,
   authErrorHandler,
   START_LOADING,
   STOP_LOADING
@@ -38,6 +39,7 @@ import {
   RECEIVE_PURCHASE_DETAILS_BY_ITEM_ROWS,
   PURCHASE_DETAILS_BY_ITEM_READ_ERROR,
   getUnpaidCharges,
+  exportUnpaidChargesCsv,
   REQUEST_UNPAID_CHARGES,
   RECEIVE_UNPAID_CHARGES
 } from "../sponsor-reports-actions";
@@ -47,6 +49,7 @@ jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
   getRequest: jest.fn(),
   getCSV: jest.fn(() => ({ type: "GET_CSV_MOCK" })),
+  downloadFileByContent: jest.fn(),
   // 401s delegate here for the guarded (session-clearing) re-login. Stub it to a
   // no-op thunk so we can assert delegation without triggering a real redirect.
   authErrorHandler: jest.fn(() => () => {})
@@ -1583,6 +1586,45 @@ describe("sponsor-reports-actions", () => {
         .filter((a) => a.type === RECEIVE_UNPAID_CHARGES);
       expect(receives).toHaveLength(1);
       expect(receives[0].payload.response.data).toEqual([{ id: 7 }]);
+    });
+  });
+
+  describe("exportUnpaidChargesCsv", () => {
+    const CSV_ROWS = [
+      ["Sponsor", "Form total"],
+      ["Acme, Inc", "10.00"]
+    ];
+    const exportWith = (term, filters) => {
+      const store = mockStore({
+        ...MOCK_STATE,
+        sponsorReportsUnpaidChargesState: { term, filters }
+      });
+      store.dispatch(exportUnpaidChargesCsv(CSV_ROWS));
+    };
+
+    beforeEach(() => downloadFileByContent.mockClear());
+
+    it("downloads the rows as a UTF-8 CSV named for the default filters", () => {
+      exportWith("", { adminOnly: true, stage: "" });
+      expect(downloadFileByContent).toHaveBeenCalledWith(
+        "unpaid-charges-summit-42-admin-only.csv",
+        "\uFEFF\"Sponsor\",\"Form total\"\r\n\"Acme, Inc\",\"10.00\"\r\n",
+        "text/csv;charset=utf-8"
+      );
+    });
+
+    it("records the stage and search in the filename", () => {
+      exportWith("Acme, Inc!", { adminOnly: false, stage: "paying_by_card" });
+      expect(downloadFileByContent.mock.calls[0][0]).toBe(
+        "unpaid-charges-summit-42-paying-by-card-search-acme-inc.csv"
+      );
+    });
+
+    it("keeps accented and non-Latin search terms in the filename", () => {
+      exportWith("Été 東京", { adminOnly: false, stage: "" });
+      expect(downloadFileByContent.mock.calls[0][0]).toBe(
+        "unpaid-charges-summit-42-search-été-東京.csv"
+      );
     });
   });
 });
