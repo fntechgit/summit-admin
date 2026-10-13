@@ -29,7 +29,13 @@ export const publishToAblyChannel = async (channel, key, message) => {
   const ablyChannel = realtimeAbly.channels.get(channel);
 
   try {
-    await ablyChannel.publish(key, message);
+    // Ably.Realtime (1.2) is the callback API: publish returns undefined, so the
+    // callback is the only way to wait for the ack and see a publish error
+    await new Promise((resolve, reject) => {
+      ablyChannel.publish(key, message, (err) =>
+        err ? reject(err) : resolve()
+      );
+    });
   } catch (err) {
     // e.g. the key has no publish capability on this channel
     Swal.fire("Publish failed", `${channel}: ${err.message}`, "warning");

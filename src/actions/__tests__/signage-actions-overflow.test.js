@@ -1,6 +1,9 @@
 import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
-import { getRequest } from "openstack-uicore-foundation/lib/utils/actions";
+import {
+  getRequest,
+  showSuccessMessage
+} from "openstack-uicore-foundation/lib/utils/actions";
 import * as methods from "../../utils/methods";
 import { publishToAblyChannel } from "../ably-actions";
 import {
@@ -18,7 +21,8 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   __esModule: true,
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
-  getRequest: jest.fn()
+  getRequest: jest.fn(),
+  showSuccessMessage: jest.fn(() => ({ type: "SUCCESS_MESSAGE" }))
 }));
 
 jest.mock("../ably-actions", () => ({
@@ -30,9 +34,11 @@ const mockStore = configureStore([thunk]);
 
 const summitId = 73;
 const locationId = 844;
+const otherLocationId = 845;
 const marketingSiteUrl = "https://2026ocpglobal.fnvirtual.app";
 const streamKey =
   "8a529477ec634e35c810f073ade6039a678bb41eae872d22cac2ea8870d38684";
+const summit = { id: summitId, marketing_site_url: marketingSiteUrl };
 
 const overflowEvent = {
   id: 10140,
@@ -47,23 +53,25 @@ const flushPromises = () =>
     realSetImmediate(resolve);
   });
 
+const overflowPublishes = () =>
+  publishToAblyChannel.mock.calls.filter(
+    ([channel]) => channel === `${summitId}:OVERFLOW:*`
+  );
+
 describe("signage overflow re-sync", () => {
   let store;
+  let requestParams;
 
   beforeEach(() => {
     jest.clearAllMocks();
     window.API_BASE_URL = "https://api.test";
     store = mockStore({
-      currentSummitState: {
-        currentSummit: { id: summitId, marketing_site_url: marketingSiteUrl }
-      },
+      currentSummitState: { currentSummit: summit },
       signageState: { locationId }
     });
     jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
     publishToAblyChannel.mockResolvedValue(true);
   });
-
-  let requestParams;
 
   const arrangeOverflowEvents = (events) => {
     requestParams = undefined;
@@ -73,16 +81,29 @@ describe("signage overflow re-sync", () => {
     });
   };
 
+  const arrangeOverflowRequestFailure = () => {
+    getRequest.mockReturnValue(
+      () => () =>
+        // uicore getRequest rejects with { err, res, ... } (not an Error) after running
+        // the error handler, e.g. on a 412
+        // eslint-disable-next-line prefer-promise-reject-errors
+        Promise.reject({ err: { status: 412 } })
+    );
+  };
+
   describe("publishOverflowState", () => {
-    it("asks the API for the location's events in OVERFLOW and re-sends one PresentationOverflow message per event", async () => {
+    it("asks the summit's published events for the location's events in OVERFLOW and re-sends one PresentationOverflow message per event", async () => {
       arrangeOverflowEvents([overflowEvent]);
 
-      await store.dispatch(publishOverflowState());
+      const result = await store.dispatch(
+        publishOverflowState(summit, locationId)
+      );
 
+      expect(result).toBe(true);
       expect(getRequest).toHaveBeenCalledTimes(1);
       const [, , url] = getRequest.mock.calls[0];
       expect(url).toBe(
-        `https://api.test/api/v1/summits/${summitId}/locations/${locationId}/events/published`
+        `https://api.test/api/v1/summits/${summitId}/events/published`
       );
 
       expect(publishToAblyChannel).toHaveBeenCalledTimes(1);
@@ -101,27 +122,30 @@ describe("signage overflow re-sync", () => {
       });
     });
 
-    it("filters the request by occupancy so only overflow events come back", async () => {
+    it("filters by location and occupancy, both allowed filters on the summit's published events", async () => {
       arrangeOverflowEvents([]);
 
-      await store.dispatch(publishOverflowState());
+      await store.dispatch(publishOverflowState(summit, locationId));
 
-      expect(requestParams["filter[]"]).toEqual(["occupancy==OVERFLOW"]);
+      expect(requestParams["filter[]"]).toEqual([
+        `location_id==${locationId}`,
+        "occupancy==OVERFLOW"
+      ]);
       expect(requestParams.per_page).toBe(100);
       expect(requestParams.access_token).toBe("TOKEN");
     });
 
     it("publishes nothing when the summit has no marketing site url to build overflow_url on", async () => {
-      store = mockStore({
-        currentSummitState: {
-          currentSummit: { id: summitId, marketing_site_url: null }
-        },
-        signageState: { locationId }
-      });
       arrangeOverflowEvents([overflowEvent]);
 
-      await store.dispatch(publishOverflowState());
+      const result = await store.dispatch(
+        publishOverflowState(
+          { id: summitId, marketing_site_url: null },
+          locationId
+        )
+      );
 
+      expect(result).toBe(true);
       expect(getRequest).not.toHaveBeenCalled();
       expect(publishToAblyChannel).not.toHaveBeenCalled();
     });
@@ -132,7 +156,7 @@ describe("signage overflow re-sync", () => {
         { id: 10139, occupancy: "OVERFLOW", overflow_stream_key: null }
       ]);
 
-      await store.dispatch(publishOverflowState());
+      await store.dispatch(publishOverflowState(summit, locationId));
 
       expect(publishToAblyChannel).toHaveBeenCalledTimes(1);
       expect(publishToAblyChannel.mock.calls[0][2].entity_id).toBe(10140);
@@ -141,14 +165,39 @@ describe("signage overflow re-sync", () => {
     it("publishes nothing when the location has no overflow events", async () => {
       arrangeOverflowEvents([]);
 
-      await store.dispatch(publishOverflowState());
+      const result = await store.dispatch(
+        publishOverflowState(summit, locationId)
+      );
 
+      expect(result).toBe(true);
       expect(publishToAblyChannel).not.toHaveBeenCalled();
+    });
+
+    it("reports failure instead of rejecting when the events request fails", async () => {
+      arrangeOverflowRequestFailure();
+
+      const result = await store.dispatch(
+        publishOverflowState(summit, locationId)
+      );
+
+      expect(result).toBe(false);
+      expect(publishToAblyChannel).not.toHaveBeenCalled();
+    });
+
+    it("reports failure when a publish fails", async () => {
+      arrangeOverflowEvents([overflowEvent]);
+      publishToAblyChannel.mockResolvedValue(false);
+
+      const result = await store.dispatch(
+        publishOverflowState(summit, locationId)
+      );
+
+      expect(result).toBe(false);
     });
   });
 
   describe("publishDate", () => {
-    it("sends JUMP_TIME to the sign and then re-sends the overflow state", async () => {
+    it("sends JUMP_TIME to the sign, then re-sends the overflow state, then shows success", async () => {
       arrangeOverflowEvents([overflowEvent]);
 
       await store.dispatch(publishDate(1791907200, "signage.date_published"));
@@ -162,6 +211,18 @@ describe("signage overflow re-sync", () => {
       expect(publishToAblyChannel.mock.calls[1][0]).toBe(
         `${summitId}:OVERFLOW:*`
       );
+      expect(showSuccessMessage).toHaveBeenCalledWith("signage.date_published");
+    });
+
+    it("does not reject nor show success over the error when the overflow re-sync fails", async () => {
+      arrangeOverflowRequestFailure();
+
+      await expect(
+        store.dispatch(publishDate(1791907200, "signage.date_published"))
+      ).resolves.toBeUndefined();
+
+      expect(showSuccessMessage).not.toHaveBeenCalled();
+      expect(store.getActions().map((a) => a.type)).toContain("STOP_LOADING");
     });
   });
 
@@ -192,10 +253,28 @@ describe("signage overflow re-sync", () => {
 
       jest.advanceTimersByTime(1);
       await flushPromises();
-      expect(publishToAblyChannel).toHaveBeenCalledTimes(2);
-      expect(publishToAblyChannel.mock.calls[1][0]).toBe(
-        `${summitId}:OVERFLOW:*`
-      );
+      expect(overflowPublishes()).toHaveLength(1);
+    });
+
+    it("re-syncs the location that was reloaded even if the selection changes during the delay", async () => {
+      let state = {
+        currentSummitState: { currentSummit: summit },
+        signageState: { locationId }
+      };
+      store = mockStore(() => state);
+      arrangeOverflowEvents([overflowEvent]);
+
+      await store.dispatch(publishReload());
+
+      state = {
+        ...state,
+        signageState: { locationId: otherLocationId }
+      };
+
+      jest.advanceTimersByTime(RELOAD_OVERFLOW_RESYNC_DELAY_MS);
+      await flushPromises();
+
+      expect(requestParams["filter[]"]).toContain(`location_id==${locationId}`);
     });
   });
 });
