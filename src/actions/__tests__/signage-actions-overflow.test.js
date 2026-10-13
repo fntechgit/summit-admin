@@ -39,6 +39,8 @@ const marketingSiteUrl = "https://2026ocpglobal.fnvirtual.app";
 const streamKey =
   "8a529477ec634e35c810f073ade6039a678bb41eae872d22cac2ea8870d38684";
 const summit = { id: summitId, marketing_site_url: marketingSiteUrl };
+// epoch the sign's clock is at
+const fromDate = 1791907200;
 
 const overflowEvent = {
   id: 10140,
@@ -96,7 +98,7 @@ describe("signage overflow re-sync", () => {
       arrangeOverflowEvents([overflowEvent]);
 
       const result = await store.dispatch(
-        publishOverflowState(summit, locationId)
+        publishOverflowState(summit, locationId, fromDate)
       );
 
       expect(result).toBe(true);
@@ -122,14 +124,15 @@ describe("signage overflow re-sync", () => {
       });
     });
 
-    it("filters by location and occupancy, both allowed filters on the summit's published events", async () => {
+    it("filters by location, occupancy and sessions not ended at the sign's time", async () => {
       arrangeOverflowEvents([]);
 
-      await store.dispatch(publishOverflowState(summit, locationId));
+      await store.dispatch(publishOverflowState(summit, locationId, fromDate));
 
       expect(requestParams["filter[]"]).toEqual([
         `location_id==${locationId}`,
-        "occupancy==OVERFLOW"
+        "occupancy==OVERFLOW",
+        `end_date>=${fromDate}`
       ]);
       expect(requestParams.per_page).toBe(100);
       expect(requestParams.access_token).toBe("TOKEN");
@@ -141,7 +144,8 @@ describe("signage overflow re-sync", () => {
       const result = await store.dispatch(
         publishOverflowState(
           { id: summitId, marketing_site_url: null },
-          locationId
+          locationId,
+          fromDate
         )
       );
 
@@ -156,7 +160,7 @@ describe("signage overflow re-sync", () => {
         { id: 10139, occupancy: "OVERFLOW", overflow_stream_key: null }
       ]);
 
-      await store.dispatch(publishOverflowState(summit, locationId));
+      await store.dispatch(publishOverflowState(summit, locationId, fromDate));
 
       expect(publishToAblyChannel).toHaveBeenCalledTimes(1);
       expect(publishToAblyChannel.mock.calls[0][2].entity_id).toBe(10140);
@@ -166,7 +170,7 @@ describe("signage overflow re-sync", () => {
       arrangeOverflowEvents([]);
 
       const result = await store.dispatch(
-        publishOverflowState(summit, locationId)
+        publishOverflowState(summit, locationId, fromDate)
       );
 
       expect(result).toBe(true);
@@ -177,7 +181,7 @@ describe("signage overflow re-sync", () => {
       arrangeOverflowRequestFailure();
 
       const result = await store.dispatch(
-        publishOverflowState(summit, locationId)
+        publishOverflowState(summit, locationId, fromDate)
       );
 
       expect(result).toBe(false);
@@ -189,7 +193,7 @@ describe("signage overflow re-sync", () => {
       publishToAblyChannel.mockResolvedValue(false);
 
       const result = await store.dispatch(
-        publishOverflowState(summit, locationId)
+        publishOverflowState(summit, locationId, fromDate)
       );
 
       expect(result).toBe(false);
@@ -200,17 +204,19 @@ describe("signage overflow re-sync", () => {
     it("sends JUMP_TIME to the sign, then re-sends the overflow state, then shows success", async () => {
       arrangeOverflowEvents([overflowEvent]);
 
-      await store.dispatch(publishDate(1791907200, "signage.date_published"));
+      await store.dispatch(publishDate(fromDate, "signage.date_published"));
 
       expect(publishToAblyChannel).toHaveBeenCalledTimes(2);
       expect(publishToAblyChannel.mock.calls[0]).toEqual([
         `SIGNAGE:${summitId}:${locationId}`,
         "JUMP_TIME",
-        { timestamp: 1791907200 }
+        { timestamp: fromDate }
       ]);
       expect(publishToAblyChannel.mock.calls[1][0]).toBe(
         `${summitId}:OVERFLOW:*`
       );
+      // only sessions not ended at the time the sign jumped to
+      expect(requestParams["filter[]"]).toContain(`end_date>=${fromDate}`);
       expect(showSuccessMessage).toHaveBeenCalledWith("signage.date_published");
     });
 
@@ -218,7 +224,7 @@ describe("signage overflow re-sync", () => {
       arrangeOverflowRequestFailure();
 
       await expect(
-        store.dispatch(publishDate(1791907200, "signage.date_published"))
+        store.dispatch(publishDate(fromDate, "signage.date_published"))
       ).resolves.toBeUndefined();
 
       expect(showSuccessMessage).not.toHaveBeenCalled();
@@ -275,6 +281,20 @@ describe("signage overflow re-sync", () => {
       await flushPromises();
 
       expect(requestParams["filter[]"]).toContain(`location_id==${locationId}`);
+    });
+
+    it("re-syncs sessions not ended at the real time the timer fires, since a reload drops the sign's jump offset", async () => {
+      const clickedAtMs = 1791900000000;
+      jest.setSystemTime(clickedAtMs);
+      arrangeOverflowEvents([overflowEvent]);
+
+      await store.dispatch(publishReload());
+
+      jest.advanceTimersByTime(RELOAD_OVERFLOW_RESYNC_DELAY_MS);
+      await flushPromises();
+
+      const firedAt = (clickedAtMs + RELOAD_OVERFLOW_RESYNC_DELAY_MS) / 1000;
+      expect(requestParams["filter[]"]).toContain(`end_date>=${firedAt}`);
     });
   });
 });
