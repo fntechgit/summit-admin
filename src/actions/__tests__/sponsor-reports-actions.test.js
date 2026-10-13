@@ -1619,5 +1619,12 @@ describe("sponsor-reports-actions", () => {
         "unpaid-charges-summit-42-paying-by-card-search-acme-inc.csv"
       );
     });
+
+    it("keeps accented and non-Latin search terms in the filename", () => {
+      exportWith("Été 東京", { adminOnly: false, stage: "" });
+      expect(downloadFileByContent.mock.calls[0][0]).toBe(
+        "unpaid-charges-summit-42-search-été-東京.csv"
+      );
+    });
   });
 });

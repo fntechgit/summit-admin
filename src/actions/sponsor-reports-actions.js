@@ -812,7 +812,7 @@ export const exportUnpaidChargesCsv = (csvRows) => (dispatch, getState) => {
   const { term, filters } = getState().sponsorReportsUnpaidChargesState;
   const searchSlug = (term || "")
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
     .replace(/^-+|-+$/g, "");
   const filename = [
     `unpaid-charges-summit-${currentSummit.id}`,

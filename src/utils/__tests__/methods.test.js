@@ -236,4 +236,12 @@ describe("toCSV", () => {
       ])
     ).toBe("\"Sponsor\",\"Total\"\r\n\"Acme, \"\"The\"\" Inc\",\"12\"\r\n\"\",\"\"\r\n");
   });
+
+  it("keeps text that starts like a formula literal, and leaves numbers alone", () => {
+    expect(
+      toCSV([["=1+1", "+cmd", "-2", "@SUM(A1)", "\tx", "\rx", "a=b", -5]])
+    ).toBe(
+      "\"'=1+1\",\"'+cmd\",\"'-2\",\"'@SUM(A1)\",\"'\tx\",\"'\rx\",\"a=b\",\"-5\"\r\n"
+    );
+  });
 });
