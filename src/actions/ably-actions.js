@@ -1,8 +1,15 @@
 import Ably from "ably";
 import Swal from "sweetalert2";
 
-const AblyApiKey = process.env.SIGNAGE_ABLY_API_KEY;
-const realtimeAbly = AblyApiKey ? new Ably.Realtime(AblyApiKey) : null;
+const createAblyClient = (apiKey) =>
+  apiKey ? new Ably.Realtime(apiKey) : null;
+
+const realtimeAbly = createAblyClient(process.env.SIGNAGE_ABLY_API_KEY);
+// the signs listen to {summit}:OVERFLOW:* on the schedule updates app (where pub-api
+// publishes), not on the signage app: channels of different Ably apps never meet
+const scheduleUpdatesAbly = createAblyClient(
+  process.env.ABLY_SCHEDULE_UPDATES_SUBSCRIBER_API_KEY
+);
 
 export const subscribeToAblyChannel = (channel, callback) => {
   if (!realtimeAbly) {
@@ -19,14 +26,14 @@ export const subscribeToAblyChannel = (channel, callback) => {
   return true;
 };
 
-export const publishToAblyChannel = async (channel, key, message) => {
-  if (!realtimeAbly) {
+const publish = async (client, channel, key, message) => {
+  if (!client) {
     Swal.fire("Publish failed", "No Ably API key found", "warning");
     return false;
   }
 
   // publish only: no implicit subscribe/attach, so the key needs just publish capability
-  const ablyChannel = realtimeAbly.channels.get(channel);
+  const ablyChannel = client.channels.get(channel);
 
   try {
     // Ably.Realtime (1.2) is the callback API: publish returns undefined, so the
@@ -44,3 +51,9 @@ export const publishToAblyChannel = async (channel, key, message) => {
 
   return true;
 };
+
+export const publishToAblyChannel = (channel, key, message) =>
+  publish(realtimeAbly, channel, key, message);
+
+export const publishToScheduleUpdatesChannel = (channel, key, message) =>
+  publish(scheduleUpdatesAbly, channel, key, message);

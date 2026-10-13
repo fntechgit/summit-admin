@@ -6,22 +6,35 @@ jest.mock("sweetalert2", () => ({
 }));
 
 const mockPublish = jest.fn();
+// api key of the client each publish went through
+const mockPublishedWithKey = [];
 
 jest.mock("ably", () => ({
   __esModule: true,
   default: {
     // callback API, as ably 1.2's Ably.Realtime: publish(name, data, callback) returns undefined
-    Realtime: jest.fn(() => ({
-      channels: { get: jest.fn(() => ({ publish: mockPublish })) }
+    Realtime: jest.fn((apiKey) => ({
+      channels: {
+        get: jest.fn(() => ({
+          publish: (...args) => {
+            mockPublishedWithKey.push(apiKey);
+            return mockPublish(...args);
+          }
+        }))
+      }
     }))
   }
 }));
 
+const signageKey = "signage.key:secret";
+const scheduleUpdatesKey = "schedule.key:secret";
+
 const loadAblyActions = () => {
   let actions;
   jest.isolateModules(() => {
-    // the client is created at module load, from this env var
-    process.env.SIGNAGE_ABLY_API_KEY = "app.key:secret";
+    // the clients are created at module load, from these env vars
+    process.env.SIGNAGE_ABLY_API_KEY = signageKey;
+    process.env.ABLY_SCHEDULE_UPDATES_SUBSCRIBER_API_KEY = scheduleUpdatesKey;
     // eslint-disable-next-line global-require
     actions = require("../ably-actions");
   });
@@ -30,13 +43,18 @@ const loadAblyActions = () => {
 
 describe("publishToAblyChannel", () => {
   const originalKey = process.env.SIGNAGE_ABLY_API_KEY;
+  const originalScheduleUpdatesKey =
+    process.env.ABLY_SCHEDULE_UPDATES_SUBSCRIBER_API_KEY;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPublishedWithKey.length = 0;
   });
 
   afterAll(() => {
     process.env.SIGNAGE_ABLY_API_KEY = originalKey;
+    process.env.ABLY_SCHEDULE_UPDATES_SUBSCRIBER_API_KEY =
+      originalScheduleUpdatesKey;
   });
 
   it("resolves true only once Ably acknowledges the publish", async () => {
@@ -65,6 +83,18 @@ describe("publishToAblyChannel", () => {
       expect.any(Function)
     );
     expect(Swal.fire).not.toHaveBeenCalled();
+    expect(mockPublishedWithKey).toEqual([signageKey]);
+  });
+
+  it("publishes schedule updates channels with the schedule updates app key, where the signs listen to OVERFLOW", async () => {
+    mockPublish.mockImplementation((name, data, callback) => callback(null));
+    const { publishToScheduleUpdatesChannel } = loadAblyActions();
+
+    await expect(
+      publishToScheduleUpdatesChannel("73:OVERFLOW:*", "EVENT", {})
+    ).resolves.toBe(true);
+
+    expect(mockPublishedWithKey).toEqual([scheduleUpdatesKey]);
   });
 
   it("reports the Ably error naming the channel and resolves false", async () => {

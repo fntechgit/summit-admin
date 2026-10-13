@@ -5,7 +5,10 @@ import {
   showSuccessMessage
 } from "openstack-uicore-foundation/lib/utils/actions";
 import * as methods from "../../utils/methods";
-import { publishToAblyChannel } from "../ably-actions";
+import {
+  publishToAblyChannel,
+  publishToScheduleUpdatesChannel
+} from "../ably-actions";
 import {
   publishDate,
   publishOverflowState,
@@ -27,7 +30,8 @@ jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
 
 jest.mock("../ably-actions", () => ({
   __esModule: true,
-  publishToAblyChannel: jest.fn()
+  publishToAblyChannel: jest.fn(),
+  publishToScheduleUpdatesChannel: jest.fn()
 }));
 
 const mockStore = configureStore([thunk]);
@@ -56,7 +60,7 @@ const flushPromises = () =>
   });
 
 const overflowPublishes = () =>
-  publishToAblyChannel.mock.calls.filter(
+  publishToScheduleUpdatesChannel.mock.calls.filter(
     ([channel]) => channel === `${summitId}:OVERFLOW:*`
   );
 
@@ -73,6 +77,7 @@ describe("signage overflow re-sync", () => {
     });
     jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
     publishToAblyChannel.mockResolvedValue(true);
+    publishToScheduleUpdatesChannel.mockResolvedValue(true);
   });
 
   const arrangeOverflowEvents = (events) => {
@@ -108,8 +113,9 @@ describe("signage overflow re-sync", () => {
         `https://api.test/api/v1/summits/${summitId}/events/published`
       );
 
-      expect(publishToAblyChannel).toHaveBeenCalledTimes(1);
-      const [channel, name, payload] = publishToAblyChannel.mock.calls[0];
+      expect(publishToScheduleUpdatesChannel).toHaveBeenCalledTimes(1);
+      const [channel, name, payload] =
+        publishToScheduleUpdatesChannel.mock.calls[0];
       expect(channel).toBe(`${summitId}:OVERFLOW:*`);
       expect(name).toBe("EVENT");
       expect(payload).toEqual({
@@ -151,7 +157,7 @@ describe("signage overflow re-sync", () => {
 
       expect(result).toBe(true);
       expect(getRequest).not.toHaveBeenCalled();
-      expect(publishToAblyChannel).not.toHaveBeenCalled();
+      expect(publishToScheduleUpdatesChannel).not.toHaveBeenCalled();
     });
 
     it("skips events that have no overflow stream key", async () => {
@@ -162,8 +168,10 @@ describe("signage overflow re-sync", () => {
 
       await store.dispatch(publishOverflowState(summit, locationId, fromDate));
 
-      expect(publishToAblyChannel).toHaveBeenCalledTimes(1);
-      expect(publishToAblyChannel.mock.calls[0][2].entity_id).toBe(10140);
+      expect(publishToScheduleUpdatesChannel).toHaveBeenCalledTimes(1);
+      expect(publishToScheduleUpdatesChannel.mock.calls[0][2].entity_id).toBe(
+        10140
+      );
     });
 
     it("publishes nothing when the location has no overflow events", async () => {
@@ -174,7 +182,7 @@ describe("signage overflow re-sync", () => {
       );
 
       expect(result).toBe(true);
-      expect(publishToAblyChannel).not.toHaveBeenCalled();
+      expect(publishToScheduleUpdatesChannel).not.toHaveBeenCalled();
     });
 
     it("reports failure instead of rejecting when the events request fails", async () => {
@@ -185,12 +193,12 @@ describe("signage overflow re-sync", () => {
       );
 
       expect(result).toBe(false);
-      expect(publishToAblyChannel).not.toHaveBeenCalled();
+      expect(publishToScheduleUpdatesChannel).not.toHaveBeenCalled();
     });
 
     it("reports failure when a publish fails", async () => {
       arrangeOverflowEvents([overflowEvent]);
-      publishToAblyChannel.mockResolvedValue(false);
+      publishToScheduleUpdatesChannel.mockResolvedValue(false);
 
       const result = await store.dispatch(
         publishOverflowState(summit, locationId, fromDate)
@@ -206,15 +214,14 @@ describe("signage overflow re-sync", () => {
 
       await store.dispatch(publishDate(fromDate, "signage.date_published"));
 
-      expect(publishToAblyChannel).toHaveBeenCalledTimes(2);
+      expect(publishToAblyChannel).toHaveBeenCalledTimes(1);
       expect(publishToAblyChannel.mock.calls[0]).toEqual([
         `SIGNAGE:${summitId}:${locationId}`,
         "JUMP_TIME",
         { timestamp: fromDate }
       ]);
-      expect(publishToAblyChannel.mock.calls[1][0]).toBe(
-        `${summitId}:OVERFLOW:*`
-      );
+      // the signs listen to OVERFLOW on the schedule updates app
+      expect(overflowPublishes()).toHaveLength(1);
       // only sessions not ended at the time the sign jumped to
       expect(requestParams["filter[]"]).toContain(`end_date>=${fromDate}`);
       expect(showSuccessMessage).toHaveBeenCalledWith("signage.date_published");
@@ -255,11 +262,12 @@ describe("signage overflow re-sync", () => {
 
       jest.advanceTimersByTime(RELOAD_OVERFLOW_RESYNC_DELAY_MS - 1);
       await flushPromises();
-      expect(publishToAblyChannel).toHaveBeenCalledTimes(1);
+      expect(overflowPublishes()).toHaveLength(0);
 
       jest.advanceTimersByTime(1);
       await flushPromises();
       expect(overflowPublishes()).toHaveLength(1);
+      expect(publishToAblyChannel).toHaveBeenCalledTimes(1);
     });
 
     it("re-syncs the location that was reloaded even if the selection changes during the delay", async () => {

@@ -27,7 +27,10 @@ import {
 import T from "i18n-react";
 import moment from "moment-timezone";
 import { getAccessTokenSafely } from "../utils/methods";
-import { publishToAblyChannel } from "./ably-actions";
+import {
+  publishToAblyChannel,
+  publishToScheduleUpdatesChannel
+} from "./ably-actions";
 
 export const REQUEST_SIGN = "REQUEST_SIGN";
 export const RECEIVE_SIGN = "RECEIVE_SIGN";
@@ -246,7 +249,7 @@ export const publishOverflowState =
           (response?.data || [])
             .filter((event) => event.overflow_stream_key)
             .map((event) =>
-              publishToAblyChannel(channel, "EVENT", {
+              publishToScheduleUpdatesChannel(channel, "EVENT", {
                 summit_id: summit.id,
                 entity_type: OVERFLOW_ENTITY_TYPE,
                 entity_id: event.id,
