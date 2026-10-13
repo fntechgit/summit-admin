@@ -776,6 +776,103 @@ class EventForm extends React.Component {
     );
   }
 
+  // Says why the reopen controls are hidden, so support staff aren't left guessing.
+  // Walks isReopenSectionVisible's conditions in the same order. Only the
+  // open-window case offers the speaker link: the speaker can already edit there.
+  getReopenUnavailableReason() {
+    const { selectionPlansOpts, currentSummit } = this.props;
+    const { entity } = this.state;
+    if (!this.isPresentation()) {
+      return {
+        message: T.translate("edit_event.reopen_unavailable_unsaved")
+      };
+    }
+    const plan =
+      entity.selection_plan_id > 0
+        ? selectionPlansOpts?.find((sp) => sp.id === entity.selection_plan_id)
+        : null;
+    if (!plan) {
+      return {
+        message: T.translate("edit_event.reopen_unavailable_no_plan")
+      };
+    }
+    if (plan.is_enabled === false) {
+      return {
+        message: T.translate("edit_event.reopen_unavailable_plan_disabled", {
+          plan: plan.name
+        })
+      };
+    }
+    if (!plan.submission_end_date) {
+      return {
+        message: T.translate("edit_event.reopen_unavailable_no_end_date", {
+          plan: plan.name
+        })
+      };
+    }
+    const deadline = epochToMomentTimeZone(
+      plan.submission_end_date,
+      currentSummit.time_zone_id
+    ).format(REOPEN_DEADLINE_FORMAT);
+    // The speaker portal only allows edits between begin and end, so a plan that
+    // hasn't opened yet must not claim speakers can already edit.
+    if (
+      plan.submission_begin_date &&
+      moment().unix() < plan.submission_begin_date
+    ) {
+      return {
+        message: T.translate("edit_event.reopen_unavailable_not_started", {
+          plan: plan.name,
+          begin: epochToMomentTimeZone(
+            plan.submission_begin_date,
+            currentSummit.time_zone_id
+          ).format(REOPEN_DEADLINE_FORMAT),
+          deadline
+        })
+      };
+    }
+    return {
+      message: T.translate("edit_event.reopen_unavailable_window_open", {
+        plan: plan.name,
+        deadline
+      }),
+      showSpeakerLink: true
+    };
+  }
+
+  renderReopenUnavailable(speakerDeepLink) {
+    const { message, showSpeakerLink } = this.getReopenUnavailableReason();
+    return (
+      <div className="row form-group">
+        <div
+          className="col-md-12"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            flexWrap: "wrap"
+          }}
+        >
+          <span>{message}</span>
+          {showSpeakerLink && this.renderSpeakerLink(speakerDeepLink)}
+        </div>
+      </div>
+    );
+  }
+
+  renderSpeakerLink(speakerDeepLink) {
+    if (!window.CFP_APP_BASE_URL) return null;
+    return (
+      <span>
+        <label>{T.translate("edit_event.reopen_deep_link_label")}</label>
+        &nbsp;
+        <CopyClipboard text={speakerDeepLink} />
+        &nbsp;
+        {speakerDeepLink}
+      </span>
+    );
+  }
+
   isSubmissionReopened() {
     const deadline = this.getReopenDeadline();
     return !!deadline?.isAfter(moment());
@@ -2038,7 +2135,7 @@ class EventForm extends React.Component {
               data={entity.materials}
               columns={material_columns}
             />
-            {this.isReopenSectionVisible() && (
+            {this.isReopenSectionVisible() ? (
               <div className="row form-group">
                 <div className="col-md-12">
                   {!this.isSubmissionReopened() && (
@@ -2136,17 +2233,7 @@ class EventForm extends React.Component {
                       >
                         {T.translate("edit_event.close_submission")}
                       </button>
-                      {window.CFP_APP_BASE_URL && (
-                        <span>
-                          <label>
-                            {T.translate("edit_event.reopen_deep_link_label")}
-                          </label>
-                          &nbsp;
-                          <CopyClipboard text={speakerDeepLink} />
-                          &nbsp;
-                          {speakerDeepLink}
-                        </span>
-                      )}
+                      {this.renderSpeakerLink(speakerDeepLink)}
                       <ReopenNotifyPanel
                         rows={recipientRows}
                         checked={notifyChecked}
@@ -2158,6 +2245,8 @@ class EventForm extends React.Component {
                   )}
                 </div>
               </div>
+            ) : (
+              this.renderReopenUnavailable(speakerDeepLink)
             )}
           </Panel>
         )}

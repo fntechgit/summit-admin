@@ -124,6 +124,9 @@ describe("EventForm", () => {
     expect(
       screen.getByRole("button", { name: "edit_event.reopen_submission" })
     ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/^edit_event\.reopen_unavailable_/)
+    ).not.toBeInTheDocument();
   });
 
   it("leaves the Materials panel title plain when there is no grant", () => {
@@ -148,6 +151,19 @@ describe("EventForm", () => {
     expect(
       screen.queryByRole("button", { name: "edit_event.reopen_submission" })
     ).not.toBeInTheDocument();
+    expect(
+      screen.getByText("edit_event.reopen_unavailable_no_plan")
+    ).toBeInTheDocument();
+  });
+
+  // A presentation type picked on a saved non-presentation activity shows the
+  // Materials panel at once, but reopen needs the saved Presentation record.
+  it("asks for a save when the type was changed to a presentation but not saved", () => {
+    renderEventForm({ entity: { ...baseEntity, class_name: "SummitEvent" } });
+
+    expect(
+      screen.getByText("edit_event.reopen_unavailable_unsaved")
+    ).toBeInTheDocument();
   });
 
   // The API only reopens a window that has actually ended on an enabled plan. Keying
@@ -169,6 +185,69 @@ describe("EventForm", () => {
     expect(
       screen.queryByRole("button", { name: "edit_event.reopen_submission" })
     ).not.toBeInTheDocument();
+    expect(
+      screen.getByText("edit_event.reopen_unavailable_window_open")
+    ).toBeInTheDocument();
+  });
+
+  describe("with a speaker portal configured", () => {
+    beforeEach(() => {
+      window.CFP_APP_BASE_URL = "https://cfp.example";
+    });
+
+    afterEach(() => {
+      delete window.CFP_APP_BASE_URL;
+    });
+
+    // The speaker can already edit while the window is open, so the link is the
+    // useful next step; it is not offered for the other reasons.
+    it("offers the speaker link while the plan's window is still open", () => {
+      renderEventForm({
+        entity: baseEntity,
+        selectionPlansOpts: [
+          planWith({ submission_end_date: moment().add(7, "days").unix() })
+        ]
+      });
+
+      expect(
+        screen.getByText("edit_event.reopen_deep_link_label")
+      ).toBeInTheDocument();
+    });
+
+    // Before the plan opens the portal refuses edits, so neither the "can already
+    // edit" message nor the link applies.
+    it("explains a plan that hasn't opened yet, without the speaker link", () => {
+      renderEventForm({
+        entity: baseEntity,
+        selectionPlansOpts: [
+          planWith({
+            submission_begin_date: moment().add(2, "days").unix(),
+            submission_end_date: moment().add(7, "days").unix()
+          })
+        ]
+      });
+
+      expect(
+        screen.getByText("edit_event.reopen_unavailable_not_started")
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText("edit_event.reopen_unavailable_window_open")
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("edit_event.reopen_deep_link_label")
+      ).not.toBeInTheDocument();
+    });
+
+    it("does not offer the speaker link on a disabled plan", () => {
+      renderEventForm({
+        entity: baseEntity,
+        selectionPlansOpts: [planWith({ is_enabled: false })]
+      });
+
+      expect(
+        screen.queryByText("edit_event.reopen_deep_link_label")
+      ).not.toBeInTheDocument();
+    });
   });
 
   it("does not offer the reopen control on a disabled plan", () => {
@@ -180,6 +259,20 @@ describe("EventForm", () => {
     expect(
       screen.queryByRole("button", { name: "edit_event.reopen_submission" })
     ).not.toBeInTheDocument();
+    expect(
+      screen.getByText("edit_event.reopen_unavailable_plan_disabled")
+    ).toBeInTheDocument();
+  });
+
+  it("explains a plan with no submission end date", () => {
+    renderEventForm({
+      entity: baseEntity,
+      selectionPlansOpts: [planWith({ submission_end_date: null })]
+    });
+
+    expect(
+      screen.getByText("edit_event.reopen_unavailable_no_end_date")
+    ).toBeInTheDocument();
   });
 
   // The ops case smarcet raised on the call-for-presentations PR: a grant is issued,
