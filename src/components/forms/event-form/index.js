@@ -780,9 +780,17 @@ class EventForm extends React.Component {
   // Walks isReopenSectionVisible's conditions in the same order. Only the
   // open-window case offers the speaker link: the speaker can already edit there.
   getReopenUnavailableReason() {
-    const { selectionPlansOpts, currentSummit } = this.props;
+    const {
+      selectionPlansOpts,
+      currentSummit,
+      entity: savedEntity
+    } = this.props;
     const { entity } = this.state;
-    if (!this.isPresentation()) {
+    // A plan picked but not saved yet would describe, and link to, a plan the
+    // talk isn't in, so ask for a save rather than judge the unsaved choice.
+    const planUnsaved =
+      (entity.selection_plan_id || 0) !== (savedEntity.selection_plan_id || 0);
+    if (!this.isPresentation() || planUnsaved) {
       return {
         message: T.translate("edit_event.reopen_unavailable_unsaved")
       };

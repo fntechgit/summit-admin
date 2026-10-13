@@ -238,6 +238,43 @@ describe("EventForm", () => {
       ).not.toBeInTheDocument();
     });
 
+    // Picking another plan only changes form state until save; judging (or
+    // linking to) that unsaved plan would point at a plan the talk isn't in.
+    it("asks for a save, without the speaker link, after an unsaved plan change", async () => {
+      // The plan change runs the form's scroll-to-error; jsdom has no scrollIntoView.
+      Element.prototype.scrollIntoView = jest.fn();
+      // Track 36473 is in track group 69, so both plans appear in the dropdown.
+      // Own errors object: the plan handler writes into it.
+      renderEventForm({
+        errors: {},
+        entity: { ...baseEntity, track_id: 36473 },
+        selectionPlansOpts: [
+          planWith({ name: "Saved Plan", track_groups: [69] }),
+          planWith({
+            id: 100,
+            name: "Other Plan",
+            track_groups: [69],
+            submission_end_date: moment().add(7, "days").unix()
+          })
+        ]
+      });
+
+      fireEvent.keyDown(document.querySelector("#selection_plan_id input"), {
+        key: "ArrowDown"
+      });
+      fireEvent.click(await screen.findByText("Other Plan"));
+
+      await waitFor(() =>
+        expect(
+          screen.getByText("edit_event.reopen_unavailable_unsaved")
+        ).toBeInTheDocument()
+      );
+      expect(
+        screen.queryByText("edit_event.reopen_deep_link_label")
+      ).not.toBeInTheDocument();
+      delete Element.prototype.scrollIntoView;
+    });
+
     it("does not offer the speaker link on a disabled plan", () => {
       renderEventForm({
         entity: baseEntity,
