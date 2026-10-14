@@ -11,81 +11,83 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
 import TicketTypeForm from "../../components/forms/ticket-type-form";
-import { getSummitById } from "../../actions/summit-actions";
 import {
   getTicketType,
   resetTicketTypeForm,
   saveTicketType
 } from "../../actions/ticket-actions";
 import { getBadgeTypes } from "../../actions/badge-actions";
-import AddNewButton from "../../components/buttons/add-new-button";
+import AddNewButtonMui from "../../components/buttons/add-new-button-mui";
 
-class EditTicketTypePage extends React.Component {
-  constructor(props) {
-    const { currentSummit, match } = props;
-    const ticketTypeId = match.params.ticket_type_id;
-    super(props);
+const EditTicketTypePage = ({
+  currentSummit,
+  entity,
+  errors,
+  match,
+  getTicketType,
+  resetTicketTypeForm,
+  saveTicketType,
+  getBadgeTypes
+}) => {
+  const ticketTypeId = match.params.ticket_type_id;
+  const [isSaving, setIsSaving] = useState(false);
 
+  useEffect(() => {
     if (currentSummit && !currentSummit.badge_types) {
-      props.getBadgeTypes();
+      getBadgeTypes();
     }
+  }, []);
 
+  useEffect(() => {
     if (!ticketTypeId) {
-      props.resetTicketTypeForm();
+      resetTicketTypeForm();
     } else {
-      props.getTicketType(ticketTypeId);
+      getTicketType(ticketTypeId);
     }
-  }
+  }, [ticketTypeId]);
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const oldId = prevProps.match.params.ticket_type_id;
-    const newId = this.props.match.params.ticket_type_id;
+  const onSave = (values) => {
+    if (isSaving) return Promise.resolve();
+    setIsSaving(true);
+    return saveTicketType(values)
+      .catch(() => {})
+      .finally(() => setIsSaving(false));
+  };
 
-    if (newId !== oldId) {
-      if (!newId) {
-        this.props.resetTicketTypeForm();
-      } else {
-        this.props.getTicketType(newId);
-      }
-    }
-  }
+  const title = entity.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
+  const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
-  render() {
-    const { currentSummit, entity, errors, match } = this.props;
-    const title = entity.id
-      ? T.translate("general.edit")
-      : T.translate("general.add");
-    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
+  // set entity currency
+  entity.currency =
+    entity.currency || currentSummit.default_ticket_type_currency;
 
-    // set entity currency
-    entity.currency =
-      entity.currency || currentSummit.default_ticket_type_currency;
-
-    return (
-      <div className="container">
-        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-        <h3>
-          {title} {T.translate("edit_ticket_type.ticket_type")}
-          <AddNewButton entity={entity} />
-        </h3>
-        <hr />
-        {currentSummit && (
-          <TicketTypeForm
-            entity={entity}
-            errors={errors}
-            currentSummit={currentSummit}
-            onSubmit={this.props.saveTicketType}
-          />
-        )}
-      </div>
-    );
-  }
-}
+  return (
+    <div className="container">
+      <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+      <h3>
+        {title} {T.translate("edit_ticket_type.ticket_type")}
+        <AddNewButtonMui entity={entity} />
+      </h3>
+      <hr />
+      {currentSummit && (
+        <TicketTypeForm
+          entity={entity}
+          errors={errors}
+          currentSummit={currentSummit}
+          isSaving={isSaving}
+          onSubmit={onSave}
+        />
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({ currentSummitState, currentTicketTypeState }) => ({
   currentSummit: currentSummitState.currentSummit,
@@ -93,7 +95,6 @@ const mapStateToProps = ({ currentSummitState, currentTicketTypeState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  getSummitById,
   getTicketType,
   resetTicketTypeForm,
   saveTicketType,
