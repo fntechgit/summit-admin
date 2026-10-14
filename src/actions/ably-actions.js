@@ -29,8 +29,8 @@ const mintAblyToken = (appName, dispatch) => async (tokenParams, callback) => {
     )({ access_token: accessToken })(dispatch);
     callback(null, response);
   } catch (e) {
-    // uicore rejects with { err, res }; a 401/403 statusCode makes Ably fail the
-    // connection instead of retrying
+    // uicore rejects with { err, res }; a 403 statusCode makes Ably fail the
+    // connection instead of retrying, any other status is retried
     const status = e?.res?.status ?? e?.err?.status;
     callback(
       {
