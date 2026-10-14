@@ -15,7 +15,7 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Pagination } from "react-bootstrap";
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
 import {
   deleteOverflowOccupancy,
@@ -29,7 +29,16 @@ import OccupancyTable from "../../components/tables/room-occupancy-table/Occupan
 import FragmentParser from "../../utils/fragmen-parser";
 
 import "../../styles/room-occupancy-page.less";
-import { ROOM_OCCUPANCY_OPTIONS } from "../../utils/constants";
+import {
+  DEFAULT_ORDER_DIR,
+  ROOM_OCCUPANCY_OPTIONS
+} from "../../utils/constants";
+
+// table column key -> API order field
+const COLUMN_TO_ORDER = { name: "last_name", room: "location" };
+const ORDER_TO_COLUMN = Object.fromEntries(
+  Object.entries(COLUMN_TO_ORDER).map(([column, order]) => [order, column])
+);
 
 const RoomOccupancyPage = ({
   currentSummit,
@@ -82,7 +91,10 @@ const RoomOccupancyPage = ({
   };
 
   const handleSort = (index, key, dir) => {
-    const keyTranslated = key === "name" ? "last_name" : key;
+    // sorting by room is meaningless when a single room is selected
+    if (key === "room" && roomId) return;
+
+    const keyTranslated = COLUMN_TO_ORDER[key] || key;
     getEventsForOccupancy(
       term,
       roomId,
@@ -112,14 +124,17 @@ const RoomOccupancyPage = ({
     fragmentParser.setParam("room", newRoomId);
     window.location.hash = fragmentParser.serialize();
 
+    // room sorting is not available once a room is selected
+    const resetSort = newRoomId && order === "location";
+
     getEventsForOccupancy(
       term,
       newRoomId,
       currentEvents,
       1,
       perPage,
-      order,
-      orderDir
+      resetSort ? "start_date" : order,
+      resetSort ? DEFAULT_ORDER_DIR : orderDir
     );
   };
 
@@ -174,7 +189,11 @@ const RoomOccupancyPage = ({
   };
 
   const columns = [
-    { columnKey: "room", value: T.translate("room_occupancy.room") },
+    {
+      columnKey: "room",
+      value: T.translate("room_occupancy.room"),
+      sortable: !roomId
+    },
     {
       columnKey: "start_date",
       value: T.translate("room_occupancy.start"),
@@ -199,7 +218,7 @@ const RoomOccupancyPage = ({
   ];
 
   const tableOptions = {
-    sortCol: order === "last_name" ? "name" : order,
+    sortCol: ORDER_TO_COLUMN[order] || order,
     sortDir: orderDir,
     actions: {
       valueRow: "occupancy",
