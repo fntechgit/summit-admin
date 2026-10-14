@@ -1,6 +1,12 @@
 import Ably from "ably";
 import Swal from "sweetalert2";
+import {
+  createAction,
+  postRequest
+} from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
+
+export const ABLY_TOKEN_MINTED = "ABLY_TOKEN_MINTED";
 
 // pub-api app names, each one mapped to an Ably app and its capabilities
 const ABLY_APP_SIGNAGE = "signage";
@@ -10,47 +16,49 @@ const ABLY_APP_OVERFLOW = "overflow";
 
 // Ably calls this on connect and again before the token expires; pub-api signs the
 // TokenRequest, so no Ably key lives in the bundle
-const mintAblyToken = (appName) => async (tokenParams, callback) => {
+const mintAblyToken = (appName, dispatch) => async (tokenParams, callback) => {
   try {
     const accessToken = await getAccessTokenSafely();
-    const response = await fetch(
+    const { response } = await postRequest(
+      null,
+      createAction(ABLY_TOKEN_MINTED),
       `${window.PUB_API_BASE_URL}/api/v1/ably/token/${appName}`,
+      null,
+      // no popup of its own: the failed publish reports it
+      null
+    )({ access_token: accessToken })(dispatch);
+    callback(null, response);
+  } catch (e) {
+    // uicore rejects with { err, res }; a 401/403 statusCode makes Ably fail the
+    // connection instead of retrying
+    const status = e?.res?.status ?? e?.err?.status;
+    callback(
       {
-        method: "POST",
-        headers: { Authorization: `Bearer ${accessToken}` }
-      }
+        statusCode: status,
+        message: `pub-api ably token ${appName}: ${status ?? e?.message}`
+      },
+      null
     );
-    if (!response.ok) {
-      // a 401/403 statusCode makes Ably fail the connection instead of retrying
-      callback(
-        {
-          statusCode: response.status,
-          message: `pub-api ably token ${appName}: ${response.status}`
-        },
-        null
-      );
-      return;
-    }
-    callback(null, await response.json());
-  } catch (err) {
-    callback(err, null);
   }
 };
 
-// created on first use, once the user is logged in and the access token is available
+// created on first use, once the user is logged in and the access token is available;
+// the store's dispatch is stable, so the first one serves the token renewals too
 const clients = {};
 
-const getAblyClient = (appName) => {
+const getAblyClient = (appName, dispatch) => {
   if (!clients[appName]) {
     clients[appName] = new Ably.Realtime({
-      authCallback: mintAblyToken(appName)
+      authCallback: mintAblyToken(appName, dispatch)
     });
   }
   return clients[appName];
 };
 
-export const subscribeToAblyChannel = (channel, callback) => {
-  const ablyChannel = getAblyClient(ABLY_APP_SIGNAGE).channels.get(channel);
+export const subscribeToAblyChannel = (channel, callback) => (dispatch) => {
+  const ablyChannel = getAblyClient(ABLY_APP_SIGNAGE, dispatch).channels.get(
+    channel
+  );
 
   ablyChannel.subscribe((msg) => {
     callback(msg.data);
@@ -80,8 +88,9 @@ const publish = async (client, channel, key, message) => {
   return true;
 };
 
-export const publishToAblyChannel = (channel, key, message) =>
-  publish(getAblyClient(ABLY_APP_SIGNAGE), channel, key, message);
+export const publishToAblyChannel = (channel, key, message) => (dispatch) =>
+  publish(getAblyClient(ABLY_APP_SIGNAGE, dispatch), channel, key, message);
 
-export const publishToScheduleUpdatesChannel = (channel, key, message) =>
-  publish(getAblyClient(ABLY_APP_OVERFLOW), channel, key, message);
+export const publishToScheduleUpdatesChannel =
+  (channel, key, message) => (dispatch) =>
+    publish(getAblyClient(ABLY_APP_OVERFLOW, dispatch), channel, key, message);

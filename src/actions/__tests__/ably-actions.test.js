@@ -1,16 +1,25 @@
 import Swal from "sweetalert2";
 
-// a factory mock, so the fresh module registry of isolateModules gets it too
-jest.mock("../../utils/methods", () => ({
-  getAccessTokenSafely: jest.fn(() => Promise.resolve("TOKEN"))
-}));
-
 jest.mock("sweetalert2", () => ({
   __esModule: true,
   default: { fire: jest.fn() }
 }));
 
+// factory mocks, so the fresh module registry of isolateModules gets them too
+jest.mock("../../utils/methods", () => ({
+  getAccessTokenSafely: jest.fn(() => Promise.resolve("TOKEN"))
+}));
+
+const mockPostRequest = jest.fn();
+
+jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
+  __esModule: true,
+  ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
+  postRequest: (...args) => mockPostRequest(...args)
+}));
+
 const mockPublish = jest.fn();
+const mockSubscribe = jest.fn();
 // options of the client each publish went through
 const mockPublishedWithOptions = [];
 
@@ -24,6 +33,10 @@ jest.mock("ably", () => ({
           publish: (...args) => {
             mockPublishedWithOptions.push(options);
             return mockPublish(...args);
+          },
+          subscribe: (...args) => {
+            mockPublishedWithOptions.push(options);
+            return mockSubscribe(...args);
           }
         }))
       }
@@ -32,6 +45,7 @@ jest.mock("ably", () => ({
 }));
 
 const PUB_API_BASE_URL = "https://pub-api.test";
+const dispatch = jest.fn();
 
 const loadAblyActions = () => {
   let actions;
@@ -40,6 +54,16 @@ const loadAblyActions = () => {
     actions = require("../ably-actions");
   });
   return actions;
+};
+
+// postRequest(...)(params)(dispatch), as uicore's
+const arrangeTokenResponse = (result) => {
+  let params;
+  mockPostRequest.mockReturnValue((p) => {
+    params = p;
+    return () => result;
+  });
+  return () => params;
 };
 
 // runs the authCallback Ably got, as Ably does on connect
@@ -51,18 +75,16 @@ const mintWith = (options) =>
   });
 
 describe("ably-actions", () => {
-  const originalFetch = global.fetch;
   const originalPubApiBaseUrl = window.PUB_API_BASE_URL;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockPublishedWithOptions.length = 0;
     window.PUB_API_BASE_URL = PUB_API_BASE_URL;
-    global.fetch = jest.fn();
+    mockPublish.mockImplementation((name, data, callback) => callback(null));
   });
 
   afterEach(() => {
-    global.fetch = originalFetch;
     window.PUB_API_BASE_URL = originalPubApiBaseUrl;
   });
 
@@ -74,12 +96,14 @@ describe("ably-actions", () => {
     const { publishToAblyChannel } = loadAblyActions();
 
     let settled = false;
-    const result = publishToAblyChannel("SIGNAGE:73:844", "RELOAD", {}).then(
-      (value) => {
-        settled = true;
-        return value;
-      }
-    );
+    const result = publishToAblyChannel(
+      "SIGNAGE:73:844",
+      "RELOAD",
+      {}
+    )(dispatch).then((value) => {
+      settled = true;
+      return value;
+    });
 
     await Promise.resolve();
     expect(settled).toBe(false);
@@ -96,52 +120,66 @@ describe("ably-actions", () => {
 
   it("mints signage tokens from pub-api with the user's access token", async () => {
     const tokenRequest = { keyName: "signage.key", mac: "mac" };
-    global.fetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(tokenRequest)
-    });
-    mockPublish.mockImplementation((name, data, callback) => callback(null));
+    const requestParams = arrangeTokenResponse(
+      Promise.resolve({ response: tokenRequest })
+    );
     const { publishToAblyChannel } = loadAblyActions();
 
-    await publishToAblyChannel("SIGNAGE:73:844", "RELOAD", {});
+    await publishToAblyChannel("SIGNAGE:73:844", "RELOAD", {})(dispatch);
 
     await expect(mintWith(mockPublishedWithOptions[0])).resolves.toEqual({
       err: null,
       tokenRequest
     });
-    expect(global.fetch).toHaveBeenCalledWith(
-      `${PUB_API_BASE_URL}/api/v1/ably/token/signage`,
-      { method: "POST", headers: { Authorization: "Bearer TOKEN" } }
-    );
+    const [requestAction, , url, payload, errorHandler] =
+      mockPostRequest.mock.calls[0];
+    expect(requestAction).toBeNull();
+    expect(url).toBe(`${PUB_API_BASE_URL}/api/v1/ably/token/signage`);
+    expect(payload).toBeNull();
+    // the failed publish reports it, no popup of its own
+    expect(errorHandler).toBeNull();
+    expect(requestParams()).toEqual({ access_token: "TOKEN" });
   });
 
   it("publishes schedule updates channels through the overflow app, where the signs listen to OVERFLOW", async () => {
-    global.fetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({})
-    });
-    mockPublish.mockImplementation((name, data, callback) => callback(null));
+    arrangeTokenResponse(Promise.resolve({ response: {} }));
     const { publishToScheduleUpdatesChannel } = loadAblyActions();
 
     await expect(
-      publishToScheduleUpdatesChannel("73:OVERFLOW:*", "EVENT", {})
+      publishToScheduleUpdatesChannel("73:OVERFLOW:*", "EVENT", {})(dispatch)
     ).resolves.toBe(true);
 
     await mintWith(mockPublishedWithOptions[0]);
-    expect(global.fetch).toHaveBeenCalledWith(
-      `${PUB_API_BASE_URL}/api/v1/ably/token/overflow`,
-      expect.any(Object)
+    expect(mockPostRequest.mock.calls[0][2]).toBe(
+      `${PUB_API_BASE_URL}/api/v1/ably/token/overflow`
+    );
+  });
+
+  it("subscribes through the signage app", async () => {
+    arrangeTokenResponse(Promise.resolve({ response: {} }));
+    const { subscribeToAblyChannel } = loadAblyActions();
+
+    expect(subscribeToAblyChannel("OCCUPANCY:73", jest.fn())(dispatch)).toBe(
+      true
+    );
+
+    await mintWith(mockPublishedWithOptions[0]);
+    expect(mockPostRequest.mock.calls[0][2]).toBe(
+      `${PUB_API_BASE_URL}/api/v1/ably/token/signage`
     );
   });
 
   it("reuses one client per app", async () => {
-    mockPublish.mockImplementation((name, data, callback) => callback(null));
     const { publishToAblyChannel, publishToScheduleUpdatesChannel } =
       loadAblyActions();
 
-    await publishToAblyChannel("SIGNAGE:73:844", "RELOAD", {});
-    await publishToAblyChannel("SIGNAGE:73:845", "RELOAD", {});
-    await publishToScheduleUpdatesChannel("73:OVERFLOW:*", "EVENT", {});
+    await publishToAblyChannel("SIGNAGE:73:844", "RELOAD", {})(dispatch);
+    await publishToAblyChannel("SIGNAGE:73:845", "RELOAD", {})(dispatch);
+    await publishToScheduleUpdatesChannel(
+      "73:OVERFLOW:*",
+      "EVENT",
+      {}
+    )(dispatch);
 
     const [first, second, third] = mockPublishedWithOptions;
     expect(first).toBe(second);
@@ -149,11 +187,12 @@ describe("ably-actions", () => {
   });
 
   it("passes the pub-api status to Ably when the token cannot be minted", async () => {
-    global.fetch.mockResolvedValue({ ok: false, status: 403 });
-    mockPublish.mockImplementation((name, data, callback) => callback(null));
+    // uicore rejects with { err, res } (not an Error)
+    // eslint-disable-next-line prefer-promise-reject-errors
+    arrangeTokenResponse(Promise.reject({ err: {}, res: { status: 403 } }));
     const { publishToAblyChannel } = loadAblyActions();
 
-    await publishToAblyChannel("SIGNAGE:73:844", "RELOAD", {});
+    await publishToAblyChannel("SIGNAGE:73:844", "RELOAD", {})(dispatch);
 
     const { err, tokenRequest } = await mintWith(mockPublishedWithOptions[0]);
     expect(err.statusCode).toBe(403);
@@ -167,7 +206,7 @@ describe("ably-actions", () => {
     const { publishToAblyChannel } = loadAblyActions();
 
     await expect(
-      publishToAblyChannel("73:OVERFLOW:*", "EVENT", {})
+      publishToAblyChannel("73:OVERFLOW:*", "EVENT", {})(dispatch)
     ).resolves.toBe(false);
 
     expect(Swal.fire).toHaveBeenCalledWith(

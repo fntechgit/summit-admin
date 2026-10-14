@@ -76,8 +76,11 @@ describe("signage overflow re-sync", () => {
       signageState: { locationId }
     });
     jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
-    publishToAblyChannel.mockResolvedValue(true);
-    publishToScheduleUpdatesChannel.mockResolvedValue(true);
+    // thunks, as the real ones
+    publishToAblyChannel.mockReturnValue(() => Promise.resolve(true));
+    publishToScheduleUpdatesChannel.mockReturnValue(() =>
+      Promise.resolve(true)
+    );
   });
 
   const arrangeOverflowEvents = (events) => {
@@ -198,7 +201,9 @@ describe("signage overflow re-sync", () => {
 
     it("reports failure when a publish fails", async () => {
       arrangeOverflowEvents([overflowEvent]);
-      publishToScheduleUpdatesChannel.mockResolvedValue(false);
+      publishToScheduleUpdatesChannel.mockReturnValue(() =>
+        Promise.resolve(false)
+      );
 
       const result = await store.dispatch(
         publishOverflowState(summit, locationId, fromDate)

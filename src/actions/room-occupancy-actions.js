@@ -43,10 +43,12 @@ export const subscribeToOccupancyChannel = () => async (dispatch, getState) => {
 
   const channel = getAblyChannel(currentSummit.id);
 
-  subscribeToAblyChannel(channel, (data) => {
-    console.log(`Received: ${JSON.stringify(data)}`);
-    dispatch(createAction(UPDATE_EVENT_OCCUPANCY)({ data }));
-  });
+  dispatch(
+    subscribeToAblyChannel(channel, (data) => {
+      console.log(`Received: ${JSON.stringify(data)}`);
+      dispatch(createAction(UPDATE_EVENT_OCCUPANCY)({ data }));
+    })
+  );
 };
 
 export const publishOccupancy =
@@ -55,10 +57,9 @@ export const publishOccupancy =
     const { currentSummit } = currentSummitState;
 
     const channel = getAblyChannel(currentSummit.id);
-    const res = await publishToAblyChannel(channel, "SET_OCCUPANCY", {
-      occupancy,
-      eventId
-    });
+    const res = await dispatch(
+      publishToAblyChannel(channel, "SET_OCCUPANCY", { occupancy, eventId })
+    );
 
     if (res) {
       console.log("ROOM OCCUPANCY PUBLISHED", occupancy, eventId);

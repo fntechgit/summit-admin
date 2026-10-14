@@ -249,14 +249,16 @@ export const publishOverflowState =
           (response?.data || [])
             .filter((event) => event.overflow_stream_key)
             .map((event) =>
-              publishToScheduleUpdatesChannel(channel, "EVENT", {
-                summit_id: summit.id,
-                entity_type: OVERFLOW_ENTITY_TYPE,
-                entity_id: event.id,
-                entity_operator: "UPDATE",
-                created_at: createdAt,
-                params: { overflow_url: buildOverflowUrl(summit, event) }
-              })
+              dispatch(
+                publishToScheduleUpdatesChannel(channel, "EVENT", {
+                  summit_id: summit.id,
+                  entity_type: OVERFLOW_ENTITY_TYPE,
+                  entity_id: event.id,
+                  entity_operator: "UPDATE",
+                  created_at: createdAt,
+                  params: { overflow_url: buildOverflowUrl(summit, event) }
+                })
+              )
             )
         );
       })
@@ -274,9 +276,9 @@ export const publishDate =
     dispatch(startLoading());
 
     const channel = getAblyChannel(currentSummit.id, locationId);
-    const res = await publishToAblyChannel(channel, "JUMP_TIME", {
-      timestamp: startDate
-    });
+    const res = await dispatch(
+      publishToAblyChannel(channel, "JUMP_TIME", { timestamp: startDate })
+    );
 
     if (res) {
       const resynced = await publishOverflowState(
@@ -300,9 +302,9 @@ export const publishTemplate = (templateFile) => async (dispatch, getState) => {
   await saveSignTemplate(templateFile)(dispatch, getState);
 
   const channel = getAblyChannel(currentSummit.id, locationId);
-  const res = await publishToAblyChannel(channel, "SET_TEMPLATE", {
-    template: templateFile
-  });
+  const res = await dispatch(
+    publishToAblyChannel(channel, "SET_TEMPLATE", { template: templateFile })
+  );
 
   if (res) {
     dispatch(showSuccessMessage(T.translate("signage.template_published")));
@@ -317,7 +319,7 @@ export const publishReload = () => async (dispatch, getState) => {
   dispatch(startLoading());
 
   const channel = getAblyChannel(currentSummit.id, locationId);
-  const res = await publishToAblyChannel(channel, "RELOAD", {});
+  const res = await dispatch(publishToAblyChannel(channel, "RELOAD", {}));
 
   if (res) {
     // the location reloaded now, even if the selection changes during the delay;
