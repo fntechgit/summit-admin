@@ -14,6 +14,9 @@ import { MAX_PER_PAGE } from "../utils/constants";
 const EditSelectionPlanPage = React.lazy(() =>
   import("../pages/selection-plans/edit-selection-plan-page")
 );
+const SelectionPlanSummaryPage = React.lazy(() =>
+  import("../pages/selection-plans/selection-plan-summary-page")
+);
 const SelectionPlanExtraQuestionsLayout = React.lazy(() =>
   import("./selection-plan-extra-questions-layout")
 );
@@ -65,6 +68,19 @@ const SelectionPlanIdLayout = ({
             strict
             exact
             path={`${match.url}`}
+            render={({ history }) =>
+              isLoaded &&
+              (selectionPlanId ? (
+                <SelectionPlanSummaryPage history={history} />
+              ) : (
+                <EditSelectionPlanPage history={history} />
+              ))
+            }
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/edit`}
             render={({ history }) =>
               isLoaded && <EditSelectionPlanPage history={history} />
             }

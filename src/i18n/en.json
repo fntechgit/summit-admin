@@ -500,6 +500,8 @@
   "edit_selection_plan": {
     "selection_plan": "Selection Plan",
     "selection_plans": "Selection Plans",
+    "dates": "Dates",
+    "linked_items": "Linked Items",
     "name": "Name",
     "id": "Id",
     "email": "Email",

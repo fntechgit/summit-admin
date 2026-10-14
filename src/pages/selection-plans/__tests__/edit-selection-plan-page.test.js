@@ -52,7 +52,7 @@ describe("EditSelectionPlanPage", () => {
     saveSelectionPlanSettings.mockReturnValue(() => Promise.resolve());
   });
 
-  it("navigates to the new selection plan after creating it", async () => {
+  it("navigates to the new selection plan edit page after creating it", async () => {
     saveSelectionPlan.mockReturnValue(() => Promise.resolve({ id: 7 }));
 
     renderWithRedux(<EditSelectionPlanPage history={history} />, {
@@ -62,7 +62,7 @@ describe("EditSelectionPlanPage", () => {
 
     expect(saveSelectionPlanSettings).toHaveBeenCalledWith({}, 7);
     expect(history.push).toHaveBeenCalledWith(
-      "/app/summits/1/selection-plans/7"
+      "/app/summits/1/selection-plans/7/edit"
     );
   });
 

@@ -47,10 +47,17 @@ const SelectionPlanListPage = ({
   const refreshSelectionPlans = () =>
     getSelectionPlans(term, currentPage, perPage, order, orderDir);
 
-  const handleEdit = (selectionPlan) => {
+  const handleView = (selectionPlan) => {
     if (!selectionPlan?.id) return;
     history.push(
       `/app/summits/${currentSummit.id}/selection-plans/${selectionPlan.id}`
+    );
+  };
+
+  const handleEdit = (selectionPlan) => {
+    if (!selectionPlan?.id) return;
+    history.push(
+      `/app/summits/${currentSummit.id}/selection-plans/${selectionPlan.id}/edit`
     );
   };
 
@@ -155,6 +162,7 @@ const SelectionPlanListPage = ({
             onSort={handleSort}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onSelect={handleView}
             deleteDialogBody={(name) =>
               `${T.translate("selection_plan_list.remove_warning")}${name}?`
             }

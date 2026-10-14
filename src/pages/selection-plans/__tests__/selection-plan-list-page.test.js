@@ -17,8 +17,14 @@ jest.mock("../../../actions/selection-plan-actions", () => ({
 
 jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => ({
   __esModule: true,
-  default: ({ onEdit, onDelete }) => (
+  default: ({ onEdit, onDelete, onSelect }) => (
     <div>
+      <button
+        type="button"
+        onClick={() => onSelect({ id: 1, name: "CFP 2026" })}
+      >
+        view-row
+      </button>
       <button type="button" onClick={() => onEdit({ id: 1, name: "CFP 2026" })}>
         edit-row
       </button>
@@ -69,7 +75,20 @@ describe("SelectionPlanListPage", () => {
     deleteSelectionPlan.mockReturnValue(() => Promise.resolve());
   });
 
-  it("navigates to the selection plan page on edit", async () => {
+  it("navigates to the selection plan summary on view", async () => {
+    renderWithRedux(
+      <SelectionPlanListPage history={mockHistory} match={mockMatch} />,
+      { initialState }
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "view-row" }));
+
+    expect(mockHistory.push).toHaveBeenCalledWith(
+      "/app/summits/1/selection-plans/1"
+    );
+  });
+
+  it("navigates to the selection plan edit page on edit", async () => {
     renderWithRedux(
       <SelectionPlanListPage history={mockHistory} match={mockMatch} />,
       { initialState }
@@ -78,7 +97,7 @@ describe("SelectionPlanListPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "edit-row" }));
 
     expect(mockHistory.push).toHaveBeenCalledWith(
-      "/app/summits/1/selection-plans/1"
+      "/app/summits/1/selection-plans/1/edit"
     );
   });
 

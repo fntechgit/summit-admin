@@ -27,6 +27,11 @@ jest.mock("../../pages/selection-plans/edit-selection-plan-page", () => ({
   default: () => <div data-testid="edit-selection-plan" />
 }));
 
+jest.mock("../../pages/selection-plans/selection-plan-summary-page", () => ({
+  __esModule: true,
+  default: () => <div data-testid="selection-plan-summary" />
+}));
+
 const initialState = {
   currentSummitState: { currentSummit: { id: 1 } },
   currentSelectionPlanState: { entity: { id: 0, name: "" } }
@@ -44,7 +49,7 @@ describe("SelectionPlanIdLayout", () => {
     );
 
     const history = createMemoryHistory({
-      initialEntries: ["/app/summits/1/selection-plans/5"]
+      initialEntries: ["/app/summits/1/selection-plans/5/edit"]
     });
     renderWithRedux(
       <Router history={history}>
@@ -68,5 +73,30 @@ describe("SelectionPlanIdLayout", () => {
     expect(
       await screen.findByTestId("edit-selection-plan")
     ).toBeInTheDocument();
+  });
+
+  it("renders the summary page at the selection plan url", async () => {
+    getSelectionPlan.mockReturnValue(() => Promise.resolve());
+    getMarketingSettingsBySelectionPlan.mockReturnValue(() =>
+      Promise.resolve()
+    );
+
+    const history = createMemoryHistory({
+      initialEntries: ["/app/summits/1/selection-plans/5"]
+    });
+    renderWithRedux(
+      <Router history={history}>
+        <Route
+          path="/app/summits/:summit_id/selection-plans/:selection_plan_id"
+          component={SelectionPlanIdLayout}
+        />
+      </Router>,
+      { initialState }
+    );
+
+    expect(
+      await screen.findByTestId("selection-plan-summary")
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("edit-selection-plan")).not.toBeInTheDocument();
   });
 });

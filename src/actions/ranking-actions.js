@@ -95,7 +95,7 @@ export const saveRatingType = (entity) => async (dispatch, getState) => {
       dispatch(
         showMessage(success_message, () => {
           history.push(
-            `/app/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}`
+            `/app/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/edit`
           );
         })
       );
@@ -119,7 +119,7 @@ export const saveRatingType = (entity) => async (dispatch, getState) => {
     dispatch(
       showMessage(success_message, () => {
         history.push(
-          `/app/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}`
+          `/app/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/edit`
         );
       })
     );
