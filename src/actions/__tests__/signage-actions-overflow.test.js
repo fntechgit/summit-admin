@@ -242,6 +242,16 @@ describe("signage overflow re-sync", () => {
       expect(showSuccessMessage).not.toHaveBeenCalled();
       expect(store.getActions().map((a) => a.type)).toContain("STOP_LOADING");
     });
+
+    it("stops loading without re-syncing when JUMP_TIME is not published", async () => {
+      publishToAblyChannel.mockReturnValue(() => Promise.resolve(false));
+
+      await store.dispatch(publishDate(fromDate, "signage.date_published"));
+
+      expect(getRequest).not.toHaveBeenCalled();
+      expect(showSuccessMessage).not.toHaveBeenCalled();
+      expect(store.getActions().map((a) => a.type)).toContain("STOP_LOADING");
+    });
   });
 
   describe("publishReload", () => {
@@ -308,6 +318,19 @@ describe("signage overflow re-sync", () => {
 
       const firedAt = (clickedAtMs + RELOAD_OVERFLOW_RESYNC_DELAY_MS) / 1000;
       expect(requestParams["filter[]"]).toContain(`end_date>=${firedAt}`);
+    });
+
+    it("stops loading and schedules no re-sync when RELOAD is not published", async () => {
+      publishToAblyChannel.mockReturnValue(() => Promise.resolve(false));
+
+      await store.dispatch(publishReload());
+
+      expect(showSuccessMessage).not.toHaveBeenCalled();
+      expect(store.getActions().map((a) => a.type)).toContain("STOP_LOADING");
+
+      jest.advanceTimersByTime(RELOAD_OVERFLOW_RESYNC_DELAY_MS);
+      await flushPromises();
+      expect(getRequest).not.toHaveBeenCalled();
     });
   });
 });

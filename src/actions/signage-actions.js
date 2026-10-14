@@ -289,6 +289,9 @@ export const publishDate =
       // on failure keep the error popup visible instead of covering it with the success one
       if (resynced) dispatch(showSuccessMessage(T.translate(popupResource)));
       else dispatch(stopLoading());
+    } else {
+      // the loader overlay sits above the "Publish failed" popup
+      dispatch(stopLoading());
     }
   };
 
@@ -308,6 +311,8 @@ export const publishTemplate = (templateFile) => async (dispatch, getState) => {
 
   if (res) {
     dispatch(showSuccessMessage(T.translate("signage.template_published")));
+  } else {
+    dispatch(stopLoading());
   }
 };
 
@@ -334,6 +339,8 @@ export const publishReload = () => async (dispatch, getState) => {
       RELOAD_OVERFLOW_RESYNC_DELAY_MS
     );
     dispatch(showSuccessMessage(T.translate("signage.sign_reloaded")));
+  } else {
+    dispatch(stopLoading());
   }
 };
 
