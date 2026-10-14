@@ -1,23 +1,56 @@
 import Ably from "ably";
 import Swal from "sweetalert2";
+import { getAccessTokenSafely } from "../utils/methods";
 
-const createAblyClient = (apiKey) =>
-  apiKey ? new Ably.Realtime(apiKey) : null;
-
-const realtimeAbly = createAblyClient(process.env.SIGNAGE_ABLY_API_KEY);
+// pub-api app names, each one mapped to an Ably app and its capabilities
+const ABLY_APP_SIGNAGE = "signage";
 // the signs listen to {summit}:OVERFLOW:* on the schedule updates app (where pub-api
 // publishes), not on the signage app: channels of different Ably apps never meet
-const scheduleUpdatesAbly = createAblyClient(
-  process.env.ABLY_SCHEDULE_UPDATES_PUBLISHER_API_KEY
-);
+const ABLY_APP_OVERFLOW = "overflow";
+
+// Ably calls this on connect and again before the token expires; pub-api signs the
+// TokenRequest, so no Ably key lives in the bundle
+const mintAblyToken = (appName) => async (tokenParams, callback) => {
+  try {
+    const accessToken = await getAccessTokenSafely();
+    const response = await fetch(
+      `${window.PUB_API_BASE_URL}/api/v1/ably/token/${appName}`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` }
+      }
+    );
+    if (!response.ok) {
+      // a 401/403 statusCode makes Ably fail the connection instead of retrying
+      callback(
+        {
+          statusCode: response.status,
+          message: `pub-api ably token ${appName}: ${response.status}`
+        },
+        null
+      );
+      return;
+    }
+    callback(null, await response.json());
+  } catch (err) {
+    callback(err, null);
+  }
+};
+
+// created on first use, once the user is logged in and the access token is available
+const clients = {};
+
+const getAblyClient = (appName) => {
+  if (!clients[appName]) {
+    clients[appName] = new Ably.Realtime({
+      authCallback: mintAblyToken(appName)
+    });
+  }
+  return clients[appName];
+};
 
 export const subscribeToAblyChannel = (channel, callback) => {
-  if (!realtimeAbly) {
-    Swal.fire("Subscribe failed", "No Ably API key found", "warning");
-    return false;
-  }
-
-  const ablyChannel = realtimeAbly.channels.get(channel);
+  const ablyChannel = getAblyClient(ABLY_APP_SIGNAGE).channels.get(channel);
 
   ablyChannel.subscribe((msg) => {
     callback(msg.data);
@@ -27,12 +60,7 @@ export const subscribeToAblyChannel = (channel, callback) => {
 };
 
 const publish = async (client, channel, key, message) => {
-  if (!client) {
-    Swal.fire("Publish failed", "No Ably API key found", "warning");
-    return false;
-  }
-
-  // publish only: no implicit subscribe/attach, so the key needs just publish capability
+  // publish only: no implicit subscribe/attach, so the token needs just publish capability
   const ablyChannel = client.channels.get(channel);
 
   try {
@@ -44,7 +72,7 @@ const publish = async (client, channel, key, message) => {
       );
     });
   } catch (err) {
-    // e.g. the key has no publish capability on this channel
+    // e.g. the token has no publish capability on this channel
     Swal.fire("Publish failed", `${channel}: ${err.message}`, "warning");
     return false;
   }
@@ -53,7 +81,7 @@ const publish = async (client, channel, key, message) => {
 };
 
 export const publishToAblyChannel = (channel, key, message) =>
-  publish(realtimeAbly, channel, key, message);
+  publish(getAblyClient(ABLY_APP_SIGNAGE), channel, key, message);
 
 export const publishToScheduleUpdatesChannel = (channel, key, message) =>
-  publish(scheduleUpdatesAbly, channel, key, message);
+  publish(getAblyClient(ABLY_APP_OVERFLOW), channel, key, message);
