@@ -192,7 +192,8 @@ const RoomOccupancyPage = ({
     {
       columnKey: "room",
       value: T.translate("room_occupancy.room"),
-      sortable: !roomId
+      sortable: !roomId,
+      width: "100px"
     },
     {
       columnKey: "start_date",
