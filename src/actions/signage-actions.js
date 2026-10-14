@@ -270,16 +270,15 @@ export const publishOverflowState =
  * Emergency stop: tells the overflow player and the signs to drop the event's
  * overflow, the same message pub-api relays when summit-api clears it.
  * Goes straight to Ably and leaves the event's occupancy in summit-api untouched.
+ * Takes the summit the event was listed for, not the current one: the confirm
+ * dialog outlives the page, so the current summit may have changed by then.
  */
-export const publishOverflowEnd = (eventId) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
-  const { currentSummit } = currentSummitState;
-
+export const publishOverflowEnd = (summitId, eventId) => async (dispatch) => {
   dispatch(startLoading());
 
-  const channel = getOverflowChannel(currentSummit.id);
+  const channel = getOverflowChannel(summitId);
   const message = {
-    summit_id: currentSummit.id,
+    summit_id: summitId,
     entity_type: OVERFLOW_ENTITY_TYPE,
     entity_id: eventId,
     entity_operator: "UPDATE",

@@ -147,7 +147,7 @@ const SignagePage = ({
       confirmButtonColor: "error"
     });
 
-    if (confirmed) props.publishOverflowEnd(id);
+    if (confirmed) props.publishOverflowEnd(summit.id, id);
   };
 
   const saveStaticBanner = () => {

@@ -93,7 +93,7 @@ describe("SignagePage end overflow action", () => {
     await userEvent.click(endOverflowIcons(container)[0]);
 
     await waitFor(() =>
-      expect(publishOverflowEnd).toHaveBeenCalledWith(overflowEvent.id)
+      expect(publishOverflowEnd).toHaveBeenCalledWith(73, overflowEvent.id)
     );
   });
 

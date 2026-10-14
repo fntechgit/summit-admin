@@ -229,7 +229,7 @@ describe("signage overflow re-sync", () => {
     });
 
     it("logs in the console whether the overflow end was published", async () => {
-      await store.dispatch(publishOverflowEnd(overflowEvent.id));
+      await store.dispatch(publishOverflowEnd(summitId, overflowEvent.id));
       expect(logSpy).toHaveBeenCalledWith(
         `Overflow end for event ${overflowEvent.id} published on ${summitId}:OVERFLOW:*`,
         expect.objectContaining({ params: { overflow_url: "" } })
@@ -238,7 +238,7 @@ describe("signage overflow re-sync", () => {
       publishToScheduleUpdatesChannel.mockReturnValue(() =>
         Promise.resolve(false)
       );
-      await store.dispatch(publishOverflowEnd(overflowEvent.id));
+      await store.dispatch(publishOverflowEnd(summitId, overflowEvent.id));
       expect(errorSpy).toHaveBeenCalledWith(
         `Overflow end for event ${overflowEvent.id} NOT published on ${summitId}:OVERFLOW:*`,
         expect.objectContaining({ entity_id: overflowEvent.id })
@@ -249,7 +249,7 @@ describe("signage overflow re-sync", () => {
       const publishThunk = jest.fn(() => Promise.resolve(true));
       publishToScheduleUpdatesChannel.mockReturnValue(publishThunk);
 
-      await store.dispatch(publishOverflowEnd(overflowEvent.id));
+      await store.dispatch(publishOverflowEnd(summitId, overflowEvent.id));
 
       expect(getRequest).not.toHaveBeenCalled();
       expect(publishToScheduleUpdatesChannel).toHaveBeenCalledTimes(1);
@@ -275,10 +275,29 @@ describe("signage overflow re-sync", () => {
         Promise.resolve(false)
       );
 
-      await store.dispatch(publishOverflowEnd(overflowEvent.id));
+      await store.dispatch(publishOverflowEnd(summitId, overflowEvent.id));
 
       expect(showSuccessMessage).not.toHaveBeenCalled();
       expect(store.getActions().map((a) => a.type)).toContain("STOP_LOADING");
+    });
+
+    it("publishes on the summit it is given, even if the current summit changed", async () => {
+      const otherSummitId = 74;
+      store = mockStore({
+        currentSummitState: { currentSummit: { ...summit, id: otherSummitId } },
+        signageState: { locationId }
+      });
+
+      await store.dispatch(publishOverflowEnd(summitId, overflowEvent.id));
+
+      expect(publishToScheduleUpdatesChannel).toHaveBeenCalledWith(
+        `${summitId}:OVERFLOW:*`,
+        "EVENT",
+        expect.objectContaining({
+          summit_id: summitId,
+          entity_id: overflowEvent.id
+        })
+      );
     });
   });
 
