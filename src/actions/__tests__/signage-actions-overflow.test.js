@@ -235,7 +235,9 @@ describe("signage overflow re-sync", () => {
         expect.objectContaining({ params: { overflow_url: "" } })
       );
 
-      publishToScheduleUpdatesChannel.mockResolvedValue(false);
+      publishToScheduleUpdatesChannel.mockReturnValue(() =>
+        Promise.resolve(false)
+      );
       await store.dispatch(publishOverflowEnd(overflowEvent.id));
       expect(errorSpy).toHaveBeenCalledWith(
         `Overflow end for event ${overflowEvent.id} NOT published on ${summitId}:OVERFLOW:*`,
@@ -244,6 +246,9 @@ describe("signage overflow re-sync", () => {
     });
 
     it("sends the event's PresentationOverflow message with an empty overflow_url straight to Ably, without calling summit-api", async () => {
+      const publishThunk = jest.fn(() => Promise.resolve(true));
+      publishToScheduleUpdatesChannel.mockReturnValue(publishThunk);
+
       await store.dispatch(publishOverflowEnd(overflowEvent.id));
 
       expect(getRequest).not.toHaveBeenCalled();
@@ -260,11 +265,15 @@ describe("signage overflow re-sync", () => {
           params: { overflow_url: "" }
         }
       );
+      // the publish is a thunk: it only reaches Ably when dispatched
+      expect(publishThunk).toHaveBeenCalledTimes(1);
       expect(showSuccessMessage).toHaveBeenCalledWith("signage.overflow_ended");
     });
 
     it("stops loading without showing success when the publish fails", async () => {
-      publishToScheduleUpdatesChannel.mockResolvedValue(false);
+      publishToScheduleUpdatesChannel.mockReturnValue(() =>
+        Promise.resolve(false)
+      );
 
       await store.dispatch(publishOverflowEnd(overflowEvent.id));
 

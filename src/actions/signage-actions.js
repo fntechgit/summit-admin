@@ -287,7 +287,9 @@ export const publishOverflowEnd = (eventId) => async (dispatch, getState) => {
     params: { overflow_url: "" }
   };
 
-  const res = await publishToScheduleUpdatesChannel(channel, "EVENT", message);
+  const res = await dispatch(
+    publishToScheduleUpdatesChannel(channel, "EVENT", message)
+  );
 
   if (res) {
     console.log(
