@@ -27,7 +27,10 @@ import {
 import T from "i18n-react";
 import moment from "moment-timezone";
 import { getAccessTokenSafely } from "../utils/methods";
-import { publishToAblyChannel } from "./ably-actions";
+import {
+  publishToAblyChannel,
+  publishToScheduleUpdatesChannel
+} from "./ably-actions";
 
 export const REQUEST_SIGN = "REQUEST_SIGN";
 export const RECEIVE_SIGN = "RECEIVE_SIGN";
@@ -45,9 +48,24 @@ export const SIGNAGE_BANNER_UPDATED = "SIGNAGE_BANNER_UPDATED";
 export const SIGNAGE_BANNER_ADDED = "SIGNAGE_BANNER_ADDED";
 export const SIGNAGE_BANNER_DELETED = "SIGNAGE_BANNER_DELETED";
 export const SIGNAGE_STATIC_BANNER_UPDATED = "SIGNAGE_STATIC_BANNER_UPDATED";
+// getRequest always dispatches its receive action; nothing reduces this one
+const RECEIVE_SIGNAGE_OVERFLOW_EVENTS = "RECEIVE_SIGNAGE_OVERFLOW_EVENTS";
+
+export const RELOAD_OVERFLOW_RESYNC_DELAY_MS = 10000;
+
+const OVERFLOW_ENTITY_TYPE = "PresentationOverflow";
+// summit-api defaults: https://github.com/OpenStackweb/summit-api/blob/d8acb355fd22d59284a8e9f16ea64a69e7c9db72/app/Models/Foundation/Summit/Events/SummitEvent.php#L2014-L2027
+const OVERFLOW_PLAYER_PATH = "/a/overflow-player";
+const OVERFLOW_QUERY_STRING_KEY = "k";
 
 const getAblyChannel = (summitId, locationId) =>
   `SIGNAGE:${summitId}:${locationId}`;
+
+// Channel pub-api relays PresentationOverflow updates on; the signs subscribe to it.
+const getOverflowChannel = (summitId) => `${summitId}:OVERFLOW:*`;
+
+const buildOverflowUrl = (summit, event) =>
+  `${summit.marketing_site_url}${OVERFLOW_PLAYER_PATH}?${OVERFLOW_QUERY_STRING_KEY}=${event.overflow_stream_key}`;
 
 export const getSign = (locationId) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -197,6 +215,57 @@ export const getSignBanners =
     });
   };
 
+/**
+ * Replays the location's PresentationOverflow messages for signs that missed them.
+ * Never rejects: resolves false if the request or a publish failed.
+ */
+export const publishOverflowState =
+  (summit, locationId, fromDate) => (dispatch) => {
+    if (!summit.marketing_site_url) return Promise.resolve(true);
+
+    return getAccessTokenSafely()
+      .then((accessToken) =>
+        getRequest(
+          null,
+          createAction(RECEIVE_SIGNAGE_OVERFLOW_EVENTS),
+          `${window.API_BASE_URL}/api/v1/summits/${summit.id}/events/published`,
+          authErrorHandler
+        )({
+          page: 1,
+          per_page: 100,
+          "filter[]": [
+            `location_id==${locationId}`,
+            "occupancy==OVERFLOW",
+            `end_date>=${fromDate}`
+          ],
+          access_token: accessToken
+        })(dispatch)
+      )
+      .then(({ response }) => {
+        const channel = getOverflowChannel(summit.id);
+        const createdAt = moment().unix();
+
+        return Promise.all(
+          (response?.data || [])
+            .filter((event) => event.overflow_stream_key)
+            .map((event) =>
+              dispatch(
+                publishToScheduleUpdatesChannel(channel, "EVENT", {
+                  summit_id: summit.id,
+                  entity_type: OVERFLOW_ENTITY_TYPE,
+                  entity_id: event.id,
+                  entity_operator: "UPDATE",
+                  created_at: createdAt,
+                  params: { overflow_url: buildOverflowUrl(summit, event) }
+                })
+              )
+            )
+        );
+      })
+      .then((results) => results.every(Boolean))
+      .catch(() => false);
+  };
+
 export const publishDate =
   (startDate, popupResource = "signage.date_published") =>
   async (dispatch, getState) => {
@@ -207,12 +276,22 @@ export const publishDate =
     dispatch(startLoading());
 
     const channel = getAblyChannel(currentSummit.id, locationId);
-    const res = await publishToAblyChannel(channel, "JUMP_TIME", {
-      timestamp: startDate
-    });
+    const res = await dispatch(
+      publishToAblyChannel(channel, "JUMP_TIME", { timestamp: startDate })
+    );
 
     if (res) {
-      dispatch(showSuccessMessage(T.translate(popupResource)));
+      const resynced = await publishOverflowState(
+        currentSummit,
+        locationId,
+        startDate
+      )(dispatch);
+      // on failure keep the error popup visible instead of covering it with the success one
+      if (resynced) dispatch(showSuccessMessage(T.translate(popupResource)));
+      else dispatch(stopLoading());
+    } else {
+      // the loader overlay sits above the "Publish failed" popup
+      dispatch(stopLoading());
     }
   };
 
@@ -226,12 +305,14 @@ export const publishTemplate = (templateFile) => async (dispatch, getState) => {
   await saveSignTemplate(templateFile)(dispatch, getState);
 
   const channel = getAblyChannel(currentSummit.id, locationId);
-  const res = await publishToAblyChannel(channel, "SET_TEMPLATE", {
-    template: templateFile
-  });
+  const res = await dispatch(
+    publishToAblyChannel(channel, "SET_TEMPLATE", { template: templateFile })
+  );
 
   if (res) {
     dispatch(showSuccessMessage(T.translate("signage.template_published")));
+  } else {
+    dispatch(stopLoading());
   }
 };
 
@@ -243,10 +324,23 @@ export const publishReload = () => async (dispatch, getState) => {
   dispatch(startLoading());
 
   const channel = getAblyChannel(currentSummit.id, locationId);
-  const res = await publishToAblyChannel(channel, "RELOAD", {});
+  const res = await dispatch(publishToAblyChannel(channel, "RELOAD", {}));
 
   if (res) {
+    // the location reloaded now, even if the selection changes during the delay;
+    // a reload drops the sign's jump offset, so it is back on real time
+    setTimeout(
+      () =>
+        publishOverflowState(
+          currentSummit,
+          locationId,
+          moment().unix()
+        )(dispatch),
+      RELOAD_OVERFLOW_RESYNC_DELAY_MS
+    );
     dispatch(showSuccessMessage(T.translate("signage.sign_reloaded")));
+  } else {
+    dispatch(stopLoading());
   }
 };
 
