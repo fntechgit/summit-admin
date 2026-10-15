@@ -18,6 +18,14 @@ describe("RefundForm", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows the refund info note and keeps submit enabled on first render", () => {
+    render(<RefundForm onSubmit={jest.fn()} />);
+    expect(screen.getByText("refund_form.info")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /refund_form\.queue_refund/i })
+    ).toBeEnabled();
+  });
+
   it("calls onSubmit with reason and amount in cents", async () => {
     const onSubmit = jest.fn();
     render(<RefundForm onSubmit={onSubmit} />);

@@ -26,11 +26,7 @@ import {
   updateClientAddress,
   updateClientInfo
 } from "../../../../../actions/sponsor-purchases-actions";
-import {
-  ACCESS_ROUTES,
-  DATE_FORMAT,
-  PURCHASE_TYPES
-} from "../../../../../utils/constants";
+import { ACCESS_ROUTES, DATE_FORMAT } from "../../../../../utils/constants";
 import Restrict from "../../../../../routes/restrict";
 import { formatDate } from "../../../../../utils/methods";
 import RefundForm from "../../../../../components/mui/RefundForm";
@@ -189,10 +185,7 @@ const SponsorOrderDetails = ({
                   "edit_sponsor.purchase_tab.order_details.issue_refund"
                 )}
               </Typography>
-              <RefundForm
-                onSubmit={handleOrderRefund}
-                disabled={currentOrder.type === PURCHASE_TYPES.OFFLINE}
-              />
+              <RefundForm onSubmit={handleOrderRefund} />
             </CardContent>
           </Card>
         </Grid2>
