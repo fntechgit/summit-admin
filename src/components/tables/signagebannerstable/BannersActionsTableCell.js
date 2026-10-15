@@ -4,6 +4,7 @@ const BannersActionsTableCell = ({
   id,
   isEditing,
   disabled,
+  isSaving,
   onEdit,
   onDelete,
   onSave,
@@ -17,6 +18,7 @@ const BannersActionsTableCell = ({
 
   const handleSave = (ev) => {
     ev.preventDefault();
+    if (isSaving) return;
     onSave(id);
   };
 
@@ -27,6 +29,7 @@ const BannersActionsTableCell = ({
 
   const handleCancel = (ev) => {
     ev.preventDefault();
+    if (isSaving) return;
     onCancel(id);
   };
 

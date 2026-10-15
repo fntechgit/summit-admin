@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import T from "i18n-react/dist/i18n-react";
+import Swal from "sweetalert2";
 import { Tooltip } from "react-tooltip";
 
 import "./bannerstable.css";
@@ -31,6 +32,7 @@ const BannerRow = ({
   rowClass,
   summitTz,
   disabled,
+  isSaving,
   onChange,
   onEdit,
   onDelete,
@@ -93,6 +95,7 @@ const BannerRow = ({
       id={row.id}
       isEditing={!!row.is_edit}
       disabled={disabled}
+      isSaving={isSaving}
       onEdit={onEdit}
       onDelete={onDelete}
       onSave={onSave}
@@ -161,6 +164,24 @@ const NewBannerRow = ({
   </tr>
 );
 
+// mirrors the API rules for scheduled banners, returns the i18n key of the first error
+const validateBanner = (row) => {
+  // API allows empty title and content on EDIT, only require them when adding
+  if (!row.id && !row.title?.trim()) return "signage.title_required";
+  if (!row.id && !row.content?.trim()) return "signage.content_required";
+  if (!row.start_date || !row.end_date) return "signage.dates_required";
+  if (row.end_date <= row.start_date) return "signage.invalid_date_range";
+  return null;
+};
+
+const isValidBanner = (row) => {
+  const error = validateBanner(row);
+  if (error) {
+    Swal.fire(T.translate("general.error"), T.translate(error), "warning");
+  }
+  return !error;
+};
+
 const getFieldValue = (ev) => {
   const { value, type } = ev.target;
   return type === "datetime" ? value.valueOf() / MILLISECONDS_IN_SECOND : value;
@@ -177,6 +198,7 @@ const BannersTable = ({
   const [rows, setRows] = useState(data);
   const [newRow, setNewRow] = useState(NEW_ROW);
   const [editingRow, setEditingRow] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setRows(data);
@@ -190,14 +212,18 @@ const BannersTable = ({
   };
 
   const saveRow = (id) => {
+    if (isSaving) return;
     const row = rows.find((r) => r.id === id);
+    if (!isValidBanner(row)) return;
 
+    setIsSaving(true);
     saveBanner(row)
       .then(() => {
         setEditingRow(null);
         updateRow(id, { is_edit: false });
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setIsSaving(false));
   };
 
   const deleteClick = async (id) => {
@@ -234,12 +260,17 @@ const BannersTable = ({
 
   const saveNewRow = (ev) => {
     ev.preventDefault();
+    // the draft is kept until the save succeeds, so block a second submit of the same draft
+    if (isSaving) return;
+    if (!isValidBanner(newRow)) return;
 
+    setIsSaving(true);
     saveBanner(newRow)
       .then(() => {
         setNewRow(NEW_ROW);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setIsSaving(false));
   };
 
   const jumpTo = async (id) => {
@@ -280,6 +311,7 @@ const BannersTable = ({
               summitTz={summitTz}
               // only one row can be edited at a time, lock the rest
               disabled={!!editingRow && editingRow.id !== row.id}
+              isSaving={isSaving}
               onChange={onChangeCell}
               onEdit={editRow}
               onDelete={deleteClick}
@@ -294,7 +326,7 @@ const BannersTable = ({
             onSave={saveNewRow}
             summitTz={summitTz}
             roomName={room.name}
-            disabled={!!editingRow}
+            disabled={!!editingRow || isSaving}
           />
         </tbody>
       </table>

@@ -3885,6 +3885,10 @@
     "event_jump": "Time has been jumped to the selected activity",
     "template_published": "Template published",
     "static_saved": "Static banner updated",
+    "title_required": "Title is required.",
+    "content_required": "Content is required.",
+    "dates_required": "Start date and end date are required.",
+    "invalid_date_range": "End date must be after start date.",
     "jump_warning": "The sign will jump to the start date of banner {title}.",
     "yes_jump": "Yes, jump.",
     "placeholders": {
