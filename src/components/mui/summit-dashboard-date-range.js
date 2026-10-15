@@ -1,28 +1,22 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import RemoveIcon from "@mui/icons-material/Remove";
-import { formatDate } from "../../../utils/methods";
-import { DATETIME_FORMAT } from "../../../utils/constants";
+import DashboardRow from "./dashboard-row";
+import { formatDate } from "../../utils/methods";
+import { DATETIME_FORMAT } from "../../utils/constants";
 
-function SummitDashboardDateRange({ label, startTs, endTs, tzName }) {
+function SummitDashboardDateRange({
+  label,
+  startTs,
+  endTs,
+  tzName,
+  labelWidth
+}) {
   if (!startTs || !endTs) return null;
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        height: 75,
-        px: 2,
-        borderBottom: 1,
-        borderColor: "divider"
-      }}
-    >
-      <Box sx={{ minWidth: 120 }}>
-        <Typography variant="body2">{label}</Typography>
-      </Box>
+    <DashboardRow label={label} labelWidth={labelWidth}>
       <Typography variant="body1">
         {formatDate(startTs, tzName, DATETIME_FORMAT)}
       </Typography>
@@ -30,7 +24,7 @@ function SummitDashboardDateRange({ label, startTs, endTs, tzName }) {
       <Typography variant="body1">
         {formatDate(endTs, tzName, DATETIME_FORMAT)}
       </Typography>
-    </Box>
+    </DashboardRow>
   );
 }
 
@@ -38,13 +32,15 @@ SummitDashboardDateRange.propTypes = {
   label: PropTypes.string.isRequired,
   startTs: PropTypes.number,
   endTs: PropTypes.number,
-  tzName: PropTypes.string
+  tzName: PropTypes.string,
+  labelWidth: PropTypes.number
 };
 
 SummitDashboardDateRange.defaultProps = {
   startTs: null,
   endTs: null,
-  tzName: undefined
+  tzName: undefined,
+  labelWidth: undefined
 };
 
 export default SummitDashboardDateRange;

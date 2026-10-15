@@ -14,13 +14,18 @@
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2 } from "@mui/material";
-import { ListCard } from "openstack-uicore-foundation/lib/components/mui/cards";
+import { Box, Grid2, Typography } from "@mui/material";
+import DashboardSection from "../../components/mui/dashboard-section";
+import DashboardRow from "../../components/mui/dashboard-row";
+import SummitDashboardDateRange from "../../components/mui/summit-dashboard-date-range";
 import { formatDate } from "../../utils/methods";
 import { DATETIME_FORMAT } from "../../utils/constants";
-import { DATE_FIELDS } from "../../components/forms/selection-plan-form";
 
-const SelectionPlanSummaryPage = ({ currentSummit, entity, history }) => {
+const SETTINGS_LABEL_WIDTH = 220;
+const DATES_LABEL_WIDTH = 260;
+const LINKED_LABEL_WIDTH = 320;
+
+const SelectionPlanSummaryPage = ({ currentSummit, entity }) => {
   const yesNo = (value) =>
     value ? T.translate("general.yes") : T.translate("general.no");
 
@@ -52,13 +57,6 @@ const SelectionPlanSummaryPage = ({ currentSummit, entity, history }) => {
     }
   ];
 
-  const dateRows = DATE_FIELDS.map((field) => ({
-    label: T.translate(`edit_selection_plan.${field}`),
-    value: entity[field]
-      ? formatDate(entity[field], currentSummit.time_zone_id, DATETIME_FORMAT)
-      : T.translate("general.n_a")
-  }));
-
   const linkedRows = [
     {
       label: T.translate("edit_selection_plan.track_groups"),
@@ -82,46 +80,104 @@ const SelectionPlanSummaryPage = ({ currentSummit, entity, history }) => {
     }
   ];
 
-  const handleEdit = () => {
-    history.push(
-      `/app/summits/${currentSummit.id}/selection-plans/${entity.id}/edit`
-    );
-  };
-
   return (
     <div className="container">
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center"
-        }}
-      >
-        <h3>{entity.name}</h3>
-        <Button variant="contained" onClick={handleEdit}>
-          {T.translate("general.edit")}
-        </Button>
-      </Box>
+      <h3>{entity.name}</h3>
       <hr />
-      <Grid2 container spacing={2} size={12} sx={{ mb: 4 }}>
+      <Grid2 container spacing={3} sx={{ mb: 4 }}>
         <Grid2 size={6}>
-          <ListCard
+          <DashboardSection
             title={T.translate("edit_selection_plan.selection_plan")}
-            rows={settingsRows}
-          />
+            variant="card"
+          >
+            {settingsRows.map(({ label, value }) => (
+              <DashboardRow
+                key={label}
+                label={label}
+                labelWidth={SETTINGS_LABEL_WIDTH}
+              >
+                <Typography variant="body1">{value}</Typography>
+              </DashboardRow>
+            ))}
+          </DashboardSection>
         </Grid2>
         <Grid2 size={6}>
-          <ListCard
+          <DashboardSection
             title={T.translate("edit_selection_plan.dates")}
-            rows={dateRows}
-          />
+            variant="card"
+          >
+            <SummitDashboardDateRange
+              label={T.translate("dashboard.submission")}
+              startTs={entity.submission_begin_date}
+              endTs={entity.submission_end_date}
+              tzName={currentSummit.time_zone_id}
+              labelWidth={DATES_LABEL_WIDTH}
+            />
+            {!!entity.submission_lock_down_presentation_status_date && (
+              <DashboardRow
+                label={T.translate(
+                  "edit_selection_plan.submission_lock_down_presentation_status_date"
+                )}
+                labelWidth={DATES_LABEL_WIDTH}
+              >
+                <Typography variant="body1">
+                  {formatDate(
+                    entity.submission_lock_down_presentation_status_date,
+                    currentSummit.time_zone_id,
+                    DATETIME_FORMAT
+                  )}
+                </Typography>
+              </DashboardRow>
+            )}
+            <SummitDashboardDateRange
+              label={T.translate("dashboard.voting")}
+              startTs={entity.voting_begin_date}
+              endTs={entity.voting_end_date}
+              tzName={currentSummit.time_zone_id}
+              labelWidth={DATES_LABEL_WIDTH}
+            />
+            <SummitDashboardDateRange
+              label={T.translate("dashboard.selection")}
+              startTs={entity.selection_begin_date}
+              endTs={entity.selection_end_date}
+              tzName={currentSummit.time_zone_id}
+              labelWidth={DATES_LABEL_WIDTH}
+            />
+          </DashboardSection>
         </Grid2>
         <Grid2 size={12}>
-          <ListCard
+          <DashboardSection
             title={T.translate("edit_selection_plan.linked_items")}
-            rows={linkedRows}
-          />
+            variant="card"
+          >
+            {linkedRows.map(({ label, value }) => (
+              <DashboardRow
+                key={label}
+                label={label}
+                labelWidth={LINKED_LABEL_WIDTH}
+              >
+                <Typography variant="body1">{value}</Typography>
+              </DashboardRow>
+            ))}
+          </DashboardSection>
         </Grid2>
+        {entity.submission_period_disclaimer && (
+          <Grid2 size={12}>
+            <DashboardSection
+              title={T.translate(
+                "edit_selection_plan.submission_period_disclaimer"
+              )}
+              variant="card"
+            >
+              <Box
+                sx={{ p: 2 }}
+                dangerouslySetInnerHTML={{
+                  __html: entity.submission_period_disclaimer
+                }}
+              />
+            </DashboardSection>
+          </Grid2>
+        )}
       </Grid2>
     </div>
   );

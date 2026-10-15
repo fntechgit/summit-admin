@@ -26,8 +26,8 @@ import DashboardStatSection from "./components/dashboard-stat-section";
 import { getSummitById } from "../../actions/summit-actions";
 import { getRegistrationData } from "../../actions/summit-stats-actions";
 import Member from "../../models/member";
-import SummitDashboardDateRange from "./components/summit-dashboard-date-range";
-import DashboardSection from "./components/dashboard-section";
+import SummitDashboardDateRange from "../../components/mui/summit-dashboard-date-range";
+import DashboardSection from "../../components/mui/dashboard-section";
 
 const TAB_KEYS = [
   "dashboard.dashboard",

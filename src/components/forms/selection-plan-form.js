@@ -31,7 +31,7 @@ import PresentationActionTypesTab from "./selection-plan-form/presentation-actio
 import AllowedMembersTab from "./selection-plan-form/allowed-members-tab";
 import CfpSettingsTab from "./selection-plan-form/cfp-settings-tab";
 
-export const DATE_FIELDS = [
+const DATE_FIELDS = [
   "submission_begin_date",
   "submission_end_date",
   "submission_lock_down_presentation_status_date",

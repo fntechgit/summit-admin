@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import Divider from "@mui/material/Divider";
 import Grid2 from "@mui/material/Grid2";
-import DashboardSection from "./dashboard-section";
+import DashboardSection from "../../../components/mui/dashboard-section";
 import SummitDashboardStat from "./summit-dashboard-stat";
 
 const GRID_COLUMNS = 12;
