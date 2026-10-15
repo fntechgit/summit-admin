@@ -216,7 +216,8 @@ class EventForm extends React.Component {
     this.setState({ entity: newEntity }, () => {
       if (id === "type_id" && entity.id)
         this.handleEventTypeChange(entity, newEntity);
-      if (id === "track_id") this.clearSelectionPlanIfNotAllowed(newEntity);
+      if (id === "type_id" || id === "track_id")
+        this.clearSelectionPlanIfNotAllowed(newEntity);
     });
   }
 
@@ -229,7 +230,12 @@ class EventForm extends React.Component {
     );
     if (!plan) return;
     const track = trackOpts.find((t) => t.id === entity.track_id);
-    if (plan.event_types.includes(entity.type_id) && isTrackInPlan(track, plan))
+    // no category means no plan can match, so clear it too
+    if (
+      track &&
+      plan.event_types.includes(entity.type_id) &&
+      isTrackInPlan(track, plan)
+    )
       return;
     this.handleChangeSelectionPlan({
       target: { id: "selection_plan_id", value: null }

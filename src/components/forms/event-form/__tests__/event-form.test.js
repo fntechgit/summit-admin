@@ -578,6 +578,23 @@ describe("EventForm", () => {
       );
     });
 
+    it("clears the selection plan when the new activity type isn't in it", async () => {
+      const { container } = renderEventForm({
+        entity: { ...presentationEntity, selection_plan_id: 100 },
+        selectionPlansOpts: [matchingPlan]
+      });
+
+      pickOption(container, "type_id", "Keynotes");
+
+      await waitFor(() =>
+        expect(
+          screen.queryByRole("button", {
+            name: "edit_event.reopen_submission"
+          })
+        ).not.toBeInTheDocument()
+      );
+    });
+
     it("keeps the selection plan when the new category is in it", () => {
       const { container } = renderEventForm({
         entity: { ...presentationEntity, selection_plan_id: 100 },
