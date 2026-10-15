@@ -2,6 +2,7 @@ import React from "react";
 import { waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import Swal from "sweetalert2";
 import { renderWithRedux } from "../../../../utils/test-utils";
 import showConfirmDialog from "../../../mui/showConfirmDialog";
 import {
@@ -27,11 +28,30 @@ jest.mock("../../../../actions/signage-actions", () => ({
   publishDate: jest.fn()
 }));
 
+jest.mock("sweetalert2", () => ({
+  __esModule: true,
+  default: { fire: jest.fn() }
+}));
+
+// typing a number sets that many epoch seconds, like the real picker's moment value
 jest.mock(
   "openstack-uicore-foundation/lib/components/inputs/datetimepicker",
   () => ({
     __esModule: true,
-    default: ({ id }) => <input data-testid={id} />
+    default: ({ id, onChange }) => (
+      <input
+        id={id}
+        onChange={(ev) =>
+          onChange({
+            target: {
+              id,
+              type: "datetime",
+              value: { valueOf: () => Number(ev.target.value) * 1000 }
+            }
+          })
+        }
+      />
+    )
   })
 );
 
@@ -69,6 +89,7 @@ const INITIAL_STATE = {
 // connect() dispatches what the action creator returns, so return thunks
 const thunkResolving = () => () => Promise.resolve();
 const thunkRejecting = () => () => Promise.reject(new Error("failed"));
+const thunkPending = () => () => new Promise(() => {});
 
 const renderTable = () =>
   renderWithRedux(<BannersTable data={BANNERS} room={{ name: "Room A" }} />, {
@@ -79,6 +100,22 @@ const getRow = (id) => document.querySelector(`tr[id="${id}"]`);
 const getAction = (id, action) =>
   getRow(id).querySelector(`[data-tooltip-content="${action}"]`);
 const getNewRow = () => document.querySelector("tr#new_row");
+const getAddButton = () =>
+  within(getNewRow()).getByRole("button", { name: "general.add" });
+
+const fillNewRow = async ({
+  title = "New banner",
+  content = "new content",
+  start = "1000",
+  end = "2000"
+} = {}) => {
+  const row = getNewRow();
+  if (title) await userEvent.type(row.querySelector("input#title"), title);
+  if (content)
+    await userEvent.type(row.querySelector("input#content"), content);
+  if (start) await userEvent.type(row.querySelector("input#start_date"), start);
+  if (end) await userEvent.type(row.querySelector("input#end_date"), end);
+};
 
 describe("BannersTable", () => {
   beforeEach(() => {
@@ -138,28 +175,102 @@ describe("BannersTable", () => {
     saveBanner.mockImplementation(thunkRejecting);
     renderTable();
 
-    const titleInput = getNewRow().querySelector("input#title");
-    await userEvent.type(titleInput, "New banner");
-    await userEvent.click(
-      within(getNewRow()).getByRole("button", { name: "general.add" })
-    );
+    await fillNewRow();
+    await userEvent.click(getAddButton());
 
     await waitFor(() => expect(saveBanner).toHaveBeenCalled());
-    expect(titleInput).toHaveValue("New banner");
+    expect(getNewRow().querySelector("input#title")).toHaveValue("New banner");
+  });
+
+  it("a second click on Add while saving does not call saveBanner again", async () => {
+    saveBanner.mockImplementation(thunkPending);
+    renderTable();
+
+    await fillNewRow();
+    await userEvent.click(getAddButton());
+    await userEvent.click(getAddButton());
+
+    expect(saveBanner).toHaveBeenCalledTimes(1);
+    expect(getAddButton()).toBeDisabled();
+  });
+
+  it("a second click on a row's save while saving does not call saveBanner again", async () => {
+    saveBanner.mockImplementation(thunkPending);
+    renderTable();
+
+    await userEvent.click(getAction(1, "edit"));
+    await userEvent.click(getAction(1, "save"));
+    await userEvent.click(getAction(1, "save"));
+
+    expect(saveBanner).toHaveBeenCalledTimes(1);
   });
 
   it("clears the new banner draft after a successful add", async () => {
     renderTable();
 
-    const titleInput = getNewRow().querySelector("input#title");
-    await userEvent.type(titleInput, "New banner");
-    await userEvent.click(
-      within(getNewRow()).getByRole("button", { name: "general.add" })
-    );
+    await fillNewRow();
+    await userEvent.click(getAddButton());
 
-    await waitFor(() => expect(titleInput).toHaveValue(""));
+    await waitFor(() =>
+      expect(getNewRow().querySelector("input#title")).toHaveValue("")
+    );
     expect(saveBanner).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "New banner" })
+      expect.objectContaining({
+        title: "New banner",
+        content: "new content",
+        start_date: 1000,
+        end_date: 2000
+      })
+    );
+  });
+
+  it.each([
+    ["the title is missing", { title: "" }, "signage.title_required"],
+    ["the content is missing", { content: "" }, "signage.content_required"],
+    ["a date is missing", { end: "" }, "signage.dates_required"],
+    [
+      "the end date is before the start date",
+      { start: "3000" },
+      "signage.invalid_date_range"
+    ]
+  ])("does not call saveBanner on Add when %s", async (_, draft, message) => {
+    renderTable();
+
+    await fillNewRow(draft);
+    await userEvent.click(getAddButton());
+
+    expect(saveBanner).not.toHaveBeenCalled();
+    expect(Swal.fire).toHaveBeenCalledWith("general.error", message, "warning");
+    expect(getNewRow().querySelector("input#content")).toHaveValue(
+      draft.content ?? "new content"
+    );
+  });
+
+  it("does not call saveBanner on a row's save when the end date is before the start date", async () => {
+    renderTable();
+
+    await userEvent.click(getAction(1, "edit"));
+    await userEvent.type(getRow(1).querySelector("input#start_date"), "3000");
+    await userEvent.click(getAction(1, "save"));
+
+    expect(saveBanner).not.toHaveBeenCalled();
+    expect(Swal.fire).toHaveBeenCalledWith(
+      "general.error",
+      "signage.invalid_date_range",
+      "warning"
+    );
+    expect(getAction(1, "save")).toBeInTheDocument();
+  });
+
+  it("allows an empty title on a row's save, as the API does on edit", async () => {
+    renderTable();
+
+    await userEvent.click(getAction(1, "edit"));
+    await userEvent.clear(getRow(1).querySelector("input#title"));
+    await userEvent.click(getAction(1, "save"));
+
+    expect(saveBanner).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 1, title: "" })
     );
   });
 
