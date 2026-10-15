@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import Menu from "../index";
 
@@ -12,9 +13,11 @@ jest.mock("react-router-dom", () => ({
   withRouter: (component) => component
 }));
 
-jest.mock("../../../models/member", () => jest.fn().mockImplementation(() => ({
+jest.mock("../../../models/member", () =>
+  jest.fn().mockImplementation(() => ({
     hasAccess: () => true
-  })));
+  }))
+);
 
 jest.mock("../menu-definition", () => ({
   getGlobalItems: () => [{ name: "directory", linkUrl: "directory" }],
@@ -58,6 +61,24 @@ describe("Menu", () => {
     renderMenu();
     const link = screen.getByText("menu.directory");
     fireEvent.click(link);
+    expect(mockHistory.push).toHaveBeenCalledWith("/app/directory");
+  });
+
+  test("notifies the host so the drawer can close, then navigates", async () => {
+    const onNavigate = jest.fn();
+    renderMenu({ onNavigate });
+
+    await userEvent.click(screen.getByText("menu.directory"));
+
+    expect(onNavigate).toHaveBeenCalledTimes(1);
+    expect(mockHistory.push).toHaveBeenCalledWith("/app/directory");
+  });
+
+  test("navigates even when the host supplies no onNavigate", async () => {
+    renderMenu();
+
+    await userEvent.click(screen.getByText("menu.directory"));
+
     expect(mockHistory.push).toHaveBeenCalledWith("/app/directory");
   });
 });
