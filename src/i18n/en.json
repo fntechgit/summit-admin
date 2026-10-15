@@ -3885,6 +3885,10 @@
     "event_jump": "Time has been jumped to the selected activity",
     "template_published": "Template published",
     "static_saved": "Static banner updated",
+    "end_overflow": "End overflow (emergency)",
+    "end_overflow_warning": "The overflow player and the signs will stop showing the overflow for \"{title}\" right away. The activity occupancy is not changed.",
+    "end_overflow_confirm": "Yes, end overflow",
+    "overflow_ended": "Overflow end sent to the player and the signs",
     "placeholders": {
       "locations": "Select location",
       "template": "Select template",

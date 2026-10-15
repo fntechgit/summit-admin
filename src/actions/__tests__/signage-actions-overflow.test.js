@@ -11,6 +11,7 @@ import {
 } from "../ably-actions";
 import {
   publishDate,
+  publishOverflowEnd,
   publishOverflowState,
   publishReload,
   RELOAD_OVERFLOW_RESYNC_DELAY_MS
@@ -210,6 +211,93 @@ describe("signage overflow re-sync", () => {
       );
 
       expect(result).toBe(false);
+    });
+  });
+
+  describe("publishOverflowEnd", () => {
+    let logSpy;
+    let errorSpy;
+
+    beforeEach(() => {
+      logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+      errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      logSpy.mockRestore();
+      errorSpy.mockRestore();
+    });
+
+    it("logs in the console whether the overflow end was published", async () => {
+      await store.dispatch(publishOverflowEnd(summitId, overflowEvent.id));
+      expect(logSpy).toHaveBeenCalledWith(
+        `Overflow end for event ${overflowEvent.id} published on ${summitId}:OVERFLOW:*`,
+        expect.objectContaining({ params: { overflow_url: "" } })
+      );
+
+      publishToScheduleUpdatesChannel.mockReturnValue(() =>
+        Promise.resolve(false)
+      );
+      await store.dispatch(publishOverflowEnd(summitId, overflowEvent.id));
+      expect(errorSpy).toHaveBeenCalledWith(
+        `Overflow end for event ${overflowEvent.id} NOT published on ${summitId}:OVERFLOW:*`,
+        expect.objectContaining({ entity_id: overflowEvent.id })
+      );
+    });
+
+    it("sends the event's PresentationOverflow message with an empty overflow_url straight to Ably, without calling summit-api", async () => {
+      const publishThunk = jest.fn(() => Promise.resolve(true));
+      publishToScheduleUpdatesChannel.mockReturnValue(publishThunk);
+
+      await store.dispatch(publishOverflowEnd(summitId, overflowEvent.id));
+
+      expect(getRequest).not.toHaveBeenCalled();
+      expect(publishToScheduleUpdatesChannel).toHaveBeenCalledTimes(1);
+      expect(publishToScheduleUpdatesChannel).toHaveBeenCalledWith(
+        `${summitId}:OVERFLOW:*`,
+        "EVENT",
+        {
+          summit_id: summitId,
+          entity_type: "PresentationOverflow",
+          entity_id: overflowEvent.id,
+          entity_operator: "UPDATE",
+          created_at: expect.any(Number),
+          params: { overflow_url: "" }
+        }
+      );
+      // the publish is a thunk: it only reaches Ably when dispatched
+      expect(publishThunk).toHaveBeenCalledTimes(1);
+      expect(showSuccessMessage).toHaveBeenCalledWith("signage.overflow_ended");
+    });
+
+    it("stops loading without showing success when the publish fails", async () => {
+      publishToScheduleUpdatesChannel.mockReturnValue(() =>
+        Promise.resolve(false)
+      );
+
+      await store.dispatch(publishOverflowEnd(summitId, overflowEvent.id));
+
+      expect(showSuccessMessage).not.toHaveBeenCalled();
+      expect(store.getActions().map((a) => a.type)).toContain("STOP_LOADING");
+    });
+
+    it("publishes on the summit it is given, even if the current summit changed", async () => {
+      const otherSummitId = 74;
+      store = mockStore({
+        currentSummitState: { currentSummit: { ...summit, id: otherSummitId } },
+        signageState: { locationId }
+      });
+
+      await store.dispatch(publishOverflowEnd(summitId, overflowEvent.id));
+
+      expect(publishToScheduleUpdatesChannel).toHaveBeenCalledWith(
+        `${summitId}:OVERFLOW:*`,
+        "EVENT",
+        expect.objectContaining({
+          summit_id: summitId,
+          entity_id: overflowEvent.id
+        })
+      );
     });
   });
 

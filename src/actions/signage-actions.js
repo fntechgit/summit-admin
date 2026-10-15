@@ -266,6 +266,45 @@ export const publishOverflowState =
       .catch(() => false);
   };
 
+/**
+ * Emergency stop: tells the overflow player and the signs to drop the event's
+ * overflow, the same message pub-api relays when summit-api clears it.
+ * Goes straight to Ably and leaves the event's occupancy in summit-api untouched.
+ * Takes the summit the event was listed for, not the current one: the confirm
+ * dialog outlives the page, so the current summit may have changed by then.
+ */
+export const publishOverflowEnd = (summitId, eventId) => async (dispatch) => {
+  dispatch(startLoading());
+
+  const channel = getOverflowChannel(summitId);
+  const message = {
+    summit_id: summitId,
+    entity_type: OVERFLOW_ENTITY_TYPE,
+    entity_id: eventId,
+    entity_operator: "UPDATE",
+    created_at: moment().unix(),
+    params: { overflow_url: "" }
+  };
+
+  const res = await dispatch(
+    publishToScheduleUpdatesChannel(channel, "EVENT", message)
+  );
+
+  if (res) {
+    console.log(
+      `Overflow end for event ${eventId} published on ${channel}`,
+      message
+    );
+    dispatch(showSuccessMessage(T.translate("signage.overflow_ended")));
+  } else {
+    console.error(
+      `Overflow end for event ${eventId} NOT published on ${channel}`,
+      message
+    );
+    dispatch(stopLoading());
+  }
+};
+
 export const publishDate =
   (startDate, popupResource = "signage.date_published") =>
   async (dispatch, getState) => {
