@@ -126,7 +126,7 @@ describe("signage-actions", () => {
 
   describe("publishDate", () => {
     it("stops loading when the Ably publish is unavailable", async () => {
-      publishToAblyChannel.mockReturnValue(false);
+      publishToAblyChannel.mockReturnValue(() => Promise.resolve(false));
       const store = mockStore(MOCK_STATE);
 
       await store.dispatch(publishDate(1000));
