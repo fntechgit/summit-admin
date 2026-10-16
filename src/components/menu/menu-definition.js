@@ -142,6 +142,7 @@ export const getSummitItems = (summitId) => [
       },
       {
         name: "track_chairs",
+        accessRoute: "track-chairs",
         isGroup: true,
         subItems: [
           {

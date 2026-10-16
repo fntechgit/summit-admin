@@ -23,15 +23,14 @@ const GROUP_LEAF_PL = 6;
 const INFO_ICON_ML = 0.5;
 
 const isAccessible = (item, memberObj) =>
-  item.isGroup ||
-  !item.hasOwnProperty("accessRoute") ||
-  memberObj.hasAccess(item.accessRoute);
+  !item.hasOwnProperty("accessRoute") || memberObj.hasAccess(item.accessRoute);
 
 // Do not show a parent folder if the user does not have access to any of the children
 const hasVisibleContent = (item, memberObj) =>
-  item.isGroup
+  isAccessible(item, memberObj) &&
+  (item.isGroup
     ? item.subItems.some((child) => hasVisibleContent(child, memberObj))
-    : isAccessible(item, memberObj);
+    : true);
 
 const isActive = (item, currentPath, memberObj) =>
   item.isGroup
