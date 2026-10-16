@@ -16,14 +16,14 @@ import T from "i18n-react/dist/i18n-react";
 import moment from "moment-timezone";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
-import Panel from "openstack-uicore-foundation/lib/components/sections/panel"
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import Table from "openstack-uicore-foundation/lib/components/table"
-import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input"
-import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
-import Exclusive from "openstack-uicore-foundation/lib/components/exclusive-wrapper"
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
+import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import Table from "openstack-uicore-foundation/lib/components/table";
+import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
+import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input";
+import Exclusive from "openstack-uicore-foundation/lib/components/exclusive-wrapper";
 import FreeMultiTextInput from "openstack-uicore-foundation/lib/components/inputs/free-multi-text-input";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import { Pagination } from "react-bootstrap";
@@ -438,6 +438,13 @@ class SummitForm extends React.Component {
       <form>
         <input type="hidden" id="id" value={entity.id} />
         <div className="row form-group">
+          <div className="col-md-12">
+            <span className="note">
+              * {T.translate("edit_summit.required_field_note")}
+            </span>
+          </div>
+        </div>
+        <div className="row form-group">
           <div className="col-md-4">
             <label htmlFor="name"> {T.translate("edit_summit.name")} *</label>
             <Input
@@ -716,7 +723,7 @@ class SummitForm extends React.Component {
 
         <Panel
           show={showSection === "dates"}
-          title={T.translate("edit_summit.dates")}
+          title={`${T.translate("edit_summit.dates")} *`}
           handleClick={(ev) => this.toggleSection("dates", ev)}
         >
           <div className="row form-group">
@@ -750,7 +757,7 @@ class SummitForm extends React.Component {
             <div className="col-md-6">
               <label htmlFor="start_date">
                 {" "}
-                {T.translate("edit_summit.start_date")}{" "}
+                {T.translate("edit_summit.start_date")} *
               </label>
               <DateTimePicker
                 id="start_date"
@@ -768,7 +775,7 @@ class SummitForm extends React.Component {
             <div className="col-md-6">
               <label htmlFor="end_date">
                 {" "}
-                {T.translate("edit_summit.end_date")}{" "}
+                {T.translate("edit_summit.end_date")} *
               </label>
               <DateTimePicker
                 id="end_date"
@@ -1582,7 +1589,7 @@ class SummitForm extends React.Component {
         <Exclusive name="room-booking">
           <Panel
             show={showSection === "room-booking"}
-            title={T.translate("edit_summit.room-booking")}
+            title={`${T.translate("edit_summit.room-booking")}`}
             handleClick={(ev) => this.toggleSection("room-booking", ev)}
           >
             <div className="row form-group">
@@ -1634,7 +1641,6 @@ class SummitForm extends React.Component {
                   {T.translate(
                     "room_bookings.meeting_room_booking_start_time"
                   )}{" "}
-                  *
                 </label>
                 <DateTimePicker
                   id="meeting_room_booking_start_time"
@@ -1648,7 +1654,7 @@ class SummitForm extends React.Component {
               <div className="col-md-4">
                 <label htmlFor="meeting_room_booking_end_time">
                   {" "}
-                  {T.translate("room_bookings.meeting_room_booking_end_time")} *
+                  {T.translate("room_bookings.meeting_room_booking_end_time")}
                 </label>
                 <DateTimePicker
                   id="meeting_room_booking_end_time"
@@ -1667,7 +1673,6 @@ class SummitForm extends React.Component {
                   {T.translate(
                     "room_bookings.meeting_room_booking_slot_length"
                   )}{" "}
-                  *
                 </label>
                 <Input
                   id="meeting_room_booking_slot_length"
@@ -1683,7 +1688,6 @@ class SummitForm extends React.Component {
                   {T.translate(
                     "room_bookings.meeting_room_booking_max_allowed"
                   )}{" "}
-                  *
                 </label>
                 <Input
                   id="meeting_room_booking_max_allowed"
