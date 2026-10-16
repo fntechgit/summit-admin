@@ -102,6 +102,19 @@ const theme = createTheme(MuiBaseCustomTheme, {
         })
       }
     },
+    // same metrics as a medium MuiButton, so toggles line up with buttons in toolbars
+    MuiToggleButton: {
+      styleOverrides: {
+        root: ({ ownerState }) => ({
+          ...(ownerState.size === "medium" && {
+            fontSize: "14px",
+            lineHeight: "20px",
+            padding: "8px 12px",
+            height: "36px"
+          })
+        })
+      }
+    },
     MuiTab: {
       styleOverrides: {
         root: {
