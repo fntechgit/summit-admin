@@ -36,10 +36,7 @@ import {
 } from "../../utils/constants";
 import GridToolbar from "../../components/mui/grid-toolbar";
 import RefundBookingPopup from "./components/refund-booking-popup";
-import {
-  buildRoomBookingFilters,
-  getCriterias
-} from "./room-booking-list-page.helpers";
+import { buildRoomBookingFilters, getCriterias } from "./helpers";
 
 const FILTER_ID = "room_booking_list";
 
@@ -165,8 +162,6 @@ const RoomBookingListPage = ({
 
   const handleRefund = (booking, amount) =>
     refundRoomBooking(booking.room_id, booking.id, amount);
-
-  if (!currentSummit.id) return <div />;
 
   const roomBookingsFormatted = roomBookings.map((rb) => ({
     ...rb,
