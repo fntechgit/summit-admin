@@ -34,18 +34,29 @@ export const getGlobalItems = () => [
   },
   {
     name: "sponsors_services",
-    accessRoute: "inventory",
     subItems: [
       {
         name: "commercial_offerings",
         isGroup: true,
         subItems: [
-          { name: "inventory", linkUrl: "inventory" },
-          { name: "form_templates", linkUrl: "form-templates" }
+          { name: "inventory", linkUrl: "inventory", accessRoute: "inventory" },
+          {
+            name: "form_templates",
+            linkUrl: "form-templates",
+            accessRoute: "inventory"
+          }
         ]
       },
-      { name: "page_templates", linkUrl: "page-templates" },
-      { name: "add_on_types", linkUrl: "add-on-types" },
+      {
+        name: "page_templates",
+        linkUrl: "page-templates",
+        accessRoute: "inventory"
+      },
+      {
+        name: "add_on_types",
+        linkUrl: "add-on-types",
+        accessRoute: "inventory"
+      },
       {
         name: "sponsorship_types",
         linkUrl: "sponsorship-types",
