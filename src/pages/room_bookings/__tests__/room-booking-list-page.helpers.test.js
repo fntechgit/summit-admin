@@ -1,5 +1,5 @@
 import { OPERATORS } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
-import { buildRoomBookingFilters } from "../room-booking-list-page.helpers";
+import { buildRoomBookingFilters } from "../helpers";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   __esModule: true,
