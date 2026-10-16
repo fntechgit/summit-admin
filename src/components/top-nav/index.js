@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
@@ -27,11 +27,10 @@ import {
   getIdToken
 } from "openstack-uicore-foundation/lib/security/methods";
 import IdTokenVerifier from "idtoken-verifier";
-import { withRouter } from "react-router-dom";
 import AuthButton from "../auth-button";
 import Menu from "../menu";
 import { getGlobalItems, getSummitItems } from "../menu/menu-definition";
-import { findMenuPath } from "../menu/menu-path";
+import { addMenuLinks } from "../menu/menu-path";
 
 const DRAWER_WIDTH = 260;
 const COMPACT_BAR_HEIGHT = 48;
@@ -39,17 +38,38 @@ const REGULAR_BAR_HEIGHT = 56;
 const SUB_BAR_HEIGHT = 36;
 const SHORT_VIEWPORT_MAX_HEIGHT = 500;
 
-// inserts the nav folders (e.g. Program Management) before the page's crumb
-const insertMenuFolders = (menuPath) => (crumbs) => {
-  if (!menuPath || menuPath.length === 0) return crumbs;
+// puts the page's menu folders after the Summit crumb (Home on global pages)
+export const insertMenuFolders = (menuMap) => (crumbs) => {
+  // deepest crumb that is a menu link = the most specific match
+  let matchIndex = -1;
+  for (let i = crumbs.length - 1; i >= 0; i--) {
+    if (menuMap.has(crumbs[i].pathname)) {
+      matchIndex = i;
+      break;
+    }
+  }
+  if (matchIndex === -1) return crumbs;
 
-  const folderCrumbs = menuPath.map((name) => ({
-    id: `menu-folder-${name}`,
-    title: T.translate(`menu.${name}`),
-    pathname: crumbs[crumbs.length - 1]?.pathname
-  }));
+  const { folders, anchor } = menuMap.get(crumbs[matchIndex].pathname);
+  const anchorIndex = crumbs.findIndex((crumb) => crumb.pathname === anchor);
+  if (anchorIndex === -1 || matchIndex <= anchorIndex) return crumbs;
 
-  return [...crumbs.slice(0, -1), ...folderCrumbs, crumbs[crumbs.length - 1]];
+  // skip a folder that repeats the matched crumb (e.g. "Activities / Activities")
+  const folderCrumbs = folders
+    .map((name) => ({ name, title: T.translate(`menu.${name}`) }))
+    .filter(({ title }) => title !== crumbs[matchIndex].title)
+    .map(({ name, title }) => ({
+      id: `menu-folder-${name}`,
+      title: <span className="crumb-folder">{title}</span>,
+      pathname: anchor
+    }));
+
+  // route crumbs between the anchor and the match are replaced by the folders
+  return [
+    ...crumbs.slice(0, anchorIndex + 1),
+    ...folderCrumbs,
+    ...crumbs.slice(matchIndex)
+  ];
 };
 
 /**
@@ -60,16 +80,25 @@ const insertMenuFolders = (menuPath) => (crumbs) => {
  * open state itself and hands `closeDrawer` to the menu so a navigation item
  * can dismiss the drawer after it acts.
  */
-const TopNav = ({ isLoggedUser, currentSummit, member, location }) => {
+const TopNav = ({ isLoggedUser, currentSummit, member }) => {
   const [open, setOpen] = useState(false);
 
   // The current summit's name, shown next to the title behind a divider.
   const contextLabel = currentSummit?.id > 0 ? currentSummit.name : null;
 
-  const menuItems = currentSummit?.id
-    ? getSummitItems(currentSummit.id)
-    : getGlobalItems();
-  const menuPath = findMenuPath(menuItems, location.pathname);
+  // built once per summit; global links stay findable while a summit is selected
+  const summitId = currentSummit?.id;
+  const setCrumbs = useMemo(() => {
+    const menuMap = addMenuLinks(getGlobalItems(), "/app", new Map());
+    if (summitId) {
+      addMenuLinks(
+        getSummitItems(summitId),
+        `/app/summits/${summitId}`,
+        menuMap
+      );
+    }
+    return insertMenuFolders(menuMap);
+  }, [summitId]);
 
   const closeDrawer = useCallback(() => setOpen(false), []);
   const toggleDrawer = useCallback(() => setOpen((prev) => !prev), []);
@@ -164,13 +193,18 @@ const TopNav = ({ isLoggedUser, currentSummit, member, location }) => {
             bgcolor: "background.paper",
             borderBottom: 1,
             borderColor: "divider",
-            overflowX: "auto"
+            overflowX: "auto",
+            // menu folder crumbs are labels, not links
+            "& .breadcrumbs__crumb:has(.crumb-folder)": {
+              pointerEvents: "none",
+              color: "inherit"
+            }
           }}
         >
           <Breadcrumbs
             className="breadcrumbs-wrapper"
             separator="/"
-            setCrumbs={insertMenuFolders(menuPath)}
+            setCrumbs={setCrumbs}
           />
         </Toolbar>
       )}
@@ -211,7 +245,6 @@ TopNav.propTypes = {
   /** Its name labels the bar; also passed through to the drawer's menu. */
   // eslint-disable-next-line react/forbid-prop-types
   currentSummit: PropTypes.object,
-  location: PropTypes.shape({ pathname: PropTypes.string }).isRequired,
   // eslint-disable-next-line react/forbid-prop-types
   member: PropTypes.object
 };
@@ -222,4 +255,4 @@ TopNav.defaultProps = {
   member: null
 };
 
-export default withRouter(TopNav);
+export default TopNav;

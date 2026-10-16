@@ -11,34 +11,14 @@
  * limitations under the License.
  * */
 
-// Walks a menu-definition.js tree (getSummitItems/getGlobalItems) and
-// returns the ordered list of ancestor folder names (their `name`, not yet
-// translated) for whichever leaf's `linkUrl` matches `pathname`.
-//
-// Allows the breadcrumb to show the same nav folders (Program Management > Activities)
-// the sidebar groups a page under, without hardcoding those labels into
-// every layout file.
-//
-// Returns `null` when no leaf matches (page isn't in the
-// menu at all) and `[]` when the matching leaf has no folder ancestors.
-const findMenuPathInItem = (item, pathname) => {
-  if (item.subItems) {
-    const childPath = findMenuPath(item.subItems, pathname);
-    return childPath !== null ? [item.name, ...childPath] : null;
-  }
-
-  if (item.linkUrl) {
-    const itemPath = `/app/${item.linkUrl}`;
-    if (pathname === itemPath || pathname.startsWith(`${itemPath}/`)) return [];
-  }
-
-  return null;
-};
-
-export const findMenuPath = (items, pathname) => {
-  const path = items
-    .map((item) => findMenuPathInItem(item, pathname))
-    .find((result) => result !== null);
-
-  return path ?? null;
+// key: a crumb pathname; value: the link's folder names and the crumb they go after
+export const addMenuLinks = (items, anchor, map, folders = []) => {
+  items.forEach((item) => {
+    if (item.subItems) {
+      addMenuLinks(item.subItems, anchor, map, [...folders, item.name]);
+    } else if (item.linkUrl) {
+      map.set(`/app/${item.linkUrl}`, { folders, anchor });
+    }
+  });
+  return map;
 };

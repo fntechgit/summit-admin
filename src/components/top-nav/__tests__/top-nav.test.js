@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import TopNav from "../index";
+import TopNav, { insertMenuFolders } from "../index";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   translate: (key) => key
@@ -13,9 +13,6 @@ jest.mock("openstack-uicore-foundation/lib/security/methods", () => ({
 jest.mock("react-breadcrumbs", () => ({
   Breadcrumbs: () => <span>crumbs</span>
 }));
-jest.mock("react-router-dom", () => ({
-  withRouter: (component) => component
-}));
 // Stands in for the app menu: a navigation item that dismisses the drawer.
 jest.mock("../../menu", () => ({ onNavigate }) => (
   <button type="button" onClick={onNavigate}>
@@ -25,8 +22,7 @@ jest.mock("../../menu", () => ({ onNavigate }) => (
 
 const DRAWER_TEXT = "drawer contents";
 
-const renderNav = (props = {}) =>
-  render(<TopNav location={{ pathname: "/app/directory" }} {...props} />);
+const renderNav = (props = {}) => render(<TopNav {...props} />);
 
 const burger = () =>
   screen.getByRole("button", { name: "menu.toggle_navigation" });
@@ -97,5 +93,99 @@ describe("TopNav", () => {
       // The title still renders; it is the only thing left on the bar.
       expect(screen.getByText("landing.os_summit_admin")).toBeInTheDocument();
     });
+  });
+});
+
+describe("insertMenuFolders", () => {
+  const SUMMIT = "/app/summits/1";
+  const HOME = { id: "home", title: "home", pathname: "/app" };
+  const SUMMIT_CRUMB = { id: "summit", title: "Summit", pathname: SUMMIT };
+  // the i18n mock returns keys, so the section crumb reads like its menu folder
+  const ACTIVITIES = {
+    id: "activities",
+    title: "menu.events",
+    pathname: `${SUMMIT}/events`
+  };
+  const SCHEDULE = {
+    id: "schedule",
+    title: "Schedule",
+    pathname: `${SUMMIT}/events/schedule`
+  };
+  const INVENTORY = {
+    id: "inv",
+    title: "Inventory",
+    pathname: "/app/inventory"
+  };
+
+  const menuMap = new Map([
+    [
+      `${SUMMIT}/events`,
+      { folders: ["program_management", "events"], anchor: SUMMIT }
+    ],
+    [
+      `${SUMMIT}/events/schedule`,
+      { folders: ["program_management"], anchor: SUMMIT }
+    ],
+    ["/app/inventory", { folders: ["sponsors_services"], anchor: "/app" }]
+  ]);
+  const setCrumbs = insertMenuFolders(menuMap);
+
+  const titles = (crumbs) =>
+    crumbs.map((c) =>
+      typeof c.title === "string" ? c.title : c.title.props.children
+    );
+
+  test("list page: folders after Summit, skipping the one that repeats the section", () => {
+    expect(titles(setCrumbs([HOME, SUMMIT_CRUMB, ACTIVITIES]))).toEqual([
+      "home",
+      "Summit",
+      "menu.program_management",
+      "menu.events"
+    ]);
+  });
+
+  test("detail page: matches the section crumb and keeps the detail crumb", () => {
+    const talk = {
+      id: "talk",
+      title: "Talk X",
+      pathname: `${SUMMIT}/events/42`
+    };
+    expect(titles(setCrumbs([HOME, SUMMIT_CRUMB, ACTIVITIES, talk]))).toEqual([
+      "home",
+      "Summit",
+      "menu.program_management",
+      "menu.events",
+      "Talk X"
+    ]);
+  });
+
+  test("nested link: deepest match wins and route crumbs above it are replaced", () => {
+    expect(
+      titles(setCrumbs([HOME, SUMMIT_CRUMB, ACTIVITIES, SCHEDULE]))
+    ).toEqual(["home", "Summit", "menu.program_management", "Schedule"]);
+  });
+
+  test("global page: folders after Home", () => {
+    expect(titles(setCrumbs([HOME, INVENTORY]))).toEqual([
+      "home",
+      "menu.sponsors_services",
+      "Inventory"
+    ]);
+  });
+
+  test("folder crumbs link to the anchor, not the current page", () => {
+    const crumbs = setCrumbs([HOME, SUMMIT_CRUMB, ACTIVITIES]);
+    expect(crumbs[2].pathname).toBe(SUMMIT);
+  });
+
+  test("unchanged when the page is not in the menu or the anchor is missing", () => {
+    const notInMenu = [
+      HOME,
+      SUMMIT_CRUMB,
+      { id: "x", title: "X", pathname: `${SUMMIT}/x` }
+    ];
+    expect(setCrumbs(notInMenu)).toBe(notInMenu);
+    const noAnchor = [HOME, ACTIVITIES];
+    expect(setCrumbs(noAnchor)).toBe(noAnchor);
   });
 });
