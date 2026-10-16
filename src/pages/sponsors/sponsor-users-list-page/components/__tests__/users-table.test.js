@@ -14,6 +14,9 @@ jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => {
           <span data-testid={`access-rights-${row.id}`}>
             {JSON.stringify(row.access_rights)}
           </span>
+          <span data-testid={`sponsors-str-${row.id}`}>
+            {JSON.stringify(row.sponsors_str)}
+          </span>
         </div>
       ))}
     </div>
@@ -27,6 +30,8 @@ jest.mock("../../../../../components/mui/chip-list", () => {
   );
   return MockChipList;
 });
+
+const SUMMIT_ID = 75;
 
 const defaultUsers = {
   items: [],
@@ -54,6 +59,7 @@ const userWithFlatSponsorId = (sponsorId) => ({
   access_rights: [
     {
       id: 10,
+      summit_id: SUMMIT_ID,
       sponsor_id: sponsorId,
       sponsor: { company_name: "Acme Corp" }, // no sponsor.id — old shape
       groups: [{ id: 100, name: "admin" }]
@@ -70,6 +76,7 @@ const userWithNestedSponsorId = (sponsorId) => ({
   access_rights: [
     {
       id: 20,
+      summit_id: SUMMIT_ID,
       // sponsor_id intentionally absent (undefined) — new shape
       sponsor: { id: sponsorId, company_name: "Beta Inc" },
       groups: [{ id: 101, name: "viewer" }]
@@ -86,12 +93,14 @@ const userWithMultipleSponsorAccessRights = () => ({
   access_rights: [
     {
       id: 30,
+      summit_id: SUMMIT_ID,
       sponsor_id: 42,
       sponsor: { company_name: "Acme Corp" },
       groups: [{ id: 100, name: "admin" }]
     },
     {
       id: 31,
+      summit_id: SUMMIT_ID,
       sponsor_id: 99,
       sponsor: { company_name: "Other Corp" },
       groups: [{ id: 102, name: "contributor" }]
@@ -104,6 +113,7 @@ const renderUsersTable = (sponsorId, items) =>
     <UsersTable
       {...defaultProps}
       sponsorId={sponsorId}
+      summitId={SUMMIT_ID}
       users={{ ...defaultUsers, items, totalCount: items.length }}
     />
   );
@@ -201,6 +211,7 @@ describe("UsersTable — access rights filtering", () => {
         access_rights: [
           {
             id: 40,
+            summit_id: SUMMIT_ID,
             sponsor: { id: 55, company_name: "Gamma Ltd" },
             groups: [{ id: 103, name: "editor" }]
           }
@@ -213,6 +224,77 @@ describe("UsersTable — access rights filtering", () => {
         screen.getByTestId("access-rights-str-4").textContent
       );
       expect(rights).toEqual(["Editor"]);
+    });
+  });
+
+  // ─── Summit scoping: access_rights holds every summit's rights ────────────
+
+  describe("summit scoping", () => {
+    const userInThreeSummits = {
+      id: 5,
+      first_name: "Eve",
+      email: "eve@example.com",
+      is_active: true,
+      access_rights: [
+        {
+          id: 50,
+          summit_id: 69,
+          sponsor: { id: 690, company_name: "Summit 69 Sponsor" },
+          groups: [{ id: 200, name: "old-group" }]
+        },
+        {
+          id: 51,
+          summit_id: 73,
+          sponsor: { id: 730, company_name: "Summit 73 Sponsor" },
+          groups: [{ id: 201, name: "older-group" }]
+        },
+        {
+          id: 52,
+          summit_id: SUMMIT_ID,
+          sponsor: { id: 750, company_name: "Summit 75 Sponsor" },
+          groups: [{ id: 202, name: "current-group" }]
+        }
+      ]
+    };
+
+    it("shows only the current summit's sponsors and groups", () => {
+      renderUsersTable(null, [userInThreeSummits]);
+
+      expect(
+        JSON.parse(screen.getByTestId("sponsors-str-5").textContent)
+      ).toEqual(["Summit 75 Sponsor"]);
+      expect(
+        JSON.parse(screen.getByTestId("access-rights-str-5").textContent)
+      ).toEqual(["Current-group"]);
+    });
+
+    it("hands the edit popup only the current summit's access rights", () => {
+      renderUsersTable(null, [userInThreeSummits]);
+
+      const rowRights = JSON.parse(
+        screen.getByTestId("access-rights-5").textContent
+      );
+      expect(rowRights.map((ar) => ar.id)).toEqual([52]);
+    });
+
+    it("hides a right with a matching sponsor but another summit", () => {
+      // pre-guard API builds could save a sponsor under the wrong summit
+      const mismatched = {
+        ...userInThreeSummits,
+        access_rights: [
+          {
+            id: 53,
+            summit_id: 69,
+            sponsor: { id: 750, company_name: "Summit 75 Sponsor" },
+            groups: [{ id: 202, name: "current-group" }]
+          }
+        ]
+      };
+      renderUsersTable(750, [mismatched]);
+
+      expect(
+        JSON.parse(screen.getByTestId("access-rights-str-5").textContent)
+      ).toEqual([]);
     });
   });
 });

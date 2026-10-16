@@ -39,6 +39,7 @@ const SponsorUsersListPerSponsorPage = ({
   users,
   term,
   importTasks,
+  summitId,
   getSponsorUserRequests,
   getSponsorUsers,
   deleteSponsorUser,
@@ -131,6 +132,7 @@ const SponsorUsersListPerSponsorPage = ({
 
       <UsersTable
         sponsorId={sponsor.id}
+        summitId={summitId}
         users={users}
         term={term}
         onEdit={handleUserEdit}
@@ -169,9 +171,14 @@ const SponsorUsersListPerSponsorPage = ({
   );
 };
 
-const mapStateToProps = ({ sponsorUsersListState, currentSponsorState }) => ({
+const mapStateToProps = ({
+  sponsorUsersListState,
+  currentSponsorState,
+  currentSummitState
+}) => ({
   ...sponsorUsersListState,
-  sponsor: currentSponsorState.entity
+  sponsor: currentSponsorState.entity,
+  summitId: currentSummitState.currentSummit.id
 });
 
 export default connect(mapStateToProps, {

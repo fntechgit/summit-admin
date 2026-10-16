@@ -319,6 +319,9 @@ export const SPONSOR_USER_ASSIGNMENT_TYPE = {
   NEW: "new"
 };
 
+// sponsor-users-api adds this group to every access right; it's implicit, so it's not offered or listed
+export const SPONSOR_SERVICES_GROUP_SLUG = "sponsors-services";
+
 export const SPONSOR_MEDIA_UPLOAD_STATUS = {
   PENDING: "PENDING",
   DEADLINE_ALERT: "DEADLINE ALERT",

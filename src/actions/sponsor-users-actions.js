@@ -162,9 +162,9 @@ export const getSponsorUsers =
       per_page: perPage,
       expand: "access_rights,access_rights.groups,access_rights.sponsor",
       relations:
-        "access_rights,access_rights.groups,access_rights.sponsor.none",
+        "access_rights,access_rights.groups,access_rights.sponsor.none,access_rights.summit.none",
       fields:
-        "id,first_name,last_name,email,is_active,access_rights.groups.name,access_rights.groups.id,access_rights.sponsor.id,access_rights.sponsor.company_name",
+        "id,first_name,last_name,email,is_active,access_rights.summit_id,access_rights.groups.name,access_rights.groups.id,access_rights.groups.slug,access_rights.sponsor.id,access_rights.sponsor.company_name",
       access_token: accessToken
     };
 
@@ -190,7 +190,7 @@ export const getSponsorUsers =
   };
 
 export const updateShowSponsorUser = (user) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
+  const { currentSummitState, sponsorUsersListState } = getState();
   const { currentSummit } = currentSummitState;
   const accessToken = await getAccessTokenSafely();
 
@@ -198,15 +198,30 @@ export const updateShowSponsorUser = (user) => async (dispatch, getState) => {
     access_token: accessToken
   };
 
+  // the PUT replaces the user's full set, so other summits' rights (not in the form) are resent unchanged or the API deletes them
+  const storedUser = sponsorUsersListState.users.items.find(
+    (u) => u.id === user.id
+  );
+  const otherSummitsAccessRights = storedUser.access_rights
+    .filter((ar) => ar.summit_id !== currentSummit.id)
+    .map((ar) => ({
+      summit_id: ar.summit_id,
+      sponsor_id: ar.sponsor.id,
+      groups: ar.groups.map((g) => g.id)
+    }));
+
   dispatch(startLoading());
 
   const payload = {
     is_active: user.is_active,
-    access_rights: user.access_rights.map((ar) => ({
-      summit_id: currentSummit.id,
-      sponsor_id: ar.sponsor.id,
-      groups: ar.groups
-    }))
+    access_rights: [
+      ...user.access_rights.map((ar) => ({
+        summit_id: currentSummit.id,
+        sponsor_id: ar.sponsor.id,
+        groups: ar.groups
+      })),
+      ...otherSummitsAccessRights
+    ]
   };
 
   putRequest(
