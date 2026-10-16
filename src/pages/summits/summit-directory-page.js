@@ -15,12 +15,12 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { formatEpoch } from "openstack-uicore-foundation/lib/utils/methods";
-import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import AddIcon from "@mui/icons-material/Add";
 import GridToolbar from "../../components/mui/grid-toolbar";
+import Table from "../../components/mui/table";
 import {
   clearCurrentSummit,
   deleteSummit,
@@ -129,21 +129,6 @@ const SummitDirectoryPage = ({
       )
     },
     {
-      columnKey: "sponsor_qty",
-      header: T.translate("directory.sponsors"),
-      render: (row) => row.sponsor_qty ?? 0
-    },
-    {
-      columnKey: "sponsor_forms_qty",
-      header: T.translate("directory.forms"),
-      render: (row) => row.sponsor_forms_qty ?? 0
-    },
-    {
-      columnKey: "sponsor_attachments_qty",
-      header: T.translate("directory.attachments"),
-      render: (row) => row.sponsor_attachments_qty ?? 0
-    },
-    {
       columnKey: "start_date",
       header: T.translate("directory.start_date"),
       render: (row) => formatEpoch(row.start_date, "MMMM Do YYYY")
@@ -183,7 +168,7 @@ const SummitDirectoryPage = ({
         )}
       </GridToolbar>
       <Box sx={{ mb: 2 }}>{countLabel("directory.summit", totalSummits)}</Box>
-      <MuiTable
+      <Table
         columns={columns}
         data={safeSummits}
         totalRows={totalSummits}
@@ -191,7 +176,7 @@ const SummitDirectoryPage = ({
         currentPage={currentPage}
         onPageChange={handlePageChange}
         onPerPageChange={handlePerPageChange}
-        onEdit={canEditSummit ? handleEditSummit : undefined}
+        onRowClick={canEditSummit ? handleEditSummit : undefined}
         onDelete={canDeleteSummits ? (id) => deleteSummit(id) : undefined}
         onSelect={handleSelectSummit}
         deleteDialogBody={(name) =>
