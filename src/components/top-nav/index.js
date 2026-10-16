@@ -27,14 +27,30 @@ import {
   getIdToken
 } from "openstack-uicore-foundation/lib/security/methods";
 import IdTokenVerifier from "idtoken-verifier";
+import { withRouter } from "react-router-dom";
 import AuthButton from "../auth-button";
 import Menu from "../menu";
+import { getGlobalItems, getSummitItems } from "../menu/menu-definition";
+import { findMenuPath } from "../menu/menu-path";
 
 const DRAWER_WIDTH = 260;
 const COMPACT_BAR_HEIGHT = 48;
 const REGULAR_BAR_HEIGHT = 56;
 const SUB_BAR_HEIGHT = 36;
 const SHORT_VIEWPORT_MAX_HEIGHT = 500;
+
+// inserts the nav folders (e.g. Program Management) before the page's crumb
+const insertMenuFolders = (menuPath) => (crumbs) => {
+  if (!menuPath || menuPath.length === 0) return crumbs;
+
+  const folderCrumbs = menuPath.map((name) => ({
+    id: `menu-folder-${name}`,
+    title: T.translate(`menu.${name}`),
+    pathname: crumbs[crumbs.length - 1]?.pathname
+  }));
+
+  return [...crumbs.slice(0, -1), ...folderCrumbs, crumbs[crumbs.length - 1]];
+};
 
 /**
  * Application top bar with an optional slide-out navigation drawer.
@@ -44,11 +60,16 @@ const SHORT_VIEWPORT_MAX_HEIGHT = 500;
  * open state itself and hands `closeDrawer` to the menu so a navigation item
  * can dismiss the drawer after it acts.
  */
-const TopNav = ({ isLoggedUser, currentSummit, member }) => {
+const TopNav = ({ isLoggedUser, currentSummit, member, location }) => {
   const [open, setOpen] = useState(false);
 
   // The current summit's name, shown next to the title behind a divider.
   const contextLabel = currentSummit?.id > 0 ? currentSummit.name : null;
+
+  const menuItems = currentSummit?.id
+    ? getSummitItems(currentSummit.id)
+    : getGlobalItems();
+  const menuPath = findMenuPath(menuItems, location.pathname);
 
   const closeDrawer = useCallback(() => setOpen(false), []);
   const toggleDrawer = useCallback(() => setOpen((prev) => !prev), []);
@@ -146,7 +167,11 @@ const TopNav = ({ isLoggedUser, currentSummit, member }) => {
             overflowX: "auto"
           }}
         >
-          <Breadcrumbs className="breadcrumbs-wrapper" separator="/" />
+          <Breadcrumbs
+            className="breadcrumbs-wrapper"
+            separator="/"
+            setCrumbs={insertMenuFolders(menuPath)}
+          />
         </Toolbar>
       )}
       {isLoggedUser && (
@@ -186,6 +211,7 @@ TopNav.propTypes = {
   /** Its name labels the bar; also passed through to the drawer's menu. */
   // eslint-disable-next-line react/forbid-prop-types
   currentSummit: PropTypes.object,
+  location: PropTypes.shape({ pathname: PropTypes.string }).isRequired,
   // eslint-disable-next-line react/forbid-prop-types
   member: PropTypes.object
 };
@@ -196,4 +222,4 @@ TopNav.defaultProps = {
   member: null
 };
 
-export default TopNav;
+export default withRouter(TopNav);

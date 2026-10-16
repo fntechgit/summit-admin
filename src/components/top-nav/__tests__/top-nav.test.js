@@ -13,6 +13,9 @@ jest.mock("openstack-uicore-foundation/lib/security/methods", () => ({
 jest.mock("react-breadcrumbs", () => ({
   Breadcrumbs: () => <span>crumbs</span>
 }));
+jest.mock("react-router-dom", () => ({
+  withRouter: (component) => component
+}));
 // Stands in for the app menu: a navigation item that dismisses the drawer.
 jest.mock("../../menu", () => ({ onNavigate }) => (
   <button type="button" onClick={onNavigate}>
@@ -22,7 +25,8 @@ jest.mock("../../menu", () => ({ onNavigate }) => (
 
 const DRAWER_TEXT = "drawer contents";
 
-const renderNav = (props = {}) => render(<TopNav {...props} />);
+const renderNav = (props = {}) =>
+  render(<TopNav location={{ pathname: "/app/directory" }} {...props} />);
 
 const burger = () =>
   screen.getByRole("button", { name: "menu.toggle_navigation" });
