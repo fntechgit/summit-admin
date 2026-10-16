@@ -9,7 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 
 import {
   RECEIVE_ROOM_BOOKINGS,
@@ -18,8 +21,6 @@ import {
 } from "../../actions/room-booking-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 
 const DEFAULT_STATE = {
   roomBookings: [],
@@ -44,17 +45,17 @@ const roomBookingListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_ROOM_BOOKINGS: {
-      let { order, orderDir, term, filters } = payload;
-      return { ...state, order, orderDir, term, filters };
+      const { order, orderDir, perPage, term, filters } = payload;
+      return { ...state, order, orderDir, perPage, term, filters };
     }
     case RECEIVE_ROOM_BOOKINGS: {
-      let { current_page, total, last_page } = payload.response;
-      let room_bookings = payload.response.data.map((rb) => {
-        let ownerName = rb.owner.first_name + " " + rb.owner.last_name;
-        let created = epochToMoment(rb.created).format("M/D/YYYY, h:mm:ss a");
+      const { current_page, total, last_page } = payload.response;
+      const room_bookings = payload.response.data.map((rb) => {
+        const ownerName = `${rb.owner.first_name} ${rb.owner.last_name}`;
+        const created = epochToMoment(rb.created).format("M/D/YYYY, h:mm:ss a");
         return {
           ...rb,
-          created: created,
+          created,
           owner_name: ownerName,
           owner_email: rb.owner.email,
           room_name: rb.room.name,
@@ -73,8 +74,8 @@ const roomBookingListReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case ROOM_BOOKING_REFUNDED: {
-      let roomBooking = payload.response;
-      let roomBookings = [...state.roomBookings];
+      const roomBooking = payload.response;
+      const roomBookings = [...state.roomBookings];
       roomBookings.forEach((rb) => {
         if (rb.id === roomBooking.id) {
           rb.status = "Refunded";
@@ -82,7 +83,7 @@ const roomBookingListReducer = (state = DEFAULT_STATE, action) => {
         }
       });
 
-      return { ...state, roomBookings: roomBookings };
+      return { ...state, roomBookings };
     }
     default:
       return state;

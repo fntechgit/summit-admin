@@ -11,15 +11,18 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import { Modal, Pagination } from "react-bootstrap";
-import Table from "openstack-uicore-foundation/lib/components/table"
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
+import { Box, Button, IconButton, Tooltip } from "@mui/material";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import EditIcon from "@mui/icons-material/Edit";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import { getSummitById } from "../../actions/summit-actions";
+import {
+  GridFilter,
+  useGridFilter
+} from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import {
   getRoomBookings,
   exportRoomBookings,
@@ -27,413 +30,299 @@ import {
   cancelRoomBooking
 } from "../../actions/room-booking-actions";
 import {
+  DEFAULT_CURRENT_PAGE,
   ReservationStatusPaid,
   ReservationStatusRequestedRefund
 } from "../../utils/constants";
-import EmailFilter from "../../components/inputs/email-filter";
+import GridToolbar from "../../components/mui/grid-toolbar";
+import RefundBookingPopup from "./components/refund-booking-popup";
+import { buildRoomBookingFilters, getCriterias } from "./helpers";
 
-class RoomBookingListPage extends React.Component {
-  constructor(props) {
-    super(props);
+const FILTER_ID = "room_booking_list";
 
-    this.handleEdit = this.handleEdit.bind(this);
-    this.handleCancelBooking = this.handleCancelBooking.bind(this);
-    this.handleSort = this.handleSort.bind(this);
-    this.handlePageChange = this.handlePageChange.bind(this);
-    this.handleSort = this.handleSort.bind(this);
-    this.handleSearch = this.handleSearch.bind(this);
-    this.handleExport = this.handleExport.bind(this);
-    this.handleRefundClick = this.handleRefundClick.bind(this);
-    this.handleRefund = this.handleRefund.bind(this);
-    this.handleRefundChange = this.handleRefundChange.bind(this);
-    this.hasPaid = this.hasPaid.bind(this);
-    this.isEditable = this.isEditable.bind(this);
-    this.onCloseModal = this.onCloseModal.bind(this);
-    this.handleAddRoomBooking = this.handleAddRoomBooking.bind(this);
-    this.handleApplyFilters = this.handleApplyFilters.bind(this);
+const RoomBookingListPage = ({
+  currentSummit,
+  roomBookings,
+  currentPage,
+  perPage,
+  term,
+  order,
+  orderDir,
+  totalRoomBookings,
+  history,
+  getRoomBookings,
+  exportRoomBookings,
+  refundRoomBooking,
+  cancelRoomBooking
+}) => {
+  const [refundBooking, setRefundBooking] = useState(null);
+  const { parsedFilter, filterValues } = useGridFilter(FILTER_ID);
+  const roomBookingFilters = buildRoomBookingFilters(filterValues);
 
-    this.state = {
-      showModal: false,
-      modalBooking: null,
-      modalAmount: 0,
-      filters: { ...this.props.filters }
-    };
-  }
-
-  componentDidMount() {
-    const { currentSummit, term, order, orderDir, page, perPage, filters } =
-      this.props;
-    if (currentSummit) {
-      this.props.getRoomBookings(term, page, perPage, order, orderDir, filters);
+  useEffect(() => {
+    if (currentSummit?.id) {
+      getRoomBookings(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        roomBookingFilters
+      );
     }
-  }
+  }, [currentSummit?.id, parsedFilter.join(",")]);
 
-  handleEdit(room_booking_id) {
-    const { currentSummit, history } = this.props;
+  const findBooking = (bookingId) =>
+    roomBookings.find((rb) => rb.id === bookingId);
+
+  const handleEdit = (roomBookingId) => {
     history.push(
-      `/app/summits/${currentSummit.id}/room-bookings/${room_booking_id}`
+      `/app/summits/${currentSummit.id}/room-bookings/${roomBookingId}`
     );
-  }
+  };
 
-  handleAddRoomBooking() {
-    const { currentSummit, history } = this.props;
+  const handleAddRoomBooking = () => {
     history.push(`/app/summits/${currentSummit.id}/room-bookings/new`);
-  }
+  };
 
-  handleCancelBooking(bookingId) {
-    const {
-      cancelRoomBooking,
-      roomBookings,
-      getRoomBookings,
+  const handleCancelBooking = (bookingId) => {
+    const roomBooking = findBooking(bookingId);
+
+    cancelRoomBooking(roomBooking.room_id, bookingId)
+      .then(() =>
+        getRoomBookings(
+          term,
+          DEFAULT_CURRENT_PAGE,
+          perPage,
+          order,
+          orderDir,
+          roomBookingFilters
+        )
+      )
+      .catch(() => {});
+  };
+
+  const handlePageChange = (page) => {
+    getRoomBookings(term, page, perPage, order, orderDir, roomBookingFilters);
+  };
+
+  const handleSort = (key, dir) => {
+    getRoomBookings(
       term,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      key,
+      dir,
+      roomBookingFilters
+    );
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    getRoomBookings(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
       order,
       orderDir,
+      roomBookingFilters
+    );
+  };
+
+  const handleSearch = (newTerm) => {
+    getRoomBookings(
+      newTerm,
+      DEFAULT_CURRENT_PAGE,
       perPage,
-      filters
-    } = this.props;
-    const roomBooking = roomBookings.find((rb) => rb.id === bookingId);
+      order,
+      orderDir,
+      roomBookingFilters
+    );
+  };
 
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("room_booking_list.delete_booking_warning")} ${
-        roomBooking.owner_name
-      }`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        cancelRoomBooking(roomBooking.room_id, bookingId).then(() =>
-          getRoomBookings(term, 1, perPage, order, orderDir, filters)
-        );
-      }
-    });
-  }
-
-  handlePageChange(page) {
-    const { term, order, orderDir, perPage, filters } = this.props;
-    this.props.getRoomBookings(term, page, perPage, order, orderDir, filters);
-  }
-
-  handleSort(index, key, dir) {
-    const { term, page, perPage, filters } = this.props;
-    this.props.getRoomBookings(term, page, perPage, key, dir, filters);
-  }
-
-  handleSearch(term) {
-    const { order, orderDir, page, perPage, filters } = this.props;
-    this.props.getRoomBookings(term, page, perPage, order, orderDir, filters);
-  }
-
-  handleExport(ev) {
-    const { term, order, orderDir, filters } = this.props;
+  const handleExport = (ev) => {
     ev.preventDefault();
-    this.props.exportRoomBookings(term, order, orderDir, filters);
-  }
+    exportRoomBookings(term, order, orderDir, roomBookingFilters);
+  };
 
-  handleRefundClick(bookingId) {
-    const { roomBookings } = this.props;
-    const roomBooking = roomBookings.find((rb) => rb.id === bookingId);
+  const handleRefundClick = (bookingId) => {
+    setRefundBooking(findBooking(bookingId));
+  };
 
-    this.setState({
-      showModal: true,
-      modalBooking: roomBooking
-    });
-  }
-
-  hasPaid(bookingId) {
-    const { roomBookings } = this.props;
-    const roomBooking = roomBookings.find((rb) => rb.id === bookingId);
+  const hasPaid = (bookingId) => {
+    const roomBooking = findBooking(bookingId);
     return (
       (roomBooking.status === ReservationStatusPaid ||
         roomBooking.status === ReservationStatusRequestedRefund) &&
       roomBooking.amount > 0
     );
-  }
+  };
 
-  isEditable(bookingId) {
-    const { roomBookings } = this.props;
-    const roomBooking = roomBookings.find((rb) => rb.id === bookingId);
-    return roomBooking.status === ReservationStatusPaid;
-  }
+  const isEditable = (bookingId) =>
+    findBooking(bookingId).status === ReservationStatusPaid;
 
-  onCloseModal() {
-    this.setState({ showModal: false });
-  }
+  const handleRefund = (booking, amount) =>
+    refundRoomBooking(booking.room_id, booking.id, amount);
 
-  handleRefund() {
-    const { modalBooking, modalAmount } = this.state;
+  const roomBookingsFormatted = roomBookings.map((rb) => ({
+    ...rb,
+    start_datetime: epochToMomentTimeZone(
+      rb.start_datetime,
+      currentSummit.time_zone_id
+    ).format("YYYY-MM-DD h:mm a"),
+    end_datetime: epochToMomentTimeZone(
+      rb.end_datetime,
+      currentSummit.time_zone_id
+    ).format("YYYY-MM-DD h:mm a")
+  }));
 
-    this.setState({
-      showModal: false
-    });
+  const columns = [
+    {
+      columnKey: "created",
+      header: T.translate("room_booking_list.created"),
+      sortable: true
+    },
+    {
+      columnKey: "room_name",
+      header: T.translate("room_booking_list.room"),
+      sortable: true
+    },
+    {
+      columnKey: "start_datetime",
+      header: T.translate("room_booking_list.start"),
+      sortable: true
+    },
+    {
+      columnKey: "end_datetime",
+      header: T.translate("room_booking_list.end"),
+      sortable: true
+    },
+    {
+      columnKey: "owner_name",
+      header: T.translate("room_booking_list.owner_name"),
+      sortable: true
+    },
+    {
+      columnKey: "owner_email",
+      header: T.translate("room_booking_list.owner_email"),
+      sortable: true
+    },
+    {
+      columnKey: "status",
+      header: T.translate("room_booking_list.status"),
+      sortable: true
+    },
+    { columnKey: "amount_str", header: T.translate("room_booking_list.paid") },
+    {
+      columnKey: "refunded_amount_str",
+      header: T.translate("room_booking_list.refunded")
+    },
+    {
+      columnKey: "refund",
+      header: "",
+      width: 40,
+      align: "center",
+      dottedBorder: true,
+      headSx: { p: 0 },
+      cellSx: { p: 0 },
+      render: (row) =>
+        hasPaid(row.id) && (
+          <Tooltip title={T.translate("room_booking_list.refund")}>
+            <IconButton
+              size="medium"
+              sx={{ padding: 0 }}
+              onClick={() => handleRefundClick(row.id)}
+            >
+              <AttachMoneyIcon fontSize="large" />
+            </IconButton>
+          </Tooltip>
+        )
+    },
+    {
+      columnKey: "edit",
+      header: "",
+      width: 40,
+      align: "center",
+      dottedBorder: true,
+      headSx: { p: 0 },
+      cellSx: { p: 0 },
+      render: (row) =>
+        isEditable(row.id) && (
+          <Tooltip title={T.translate("general.edit")}>
+            <IconButton
+              size="medium"
+              sx={{ padding: 0 }}
+              onClick={() => handleEdit(row.id)}
+            >
+              <EditIcon fontSize="large" />
+            </IconButton>
+          </Tooltip>
+        )
+    }
+  ];
 
-    this.props.refundRoomBooking(
-      modalBooking.room_id,
-      modalBooking.id,
-      modalAmount
-    );
-  }
+  return (
+    <div className="container">
+      <h3>{T.translate("room_booking_list.room_booking_list")}</h3>
+      <GridToolbar
+        searchProps={{
+          term,
+          onSearch: handleSearch,
+          placeholder: T.translate(
+            "room_booking_list.placeholders.search_bookings"
+          )
+        }}
+      >
+        <GridFilter
+          id={FILTER_ID}
+          criterias={getCriterias()}
+          hideJoinOperators
+        />
+        <Button variant="contained" onClick={handleAddRoomBooking}>
+          {T.translate("room_booking_list.add_room_booking")}
+        </Button>
+        <Button variant="outlined" onClick={handleExport}>
+          {T.translate("general.export")}
+        </Button>
+      </GridToolbar>
 
-  handleRefundChange(ev) {
-    const { value } = ev.target;
-    this.setState({ modalAmount: parseInt(value) });
-  }
+      <Box sx={{ mb: 2 }}>
+        {totalRoomBookings} {T.translate("room_bookings.room_bookings")}
+      </Box>
 
-  handleApplyFilters() {
-    const { term, order, orderDir, page, perPage } = this.props;
-    this.props.getRoomBookings(
-      term,
-      page,
-      perPage,
-      order,
-      orderDir,
-      this.state.filters
-    );
-  }
+      {roomBookings.length === 0 && (
+        <div>{T.translate("room_booking_list.no_room_bookings")}</div>
+      )}
 
-  render() {
-    const {
-      currentSummit,
-      roomBookings,
-      lastPage,
-      currentPage,
-      term,
-      order,
-      orderDir,
-      totalRoomBookings,
-      filters
-    } = this.props;
-    const { showModal, modalBooking, modalAmount } = this.state;
-
-    const roomBookingsFormatted = roomBookings.map((rb) => {
-      const start_datetime = epochToMomentTimeZone(
-        rb.start_datetime,
-        currentSummit.time_zone_id
-      ).format("YYYY-MM-DD h:mm a");
-      const end_datetime = epochToMomentTimeZone(
-        rb.end_datetime,
-        currentSummit.time_zone_id
-      ).format("YYYY-MM-DD h:mm a");
-      return {
-        ...rb,
-        start_datetime,
-        end_datetime
-      };
-    });
-
-    const columns = [
-      {
-        columnKey: "created",
-        value: T.translate("room_booking_list.created"),
-        sortable: true
-      },
-      {
-        columnKey: "room_name",
-        value: T.translate("room_booking_list.room"),
-        sortable: true
-      },
-      {
-        columnKey: "start_datetime",
-        value: T.translate("room_booking_list.start"),
-        sortable: true
-      },
-      {
-        columnKey: "end_datetime",
-        value: T.translate("room_booking_list.end"),
-        sortable: true
-      },
-      {
-        columnKey: "owner_name",
-        value: T.translate("room_booking_list.owner_name"),
-        sortable: true
-      },
-      {
-        columnKey: "owner_email",
-        value: T.translate("room_booking_list.owner_email"),
-        sortable: true
-      },
-      {
-        columnKey: "status",
-        value: T.translate("room_booking_list.status"),
-        sortable: true
-      },
-      { columnKey: "amount_str", value: T.translate("room_booking_list.paid") },
-      {
-        columnKey: "refunded_amount_str",
-        value: T.translate("room_booking_list.refunded")
-      }
-    ];
-
-    const table_options = {
-      sortCol: order,
-      sortDir: orderDir,
-      actions: {
-        delete: { onClick: this.handleCancelBooking },
-        custom: [
-          {
-            name: "refund",
-            tooltip: "refund",
-            icon: <i className="fa fa-money" />,
-            onClick: this.handleRefundClick,
-            display: this.hasPaid
-          },
-          {
-            name: "edit",
-            tooltip: "edit",
-            icon: <i className="fa fa-pencil" />,
-            onClick: this.handleEdit,
-            display: this.isEditable
+      {roomBookings.length > 0 && (
+        <MuiTable
+          options={{ sortCol: order, sortDir: orderDir }}
+          data={roomBookingsFormatted}
+          columns={columns}
+          perPage={perPage}
+          currentPage={currentPage}
+          totalRows={totalRoomBookings}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSort={handleSort}
+          onDelete={handleCancelBooking}
+          getName={(row) => row.owner_name}
+          deleteDialogBody={(name) =>
+            T.translate("room_booking_list.delete_booking_warning", { name })
           }
-        ]
-      }
-    };
+          confirmButtonColor="error"
+        />
+      )}
 
-    if (!currentSummit.id) return <div />;
-
-    return (
-      <div className="container">
-        <h3>
-          {" "}
-          {T.translate("room_booking_list.room_booking_list")} (
-          {totalRoomBookings})
-        </h3>
-
-        <div className="row">
-          <div className="col-md-6">
-            <FreeTextSearch
-              value={term}
-              placeholder={T.translate(
-                "room_booking_list.placeholders.search_bookings"
-              )}
-              onSearch={this.handleSearch}
-            />
-          </div>
-          <div className="col-md-6 text-right">
-            <button
-              className="btn btn-primary right-space"
-              onClick={this.handleAddRoomBooking}
-            >
-              {T.translate("room_booking_list.add_room_booking")}
-            </button>
-            <button
-              className="btn btn-default right-space"
-              onClick={this.handleExport}
-            >
-              {T.translate("general.export")}
-            </button>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-md-6">
-            <EmailFilter
-              id="email_filter"
-              filterInitialValue={filters.email_filter.value}
-              operatorInitialValue={filters.email_filter.operator}
-              onChange={(ev) => {
-                this.setState({
-                  ...this.state,
-                  filters: {
-                    ...this.state.filters,
-                    email_filter: {
-                      operator: ev.target.operator,
-                      value: ev.target.value
-                    }
-                  }
-                });
-              }}
-            />
-          </div>
-          <div className="col-md-6">
-            <button
-              className="btn btn-primary right-space"
-              onClick={this.handleApplyFilters}
-            >
-              {T.translate("room_booking_list.apply_filters")}
-            </button>
-          </div>
-        </div>
-        {roomBookings.length === 0 && (
-          <div>{T.translate("room_booking_list.no_room_bookings")}</div>
-        )}
-
-        {roomBookings.length > 0 && (
-          <div className="table-responsive">
-            <Table
-              options={table_options}
-              data={roomBookingsFormatted}
-              columns={columns}
-              onSort={this.handleSort}
-            />
-            <Pagination
-              bsSize="medium"
-              prev
-              next
-              first
-              last
-              ellipsis
-              boundaryLinks
-              maxButtons={10}
-              items={lastPage}
-              activePage={currentPage}
-              onSelect={this.handlePageChange}
-            />
-          </div>
-        )}
-
-        {modalBooking && (
-          <Modal
-            show={showModal}
-            onHide={this.onCloseModal}
-            dialogClassName="refund-modal"
-          >
-            <Modal.Header closeButton>
-              <Modal.Title>
-                REFUND {modalBooking.owner_name} for room{" "}
-                {modalBooking.room_name}
-              </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <form className="room-booking-form">
-                <input type="hidden" id="id" value={modalBooking.id} />
-                <div className="row">
-                  <div className="col-md-12">
-                    <strong>User Payed: </strong>
-                    {modalBooking.amount_str} {modalBooking.currency}
-                  </div>
-                  <br />
-                  <div className="col-md-12">
-                    <label> Refund </label>
-                    <input
-                      type="number"
-                      min="0"
-                      id="amount"
-                      value={modalAmount}
-                      className="form-control"
-                      onChange={this.handleRefundChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="row">
-                  <div className="col-md-12 submit-buttons">
-                    <input
-                      type="button"
-                      onClick={this.handleRefund}
-                      className="btn btn-primary pull-right"
-                      value={T.translate("room_booking_list.refund")}
-                    />
-                  </div>
-                </div>
-              </form>
-            </Modal.Body>
-          </Modal>
-        )}
-      </div>
-    );
-  }
-}
+      {refundBooking && (
+        <RefundBookingPopup
+          booking={refundBooking}
+          onClose={() => setRefundBooking(null)}
+          onSave={handleRefund}
+        />
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({
   currentSummitState,
@@ -444,7 +333,6 @@ const mapStateToProps = ({
 });
 
 export default connect(mapStateToProps, {
-  getSummitById,
   getRoomBookings,
   exportRoomBookings,
   refundRoomBooking,
