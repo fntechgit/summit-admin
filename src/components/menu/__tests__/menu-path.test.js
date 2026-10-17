@@ -8,7 +8,6 @@ const items = [
     subItems: [
       {
         name: "events",
-        isGroup: true,
         subItems: [{ name: "event_list", linkUrl: "summits/1/events" }]
       },
       { name: "schedule", linkUrl: "summits/1/events/schedule" }

@@ -28,12 +28,12 @@ const isAccessible = (item, memberObj) =>
 // Do not show a parent folder if the user does not have access to any of the children
 const hasVisibleContent = (item, memberObj) =>
   isAccessible(item, memberObj) &&
-  (item.isGroup
+  (item.subItems
     ? item.subItems.some((child) => hasVisibleContent(child, memberObj))
     : true);
 
 const isActive = (item, currentPath, memberObj) =>
-  item.isGroup
+  item.subItems
     ? item.subItems
         .filter((ch) => isAccessible(ch, memberObj))
         .some((ch) => isActive(ch, currentPath, memberObj))
@@ -102,7 +102,7 @@ function SubMenuItem({ name, onItemClick, subItems, memberObj, currentPath }) {
       defaultOpen={isChildActive}
     >
       {_subItems.map((item) =>
-        item.isGroup ? renderGroup(item) : renderLeaf(item)
+        item.subItems ? renderGroup(item) : renderLeaf(item)
       )}
     </ExpandableItem>
   );

@@ -37,7 +37,6 @@ export const getGlobalItems = () => [
     subItems: [
       {
         name: "commercial_offerings",
-        isGroup: true,
         subItems: [
           { name: "inventory", linkUrl: "inventory", accessRoute: "inventory" },
           {
@@ -111,7 +110,6 @@ export const getSummitItems = (summitId) => [
     subItems: [
       {
         name: "events",
-        isGroup: true,
         subItems: [
           {
             name: "new_event",
@@ -143,7 +141,6 @@ export const getSummitItems = (summitId) => [
       {
         name: "track_chairs",
         accessRoute: "track-chairs",
-        isGroup: true,
         subItems: [
           {
             name: "track_chair_list",
@@ -169,7 +166,6 @@ export const getSummitItems = (summitId) => [
       },
       {
         name: "summit_speakers",
-        isGroup: true,
         subItems: [
           {
             name: "summit_speaker_list",
@@ -220,7 +216,6 @@ export const getSummitItems = (summitId) => [
     subItems: [
       {
         name: "attendees",
-        isGroup: true,
         subItems: [
           {
             name: "attendee-list",
@@ -236,7 +231,6 @@ export const getSummitItems = (summitId) => [
       },
       {
         name: "badges",
-        isGroup: true,
         subItems: [
           {
             name: "badge_feature_list",
@@ -272,7 +266,6 @@ export const getSummitItems = (summitId) => [
     subItems: [
       {
         name: "purchase_orders",
-        isGroup: true,
         subItems: [
           {
             name: "purchase_order_list",
@@ -298,7 +291,6 @@ export const getSummitItems = (summitId) => [
       },
       {
         name: "tickets",
-        isGroup: true,
         subItems: [
           {
             name: "registration_invitation_list",
@@ -426,7 +418,6 @@ export const getSummitItems = (summitId) => [
     subItems: [
       {
         name: "email_flow_events",
-        isGroup: true,
         subItems: [
           {
             name: "email_flow_overrides",
@@ -452,7 +443,6 @@ export const getSummitItems = (summitId) => [
     subItems: [
       {
         name: "settings",
-        isGroup: true,
         subItems: [
           {
             name: "marketing",
