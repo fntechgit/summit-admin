@@ -13,14 +13,11 @@
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import Tooltip from "@mui/material/Tooltip";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import MenuItem from "./menu-item";
 import ExpandableItem from "./expandable-item";
 
 const GROUP_PL = 4;
 const GROUP_LEAF_PL = 6;
-const INFO_ICON_ML = 0.5;
 
 const isAccessible = (item, memberObj) =>
   !item.hasOwnProperty("accessRoute") || memberObj.hasAccess(item.accessRoute);
@@ -73,20 +70,7 @@ function SubMenuItem({ name, onItemClick, subItems, memberObj, currentPath }) {
       <ExpandableItem
         key={item.name}
         pl={GROUP_PL}
-        label={
-          <>
-            {T.translate(`menu.${item.name}`)}
-            {item.infoKey && (
-              <Tooltip title={T.translate(`menu.${item.infoKey}`)}>
-                <InfoOutlinedIcon
-                  fontSize="small"
-                  sx={{ ml: INFO_ICON_ML, color: "text.secondary" }}
-                  onClick={(ev) => ev.stopPropagation()}
-                />
-              </Tooltip>
-            )}
-          </>
-        }
+        label={T.translate(`menu.${item.name}`)}
         defaultOpen={groupItems.some((ch) =>
           isActive(ch, currentPath, memberObj)
         )}
