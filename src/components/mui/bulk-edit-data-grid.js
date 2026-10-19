@@ -127,10 +127,11 @@ const ExpandableQuickFilter = ({ placeholder, term, onSearch }) => {
       ref={searchRef}
       sx={{ width: SEARCH_WIDTH }}
       // SearchInput takes no onBlur either; collapse once focus leaves both
-      // its input and its clear button with nothing typed
+      // its input and its clear button with nothing typed or applied
       onBlur={(ev) => {
         if (ev.currentTarget.contains(ev.relatedTarget)) return;
-        if (!ev.currentTarget.querySelector("input").value) setExpanded(false);
+        if (!ev.currentTarget.querySelector("input").value && !term)
+          setExpanded(false);
       }}
     >
       <SearchInput term={term} placeholder={placeholder} onSearch={onSearch} />

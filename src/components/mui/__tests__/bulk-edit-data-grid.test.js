@@ -239,13 +239,24 @@ describe("BulkEditDataGrid", () => {
     expect(onSearch).toHaveBeenCalledWith("keynote");
   });
 
-  test("shows the search box open when a search term is applied, and collapses it when left empty", async () => {
+  test("keeps the search box open while a search term is applied, even when cleared", async () => {
     renderGrid({ searchProps: { term: "keynote", onSearch: jest.fn() } });
 
     const searchbox = screen.getByRole("textbox");
     expect(searchbox).toHaveValue("keynote");
 
     await userEvent.clear(searchbox);
+    await userEvent.tab();
+
+    expect(screen.getByRole("textbox")).toBeInTheDocument();
+  });
+
+  test("collapses the search box when left empty with no term applied", async () => {
+    renderGrid({ searchProps: { term: "", onSearch: jest.fn() } });
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "general.search" })
+    );
     await userEvent.tab();
 
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
