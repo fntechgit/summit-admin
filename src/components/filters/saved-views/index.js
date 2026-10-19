@@ -229,9 +229,13 @@ const SavedViews = ({
             value={search}
             onChange={handleSearch}
             placeholder={T.translate("general.placeholders.search")}
-            // the menu otherwise treats typing as item navigation
-            onKeyDown={(ev) => ev.stopPropagation()}
-            inputProps={{ "aria-label": T.translate("general.search") }}
+            // stop menu typeahead, but let Escape/Tab through to close it
+            onKeyDown={(ev) =>
+              !(ev.key === "Escape" || ev.key === "Tab") && ev.stopPropagation()
+            }
+            slotProps={{
+              htmlInput: { "aria-label": T.translate("general.search") }
+            }}
           />
         </Box>
         {views?.length === 0 && (
