@@ -6,6 +6,7 @@ import flushPromises from "flush-promises";
 import SummitEventListPage from "../summit-event-list-page";
 import { renderWithRedux } from "../../../utils/test-utils";
 import { unpackJoinOperatorFromCriteria } from "../summit-event-list-page/helpers";
+import { CHANGE_EXTRA_COLUMNS } from "../../../actions/event-actions";
 import {
   saveFilterCriteria,
   deleteFilterCriteria
@@ -482,5 +483,56 @@ describe("SummitEventListPage", () => {
       latestGridProps().onColumnVisibilityModelChange({});
     });
     expect(latestGridProps().columnVisibilityModel.type).not.toBe(false);
+  });
+
+  test("saves the chosen optional columns to the store so they survive leaving the page", () => {
+    const { store } = renderWithRedux(<SummitEventListPage />, {
+      initialState: {
+        currentSummitState: {
+          currentSummit: {
+            id: 12,
+            time_zone: { name: "UTC" },
+            time_zone_id: "UTC",
+            selection_plans: [],
+            tracks: [],
+            event_types: [],
+            locations: [],
+            presentation_action_types: []
+          }
+        },
+        mediaUploadListState: {
+          media_uploads: []
+        },
+        currentEventListState: {
+          events: [],
+          lastPage: 1,
+          currentPage: 1,
+          order: "id",
+          orderDir: 1,
+          totalEvents: 0,
+          term: "",
+          filters: {},
+          extraColumns: [],
+          perPage: 10
+        }
+      }
+    });
+
+    const latestGridProps =
+      mockEditableTableSpy.mock.calls[
+        mockEditableTableSpy.mock.calls.length - 1
+      ][0];
+
+    act(() => {
+      latestGridProps.onColumnVisibilityModelChange({
+        selection_status: false
+      });
+    });
+
+    const { extraColumns } = store
+      .getActions()
+      .find((a) => a.type === CHANGE_EXTRA_COLUMNS).payload;
+    expect(extraColumns).toContain("track");
+    expect(extraColumns).not.toContain("selection_status");
   });
 });

@@ -22,6 +22,7 @@ import {
 import BulkEditDataGrid from "../../../components/mui/bulk-edit-data-grid";
 import {
   bulkUpdateEvents,
+  changeEventListExtraColumns,
   deleteEvent,
   exportEvents,
   getEvents,
@@ -76,7 +77,8 @@ const SummitEventListPage = ({
   importMP4AssetsFromMUX,
   saveFilterCriteria,
   deleteFilterCriteria,
-  bulkUpdateEvents
+  bulkUpdateEvents,
+  changeEventListExtraColumns
 }) => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showImportFromMUXModal, setShowImportFromMUXModal] = useState(false);
@@ -210,12 +212,12 @@ const SummitEventListPage = ({
   // the grid omits columns from the model when they're visible (e.g. after
   // "Show all"), so only an explicit false hides one
   const handleColumnVisibilityModelChange = (model) => {
+    const newColumns = optionalColumns
+      .map((oc) => oc.columnKey)
+      .filter((columnKey) => model[columnKey] !== false);
     setGridColumnVisibility(model);
-    setSelectedColumns(
-      optionalColumns
-        .map((oc) => oc.columnKey)
-        .filter((columnKey) => model[columnKey] !== false)
-    );
+    setSelectedColumns(newColumns);
+    changeEventListExtraColumns(newColumns);
   };
 
   const handleFilterCriteriaChange = (filterCriteria) => {
@@ -387,5 +389,6 @@ export default connect(mapStateToProps, {
   saveFilterCriteria,
   deleteFilterCriteria,
   bulkUpdateEvents,
-  getMediaUploads
+  getMediaUploads,
+  changeEventListExtraColumns
 })(SummitEventListPage);
