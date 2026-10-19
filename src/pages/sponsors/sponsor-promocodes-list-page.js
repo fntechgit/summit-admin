@@ -282,7 +282,7 @@ const SponsorPromocodesListPage = ({
   columns = [...columns, ...showColumns];
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <Breadcrumb
         data={{
           title: T.translate("sponsor_promocodes_list.promocodes"),

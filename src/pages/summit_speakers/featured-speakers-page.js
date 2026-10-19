@@ -101,7 +101,7 @@ class FeaturedSpeakersPage extends React.Component {
     if (!currentSummit.id) return <div />;
 
     return (
-      <div className="container">
+      <div className="container table-container">
         <h3>
           {" "}
           {T.translate("featured_speakers.featured_speakers")} ({totalSpeakers})

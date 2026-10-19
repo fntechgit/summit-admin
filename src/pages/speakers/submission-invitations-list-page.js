@@ -388,7 +388,7 @@ class SubmissionInvitationsListPage extends React.Component {
 
     return (
       <div>
-        <div className="container">
+        <div className="container table-container">
           <h3>
             {" "}
             {T.translate("submission_invitation_list.invitation_list")} (

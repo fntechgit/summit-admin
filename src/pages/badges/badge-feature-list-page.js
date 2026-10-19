@@ -110,7 +110,7 @@ class BadgeFeatureListPage extends React.Component {
     if (!currentSummit.id) return <div />;
 
     return (
-      <div className="container">
+      <div className="container table-container">
         <h3>
           {" "}
           {T.translate("badge_feature_list.badge_feature_list")} (

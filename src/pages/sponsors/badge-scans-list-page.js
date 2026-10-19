@@ -124,7 +124,7 @@ const BadgeScansListPage = ({
   if (!currentSummit.id) return <div />;
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <h3>
         {" "}
         {T.translate("badge_scan_list.badge_scan_list")} ({totalBadgeScans})

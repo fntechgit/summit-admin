@@ -295,7 +295,7 @@ class SummitPresentationsVotesPage extends React.Component {
             pathname: match.url
           }}
         />
-        <div className="container">
+        <div className="container table-container">
           <h3>
             {" "}
             {this.isReportByPresentation(current_report_type)

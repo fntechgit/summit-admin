@@ -191,7 +191,7 @@ const SignagePage = ({
       <Breadcrumb
         data={{ title: T.translate("signage.signs"), pathname: match.url }}
       />
-      <div className="container">
+      <div className="container table-container">
         <div className={styles.header}>
           <div className="row form-group">
             <div className="col-md-4">
