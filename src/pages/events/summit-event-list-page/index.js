@@ -264,6 +264,16 @@ const SummitEventListPage = ({
           }}
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...extraProps}
+          onChange={(ev) =>
+            extraProps.onChange({
+              target: {
+                value:
+                  currentSummit.event_types.find(
+                    (type) => type.id === ev.target.value
+                  ) ?? null
+              }
+            })
+          }
         />
       ),
       render: (e) => e.name

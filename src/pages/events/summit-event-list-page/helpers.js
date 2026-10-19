@@ -241,6 +241,15 @@ export const getOptionalColumns = (
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...extraProps}
           value={extraProps.row.track?.id}
+          onChange={(ev) =>
+            extraProps.onChange({
+              target: {
+                value:
+                  allTracks.find((track) => track.id === ev.target.value) ??
+                  null
+              }
+            })
+          }
         />
       );
     }
