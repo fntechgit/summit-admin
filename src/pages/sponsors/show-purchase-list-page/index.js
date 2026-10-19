@@ -252,7 +252,7 @@ const ShowPurchaseListPage = ({
   ];
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <div>
         <Breadcrumb
           data={{

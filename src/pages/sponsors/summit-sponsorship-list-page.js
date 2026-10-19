@@ -127,7 +127,7 @@ const SummitSponsorshipListPage = ({
   if (!currentSummit.id) return <div />;
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <h3> {T.translate("summit_sponsorship_list.tiers")}</h3>
 
       <Alert

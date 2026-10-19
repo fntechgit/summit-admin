@@ -81,7 +81,7 @@ const ScheduleSettingsListPage = ({
   if (!currentSummit.id) return null;
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <h3>
         {" "}
         {T.translate("schedule_settings_list.schedule_settings")} (

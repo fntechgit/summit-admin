@@ -129,7 +129,7 @@ const MarketingSettingListPage = ({
   if (!currentSummit.id) return <div />;
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <h3>
         {" "}
         {T.translate("marketing.setting_list")} ({totalSettings})

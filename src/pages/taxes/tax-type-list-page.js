@@ -137,7 +137,7 @@ const TaxTypeListPage = ({
           pathname: match.url
         }}
       />
-      <div className="container">
+      <div className="container table-container">
         <h3>{T.translate("tax_type_list.tax_type_list")}</h3>
 
         <GridToolbar

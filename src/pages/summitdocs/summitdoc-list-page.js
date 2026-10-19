@@ -95,7 +95,7 @@ const SummitDocListPage = ({
   if (!currentSummit.id) return <div />;
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <h3>
         {" "}
         {T.translate("summitdoc.list")} ({totalSummitDocs})

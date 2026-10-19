@@ -102,7 +102,7 @@ const MediaUploadListPage = ({
   if (!currentSummit.id) return <div />;
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <h3>{T.translate("media_upload.media_upload_list")}</h3>
       <GridToolbar searchProps={{ term, onSearch: handleSearch }}>
         {/* TODO: remove this wrapper once SummitDropdown is migrated to MUI */}

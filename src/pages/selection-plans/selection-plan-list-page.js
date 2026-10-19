@@ -169,7 +169,7 @@ const SelectionPlanListPage = ({
   if (!currentSummit.id) return <div />;
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <h3>{T.translate("selection_plan_list.selection_plan_list")}</h3>
 
       <GridToolbar

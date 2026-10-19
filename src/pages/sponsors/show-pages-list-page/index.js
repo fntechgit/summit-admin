@@ -185,7 +185,7 @@ const ShowPagesListPage = ({
   };
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <div>
         <Breadcrumb
           data={{

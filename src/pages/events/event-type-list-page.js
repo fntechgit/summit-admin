@@ -132,7 +132,7 @@ const EventTypeListPage = ({
   if (!currentSummit.id) return <div />;
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <h3>{T.translate("event_type_list.event_type_list")}</h3>
       <GridToolbar searchProps={{ term, onSearch: handleSearch }}>
         <Button variant="outlined" onClick={handleSeed}>
