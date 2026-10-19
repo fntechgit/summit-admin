@@ -121,7 +121,13 @@ module.exports = {
         type: "asset/resource"
       },
       {
+        // inline the invoice logo so react-pdf never fetches it (CDN may serve WebP, react-pdf caches failures)
+        test: /fn-invoice-header\.png$/,
+        type: "asset/inline"
+      },
+      {
         test: /\.jpg|\.png|\.gif$/,
+        exclude: /fn-invoice-header\.png$/,
         use: "file-loader?name=images/[name].[ext]"
       },
       {
