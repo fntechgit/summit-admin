@@ -643,7 +643,7 @@ export const updatePaymentIntent =
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/payments/${paymentIntent?.id}/reprice`,
       payload,
       snackbarErrorHandler
-    )(params)(dispatch);
+    )(params)(dispatch).catch(() => {}); // error already shown by snackbarErrorHandler
   };
 
 export const confirmPayment = () => async (dispatch, getState) => {
