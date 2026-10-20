@@ -62,7 +62,16 @@ const fieldNames = [
   { columnKey: "owner_email", header: "owner_email" },
   { columnKey: "owner", header: "owner" },
   { columnKey: "email_sent", header: "emailed" },
-  { columnKey: "creator", header: "creator" }
+  { columnKey: "creator", header: "creator" },
+  {
+    columnKey: "quantity_available",
+    header: "quantity_available",
+    sortable: true,
+    // 0 means no usage limit
+    render: (row) =>
+      row.quantity_available || T.translate("promocode_list.unlimited")
+  },
+  { columnKey: "quantity_used", header: "quantity_used", sortable: true }
 ];
 
 const PromocodeListPage = ({
@@ -219,7 +228,15 @@ const PromocodeListPage = ({
     },
     { value: "tags", label: T.translate("promocode_list.tags") },
     { value: "email_sent", label: T.translate("promocode_list.emailed") },
-    { value: "creator", label: T.translate("promocode_list.creator") }
+    { value: "creator", label: T.translate("promocode_list.creator") },
+    {
+      value: "quantity_available",
+      label: T.translate("promocode_list.quantity_available")
+    },
+    {
+      value: "quantity_used",
+      label: T.translate("promocode_list.quantity_used")
+    }
   ];
 
   const table_options = {

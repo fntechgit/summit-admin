@@ -141,6 +141,8 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
           owner_email: ownerEmail || "",
           email_sent: p.email_sent ? "Yes" : "No",
           redeemed: p.redeemed ? "Yes" : "No",
+          quantity_available: p.quantity_available,
+          quantity_used: p.quantity_used,
           creator: p?.creator
             ? `${p.creator.first_name} ${p.creator.last_name}`
             : "TBD"
