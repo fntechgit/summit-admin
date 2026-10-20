@@ -256,11 +256,16 @@ describe("EventForm", () => {
         errors: {},
         entity: { ...baseEntity, track_id: 36473 },
         selectionPlansOpts: [
-          planWith({ name: "Saved Plan", track_groups: [69] }),
+          planWith({
+            name: "Saved Plan",
+            track_groups: [69],
+            event_types: [930]
+          }),
           planWith({
             id: 100,
             name: "Other Plan",
             track_groups: [69],
+            event_types: [930],
             submission_end_date: moment().add(7, "days").unix()
           })
         ]
