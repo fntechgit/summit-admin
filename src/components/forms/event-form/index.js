@@ -1298,27 +1298,28 @@ class EventForm extends React.Component {
     const tracksWithPlans = leafTracks.filter((t) =>
       plansForType.some((sp) => isTrackInPlan(t, sp))
     );
-    let tracks_ddl = leafTracks.map(toTrackOption);
-    const selectedTrack =
-      tracks_ddl.find((t) => t.value === entity.track_id) ?? null;
+    // Dropdown can't find an id inside groups, so pass the option itself
+    const currentTrack = leafTracks.find((t) => t.id === entity.track_id);
+    const selectedTrack = currentTrack ? toTrackOption(currentTrack) : null;
+    const type = typeOpts.find((t) => t.id === entity.type_id);
 
-    if (tracksWithPlans.length > 0) {
-      const type = typeOpts.find((t) => t.id === entity.type_id);
-      tracks_ddl = [
-        {
-          label: T.translate("edit_event.tracks_with_selection_plans", {
-            type: type.name
-          }),
-          options: tracksWithPlans.map(toTrackOption)
-        },
-        {
-          label: T.translate("edit_event.tracks_without_selection_plans"),
-          options: leafTracks
-            .filter((t) => !tracksWithPlans.includes(t))
-            .map(toTrackOption)
-        }
-      ].filter((group) => group.options.length > 0);
-    }
+    const tracks_ddl =
+      tracksWithPlans.length > 0
+        ? [
+            {
+              label: T.translate("edit_event.tracks_with_selection_plans", {
+                type: type.name
+              }),
+              options: tracksWithPlans.map(toTrackOption)
+            },
+            {
+              label: T.translate("edit_event.tracks_without_selection_plans"),
+              options: leafTracks
+                .filter((t) => !tracksWithPlans.includes(t))
+                .map(toTrackOption)
+            }
+          ].filter((group) => group.options.length > 0)
+        : leafTracks.map(toTrackOption);
 
     const venues = locationOpts
       .filter((v) => v.class_name === "SummitVenue")
