@@ -54,6 +54,12 @@ jest.mock(
   "openstack-uicore-foundation/lib/components/inputs/tag-input",
   () => () => null
 );
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/snackbar-notification",
+  () => ({
+    useSnackbarMessage: () => ({ successMessage: jest.fn() })
+  })
+);
 jest.mock("i18n-react/dist/i18n-react", () => ({
   __esModule: true,
   default: { translate: (key) => key }

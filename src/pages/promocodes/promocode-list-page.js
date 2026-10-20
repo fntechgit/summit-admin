@@ -15,13 +15,16 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
+  Button,
   FormControl,
   InputLabel,
   MenuItem,
   OutlinedInput,
-  Select
+  Select,
+  Tooltip
 } from "@mui/material";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input";
@@ -95,6 +98,12 @@ const PromocodeListPage = ({
   importPromoCodesCSV
 }) => {
   const [selectedColumns, setSelectedColumns] = useState(extraColumns);
+  const { successMessage } = useSnackbarMessage();
+
+  const handleCopyCode = (code) => {
+    navigator.clipboard.writeText(code);
+    successMessage(T.translate("general.copied"));
+  };
 
   useEffect(() => {
     getPromocodeMeta();
@@ -203,7 +212,19 @@ const PromocodeListPage = ({
     {
       columnKey: "code",
       header: T.translate("promocode_list.code"),
-      sortable: true
+      sortable: true,
+      render: (row) => (
+        <Tooltip title={T.translate("general.copy_to_clipboard")}>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => handleCopyCode(row.code)}
+            sx={{ textTransform: "none", fontFamily: "monospace" }}
+          >
+            {row.code}
+          </Button>
+        </Tooltip>
+      )
     },
     {
       columnKey: "redeemed",
