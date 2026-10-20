@@ -30,7 +30,6 @@ import IdTokenVerifier from "idtoken-verifier";
 import AuthButton from "../auth-button";
 import Menu from "../menu";
 import { getGlobalItems, getSummitItems } from "../menu/menu-definition";
-import { addMenuLinks } from "../menu/menu-path";
 
 const DRAWER_WIDTH = 260;
 const COMPACT_BAR_HEIGHT = 48;
@@ -38,38 +37,54 @@ const REGULAR_BAR_HEIGHT = 56;
 const SUB_BAR_HEIGHT = 36;
 const SHORT_VIEWPORT_MAX_HEIGHT = 500;
 
-// puts the page's menu folders after the Summit crumb (Home on global pages)
-export const insertMenuFolders = (menuMap) => (crumbs) => {
-  // deepest crumb that is a menu link = the most specific match
-  let matchIndex = -1;
-  for (let i = crumbs.length - 1; i >= 0; i--) {
-    if (menuMap.has(crumbs[i].pathname)) {
-      matchIndex = i;
-      break;
+// key: a menu link's pathname; value: the folders it sits in, outermost first
+export const addMenuLinks = (items, map = new Map(), folders = []) => {
+  items.forEach((item) => {
+    if (item.subItems) {
+      addMenuLinks(item.subItems, map, [...folders, item.name]);
+    } else if (item.linkUrl) {
+      map.set(`/app/${item.linkUrl}`, folders);
     }
-  }
+  });
+  return map;
+};
+
+// puts the page's menu folders after the Summit crumb (Home on global pages)
+export const insertMenuFolders = (menuMap, summitId) => (crumbs) => {
+  // deepest crumb that is a menu link = the most specific match
+  const matchIndex = crumbs.findLastIndex((crumb) =>
+    menuMap.has(crumb.pathname)
+  );
   if (matchIndex === -1) return crumbs;
 
-  const { folders, anchor } = menuMap.get(crumbs[matchIndex].pathname);
-  const anchorIndex = crumbs.findIndex((crumb) => crumb.pathname === anchor);
-  if (anchorIndex === -1 || matchIndex <= anchorIndex) return crumbs;
+  // Summit crumb when present, otherwise Home
+  const summitIndex = crumbs.findIndex(
+    (crumb) => crumb.pathname === `/app/summits/${summitId}`
+  );
+  const anchorIndex = Math.max(summitIndex, 0);
+  if (matchIndex <= anchorIndex) return crumbs;
 
-  // skip a folder that repeats the matched crumb (e.g. "Activities / Activities")
+  const anchor = crumbs[anchorIndex].pathname;
+  const folders = menuMap.get(crumbs[matchIndex].pathname);
+  const routeCrumbs = crumbs.slice(anchorIndex + 1);
+
+  // skip a folder that repeats a route crumb (e.g. "Activities / Activities")
   const folderCrumbs = folders
-    .map((name) => ({ name, title: T.translate(`menu.${name}`) }))
-    .filter(({ title }) => title !== crumbs[matchIndex].title)
-    .map(({ name, title }) => ({
+    .filter(
+      (name) =>
+        !routeCrumbs.some(
+          (crumb) => crumb.title === T.translate(`menu.${name}`)
+        )
+    )
+    .map((name) => ({
       id: `menu-folder-${name}`,
-      title: <span className="crumb-folder">{title}</span>,
+      title: (
+        <span className="crumb-folder">{T.translate(`menu.${name}`)}</span>
+      ),
       pathname: anchor
     }));
 
-  // route crumbs between the anchor and the match are replaced by the folders
-  return [
-    ...crumbs.slice(0, anchorIndex + 1),
-    ...folderCrumbs,
-    ...crumbs.slice(matchIndex)
-  ];
+  return [...crumbs.slice(0, anchorIndex + 1), ...folderCrumbs, ...routeCrumbs];
 };
 
 /**
@@ -88,17 +103,17 @@ const TopNav = ({ isLoggedUser, currentSummit, member }) => {
 
   // built once per summit; global links stay findable while a summit is selected
   const summitId = currentSummit?.id;
-  const setCrumbs = useMemo(() => {
-    const menuMap = addMenuLinks(getGlobalItems(), "/app", new Map());
-    if (summitId) {
-      addMenuLinks(
-        getSummitItems(summitId),
-        `/app/summits/${summitId}`,
-        menuMap
-      );
-    }
-    return insertMenuFolders(menuMap);
-  }, [summitId]);
+  const setCrumbs = useMemo(
+    () =>
+      insertMenuFolders(
+        addMenuLinks([
+          ...getGlobalItems(),
+          ...(summitId ? getSummitItems(summitId) : [])
+        ]),
+        summitId
+      ),
+    [summitId]
+  );
 
   const closeDrawer = useCallback(() => setOpen(false), []);
   const toggleDrawer = useCallback(() => setOpen((prev) => !prev), []);

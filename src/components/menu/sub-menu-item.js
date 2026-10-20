@@ -17,7 +17,7 @@ import MenuItem from "./menu-item";
 import ExpandableItem from "./expandable-item";
 
 const GROUP_PL = 4;
-const GROUP_LEAF_PL = 6;
+const GROUP_PL_STEP = 2;
 
 const isAccessible = (item, memberObj) =>
   !item.hasOwnProperty("accessRoute") || memberObj.hasAccess(item.accessRoute);
@@ -59,9 +59,9 @@ function SubMenuItem({ name, onItemClick, subItems, memberObj, currentPath }) {
     />
   );
 
-  const renderGroup = (item) => {
+  const renderGroup = (item, pl = GROUP_PL) => {
     const groupItems = item.subItems.filter((ch) =>
-      isAccessible(ch, memberObj)
+      hasVisibleContent(ch, memberObj)
     );
 
     if (groupItems.length === 0) return null;
@@ -69,13 +69,17 @@ function SubMenuItem({ name, onItemClick, subItems, memberObj, currentPath }) {
     return (
       <ExpandableItem
         key={item.name}
-        pl={GROUP_PL}
+        pl={pl}
         label={T.translate(`menu.${item.name}`)}
         defaultOpen={groupItems.some((ch) =>
           isActive(ch, currentPath, memberObj)
         )}
       >
-        {groupItems.map((ch) => renderLeaf(ch, GROUP_LEAF_PL))}
+        {groupItems.map((ch) =>
+          ch.subItems
+            ? renderGroup(ch, pl + GROUP_PL_STEP)
+            : renderLeaf(ch, pl + GROUP_PL_STEP)
+        )}
       </ExpandableItem>
     );
   };

@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import TopNav, { insertMenuFolders } from "../index";
+import TopNav, { addMenuLinks, insertMenuFolders } from "../index";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   translate: (key) => key
@@ -118,17 +118,11 @@ describe("insertMenuFolders", () => {
   };
 
   const menuMap = new Map([
-    [
-      `${SUMMIT}/events`,
-      { folders: ["program_management", "events"], anchor: SUMMIT }
-    ],
-    [
-      `${SUMMIT}/events/schedule`,
-      { folders: ["program_management"], anchor: SUMMIT }
-    ],
-    ["/app/inventory", { folders: ["sponsors_services"], anchor: "/app" }]
+    [`${SUMMIT}/events`, ["program_management", "events"]],
+    [`${SUMMIT}/events/schedule`, ["program_management"]],
+    ["/app/inventory", ["sponsors_services"]]
   ]);
-  const setCrumbs = insertMenuFolders(menuMap);
+  const setCrumbs = insertMenuFolders(menuMap, 1);
 
   const titles = (crumbs) =>
     crumbs.map((c) =>
@@ -159,10 +153,36 @@ describe("insertMenuFolders", () => {
     ]);
   });
 
-  test("nested link: deepest match wins and route crumbs above it are replaced", () => {
+  test("nested link: deepest match wins and route crumbs above it are kept", () => {
     expect(
       titles(setCrumbs([HOME, SUMMIT_CRUMB, ACTIVITIES, SCHEDULE]))
-    ).toEqual(["home", "Summit", "menu.program_management", "Schedule"]);
+    ).toEqual([
+      "home",
+      "Summit",
+      "menu.program_management",
+      "menu.events",
+      "Schedule"
+    ]);
+  });
+
+  test("skips a folder that repeats any route crumb, not only the matched one", () => {
+    const sponsors = {
+      id: "sponsors",
+      title: "menu.sponsors",
+      pathname: `${SUMMIT}/sponsors`
+    };
+    const forms = {
+      id: "forms",
+      title: "Forms",
+      pathname: `${SUMMIT}/sponsors/forms`
+    };
+    const setSponsorCrumbs = insertMenuFolders(
+      new Map([[forms.pathname, ["sponsors"]]]),
+      1
+    );
+    expect(
+      titles(setSponsorCrumbs([HOME, SUMMIT_CRUMB, sponsors, forms]))
+    ).toEqual(["home", "Summit", "menu.sponsors", "Forms"]);
   });
 
   test("global page: folders after Home", () => {
@@ -178,14 +198,55 @@ describe("insertMenuFolders", () => {
     expect(crumbs[2].pathname).toBe(SUMMIT);
   });
 
-  test("unchanged when the page is not in the menu or the anchor is missing", () => {
+  test("unchanged when the page is not in the menu", () => {
     const notInMenu = [
       HOME,
       SUMMIT_CRUMB,
       { id: "x", title: "X", pathname: `${SUMMIT}/x` }
     ];
     expect(setCrumbs(notInMenu)).toBe(notInMenu);
-    const noAnchor = [HOME, ACTIVITIES];
-    expect(setCrumbs(noAnchor)).toBe(noAnchor);
+  });
+});
+
+describe("addMenuLinks", () => {
+  const items = [
+    {
+      name: "program_management",
+      subItems: [
+        {
+          name: "events",
+          subItems: [{ name: "event_list", linkUrl: "summits/1/events" }]
+        },
+        { name: "schedule", linkUrl: "summits/1/events/schedule" }
+      ]
+    },
+    { name: "dashboard", linkUrl: "summits/1/dashboard" }
+  ];
+  const map = addMenuLinks(items);
+
+  test("keys each link by its crumb pathname with its folders", () => {
+    expect(map.get("/app/summits/1/events")).toEqual([
+      "program_management",
+      "events"
+    ]);
+  });
+
+  test("a link's folders do not include sibling folders visited before it", () => {
+    expect(map.get("/app/summits/1/events/schedule")).toEqual([
+      "program_management"
+    ]);
+  });
+
+  test("a top-level link has no folders", () => {
+    expect(map.get("/app/summits/1/dashboard")).toEqual([]);
+  });
+
+  test("global and summit links share one lookup", () => {
+    const shared = addMenuLinks([
+      { name: "inventory", linkUrl: "inventory" },
+      ...items
+    ]);
+    expect(shared.has("/app/inventory")).toBe(true);
+    expect(shared.has("/app/summits/1/events")).toBe(true);
   });
 });
