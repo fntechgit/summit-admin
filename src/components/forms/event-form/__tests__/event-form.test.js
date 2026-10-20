@@ -250,10 +250,8 @@ describe("EventForm", () => {
     it("asks for a save, without the speaker link, after an unsaved plan change", async () => {
       // The plan change runs the form's scroll-to-error; jsdom has no scrollIntoView.
       Element.prototype.scrollIntoView = jest.fn();
-      // Track 36473 is in track group 69, so both plans appear in the dropdown.
-      // Own errors object: the plan handler writes into it.
+      // Track 36473 is in track group 69 and both plans accept type 930, so both appear.
       renderEventForm({
-        errors: {},
         entity: { ...baseEntity, track_id: 36473 },
         selectionPlansOpts: [
           planWith({
@@ -687,12 +685,38 @@ describe("EventForm", () => {
         keyCode: 40
       });
 
+      // each heading's parent is its group, holding the group's options
+      const withPlans = screen.getByText(
+        "edit_event.tracks_with_selection_plans"
+      ).parentElement;
+      const withoutPlans = screen.getByText(
+        "edit_event.tracks_without_selection_plans"
+      ).parentElement;
+      expect(within(withPlans).getByText("FTS: AI / HPC")).toBeInTheDocument();
+      expect(within(withoutPlans).getByText("Networking")).toBeInTheDocument();
       expect(
-        screen.getByText("edit_event.tracks_with_selection_plans")
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText("edit_event.tracks_without_selection_plans")
-      ).toBeInTheDocument();
+        within(withPlans).queryByText("Networking")
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows the saved plan even when it no longer accepts the type", () => {
+      renderEventForm({
+        entity: {
+          ...presentationEntity,
+          selection_plan_id: 101,
+          selection_plan: { id: 101, name: "Old Plan" }
+        },
+        selectionPlansOpts: [
+          planWith({
+            id: 101,
+            name: "Old Plan",
+            track_groups: [69],
+            event_types: [999]
+          })
+        ]
+      });
+
+      expect(screen.getByText("Old Plan")).toBeInTheDocument();
     });
 
     // the reopen control only renders while the event has a selection plan
@@ -745,16 +769,19 @@ describe("EventForm", () => {
 
     it("doesn't write into the errors prop when a plan is picked", async () => {
       const errors = {};
+      // own mock: an earlier test already called the shared one with these args
+      const fetchExtraQuestionsAnswers = jest.fn();
       const { container } = renderEventForm({
         entity: { ...presentationEntity, selection_plan_id: null },
         selectionPlansOpts: [matchingPlan],
-        errors
+        errors,
+        fetchExtraQuestionsAnswers
       });
 
       pickOption(container, "selection_plan_id", "Matching Plan");
 
       await waitFor(() =>
-        expect(baseProps.fetchExtraQuestionsAnswers).toHaveBeenCalledWith(
+        expect(fetchExtraQuestionsAnswers).toHaveBeenCalledWith(
           currentSummitMock.id,
           100,
           presentationEntity.id
