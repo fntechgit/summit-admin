@@ -1047,7 +1047,7 @@
     "owner_email": "Owner Email",
     "tags": "Tags",
     "emailed": "Emailed",
-    "redeemed": "Redeemed",
+    "redeemed": "Claimed",
     "creator": "Creator",
     "remove_promocode_warning": "Are you sure you want to delete promo code for attendee",
     "import": "Import",
