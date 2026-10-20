@@ -792,16 +792,14 @@ describe("EventForm", () => {
   });
 
   describe("activity type kind changes", () => {
-    it("doesn't let a saved presentation switch to a non-presentation type", async () => {
+    it("doesn't let a saved presentation switch to a non-presentation type", () => {
       const { container } = renderEventForm({ entity: baseEntity });
 
       pickOption(container, "type_id", "Lunch");
 
-      await waitFor(() =>
-        expect(
-          screen.queryByText("edit_event.downgrade_message")
-        ).not.toBeInTheDocument()
-      );
+      expect(
+        container.querySelector("#type_id [class*='singleValue']")
+      ).toHaveTextContent("Presentation");
     });
 
     it("still lets a saved plain event upgrade to a presentation type", async () => {

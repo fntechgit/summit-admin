@@ -1086,9 +1086,6 @@ class EventForm extends React.Component {
     const isEventUpgrade =
       !this.isEventType(EVENT_TYPE_PRESENTATION, oldEntity) &&
       this.isEventType(EVENT_TYPE_PRESENTATION, newEntity);
-    const isEventDowngrade =
-      this.isEventType(EVENT_TYPE_PRESENTATION, oldEntity) &&
-      !this.isEventType(EVENT_TYPE_PRESENTATION, newEntity);
 
     if (isEventUpgrade) {
       Swal.fire({
@@ -1106,24 +1103,6 @@ class EventForm extends React.Component {
           onEventUpgrade(newEntity);
         }
         if (result.dismiss) {
-          this.setState((prevState) => ({
-            ...prevState,
-            entity: oldEntity
-          }));
-        }
-      });
-    }
-
-    if (isEventDowngrade) {
-      Swal.fire({
-        title: T.translate("general.attention"),
-        text: T.translate("edit_event.downgrade_message"),
-        type: "warning",
-        showCancelButton: false,
-        confirmButtonColor: "#DD6B55"
-        // confirmButtonText: T.translate("general.yes_delete")
-      }).then((result) => {
-        if (result.value) {
           this.setState((prevState) => ({
             ...prevState,
             entity: oldEntity
