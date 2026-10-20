@@ -28,7 +28,7 @@ import {
   postFile
 } from "openstack-uicore-foundation/lib/utils/actions";
 import history from "../history";
-import { checkOrFilter, getAccessTokenSafely } from "../utils/methods";
+import { getAccessTokenSafely } from "../utils/methods";
 import { DEFAULT_PER_PAGE } from "../utils/constants";
 
 export const EXISTING_SPEAKERS_PROMO_CODE = 1;
@@ -59,33 +59,9 @@ export const GET_ASSIGNED_SPEAKERS_LOCALLY = "GET_ASSIGNED_SPEAKERS_LOCALLY";
 export const REQUEST_ASSIGNED_SPEAKERS = "REQUEST_ASSIGNED_SPEAKERS";
 export const RECEIVE_ASSIGNED_SPEAKERS = "RECEIVE_ASSIGNED_SPEAKERS";
 
-const parseFilters = (filters, term = null) => {
-  const filter = [];
-
-  if (filters?.typeFilter && filters.typeFilter !== "ALL") {
-    filter.push(`type==${filters.typeFilter}`);
-  }
-
-  if (filters?.creatorFilter && filters.creatorFilter !== "ALL") {
-    filter.push(`creator_email==${filters.creatorFilter.email}`);
-  }
-
-  if (filters?.assigneeFilter && filters.assigneeFilter !== "ALL") {
-    filter.push(
-      `owner_email==${filters.assigneeFilter.email},contact_email==${filters.assigneeFilter.email}`
-    );
-  }
-
-  if (
-    Array.isArray(filters?.classNamesFilter) &&
-    filters.classNamesFilter.length > 0
-  ) {
-    filter.push(`class_name==${filters.classNamesFilter.join("||")}`);
-  }
-
-  if (Array.isArray(filters?.tagsFilter) && filters.tagsFilter.length > 0) {
-    filter.push(`tag_id==${filters.tagsFilter.map((t) => t.id).join("||")}`);
-  }
+// filters is GridFilter's parsedFilter (already or()-wrapped when joined by ANY); the search term is always ANDed
+const parseFilters = (filters = [], term = null) => {
+  const filter = Array.isArray(filters) ? [...filters] : [];
 
   if (term) {
     const escapedTerm = escapeFilterValue(term);
@@ -103,7 +79,7 @@ const parseFilters = (filters, term = null) => {
     filter.push(searchString);
   }
 
-  return checkOrFilter(filters, filter);
+  return filter;
 };
 
 const normalizeEntity = (entity) => {
@@ -188,7 +164,7 @@ export const getPromocodes =
     perPage = DEFAULT_PER_PAGE,
     order = "code",
     orderDir = 1,
-    filters = {},
+    filters = [],
     extraColumns = []
   ) =>
   async (dispatch, getState) => {
@@ -370,7 +346,7 @@ export const sendEmail = (promocodeId) => async (dispatch, getState) => {
 };
 
 export const exportPromocodes =
-  (term = null, order = "code", orderDir = 1, filters = {}) =>
+  (term = null, order = "code", orderDir = 1, filters = []) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
