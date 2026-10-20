@@ -143,6 +143,26 @@ describe("TrackChairDialog", () => {
       });
     });
 
+    it("drops assigned tracks that are not in the tracks list on submit", async () => {
+      const entity = {
+        id: 5,
+        member: {
+          id: 10,
+          first_name: "Jane",
+          last_name: "Doe",
+          email: "jane@example.com"
+        },
+        trackIds: [2, 99]
+      };
+      renderDialog({ entity });
+      await clickSave();
+      expect(onSave).toHaveBeenCalledWith({
+        id: 5,
+        member: { value: 10, label: "Jane Doe (jane@example.com)" },
+        trackIds: [2]
+      });
+    });
+
     it("disables the member field when editing an existing chair", () => {
       const entity = {
         id: 5,
