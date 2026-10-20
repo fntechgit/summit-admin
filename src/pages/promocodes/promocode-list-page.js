@@ -273,9 +273,9 @@ const PromocodeListPage = ({
           onEdit={handleEdit}
           onDelete={props.deletePromocode}
           canDelete={(row) => row.redeemed === "No"}
-          getName={(row) => row.owner}
-          deleteDialogBody={(name) =>
-            `${T.translate("promocode_list.remove_promocode_warning")} ${name}`
+          getName={(row) => row.code}
+          deleteDialogBody={(code) =>
+            T.translate("promocode_list.remove_promocode_warning", { code })
           }
         />
       )}

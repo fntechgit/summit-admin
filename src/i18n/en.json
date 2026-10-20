@@ -1051,7 +1051,7 @@
     "creator": "Creator",
     "class_name": "Class Name",
     "assignee": "Assignee",
-    "remove_promocode_warning": "Are you sure you want to delete promo code for attendee",
+    "remove_promocode_warning": "Are you sure you want to delete promo code {code} ?",
     "import": "Import",
     "import_promocodes": "Import Promo Codes",
     "placeholders": {
