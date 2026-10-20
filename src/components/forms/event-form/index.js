@@ -1700,7 +1700,14 @@ class EventForm extends React.Component {
               <label> {T.translate("edit_event.selection_plan")} </label>
               <Dropdown
                 id="selection_plan_id"
-                value={entity.selection_plan_id}
+                value={
+                  entity.selection_plan
+                    ? {
+                        label: entity.selection_plan.name,
+                        value: entity.selection_plan.id
+                      }
+                    : null
+                }
                 onChange={this.handleChangeSelectionPlan}
                 placeholder={T.translate(selectionPlanPlaceholder)}
                 disabled={!entity.track_id}
