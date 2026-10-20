@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { Switch, Route, withRouter } from "react-router-dom";
@@ -21,37 +21,32 @@ import EditPromocodePage from "../pages/promocodes/edit-promocode-page";
 import PromocodeListPage from "../pages/promocodes/promocode-list-page";
 import NoMatchPage from "../pages/no-match-page";
 
-class PromocodeLayout extends React.Component {
-  render() {
-    const { match } = this.props;
-    return (
-      <div>
-        <Breadcrumb
-          data={{
-            title: T.translate("promocode_list.promocodes"),
-            pathname: match.url
-          }}
-        />
+const PromocodeLayout = ({ match }) => (
+  <div>
+    <Breadcrumb
+      data={{
+        title: T.translate("promocode_list.promocodes"),
+        pathname: match.url
+      }}
+    />
 
-        <Switch>
-          <Route strict exact path={match.url} component={PromocodeListPage} />
-          <Route
-            strict
-            exact
-            path={`${match.url}/new`}
-            component={EditPromocodePage}
-          />
-          <Route
-            strict
-            exact
-            path={`${match.url}/:promocode_id(\\d+)`}
-            component={EditPromocodePage}
-          />
-          <Route component={NoMatchPage} />
-        </Switch>
-      </div>
-    );
-  }
-}
+    <Switch>
+      <Route strict exact path={match.url} component={PromocodeListPage} />
+      <Route
+        strict
+        exact
+        path={`${match.url}/new`}
+        component={EditPromocodePage}
+      />
+      <Route
+        strict
+        exact
+        path={`${match.url}/:promocode_id(\\d+)`}
+        component={EditPromocodePage}
+      />
+      <Route component={NoMatchPage} />
+    </Switch>
+  </div>
+);
 
 export default Restrict(withRouter(PromocodeLayout), "tickets");
