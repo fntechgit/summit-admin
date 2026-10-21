@@ -101,18 +101,25 @@ const TopNav = ({ isLoggedUser, currentSummit, member }) => {
   // The current summit's name, shown next to the title behind a divider.
   const contextLabel = currentSummit?.id > 0 ? currentSummit.name : null;
 
-  // built once per summit; global links stay findable while a summit is selected
   const summitId = currentSummit?.id;
+
+  // use this memo as a source when rendering menu definitions
+  const setMenuDefs = useMemo(
+    () => ({
+      global: getGlobalItems(),
+      summit: summitId ? getSummitItems(summitId) : []
+    }),
+    [summitId]
+  );
+
+  // built once per summit; global links stay findable while a summit is selected
   const setCrumbs = useMemo(
     () =>
       insertMenuFolders(
-        addMenuLinks([
-          ...getGlobalItems(),
-          ...(summitId ? getSummitItems(summitId) : [])
-        ]),
+        addMenuLinks([...setMenuDefs.global, ...setMenuDefs.summit]),
         summitId
       ),
-    [summitId]
+    [summitId, setMenuDefs]
   );
 
   const closeDrawer = useCallback(() => setOpen(false), []);
@@ -246,6 +253,7 @@ const TopNav = ({ isLoggedUser, currentSummit, member }) => {
               currentSummit={currentSummit}
               member={member}
               onNavigate={closeDrawer}
+              menuDefs={setMenuDefs}
             />
           </Box>
         </Drawer>
