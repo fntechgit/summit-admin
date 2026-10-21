@@ -22,7 +22,9 @@ const CheckboxWithInfo = ({ name, label, info }) => (
       <MuiFormikCheckbox name={name} label={label} margin="none" />
     </Box>
     <Tooltip title={info}>
-      <InfoOutlinedIcon fontSize="small" />
+      <InfoOutlinedIcon
+        sx={{ position: "relative", top: "-2px", left: "-10px" }}
+      />
     </Tooltip>
   </Box>
 );

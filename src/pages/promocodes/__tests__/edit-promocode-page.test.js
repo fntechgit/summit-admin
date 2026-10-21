@@ -12,6 +12,10 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import EditPromocodePage from "../edit-promocode-page";
 import promocodeReducer from "../../../reducers/promocodes/promocode-reducer";
+import {
+  RECEIVE_PROMOCODE,
+  RECEIVE_PROMOCODE_META
+} from "../../../actions/promocode-actions";
 import * as methods from "../../../utils/methods";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
@@ -30,10 +34,11 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 jest.mock("react-breadcrumbs", () => ({ Breadcrumb: () => null }));
 
 // the form itself is covered by its own tests, only the page's save flow matters here
+const mockPromocodeForm = jest.fn(() => null);
 jest.mock("../../../components/forms/promocode-form", () => ({
   __esModule: true,
   ...jest.requireActual("../../../components/forms/promocode-form"),
-  default: () => null
+  default: (props) => mockPromocodeForm(props)
 }));
 
 const SAVED = {
@@ -70,10 +75,10 @@ const buildStore = () =>
     applyMiddleware(thunk)
   );
 
-const renderPage = (url, promocodeId) => {
+const renderPage = (url, promocodeId, store = buildStore()) => {
   const history = { push: jest.fn() };
   render(
-    <Provider store={buildStore()}>
+    <Provider store={store}>
       <EditPromocodePage
         match={{ url, params: { promocode_id: promocodeId } }}
         history={history}
@@ -129,6 +134,29 @@ describe("EditPromocodePage", () => {
       )
     );
     expect(putRequest).toHaveBeenCalled();
+  });
+
+  test("a new promo code never mounts the form with the code edited before it", async () => {
+    // the store still holds the speakers code saved on the previous page, and the classes the list loaded
+    const store = buildStore();
+    store.dispatch({
+      type: RECEIVE_PROMOCODE_META,
+      payload: { response: [{ class_name: "SPEAKERS_PROMO_CODE", type: [] }] }
+    });
+    store.dispatch({
+      type: RECEIVE_PROMOCODE,
+      payload: { response: { ...SAVED, class_name: "SPEAKERS_PROMO_CODE" } }
+    });
+
+    renderPage("/app/summits/1/promocodes/new", undefined, store);
+
+    expect(
+      await screen.findByText("general.add edit_promocode.promocode")
+    ).toBeInTheDocument();
+    expect(mockPromocodeForm).toHaveBeenCalled();
+    mockPromocodeForm.mock.calls.forEach(([props]) =>
+      expect(props.entity.id).toBe(0)
+    );
   });
 
   test("a failed save stays on the page", async () => {

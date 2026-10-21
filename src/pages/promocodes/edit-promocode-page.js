@@ -93,7 +93,8 @@ const EditPromocodePage = ({
     formik.resetForm({ values: buildPromocodeValues(entity, currentSummit) });
   }, [entity.id]);
 
-  if (promocodeId && String(entity.id) !== promocodeId) {
+  // wait for the reset on /new too: a stale entity would mount sub-forms that fetch for its id
+  if (promocodeId ? String(entity.id) !== promocodeId : entity.id) {
     return null;
   }
 

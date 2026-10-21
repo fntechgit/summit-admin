@@ -251,7 +251,7 @@ const PromocodeForm = ({
           maxLength={DESCRIPTION_MAX_LENGTH}
         />
       </Grid2>
-      <Grid2 size={4}>
+      <Grid2 size={4} sx={{ mt: 2 }}>
         <CheckboxWithInfo
           name="allows_to_delegate"
           label={T.translate("edit_promocode.allows_to_delegate")}
