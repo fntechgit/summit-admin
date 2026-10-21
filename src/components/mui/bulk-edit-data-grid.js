@@ -607,7 +607,8 @@ const BulkEditDataGrid = ({
                   .map((col) => col.field),
               searchInputProps: {
                 sx: { "& .MuiInputBase-input": { boxSizing: "content-box" } }
-              }
+              },
+              sort: "asc"
             },
             toolbar: {
               views,
