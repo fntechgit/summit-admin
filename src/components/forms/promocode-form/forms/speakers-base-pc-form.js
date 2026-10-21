@@ -1,197 +1,201 @@
-import React, { useEffect } from "react";
-import Swal from "sweetalert2";
+import React, { useEffect, useState } from "react";
 import T from "i18n-react";
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import SpeakerInput from "openstack-uicore-foundation/lib/components/inputs/speaker-input"
-import Table from "openstack-uicore-foundation/lib/components/table";
-import { Pagination } from "react-bootstrap";
+import { useFormikContext } from "formik";
+import {
+  Autocomplete,
+  Button,
+  Divider,
+  Grid2,
+  InputLabel,
+  TextField
+} from "@mui/material";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import { querySpeakers } from "openstack-uicore-foundation/lib/utils/query-actions";
+import { formatSpeakerOption } from "./speaker-base-pc-form";
 
-const SpeakersBasePCForm = (props) => {
-  const { entity, summit } = props;
-  const {
-    speakers: {
-      filtered_speakers_list,
-      term,
-      order,
-      orderDir,
-      currentPage,
-      lastPage
-    }
-  } = entity;
+// assignments are saved by their own endpoints (or kept in redux until a new code is created), so they live outside formik
+const SpeakersBasePCForm = ({
+  entity,
+  summit,
+  assignSpeaker,
+  getAssignedSpeakers,
+  unAssignSpeaker
+}) => {
+  const { values } = useFormikContext();
+  const [speakerToAssign, setSpeakerToAssign] = useState(null);
+  const [speakerOptions, setSpeakerOptions] = useState([]);
+  const [speakerInput, setSpeakerInput] = useState("");
+  const { speakers } = entity;
+  const promocode = { ...entity, class_name: values.class_name };
 
   useEffect(() => {
-    const { entity } = props;
-    if (entity.id) props.getAssignedSpeakers(entity);
+    if (entity.id) getAssignedSpeakers(promocode);
   }, [entity.id]);
 
-  const handleSpeakerAssignment = (ev) => {
-    const { assignSpeaker, entity } = props;
-    ev.preventDefault();
-    if (entity.speaker) assignSpeaker(entity);
+  useEffect(() => {
+    if (speakerInput) {
+      querySpeakers(summit.id, speakerInput, (results) =>
+        setSpeakerOptions(results.map(formatSpeakerOption))
+      );
+    }
+  }, [speakerInput]);
+
+  const handleAssign = () => {
+    if (!speakerToAssign) return;
+    assignSpeaker({ ...promocode, speaker: speakerToAssign.raw });
+    setSpeakerToAssign(null);
   };
 
   const handleDelete = (speakerId) => {
-    const {
-      unAssignSpeaker,
-      entity: { class_name, id, speakers }
-    } = props;
-    const speakerToDelete = speakers.speakers_list.find(
-      (s) => s.id === speakerId
-    );
-
-    if (speakerToDelete.redeemed) {
-      Swal.fire({
-        title: T.translate(
-          "edit_promo_code.cannot_unassign_speaker_warning_title"
-        ),
-        text: T.translate("edit_promo_code.cannot_unassign_speaker_warning"),
-        type: "warning"
-      });
-      return;
-    }
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("edit_promo_code.unassign_speaker_warning")} ${
-        speakerToDelete.first_name
-      } ${speakerToDelete.last_name} `,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        unAssignSpeaker(class_name, id, speakerId);
-      }
-    });
+    unAssignSpeaker(values.class_name, entity.id, speakerId);
   };
 
   const handleSearch = (term) => {
-    const { entity } = props;
-    const {
-      speakers: { order, orderDir, currentPage, perPage }
-    } = entity;
-    props.getAssignedSpeakers(
-      entity,
+    getAssignedSpeakers(
+      promocode,
       term,
-      currentPage,
-      perPage,
-      order,
-      orderDir
+      speakers.currentPage,
+      speakers.perPage,
+      speakers.order,
+      speakers.orderDir
     );
   };
 
   const handlePageChange = (page) => {
-    const { entity } = props;
-    const {
-      speakers: { term, order, orderDir, perPage }
-    } = entity;
-    props.getAssignedSpeakers(entity, term, page, perPage, order, orderDir);
+    getAssignedSpeakers(
+      promocode,
+      speakers.term,
+      page,
+      speakers.perPage,
+      speakers.order,
+      speakers.orderDir
+    );
   };
 
-  const handleSort = (index, key, dir) => {
-    const { entity } = props;
-    const {
-      speakers: { term, currentPage, perPage }
-    } = entity;
-    props.getAssignedSpeakers(entity, term, currentPage, perPage, key, dir);
+  const handlePerPageChange = (perPage) => {
+    getAssignedSpeakers(
+      promocode,
+      speakers.term,
+      1,
+      perPage,
+      speakers.order,
+      speakers.orderDir
+    );
   };
+
+  const handleSort = (key, dir) => {
+    getAssignedSpeakers(
+      promocode,
+      speakers.term,
+      speakers.currentPage,
+      speakers.perPage,
+      key,
+      dir
+    );
+  };
+
+  const yesNo = (flag) =>
+    flag ? T.translate("general.yes") : T.translate("general.no");
 
   const columns = [
-    { columnKey: "id", value: "Id", sortable: true },
+    { columnKey: "id", header: "Id", sortable: true },
     {
       columnKey: "full_name",
-      value: T.translate("general.name"),
+      header: T.translate("general.name"),
       sortable: true
     },
-    { columnKey: "email", value: T.translate("general.email"), sortable: true },
+    {
+      columnKey: "email",
+      header: T.translate("general.email"),
+      sortable: true
+    },
     {
       columnKey: "email_sent",
-      value: T.translate("edit_promo_code.assigned_speakers_list.email_sent"),
-      sortable: true
+      header: T.translate("edit_promo_code.assigned_speakers_list.email_sent"),
+      sortable: true,
+      render: (row) => yesNo(row.email_sent)
     },
     {
       columnKey: "redeemed",
-      value: T.translate("edit_promo_code.assigned_speakers_list.redeemed"),
-      sortable: true
+      header: T.translate("edit_promo_code.assigned_speakers_list.redeemed"),
+      sortable: true,
+      render: (row) => yesNo(row.redeemed)
     }
   ];
 
-  const table_options = {
-    sortCol: order,
-    sortDir: orderDir,
-    actions: {
-      delete: { onClick: handleDelete }
-    }
-  };
-
   return (
     <>
-      <hr />
-      <label> {T.translate("edit_promo_code.speakers")} </label>
-      <div className="row">
+      <Grid2 size={12}>
+        <Divider />
+      </Grid2>
+      <Grid2 size={12}>
+        <InputLabel>{T.translate("edit_promo_code.speakers")}</InputLabel>
+      </Grid2>
+      <Grid2 size={6}>
         {entity.id > 0 && (
-          <div className="col-md-6" style={{ zIndex: 0 }}>
-            <FreeTextSearch
-              value={term ?? ""}
-              placeholder={T.translate(
-                "edit_promo_code.placeholders.search_speakers"
-              )}
-              onSearch={handleSearch}
-              preventEvents
-            />
-          </div>
-        )}
-        <div className="col-md-4">
-          <SpeakerInput
-            id="speaker"
-            value={entity.speaker}
+          <SearchInput
+            term={speakers.term ?? ""}
             placeholder={T.translate(
-              "edit_promo_code.placeholders.speaker_to_assign"
+              "edit_promo_code.placeholders.search_speakers"
             )}
-            onChange={props.handleChange}
-            summitId={summit.id}
-            error={props.hasErrors("speaker_id")}
+            onSearch={handleSearch}
           />
-        </div>
-        <div className="col-md-2">
-          <button className="btn btn-primary" onClick={handleSpeakerAssignment}>
-            {T.translate("edit_promo_code.assign_speaker")}
-          </button>
-        </div>
-      </div>
-      <div className="row">
-        <div className="col-md-12">
-          <Table
-            options={table_options}
-            data={filtered_speakers_list.map((sp) => ({
-              ...sp,
-              email_sent: sp.email_sent
-                ? T.translate("general.yes")
-                : T.translate("general.no"),
-              redeemed: sp.redeemed
-                ? T.translate("general.yes")
-                : T.translate("general.no")
-            }))}
-            columns={columns}
-            onSort={handleSort}
-          />
-          <Pagination
-            bsSize="medium"
-            prev
-            next
-            first
-            last
-            ellipsis
-            boundaryLinks
-            maxButtons={10}
-            items={lastPage}
-            activePage={currentPage}
-            onSelect={handlePageChange}
-          />
-        </div>
-      </div>
-      <hr />
+        )}
+      </Grid2>
+      <Grid2 size={4}>
+        <Autocomplete
+          id="speaker_to_assign"
+          options={speakerOptions}
+          value={speakerToAssign}
+          onChange={(_ev, selected) => setSpeakerToAssign(selected)}
+          onInputChange={(_ev, input) => setSpeakerInput(input)}
+          filterOptions={(opts) => opts}
+          getOptionLabel={(option) => option.label}
+          isOptionEqualToValue={(option, value) => option.value === value.value}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              placeholder={T.translate(
+                "edit_promo_code.placeholders.speaker_to_assign"
+              )}
+            />
+          )}
+        />
+      </Grid2>
+      <Grid2 size={2}>
+        <Button
+          variant="contained"
+          onClick={handleAssign}
+          disabled={!speakerToAssign}
+        >
+          {T.translate("edit_promo_code.assign_speaker")}
+        </Button>
+      </Grid2>
+      <Grid2 size={12}>
+        <MuiTable
+          options={{ sortCol: speakers.order, sortDir: speakers.orderDir }}
+          data={speakers.filtered_speakers_list}
+          columns={columns}
+          perPage={speakers.perPage}
+          currentPage={speakers.currentPage}
+          totalRows={
+            entity.id ? speakers.totalSpeakers : speakers.speakers_list.length
+          }
+          onSort={handleSort}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onDelete={handleDelete}
+          canDelete={(row) => !row.redeemed}
+          getName={(row) => row.full_name}
+          deleteDialogBody={(name) =>
+            `${T.translate("edit_promo_code.unassign_speaker_warning")} ${name}`
+          }
+        />
+      </Grid2>
+      <Grid2 size={12}>
+        <Divider />
+      </Grid2>
     </>
   );
 };

@@ -1049,18 +1049,14 @@
     "emailed": "Emailed",
     "redeemed": "Redeemed",
     "creator": "Creator",
-    "remove_promocode_warning": "Are you sure you want to delete promo code for attendee",
+    "class_name": "Class Name",
+    "assignee": "Assignee",
+    "remove_promocode_warning": "Are you sure you want to delete promo code {code} ?",
     "import": "Import",
     "import_promocodes": "Import Promo Codes",
-    "ingest": "Ingest File",
     "placeholders": {
       "search_promocodes": "Search by Code, Speaker, Member, Email, Company",
-      "select_type": "Select a Type",
-      "filter_class_name": "Filter by Class Name",
-      "filter_tags": "Filter by Tags",
-      "filter_type": "Filter by Type",
-      "filter_creator": "Filter by Creator",
-      "filter_assignee": "Filter by Assignee"
+      "select_type": "Select a Type"
     }
   },
   "edit_promocode": {
@@ -1096,6 +1092,7 @@
     "badge_features_apply_to_all_tix_retroactively": "Apply to Tickets already using this Promo Code ?",
     "promocode_saved": "Promo Code saved successfully.",
     "promocode_created": "Promo Code created successfully.",
+    "save_before_ticket_rates": "Please save the promocode before adding rates to different ticket types",
     "apply_to_all_tix_discounts": "Discounts",
     "allowed_email_domains": "Allowed Email Domains",
     "quantity_per_account": "Max Per Account",
@@ -3936,8 +3933,6 @@
     "assign_speaker": "Assign speaker",
     "speakers": "Assigned speakers",
     "unassign_speaker_warning": "Are you sure you want unassign speaker",
-    "cannot_unassign_speaker_warning_title": "Unassignment not allowed",
-    "cannot_unassign_speaker_warning": "Cannot unassign a speaker who has redeemed the promo code",
     "assigned_speakers_list": {
       "email_sent": "Email Sent",
       "redeemed": "Redeemed"

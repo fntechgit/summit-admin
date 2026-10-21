@@ -1,50 +1,29 @@
 import React from "react";
 import T from "i18n-react";
+import { Button, Checkbox, FormControlLabel, Grid2 } from "@mui/material";
 
-const EmailRedeemForm = (props) => (
+// email_sent and redeemed are server-side state, shown read-only from the saved promo code
+const EmailRedeemForm = ({ entity, onSendEmail }) => (
   <>
-    <div className="row form-group checkboxes-div">
-      <div className="col-md-3">
-        <div className="form-check abc-checkbox">
-          <input
-            disabled
-            type="checkbox"
-            id="email_sent"
-            checked={props.entity.email_sent}
-            onChange={props.handleChange}
-            className="form-check-input"
-          />
-          <label className="form-check-label" htmlFor="email_sent">
-            {T.translate("edit_promocode.email_sent")}
-          </label>
-        </div>
-      </div>
-      <div className="col-md-3">
-        <div className="form-check abc-checkbox">
-          <input
-            disabled
-            type="checkbox"
-            id="redeemed"
-            checked={props.entity.redeemed}
-            onChange={props.handleChange}
-            className="form-check-input"
-          />
-          <label className="form-check-label" htmlFor="redeemed">
-            {T.translate("edit_promocode.redeemed")}
-          </label>
-        </div>
-      </div>
-      {props.entity.id !== 0 && (
-        <div className="col-md-3">
-          <input
-            type="button"
-            onClick={props.handleSendEmail}
-            className="btn btn-default pull-right"
-            value={T.translate("edit_promocode.send_email")}
-          />
-        </div>
+    <Grid2 size={3}>
+      <FormControlLabel
+        control={<Checkbox checked={!!entity.email_sent} disabled />}
+        label={T.translate("edit_promocode.email_sent")}
+      />
+    </Grid2>
+    <Grid2 size={3}>
+      <FormControlLabel
+        control={<Checkbox checked={!!entity.redeemed} disabled />}
+        label={T.translate("edit_promocode.redeemed")}
+      />
+    </Grid2>
+    <Grid2 size={6} sx={{ display: "flex", justifyContent: "flex-end" }}>
+      {entity.id !== 0 && (
+        <Button variant="outlined" onClick={() => onSendEmail(entity.id)}>
+          {T.translate("edit_promocode.send_email")}
+        </Button>
       )}
-    </div>
+    </Grid2>
   </>
 );
 

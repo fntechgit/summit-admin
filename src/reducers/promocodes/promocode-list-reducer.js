@@ -19,24 +19,13 @@ import {
   PROMOCODE_DELETED
 } from "../../actions/promocode-actions";
 
-import { ALL_FILTER } from "../../utils/constants";
-
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-
-const FILTERS_DEFAULT_STATE = {
-  assigneeFilter: null,
-  creatorFilter: null,
-  typeFilter: null,
-  classNamesFilter: [],
-  tagsFilter: [],
-  orAndFilter: ALL_FILTER
-};
 
 const DEFAULT_STATE = {
   promocodes: [],
   tags: [],
   term: null,
-  filters: { ...FILTERS_DEFAULT_STATE },
+  filters: [],
   classNames: [],
   type: "ALL",
   assignee: null,
