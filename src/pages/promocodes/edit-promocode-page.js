@@ -11,110 +11,159 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
-import PromocodeForm from "../../components/forms/promocode-form";
-import { getSummitById } from "../../actions/summit-actions";
+import { FormikProvider, useFormik } from "formik";
+import { Box, Button, Grid2 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import PromocodeForm, {
+  buildPromocodeValues,
+  promocodeValidationSchema,
+  toPromocodeEntity
+} from "../../components/forms/promocode-form";
 import {
   getPromocode,
   getPromocodeMeta,
   resetPromocodeForm,
   sendEmail,
-  addBadgeFeatureToPromocode,
-  removeBadgeFeatureFromPromocode,
   savePromocode,
   assignSpeaker,
   getAssignedSpeakers,
   unAssignSpeaker
 } from "../../actions/promocode-actions";
 import { getBadgeFeatures, getBadgeTypes } from "../../actions/badge-actions";
-import "../../styles/edit-promocode-page.less";
-import { createCompany } from "../../actions/sponsor-actions";
-import AddNewButton from "../../components/buttons/add-new-button";
+import useScrollToError from "../../hooks/useScrollToError";
 
-class EditPromocodePage extends React.Component {
-  constructor(props) {
-    const { currentSummit, match } = props;
-    const promocodeId = match.params.promocode_id;
-    super(props);
+const EditPromocodePage = ({
+  currentSummit,
+  allClasses,
+  entity,
+  match,
+  history,
+  getPromocode,
+  getPromocodeMeta,
+  getBadgeFeatures,
+  getBadgeTypes,
+  resetPromocodeForm,
+  sendEmail,
+  savePromocode,
+  assignSpeaker,
+  getAssignedSpeakers,
+  unAssignSpeaker
+}) => {
+  const promocodeId = match.params.promocode_id;
+  // the same page serves the summit and the sponsor promo code lists
+  const listUrl = match.url.substring(0, match.url.lastIndexOf("/"));
+  const [isSaving, setIsSaving] = useState(false);
 
-    if (!promocodeId) {
-      props.resetPromocodeForm();
-    } else {
-      props.getPromocode(promocodeId);
+  useEffect(() => {
+    // reset first so a stale entity with the same id never seeds the form
+    resetPromocodeForm();
+    if (promocodeId) getPromocode(promocodeId);
+  }, [promocodeId]);
+
+  useEffect(() => {
+    getPromocodeMeta();
+    if (!currentSummit.badge_features) getBadgeFeatures();
+    if (!currentSummit.badge_types) getBadgeTypes();
+  }, []);
+
+  const formik = useFormik({
+    initialValues: buildPromocodeValues(entity, currentSummit),
+    validationSchema: promocodeValidationSchema,
+    onSubmit: (values) => {
+      if (isSaving) return;
+      const isNew = !entity.id;
+      setIsSaving(true);
+      savePromocode(toPromocodeEntity(values, entity, currentSummit))
+        .then(({ response }) =>
+          // a new code goes to its edit page, where rates, speakers and emails need a saved id
+          history.push(isNew ? `${listUrl}/${response.id}` : listUrl)
+        )
+        .catch(() => {})
+        .finally(() => setIsSaving(false));
     }
+  });
 
-    props.getPromocodeMeta();
-    if (!currentSummit.badge_features) props.getBadgeFeatures();
-    if (!currentSummit.badge_types) props.getBadgeTypes();
+  useScrollToError(formik);
+
+  useEffect(() => {
+    formik.resetForm({ values: buildPromocodeValues(entity, currentSummit) });
+  }, [entity.id]);
+
+  if (promocodeId && String(entity.id) !== promocodeId) {
+    return null;
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const oldId = prevProps.match.params.promocode_id;
-    const newId = this.props.match.params.promocode_id;
-
-    if (newId !== oldId) {
-      if (!newId) {
-        this.props.resetPromocodeForm();
-      } else {
-        this.props.getPromocode(newId);
-      }
-    }
+  if (
+    !allClasses.length ||
+    !currentSummit.badge_features ||
+    !currentSummit.badge_types
+  ) {
+    return <div />;
   }
 
-  render() {
-    const { currentSummit, allTypes, allClasses, entity, errors, match } =
-      this.props;
-    const title = entity.id
-      ? T.translate("general.edit")
-      : T.translate("general.add");
-    const breadcrumb = entity.id ? entity.code : T.translate("general.new");
+  const title = entity.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
+  const breadcrumb = entity.id ? entity.code : T.translate("general.new");
 
-    if (entity.id && match.params.promocode_id != entity.id) {
-      return null;
-    }
-
-    if (
-      !allClasses.length ||
-      !currentSummit.badge_features ||
-      !currentSummit.badge_types
-    ) {
-      return <div />;
-    }
-
-    return (
-      <div className="container">
-        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-        <h3>
-          {title} {T.translate("edit_promocode.promocode")}
-          <AddNewButton entity={entity} />
-        </h3>
-        <hr />
-        {currentSummit && (
-          <PromocodeForm
-            history={this.props.history}
-            currentSummit={currentSummit}
-            allTypes={allTypes}
-            allClasses={allClasses}
-            entity={entity}
-            errors={errors}
-            onSendEmail={this.props.sendEmail}
-            onBadgeFeatureLink={this.props.addBadgeFeatureToPromocode}
-            onBadgeFeatureUnLink={this.props.removeBadgeFeatureFromPromocode}
-            onCreateCompany={this.props.createCompany}
-            onSubmit={this.props.savePromocode}
-            assignSpeaker={this.props.assignSpeaker}
-            getAssignedSpeakers={this.props.getAssignedSpeakers}
-            unAssignSpeaker={this.props.unAssignSpeaker}
-            resetPromocodeForm={this.props.resetPromocodeForm}
-          />
+  return (
+    <div className="container">
+      <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+      <Grid2
+        container
+        sx={{ justifyContent: "space-between", alignItems: "center" }}
+      >
+        <Grid2>
+          <h3>
+            {title} {T.translate("edit_promocode.promocode")}
+          </h3>
+        </Grid2>
+        {entity.id > 0 && (
+          <Grid2>
+            <Button
+              variant="contained"
+              onClick={() => history.push(`${listUrl}/new`)}
+              startIcon={<AddIcon />}
+            >
+              {T.translate("general.add_new")}
+            </Button>
+          </Grid2>
         )}
-      </div>
-    );
-  }
-}
+      </Grid2>
+      <hr />
+      <FormikProvider value={formik}>
+        <Box
+          component="form"
+          onSubmit={formik.handleSubmit}
+          noValidate
+          autoComplete="off"
+        >
+          <PromocodeForm
+            entity={entity}
+            currentSummit={currentSummit}
+            allClasses={allClasses}
+            onSendEmail={sendEmail}
+            assignSpeaker={assignSpeaker}
+            getAssignedSpeakers={getAssignedSpeakers}
+            unAssignSpeaker={unAssignSpeaker}
+          />
+          <Grid2
+            size={12}
+            sx={{ p: 3, pt: 0, display: "flex", justifyContent: "flex-end" }}
+          >
+            <Button type="submit" variant="contained" disabled={isSaving}>
+              {T.translate("general.save")}
+            </Button>
+          </Grid2>
+        </Box>
+      </FormikProvider>
+    </div>
+  );
+};
 
 const mapStateToProps = ({ currentSummitState, currentPromocodeState }) => ({
   currentSummit: currentSummitState.currentSummit,
@@ -122,16 +171,12 @@ const mapStateToProps = ({ currentSummitState, currentPromocodeState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  getSummitById,
   getPromocode,
   getPromocodeMeta,
   getBadgeFeatures,
   getBadgeTypes,
   resetPromocodeForm,
   sendEmail,
-  createCompany,
-  addBadgeFeatureToPromocode,
-  removeBadgeFeatureFromPromocode,
   savePromocode,
   assignSpeaker,
   getAssignedSpeakers,

@@ -20,14 +20,12 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  showMessage,
-  showSuccessMessage,
   getCSV,
-  authErrorHandler,
+  snackbarErrorHandler,
+  snackbarSuccessHandler,
   escapeFilterValue,
   postFile
 } from "openstack-uicore-foundation/lib/utils/actions";
-import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
 import { DEFAULT_PER_PAGE } from "../utils/constants";
 
@@ -151,7 +149,7 @@ export const getPromocodeMeta = () => async (dispatch, getState) => {
     null,
     createAction(RECEIVE_PROMOCODE_META),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/metadata`,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -206,7 +204,7 @@ export const getPromocodes =
       createAction(REQUEST_PROMOCODES),
       createAction(RECEIVE_PROMOCODES),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { page, perPage, order, orderDir, term, filters, extraColumns }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -232,7 +230,7 @@ export const getPromocode = (promocodeId) => async (dispatch, getState) => {
     null,
     createAction(RECEIVE_PROMOCODE),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/${promocodeId}`,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -242,61 +240,56 @@ export const resetPromocodeForm = () => (dispatch) => {
   dispatch(createAction(RESET_PROMOCODE_FORM)({}));
 };
 
-export const savePromocode =
-  (entity, isSponsor) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
+export const savePromocode = (entity) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  dispatch(startLoading());
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
 
-    dispatch(startLoading());
+  const normalizedEntity = normalizeEntity(entity);
 
-    const normalizedEntity = normalizeEntity(entity);
+  const params = {
+    expand:
+      "owner,sponsor,sponsor.company,sponsor.sponsorship,speaker,tickets,ticket_type,ticket_types_rules,tags,allowed_ticket_types",
+    access_token: accessToken
+  };
 
-    const params = {
-      expand:
-        "owner,sponsor,sponsor.company,sponsor.sponsorship,speaker,tickets,ticket_type,ticket_types_rules,tags,allowed_ticket_types",
-      access_token: accessToken
-    };
-
-    if (entity.id) {
-      return putRequest(
-        createAction(UPDATE_PROMOCODE),
-        createAction(PROMOCODE_UPDATED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/${entity.id}`,
-        normalizedEntity,
-        authErrorHandler,
-        entity
-      )(params)(dispatch).then(() => {
-        dispatch(
-          showSuccessMessage(T.translate("edit_promocode.promocode_saved"))
-        );
-      });
-    }
-    const successMessage = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_promocode.promocode_created"),
-      type: "success"
-    };
-
-    return postRequest(
+  if (entity.id) {
+    return putRequest(
       createAction(UPDATE_PROMOCODE),
-      createAction(PROMOCODE_ADDED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes`,
+      createAction(PROMOCODE_UPDATED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/${entity.id}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch).then((payload) => {
       dispatch(
-        showMessage(successMessage, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}${
-              isSponsor ? "/sponsors" : ""
-            }/promocodes/${payload.response.id}`
-          );
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_promocode.promocode_saved")
         })
       );
+      return payload;
     });
-  };
+  }
+
+  return postRequest(
+    createAction(UPDATE_PROMOCODE),
+    createAction(PROMOCODE_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes`,
+    normalizedEntity,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch).then((payload) => {
+    dispatch(
+      snackbarSuccessHandler({
+        title: T.translate("general.success"),
+        html: T.translate("edit_promocode.promocode_created")
+      })
+    );
+    return payload;
+  });
+};
 
 export const deletePromocode = (promocodeId) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -312,7 +305,7 @@ export const deletePromocode = (promocodeId) => async (dispatch, getState) => {
     createAction(PROMOCODE_DELETED)({ promocodeId }),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/${promocodeId}`,
     null,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -332,15 +325,13 @@ export const sendEmail = (promocodeId) => async (dispatch, getState) => {
     createAction(EMAIL_SENT),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/${promocodeId}/mail`,
     null,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
     dispatch(
-      showMessage(
-        T.translate("general.done"),
-        T.translate("general.mail_sent"),
-        "success"
-      )
+      snackbarSuccessHandler({
+        title: T.translate("general.success"),
+        html: T.translate("general.email_sent")
+      })
     );
   });
 };
@@ -400,7 +391,7 @@ export const addBadgeFeatureToPromocode =
       createAction(BADGE_FEATURE_ADDED)({ badgeFeature }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/${promocodeId}/badge-features/${badgeFeature.id}`,
       {},
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -423,7 +414,7 @@ export const removeBadgeFeatureFromPromocode =
       createAction(BADGE_FEATURE_REMOVED)({ badgeFeatureId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/${promocodeId}/badge-features/${badgeFeatureId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -446,7 +437,7 @@ export const addDiscountTicket = (ticket) => async (dispatch, getState) => {
     createAction(DISCOUNT_TICKET_ADDED),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/${ticket.owner_id}/ticket-types/${ticket.ticket_type_id}`,
     ticket,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -467,7 +458,7 @@ export const deleteDiscountTicket =
       createAction(DISCOUNT_TICKET_DELETED)({ ticketId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/${promocodeId}/ticket-types/${ticketTypeId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -488,7 +479,7 @@ export const importPromoCodesCSV = (file) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/csv`,
     file,
     {},
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
     window.location.reload();
@@ -557,7 +548,7 @@ export const getAssignedSpeakers =
       createAction(REQUEST_ASSIGNED_SPEAKERS),
       createAction(RECEIVE_ASSIGNED_SPEAKERS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/${promoCodeRoute}/${entity.id}/speakers`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { entity, order, orderDir, page, term }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -582,7 +573,7 @@ export const assignSpeaker = (entity) => async (dispatch, getState) => {
     createAction(SPEAKER_ASSIGNED),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/speakers-promo-codes/${entity.id}/speakers/${entity.speaker.id}`,
     null,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
     dispatch(getAssignedSpeakers(entity));
@@ -614,7 +605,7 @@ export const unAssignSpeaker =
       createAction(SPEAKER_UNASSIGNED)({ speakerId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/speakers-promo-codes/${promocodeId}/speakers/${speakerId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

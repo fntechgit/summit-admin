@@ -1,39 +1,27 @@
 import React from "react";
 import T from "i18n-react";
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
-import { fireChange } from "./utils";
+import { Grid2 } from "@mui/material";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import LabelWithInfo from "../label-with-info";
 
-// Returns the col-md-4 directly. Host (BasePCForm's Quantity row) provides
-// the .row.form-group wrapper.
-const MaxPerAccountInput = ({ entity, handleChange }) => (
-  <div className="col-md-4">
-    <label htmlFor="quantity_per_account">
-      {T.translate("edit_promocode.quantity_per_account")}&nbsp;
-      <i
-        className="fa fa-info-circle"
-        aria-hidden="true"
-        title={T.translate("edit_promocode.info.quantity_per_account")}
-      />
-    </label>
-    <Input
-      id="quantity_per_account"
-      type="number"
-      min="0"
-      value={entity.quantity_per_account}
-      onChange={(ev) =>
-        fireChange(
-          handleChange,
-          "quantity_per_account",
-          ev.target.value,
-          "number"
-        )
-      }
-      className="form-control"
+const MaxPerAccountInput = () => (
+  <Grid2 size={4}>
+    <LabelWithInfo
+      htmlFor="quantity_per_account"
+      label={T.translate("edit_promocode.quantity_per_account")}
+      info={T.translate("edit_promocode.info.quantity_per_account")}
     />
-    <small className="form-text text-muted">
-      {T.translate("edit_promocode.captions.quantity_per_account_unlimited")}
-    </small>
-  </div>
+    <MuiFormikTextField
+      name="quantity_per_account"
+      type="number"
+      margin="none"
+      fullWidth
+      slotProps={{ htmlInput: { min: 0 } }}
+      helperText={T.translate(
+        "edit_promocode.captions.quantity_per_account_unlimited"
+      )}
+    />
+  </Grid2>
 );
 
 export default MaxPerAccountInput;
