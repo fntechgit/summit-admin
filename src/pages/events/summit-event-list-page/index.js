@@ -345,7 +345,7 @@ const SummitEventListPage = ({
           onExport={handleExport}
           searchProps={{
             term,
-            placeholder: T.translate("general.placeholders.search"),
+            placeholder: T.translate("event_list.placeholders.search_events"),
             onSearch: handleSearch
           }}
           noRowsLabel={T.translate("event_list.no_events")}

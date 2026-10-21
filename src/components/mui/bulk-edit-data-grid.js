@@ -49,7 +49,7 @@ import {
 // same select -> "Edit Selected" -> Apply flow
 
 const EDIT_COLUMN_MIN_WIDTH = 250;
-const SEARCH_WIDTH = 250;
+const SEARCH_WIDTH = 330;
 
 // the grid uses arrows/space for cell navigation and row selection, which
 // would otherwise swallow typing inside the bulk-edit inputs
