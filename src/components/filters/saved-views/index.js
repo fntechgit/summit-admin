@@ -161,8 +161,6 @@ const SavedViews = ({
   const handleOpen = (ev) => {
     setAnchorEl(ev.currentTarget);
     setSearch("");
-    // don't show the list from the last time it was opened while reloading
-    setViews(null);
     loadViews("");
   };
 
