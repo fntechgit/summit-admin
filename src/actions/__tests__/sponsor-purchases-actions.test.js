@@ -46,6 +46,12 @@ jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   }))
 }));
 
+// webpack inlines this asset as a data URI, the generic png file mock would return {}
+jest.mock(
+  "../../assets/fn-invoice-header.png",
+  () => "data:image/png;base64,TEST"
+);
+
 jest.mock(
   "openstack-uicore-foundation/lib/components/order-invoice-pdf",
   () => ({
@@ -93,7 +99,9 @@ describe("downloadSponsorInvoice", () => {
     expect(generateInvoicePDF).toHaveBeenCalledWith(
       fetchedOrder,
       { id: 1 },
-      expect.objectContaining({ logoSrc: expect.anything() })
+      expect.objectContaining({
+        logoSrc: expect.stringMatching(/^data:image\/png;base64,/)
+      })
     );
     expect(snackbarErrorMsg).not.toHaveBeenCalled();
   });
