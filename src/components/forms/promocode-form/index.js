@@ -13,10 +13,12 @@
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
-import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input";
+import * as yup from "yup";
+import { useFormikContext } from "formik";
+import { Grid2, InputLabel, MenuItem } from "@mui/material";
+import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   SpeakerPCForm,
   MemberPCForm,
@@ -32,562 +34,249 @@ import {
   DomainAuthorizedDiscountPCForm
 } from "./forms";
 import {
-  isEmpty,
-  scrollToError,
-  shallowEqual,
-  validateEmail,
+  dateToShowTZEpoch,
   validateAllowedEmailDomainEntry
 } from "../../../utils/methods";
 import { isDomainAuthorizedClass } from "./forms/domain-authorized/utils";
 import AllowedEmailDomainsRow from "./forms/domain-authorized/AllowedEmailDomainsRow";
 import AutoApplyCheckbox from "./forms/auto-apply-checkbox";
+import { formatSpeakerOption } from "./forms/speaker-base-pc-form";
+import CheckboxWithInfo from "./forms/checkbox-with-info";
+import TagsInput from "./forms/tags-input";
 import { DEFAULT_ENTITY } from "../../../reducers/promocodes/promocode-reducer";
 import FragmentParser from "../../../utils/fragmen-parser";
-import TextAreaInputWithCounter from "../../inputs/text-area-input-with-counter";
-import {
-  INDEX_NOT_FOUND,
-  MILLISECONDS_TO_SECONDS
-} from "../../../utils/constants";
 
-class PromocodeForm extends React.Component {
-  constructor(props) {
-    super(props);
+const DESCRIPTION_MAX_LENGTH = 255;
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors
-    };
+const CLASS_FORMS = {
+  SPEAKER_PROMO_CODE: SpeakerPCForm,
+  SPONSOR_PROMO_CODE: SponsorPCForm,
+  MEMBER_PROMO_CODE: MemberPCForm,
+  SPEAKER_DISCOUNT_CODE: SpeakerDiscountPCForm,
+  SPONSOR_DISCOUNT_CODE: SponsorDiscountPCForm,
+  MEMBER_DISCOUNT_CODE: MemberDiscountPCForm,
+  SUMMIT_PROMO_CODE: SummitPCForm,
+  PRE_PAID_PROMO_CODE: SummitPCForm,
+  SUMMIT_DISCOUNT_CODE: SummitDiscountPCForm,
+  PRE_PAID_DISCOUNT_CODE: SummitDiscountPCForm,
+  SPEAKERS_PROMO_CODE: SpeakersPCForm,
+  SPEAKERS_DISCOUNT_CODE: SpeakersDiscountPCForm,
+  DOMAIN_AUTHORIZED_PROMO_CODE: DomainAuthorizedPCForm,
+  DOMAIN_AUTHORIZED_DISCOUNT_CODE: DomainAuthorizedDiscountPCForm
+};
 
-    this.fragmentParser = new FragmentParser();
+const toMoment = (epoch, timezone) =>
+  epoch ? epochToMomentTimeZone(epoch, timezone) : null;
 
-    this.handleClassChange = this.handleClassChange.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSendEmail = this.handleSendEmail.bind(this);
-    this.hasErrors = this.hasErrors.bind(this);
-    this.handleBadgeFeatureLink = this.handleBadgeFeatureLink.bind(this);
-    this.handleBadgeFeatureUnLink = this.handleBadgeFeatureUnLink.bind(this);
-    this.queryBadgeFeatures = this.queryBadgeFeatures.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleNewTag = this.handleNewTag.bind(this);
-    this.validate = this.validate.bind(this);
-  }
-
-  componentDidUpdate(prevProps) {
-    const state = {};
-    const { errors, entity } = this.props;
-    scrollToError(errors);
-
-    if (!shallowEqual(prevProps.entity, entity)) {
-      state.entity = { ...entity };
-      state.errors = {};
-    }
-
-    if (!shallowEqual(prevProps.errors, errors)) {
-      state.errors = { ...errors };
-    }
-
-    if (!isEmpty(state)) {
-      this.setState((prevState) => ({ ...prevState, ...state }));
-    }
-  }
-
-  handleChange(ev) {
-    const { entity, errors } = this.state;
-    const newEntity = { ...entity };
-    const newErrors = { ...errors };
-    const { id } = ev.target;
-    let { value } = ev.target;
-
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
-
-    if (id === "apply_to_all_tix" && value === false) {
-      newEntity.amount = 0;
-      newEntity.rate = 0;
-    }
-
-    if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_TO_SECONDS;
-    }
-
-    newErrors[id] = "";
-    newEntity[id] = value;
-    this.setState({ entity: newEntity, errors: newErrors });
-  }
-
-  handleClassChange(ev) {
-    const { entity } = this.state;
-    let newEntity = { ...entity };
-    const { value } = ev.target;
-
-    newEntity = { ...DEFAULT_ENTITY };
-    newEntity.class_name = value;
-
-    this.setState({ entity: newEntity });
-  }
-
-  handleSendEmail(ev) {
-    const { onSendEmail } = this.props;
-    const { entity } = this.state;
-    ev.preventDefault();
-
-    onSendEmail(entity.id);
-  }
-
-  handleSubmit(ev) {
-    ev.preventDefault();
-    const { onSubmit } = this.props;
-    const { entity } = this.state;
-    const typeScope = this.fragmentParser.getParam("type");
-
-    if (this.validate()) {
-      onSubmit(entity, typeScope === "sponsor");
-    }
-  }
-
-  handleBadgeFeatureLink(valueId) {
-    const { entity } = this.state;
-    const { onBadgeFeatureLink } = this.props;
-    onBadgeFeatureLink(entity.id, valueId);
-  }
-
-  handleBadgeFeatureUnLink(valueId) {
-    const { entity } = this.state;
-    const { onBadgeFeatureUnLink } = this.props;
-    onBadgeFeatureUnLink(entity.id, valueId);
-  }
-
-  handleNewTag(newTag) {
-    this.setState((prevState) => ({
-      ...prevState,
-      entity: {
-        ...prevState.entity,
-        tags: [...prevState.entity.tags, { tag: newTag }]
+// speakers, ticket_types_rules, email_sent, redeemed and quantity_used are saved by their own endpoints, so they stay in redux
+export const buildPromocodeValues = (entity, summit) => ({
+  id: entity.id,
+  class_name: entity.class_name ?? "",
+  type: entity.type ?? "",
+  code: entity.code ?? "",
+  tags: entity.tags ?? [],
+  description: entity.description ?? "",
+  allows_to_delegate: !!entity.allows_to_delegate,
+  allows_to_reassign: !!entity.allows_to_reassign,
+  auto_apply: !!entity.auto_apply,
+  allowed_email_domains: entity.allowed_email_domains ?? [],
+  quantity_per_account: entity.quantity_per_account ?? 0,
+  email: entity.owner?.email ?? entity.email ?? "",
+  first_name: entity.owner?.first_name ?? entity.first_name ?? "",
+  last_name: entity.owner?.last_name ?? entity.last_name ?? "",
+  speaker:
+    entity.speaker && typeof entity.speaker === "object"
+      ? formatSpeakerOption(entity.speaker)
+      : null,
+  sponsor: entity.sponsor?.id
+    ? {
+        id: entity.sponsor.id,
+        name: entity.sponsor.company?.name ?? entity.sponsor.name
       }
-    }));
-  }
+    : null,
+  contact_email: entity.contact_email ?? "",
+  quantity_available: entity.quantity_available ?? 0,
+  valid_since_date: toMoment(entity.valid_since_date, summit.time_zone_id),
+  valid_until_date: toMoment(entity.valid_until_date, summit.time_zone_id),
+  badge_features: (entity.badge_features ?? []).map((f) => f?.id ?? f),
+  badge_features_apply_to_all_tix_retroactively:
+    !!entity.badge_features_apply_to_all_tix_retroactively,
+  notes: entity.notes ?? "",
+  allowed_ticket_types: (entity.allowed_ticket_types ?? []).map((tt) => ({
+    value: tt.id,
+    label: tt.name
+  })),
+  apply_to_all_tix: !!entity.apply_to_all_tix,
+  amount: entity.amount ?? "",
+  rate: entity.rate ?? ""
+});
 
-  queryBadgeFeatures(input, callback) {
-    const { currentSummit } = this.props;
-    let badgeFeatures = [];
+// rebuilds the entity shape normalizeEntity expects in savePromocode
+export const toPromocodeEntity = (values, entity, summit) => {
+  const { email, first_name, last_name, ...rest } = values;
+  return {
+    ...entity,
+    ...rest,
+    email,
+    first_name,
+    last_name,
+    owner: { email, first_name, last_name },
+    speaker: values.speaker?.raw ?? null,
+    allowed_ticket_types: values.allowed_ticket_types.map((tt) => tt.value),
+    valid_since_date: values.valid_since_date
+      ? dateToShowTZEpoch(values.valid_since_date, summit.time_zone_id)
+      : "",
+    valid_until_date: values.valid_until_date
+      ? dateToShowTZEpoch(values.valid_until_date, summit.time_zone_id)
+      : ""
+  };
+};
 
-    badgeFeatures = currentSummit.badge_features.filter(
-      (f) =>
-        f.name.toLowerCase().indexOf(input.toLowerCase()) !== INDEX_NOT_FOUND
-    );
+export const promocodeValidationSchema = yup.object({
+  contact_email: yup.string().email(T.translate("validation.email")),
+  allowed_email_domains: yup.array().when("class_name", {
+    is: isDomainAuthorizedClass,
+    then: (schema) =>
+      schema.test(
+        "allowed-email-domains-format",
+        T.translate("edit_promocode.errors.allowed_email_domains_format"),
+        (domains = []) => domains.every(validateAllowedEmailDomainEntry)
+      )
+  })
+});
 
-    callback(badgeFeatures);
-  }
+const fragmentParser = new FragmentParser();
 
-  hasErrors(field) {
-    const { errors } = this.state;
-    if (field in errors) {
-      return errors[field];
-    }
+const PromocodeForm = ({
+  entity,
+  currentSummit,
+  allClasses,
+  onSendEmail,
+  assignSpeaker,
+  getAssignedSpeakers,
+  unAssignSpeaker
+}) => {
+  const { values, setValues, setTouched } = useFormikContext();
+  const isDomainAuthorized = isDomainAuthorizedClass(values.class_name);
+  const isNew = !values.id;
+  const typeScope = fragmentParser.getParam("type");
 
-    return "";
-  }
+  const classOptions = allClasses
+    .map((c) => c.class_name)
+    .filter((c) => typeScope !== "sponsor" || c.includes("SPONSOR"));
+  const typeOptions =
+    allClasses.find((c) => c.class_name === values.class_name)?.type ?? [];
 
-  validate() {
-    const { entity, errors } = this.state;
-    const validEmail = validateEmail(entity.contact_email);
+  const handleClassChange = (ev) => {
+    setTouched({});
+    setValues({
+      ...buildPromocodeValues(DEFAULT_ENTITY, currentSummit),
+      class_name: ev.target.value
+    });
+  };
 
-    if (entity.contact_email && !validEmail) {
-      errors.contact_email = "Please enter a valid email.";
-      this.setState({ errors });
-      // componentDidUpdate's scrollToError reads props.errors (server-side),
-      // so local validate() errors never trigger it. Scroll directly here.
-      // Pass a single-key object so scrollToError targets THIS field — state
-      // .errors accumulates empty-string keys for every edited field via
-      // handleChange (line 114), and scrollToError uses Object.keys()[0].
-      scrollToError({ contact_email: errors.contact_email });
-      return false;
-    }
+  const ClassForm = CLASS_FORMS[values.class_name];
 
-    const isDomainAuthorized = isDomainAuthorizedClass(entity.class_name);
-    if (isDomainAuthorized && Array.isArray(entity.allowed_email_domains)) {
-      const bad = entity.allowed_email_domains.find(
-        (d) => !validateAllowedEmailDomainEntry(d)
-      );
-      if (bad !== undefined) {
-        errors.allowed_email_domains = T.translate(
-          "edit_promocode.errors.allowed_email_domains_format"
-        );
-        this.setState({ errors });
-        scrollToError({
-          allowed_email_domains: errors.allowed_email_domains
-        });
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  render() {
-    const { entity } = this.state;
-    const {
-      currentSummit,
-      allClasses,
-      onCreateCompany,
-      assignSpeaker,
-      getAssignedSpeakers,
-      unAssignSpeaker,
-      resetPromocodeForm
-    } = this.props;
-    const isDomainAuthorized = isDomainAuthorizedClass(entity.class_name);
-    const typeScope = this.fragmentParser.getParam("type");
-
-    let promocode_class_ddl = allClasses.map((c) => ({
-      label: c.class_name,
-      value: c.class_name
-    }));
-    let promocode_types_ddl = [];
-
-    if (typeScope === "sponsor") {
-      promocode_class_ddl = promocode_class_ddl.filter((pc) =>
-        pc.value.includes("SPONSOR")
-      );
-    }
-
-    if (entity.class_name) {
-      const classTypes = allClasses.find(
-        (c) => c.class_name === entity.class_name
-      ).type;
-
-      if (classTypes) {
-        promocode_types_ddl = classTypes.map((t) => ({ label: t, value: t }));
-      }
-    }
-
-    const badgeFeatureColumns = [
-      { columnKey: "name", value: T.translate("edit_promocode.name") },
-      {
-        columnKey: "description",
-        value: T.translate("edit_promocode.description")
-      }
-    ];
-
-    const badgeFeatureOptions = {
-      title: T.translate("edit_promocode.badge_features"),
-      valueKey: "name",
-      labelKey: "name",
-      actions: {
-        search: this.queryBadgeFeatures,
-        delete: { onClick: this.handleBadgeFeatureUnLink },
-        add: { onClick: this.handleBadgeFeatureLink }
-      }
-    };
-
-    return (
-      <form className="promocode-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-3">
-            <label htmlFor="class_name">
-              {" "}
-              {T.translate("edit_promocode.class_name")} *
-            </label>
-            <Dropdown
-              id="class_name"
-              value={entity.class_name}
-              placeholder={T.translate(
-                "edit_promocode.placeholders.select_class_name"
-              )}
-              options={promocode_class_ddl}
-              onChange={this.handleClassChange}
-              disabled={entity.id !== 0}
-              error={this.hasErrors("class_name")}
-            />
-          </div>
-          {promocode_types_ddl.length > 0 && (
-            <div className="col-md-3">
-              <label htmlFor="type">
-                {" "}
-                {T.translate("edit_promocode.type")} *
-              </label>
-              <Dropdown
-                id="type"
-                value={entity.type}
-                placeholder={T.translate(
-                  "promocode_list.placeholders.select_type"
-                )}
-                options={promocode_types_ddl}
-                onChange={this.handleChange}
-                disabled={entity.id !== 0}
-                error={this.hasErrors("type")}
-              />
-            </div>
+  return (
+    <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
+      <Grid2 size={3}>
+        <InputLabel htmlFor="class_name">
+          {T.translate("edit_promocode.class_name")} *
+        </InputLabel>
+        <MuiFormikSelect
+          name="class_name"
+          placeholder={T.translate(
+            "edit_promocode.placeholders.select_class_name"
           )}
-          <div className="col-md-3">
-            <label htmlFor="code">
-              {" "}
-              {T.translate("edit_promocode.code")} *
-            </label>
-            <Input
-              id="code"
-              value={entity.code}
-              onChange={this.handleChange}
-              className="form-control"
-              error={this.hasErrors("code")}
-            />
-          </div>
-          <div className="col-md-3">
-            <label htmlFor="tags"> {T.translate("edit_promocode.tags")}</label>
-            <TagInput
-              id="tags"
-              clearable
-              isMulti
-              allowCreate
-              value={entity.tags}
-              onChange={this.handleChange}
-              onCreate={this.handleNewTag}
-              placeholder={T.translate(
-                "edit_promocode.placeholders.select_tags"
-              )}
-            />
-          </div>
-        </div>
-        {isDomainAuthorized && (
-          <AllowedEmailDomainsRow
-            entity={entity}
-            handleChange={this.handleChange}
-            hasErrors={this.hasErrors}
-          />
-        )}
-        <div className="row form-group">
-          <div className="col-md-8">
-            <label htmlFor="description">
-              {" "}
-              {T.translate("edit_promocode.description")}
-            </label>
-            <TextAreaInputWithCounter
-              className="form-control"
-              rows={4}
-              maxLength={255}
-              id="description"
-              value={entity.description}
-              onChange={this.handleChange}
-              error={this.hasErrors("description")}
-            />
-          </div>
-          <div className="col-md-4 checkboxes-div">
-            <div className="form-check abc-checkbox">
-              <input
-                type="checkbox"
-                id="allows_to_delegate"
-                checked={entity.allows_to_delegate}
-                onChange={this.handleChange}
-                className="form-check-input"
-              />
-              <label className="form-check-label" htmlFor="allows_to_delegate">
-                {T.translate("edit_promocode.allows_to_delegate")}&nbsp;
-                <i
-                  className="fa fa-info-circle"
-                  aria-hidden="true"
-                  title={T.translate("edit_promocode.allows_to_delegate_info")}
-                />
-              </label>
-            </div>
-            <div
-              className="form-check abc-checkbox"
-              style={{ marginTop: "10px" }}
-            >
-              <input
-                type="checkbox"
-                id="allows_to_reassign"
-                checked={entity.allows_to_reassign}
-                onChange={this.handleChange}
-                className="form-check-input"
-              />
-              <label className="form-check-label" htmlFor="allows_to_reassign">
-                {T.translate("edit_promocode.allows_to_reassign")}&nbsp;
-                <i
-                  className="fa fa-info-circle"
-                  aria-hidden="true"
-                  title={T.translate("edit_promocode.allows_to_reassign_info")}
-                />
-              </label>
-            </div>
-            {isDomainAuthorized && (
-              <AutoApplyCheckbox
-                entity={entity}
-                handleChange={this.handleChange}
-                withCaption
-                marginTop
-              />
-            )}
-          </div>
-        </div>
+          onChange={handleClassChange}
+          disabled={!isNew}
+        >
+          {classOptions.map((c) => (
+            <MenuItem key={c} value={c}>
+              {c}
+            </MenuItem>
+          ))}
+        </MuiFormikSelect>
+      </Grid2>
+      {typeOptions.length > 0 && (
+        <Grid2 size={3}>
+          <InputLabel htmlFor="type">
+            {T.translate("edit_promocode.type")} *
+          </InputLabel>
+          <MuiFormikSelect
+            name="type"
+            placeholder={T.translate("promocode_list.placeholders.select_type")}
+            disabled={!isNew}
+          >
+            {typeOptions.map((t) => (
+              <MenuItem key={t} value={t}>
+                {t}
+              </MenuItem>
+            ))}
+          </MuiFormikSelect>
+        </Grid2>
+      )}
+      <Grid2 size={3}>
+        <InputLabel htmlFor="code">
+          {T.translate("edit_promocode.code")} *
+        </InputLabel>
+        <MuiFormikTextField name="code" margin="none" fullWidth />
+      </Grid2>
+      <Grid2 size={3}>
+        <InputLabel htmlFor="tags">
+          {T.translate("edit_promocode.tags")}
+        </InputLabel>
+        <TagsInput
+          name="tags"
+          placeholder={T.translate("edit_promocode.placeholders.select_tags")}
+        />
+      </Grid2>
 
-        {entity.class_name === "SPEAKER_PROMO_CODE" && (
-          <SpeakerPCForm
-            entity={entity}
-            summit={currentSummit}
-            handleChange={this.handleChange}
-            handleSendEmail={this.handleSendEmail}
-            badgeFeatureColumns={badgeFeatureColumns}
-            badgeFeatureOptions={badgeFeatureOptions}
-            hasErrors={this.hasErrors}
-          />
-        )}
+      {isDomainAuthorized && (
+        <Grid2 size={12}>
+          <AllowedEmailDomainsRow />
+        </Grid2>
+      )}
 
-        {entity.class_name === "SPONSOR_PROMO_CODE" && (
-          <SponsorPCForm
-            entity={entity}
-            summit={currentSummit}
-            handleChange={this.handleChange}
-            handleSendEmail={this.handleSendEmail}
-            onCreateCompany={onCreateCompany}
-            badgeFeatureColumns={badgeFeatureColumns}
-            badgeFeatureOptions={badgeFeatureOptions}
-            hasErrors={this.hasErrors}
-          />
-        )}
+      <Grid2 size={8}>
+        <InputLabel htmlFor="description">
+          {T.translate("edit_promocode.description")}
+        </InputLabel>
+        <MuiFormikTextField
+          name="description"
+          margin="none"
+          fullWidth
+          multiline
+          rows={4}
+          maxLength={DESCRIPTION_MAX_LENGTH}
+        />
+      </Grid2>
+      <Grid2 size={4}>
+        <CheckboxWithInfo
+          name="allows_to_delegate"
+          label={T.translate("edit_promocode.allows_to_delegate")}
+          info={T.translate("edit_promocode.allows_to_delegate_info")}
+        />
+        <CheckboxWithInfo
+          name="allows_to_reassign"
+          label={T.translate("edit_promocode.allows_to_reassign")}
+          info={T.translate("edit_promocode.allows_to_reassign_info")}
+        />
+        {isDomainAuthorized && <AutoApplyCheckbox withCaption />}
+      </Grid2>
 
-        {entity.class_name === "MEMBER_PROMO_CODE" && (
-          <MemberPCForm
-            entity={entity}
-            summit={currentSummit}
-            handleChange={this.handleChange}
-            handleSendEmail={this.handleSendEmail}
-            badgeFeatureColumns={badgeFeatureColumns}
-            badgeFeatureOptions={badgeFeatureOptions}
-            hasErrors={this.hasErrors}
-          />
-        )}
-
-        {entity.class_name === "SPEAKER_DISCOUNT_CODE" && (
-          <SpeakerDiscountPCForm
-            entity={entity}
-            summit={currentSummit}
-            handleChange={this.handleChange}
-            handleSendEmail={this.handleSendEmail}
-            badgeFeatureColumns={badgeFeatureColumns}
-            badgeFeatureOptions={badgeFeatureOptions}
-            hasErrors={this.hasErrors}
-          />
-        )}
-
-        {entity.class_name === "SPONSOR_DISCOUNT_CODE" && (
-          <SponsorDiscountPCForm
-            entity={entity}
-            summit={currentSummit}
-            handleChange={this.handleChange}
-            handleSendEmail={this.handleSendEmail}
-            badgeFeatureColumns={badgeFeatureColumns}
-            badgeFeatureOptions={badgeFeatureOptions}
-            onCreateCompany={onCreateCompany}
-            hasErrors={this.hasErrors}
-          />
-        )}
-
-        {entity.class_name === "MEMBER_DISCOUNT_CODE" && (
-          <MemberDiscountPCForm
-            entity={entity}
-            summit={currentSummit}
-            handleChange={this.handleChange}
-            handleSendEmail={this.handleSendEmail}
-            badgeFeatureColumns={badgeFeatureColumns}
-            badgeFeatureOptions={badgeFeatureOptions}
-            hasErrors={this.hasErrors}
-          />
-        )}
-
-        {["SUMMIT_PROMO_CODE", "PRE_PAID_PROMO_CODE"].includes(
-          entity.class_name
-        ) && (
-          <SummitPCForm
-            entity={entity}
-            summit={currentSummit}
-            handleChange={this.handleChange}
-            badgeFeatureColumns={badgeFeatureColumns}
-            badgeFeatureOptions={badgeFeatureOptions}
-            hasErrors={this.hasErrors}
-          />
-        )}
-
-        {["SUMMIT_DISCOUNT_CODE", "PRE_PAID_DISCOUNT_CODE"].includes(
-          entity.class_name
-        ) && (
-          <SummitDiscountPCForm
-            entity={entity}
-            summit={currentSummit}
-            handleChange={this.handleChange}
-            badgeFeatureColumns={badgeFeatureColumns}
-            badgeFeatureOptions={badgeFeatureOptions}
-            hasErrors={this.hasErrors}
-          />
-        )}
-
-        {entity.class_name === "SPEAKERS_PROMO_CODE" && (
-          <SpeakersPCForm
-            entity={entity}
-            summit={currentSummit}
-            handleChange={this.handleChange}
-            handleSendEmail={this.handleSendEmail}
-            badgeFeatureColumns={badgeFeatureColumns}
-            badgeFeatureOptions={badgeFeatureOptions}
-            hasErrors={this.hasErrors}
-            assignSpeaker={assignSpeaker}
-            getAssignedSpeakers={getAssignedSpeakers}
-            unAssignSpeaker={unAssignSpeaker}
-            resetPromocodeForm={resetPromocodeForm}
-          />
-        )}
-
-        {entity.class_name === "SPEAKERS_DISCOUNT_CODE" && (
-          <SpeakersDiscountPCForm
-            entity={entity}
-            summit={currentSummit}
-            handleChange={this.handleChange}
-            handleSendEmail={this.handleSendEmail}
-            badgeFeatureColumns={badgeFeatureColumns}
-            badgeFeatureOptions={badgeFeatureOptions}
-            hasErrors={this.hasErrors}
-            assignSpeaker={assignSpeaker}
-            getAssignedSpeakers={getAssignedSpeakers}
-            unAssignSpeaker={unAssignSpeaker}
-            resetPromocodeForm={resetPromocodeForm}
-          />
-        )}
-
-        {entity.class_name === "DOMAIN_AUTHORIZED_PROMO_CODE" && (
-          <DomainAuthorizedPCForm
-            entity={entity}
-            summit={currentSummit}
-            handleChange={this.handleChange}
-            badgeFeatureColumns={badgeFeatureColumns}
-            badgeFeatureOptions={badgeFeatureOptions}
-            hasErrors={this.hasErrors}
-          />
-        )}
-
-        {entity.class_name === "DOMAIN_AUTHORIZED_DISCOUNT_CODE" && (
-          <DomainAuthorizedDiscountPCForm
-            entity={entity}
-            summit={currentSummit}
-            handleChange={this.handleChange}
-            badgeFeatureColumns={badgeFeatureColumns}
-            badgeFeatureOptions={badgeFeatureOptions}
-            hasErrors={this.hasErrors}
-          />
-        )}
-
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
-        </div>
-      </form>
-    );
-  }
-}
+      {ClassForm && (
+        <ClassForm
+          entity={entity}
+          summit={currentSummit}
+          onSendEmail={onSendEmail}
+          assignSpeaker={assignSpeaker}
+          getAssignedSpeakers={getAssignedSpeakers}
+          unAssignSpeaker={unAssignSpeaker}
+        />
+      )}
+    </Grid2>
+  );
+};
 
 export default PromocodeForm;

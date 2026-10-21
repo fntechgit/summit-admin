@@ -1092,6 +1092,7 @@
     "badge_features_apply_to_all_tix_retroactively": "Apply to Tickets already using this Promo Code ?",
     "promocode_saved": "Promo Code saved successfully.",
     "promocode_created": "Promo Code created successfully.",
+    "save_before_ticket_rates": "Please save the promocode before adding rates to different ticket types",
     "apply_to_all_tix_discounts": "Discounts",
     "allowed_email_domains": "Allowed Email Domains",
     "quantity_per_account": "Max Per Account",
@@ -3932,8 +3933,6 @@
     "assign_speaker": "Assign speaker",
     "speakers": "Assigned speakers",
     "unassign_speaker_warning": "Are you sure you want unassign speaker",
-    "cannot_unassign_speaker_warning_title": "Unassignment not allowed",
-    "cannot_unassign_speaker_warning": "Cannot unassign a speaker who has redeemed the promo code",
     "assigned_speakers_list": {
       "email_sent": "Email Sent",
       "redeemed": "Redeemed"

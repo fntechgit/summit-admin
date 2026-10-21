@@ -1,30 +1,43 @@
 import React from "react";
 import T from "i18n-react";
-import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input";
+import { Grid2, InputLabel } from "@mui/material";
+import { queryTicketTypes } from "openstack-uicore-foundation/lib/utils/query-actions";
+import MuiFormikAsyncAutocomplete from "../../../mui/formik-inputs/mui-formik-async-select";
 import BasePCForm from "./base-pc-form";
 
-const GenericBasePCForm = (props) => (
-  <>
-    <BasePCForm {...props} />
-    <div className="row form-group">
-      <div className="col-md-6">
-        <label> {T.translate("edit_promocode.allowed_ticket_types")}</label>
-        <TicketTypesInput
-          id="allowed_ticket_types"
-          value={props.entity.allowed_ticket_types}
-          onChange={props.handleChange}
+const TICKET_TYPES_LIMIT = 100;
+
+const GenericBasePCForm = (props) => {
+  const { summit } = props;
+  return (
+    <>
+      <BasePCForm {...props} />
+      <Grid2 size={6}>
+        <InputLabel htmlFor="allowed_ticket_types">
+          {T.translate("edit_promocode.allowed_ticket_types")}
+        </InputLabel>
+        <MuiFormikAsyncAutocomplete
+          name="allowed_ticket_types"
+          isMulti
+          defaultOptions
           placeholder={T.translate(
             "edit_promocode.placeholders.select_ticket_types"
           )}
-          summitId={props.summit.id}
-          version="v2"
-          defaultOptions
-          optionsLimit={100}
-          isMulti
+          queryFunction={(input, callback) =>
+            queryTicketTypes(
+              summit.id,
+              { name: input },
+              callback,
+              "v2",
+              TICKET_TYPES_LIMIT
+            )
+          }
+          formatOption={(tt) => ({ value: tt.id, label: tt.name })}
+          formatSelectedValue={(s) => ({ value: s.value, label: s.label })}
         />
-      </div>
-    </div>
-  </>
-);
+      </Grid2>
+    </>
+  );
+};
 
 export default GenericBasePCForm;
