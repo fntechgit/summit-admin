@@ -11,55 +11,37 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Divider, TextField, Tooltip } from "@mui/material";
+import { Box, TextField } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import FileUploadIcon from "@mui/icons-material/FileUpload";
-import SearchIcon from "@mui/icons-material/Search";
 import {
   DataGrid,
   GRID_STRING_COL_DEF,
   GridActionsCellItem,
-  GridColumnMenu,
-  GridColumnMenuHideItem,
-  GridPreferencePanelsValue,
-  GridToolbarColumnsButton,
-  GridToolbarContainer,
-  gridPreferencePanelStateSelector,
-  useGridApiContext,
-  useGridApiRef,
-  useGridSelector
+  useGridApiRef
 } from "@mui/x-data-grid";
 import CustomTablePagination from "openstack-uicore-foundation/lib/components/mui/table/custom-table-pagination";
-import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
-import MenuButton from "./menu-button";
-import showConfirmDialog from "./showConfirmDialog";
+import showConfirmDialog from "../showConfirmDialog";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE,
   SORT_DESCENDING
-} from "../../utils/constants";
+} from "../../../utils/constants";
+import Toolbar from "./components/toolbar";
+import ColumnMenu from "./components/column-menu";
 
 // MUI DataGrid version of uicore's BulkEditTable:
 // same select -> "Edit Selected" -> Apply flow
 
 const EDIT_COLUMN_MIN_WIDTH = 250;
-const SEARCH_WIDTH = 330;
 
 // the grid uses arrows/space for cell navigation and row selection, which
 // would otherwise swallow typing inside the bulk-edit inputs
 const stopGridKeyDown = (ev) => ev.stopPropagation();
-
-// icon-only toolbar buttons; the label stays as tooltip/aria-label
-const ICON_ONLY_BUTTON_SX = {
-  minWidth: 0,
-  "& .MuiButton-startIcon": { m: 0 }
-};
 
 const renderEditor = (col, editRow, onChange) => {
   if (col.editableField === true) {
@@ -88,254 +70,6 @@ const renderEditor = (col, editRow, onChange) => {
       rowData: editRow[col.columnKey]
     }) ?? null
   );
-};
-
-// search icon that expands into uicore's SearchInput
-const ExpandableQuickFilter = ({ placeholder, term, onSearch }) => {
-  const [expanded, setExpanded] = useState(!!term);
-  const searchRef = useRef(null);
-  const focusOnOpenRef = useRef(false);
-
-  // SearchInput takes no autoFocus, so focus its input once opened from the
-  // icon (but not when it starts open with a term)
-  useEffect(() => {
-    if (expanded && focusOnOpenRef.current) {
-      searchRef.current.querySelector("input").focus();
-      focusOnOpenRef.current = false;
-    }
-  }, [expanded]);
-
-  if (!expanded) {
-    return (
-      <Tooltip title={T.translate("general.search")}>
-        <Button
-          size="small"
-          startIcon={<SearchIcon />}
-          onClick={() => {
-            focusOnOpenRef.current = true;
-            setExpanded(true);
-          }}
-          aria-label={T.translate("general.search")}
-          sx={ICON_ONLY_BUTTON_SX}
-        />
-      </Tooltip>
-    );
-  }
-
-  return (
-    <Box
-      ref={searchRef}
-      sx={{ width: SEARCH_WIDTH }}
-      // SearchInput takes no onBlur either; collapse once focus leaves both
-      // its input and its clear button with nothing typed or applied
-      onBlur={(ev) => {
-        if (ev.currentTarget.contains(ev.relatedTarget)) return;
-        if (!ev.currentTarget.querySelector("input").value && !term)
-          setExpanded(false);
-      }}
-    >
-      <SearchInput term={term} placeholder={placeholder} onSearch={onSearch} />
-    </Box>
-  );
-};
-
-ExpandableQuickFilter.propTypes = {
-  placeholder: PropTypes.string,
-  term: PropTypes.string,
-  onSearch: PropTypes.func.isRequired
-};
-
-ExpandableQuickFilter.defaultProps = {
-  placeholder: "",
-  term: ""
-};
-
-// the column menu's columns item is "Hide column" + "Manage columns"; keep
-// only hide (the toolbar has the columns panel), and drop the item entirely
-// for columns that can't be hidden so their menu has no empty section
-const ColumnMenu = (props) => {
-  const { colDef } = props;
-  return (
-    <GridColumnMenu
-      // eslint-disable-next-line react/jsx-props-no-spreading
-      {...props}
-      slots={{
-        columnMenuColumnsItem:
-          colDef.hideable === false ? null : GridColumnMenuHideItem
-      }}
-    />
-  );
-};
-
-ColumnMenu.propTypes = {
-  colDef: PropTypes.shape({ hideable: PropTypes.bool }).isRequired
-};
-
-// clicking the button while its panel is open should close it, but React 16
-// runs the button's handlers on document, next to the panel's click-away
-// listener, so the button can't stop it: the panel closes on pointerup and the
-// button's click reopens it. Remember whether it was open when the press
-// started and close it again after the click.
-const ColumnsButton = ({ buttonRef }) => {
-  const apiRef = useGridApiContext();
-  const preferencePanel = useGridSelector(
-    apiRef,
-    gridPreferencePanelStateSelector
-  );
-  const wasOpenRef = useRef(false);
-
-  return (
-    <GridToolbarColumnsButton
-      ref={buttonRef}
-      slotProps={{
-        button: {
-          sx: ICON_ONLY_BUTTON_SX,
-          onPointerDown: () => {
-            wasOpenRef.current =
-              preferencePanel.open &&
-              preferencePanel.openedPanelValue ===
-                GridPreferencePanelsValue.columns;
-          },
-          onClick: () => {
-            if (wasOpenRef.current) apiRef.current.hidePreferences();
-            wasOpenRef.current = false;
-          }
-        }
-      }}
-    />
-  );
-};
-
-ColumnsButton.propTypes = {
-  buttonRef: PropTypes.func.isRequired
-};
-
-const Toolbar = ({
-  views,
-  onAdd,
-  addLabel,
-  importItems,
-  importLabel,
-  filter,
-  onExport,
-  searchProps,
-  editEnabled,
-  selectedCount,
-  onEditSelected,
-  onApply,
-  onCancel,
-  setColumnsButtonEl
-}) => (
-  <GridToolbarContainer
-    sx={{ p: 1, gap: 1, borderBottom: 1, borderColor: "divider" }}
-  >
-    {editEnabled ? (
-      <>
-        <Button size="small" variant="contained" onClick={onApply}>
-          {T.translate("bulk_edit_table.apply_changes")}
-        </Button>
-        <Button size="small" variant="outlined" onClick={onCancel}>
-          {T.translate("general.cancel")}
-        </Button>
-      </>
-    ) : (
-      <Button
-        size="small"
-        variant="contained"
-        onClick={onEditSelected}
-        disabled={selectedCount === 0}
-      >
-        {T.translate("general.edit_selected")}
-        {selectedCount > 0 ? ` (${selectedCount})` : ""}
-      </Button>
-    )}
-    {views}
-    <Box sx={{ flex: 1 }} />
-    {onAdd && (
-      <Button size="small" onClick={onAdd}>
-        {addLabel}
-      </Button>
-    )}
-    {importItems.length > 0 && (
-      <MenuButton
-        buttonId="bulk-edit-data-grid-import-button"
-        menuId="bulk-edit-data-grid-import-menu"
-        menuItems={importItems}
-        size="small"
-        aria-label={importLabel}
-        // same startIcon slot as Export so both icons render at the same size
-        startIcon={
-          <Tooltip title={importLabel}>
-            <FileUploadIcon />
-          </Tooltip>
-        }
-        sx={ICON_ONLY_BUTTON_SX}
-      />
-    )}
-    {(onAdd || importItems.length > 0) && (
-      <Divider orientation="vertical" flexItem />
-    )}
-    <ColumnsButton buttonRef={setColumnsButtonEl} />
-    {filter}
-    {onExport && (
-      <>
-        <Divider orientation="vertical" flexItem />
-        <Tooltip title={T.translate("general.export")}>
-          <Button
-            size="small"
-            startIcon={<FileDownloadIcon />}
-            onClick={onExport}
-            aria-label={T.translate("general.export")}
-            sx={ICON_ONLY_BUTTON_SX}
-          />
-        </Tooltip>
-      </>
-    )}
-    {searchProps && (
-      <>
-        <Divider orientation="vertical" flexItem />
-        <ExpandableQuickFilter
-          placeholder={searchProps.placeholder}
-          term={searchProps.term}
-          onSearch={searchProps.onSearch}
-        />
-      </>
-    )}
-  </GridToolbarContainer>
-);
-
-Toolbar.propTypes = {
-  views: PropTypes.node,
-  onAdd: PropTypes.func,
-  addLabel: PropTypes.string,
-  importItems: PropTypes.arrayOf(
-    PropTypes.shape({ label: PropTypes.string, onClick: PropTypes.func })
-  ),
-  importLabel: PropTypes.string,
-  filter: PropTypes.node,
-  onExport: PropTypes.func,
-  searchProps: PropTypes.shape({
-    placeholder: PropTypes.string,
-    term: PropTypes.string,
-    onSearch: PropTypes.func.isRequired
-  }),
-  editEnabled: PropTypes.bool.isRequired,
-  selectedCount: PropTypes.number.isRequired,
-  onEditSelected: PropTypes.func.isRequired,
-  onApply: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
-  setColumnsButtonEl: PropTypes.func.isRequired
-};
-
-Toolbar.defaultProps = {
-  views: null,
-  onAdd: null,
-  addLabel: "",
-  importItems: [],
-  importLabel: "",
-  filter: null,
-  onExport: null,
-  searchProps: null
 };
 
 const BulkEditDataGrid = ({
