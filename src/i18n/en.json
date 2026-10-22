@@ -3772,7 +3772,7 @@
     "filter_title": "Attendee Filters",
     "filter_subtitle": "Interactive filters attendees can use themselves on the schedule's side panel. Choose which ones are active, their label, and their order.",
     "pre_filter_title": "Preset Filters",
-    "pre_filter_subtitle": "Fixed values applied automatically to scope which events appear in this schedule, before attendees filter anything themselves.",
+    "pre_filter_subtitle": "Fixed filters that scope which events appear in this schedule, before attendees filter anything themselves.",
     "color_title": "Color By",
     "color_subtitle": "The selected option will be use as color codification on schedule",
     "track": "Category",
