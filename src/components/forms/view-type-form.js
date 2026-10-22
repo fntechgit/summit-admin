@@ -11,129 +11,104 @@
  * limitations under the License.
  * */
 
-import React from "react";
-import T from "i18n-react";
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
-import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
-import {
-  hasErrors,
-  isEmpty,
-  scrollToError,
-  shallowEqual
-} from "../../utils/methods";
+import React, { useEffect } from "react";
+import PropTypes from "prop-types";
+import { useFormik, FormikProvider } from "formik";
+import * as yup from "yup";
+import T from "i18n-react/dist/i18n-react";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Grid2 from "@mui/material/Grid2";
+import InputLabel from "@mui/material/InputLabel";
+import Stack from "@mui/material/Stack";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
+import FormikTextEditor from "openstack-uicore-foundation/lib/components/mui/formik-inputs/texteditor";
+import useScrollToError from "../../hooks/useScrollToError";
+import { requiredStringValidation } from "../../utils/yup";
 
-class ViewTypeForm extends React.Component {
-  constructor(props) {
-    super(props);
+const validationSchema = yup.object({
+  name: requiredStringValidation()
+});
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors
-    };
+const ViewTypeForm = ({ entity, errors, onSubmit }) => {
+  const formik = useFormik({
+    initialValues: {
+      name: entity.name || "",
+      description: entity.description || "",
+      is_default: !!entity.is_default
+    },
+    validationSchema,
+    enableReinitialize: true,
+    onSubmit: (values) => onSubmit({ ...entity, ...values })
+  });
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+  useScrollToError(formik);
 
-  componentDidUpdate(prevProps) {
-    const state = {};
-    scrollToError(this.props.errors);
-
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
+  useEffect(() => {
+    const errorFields = Object.keys(errors || {});
+    formik.setErrors(errorFields.length > 0 ? errors : {});
+    if (errorFields.length > 0) {
+      formik.setTouched(
+        errorFields.reduce((acc, field) => ({ ...acc, [field]: true }), {}),
+        false
+      );
     }
+  }, [errors]);
 
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
-    }
-
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
-    }
-  }
-
-  handleChange(ev) {
-    const entity = { ...this.state.entity };
-    const errors = { ...this.state.errors };
-    let { value, id } = ev.target;
-
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
-
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ entity, errors });
-  }
-
-  handleSubmit(ev) {
-    ev.preventDefault();
-    this.props.onSubmit(this.state.entity);
-  }
-
-  render() {
-    const { entity, errors } = this.state;
-
-    return (
-      <form className="badge-feature-type-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label> {T.translate("edit_view_type.name")} *</label>
-            <Input
-              id="name"
-              className="form-control"
-              error={hasErrors("name", errors)}
-              onChange={this.handleChange}
-              value={entity.name}
+  return (
+    <FormikProvider value={formik}>
+      <Box
+        component="form"
+        noValidate
+        autoComplete="off"
+        onSubmit={formik.handleSubmit}
+      >
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={12}>
+            <MuiFormikTextField
+              name="name"
+              label={T.translate("edit_view_type.name")}
+              required
+              fullWidth
             />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label> {T.translate("edit_view_type.description")}</label>
-            <TextEditorV3
-              id="description"
-              value={entity.description}
-              onChange={this.handleChange}
-              error={hasErrors("description", errors)}
-              license={process.env.JODIT_LICENSE_KEY}
+          </Grid2>
+          <Grid2 size={12}>
+            <InputLabel htmlFor="description">
+              {T.translate("edit_view_type.description")}
+            </InputLabel>
+            <FormikTextEditor name="description" />
+          </Grid2>
+          <Grid2 size={12}>
+            <MuiFormikCheckbox
+              name="is_default"
+              label={T.translate("edit_view_type.is_default")}
             />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-12">
-            <div className="form-check abc-checkbox">
-              <input
-                type="checkbox"
-                id="is_default"
-                checked={entity.is_default}
-                onChange={this.handleChange}
-                className="form-check-input"
-              />
-              <label className="form-check-label" htmlFor="is_default">
-                {T.translate("edit_view_type.is_default")}
-              </label>
-            </div>
-          </div>
-        </div>
+          </Grid2>
+        </Grid2>
 
-        <hr />
+        <Stack direction="row" justifyContent="flex-end">
+          <Button
+            variant="contained"
+            type="submit"
+            disabled={formik.isSubmitting}
+          >
+            {T.translate("general.save")}
+          </Button>
+        </Stack>
+      </Box>
+    </FormikProvider>
+  );
+};
 
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
-        </div>
-      </form>
-    );
-  }
-}
+ViewTypeForm.propTypes = {
+  entity: PropTypes.object.isRequired,
+  errors: PropTypes.object,
+  onSubmit: PropTypes.func.isRequired
+};
+
+ViewTypeForm.defaultProps = {
+  errors: {}
+};
 
 export default ViewTypeForm;
