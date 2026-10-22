@@ -19,10 +19,6 @@ import * as yup from "yup";
 import {
   Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Divider,
   IconButton,
   ListItemText,
@@ -35,6 +31,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import DeleteIcon from "@mui/icons-material/Delete";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikRadioGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/radio-group";
+import CustomDialog from "openstack-uicore-foundation/lib/components/mui/custom-dialog";
 import showConfirmDialog from "../../mui/showConfirmDialog";
 import { queryFilterCriterias } from "../../../actions/filter-criteria-actions";
 import { requiredStringValidation } from "../../../utils/yup";
@@ -65,59 +62,52 @@ const SaveViewDialog = ({ selectedView, onSave, onClose }) => {
   };
 
   return (
-    <Dialog
+    <CustomDialog
+      title={T.translate("saved_views.save_current")}
       open
       onClose={handleClose}
-      disableEscapeKeyDown={formik.isSubmitting}
       maxWidth="xs"
-      fullWidth
+      primaryAction={{
+        label: T.translate("general.save"),
+        onClick: formik.submitForm
+      }}
+      secondaryAction={{
+        label: T.translate("general.cancel"),
+        onClick: handleClose
+      }}
     >
-      <DialogTitle>{T.translate("saved_views.save_current")}</DialogTitle>
       <FormikProvider value={formik}>
+        {/* keeps Enter in the name field submitting */}
         <Box
           component="form"
           onSubmit={formik.handleSubmit}
           noValidate
           autoComplete="off"
         >
-          <DialogContent>
-            <MuiFormikTextField
-              name="name"
-              label={T.translate("general.name")}
-              fullWidth
-              autoFocus
-            />
-            <MuiFormikRadioGroup
-              name="visibility"
-              label={T.translate("save_filter_criteria.visible_to")}
-              row
-              options={[
-                {
-                  value: VISIBILITY_OPTION_ME,
-                  label: T.translate("save_filter_criteria.me")
-                },
-                {
-                  value: VISIBILITY_OPTION_EVERYONE,
-                  label: T.translate("save_filter_criteria.everyone")
-                }
-              ]}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose} disabled={formik.isSubmitting}>
-              {T.translate("general.cancel")}
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={formik.isSubmitting}
-            >
-              {T.translate("general.save")}
-            </Button>
-          </DialogActions>
+          <MuiFormikTextField
+            name="name"
+            label={T.translate("general.name")}
+            fullWidth
+            autoFocus
+          />
+          <MuiFormikRadioGroup
+            name="visibility"
+            label={T.translate("save_filter_criteria.visible_to")}
+            row
+            options={[
+              {
+                value: VISIBILITY_OPTION_ME,
+                label: T.translate("save_filter_criteria.me")
+              },
+              {
+                value: VISIBILITY_OPTION_EVERYONE,
+                label: T.translate("save_filter_criteria.everyone")
+              }
+            ]}
+          />
         </Box>
       </FormikProvider>
-    </Dialog>
+    </CustomDialog>
   );
 };
 
