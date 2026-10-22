@@ -139,7 +139,7 @@ function LocationListPage({
   const showSyncPanel = !!window.DROPBOX_MATERIALIZER_API_BASE_URL;
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <h3>
         {" "}
         {T.translate("location_list.location_list")} ({totalLocations})

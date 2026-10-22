@@ -139,7 +139,7 @@ const PaymentProfileListPage = ({
   if (!currentSummit.id) return <div />;
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <h3>{T.translate("payment_profiles.payment_profiles_list")}</h3>
       <GridToolbar
         searchProps={{

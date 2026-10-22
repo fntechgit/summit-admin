@@ -102,7 +102,7 @@ class EventCategoryGroupListPage extends React.Component {
     if (!currentSummit.id) return <div />;
 
     return (
-      <div className="container">
+      <div className="container table-container">
         <h3> {T.translate("event_category_list.event_category_list")} </h3>
         <div className="row">
           <div className="col-md-6 col-md-offset-6 text-right">

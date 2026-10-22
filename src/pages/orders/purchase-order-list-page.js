@@ -319,7 +319,7 @@ class PurchaseOrderListPage extends React.Component {
     if (!currentSummit.id) return <div />;
 
     return (
-      <div className="container large">
+      <div className="container large table-container">
         <h3>
           {" "}
           {T.translate("purchase_order_list.purchase_orders")} (

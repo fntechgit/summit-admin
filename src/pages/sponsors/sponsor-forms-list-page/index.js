@@ -335,7 +335,7 @@ const SponsorFormsListPage = ({
   };
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <h3>{T.translate("sponsor_forms.forms")}</h3>
       <CustomAlert message={T.translate("sponsor_forms.alert_info")} hideIcon />
       <GridToolbar

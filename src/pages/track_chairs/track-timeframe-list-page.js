@@ -78,7 +78,7 @@ const TrackTimeframeListPage = ({
   };
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <h3>Tracks with timeframes restrictions</h3>
       <div className="row">
         <div className="col-md-6 text-right col-md-offset-6">

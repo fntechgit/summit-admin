@@ -146,7 +146,7 @@ class RegistrationCompaniesListPage extends React.Component {
     if (!currentSummit.id) return <div />;
 
     return (
-      <div className="container">
+      <div className="container table-container">
         <h3>
           {" "}
           {T.translate("registration_companies.registration_companies_list")} (

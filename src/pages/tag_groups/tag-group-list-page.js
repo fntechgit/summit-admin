@@ -105,7 +105,7 @@ class TagGroupListPage extends React.Component {
     );
 
     return (
-      <div className="container">
+      <div className="container table-container">
         <h3> {T.translate("tag_group_list.tag_groups")} </h3>
         <div className={"row"}>
           <div className="col-md-6 col-md-offset-6 text-right">

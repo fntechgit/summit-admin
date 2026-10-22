@@ -706,7 +706,7 @@ class SummitSpeakersListPage extends React.Component {
     if (!currentSummit.id) return <div />;
 
     return (
-      <div className="container">
+      <div className="container table-container">
         <h3>
           {" "}
           {this.state.source === sources.speakers

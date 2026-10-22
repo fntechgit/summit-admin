@@ -76,7 +76,7 @@ const EventCategoryListPage = ({
   const handleCopyCategories = () => copyEventCategories(summitToCopy);
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <h3> {T.translate("event_category_list.event_category_list")} </h3>
       <Grid2
         container

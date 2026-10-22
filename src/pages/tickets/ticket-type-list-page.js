@@ -260,7 +260,7 @@ const TicketTypeListPage = function ({
   if (!currentSummit.id) return <div />;
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <h3>{T.translate("ticket_type_list.ticket_type_list")}</h3>
       <GridToolbar
         searchProps={{

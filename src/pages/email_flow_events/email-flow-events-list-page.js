@@ -100,7 +100,7 @@ class EmailFlowEventListPage extends React.Component {
     if (!currentSummit.id) return <div />;
 
     return (
-      <div className="container">
+      <div className="container table-container">
         <h3>
           {" "}
           {T.translate("email_flow_event_list.email_flow_event_list")} (

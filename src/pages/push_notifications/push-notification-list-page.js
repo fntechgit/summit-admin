@@ -262,7 +262,7 @@ class PushNotificationListPage extends React.Component {
     if (!currentSummit.id) return <div />;
 
     return (
-      <div className="container">
+      <div className="container table-container">
         <h3>
           {" "}
           {T.translate("push_notification_list.push_notification_list")} (

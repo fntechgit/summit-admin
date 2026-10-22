@@ -98,7 +98,7 @@ const SponsorUsersListPage = ({
   ) => importSponsorUsers(targetSponsorId, companyId, sourceSummitId, userIds);
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <Breadcrumb
         data={{
           title: T.translate("sponsor_users.users"),

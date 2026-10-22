@@ -671,7 +671,7 @@ class SummitAttendeeListPage extends React.Component {
     columns = [...columns, ...showColumns];
 
     return (
-      <div className="container">
+      <div className="container table-container">
         <h3>
           {" "}
           {T.translate("attendee_list.attendee_list")} ({totalRealAttendees})

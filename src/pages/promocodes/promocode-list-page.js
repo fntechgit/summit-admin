@@ -400,7 +400,7 @@ class PromocodeListPage extends React.Component {
     }));
 
     return (
-      <div className="container">
+      <div className="container table-container">
         <h3>
           {" "}
           {T.translate("promocode_list.promocode_list")} ({totalPromocodes})

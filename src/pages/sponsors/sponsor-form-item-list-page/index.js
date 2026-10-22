@@ -260,7 +260,7 @@ const SponsorFormItemListPage = ({
   };
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <Breadcrumb
         data={{
           title: T.translate("sponsor_form_item_list.form_items"),

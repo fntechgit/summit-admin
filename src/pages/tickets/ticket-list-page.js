@@ -766,7 +766,7 @@ class TicketListPage extends React.Component {
             pathname: match.url
           }}
         />
-        <div className="container">
+        <div className="container table-container">
           <h3>
             {" "}
             {T.translate("ticket_list.ticket_list")} ({totalTickets})

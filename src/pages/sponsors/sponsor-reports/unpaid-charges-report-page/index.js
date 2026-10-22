@@ -82,7 +82,7 @@ const UnpaidChargesReportPage = ({
   ];
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <h3>{t("unpaid_charges_title")}</h3>
       <GridToolbar
         splitAt="lg"

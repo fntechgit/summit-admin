@@ -17,7 +17,7 @@ import T from "i18n-react/dist/i18n-react";
 import AuditLogs from "../../components/audit-logs";
 
 const AuditLogPage = ({ totalLogEntries }) => (
-  <div className="container">
+  <div className="container table-container">
     <h3>
       {T.translate("audit_log.log_entries")} ({totalLogEntries})
     </h3>

@@ -321,7 +321,7 @@ const SummitEventListPage = ({
   const tableData = events.map((e) => formatEventData(e, currentSummit));
 
   return (
-    <div className="container summit-event-list-filters">
+    <div className="container table-container summit-event-list-filters">
       <h3>
         {T.translate("event_list.event_list")} ({totalEvents})
       </h3>

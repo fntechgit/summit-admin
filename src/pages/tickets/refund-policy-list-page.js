@@ -69,7 +69,7 @@ class RefundPolicyListPage extends React.Component {
             pathname: match.url
           }}
         />
-        <div className="container">
+        <div className="container table-container">
           <h3> {T.translate("refund_policy_list.refund_policies")}</h3>
           <p> {T.translate("refund_policy_list.warning")}</p>
           <div className={"row"}>
