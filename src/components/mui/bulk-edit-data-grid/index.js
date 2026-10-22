@@ -183,7 +183,8 @@ const BulkEditDataGrid = ({
   const gridColumns = columns.map((col) => {
     const customMinWidth = parseFloat(col.customStyle?.minWidth);
     const minWidth = Math.max(
-      Number.isNaN(customMinWidth)
+      // a page's min width is room for its editor, so only apply it while editing
+      Number.isNaN(customMinWidth) || !editEnabled
         ? GRID_STRING_COL_DEF.minWidth
         : customMinWidth,
       editEnabled && col.editableField ? EDIT_COLUMN_MIN_WIDTH : 0
