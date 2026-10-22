@@ -199,7 +199,7 @@ describe("SavedViews", () => {
     );
   });
 
-  test("keeps the dialog open when the save fails", async () => {
+  test("closes the dialog when the save fails so the error isn't covered", async () => {
     let rejectSave;
     const onSave = jest.fn(
       () =>
@@ -227,11 +227,11 @@ describe("SavedViews", () => {
         screen.getByRole("button", { name: "general.save" })
       ).toBeDisabled()
     );
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
     await act(async () => rejectSave(new Error("nope")));
 
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: "general.save" })).toBeEnabled()
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     );
   });
 });

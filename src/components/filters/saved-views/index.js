@@ -55,9 +55,7 @@ const SaveViewDialog = ({ selectedView, onSave, onClose }) => {
     }),
     onSubmit: (values) =>
       onSave(values)
-        .then(() => onClose())
-        // the action's error handler reports the failure; keep the dialog
-        // open so the user can retry
+        .finally(() => onClose())
         .catch(() => {})
   });
 
