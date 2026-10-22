@@ -46,17 +46,15 @@ import {
 const SaveViewDialog = ({ selectedView, onSave, onClose }) => {
   const formik = useFormik({
     initialValues: {
-      name: selectedView?.name ?? "",
+      name: "",
       visibility: selectedView?.visibility ?? ""
     },
     validationSchema: yup.object({
       name: requiredStringValidation().trim(),
       visibility: requiredStringValidation()
     }),
-    // keeps the id of the active view so saving updates it instead of
-    // creating a new one
     onSubmit: (values) =>
-      onSave({ id: selectedView?.id, ...values })
+      onSave(values)
         .then(() => onClose())
         // the action's error handler reports the failure; keep the dialog
         // open so the user can retry

@@ -72,20 +72,22 @@ jest.mock(
 jest.mock(
   "../../../components/filters/saved-views",
   () =>
-    function SavedViewsMock({ onSave }) {
+    function SavedViewsMock({ selectedView, onSave }) {
       return (
-        <button
-          type="button"
-          onClick={() =>
-            onSave({
-              name: "My saved filter",
-              id: null,
-              visibility: "everyone"
-            })
-          }
-        >
-          save-filter-criteria
-        </button>
+        <>
+          <span>{selectedView?.name}</span>
+          <button
+            type="button"
+            onClick={() =>
+              onSave({
+                name: "My saved filter",
+                visibility: "everyone"
+              })
+            }
+          >
+            save-filter-criteria
+          </button>
+        </>
       );
     }
 );
@@ -117,7 +119,9 @@ describe("SummitEventListPage", () => {
     mockGridFilterState.parsedFilter = [];
     mockGridFilterState.filterValues = [];
     mockGridFilterState.joinOperator = undefined;
-    saveFilterCriteria.mockReturnValue(() => Promise.resolve());
+    saveFilterCriteria.mockReturnValue(() =>
+      Promise.resolve({ response: { id: 1, name: "view", criteria: [] } })
+    );
     deleteFilterCriteria.mockReturnValue(() => Promise.resolve());
   });
 
@@ -428,6 +432,57 @@ describe("SummitEventListPage", () => {
     expect(rehydratedCriteria).toEqual([
       { criteria: "type", operator: "==", value: "1" }
     ]);
+  });
+
+  test("switches to the newly saved view", async () => {
+    saveFilterCriteria.mockReturnValue(() =>
+      Promise.resolve({
+        response: { id: 7, name: "My saved filter", criteria: [] }
+      })
+    );
+
+    renderWithRedux(<SummitEventListPage />, {
+      initialState: {
+        currentSummitState: {
+          currentSummit: {
+            id: 12,
+            time_zone: { name: "UTC" },
+            time_zone_id: "UTC",
+            selection_plans: [],
+            tracks: [],
+            event_types: [],
+            locations: [],
+            presentation_action_types: []
+          }
+        },
+        mediaUploadListState: {
+          media_uploads: []
+        },
+        currentEventListState: {
+          events: [],
+          lastPage: 1,
+          currentPage: 1,
+          order: "id",
+          orderDir: 1,
+          totalEvents: 0,
+          term: "",
+          filters: {},
+          extraColumns: [],
+          perPage: 10
+        }
+      }
+    });
+
+    expect(screen.queryByText("My saved filter")).not.toBeInTheDocument();
+
+    await act(async () => {
+      await userEvent.click(
+        screen.getByRole("button", { name: "save-filter-criteria" })
+      );
+      await flushPromises();
+    });
+
+    expect(screen.getByText("My saved filter")).toBeInTheDocument();
   });
 
   test("keeps Activity Type hidden once hidden, and shows it again with Show all", async () => {

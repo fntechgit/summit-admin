@@ -25,7 +25,7 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
 import Swal from "sweetalert2";
-import debounce from "lodash/debounce"
+import debounce from "lodash/debounce";
 
 import { getAccessTokenSafely } from "../utils/methods";
 import {
@@ -87,8 +87,9 @@ export const saveFilterCriteria = (filterCriteria) => async (dispatch) => {
     `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`,
     filterCriteria,
     customErrorHandler
-  )(params)(dispatch).then(() => {
+  )(params)(dispatch).then((payload) => {
     dispatch(stopLoading());
+    return payload;
   });
 };
 

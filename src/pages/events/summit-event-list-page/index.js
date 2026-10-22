@@ -168,9 +168,8 @@ const SummitEventListPage = ({
     history.push(`/app/summits/${currentSummit.id}/events/new`);
   };
 
-  const handleFilterCriteriaSave = ({ name, id, visibility }) => {
+  const handleFilterCriteriaSave = ({ name, visibility }) => {
     const filterToSave = {
-      id,
       show_id: currentSummit.id,
       name,
       enabled_filters: filterValues.map((f) => f.criteria),
@@ -181,15 +180,9 @@ const SummitEventListPage = ({
       visibility
     };
 
-    return saveFilterCriteria(filterToSave).then(() => {
-      // keep the active view in sync with what was just saved over it
-      if (id) {
-        setSelectedFilterCriteria((current) => ({
-          ...current,
-          ...filterToSave
-        }));
-      }
-    });
+    return saveFilterCriteria(filterToSave).then(({ response }) =>
+      setSelectedFilterCriteria(response)
+    );
   };
 
   const optionalColumns = getOptionalColumns(

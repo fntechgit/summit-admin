@@ -176,7 +176,7 @@ describe("SavedViews", () => {
     expect(onSave).not.toHaveBeenCalled();
   });
 
-  test("saves over the active view and closes once the save resolves", async () => {
+  test("starts with an empty name and closes once the save resolves", async () => {
     const onSave = jest.fn(() => Promise.resolve());
     renderViews({ onSave, selectedView: VIEWS[0] });
 
@@ -186,13 +186,11 @@ describe("SavedViews", () => {
     );
 
     const name = screen.getByRole("textbox", { name: "general.name" });
-    expect(name).toHaveValue("Open Activities");
-    await userEvent.clear(name);
+    expect(name).toHaveValue("");
     await userEvent.type(name, "Open Keynotes");
     await userEvent.click(screen.getByRole("button", { name: "general.save" }));
 
     expect(onSave).toHaveBeenCalledWith({
-      id: 1,
       name: "Open Keynotes",
       visibility: "Everyone"
     });
