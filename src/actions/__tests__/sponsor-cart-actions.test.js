@@ -16,16 +16,18 @@ import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
 import {
   getRequest,
-  postRequest
+  postRequest,
+  putRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { payWithInvoice } from "../sponsor-cart-actions";
+import { payWithInvoice, updatePaymentIntent } from "../sponsor-cart-actions";
 import * as methods from "../../utils/methods";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   __esModule: true,
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
   getRequest: jest.fn(),
-  postRequest: jest.fn()
+  postRequest: jest.fn(),
+  putRequest: jest.fn()
 }));
 
 describe("payWithInvoice", () => {
@@ -79,5 +81,40 @@ describe("payWithInvoice", () => {
     await flushPromises();
     const [, , cartUrl] = getRequest.mock.calls[0];
     expect(cartUrl).toContain("/sponsors/456/carts/current");
+  });
+});
+
+describe("updatePaymentIntent", () => {
+  const mockStore = configureStore([thunk]);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    window.PURCHASES_API_URL = "https://purchases.example.com";
+    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    delete window.PURCHASES_API_URL;
+  });
+
+  it("resolves when the reprice fails, so a payment method change never leaks an unhandled rejection", async () => {
+    putRequest.mockImplementation(
+      () => () => () => Promise.reject(new Error("412"))
+    );
+    const store = mockStore({
+      currentSummitState: { currentSummit: { id: 1 } },
+      currentSponsorState: { entity: { id: 123 } },
+      sponsorPageCartListState: { cart: { id: 55 }, paymentIntent: { id: 230 } }
+    });
+
+    await expect(
+      store.dispatch(updatePaymentIntent("us_bank_account"))
+    ).resolves.toBeUndefined();
+    const [, , url, payload] = putRequest.mock.calls[0];
+    expect(url).toBe(
+      "https://purchases.example.com/api/v1/summits/1/sponsors/123/payments/230/reprice"
+    );
+    expect(payload).toEqual({ payment_method: "us_bank_account", cart_id: 55 });
   });
 });

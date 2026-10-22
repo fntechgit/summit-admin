@@ -146,6 +146,8 @@ const PaymentView = ({
                   showBilling
                   redirectUrl={redirectUrl}
                   stripeFormTitle={false}
+                  // the admin pays for the sponsor, so never offer the admin's own saved Link card
+                  paymentOptions={{ wallets: { link: "never" } }}
                   updatePaymentIntent={updatePaymentIntent}
                   onPaymentSuccess={handlePaymentSuccess}
                   onPaymentError={handlePaymentError}
