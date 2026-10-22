@@ -9,119 +9,71 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import React, { Component } from "react";
-import Switch from "react-switch";
-import styles from "../../styles/edit-label-slider.module.less";
+import React, { useState } from "react";
+import PropTypes from "prop-types";
+import T from "i18n-react/dist/i18n-react";
+import { Box, Button, Switch, TextField, Typography } from "@mui/material";
+import { useField } from "formik";
 
-class EditNameInput extends Component {
-  constructor(props) {
-    super(props);
+const EditLabelSlider = ({ name, disabled = false }) => {
+  const [enabledField] = useField(`${name}.is_enabled`);
+  const [labelField, , labelHelpers] = useField(`${name}.label`);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
 
-    this.state = {
-      editing: false,
-      value: props.value
-    };
-    this.handleChange = this.handleChange.bind(this);
-    this.onSave = this.onSave.bind(this);
-    this.onCancel = this.onCancel.bind(this);
-    this.onEdit = this.onEdit.bind(this);
-  }
+  const handleEdit = () => {
+    setDraft(labelField.value);
+    setEditing(true);
+  };
 
-  handleChange(ev) {
-    let { value, id } = ev.target;
-    this.setState({ ...this.state, value: value });
-  }
+  // label is only committed on Save so Cancel can discard the draft
+  const handleSave = () => {
+    labelHelpers.setValue(draft);
+    setEditing(false);
+  };
 
-  onEdit(ev) {
-    ev.preventDefault();
-    this.setState({ ...this.state, editing: true });
-  }
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <Switch
+        name={enabledField.name}
+        checked={!!enabledField.value}
+        onChange={enabledField.onChange}
+        disabled={disabled}
+        inputProps={{ "aria-label": labelField.value }}
+      />
+      <Typography>{labelField.value}</Typography>
+      {!editing && !disabled && (
+        <Button size="small" onClick={handleEdit}>
+          {T.translate("edit_schedule_settings.edit_name")}
+        </Button>
+      )}
+      {editing && (
+        <>
+          <TextField
+            size="small"
+            value={draft}
+            onChange={(ev) => setDraft(ev.target.value)}
+            inputProps={{
+              "aria-label": T.translate("edit_schedule_settings.edit_name")
+            }}
+          />
+          <Button size="small" onClick={handleSave}>
+            {T.translate("general.save")}
+          </Button>
+          <Button size="small" onClick={() => setEditing(false)}>
+            {T.translate("general.cancel")}
+          </Button>
+        </>
+      )}
+    </Box>
+  );
+};
 
-  onSave(ev) {
-    ev.preventDefault();
-    this.setState({ ...this.state, editing: false });
-    // send event
-    this.props.onSave(this.state.value);
-  }
+EditLabelSlider.propTypes = {
+  name: PropTypes.string.isRequired,
+  disabled: PropTypes.bool
+};
 
-  onCancel(ev) {
-    ev.preventDefault();
-    this.setState({ ...this.state, editing: false });
-  }
-
-  render() {
-    let { editing, value } = this.state;
-    let { id, disabled } = this.props;
-    return (
-      <>
-        {!editing && !disabled && (
-          <a className={styles.action_link} href="#" onClick={this.onEdit}>
-            Edit Name
-          </a>
-        )}
-        {editing && (
-          <span>
-            <input
-              className={styles.input_text}
-              type="text"
-              id={id}
-              name={id}
-              value={value}
-              onChange={this.handleChange}
-            />
-            <a className={styles.action_link} href="#" onClick={this.onSave}>
-              Save
-            </a>
-            <a className={styles.action_link} href="#" onClick={this.onCancel}>
-              Cancel
-            </a>
-          </span>
-        )}
-      </>
-    );
-  }
-}
-
-export default class EditLabelSlider extends Component {
-  constructor(props) {
-    super(props);
-    this.handleChange = this.handleChange.bind(this);
-    this.onSave = this.onSave.bind(this);
-  }
-
-  handleChange(checked) {
-    const { id, value } = this.props;
-    this.props.onChange(id, checked, value);
-  }
-
-  onSave(value) {
-    const { id, checked } = this.props;
-    this.props.onChange(id, checked, value);
-  }
-
-  render() {
-    let { value, id, checked, disabled } = this.props;
-    return (
-      <label htmlFor="material-switch" className={styles.editLabelSlider}>
-        <Switch
-          checked={checked}
-          onChange={this.handleChange}
-          uncheckedIcon={false}
-          checkedIcon={false}
-          className="react-switch"
-          id={id}
-          disabled={disabled}
-        />
-        <span className={styles.label}>{value}</span>
-        <EditNameInput
-          value={value}
-          id={id}
-          onSave={this.onSave}
-          disabled={disabled}
-        />
-      </label>
-    );
-  }
-}
+export default EditLabelSlider;
