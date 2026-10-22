@@ -78,7 +78,7 @@ const MediaTypeFilter = ({
         id,
         value,
         type: "mediatypeinput",
-        operator: value.length > 0 ? operatorValue?.value ?? null : null
+        operator: value.length > 0 ? operatorValue.value : null
       }
     };
     onChange(ev);
@@ -112,9 +112,7 @@ const MediaTypeFilter = ({
           isClearable
           isMulti
           placeholder={T.translate(
-            `media_upload_type_filter.placeholders.${
-              operatorValue?.value ?? "has_media_upload_with_type=="
-            }`
+            "media_upload_type_filter.placeholders.media_types"
           )}
         />
       </div>

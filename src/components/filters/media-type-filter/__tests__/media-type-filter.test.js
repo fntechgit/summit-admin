@@ -7,8 +7,7 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
   translate: (key) => key
 }));
 
-// Mirrors the real react-select single-select contract: the operator control
-// receives and emits whole option objects, not raw values.
+// Like react-select: the operator emits whole option objects.
 jest.mock(
   "react-select",
   () =>
@@ -32,8 +31,7 @@ jest.mock(
     }
 );
 
-// Mirrors the real Dropdown (react-select) wrapper's isMulti contract:
-// value/onChange both deal in a flat array of raw option ids.
+// Like uicore Dropdown with isMulti: value/onChange use an array of ids.
 jest.mock(
   "openstack-uicore-foundation/lib/components/inputs/dropdown",
   () =>
@@ -92,12 +90,11 @@ describe("MediaTypeFilter", () => {
   });
 
   test("selecting a media type reports it as an inclusive filter", async () => {
+    const user = userEvent.setup();
     render(<MediaTypeFilter {...baseProps} />);
     await waitFor(() => screen.getByText("Video"));
 
-    const select = screen.getByTestId("media-type-dropdown");
-    select.querySelector("option[value='1']").selected = true;
-    select.dispatchEvent(new Event("change", { bubbles: true }));
+    await user.selectOptions(screen.getByTestId("media-type-dropdown"), ["1"]);
 
     expect(baseProps.onChange).toHaveBeenCalledWith({
       target: {
@@ -110,6 +107,7 @@ describe("MediaTypeFilter", () => {
   });
 
   test("clearing the selection clears the filter", async () => {
+    const user = userEvent.setup();
     render(
       <MediaTypeFilter
         {...baseProps}
@@ -118,9 +116,9 @@ describe("MediaTypeFilter", () => {
     );
     await waitFor(() => screen.getByText("Video"));
 
-    const select = screen.getByTestId("media-type-dropdown");
-    select.querySelector("option[value='1']").selected = false;
-    select.dispatchEvent(new Event("change", { bubbles: true }));
+    await user.deselectOptions(screen.getByTestId("media-type-dropdown"), [
+      "1"
+    ]);
 
     expect(baseProps.onChange).toHaveBeenCalledWith({
       target: {

@@ -87,8 +87,7 @@ describe("getAllMediaUploadTypes", () => {
 
   let requestedParams;
 
-  // One row per page, named after its page, so the accumulated list mirrors
-  // exactly which pages the thunk asked for and in what order it merged them.
+  // One row per page, named after it, so the result shows the merge order.
   const mockPagedRequest = (lastPage) => {
     getRequest.mockImplementation(() => (params) => () => {
       requestedParams.push(params);
@@ -103,8 +102,7 @@ describe("getAllMediaUploadTypes", () => {
 
   beforeEach(() => {
     requestedParams = [];
-    // getRequest is a module-level jest.fn() shared with the suites above;
-    // restoreAllMocks does not reset its call history.
+    // getRequest is shared with the suites above; reset its call history.
     getRequest.mockClear();
     window.API_BASE_URL = "https://api.test";
     jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
@@ -148,5 +146,14 @@ describe("getAllMediaUploadTypes", () => {
     });
     expect(getRequest.mock.calls[0][2]).toBe(ENDPOINT);
     expect(getRequest.mock.calls[0][3]).toBe(snackbarErrorHandler);
+  });
+
+  it("resolves to an empty list when the request fails", async () => {
+    getRequest.mockImplementation(() => () => () => Promise.reject());
+    const store = mockStore({});
+
+    const result = await store.dispatch(getAllMediaUploadTypes(42));
+
+    expect(result).toEqual([]);
   });
 });

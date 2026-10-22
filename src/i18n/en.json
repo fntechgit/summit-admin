@@ -1179,8 +1179,7 @@
       "track_group_filter": "Filter By Track Group",
       "activity_type_filter": "Filter By Activity Type",
       "selection_status_filter": "Filter By Selection Status",
-      "pending_submissions_filter": "Filter By Pending Submissions",
-      "media_upload_filter": "Filter by Media Upload Type"
+      "pending_submissions_filter": "Filter By Pending Submissions"
     },
     "email_section_title": "Email Speakers",
     "speakers": "Speakers",
@@ -3966,8 +3965,7 @@
     "has_media_upload": "Uploaded",
     "has_not_media_upload": "Not uploaded",
     "placeholders": {
-      "has_media_upload_with_type==": "Select media type(s)",
-      "has_not_media_upload_with_type==": "Select media type(s)",
+      "media_types": "Select media type(s)",
       "operator": "Uploaded or not uploaded"
     }
   },
