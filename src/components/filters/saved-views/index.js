@@ -14,8 +14,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import { FormikProvider, useFormik } from "formik";
-import * as yup from "yup";
 import {
   Box,
   Button,
@@ -29,101 +27,9 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import DeleteIcon from "@mui/icons-material/Delete";
-import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
-import MuiFormikRadioGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/radio-group";
-import CustomDialog from "openstack-uicore-foundation/lib/components/mui/custom-dialog";
 import showConfirmDialog from "../../mui/showConfirmDialog";
 import { queryFilterCriterias } from "../../../actions/filter-criteria-actions";
-import { requiredStringValidation } from "../../../utils/yup";
-import {
-  VISIBILITY_OPTION_EVERYONE,
-  VISIBILITY_OPTION_ME
-} from "../../../utils/filter-criteria-constants";
-
-const SaveViewDialog = ({ selectedView, onSave, onClose }) => {
-  const formik = useFormik({
-    initialValues: {
-      name: "",
-      visibility: selectedView?.visibility ?? ""
-    },
-    validationSchema: yup.object({
-      name: requiredStringValidation().trim(),
-      visibility: requiredStringValidation()
-    }),
-    onSubmit: (values) =>
-      onSave(values)
-        .finally(() => onClose())
-        .catch(() => {})
-  });
-
-  const handleClose = () => {
-    if (formik.isSubmitting) return;
-    onClose();
-  };
-
-  return (
-    <CustomDialog
-      title={T.translate("saved_views.save_current")}
-      open
-      onClose={handleClose}
-      maxWidth="xs"
-      primaryAction={{
-        label: T.translate("general.save"),
-        onClick: formik.submitForm
-      }}
-      secondaryAction={{
-        label: T.translate("general.cancel"),
-        onClick: handleClose
-      }}
-    >
-      <FormikProvider value={formik}>
-        {/* keeps Enter in the name field submitting */}
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          autoComplete="off"
-        >
-          <MuiFormikTextField
-            name="name"
-            label={T.translate("general.name")}
-            fullWidth
-            autoFocus
-          />
-          <MuiFormikRadioGroup
-            name="visibility"
-            label={T.translate("save_filter_criteria.visible_to")}
-            row
-            options={[
-              {
-                value: VISIBILITY_OPTION_ME,
-                label: T.translate("save_filter_criteria.me")
-              },
-              {
-                value: VISIBILITY_OPTION_EVERYONE,
-                label: T.translate("save_filter_criteria.everyone")
-              }
-            ]}
-          />
-        </Box>
-      </FormikProvider>
-    </CustomDialog>
-  );
-};
-
-SaveViewDialog.propTypes = {
-  selectedView: PropTypes.shape({
-    id: PropTypes.number,
-    name: PropTypes.string,
-    visibility: PropTypes.string
-  }),
-  onSave: PropTypes.func.isRequired,
-  onClose: PropTypes.func.isRequired
-};
-
-SaveViewDialog.defaultProps = {
-  selectedView: null
-};
+import SaveViewDialog from "./components/save-view-dialog";
 
 // Saved filter criteria as a toolbar dropdown: pick a view to apply it,
 // delete one, clear the active one, or save the current filters as a view.
