@@ -102,7 +102,7 @@ const SummitDocForm = ({
           <label htmlFor="event_types">
             {T.translate("summitdoc.event_types")} *{" "}
             <Tooltip title={T.translate("summitdoc.event_types_info")}>
-              <InfoOutlinedIcon size="small" />
+              <InfoOutlinedIcon fontSize="inherit" />
             </Tooltip>
           </label>
           <MuiFormikSelect

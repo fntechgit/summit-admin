@@ -619,7 +619,7 @@ const AddSponsorExtraQuestionPopup = ({
                     >
                       <IconButton size="small" disableRipple>
                         <InfoIcon
-                          size="small"
+                          fontSize="small"
                           sx={{
                             "&:hover": {
                               color: "#2196F3"
