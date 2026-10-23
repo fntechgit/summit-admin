@@ -22,9 +22,12 @@ const tagFormatOption = (item) => {
   return { value: tag, label: tag };
 };
 
+export const speakerLabel = (speaker) =>
+  [speaker.first_name, speaker.last_name].filter(Boolean).join(" ");
+
 const speakerFormatOption = (item) => ({
   value: item.id.toString(),
-  label: `${item.first_name} ${item.last_name}`
+  label: speakerLabel(item)
 });
 
 const getSelectConfig = (type, summit) => {

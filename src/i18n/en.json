@@ -3777,6 +3777,8 @@
     "companies": "Companies",
     "speakers": "Speakers",
     "edit_name": "Edit Name",
+    "filters": "Filters",
+    "pre_filters": "Pre Filters",
     "saved": "Schedule settings saved successfully.",
     "created": "Schedule settings created successfully."
   },
