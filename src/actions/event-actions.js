@@ -386,8 +386,9 @@ export const bulkUpdateEvents = (events) => async (dispatch, getState) => {
         )
       );
     })
-    .catch(() => {
+    .catch((err) => {
       dispatch(stopLoading());
+      throw err;
     });
 };
 
