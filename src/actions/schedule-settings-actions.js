@@ -17,12 +17,11 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  authErrorHandler,
   putRequest,
   postRequest,
   deleteRequest,
-  showMessage,
-  showSuccessMessage
+  snackbarErrorHandler,
+  snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 
 import { getAccessTokenSafely } from "../utils/methods";
@@ -70,7 +69,7 @@ export const seedDefaultScheduleSettings = () => async (dispatch, getState) => {
     createAction(DEFAULT_SCHEDULE_SETTINGS_SEEDED),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/schedule-settings/seed`,
     {},
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch)
     .finally(() => {
       dispatch(stopLoading());
@@ -102,7 +101,7 @@ export const getAllScheduleSettings =
       createAction(REQUEST_ALL_SCHEDULE_SETTINGS),
       createAction(RECEIVE_ALL_SCHEDULE_SETTINGS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/schedule-settings`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { order, orderDir }
     )(params)(dispatch)
       .finally(() => {
@@ -127,7 +126,7 @@ export const getScheduleSetting =
       createAction(REQUEST_SCHEDULE_SETTINGS),
       createAction(RECEIVE_SCHEDULE_SETTINGS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/schedule-settings/${scheduleSettingId}`,
-      authErrorHandler,
+      snackbarErrorHandler,
       {}
     )(params)(dispatch)
       .finally(() => {
@@ -152,7 +151,7 @@ export const deleteScheduleSetting =
       createAction(SCHEDULE_SETTING_DELETED)({ scheduleSettingId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/schedule-settings/${scheduleSettingId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch)
       .finally(() => {
         dispatch(stopLoading());
@@ -182,39 +181,37 @@ export const saveScheduleSettings = (entity) => async (dispatch, getState) => {
       createAction(SCHEDULE_SETTINGS_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/schedule-settings/${entity.id}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch)
       .then(() => {
         dispatch(
-          showSuccessMessage(T.translate("edit_schedule_settings.saved"))
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_schedule_settings.saved")
+          })
         );
+        history.push(`/app/summits/${currentSummit.id}/schedule-settings`);
       })
       .finally(() => dispatch(stopLoading()));
   }
-
-  const success_message = {
-    title: T.translate("general.done"),
-    html: T.translate("edit_schedule_settings.created"),
-    type: "success"
-  };
 
   return postRequest(
     createAction(UPDATE_SCHEDULE_SETTINGS),
     createAction(SCHEDULE_SETTINGS_ADDED),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/schedule-settings/`,
     normalizedEntity,
-    authErrorHandler,
+    snackbarErrorHandler,
     entity
   )(params)(dispatch)
-    .then((payload) => {
+    .then(() => {
       dispatch(
-        showMessage(success_message, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/schedule-settings/${payload.response.id}`
-          );
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_schedule_settings.created")
         })
       );
+      history.push(`/app/summits/${currentSummit.id}/schedule-settings`);
     })
     .finally(() => dispatch(stopLoading()));
 };
@@ -229,7 +226,7 @@ const normalizeEntity = (entity) => {
     is_enabled: f.is_enabled
   }));
   normalized.pre_filters = entity.pre_filters.map((pf) => {
-    let {values} = pf;
+    let { values } = pf;
     if (pf.type === FILTER_TYPES.company) {
       values = values.map((v) => v.id);
     }
