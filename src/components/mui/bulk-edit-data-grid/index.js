@@ -331,7 +331,6 @@ const BulkEditDataGrid = ({
           slots={{ toolbar: Toolbar, columnMenu: ColumnMenu }}
           slotProps={{
             panel: { anchorEl: columnsButtonEl, placement: "bottom-end" },
-            // bootstrap 3 sets box-sizing: border-box on input[type="search"],
             // which squeezes MUI's padding into the input's fixed height
             columnsManagement: {
               // the actions column should always be shown, so leave it out
@@ -340,6 +339,7 @@ const BulkEditDataGrid = ({
                 cols
                   .filter((col) => col.field !== "actions")
                   .map((col) => col.field),
+              // bootstrap 3 sets box-sizing: border-box on input[type="search"],
               searchInputProps: {
                 sx: { "& .MuiInputBase-input": { boxSizing: "content-box" } }
               },
