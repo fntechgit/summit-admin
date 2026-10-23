@@ -66,7 +66,11 @@ const SaveViewDialog = ({ selectedView, onSave, onClose }) => {
         {/* keeps Enter in the name field submitting */}
         <Box
           component="form"
-          onSubmit={formik.handleSubmit}
+          onSubmit={(ev) => {
+            ev.preventDefault();
+            if (formik.isSubmitting) return;
+            formik.handleSubmit(ev);
+          }}
           noValidate
           autoComplete="off"
         >
