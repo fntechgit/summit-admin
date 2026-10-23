@@ -77,6 +77,9 @@ import { buildRecipientRows, toNotifyPayload } from "./utils";
 
 const REOPEN_DEADLINE_FORMAT = "MMMM DD, YYYY h:mm a";
 
+const isTrackInPlan = (track, sp) =>
+  sp.track_groups.some((gr) => track.track_groups.includes(gr));
+
 class EventForm extends React.Component {
   constructor(props) {
     super(props);
@@ -213,6 +216,29 @@ class EventForm extends React.Component {
     this.setState({ entity: newEntity }, () => {
       if (id === "type_id" && entity.id)
         this.handleEventTypeChange(entity, newEntity);
+      if (id === "type_id" || id === "track_id")
+        this.clearSelectionPlanIfNotAllowed(newEntity);
+    });
+  }
+
+  // a plan that doesn't accept the type and category can't be saved with them
+  // so remove the selection
+  clearSelectionPlanIfNotAllowed(entity) {
+    const { trackOpts, selectionPlansOpts } = this.props;
+    const plan = selectionPlansOpts.find(
+      (sp) => sp.id === entity.selection_plan_id
+    );
+    if (!plan) return;
+    const track = trackOpts.find((t) => t.id === entity.track_id);
+    // no category means no plan can match, so clear it too
+    if (
+      track &&
+      plan.event_types.includes(entity.type_id) &&
+      isTrackInPlan(track, plan)
+    )
+      return;
+    this.handleChangeSelectionPlan({
+      target: { id: "selection_plan_id", value: null }
     });
   }
 
@@ -372,11 +398,11 @@ class EventForm extends React.Component {
       }
     }
 
-    errors[id] = "";
+    const newErrors = { ...errors, [id]: "" };
     newEntity.selection_plan_id = value;
     newEntity.selection_plan = newSelectionPlan;
     newEntity.extra_questions = extraQuestionsAnswers;
-    this.setState({ entity: newEntity });
+    this.setState({ entity: newEntity, errors: newErrors });
   }
 
   handleChangeExtraQuestion(formValues) {
@@ -1060,9 +1086,6 @@ class EventForm extends React.Component {
     const isEventUpgrade =
       !this.isEventType(EVENT_TYPE_PRESENTATION, oldEntity) &&
       this.isEventType(EVENT_TYPE_PRESENTATION, newEntity);
-    const isEventDowngrade =
-      this.isEventType(EVENT_TYPE_PRESENTATION, oldEntity) &&
-      !this.isEventType(EVENT_TYPE_PRESENTATION, newEntity);
 
     if (isEventUpgrade) {
       Swal.fire({
@@ -1080,24 +1103,6 @@ class EventForm extends React.Component {
           onEventUpgrade(newEntity);
         }
         if (result.dismiss) {
-          this.setState((prevState) => ({
-            ...prevState,
-            entity: oldEntity
-          }));
-        }
-      });
-    }
-
-    if (isEventDowngrade) {
-      Swal.fire({
-        title: T.translate("general.attention"),
-        text: T.translate("edit_event.downgrade_message"),
-        type: "warning",
-        showCancelButton: false,
-        confirmButtonColor: "#DD6B55"
-        // confirmButtonText: T.translate("general.yes_delete")
-      }).then((result) => {
-        if (result.value) {
           this.setState((prevState) => ({
             ...prevState,
             entity: oldEntity
@@ -1231,12 +1236,15 @@ class EventForm extends React.Component {
     } = this.props;
 
     const event_types_ddl = typeOpts.map((t) => {
-      const disabled = entity.id ? !this.isEventType(t.class_name) : false;
+      // a saved presentation can't become a plain event; upgrades stay allowed
+      const isDisabled = entity.id
+        ? this.isPresentation() && t.class_name !== EVENT_TYPE_PRESENTATION
+        : false;
       return {
         label: t.name,
         value: t.id,
         type: t.class_name,
-        disabled
+        isDisabled
       };
     });
 
@@ -1257,9 +1265,40 @@ class EventForm extends React.Component {
       }
     };
 
-    const tracks_ddl = trackOpts
-      .filter((track) => track.subtracks.length === 0)
-      .map((t) => ({ label: t.name, value: t.id }));
+    // a selection plan only accepts its own activity types and track groups
+    const plansForType = selectionPlansOpts.filter((sp) =>
+      sp.event_types.includes(entity.type_id)
+    );
+
+    const leafTracks = trackOpts.filter(
+      (track) => track.subtracks.length === 0
+    );
+    const toTrackOption = (t) => ({ label: t.name, value: t.id });
+    const tracksWithPlans = leafTracks.filter((t) =>
+      plansForType.some((sp) => isTrackInPlan(t, sp))
+    );
+    // Dropdown can't find an id inside groups, so pass the option itself
+    const currentTrack = leafTracks.find((t) => t.id === entity.track_id);
+    const selectedTrack = currentTrack ? toTrackOption(currentTrack) : null;
+    const type = typeOpts.find((t) => t.id === entity.type_id);
+
+    const tracks_ddl =
+      tracksWithPlans.length > 0
+        ? [
+            {
+              label: T.translate("edit_event.tracks_with_selection_plans", {
+                type: type.name
+              }),
+              options: tracksWithPlans.map(toTrackOption)
+            },
+            {
+              label: T.translate("edit_event.tracks_without_selection_plans"),
+              options: leafTracks
+                .filter((t) => !tracksWithPlans.includes(t))
+                .map(toTrackOption)
+            }
+          ].filter((group) => group.options.length > 0)
+        : leafTracks.map(toTrackOption);
 
     const venues = locationOpts
       .filter((v) => v.class_name === "SummitVenue")
@@ -1277,13 +1316,23 @@ class EventForm extends React.Component {
 
     let selection_plans_ddl = [];
 
-    if (entity.track_id) {
-      const track = trackOpts.find((t) => t.id === entity.track_id);
-      selection_plans_ddl = selectionPlansOpts
-        .filter((sp) =>
-          sp.track_groups.some((gr) => track.track_groups.includes(gr))
-        )
+    const track = entity.track_id
+      ? trackOpts.find((t) => t.id === entity.track_id)
+      : null;
+
+    // the saved track may not be in the summit's tracks anymore
+    if (track) {
+      selection_plans_ddl = plansForType
+        .filter((sp) => isTrackInPlan(track, sp))
         .map((sp) => ({ label: sp.name, value: sp.id }));
+    }
+
+    let selectionPlanPlaceholder =
+      "edit_event.placeholders.select_selection_plan";
+    if (!entity.track_id) {
+      selectionPlanPlaceholder = "edit_event.placeholders.select_track_first";
+    } else if (selection_plans_ddl.length === 0) {
+      selectionPlanPlaceholder = "edit_event.placeholders.no_selection_plans";
     }
 
     const rsvp_types_ddl = [
@@ -1619,6 +1668,40 @@ class EventForm extends React.Component {
               error={hasErrors("type_id", errors)}
             />
           </div>
+          <div className="col-md-4">
+            <label> {T.translate("edit_event.track")} *</label>
+            <Dropdown
+              id="track_id"
+              value={selectedTrack}
+              onChange={this.handleChange}
+              placeholder={T.translate("edit_event.placeholders.select_track")}
+              options={tracks_ddl}
+              error={hasErrors("track_id", errors)}
+            />
+          </div>
+          {this.isEventType(EVENT_TYPE_PRESENTATION) && (
+            <div className="col-md-4">
+              <label> {T.translate("edit_event.selection_plan")} </label>
+              <Dropdown
+                id="selection_plan_id"
+                value={
+                  entity.selection_plan
+                    ? {
+                        label: entity.selection_plan.name,
+                        value: entity.selection_plan.id
+                      }
+                    : null
+                }
+                onChange={this.handleChangeSelectionPlan}
+                placeholder={T.translate(selectionPlanPlaceholder)}
+                disabled={!entity.track_id}
+                isClearable
+                options={selection_plans_ddl}
+              />
+            </div>
+          )}
+        </div>
+        <div className="row form-group">
           {this.shouldShowField("allows_location") && (
             <div className="col-md-4">
               <label> {T.translate("edit_event.location")} </label>
@@ -1648,34 +1731,6 @@ class EventForm extends React.Component {
               />
             </div>
           )}
-        </div>
-        <div className="row form-group">
-          {this.isEventType(EVENT_TYPE_PRESENTATION) && (
-            <div className="col-md-4">
-              <label> {T.translate("edit_event.selection_plan")} </label>
-              <Dropdown
-                id="selection_plan_id"
-                value={entity.selection_plan_id}
-                onChange={this.handleChangeSelectionPlan}
-                placeholder={T.translate(
-                  "edit_event.placeholders.select_selection_plan"
-                )}
-                isClearable
-                options={selection_plans_ddl}
-              />
-            </div>
-          )}
-          <div className="col-md-4">
-            <label> {T.translate("edit_event.track")} *</label>
-            <Dropdown
-              id="track_id"
-              value={entity.track_id}
-              onChange={this.handleChange}
-              placeholder={T.translate("edit_event.placeholders.select_track")}
-              options={tracks_ddl}
-              error={hasErrors("track_id", errors)}
-            />
-          </div>
           {this.isEventType(EVENT_TYPE_PRESENTATION) &&
             this.shouldShowField("allow_custom_ordering") && (
               <div className="col-md-4">

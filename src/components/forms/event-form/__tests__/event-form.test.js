@@ -1,5 +1,11 @@
 import React from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  fireEvent,
+  within
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import moment from "moment-timezone";
 import EventForm from "../index";
@@ -36,7 +42,8 @@ describe("EventForm", () => {
         is_enabled: true,
         submission_end_date: moment().subtract(7, "days").unix(),
         allowed_presentation_questions: [],
-        track_groups: []
+        track_groups: [],
+        event_types: []
       }
     ],
     rsvpTemplateOpts: [],
@@ -243,17 +250,20 @@ describe("EventForm", () => {
     it("asks for a save, without the speaker link, after an unsaved plan change", async () => {
       // The plan change runs the form's scroll-to-error; jsdom has no scrollIntoView.
       Element.prototype.scrollIntoView = jest.fn();
-      // Track 36473 is in track group 69, so both plans appear in the dropdown.
-      // Own errors object: the plan handler writes into it.
+      // Track 36473 is in track group 69 and both plans accept type 930, so both appear.
       renderEventForm({
-        errors: {},
         entity: { ...baseEntity, track_id: 36473 },
         selectionPlansOpts: [
-          planWith({ name: "Saved Plan", track_groups: [69] }),
+          planWith({
+            name: "Saved Plan",
+            track_groups: [69],
+            event_types: [930]
+          }),
           planWith({
             id: 100,
             name: "Other Plan",
             track_groups: [69],
+            event_types: [930],
             submission_end_date: moment().add(7, "days").unix()
           })
         ]
@@ -643,5 +653,184 @@ describe("EventForm", () => {
 
     const dayBeforeSummitStart = getDayBeforeSummitStartCell(container);
     expect(dayBeforeSummitStart).not.toHaveClass("rdtDisabled");
+  });
+
+  const pickOption = (container, fieldId, name) => {
+    const field = container.querySelector(`#${fieldId}`);
+    fireEvent.keyDown(field.querySelector("input"), { keyCode: 40 });
+    fireEvent.click(within(field).getByText(name));
+  };
+
+  describe("selection plan matching", () => {
+    // 930 is "Presentation"; 36473 is a leaf track in track group 69
+    const presentationEntity = {
+      ...baseEntity,
+      type_id: 930,
+      track_id: 36473
+    };
+    const matchingPlan = planWith({
+      id: 100,
+      name: "Matching Plan",
+      track_groups: [69],
+      event_types: [930]
+    });
+
+    it("groups categories by whether a selection plan accepts them for the activity type", () => {
+      const { container } = renderEventForm({
+        entity: { ...presentationEntity, selection_plan_id: 100 },
+        selectionPlansOpts: [matchingPlan]
+      });
+
+      fireEvent.keyDown(container.querySelector("#track_id input"), {
+        keyCode: 40
+      });
+
+      // each heading's parent is its group, holding the group's options
+      const withPlans = screen.getByText(
+        "edit_event.tracks_with_selection_plans"
+      ).parentElement;
+      const withoutPlans = screen.getByText(
+        "edit_event.tracks_without_selection_plans"
+      ).parentElement;
+      expect(within(withPlans).getByText("FTS: AI / HPC")).toBeInTheDocument();
+      expect(within(withoutPlans).getByText("Networking")).toBeInTheDocument();
+      expect(
+        within(withPlans).queryByText("Networking")
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows the saved plan even when it no longer accepts the type", () => {
+      renderEventForm({
+        entity: {
+          ...presentationEntity,
+          selection_plan_id: 101,
+          selection_plan: { id: 101, name: "Old Plan" }
+        },
+        selectionPlansOpts: [
+          planWith({
+            id: 101,
+            name: "Old Plan",
+            track_groups: [69],
+            event_types: [999]
+          })
+        ]
+      });
+
+      expect(screen.getByText("Old Plan")).toBeInTheDocument();
+    });
+
+    // the reopen control only renders while the event has a selection plan
+    it("clears the selection plan when the new category isn't in it", async () => {
+      const { container } = renderEventForm({
+        entity: { ...presentationEntity, selection_plan_id: 100 },
+        selectionPlansOpts: [matchingPlan]
+      });
+
+      pickOption(container, "track_id", "Networking");
+
+      await waitFor(() =>
+        expect(
+          screen.queryByRole("button", {
+            name: "edit_event.reopen_submission"
+          })
+        ).not.toBeInTheDocument()
+      );
+    });
+
+    it("clears the selection plan when the new activity type isn't in it", async () => {
+      const { container } = renderEventForm({
+        entity: { ...presentationEntity, selection_plan_id: 100 },
+        selectionPlansOpts: [matchingPlan]
+      });
+
+      pickOption(container, "type_id", "Keynotes");
+
+      await waitFor(() =>
+        expect(
+          screen.queryByRole("button", {
+            name: "edit_event.reopen_submission"
+          })
+        ).not.toBeInTheDocument()
+      );
+    });
+
+    it("keeps the selection plan when the new category is in it", () => {
+      const { container } = renderEventForm({
+        entity: { ...presentationEntity, selection_plan_id: 100 },
+        selectionPlansOpts: [matchingPlan]
+      });
+
+      pickOption(container, "track_id", "FTS: AI / HPC");
+
+      expect(
+        screen.getByRole("button", { name: "edit_event.reopen_submission" })
+      ).toBeInTheDocument();
+    });
+
+    it("renders with no plan options when the saved category isn't in the summit's tracks", () => {
+      renderEventForm({
+        entity: {
+          ...presentationEntity,
+          track_id: 999999,
+          selection_plan_id: 100
+        },
+        selectionPlansOpts: [matchingPlan]
+      });
+
+      expect(
+        screen.getByText("edit_event.placeholders.no_selection_plans")
+      ).toBeInTheDocument();
+    });
+
+    it("doesn't write into the errors prop when a plan is picked", async () => {
+      const errors = {};
+      // own mock: an earlier test already called the shared one with these args
+      const fetchExtraQuestionsAnswers = jest.fn();
+      const { container } = renderEventForm({
+        entity: { ...presentationEntity, selection_plan_id: null },
+        selectionPlansOpts: [matchingPlan],
+        errors,
+        fetchExtraQuestionsAnswers
+      });
+
+      pickOption(container, "selection_plan_id", "Matching Plan");
+
+      await waitFor(() =>
+        expect(fetchExtraQuestionsAnswers).toHaveBeenCalledWith(
+          currentSummitMock.id,
+          100,
+          presentationEntity.id
+        )
+      );
+      expect(errors).toEqual({});
+    });
+  });
+
+  describe("activity type kind changes", () => {
+    it("doesn't let a saved presentation switch to a non-presentation type", () => {
+      const { container } = renderEventForm({ entity: baseEntity });
+
+      pickOption(container, "type_id", "Lunch");
+
+      expect(
+        container.querySelector("#type_id [class*='singleValue']")
+      ).toHaveTextContent("Presentation");
+    });
+
+    it("still lets a saved plain event upgrade to a presentation type", async () => {
+      const { container } = renderEventForm({
+        entity: {
+          ...baseProps.entity,
+          id: 42,
+          class_name: "SummitEvent"
+        }
+      });
+
+      pickOption(container, "type_id", "Presentation");
+
+      expect(
+        await screen.findByText(/edit_event\.upgrade_message/)
+      ).toBeInTheDocument();
+    });
   });
 });
