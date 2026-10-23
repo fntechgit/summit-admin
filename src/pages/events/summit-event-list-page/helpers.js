@@ -241,6 +241,15 @@ export const getOptionalColumns = (
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...extraProps}
           value={extraProps.row.track?.id}
+          onChange={(ev) =>
+            extraProps.onChange({
+              target: {
+                value:
+                  allTracks.find((track) => track.id === ev.target.value) ??
+                  null
+              }
+            })
+          }
         />
       );
     }
@@ -384,6 +393,13 @@ export const getOptionalColumns = (
     sortable: true,
     label: T.translate("event_list.streaming_type"),
     render: (type) => type || "N/A"
+  },
+  {
+    columnKey: "selection_status",
+    label: T.translate("event_list.selection_status"),
+    sortable: true,
+    render: (status, row) =>
+      status === "unaccepted" && row.is_published === true ? "accepted" : status
   },
   {
     columnKey: "review_status",
