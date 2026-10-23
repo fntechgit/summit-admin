@@ -77,7 +77,7 @@ describe("saveScheduleSettings", () => {
   it("does not redirect when creating fails", async () => {
     postRequest.mockImplementation(() => () => () => Promise.reject());
     const store = mockStore(storeState);
-    await store.dispatch(saveScheduleSettings(entity)).catch(() => {});
+    await store.dispatch(saveScheduleSettings(entity));
 
     expect(snackbarSuccessHandler).not.toHaveBeenCalled();
     expect(history.push).not.toHaveBeenCalled();

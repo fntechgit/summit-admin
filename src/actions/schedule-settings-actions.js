@@ -193,7 +193,8 @@ export const saveScheduleSettings = (entity) => async (dispatch, getState) => {
         );
         history.push(`/app/summits/${currentSummit.id}/schedule-settings`);
       })
-      .finally(() => dispatch(stopLoading()));
+      .finally(() => dispatch(stopLoading()))
+      .catch(() => {});
   }
 
   return postRequest(
@@ -213,7 +214,8 @@ export const saveScheduleSettings = (entity) => async (dispatch, getState) => {
       );
       history.push(`/app/summits/${currentSummit.id}/schedule-settings`);
     })
-    .finally(() => dispatch(stopLoading()));
+    .finally(() => dispatch(stopLoading()))
+    .catch(() => {});
 };
 
 const normalizeEntity = (entity) => {

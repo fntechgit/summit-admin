@@ -55,6 +55,13 @@ const EditLabelSlider = ({ name, disabled = false }) => {
             size="small"
             value={draft}
             onChange={(ev) => setDraft(ev.target.value)}
+            // Enter would otherwise submit the parent form with the old label
+            onKeyDown={(ev) => {
+              if (ev.key === "Enter") {
+                ev.preventDefault();
+                handleSave();
+              }
+            }}
             inputProps={{
               "aria-label": T.translate("edit_schedule_settings.edit_name")
             }}

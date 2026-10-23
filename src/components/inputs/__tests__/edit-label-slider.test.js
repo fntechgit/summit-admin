@@ -64,6 +64,37 @@ describe("EditLabelSlider", () => {
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   });
 
+  test("Enter commits the edited label without submitting the parent form", async () => {
+    const onSubmit = jest.fn();
+    render(
+      <Formik
+        initialValues={{
+          filters: [{ type: "TRACK", label: "Category", is_enabled: false }]
+        }}
+        onSubmit={onSubmit}
+      >
+        {({ handleSubmit }) => (
+          <form onSubmit={handleSubmit}>
+            <EditLabelSlider name="filters[0]" />
+            <FieldValue />
+            <button type="submit">submit</button>
+          </form>
+        )}
+      </Formik>
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "edit_schedule_settings.edit_name" })
+    );
+    const input = screen.getByRole("textbox");
+    await userEvent.clear(input);
+    await userEvent.type(input, "Tracks{enter}");
+
+    expect(fieldValue().label).toBe("Tracks");
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
   test("Cancel discards the draft and the next edit starts from the saved label", async () => {
     renderWithFormik();
 
