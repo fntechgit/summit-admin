@@ -1316,8 +1316,12 @@ class EventForm extends React.Component {
 
     let selection_plans_ddl = [];
 
-    if (entity.track_id) {
-      const track = trackOpts.find((t) => t.id === entity.track_id);
+    const track = entity.track_id
+      ? trackOpts.find((t) => t.id === entity.track_id)
+      : null;
+
+    // the saved track may not be in the summit's tracks anymore
+    if (track) {
       selection_plans_ddl = plansForType
         .filter((sp) => isTrackInPlan(track, sp))
         .map((sp) => ({ label: sp.name, value: sp.id }));
