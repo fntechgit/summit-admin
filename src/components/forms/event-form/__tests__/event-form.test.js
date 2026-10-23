@@ -767,6 +767,21 @@ describe("EventForm", () => {
       ).toBeInTheDocument();
     });
 
+    it("renders with no plan options when the saved category isn't in the summit's tracks", () => {
+      renderEventForm({
+        entity: {
+          ...presentationEntity,
+          track_id: 999999,
+          selection_plan_id: 100
+        },
+        selectionPlansOpts: [matchingPlan]
+      });
+
+      expect(
+        screen.getByText("edit_event.placeholders.no_selection_plans")
+      ).toBeInTheDocument();
+    });
+
     it("doesn't write into the errors prop when a plan is picked", async () => {
       const errors = {};
       // own mock: an earlier test already called the shared one with these args
