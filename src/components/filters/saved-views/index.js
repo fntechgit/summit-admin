@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -46,9 +46,15 @@ const SavedViews = ({
   const [views, setViews] = useState(null);
   const [search, setSearch] = useState("");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const latestRequest = useRef(0);
 
-  const loadViews = (input) =>
-    queryFilterCriterias(summitId, context, input, setViews);
+  const loadViews = (input) => {
+    latestRequest.current += 1;
+    const requestId = latestRequest.current;
+    queryFilterCriterias(summitId, context, input, (data) => {
+      if (requestId === latestRequest.current) setViews(data);
+    });
+  };
 
   const handleOpen = (ev) => {
     setAnchorEl(ev.currentTarget);
