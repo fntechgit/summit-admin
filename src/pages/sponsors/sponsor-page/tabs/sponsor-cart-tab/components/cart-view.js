@@ -184,11 +184,7 @@ const CartView = ({
       align: "right",
       render: (row) => (
         <IconButton size="large" onClick={() => handleLock(row)}>
-          {row.is_locked ? (
-            <LockClosedIcon fontSize="large" />
-          ) : (
-            <LockOpenIcon fontSize="large" />
-          )}
+          {row.is_locked ? <LockClosedIcon /> : <LockOpenIcon />}
         </IconButton>
       )
     }

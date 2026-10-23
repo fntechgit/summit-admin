@@ -12,7 +12,6 @@ import {
   IconButton,
   Divider,
   Grid2,
-  Typography,
   InputLabel,
   Box
 } from "@mui/material";
@@ -88,9 +87,7 @@ const AddSponsorDialog = ({ onClose, onSubmit, summitId }) => {
       disableEscapeKeyDown={isSaving}
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1.5rem">
-          {T.translate("sponsor_list.add_sponsor")}
-        </Typography>
+        {T.translate("sponsor_list.add_sponsor")}
         <IconButton
           size="small"
           onClick={() => handleClose()}

@@ -117,7 +117,7 @@ const EditBadgeScanPopup = ({ badgeScan, onClose, onSubmit }) => {
   return (
     <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1.5rem">
+        <Typography fontSize="1rem">
           {T.translate("edit_badge_scan.edit_badge_scan")}
         </Typography>
         <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
