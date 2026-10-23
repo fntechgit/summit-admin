@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
@@ -29,12 +29,63 @@ import {
 import IdTokenVerifier from "idtoken-verifier";
 import AuthButton from "../auth-button";
 import Menu from "../menu";
+import { getGlobalItems, getSummitItems } from "../menu/menu-definition";
 
 const DRAWER_WIDTH = 260;
 const COMPACT_BAR_HEIGHT = 48;
 const REGULAR_BAR_HEIGHT = 56;
 const SUB_BAR_HEIGHT = 36;
 const SHORT_VIEWPORT_MAX_HEIGHT = 500;
+
+// key: a menu link's pathname; value: the folders it sits in, outermost first
+export const addMenuLinks = (items, map = new Map(), folders = []) => {
+  items.forEach((item) => {
+    if (item.subItems) {
+      addMenuLinks(item.subItems, map, [...folders, item.name]);
+    } else if (item.linkUrl) {
+      map.set(`/app/${item.linkUrl}`, folders);
+    }
+  });
+  return map;
+};
+
+// puts the page's menu folders after the Summit crumb (Home on global pages)
+export const insertMenuFolders = (menuMap, summitId) => (crumbs) => {
+  // deepest crumb that is a menu link = the most specific match
+  const matchIndex = crumbs.findLastIndex((crumb) =>
+    menuMap.has(crumb.pathname)
+  );
+  if (matchIndex === -1) return crumbs;
+
+  // Summit crumb when present, otherwise Home
+  const summitIndex = crumbs.findIndex(
+    (crumb) => crumb.pathname === `/app/summits/${summitId}`
+  );
+  const anchorIndex = Math.max(summitIndex, 0);
+  if (matchIndex <= anchorIndex) return crumbs;
+
+  const anchor = crumbs[anchorIndex].pathname;
+  const folders = menuMap.get(crumbs[matchIndex].pathname);
+  const routeCrumbs = crumbs.slice(anchorIndex + 1);
+
+  // skip a folder that repeats a route crumb (e.g. "Activities / Activities")
+  const folderCrumbs = folders
+    .filter(
+      (name) =>
+        !routeCrumbs.some(
+          (crumb) => crumb.title === T.translate(`menu.${name}`)
+        )
+    )
+    .map((name) => ({
+      id: `menu-folder-${name}`,
+      title: (
+        <span className="crumb-folder">{T.translate(`menu.${name}`)}</span>
+      ),
+      pathname: anchor
+    }));
+
+  return [...crumbs.slice(0, anchorIndex + 1), ...folderCrumbs, ...routeCrumbs];
+};
 
 /**
  * Application top bar with an optional slide-out navigation drawer.
@@ -49,6 +100,27 @@ const TopNav = ({ isLoggedUser, currentSummit, member }) => {
 
   // The current summit's name, shown next to the title behind a divider.
   const contextLabel = currentSummit?.id > 0 ? currentSummit.name : null;
+
+  const summitId = currentSummit?.id;
+
+  // use this memo as a source when rendering menu definitions
+  const setMenuDefs = useMemo(
+    () => ({
+      global: getGlobalItems(),
+      summit: summitId ? getSummitItems(summitId) : []
+    }),
+    [summitId]
+  );
+
+  // built once per summit; global links stay findable while a summit is selected
+  const setCrumbs = useMemo(
+    () =>
+      insertMenuFolders(
+        addMenuLinks([...setMenuDefs.global, ...setMenuDefs.summit]),
+        summitId
+      ),
+    [summitId, setMenuDefs]
+  );
 
   const closeDrawer = useCallback(() => setOpen(false), []);
   const toggleDrawer = useCallback(() => setOpen((prev) => !prev), []);
@@ -143,10 +215,19 @@ const TopNav = ({ isLoggedUser, currentSummit, member }) => {
             bgcolor: "background.paper",
             borderBottom: 1,
             borderColor: "divider",
-            overflowX: "auto"
+            overflowX: "auto",
+            // menu folder crumbs are labels, not links
+            "& .breadcrumbs__crumb:has(.crumb-folder)": {
+              pointerEvents: "none",
+              color: "inherit"
+            }
           }}
         >
-          <Breadcrumbs className="breadcrumbs-wrapper" separator="/" />
+          <Breadcrumbs
+            className="breadcrumbs-wrapper"
+            separator="/"
+            setCrumbs={setCrumbs}
+          />
         </Toolbar>
       )}
       {isLoggedUser && (
@@ -172,6 +253,7 @@ const TopNav = ({ isLoggedUser, currentSummit, member }) => {
               currentSummit={currentSummit}
               member={member}
               onNavigate={closeDrawer}
+              menuDefs={setMenuDefs}
             />
           </Box>
         </Drawer>

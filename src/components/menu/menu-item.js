@@ -17,14 +17,16 @@ import Exclusive from "openstack-uicore-foundation/lib/components/exclusive-wrap
 import ListItemButton from "@mui/material/ListItemButton";
 import Typography from "@mui/material/Typography";
 
-const MenuItem = ({ name, onClick, exclusive, nested, selected }) => {
+const NESTED_PL = 4;
+const TOP_LEVEL_PL = 2;
+
+const MenuItem = ({ name, onClick, exclusive, nested, selected, pl }) => {
   const itemHtml = (
     <ListItemButton
       id={`${name}-menu`}
       onClick={onClick}
       selected={selected}
-      // eslint-disable-next-line no-magic-numbers
-      sx={{ pl: nested ? 4 : 2, py: 1 }}
+      sx={{ pl: pl ?? (nested ? NESTED_PL : TOP_LEVEL_PL), py: 1 }}
     >
       <Typography
         variant="body1"
