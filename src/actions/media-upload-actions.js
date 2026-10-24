@@ -12,6 +12,7 @@
  * */
 import T from "i18n-react/dist/i18n-react";
 import URI from "urijs";
+import pLimit from "p-limit";
 import {
   getRequest,
   putRequest,
@@ -27,8 +28,14 @@ import {
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import debounce from "lodash/debounce";
-import { getAccessTokenSafely } from "../utils/methods";
-import { DEBOUNCE_WAIT, DEFAULT_PER_PAGE } from "../utils/constants";
+import { getAccessTokenSafely, range } from "../utils/methods";
+import {
+  DEBOUNCE_WAIT,
+  DEFAULT_PER_PAGE,
+  MAX_PER_PAGE,
+  TEN,
+  TWO
+} from "../utils/constants";
 
 URI.escapeQuerySpace = false;
 
@@ -141,6 +148,46 @@ export const queryMediaUploads = debounce(async (summitId, input, callback) => {
     })
     .catch(fetchErrorHandler);
 }, DEBOUNCE_WAIT);
+
+export const getAllMediaUploadTypes = (summitId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+  const endpoint = `${window.API_BASE_URL}/api/v1/summits/${summitId}/media-upload-types`;
+  const baseParams = {
+    access_token: accessToken,
+    order: "name",
+    per_page: MAX_PER_PAGE,
+    fields: "id,name"
+  };
+  const getPage = (page) =>
+    getRequest(
+      createAction("DUMMY"),
+      createAction("DUMMY"),
+      endpoint,
+      snackbarErrorHandler
+    )({ ...baseParams, page })(dispatch);
+  const limit = pLimit(TEN);
+
+  return (
+    getPage(1)
+      .then(({ response }) => {
+        const { last_page: lastPage, data: firstPageData } = response;
+        if (lastPage <= 1) return firstPageData;
+        // local range() is stop-INCLUSIVE: range(TWO, lastPage, 1) === [2..lastPage]
+        return Promise.all(
+          range(TWO, lastPage, 1).map((page) => limit(() => getPage(page)))
+        ).then((responses) => {
+          // Promise.all preserves input order -> page-order accumulation.
+          const accumulated = [...firstPageData];
+          responses.forEach(({ response: pageResponse }) => {
+            accumulated.push(...pageResponse.data);
+          });
+          return accumulated;
+        });
+      })
+      // Swallow the rejection since message is already shown by error handler
+      .catch(() => [])
+  );
+};
 
 export const resetMediaUploadForm = () => (dispatch) => {
   dispatch(createAction(RESET_MEDIA_UPLOAD_FORM)({}));
