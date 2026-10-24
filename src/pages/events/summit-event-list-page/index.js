@@ -275,6 +275,7 @@ const SummitEventListPage = ({
       columnKey: "title",
       label: T.translate("event_list.title"),
       sortable: true,
+      hideable: false,
       flex: 2,
       editableField: true,
       placeholder: T.translate("bulk_actions_page.placeholders.event_title")

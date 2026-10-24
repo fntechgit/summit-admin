@@ -19,6 +19,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
   DataGrid,
+  GRID_CHECKBOX_SELECTION_FIELD,
   GRID_STRING_COL_DEF,
   GridActionsCellItem,
   useGridApiRef
@@ -33,6 +34,7 @@ import {
 } from "../../../utils/constants";
 import Toolbar from "./components/toolbar";
 import ColumnMenu from "./components/column-menu";
+import { ACTION_ICON_SX } from "./constants";
 
 // MUI DataGrid version of uicore's BulkEditTable:
 // same select -> "Edit Selected" -> Apply flow
@@ -230,7 +232,7 @@ const BulkEditDataGrid = ({
           onEdit && (
             <GridActionsCellItem
               key="edit"
-              icon={<EditIcon />}
+              icon={<EditIcon sx={ACTION_ICON_SX} />}
               label={T.translate("general.edit")}
               onClick={() => onEdit(row)}
             />
@@ -238,7 +240,7 @@ const BulkEditDataGrid = ({
           onDelete && (
             <GridActionsCellItem
               key="delete"
-              icon={<DeleteIcon />}
+              icon={<DeleteIcon sx={ACTION_ICON_SX} />}
               label={T.translate("general.delete")}
               onClick={() => handleDelete(row)}
             />
@@ -333,11 +335,17 @@ const BulkEditDataGrid = ({
             panel: { anchorEl: columnsButtonEl, placement: "bottom-end" },
             // which squeezes MUI's padding into the input's fixed height
             columnsManagement: {
-              // the actions column should always be shown, so leave it out
-              // of the list (and out of Show/Hide All)
+              // the actions, checkbox and non-hideable columns should always
+              // be shown, so leave them out of the list (and out of Show/Hide All)
               getTogglableColumns: (cols) =>
                 cols
-                  .filter((col) => col.field !== "actions")
+                  .filter(
+                    (col) =>
+                      col.hideable &&
+                      !["actions", GRID_CHECKBOX_SELECTION_FIELD].includes(
+                        col.field
+                      )
+                  )
                   .map((col) => col.field),
               // bootstrap 3 sets box-sizing: border-box on input[type="search"],
               searchInputProps: {
