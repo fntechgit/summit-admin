@@ -25,40 +25,23 @@ const theme = createTheme(MuiBaseCustomTheme, {
   typography: {
     fontFamily: ["Roboto", "sans-serif"].join(","),
     body1: {
-      fontSize: "14px",
-      fontWeight: 400
+      fontSize: "14px"
     },
     body2: {
-      fontSize: "14px",
       fontWeight: 500
     },
-    caption: {
-      fontSize: "12px",
-      fontWeight: 400
-    },
     subtitle2: ({ theme: t }) => ({
-      fontSize: "14px",
-      fontWeight: 500,
       color: t.palette.text.primary
     }),
     h4: {
-      fontSize: "34px",
-      fontWeight: 500,
-      lineHeight: "42px",
-      letterSpacing: "0.25px"
+      fontWeight: 500
     },
     h5: {
-      fontSize: "24px",
-      fontWeight: 400,
       "&.MuiTypography-gutterBottom": {
         marginBottom: "20px"
       }
     },
     h6: {
-      fontSize: "20px",
-      fontWeight: 500,
-      lineHeight: "32px",
-      letterSpacing: "0.15px",
       "&.MuiTypography-gutterBottom": {
         marginBottom: "20px"
       }
@@ -78,18 +61,15 @@ const theme = createTheme(MuiBaseCustomTheme, {
     MuiButton: {
       styleOverrides: {
         root: ({ ownerState }) => ({
-          fontWeight: 500,
           boxShadow: "none",
           "&:hover": { boxShadow: "none" },
           "&:active": { boxShadow: "none" },
           "&:focus": { boxShadow: "none" },
           ...(ownerState.size === "small" && {
-            fontSize: "13px",
             lineHeight: "18px",
             padding: "9px 16px"
           }),
           ...(ownerState.size === "medium" && {
-            fontSize: "14px",
             lineHeight: "20px",
             padding: "8px 12px",
             height: "36px"
@@ -105,7 +85,6 @@ const theme = createTheme(MuiBaseCustomTheme, {
     MuiTab: {
       styleOverrides: {
         root: {
-          fontSize: "14px",
           lineHeight: "18px",
           color: "#00000099",
           "&.Mui-selected": {

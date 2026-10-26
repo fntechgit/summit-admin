@@ -180,7 +180,7 @@ const SponsorFormAddItemFromInventoryPopup = ({
           disabled={isSaving}
           data-testid="close-dialog"
         >
-          <CloseIcon fontSize="large" />
+          <CloseIcon />
         </IconButton>
       </DialogTitle>
       <Divider />

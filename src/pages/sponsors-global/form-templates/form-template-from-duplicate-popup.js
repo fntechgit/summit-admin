@@ -94,7 +94,7 @@ const FormTemplateFromDuplicateDialog = ({
   return (
     <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1.5rem">
+        <Typography fontSize="1rem">
           {T.translate("form_template_from_duplicate_dialog.duplicate_form")}
         </Typography>
         <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
@@ -125,8 +125,7 @@ const FormTemplateFromDuplicateDialog = ({
                   }
                 ]}
               >
-                <SwapVertIcon fontSize="large" sx={{ mr: 1 }} />{" "}
-                {T.translate("general.sort_by")}
+                <SwapVertIcon sx={{ mr: 1 }} /> {T.translate("general.sort_by")}
               </MenuButton>
             </Grid2>
             <Grid2 size={8}>

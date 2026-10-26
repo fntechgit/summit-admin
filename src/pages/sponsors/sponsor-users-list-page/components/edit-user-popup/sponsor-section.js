@@ -58,7 +58,7 @@ const SponsorSection = ({
             "&:hover": { bgcolor: "action.disabled" }
           }}
         >
-          <DeleteIcon fontSize="large" />
+          <DeleteIcon />
         </IconButton>
         {onAdd && (
           <IconButton
@@ -71,7 +71,7 @@ const SponsorSection = ({
               "&:hover": { bgcolor: "primary.dark" }
             }}
           >
-            <AddIcon fontSize="large" />
+            <AddIcon />
           </IconButton>
         )}
       </Box>

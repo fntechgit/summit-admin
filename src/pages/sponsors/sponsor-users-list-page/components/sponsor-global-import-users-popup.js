@@ -177,7 +177,7 @@ const SponsorGlobalImportUsersPopup = ({
           onClick={handleClose}
           disabled={isSaving}
         >
-          <CloseIcon fontSize="large" />
+          <CloseIcon />
         </IconButton>
       </DialogTitle>
       <Divider />

@@ -63,8 +63,8 @@ const BadgeScanSettings = ({
             sx={{
               fontWeight: "500",
               letterSpacing: "0.15px",
-              fontSize: "2rem",
-              lineHeight: "1.6rem"
+              fontSize: "1.25rem",
+              lineHeight: "1rem"
             }}
           >
             {T.translate("edit_sponsor.badge_scan_settings")}
@@ -78,7 +78,7 @@ const BadgeScanSettings = ({
             sx={{
               fontWeight: "400",
               letterSpacing: "0.15px",
-              fontSize: "1.6rem",
+              fontSize: "1rem",
               lineHeight: "150%",
               textTransform: "lowercase"
             }}

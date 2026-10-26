@@ -36,9 +36,9 @@ const InfoTooltip = ({ title }) => (
   <Tooltip
     title={title}
     placement="top"
-    componentsProps={{ tooltip: { sx: { fontSize: "1rem" } } }}
+    componentsProps={{ tooltip: { sx: { fontSize: "0.625rem" } } }}
   >
-    <InfoIcon sx={{ ml: 0.5, verticalAlign: "middle" }} />
+    <InfoIcon fontSize="small" sx={{ ml: 0.5, verticalAlign: "middle" }} />
   </Tooltip>
 );
 
@@ -448,8 +448,7 @@ const PaymentProfileDialog = ({
                           onClick={handleNewFeeType}
                           startIcon={<AddIcon />}
                           sx={{
-                            lineHeight: "2.4rem",
-                            letterSpacing: "0.4px"
+                            lineHeight: "1.5rem"
                           }}
                         >
                           {T.translate("edit_payment_profile.new_fee_type")}
@@ -638,8 +637,7 @@ const PaymentProfileDialog = ({
                             variant="outlined"
                             onClick={handleCancelFeeType}
                             sx={{
-                              lineHeight: "2.4rem",
-                              letterSpacing: "0.4px"
+                              lineHeight: "1.5rem"
                             }}
                           >
                             {T.translate("general.cancel")}
@@ -649,8 +647,7 @@ const PaymentProfileDialog = ({
                             onClick={feeTypeFormik.handleSubmit}
                             disabled={isSaving}
                             sx={{
-                              lineHeight: "2.4rem",
-                              letterSpacing: "0.4px"
+                              lineHeight: "1.5rem"
                             }}
                           >
                             {T.translate("edit_payment_profile.save_fee_type")}

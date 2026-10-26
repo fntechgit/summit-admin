@@ -175,7 +175,7 @@ const AddFormTemplateItemDialog = ({
   return (
     <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1.5rem">
+        <Typography fontSize="1rem">
           {T.translate("inventory_items_list_modal.select_items")}
         </Typography>
         <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
@@ -214,8 +214,7 @@ const AddFormTemplateItemDialog = ({
                   }
                 ]}
               >
-                <SwapVertIcon fontSize="large" sx={{ mr: 1 }} />{" "}
-                {T.translate("general.sort_by")}
+                <SwapVertIcon sx={{ mr: 1 }} /> {T.translate("general.sort_by")}
               </MenuButton>
             </Grid2>
             <Grid2 size={8}>
