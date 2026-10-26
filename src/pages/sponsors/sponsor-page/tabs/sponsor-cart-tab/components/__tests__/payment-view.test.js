@@ -15,6 +15,7 @@ import React from "react";
 import { act, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import flushPromises from "flush-promises";
+import StripePayment from "openstack-uicore-foundation/lib/components/mui/stripe-payment";
 import { renderWithRedux } from "../../../../../../../utils/test-utils";
 import PaymentView from "../payment-view";
 import { payWithInvoice } from "../../../../../../../actions/sponsor-cart-actions";
@@ -52,7 +53,7 @@ jest.mock(
   "openstack-uicore-foundation/lib/components/mui/stripe-payment",
   () => ({
     __esModule: true,
-    default: () => <div data-testid="stripe-payment" />
+    default: jest.fn(() => <div data-testid="stripe-payment" />)
   })
 );
 
@@ -157,5 +158,22 @@ describe("PaymentView - Pay with invoice instead", () => {
     });
 
     expect(history.push).not.toHaveBeenCalled();
+  });
+});
+
+describe("PaymentView - Stripe payment form", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("hides Link so the admin's own saved card is never offered", () => {
+    renderPaymentView();
+
+    expect(StripePayment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        paymentOptions: { wallets: { link: "never" } }
+      }),
+      expect.anything()
+    );
   });
 });
