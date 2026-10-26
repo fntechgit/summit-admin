@@ -279,6 +279,15 @@ const SummitEventListPage = ({
       flex: 2,
       editableField: true,
       placeholder: T.translate("bulk_actions_page.placeholders.event_title")
+    },
+    {
+      columnKey: "selection_status",
+      label: T.translate("event_list.selection_status"),
+      sortable: true,
+      render: (status, row) =>
+        status === "unaccepted" && row.is_published === true
+          ? "accepted"
+          : status
     }
   ];
 
