@@ -3,6 +3,7 @@ import { screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import flushPromises from "flush-promises";
+import { getRequest } from "openstack-uicore-foundation/lib/utils/actions";
 import SummitEventListPage from "../summit-event-list-page";
 import { renderWithRedux } from "../../../utils/test-utils";
 import { unpackJoinOperatorFromCriteria } from "../summit-event-list-page/helpers";
@@ -11,8 +12,15 @@ import {
   saveFilterCriteria,
   deleteFilterCriteria
 } from "../../../actions/filter-criteria-actions";
+import * as methods from "../../../utils/methods";
 
 const mockEditableTableSpy = jest.fn(() => null);
+
+jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
+  __esModule: true,
+  ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
+  getRequest: jest.fn()
+}));
 
 jest.mock("../../../actions/filter-criteria-actions", () => ({
   saveFilterCriteria: jest.fn(),
@@ -116,6 +124,13 @@ describe("SummitEventListPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     windowOpenSpy = jest.spyOn(window, "open").mockImplementation(() => null);
+    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
+    getRequest.mockImplementation(
+      () => () => () =>
+        Promise.resolve({
+          response: { total: 0, last_page: 1, current_page: 1, data: [] }
+        })
+    );
     mockGridFilterState.parsedFilter = [];
     mockGridFilterState.filterValues = [];
     mockGridFilterState.joinOperator = undefined;
@@ -580,7 +595,7 @@ describe("SummitEventListPage", () => {
 
     act(() => {
       latestGridProps.onColumnVisibilityModelChange({
-        selection_status: false
+        streaming_type: false
       });
     });
 
@@ -588,6 +603,6 @@ describe("SummitEventListPage", () => {
       .getActions()
       .find((a) => a.type === CHANGE_EXTRA_COLUMNS).payload;
     expect(extraColumns).toContain("track");
-    expect(extraColumns).not.toContain("selection_status");
+    expect(extraColumns).not.toContain("streaming_type");
   });
 });
