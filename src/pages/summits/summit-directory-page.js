@@ -21,11 +21,7 @@ import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import AddIcon from "@mui/icons-material/Add";
 import GridToolbar from "../../components/mui/grid-toolbar";
-import {
-  clearCurrentSummit,
-  deleteSummit,
-  loadSummits
-} from "../../actions/summit-actions";
+import { clearCurrentSummit, loadSummits } from "../../actions/summit-actions";
 import Member from "../../models/member";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 import { countLabel } from "../../utils/methods";
@@ -38,7 +34,6 @@ const SummitDirectoryPage = ({
   totalSummits,
   loadSummits,
   clearCurrentSummit,
-  deleteSummit,
   history
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -58,24 +53,13 @@ const SummitDirectoryPage = ({
     memberObj = new Member(safeMember);
   } catch (e) {
     memberObj = {
-      canEditSummit: () => false,
-      canAddSummits: () => false,
-      canDeleteSummits: () => false
+      canAddSummits: () => false
     };
   }
-  const canEditSummit =
-    typeof memberObj.canEditSummit === "function"
-      ? memberObj.canEditSummit()
-      : false;
   const canAddSummits =
     typeof memberObj.canAddSummits === "function"
       ? memberObj.canAddSummits()
       : false;
-  const canDeleteSummits =
-    typeof memberObj.canDeleteSummits === "function"
-      ? memberObj.canDeleteSummits()
-      : false;
-
   const handlePageChange = (page) => {
     loadSummits(page, perPage, searchTerm, hidePastEvents);
   };
@@ -99,12 +83,18 @@ const SummitDirectoryPage = ({
     history.push("/app/summits/new");
   };
 
-  const handleEditSummit = (summit) => {
-    history.push(`/app/summits/${summit.id}`);
-  };
-
   const handleSelectSummit = (summit) => {
     history.push(`/app/summits/${summit.id}/dashboard`);
+  };
+
+  // MuiTable has no row click prop, so resolve the clicked body row by index.
+  // Clicks on buttons (e.g. the view arrow) are already handled by the table.
+  const handleRowClick = (ev) => {
+    if (ev.target.closest("button")) return;
+    const row = ev.target.closest("tbody tr");
+    if (!row) return;
+    const summit = safeSummits[row.sectionRowIndex];
+    if (summit) handleSelectSummit(summit);
   };
 
   const columns = [
@@ -183,21 +173,19 @@ const SummitDirectoryPage = ({
         )}
       </GridToolbar>
       <Box sx={{ mb: 2 }}>{countLabel("directory.summit", totalSummits)}</Box>
-      <MuiTable
-        columns={columns}
-        data={safeSummits}
-        totalRows={totalSummits}
-        perPage={perPage}
-        currentPage={currentPage}
-        onPageChange={handlePageChange}
-        onPerPageChange={handlePerPageChange}
-        onEdit={canEditSummit ? handleEditSummit : undefined}
-        onDelete={canDeleteSummits ? (id) => deleteSummit(id) : undefined}
-        onSelect={handleSelectSummit}
-        deleteDialogBody={(name) =>
-          `${T.translate("directory.remove_warning")} ${name}`
-        }
-      />
+      <Box onClick={handleRowClick}>
+        <MuiTable
+          columns={columns}
+          data={safeSummits}
+          totalRows={totalSummits}
+          perPage={perPage}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSelect={handleSelectSummit}
+          tableSx={{ "& tbody tr": { cursor: "pointer" } }}
+        />
+      </Box>
     </Box>
   );
 };
@@ -209,6 +197,5 @@ const mapStateToProps = ({ directoryState, loggedUserState }) => ({
 
 export default connect(mapStateToProps, {
   loadSummits,
-  clearCurrentSummit,
-  deleteSummit
+  clearCurrentSummit
 })(SummitDirectoryPage);

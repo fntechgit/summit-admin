@@ -18,12 +18,17 @@ import { Breadcrumb } from "react-breadcrumbs";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Grid2 from "@mui/material/Grid2";
+import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import DashboardStatSection from "./components/dashboard-stat-section";
-import { getSummitById } from "../../actions/summit-actions";
+import showConfirmDialog from "../../components/mui/showConfirmDialog";
+import { deleteSummit, getSummitById } from "../../actions/summit-actions";
 import { getRegistrationData } from "../../actions/summit-stats-actions";
 import Member from "../../models/member";
 import SummitDashboardDateRange from "./components/summit-dashboard-date-range";
@@ -44,11 +49,15 @@ function SummitDashboardPage({
   currentSummit,
   member,
   match,
+  history,
   totalOrders,
   totalActiveTickets,
-  getRegistrationData: fetchRegistrationData
+  getRegistrationData: fetchRegistrationData,
+  deleteSummit: removeSummit
 }) {
-  const canEditSummit = new Member(member).canEditSummit();
+  const memberObj = new Member(member);
+  const canEditSummit = memberObj.canEditSummit();
+  const canDeleteSummits = memberObj.canDeleteSummits();
 
   useEffect(() => {
     // registration-stats endpoints are admin-only; a sponsors-only member
@@ -60,6 +69,25 @@ function SummitDashboardPage({
     (l) => l.class_name === "SummitVenue"
   ).length;
 
+  const handleEditSummit = () => {
+    history.push(`/app/summits/${currentSummit.id}`);
+  };
+
+  const handleDeleteSummit = async () => {
+    const confirmed = await showConfirmDialog({
+      title: T.translate("general.are_you_sure"),
+      text: `${T.translate("directory.remove_warning")} ${currentSummit.name}`,
+      iconType: "warning",
+      confirmButtonText: T.translate("general.delete"),
+      confirmButtonColor: "error"
+    });
+
+    if (confirmed) {
+      await removeSummit(currentSummit.id);
+      history.push("/app/summits");
+    }
+  };
+
   return (
     <Container sx={{ my: "30px" }}>
       <Breadcrumb
@@ -69,9 +97,31 @@ function SummitDashboardPage({
         }}
       />
 
-      <Typography variant="h4" gutterBottom>
-        {currentSummit.name}
-      </Typography>
+      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+        <Typography variant="h4">{currentSummit.name}</Typography>
+        {canEditSummit && (
+          <Tooltip title={T.translate("general.edit")}>
+            <IconButton
+              onClick={handleEditSummit}
+              data-testid="summit-edit"
+              aria-label={T.translate("general.edit")}
+            >
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+        {canDeleteSummits && (
+          <Tooltip title={T.translate("general.delete")}>
+            <IconButton
+              onClick={handleDeleteSummit}
+              data-testid="summit-delete"
+              aria-label={T.translate("general.delete")}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Stack>
 
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
         <Tabs value={0} onChange={() => {}}>
@@ -236,9 +286,13 @@ SummitDashboardPage.propTypes = {
   match: PropTypes.shape({
     url: PropTypes.string
   }).isRequired,
+  history: PropTypes.shape({
+    push: PropTypes.func
+  }).isRequired,
   totalOrders: PropTypes.number,
   totalActiveTickets: PropTypes.number,
-  getRegistrationData: PropTypes.func.isRequired
+  getRegistrationData: PropTypes.func.isRequired,
+  deleteSummit: PropTypes.func.isRequired
 };
 
 SummitDashboardPage.defaultProps = {
@@ -260,5 +314,6 @@ const mapStateToProps = ({
 
 export default connect(mapStateToProps, {
   getSummitById,
-  getRegistrationData
+  getRegistrationData,
+  deleteSummit
 })(SummitDashboardPage);
