@@ -40,18 +40,6 @@ jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => ({
   )
 }));
 
-jest.mock(
-  "openstack-uicore-foundation/lib/components/mui/search-input",
-  () => ({
-    __esModule: true,
-    default: ({ onSearch }) => (
-      <button type="button" onClick={() => onSearch("foo")}>
-        search-foo
-      </button>
-    )
-  })
-);
-
 jest.mock("../../../components/summit-dropdown", () => ({
   __esModule: true,
   default: ({ onClick }) => (
@@ -106,7 +94,10 @@ describe("MediaUploadListPage", () => {
   it("threads search, pagination and sort params to getMediaUploads", async () => {
     renderPage();
 
-    await userEvent.click(screen.getByRole("button", { name: "search-foo" }));
+    await userEvent.type(
+      screen.getByPlaceholderText("Search..."),
+      "foo{Enter}"
+    );
     expect(getMediaUploads).toHaveBeenLastCalledWith("foo", 1, 10, "id", 1);
 
     await userEvent.click(screen.getByRole("button", { name: "page-2" }));

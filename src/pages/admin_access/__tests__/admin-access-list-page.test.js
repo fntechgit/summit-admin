@@ -63,16 +63,6 @@ jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => {
   return MockMuiTable;
 });
 
-jest.mock(
-  "openstack-uicore-foundation/lib/components/mui/search-input",
-  () => ({
-    __esModule: true,
-    default: ({ onSearch }) => (
-      <input placeholder="search" onChange={(e) => onSearch(e.target.value)} />
-    )
-  })
-);
-
 jest.mock("../../../components/forms/admin-access-form", () => {
   const MockAdminAccessForm = ({ onSubmit, isSaving }) => (
     <div data-testid="admin-access-form">
@@ -202,9 +192,11 @@ describe("AdminAccessListPage", () => {
 
     it("requests data with search term and resets to page 1", async () => {
       renderPage();
-      fireEvent.change(screen.getByPlaceholderText("search"), {
-        target: { value: "admins" }
-      });
+      const searchInput = screen.getByPlaceholderText(
+        "admin_access.placeholders.search"
+      );
+      fireEvent.change(searchInput, { target: { value: "admins" } });
+      fireEvent.keyDown(searchInput, { key: "Enter" });
       await waitFor(() => {
         expect(mockGetAdminAccesses).toHaveBeenCalledWith(
           "admins",
