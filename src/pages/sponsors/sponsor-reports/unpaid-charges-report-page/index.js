@@ -18,7 +18,7 @@ import { Alert, Box, Button } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
 import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
-import GridToolbar from "../../../../components/mui/grid-toolbar";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
 import UnpaidChargesBySponsor, {
   buildUnpaidChargesCsvRows,

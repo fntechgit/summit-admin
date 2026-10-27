@@ -26,7 +26,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import GridToolbar from "../../components/mui/grid-toolbar";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import {
   getTrackChairs,
   deleteTrackChair,

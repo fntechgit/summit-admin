@@ -18,8 +18,8 @@ import T from "i18n-react/dist/i18n-react";
 import { Alert, Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTableEditable from "openstack-uicore-foundation/lib/components/mui/editable-table";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import { ImagePreviewCell } from "../../../components/image-preview-cell";
-import GridToolbar from "../../../components/mui/grid-toolbar";
 import {
   deleteSponsorFormItem,
   getSponsorFormItem,

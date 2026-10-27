@@ -17,7 +17,7 @@ import T from "i18n-react/dist/i18n-react";
 import { Box, Button, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
-import GridToolbar from "../../../../../components/mui/grid-toolbar";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import {
   deleteSponsorUser,
   getSponsorUserRequests,

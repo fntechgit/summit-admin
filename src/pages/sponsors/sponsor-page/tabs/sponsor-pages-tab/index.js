@@ -18,7 +18,7 @@ import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import GridToolbar from "../../../../../components/mui/grid-toolbar";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import {
   getSponsorManagedPages,
   getSponsorManagedPage,

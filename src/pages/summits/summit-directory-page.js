@@ -20,7 +20,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import AddIcon from "@mui/icons-material/Add";
-import GridToolbar from "../../components/mui/grid-toolbar";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import {
   clearCurrentSummit,
   deleteSummit,

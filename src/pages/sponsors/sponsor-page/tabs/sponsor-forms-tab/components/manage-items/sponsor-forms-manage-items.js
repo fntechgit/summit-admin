@@ -18,7 +18,7 @@ import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ImageIcon from "@mui/icons-material/Image";
 import MuiTableEditable from "openstack-uicore-foundation/lib/components/mui/editable-table";
-import GridToolbar from "../../../../../../../components/mui/grid-toolbar";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import {
   addSponsorManagedFormItems,
   archiveSponsorCustomizedFormItem,

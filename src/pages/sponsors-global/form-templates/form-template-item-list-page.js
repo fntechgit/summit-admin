@@ -17,8 +17,8 @@ import T from "i18n-react/dist/i18n-react";
 import { Alert, Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import { ImagePreviewCell } from "../../../components/image-preview-cell";
-import GridToolbar from "../../../components/mui/grid-toolbar";
 import {
   cloneFromInventoryItem,
   getFormTemplateItem,

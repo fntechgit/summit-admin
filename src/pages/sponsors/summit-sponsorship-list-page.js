@@ -17,7 +17,7 @@ import T from "i18n-react/dist/i18n-react";
 import { Alert, Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTableSortable from "openstack-uicore-foundation/lib/components/mui/sortable-table";
-import GridToolbar from "../../components/mui/grid-toolbar";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   deleteSummitSponsorship,

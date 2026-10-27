@@ -21,7 +21,7 @@ import LockClosedIcon from "@mui/icons-material/Lock";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import { TotalRow } from "openstack-uicore-foundation/lib/components/mui/table/extra-rows";
 import InfoNote from "openstack-uicore-foundation/lib/components/mui/info-note";
-import GridToolbar from "../../../../../../components/mui/grid-toolbar";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import history from "../../../../../../history";
 import {
   checkoutCart,
