@@ -53,7 +53,7 @@
     "@uiw/codemirror-theme-sublime": "^4.21.23",
     "@uiw/react-codemirror": "^4.21.7",
     "@uiw/react-color-sketch": "^2.1.0",
-    "ably": "^1.2.39",
+    "ably": "^2.30.0",
     "address-rfc2822": "^2.2.2",
     "awesome-bootstrap-checkbox": "^1.0.1",
     "babel-loader": "^8.1.0",

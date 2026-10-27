@@ -1,8 +1,14 @@
 import Swal from "sweetalert2";
+import flushPromises from "flush-promises";
 
 jest.mock("sweetalert2", () => ({
   __esModule: true,
   default: { fire: jest.fn() }
+}));
+
+jest.mock("i18n-react/dist/i18n-react", () => ({
+  __esModule: true,
+  default: { translate: (key) => key }
 }));
 
 // factory mocks, so the fresh module registry of isolateModules gets them too
@@ -26,7 +32,7 @@ const mockPublishedWithOptions = [];
 jest.mock("ably", () => ({
   __esModule: true,
   default: {
-    // callback API, as ably 1.2's Ably.Realtime: publish(name, data, callback) returns undefined
+    // promise API, as ably 2's Ably.Realtime: publish and subscribe return promises
     Realtime: jest.fn((options) => ({
       channels: {
         get: jest.fn(() => ({
@@ -81,7 +87,8 @@ describe("ably-actions", () => {
     jest.clearAllMocks();
     mockPublishedWithOptions.length = 0;
     window.PUB_API_BASE_URL = PUB_API_BASE_URL;
-    mockPublish.mockImplementation((name, data, callback) => callback(null));
+    mockPublish.mockResolvedValue(undefined);
+    mockSubscribe.mockResolvedValue(null);
   });
 
   afterEach(() => {
@@ -90,9 +97,12 @@ describe("ably-actions", () => {
 
   it("resolves true only once Ably acknowledges the publish", async () => {
     let ack;
-    mockPublish.mockImplementation((name, data, callback) => {
-      ack = callback;
-    });
+    mockPublish.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          ack = resolve;
+        })
+    );
     const { publishToAblyChannel } = loadAblyActions();
 
     let settled = false;
@@ -108,13 +118,10 @@ describe("ably-actions", () => {
     await Promise.resolve();
     expect(settled).toBe(false);
 
-    ack(null);
+    ack();
     await expect(result).resolves.toBe(true);
-    expect(mockPublish).toHaveBeenCalledWith(
-      "RELOAD",
-      {},
-      expect.any(Function)
-    );
+    // no trailing callback: ably 2 throws on the v1 callback signature
+    expect(mockPublish).toHaveBeenCalledWith("RELOAD", {});
     expect(Swal.fire).not.toHaveBeenCalled();
   });
 
@@ -169,6 +176,36 @@ describe("ably-actions", () => {
     );
   });
 
+  it("passes the message data to the subscriber callback", () => {
+    const callback = jest.fn();
+    const { subscribeToAblyChannel } = loadAblyActions();
+
+    subscribeToAblyChannel("OCCUPANCY:73", callback)(dispatch);
+
+    expect(mockSubscribe).toHaveBeenCalledWith(expect.any(Function));
+    const [listener] = mockSubscribe.mock.calls[0];
+    listener({ data: { occupancy: "FULL", eventId: 1 } });
+    expect(callback).toHaveBeenCalledWith({ occupancy: "FULL", eventId: 1 });
+  });
+
+  it("reports a failed subscribe naming the channel", async () => {
+    mockSubscribe.mockRejectedValue({
+      message: "Channel denied access based on given capability"
+    });
+    const { subscribeToAblyChannel } = loadAblyActions();
+
+    expect(subscribeToAblyChannel("OCCUPANCY:73", jest.fn())(dispatch)).toBe(
+      true
+    );
+
+    await flushPromises();
+    expect(Swal.fire).toHaveBeenCalledWith(
+      "signage.subscribe_failed",
+      "OCCUPANCY:73: Channel denied access based on given capability",
+      "warning"
+    );
+  });
+
   it("reuses one client per app", async () => {
     const { publishToAblyChannel, publishToScheduleUpdatesChannel } =
       loadAblyActions();
@@ -200,8 +237,8 @@ describe("ably-actions", () => {
   });
 
   it("reports the Ably error naming the channel and resolves false", async () => {
-    mockPublish.mockImplementation((name, data, callback) => {
-      callback({ message: "Channel denied access based on given capability" });
+    mockPublish.mockRejectedValue({
+      message: "Channel denied access based on given capability"
     });
     const { publishToAblyChannel } = loadAblyActions();
 
@@ -210,7 +247,7 @@ describe("ably-actions", () => {
     ).resolves.toBe(false);
 
     expect(Swal.fire).toHaveBeenCalledWith(
-      "Publish failed",
+      "signage.publish_failed",
       "73:OVERFLOW:*: Channel denied access based on given capability",
       "warning"
     );
