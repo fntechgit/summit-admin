@@ -19,7 +19,8 @@ import {
   RECEIVE_EVENTS,
   REQUEST_EVENTS,
   EVENT_DELETED,
-  CHANGE_SEARCH_TERM
+  CHANGE_SEARCH_TERM,
+  CHANGE_EXTRA_COLUMNS
 } from "../../actions/event-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
@@ -89,6 +90,10 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
     case CHANGE_SEARCH_TERM: {
       const { term } = payload;
       return { ...state, term };
+    }
+    case CHANGE_EXTRA_COLUMNS: {
+      const { extraColumns } = payload;
+      return { ...state, extraColumns };
     }
     default:
       return state;

@@ -81,6 +81,7 @@ export const FLAG_CHANGED = "FLAG_CHANGED";
 export const REQUEST_EVENT_COMMENTS = "REQUEST_EVENT_COMMENTS";
 export const RECEIVE_EVENT_COMMENTS = "RECEIVE_EVENT_COMMENTS";
 export const CHANGE_SEARCH_TERM = "CHANGE_SEARCH_TERM";
+export const CHANGE_EXTRA_COLUMNS = "CHANGE_EXTRA_COLUMNS";
 export const SUBMISSION_PERIOD_REOPENED = "SUBMISSION_PERIOD_REOPENED";
 export const SUBMISSION_PERIOD_CLOSED = "SUBMISSION_PERIOD_CLOSED";
 export const SUBMISSION_REOPEN_NOTIFIED = "SUBMISSION_REOPEN_NOTIFIED";
@@ -385,8 +386,9 @@ export const bulkUpdateEvents = (events) => async (dispatch, getState) => {
         )
       );
     })
-    .catch(() => {
+    .catch((err) => {
       dispatch(stopLoading());
+      throw err;
     });
 };
 
@@ -1528,4 +1530,8 @@ export const queryAllCompanies = debounce(async (input, callback) => {
 
 export const changeEventListSearchTerm = (term) => (dispatch) => {
   dispatch(createAction(CHANGE_SEARCH_TERM)({ term }));
+};
+
+export const changeEventListExtraColumns = (extraColumns) => (dispatch) => {
+  dispatch(createAction(CHANGE_EXTRA_COLUMNS)({ extraColumns }));
 };

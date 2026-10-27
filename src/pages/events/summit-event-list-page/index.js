@@ -14,18 +14,15 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
-import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
 import {
   GridFilter,
   useGridFilter
 } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
-import BulkEditTable from "openstack-uicore-foundation/lib/components/mui/bulk-edit-table";
-import GridToolbar from "../../../components/mui/grid-toolbar";
+import BulkEditDataGrid from "../../../components/mui/bulk-edit-data-grid";
 import {
   bulkUpdateEvents,
+  changeEventListExtraColumns,
   deleteEvent,
   exportEvents,
   getEvents,
@@ -33,15 +30,13 @@ import {
   importMP4AssetsFromMUX
 } from "../../../actions/event-actions";
 import { getMediaUploads } from "../../../actions/media-upload-actions";
-import { handleDDLSortByLabel } from "../../../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_Z_INDEX,
   HIGH_Z_INDEX,
   MAX_PER_PAGE
 } from "../../../utils/constants";
-import SaveFilterCriteria from "../../../components/filters/save-filter-criteria";
-import SelectFilterCriteria from "../../../components/filters/select-filter-criteria";
+import SavedViews from "../../../components/filters/saved-views";
 import {
   deleteFilterCriteria,
   saveFilterCriteria
@@ -82,11 +77,15 @@ const SummitEventListPage = ({
   importMP4AssetsFromMUX,
   saveFilterCriteria,
   deleteFilterCriteria,
-  bulkUpdateEvents
+  bulkUpdateEvents,
+  changeEventListExtraColumns
 }) => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showImportFromMUXModal, setShowImportFromMUXModal] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState(extraColumns ?? []);
+  // the grid's last column visibility; only the optional columns are
+  // remembered (selectedColumns), the default ones reset each visit
+  const [gridColumnVisibility, setGridColumnVisibility] = useState({});
   const [selectedFilterCriteria, setSelectedFilterCriteria] = useState(null);
   const { parsedFilter, resetFilters, filterValues, setFilters, joinOperator } =
     useGridFilter(FILTER_ID);
@@ -140,11 +139,6 @@ const SummitEventListPage = ({
     setSelectedColumns(extraColumns ?? []);
   }, [extraColumns]);
 
-  const handleMUXImport = (ev) => {
-    ev.preventDefault();
-    setShowImportFromMUXModal(true);
-  };
-
   const handleEdit = (row) => {
     history.push(`/app/summits/${currentSummit.id}/events/${row.id}`);
   };
@@ -174,9 +168,8 @@ const SummitEventListPage = ({
     history.push(`/app/summits/${currentSummit.id}/events/new`);
   };
 
-  const handleFilterCriteriaSave = ({ name, id, visibility }) => {
+  const handleFilterCriteriaSave = ({ name, visibility }) => {
     const filterToSave = {
-      id,
       show_id: currentSummit.id,
       name,
       enabled_filters: filterValues.map((f) => f.criteria),
@@ -187,7 +180,9 @@ const SummitEventListPage = ({
       visibility
     };
 
-    saveFilterCriteria(filterToSave);
+    return saveFilterCriteria(filterToSave).then(({ response }) =>
+      setSelectedFilterCriteria(response)
+    );
   };
 
   const optionalColumns = getOptionalColumns(
@@ -197,70 +192,49 @@ const SummitEventListPage = ({
     currentSummit.id
   );
 
-  const columnDDLOptions = [
-    ...optionalColumns.map((oc) => ({ value: oc.columnKey, label: oc.label })),
-    {
-      value: "all_companies",
-      label: T.translate("event_list.all_companies")
-    },
-    {
-      value: "all",
-      label: T.translate("general.all")
-    }
-  ];
+  const columnVisibilityModel = {
+    ...gridColumnVisibility,
+    ...Object.fromEntries(
+      optionalColumns.map((oc) => [
+        oc.columnKey,
+        selectedColumns.includes(oc.columnKey)
+      ])
+    )
+  };
 
-  const handleColumnsChange = (ev) => {
-    const { value: newColumns } = ev.target;
-
-    if (newColumns.includes("all")) {
-      setSelectedColumns(
-        columnDDLOptions.map((opt) => opt.value).filter((v) => v !== "all")
-      );
-      return;
-    }
-
-    const allCompanies = ["submitter_company", "speaker_company", "sponsor"];
-    const hadAllCompanies = selectedColumns.includes("all_companies");
-    const hasAllCompanies = newColumns.includes("all_companies");
-
-    if (hadAllCompanies && !hasAllCompanies) {
-      setSelectedColumns(newColumns.filter((c) => !allCompanies.includes(c)));
-      return;
-    }
-
-    if (hasAllCompanies) {
-      const selectedCompanies = allCompanies.filter((c) =>
-        selectedColumns.includes(c)
-      ).length;
-      const newCompanies = allCompanies.filter((c) =>
-        newColumns.includes(c)
-      ).length;
-
-      setSelectedColumns(
-        newCompanies < selectedCompanies
-          ? newColumns.filter((c) => c !== "all_companies")
-          : [...new Set([...newColumns, ...allCompanies])]
-      );
-      return;
-    }
-
+  // the grid omits columns from the model when they're visible (e.g. after
+  // "Show all"), so only an explicit false hides one
+  const handleColumnVisibilityModelChange = (model) => {
+    const newColumns = optionalColumns
+      .map((oc) => oc.columnKey)
+      .filter((columnKey) => model[columnKey] !== false);
+    setGridColumnVisibility(model);
     setSelectedColumns(newColumns);
+    changeEventListExtraColumns(newColumns);
   };
 
   const handleFilterCriteriaChange = (filterCriteria) => {
     setSelectedFilterCriteria(filterCriteria);
   };
 
-  const handleFilterCriteriaDelete = (filterCriteriaId) => {
+  // any view can be deleted from the list, so only clear the filters when
+  // the active one goes
+  const handleFilterCriteriaDelete = (filterCriteriaId) =>
     deleteFilterCriteria(filterCriteriaId).then(() => {
-      setSelectedFilterCriteria(null);
+      if (selectedFilterCriteria?.id === filterCriteriaId) {
+        setSelectedFilterCriteria(null);
+      }
     });
-  };
 
   const eventTypeOptions = buildNameIdDDL(currentSummit.event_types);
 
   const fixedColumns = [
-    { columnKey: "id", label: T.translate("general.id"), sortable: true },
+    {
+      columnKey: "id",
+      label: T.translate("general.id"),
+      sortable: true,
+      width: 90
+    },
     {
       columnKey: "type",
       label: T.translate("event_list.type"),
@@ -283,6 +257,16 @@ const SummitEventListPage = ({
           }}
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...extraProps}
+          onChange={(ev) =>
+            extraProps.onChange({
+              target: {
+                value:
+                  currentSummit.event_types.find(
+                    (type) => type.id === ev.target.value
+                  ) ?? null
+              }
+            })
+          }
         />
       ),
       render: (e) => e.name
@@ -291,6 +275,8 @@ const SummitEventListPage = ({
       columnKey: "title",
       label: T.translate("event_list.title"),
       sortable: true,
+      hideable: false,
+      flex: 2,
       editableField: true,
       placeholder: T.translate("bulk_actions_page.placeholders.event_title")
     },
@@ -310,11 +296,7 @@ const SummitEventListPage = ({
     sortDir: orderDir
   };
 
-  const selectedOptionalColumns = optionalColumns.filter((c) =>
-    selectedColumns.includes(c.columnKey)
-  );
-
-  const tableColumns = [...fixedColumns, ...selectedOptionalColumns];
+  const tableColumns = [...fixedColumns, ...optionalColumns];
 
   if (!currentSummit.id) return <div />;
 
@@ -322,96 +304,69 @@ const SummitEventListPage = ({
 
   return (
     <div className="container table-container summit-event-list-filters">
-      <h3>
-        {T.translate("event_list.event_list")} ({totalEvents})
-      </h3>
-      <GridToolbar
-        splitAt="lg"
-        searchProps={{
-          term,
-          placeholder: T.translate("event_list.placeholders.search_events"),
-          onSearch: handleSearch
-        }}
-      >
-        <GridFilter
-          id={FILTER_ID}
-          criterias={getCriterias(currentSummit, mediaUploadTypes)}
-        />
-        <Button
-          variant="contained"
-          onClick={handleNewEvent}
-          startIcon={<AddIcon />}
-          sx={{ whiteSpace: "nowrap", flexShrink: 0, minWidth: 140 }}
-        >
-          {T.translate("event_list.add_event")}
-        </Button>
-        <Button variant="outlined" onClick={handleExport}>
-          {T.translate("general.export")}
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={handleMUXImport}
-          sx={{ whiteSpace: "nowrap", flexShrink: 0, minWidth: 190 }}
-        >
-          {T.translate("event_list.mux_import")}
-        </Button>
-        <Button variant="outlined" onClick={() => setShowImportModal(true)}>
-          {T.translate("event_list.import")}
-        </Button>
-      </GridToolbar>
-      <hr />
-      <div>
-        <SelectFilterCriteria
-          summitId={currentSummit.id}
-          context={CONTEXT_ACTIVITIES}
-          onDelete={handleFilterCriteriaDelete}
-          selectedFilterCriteria={selectedFilterCriteria}
-          onChange={handleFilterCriteriaChange}
-        />
-        <SaveFilterCriteria
-          onSave={handleFilterCriteriaSave}
-          selectedFilterCriteria={selectedFilterCriteria}
+      <div className="summit-event-list-table-wrapper">
+        <BulkEditDataGrid
+          title={
+            <h3>
+              {T.translate("event_list.event_list")} ({totalEvents})
+            </h3>
+          }
+          options={tableOptions}
+          data={tableData}
+          columns={tableColumns}
+          columnVisibilityModel={columnVisibilityModel}
+          onColumnVisibilityModelChange={handleColumnVisibilityModelChange}
+          filter={
+            <GridFilter
+              id={FILTER_ID}
+              criterias={getCriterias(currentSummit, mediaUploadTypes)}
+            />
+          }
+          views={
+            <SavedViews
+              summitId={currentSummit.id}
+              context={CONTEXT_ACTIVITIES}
+              selectedView={selectedFilterCriteria}
+              onChange={handleFilterCriteriaChange}
+              onSave={handleFilterCriteriaSave}
+              onDelete={handleFilterCriteriaDelete}
+            />
+          }
+          onAdd={handleNewEvent}
+          addLabel={T.translate("event_list.add_event")}
+          importItems={[
+            {
+              label: T.translate("event_list.mux_import"),
+              onClick: () => setShowImportFromMUXModal(true)
+            },
+            {
+              label: T.translate("event_list.import"),
+              onClick: () => setShowImportModal(true)
+            }
+          ]}
+          importLabel={T.translate("event_list.import")}
+          onExport={handleExport}
+          searchProps={{
+            term,
+            placeholder: T.translate("event_list.placeholders.search_events"),
+            onSearch: handleSearch
+          }}
+          noRowsLabel={T.translate("event_list.no_events")}
+          onSort={handleSort}
+          onUpdate={bulkUpdateEvents}
+          totalRows={totalEvents}
+          perPage={perPage}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onEdit={handleEdit}
+          onDelete={deleteEvent}
+          getName={(row) => row.title}
+          deleteDialogBody={(name) =>
+            `${T.translate("event_list.delete_event_warning")} ${name}`
+          }
         />
       </div>
-
-      <hr />
-      <Box sx={{ mb: 2 }}>
-        <MuiDropdown
-          id="select_fields"
-          label={T.translate("event_list.select_fields")}
-          placeholder={T.translate("event_list.placeholders.select_fields")}
-          value={selectedColumns}
-          onChange={handleColumnsChange}
-          options={handleDDLSortByLabel(columnDDLOptions)}
-          multiple
-        />
-      </Box>
-
-      {events.length === 0 && <div>{T.translate("event_list.no_events")}</div>}
-
-      {events.length > 0 && (
-        <div className="summit-event-list-table-wrapper">
-          <BulkEditTable
-            options={tableOptions}
-            data={tableData}
-            columns={tableColumns}
-            onSort={handleSort}
-            onUpdate={bulkUpdateEvents}
-            totalRows={totalEvents}
-            perPage={perPage}
-            currentPage={currentPage}
-            onPageChange={handlePageChange}
-            onPerPageChange={handlePerPageChange}
-            onEdit={handleEdit}
-            onDelete={deleteEvent}
-            getName={(row) => row.title}
-            deleteDialogBody={(name) =>
-              `${T.translate("event_list.delete_event_warning")} ${name}`
-            }
-            showPageJump
-          />
-        </div>
-      )}
 
       <ImportModal
         show={showImportModal}
@@ -447,5 +402,6 @@ export default connect(mapStateToProps, {
   saveFilterCriteria,
   deleteFilterCriteria,
   bulkUpdateEvents,
-  getMediaUploads
+  getMediaUploads,
+  changeEventListExtraColumns
 })(SummitEventListPage);

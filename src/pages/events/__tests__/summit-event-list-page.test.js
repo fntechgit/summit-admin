@@ -3,15 +3,24 @@ import { screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import flushPromises from "flush-promises";
+import { getRequest } from "openstack-uicore-foundation/lib/utils/actions";
 import SummitEventListPage from "../summit-event-list-page";
 import { renderWithRedux } from "../../../utils/test-utils";
 import { unpackJoinOperatorFromCriteria } from "../summit-event-list-page/helpers";
+import { CHANGE_EXTRA_COLUMNS } from "../../../actions/event-actions";
 import {
   saveFilterCriteria,
   deleteFilterCriteria
 } from "../../../actions/filter-criteria-actions";
+import * as methods from "../../../utils/methods";
 
 const mockEditableTableSpy = jest.fn(() => null);
+
+jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
+  __esModule: true,
+  ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
+  getRequest: jest.fn()
+}));
 
 jest.mock("../../../actions/filter-criteria-actions", () => ({
   saveFilterCriteria: jest.fn(),
@@ -19,13 +28,13 @@ jest.mock("../../../actions/filter-criteria-actions", () => ({
 }));
 
 jest.mock(
-  "openstack-uicore-foundation/lib/components/mui/bulk-edit-table",
+  "../../../components/mui/bulk-edit-data-grid",
   () =>
-    function BulkEditTableMock(props) {
+    function BulkEditDataGridMock(props) {
       mockEditableTableSpy(props);
-      return null;
-    },
-  { virtual: true }
+      // the saved views dropdown is rendered inside the grid toolbar
+      return props.views;
+    }
 );
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
@@ -66,31 +75,29 @@ jest.mock(
   })
 );
 
-// Stubs the real popup: exposes a button that calls onSave with a fixed
-// "save this filter" payload, mirroring how the real dialog invokes onSave.
+// Stubs the saved views dropdown: exposes a button that calls onSave with a
+// fixed "save this filter" payload, mirroring how its save dialog invokes it.
 jest.mock(
-  "../../../components/filters/save-filter-criteria",
+  "../../../components/filters/saved-views",
   () =>
-    function SaveFilterCriteriaMock({ onSave }) {
+    function SavedViewsMock({ selectedView, onSave }) {
       return (
-        <button
-          type="button"
-          onClick={() =>
-            onSave({
-              name: "My saved filter",
-              id: null,
-              visibility: "everyone"
-            })
-          }
-        >
-          save-filter-criteria
-        </button>
+        <>
+          <span>{selectedView?.name}</span>
+          <button
+            type="button"
+            onClick={() =>
+              onSave({
+                name: "My saved filter",
+                visibility: "everyone"
+              })
+            }
+          >
+            save-filter-criteria
+          </button>
+        </>
       );
     }
-);
-jest.mock(
-  "../../../components/filters/select-filter-criteria",
-  () => () => null
 );
 
 // Mutable shared state so tests can seed the GridFilter's current
@@ -117,10 +124,19 @@ describe("SummitEventListPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     windowOpenSpy = jest.spyOn(window, "open").mockImplementation(() => null);
+    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
+    getRequest.mockImplementation(
+      () => () => () =>
+        Promise.resolve({
+          response: { total: 0, last_page: 1, current_page: 1, data: [] }
+        })
+    );
     mockGridFilterState.parsedFilter = [];
     mockGridFilterState.filterValues = [];
     mockGridFilterState.joinOperator = undefined;
-    saveFilterCriteria.mockReturnValue(() => Promise.resolve());
+    saveFilterCriteria.mockReturnValue(() =>
+      Promise.resolve({ response: { id: 1, name: "view", criteria: [] } })
+    );
     deleteFilterCriteria.mockReturnValue(() => Promise.resolve());
   });
 
@@ -431,5 +447,162 @@ describe("SummitEventListPage", () => {
     expect(rehydratedCriteria).toEqual([
       { criteria: "type", operator: "==", value: "1" }
     ]);
+  });
+
+  test("switches to the newly saved view", async () => {
+    saveFilterCriteria.mockReturnValue(() =>
+      Promise.resolve({
+        response: { id: 7, name: "My saved filter", criteria: [] }
+      })
+    );
+
+    renderWithRedux(<SummitEventListPage />, {
+      initialState: {
+        currentSummitState: {
+          currentSummit: {
+            id: 12,
+            time_zone: { name: "UTC" },
+            time_zone_id: "UTC",
+            selection_plans: [],
+            tracks: [],
+            event_types: [],
+            locations: [],
+            presentation_action_types: []
+          }
+        },
+        mediaUploadListState: {
+          media_uploads: []
+        },
+        currentEventListState: {
+          events: [],
+          lastPage: 1,
+          currentPage: 1,
+          order: "id",
+          orderDir: 1,
+          totalEvents: 0,
+          term: "",
+          filters: {},
+          extraColumns: [],
+          perPage: 10
+        }
+      }
+    });
+
+    expect(screen.queryByText("My saved filter")).not.toBeInTheDocument();
+
+    await act(async () => {
+      await userEvent.click(
+        screen.getByRole("button", { name: "save-filter-criteria" })
+      );
+      await flushPromises();
+    });
+
+    expect(screen.getByText("My saved filter")).toBeInTheDocument();
+  });
+
+  test("keeps Activity Type hidden once hidden, and shows it again with Show all", async () => {
+    renderWithRedux(<SummitEventListPage />, {
+      initialState: {
+        currentSummitState: {
+          currentSummit: {
+            id: 12,
+            time_zone: { name: "UTC" },
+            time_zone_id: "UTC",
+            selection_plans: [],
+            tracks: [],
+            event_types: [],
+            locations: [],
+            presentation_action_types: []
+          }
+        },
+        mediaUploadListState: {
+          media_uploads: []
+        },
+        currentEventListState: {
+          events: [],
+          lastPage: 1,
+          currentPage: 1,
+          order: "id",
+          orderDir: 1,
+          totalEvents: 0,
+          term: "",
+          filters: {},
+          extraColumns: [],
+          perPage: 10
+        }
+      }
+    });
+
+    const latestGridProps = () =>
+      mockEditableTableSpy.mock.calls[
+        mockEditableTableSpy.mock.calls.length - 1
+      ][0];
+
+    expect(latestGridProps().columnVisibilityModel.type).not.toBe(false);
+
+    act(() => {
+      latestGridProps().onColumnVisibilityModelChange({
+        ...latestGridProps().columnVisibilityModel,
+        type: false
+      });
+    });
+    expect(latestGridProps().columnVisibilityModel.type).toBe(false);
+
+    // "Show all" reports visible columns by leaving them out of the model
+    act(() => {
+      latestGridProps().onColumnVisibilityModelChange({});
+    });
+    expect(latestGridProps().columnVisibilityModel.type).not.toBe(false);
+  });
+
+  test("saves the chosen optional columns to the store so they survive leaving the page", () => {
+    const { store } = renderWithRedux(<SummitEventListPage />, {
+      initialState: {
+        currentSummitState: {
+          currentSummit: {
+            id: 12,
+            time_zone: { name: "UTC" },
+            time_zone_id: "UTC",
+            selection_plans: [],
+            tracks: [],
+            event_types: [],
+            locations: [],
+            presentation_action_types: []
+          }
+        },
+        mediaUploadListState: {
+          media_uploads: []
+        },
+        currentEventListState: {
+          events: [],
+          lastPage: 1,
+          currentPage: 1,
+          order: "id",
+          orderDir: 1,
+          totalEvents: 0,
+          term: "",
+          filters: {},
+          extraColumns: [],
+          perPage: 10
+        }
+      }
+    });
+
+    const latestGridProps =
+      mockEditableTableSpy.mock.calls[
+        mockEditableTableSpy.mock.calls.length - 1
+      ][0];
+
+    act(() => {
+      latestGridProps.onColumnVisibilityModelChange({
+        streaming_type: false
+      });
+    });
+
+    const { extraColumns } = store
+      .getActions()
+      .find((a) => a.type === CHANGE_EXTRA_COLUMNS).payload;
+    expect(extraColumns).toContain("track");
+    expect(extraColumns).not.toContain("streaming_type");
   });
 });
