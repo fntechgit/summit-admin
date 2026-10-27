@@ -1,4 +1,24 @@
 .mediaTypeFilterWrapper {
   display: flex;
-  align-items: baseline;
+  align-items: center;
+}
+
+/* Push the two controls together into one segmented control. */
+.operatorCol {
+  padding-right: 0;
+}
+
+.typesCol {
+  padding-left: 0;
+}
+
+.operatorCol :global(.mediaTypeOperator__control) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.typesCol :global(.mediaTypeValue__control) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin-left: -1px;
 }
