@@ -19,12 +19,9 @@ import SubMenuItem from "./sub-menu-item";
 import MenuItem from "./menu-item";
 import ExpandableItem from "./expandable-item";
 import Member from "../../models/member";
-import { getGlobalItems, getSummitItems } from "./menu-definition";
 
-const Menu = ({ currentSummit, member, history, onNavigate }) => {
+const Menu = ({ currentSummit, member, history, onNavigate, menuDefs }) => {
   const memberObj = new Member(member);
-  const globalItems = getGlobalItems();
-  const summitItems = currentSummit ? getSummitItems(currentSummit.id) : [];
 
   const onMenuItemClick = (ev, url) => {
     ev.preventDefault();
@@ -66,14 +63,14 @@ const Menu = ({ currentSummit, member, history, onNavigate }) => {
   return (
     <>
       <ExpandableItem label={T.translate("menu.general")} isHeader>
-        {globalItems.map(drawMenuItem)}
+        {menuDefs.global.map(drawMenuItem)}
       </ExpandableItem>
 
       {!!currentSummit?.id && (
         <>
           <Divider sx={{ my: 2 }} />
           <ExpandableItem label={currentSummit.name} isHeader>
-            {summitItems.map(drawMenuItem)}
+            {menuDefs.summit.map(drawMenuItem)}
           </ExpandableItem>
         </>
       )}

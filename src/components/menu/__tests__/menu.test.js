@@ -19,18 +19,20 @@ jest.mock("../../../models/member", () =>
   }))
 );
 
-jest.mock("../menu-definition", () => ({
-  getGlobalItems: () => [{ name: "directory", linkUrl: "directory" }],
-  getSummitItems: () => [{ name: "summit_dashboard", linkUrl: "dashboard" }]
-}));
-
 const mockHistory = {
   push: jest.fn(),
   location: { pathname: "/app/directory" }
 };
 
+const menuDefs = {
+  global: [{ name: "directory", linkUrl: "directory" }],
+  summit: [{ name: "summit_dashboard", linkUrl: "dashboard" }]
+};
+
 const renderMenu = (props = {}) =>
-  render(<Menu member={{}} history={mockHistory} {...props} />);
+  render(
+    <Menu member={{}} history={mockHistory} menuDefs={menuDefs} {...props} />
+  );
 
 describe("Menu", () => {
   beforeEach(() => {
