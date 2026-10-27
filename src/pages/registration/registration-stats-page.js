@@ -9,29 +9,30 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react";
-import { trim } from "../../utils/methods";
-import { formatCurrency } from "../../helpers/formatCurrency";
 import { Breadcrumb } from "react-breadcrumbs";
+import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
+import SteppedSelect from "openstack-uicore-foundation/lib/components/inputs/stepped-select";
+import { truncateText } from "../../utils/methods";
+import { formatCurrency } from "../../helpers/formatCurrency";
 import DateIntervalFilter from "../../components/filters/date-interval-filter";
 import {
   getRegistrationData,
   changeTimeUnit
 } from "../../actions/summit-stats-actions";
 import PieGraph from "../../components/graphs/registration-pie-graph";
-import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader"
-import SteppedSelect from "openstack-uicore-foundation/lib/components/inputs/stepped-select";
 import LineGraph from "../../components/graphs/registration-line-graph";
+import { BPS } from "../../utils/constants";
 
 const DATA_POOLING_INTERVAL = 20000;
 
-const trimString = (str, length = 75) => {
-  return trim(str.replace(/ *\([^)]*\) */g, ""), length);
-};
+const DEFAULT_TRIM_LENGTH = 75;
+
+const trimString = (str, length = DEFAULT_TRIM_LENGTH) => truncateText(str.replace(/ *\([^)]*\) */g, ""), length);
 
 const RegistrationStatsPage = ({ currentSummit, match, loading, ...props }) => {
   const [fromDate, setFromDate] = useState(null);
@@ -203,7 +204,7 @@ const RegistrationStatsPage = ({ currentSummit, match, loading, ...props }) => {
             }))}
             labels={sortedTicketTypes.map((tt) => {
               const percent = Math.round(
-                (tt.sold_qty / totalTicketsSold) * 100
+                (tt.sold_qty / totalTicketsSold) * BPS
               );
               return `${trimString(tt.type)}: ${percent}%`;
             })}
@@ -227,7 +228,7 @@ const RegistrationStatsPage = ({ currentSummit, match, loading, ...props }) => {
             }))}
             labels={sortedTicketPerBadgeTypes.map((tt) => {
               const percent = Math.round(
-                (tt.badges_qty / totalTicketsSold) * 100
+                (tt.badges_qty / totalTicketsSold) * BPS
               );
               return `${trimString(tt.type)}: ${percent}%`;
             })}
@@ -251,7 +252,7 @@ const RegistrationStatsPage = ({ currentSummit, match, loading, ...props }) => {
             }))}
             labels={sortedTicketsPerBadgeFeature.map((tt) => {
               const percent = Math.round(
-                (tt.sold_qty / totalTicketsSoldWBadgeFeature) * 100
+                (tt.sold_qty / totalTicketsSoldWBadgeFeature) * BPS
               );
               return `${trimString(tt.type)}: ${percent}%`;
             })}
@@ -278,7 +279,7 @@ const RegistrationStatsPage = ({ currentSummit, match, loading, ...props }) => {
               }))}
               labels={sortedTicketTypes.map((tt) => {
                 const percent = Math.round(
-                  (tt.checkin_qty / totalTicketsCheckedIn) * 100
+                  (tt.checkin_qty / totalTicketsCheckedIn) * BPS
                 );
                 return `${trimString(tt.type)}: ${percent}%`;
               })}
@@ -300,7 +301,7 @@ const RegistrationStatsPage = ({ currentSummit, match, loading, ...props }) => {
               }))}
               labels={sortedTicketPerBadgeTypes.map((tt) => {
                 const percent = Math.round(
-                  (tt.checkin_qty / totalTicketsCheckedIn) * 100
+                  (tt.checkin_qty / totalTicketsCheckedIn) * BPS
                 );
                 return `${trimString(tt.type)}: ${percent}%`;
               })}
@@ -322,7 +323,7 @@ const RegistrationStatsPage = ({ currentSummit, match, loading, ...props }) => {
               }))}
               labels={sortedTicketsPerBadgeFeature.map((tt) => {
                 const percent = Math.round(
-                  (tt.checkin_qty / totalTicketsCheckedInWBadgeFeature) * 100
+                  (tt.checkin_qty / totalTicketsCheckedInWBadgeFeature) * BPS
                 );
                 return `${trimString(tt.type)}: ${percent}%`;
               })}
