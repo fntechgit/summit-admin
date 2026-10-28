@@ -154,6 +154,7 @@ const SponsorUsersListPage = ({
       </Box>
 
       <UsersTable
+        summitId={summitId}
         users={users}
         term={term}
         getUsers={getSponsorUsers}

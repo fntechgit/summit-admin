@@ -129,6 +129,7 @@ const buildState = ({
   users = DEFAULT_USERS,
   term = ""
 } = {}) => ({
+  currentSummitState: { currentSummit: { id: 1 } },
   currentSponsorState: { entity: sponsor },
   sponsorUsersListState: { term, userGroups: [], importTasks, requests, users }
 });

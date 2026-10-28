@@ -5,9 +5,11 @@ import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import ChipList from "../../../../components/mui/chip-list";
 import { titleCase } from "../../../../utils/methods";
+import { SPONSOR_SERVICES_GROUP_SLUG } from "../../../../utils/constants";
 
 const UsersTable = ({
   sponsorId = null,
+  summitId,
   users,
   term,
   onEdit,
@@ -92,14 +94,21 @@ const UsersTable = ({
   };
 
   const userData = users.items.map((u) => {
+    // access_rights holds the user's rights in every summit; only this summit's are shown or edited here
     const sponsorAccessRights = u.access_rights.filter(
-      (ar) => !sponsorId || (ar.sponsor_id ?? ar.sponsor?.id) === sponsorId
+      (ar) =>
+        ar.summit_id === summitId &&
+        (!sponsorId || (ar.sponsor_id ?? ar.sponsor?.id) === sponsorId)
     );
 
     const accessRights = sponsorAccessRights.reduce((res, it) => {
       it.groups?.forEach((group) => {
         if (!res.find((g) => g.id === group.id))
-          res.push({ name: titleCase(group.name), id: group.id });
+          res.push({
+            name: titleCase(group.name),
+            id: group.id,
+            slug: group.slug
+          });
       });
       return res;
     }, []);
@@ -112,7 +121,10 @@ const UsersTable = ({
     return {
       ...u,
       access_rights: sponsorAccessRights,
-      access_rights_str: accessRights.map((a) => a.name),
+      // ids keep the default group: the per-sponsor edit form loads its groups from access_rights_id
+      access_rights_str: accessRights
+        .filter((a) => a.slug !== SPONSOR_SERVICES_GROUP_SLUG)
+        .map((a) => a.name),
       access_rights_id: accessRights.map((a) => a.id),
       sponsors_str: sponsors
     };
