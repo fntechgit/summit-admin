@@ -1,5 +1,6 @@
 import Ably from "ably";
 import Swal from "sweetalert2";
+import T from "i18n-react/dist/i18n-react";
 import {
   createAction,
   postRequest
@@ -60,9 +61,18 @@ export const subscribeToAblyChannel = (channel, callback) => (dispatch) => {
     channel
   );
 
-  ablyChannel.subscribe((msg) => {
-    callback(msg.data);
-  });
+  // subscribe attaches the channel and rejects if that fails, e.g. no subscribe capability
+  ablyChannel
+    .subscribe((msg) => {
+      callback(msg.data);
+    })
+    .catch((err) => {
+      Swal.fire(
+        T.translate("signage.subscribe_failed"),
+        `${channel}: ${err.message}`,
+        "warning"
+      );
+    });
 
   return true;
 };
@@ -72,16 +82,15 @@ const publish = async (client, channel, key, message) => {
   const ablyChannel = client.channels.get(channel);
 
   try {
-    // Ably.Realtime (1.2) is the callback API: publish returns undefined, so the
-    // callback is the only way to wait for the ack and see a publish error
-    await new Promise((resolve, reject) => {
-      ablyChannel.publish(key, message, (err) =>
-        err ? reject(err) : resolve()
-      );
-    });
+    // resolves once Ably acks the publish, rejects with the publish error
+    await ablyChannel.publish(key, message);
   } catch (err) {
     // e.g. the token has no publish capability on this channel
-    Swal.fire("Publish failed", `${channel}: ${err.message}`, "warning");
+    Swal.fire(
+      T.translate("signage.publish_failed"),
+      `${channel}: ${err.message}`,
+      "warning"
+    );
     return false;
   }
 

@@ -3905,6 +3905,8 @@
     "event_jump": "Time has been jumped to the selected activity",
     "template_published": "Template published",
     "static_saved": "Static banner updated",
+    "publish_failed": "Publish failed",
+    "subscribe_failed": "Subscribe failed",
     "placeholders": {
       "locations": "Select location",
       "template": "Select template",
