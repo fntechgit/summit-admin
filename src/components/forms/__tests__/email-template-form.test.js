@@ -7,9 +7,10 @@ import {
   beforeEach,
   afterEach
 } from "@jest/globals";
-import { render, act, fireEvent } from "@testing-library/react";
+import { render, act, fireEvent, screen, within } from "@testing-library/react";
 import mjml2html from "mjml-browser";
 import showConfirmDialog from "../../mui/showConfirmDialog";
+import { EMAIL_TEMPLATE_TYPE_MJML } from "../../../utils/constants";
 
 import EmailTemplateForm from "../email-template-form";
 
@@ -355,5 +356,108 @@ describe("EmailTemplateForm mjml validation", () => {
 
     expect(mjml2html).not.toHaveBeenCalled();
     expect(getByRole("button", { name: "general.save" })).not.toBeDisabled();
+  });
+
+  it("compiles the seeded sample MJML of a new template", async () => {
+    mjml2html.mockImplementation(() => ({ html: "<p>compiled sample</p>" }));
+    const newEntity = {
+      ...mjmlEntity,
+      id: 0,
+      mjml_content: "",
+      html_content: ""
+    };
+    render(<EmailTemplateForm {...baseProps(newEntity)} />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByText("emails.display_html"));
+    });
+
+    expect(screen.getByTestId("editor-html_content")).toHaveValue(
+      "<p>compiled sample</p>"
+    );
+  });
+
+  it("puts back the stored HTML when an MJML edit is undone", async () => {
+    mjml2html.mockImplementation(() => ({ html: "<p>compiled edit</p>" }));
+    const entity = {
+      ...mjmlEntity,
+      html_content: "<p>stored</p>",
+      original_mjml_content: mjmlEntity.mjml_content,
+      original_html_content: "<p>stored</p>"
+    };
+    render(<EmailTemplateForm {...baseProps(entity)} />);
+
+    const mjmlEditor = screen.getByTestId("editor-mjml_content");
+    await act(async () => {
+      fireEvent.change(mjmlEditor, {
+        target: {
+          value: "<mjml><mj-body><mj-text>B</mj-text></mj-body></mjml>"
+        }
+      });
+    });
+    await act(async () => {
+      fireEvent.change(mjmlEditor, {
+        target: { value: mjmlEntity.mjml_content }
+      });
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByText("emails.display_html"));
+    });
+
+    expect(screen.getByTestId("editor-html_content")).toHaveValue(
+      "<p>stored</p>"
+    );
+  });
+
+  it("re-enables Save after Current version restores the stored MJML from HTML mode", async () => {
+    const entity = {
+      ...mjmlEntity,
+      original_mjml_content: mjmlEntity.mjml_content,
+      original_html_content: "",
+      versions: [
+        {
+          sha: "abc123",
+          type: EMAIL_TEMPLATE_TYPE_MJML,
+          content: "<mjml><mj-body><mj-text foo='1'>",
+          commit_date: 1700000000,
+          commit_message: "broken",
+          html_url: "https://example.com/abc123"
+        }
+      ]
+    };
+    render(<EmailTemplateForm {...baseProps(entity)} />);
+    const save = () => screen.getByRole("button", { name: "general.save" });
+    const pickVersion = async (label) => {
+      await act(async () => {
+        fireEvent.mouseDown(
+          screen
+            .getAllByRole("combobox")
+            .find((el) => /select_version|abc123/.test(el.textContent))
+        );
+      });
+      await act(async () => {
+        fireEvent.click(
+          within(screen.getByRole("listbox")).getByText(label, {
+            exact: false
+          })
+        );
+      });
+    };
+
+    await pickVersion("abc123");
+    expect(save()).toBeDisabled();
+
+    await act(async () => {
+      fireEvent.click(screen.getByText("emails.display_html"));
+    });
+    await pickVersion("emails.current_version");
+    await act(async () => {
+      fireEvent.click(screen.getByText("emails.display_mjml"));
+    });
+
+    expect(screen.getByTestId("editor-mjml_content")).toHaveValue(
+      mjmlEntity.mjml_content
+    );
+    expect(save()).not.toBeDisabled();
   });
 });

@@ -74,7 +74,7 @@ const EmailTemplateJsonDialog = ({
             {T.translate("emails.sample_data_legend")}
           </Box>
         </Box>
-        <IconButton onClick={onClose}>
+        <IconButton aria-label={T.translate("emails.close")} onClick={onClose}>
           <CloseIcon />
         </IconButton>
       </DialogTitle>

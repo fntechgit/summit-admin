@@ -15,6 +15,7 @@ import {
   getEmailTemplate,
   resetTemplateForm,
   deleteEmailTemplate,
+  queryTemplates,
   buildRenderPayload,
   normalizeRenderErrors
 } from "../email-actions";
@@ -26,7 +27,8 @@ jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   postRequest: jest.fn(),
   putRequest: jest.fn(),
   getRequest: jest.fn(),
-  deleteRequest: jest.fn()
+  deleteRequest: jest.fn(),
+  fetchErrorHandler: jest.fn()
 }));
 
 jest.mock("../marketing-actions", () => ({
@@ -217,6 +219,32 @@ describe("deleteEmailTemplate", () => {
       .find((a) => a.type === "TEMPLATE_DELETED");
     expect(deleted).toBeDefined();
     expect(deleted.payload).toMatchObject({ templateId: 42 });
+  });
+});
+
+describe("queryTemplates", () => {
+  beforeEach(() => {
+    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
+    global.fetch = jest.fn(() => Promise.reject(new Error("network down")));
+  });
+
+  afterEach(() => {
+    delete global.fetch;
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  it("settles the callback with no options when the search request fails", async () => {
+    jest.useFakeTimers();
+    const callback = jest.fn();
+
+    queryTemplates("welcome", callback);
+    jest.runAllTimers();
+    // flushPromises schedules on a timer, so it needs the real ones
+    jest.useRealTimers();
+    await flushPromises();
+
+    expect(callback).toHaveBeenCalledWith([]);
   });
 });
 

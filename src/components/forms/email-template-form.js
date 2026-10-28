@@ -290,15 +290,14 @@ const EmailTemplateForm = ({
     debouncedRenderTemplate(editorContent, templateJsonData, mjmlEditor);
   }, [editorContent, mjmlEditor, entity, templateJsonData]);
 
-  // only compile what the user changed (an edit or a picked history version):
-  // the stored mjml was already validated by the API, and a child template's
-  // raw mjml ({% extends 'layout' %} + blocks) is never a full <mjml>
-  // document -- the API validates it after merging the parent, so the
-  // browser compiler can't judge it. Skipping returns a null error so a
-  // stale one doesn't keep Save disabled.
-  // mjmlEditor is deliberately not a dep: a bare mode switch with unchanged
-  // content must not compile
+  // only compile a new template's seeded sample or what the user changed (an
+  // edit or a picked history version): the stored mjml was already validated
+  // by the API, and a child template's raw mjml ({% extends 'layout' %} +
+  // blocks) is never a full <mjml> document -- the API validates it after
+  // merging the parent, so the browser compiler can't judge it. Skipping
+  // returns a null error so a stale one doesn't keep Save disabled.
   const mjmlEdited =
+    !entity.id ||
     values.mjml_content !== formik.initialValues.mjml_content ||
     historyVersion !== "";
   const isChildTemplate = Boolean(values.parent?.id);
@@ -318,7 +317,18 @@ const EmailTemplateForm = ({
     } catch (err) {
       return { htmlContent: null, error: err };
     }
-  }, [values.mjml_content, historyVersion, mjmlEdited, isChildTemplate]);
+  }, [
+    values.mjml_content,
+    historyVersion,
+    mjmlEdited,
+    isChildTemplate,
+    mjmlEditor
+  ]);
+
+  // tracks whether html_content currently holds our own compile output, so an
+  // edit undone back to the stored mjml can put back the stored html that
+  // matches it -- without clobbering html the user edited by hand
+  const htmlCompiledRef = useRef(false);
 
   useEffect(() => {
     if (!mjmlCompileResult) return;
@@ -329,6 +339,10 @@ const EmailTemplateForm = ({
         mjmlCompileResult.htmlContent,
         false
       );
+      htmlCompiledRef.current = true;
+    } else if (!mjmlEdited && htmlCompiledRef.current) {
+      formik.setFieldValue("html_content", values.original_html_content, false);
+      htmlCompiledRef.current = false;
     }
   }, [mjmlCompileResult]);
 
@@ -500,7 +514,7 @@ const EmailTemplateForm = ({
         </Box>
       );
     }
-    if (mjmlRenderError?.message) {
+    if (mjmlEditor && mjmlRenderError?.message) {
       return (
         <Box>
           {T.translate("emails.error_render_template")}

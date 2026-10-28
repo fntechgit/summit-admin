@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
@@ -31,10 +31,15 @@ const EmailTemplateInput = ({
 }) => {
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const requestSeq = useRef(0);
 
   const fetchOptions = (input) => {
+    requestSeq.current += 1;
+    const mySeq = requestSeq.current;
     setLoading(true);
     queryTemplates(input, (templates) => {
+      // a newer search (or a clear) superseded this one
+      if (mySeq !== requestSeq.current) return;
       const filtered = ownerId
         ? templates.filter((t) => t.id !== ownerId)
         : templates;
@@ -53,7 +58,9 @@ const EmailTemplateInput = ({
     if (reason !== "input" && reason !== "clear") return;
 
     if (!input) {
+      requestSeq.current += 1;
       setOptions([]);
+      setLoading(false);
       return;
     }
     fetchOptions(input);
@@ -73,12 +80,14 @@ const EmailTemplateInput = ({
     onChange({ target: { id, value: theValue, type: "emailtemplateinput" } });
   };
 
-  let selectedOption = null;
-  if (value) {
-    selectedOption = plainValue
+  // keep the reference stable between renders: MUI Autocomplete resets the
+  // typed text whenever the value reference changes
+  const selectedOption = useMemo(() => {
+    if (!value) return null;
+    return plainValue
       ? { value, label: value }
       : { value: String(value.id ?? ""), label: value.identifier ?? "" };
-  }
+  }, [value, plainValue]);
 
   // the selected value may not be in the freshly-fetched options list --
   // pin it in so Autocomplete doesn't warn about an "invalid" controlled value

@@ -297,7 +297,11 @@ export const queryTemplates = debounce(async (input, callback) => {
 
       callback(options);
     })
-    .catch(fetchErrorHandler);
+    .catch((err) => {
+      fetchErrorHandler(err);
+      // settle the callback so callers can clear their loading state
+      callback([]);
+    });
 }, DEBOUNCE_WAIT);
 
 /** ********************************************************************************************************* */

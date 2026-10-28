@@ -42,6 +42,9 @@ describe("EmailTemplateJsonDialog", () => {
 
       const editor = screen.getByTestId("json-editor");
       expect(editor).toHaveValue(JSON.stringify({ foo: "bar" }, null, 2));
+      expect(
+        screen.getByRole("button", { name: "emails.close" })
+      ).toBeInTheDocument();
 
       fireEvent.change(editor, {
         target: { value: JSON.stringify({ baz: 1 }) }
