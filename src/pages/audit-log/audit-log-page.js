@@ -23,7 +23,9 @@ const AuditLogPage = ({ totalLogEntries }) => (
     </h3>
     <AuditLogs
       filterId="standalone"
-      entityFilter={["class_name==SummitEvent"]}
+      entityFilter={[
+        "class_name==SummitEvent||Presentation||SummitEventWithFile||SummitGroupEvent"
+      ]}
     />
   </div>
 );

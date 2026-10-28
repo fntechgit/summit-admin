@@ -43,11 +43,13 @@ describe("AuditLogPage", () => {
     );
   });
 
-  it("scopes AuditLogs to the standalone context, filtered to SummitEvent audit logs", () => {
+  it("scopes AuditLogs to the standalone context, filtered to every SummitEvent subclass", () => {
     renderPage(0);
 
     const props = JSON.parse(screen.getByTestId("audit-logs-mock").textContent);
     expect(props.filterId).toBe("standalone");
-    expect(props.entityFilter).toEqual(["class_name==SummitEvent"]);
+    expect(props.entityFilter).toEqual([
+      "class_name==SummitEvent||Presentation||SummitEventWithFile||SummitGroupEvent"
+    ]);
   });
 });
