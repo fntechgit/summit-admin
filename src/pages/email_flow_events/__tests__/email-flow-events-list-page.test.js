@@ -36,18 +36,6 @@ jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => ({
   )
 }));
 
-jest.mock(
-  "openstack-uicore-foundation/lib/components/mui/search-input",
-  () => ({
-    __esModule: true,
-    default: ({ onSearch }) => (
-      <button type="button" onClick={() => onSearch("newterm")}>
-        search-trigger
-      </button>
-    )
-  })
-);
-
 jest.mock("i18n-react/dist/i18n-react", () => ({
   __esModule: true,
   default: { translate: (key) => key }
@@ -121,8 +109,9 @@ describe("EmailFlowEventListPage", () => {
       initialState
     });
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "search-trigger" })
+    await userEvent.type(
+      screen.getByPlaceholderText("email_flow_event_list.placeholders.search"),
+      "newterm{Enter}"
     );
 
     expect(getEmailFlowEvents).toHaveBeenCalledWith(
