@@ -18,7 +18,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import GridToolbar from "../../../../../../../components/mui/grid-toolbar";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import { ImagePreviewCell } from "../../../../../../../components/image-preview-cell";
 import { formatRateFromCents } from "../../../../../../../utils/rate-helpers";
 import {

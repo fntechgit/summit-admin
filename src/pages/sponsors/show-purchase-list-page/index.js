@@ -18,7 +18,7 @@ import { Breadcrumb } from "react-breadcrumbs";
 import { Box, Button, CircularProgress, IconButton } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import GridToolbar from "../../../components/mui/grid-toolbar";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import history from "../../../history";
 import {
   getSponsorCart,

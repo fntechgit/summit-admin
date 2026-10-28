@@ -26,19 +26,6 @@ jest.mock(
   () => () => <div data-testid="users-table" />
 );
 
-jest.mock(
-  "openstack-uicore-foundation/lib/components/mui/search-input",
-  () =>
-    function SearchInputMock({ onSearch }) {
-      return (
-        <input
-          data-testid="search-input"
-          onChange={(e) => onSearch(e.target.value)}
-        />
-      );
-    }
-);
-
 jest.mock("../../../../../../components/mui/custom-alert", () => () => (
   <div data-testid="custom-alert" />
 ));
@@ -401,13 +388,13 @@ describe("SponsorUsersListPerSponsorPage", () => {
   // ── Search ─────────────────────────────────────────────────────────────────
 
   describe("search", () => {
-    it("calls getSponsorUsers with the search term when the search input changes", () => {
+    it("calls getSponsorUsers with the search term when a search term is submitted", () => {
       renderPage();
       jest.clearAllMocks();
 
-      fireEvent.change(screen.getByTestId("search-input"), {
-        target: { value: "alice" }
-      });
+      const searchInput = screen.getByPlaceholderText("Search...");
+      fireEvent.change(searchInput, { target: { value: "alice" } });
+      fireEvent.keyDown(searchInput, { key: "Enter" });
 
       expect(getSponsorUsers).toHaveBeenCalledWith(DEFAULT_SPONSOR.id, "alice");
     });

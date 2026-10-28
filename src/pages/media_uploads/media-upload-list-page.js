@@ -20,8 +20,8 @@ import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import RawHTML from "openstack-uicore-foundation/lib/components/raw-html";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import SummitDropdown from "../../components/summit-dropdown";
-import GridToolbar from "../../components/mui/grid-toolbar";
 import {
   getMediaUploads as getMediaUploadsAction,
   deleteMediaUpload as deleteMediaUploadAction,

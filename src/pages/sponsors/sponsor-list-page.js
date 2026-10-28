@@ -18,7 +18,7 @@ import { Badge, Button, Tooltip, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import GridToolbar from "../../components/mui/grid-toolbar";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import {
   getLeadReportSettingsMeta,
   getSummitById,

@@ -33,26 +33,6 @@ jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => ({
   )
 }));
 
-jest.mock("openstack-uicore-foundation/lib/components/mui/search-input", () => {
-  const React = require("react");
-  return {
-    __esModule: true,
-    default: ({ onSearch, term }) => {
-      const [value, setValue] = React.useState(term || "");
-      return (
-        <input
-          data-testid="search-input"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") onSearch(value);
-          }}
-        />
-      );
-    }
-  };
-});
-
 jest.mock("../components/media-file-type-dialog", () => ({
   __esModule: true,
   default: ({ onClose, onSave }) => (
@@ -207,7 +187,7 @@ describe("MediaFileTypeListPage", () => {
       initialState: buildInitialState()
     });
 
-    await user.type(screen.getByTestId("search-input"), "pdf{Enter}");
+    await user.type(screen.getByPlaceholderText("Search..."), "pdf{Enter}");
 
     await waitFor(() => {
       expect(mediaFileTypeActions.getMediaFileTypes).toHaveBeenCalledWith(

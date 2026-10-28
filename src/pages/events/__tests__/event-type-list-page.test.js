@@ -52,18 +52,6 @@ jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => ({
   )
 }));
 
-jest.mock(
-  "openstack-uicore-foundation/lib/components/mui/search-input",
-  () => ({
-    __esModule: true,
-    default: ({ onSearch }) => (
-      <button type="button" onClick={() => onSearch("foo")}>
-        search-foo
-      </button>
-    )
-  })
-);
-
 // The stub mirrors the real popup contract from the popup-dialog pattern:
 // it closes only when the promise returned by onSave resolves.
 jest.mock("../components/event-type-dialog", () => ({
@@ -125,7 +113,10 @@ describe("EventTypeListPage", () => {
   it("threads search, pagination and sort params to getEventTypes", async () => {
     renderWithRedux(<EventTypeListPage />, { initialState });
 
-    await userEvent.click(screen.getByRole("button", { name: "search-foo" }));
+    await userEvent.type(
+      screen.getByPlaceholderText("Search..."),
+      "foo{Enter}"
+    );
     // search resets to the first page and keeps current order
     expect(getEventTypes).toHaveBeenLastCalledWith("foo", 1, 10, "id", 1);
 

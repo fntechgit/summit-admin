@@ -18,7 +18,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import GridToolbar from "../../components/mui/grid-toolbar";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import SummitDropdown from "../../components/summit-dropdown";
 import showConfirmDialog from "../../components/mui/showConfirmDialog";
 import { getSummitById } from "../../actions/summit-actions";

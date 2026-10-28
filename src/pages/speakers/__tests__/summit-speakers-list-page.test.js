@@ -33,26 +33,6 @@ jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => ({
   )
 }));
 
-jest.mock("openstack-uicore-foundation/lib/components/mui/search-input", () => {
-  const React = require("react");
-  return {
-    __esModule: true,
-    default: ({ onSearch, term }) => {
-      const [value, setValue] = React.useState(term || "");
-      return (
-        <input
-          data-testid="search-input"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") onSearch(value);
-          }}
-        />
-      );
-    }
-  };
-});
-
 jest.mock("../../../actions/speaker-actions", () => ({
   ...jest.requireActual("../../../actions/speaker-actions"),
   getSpeakers: jest.fn(() => () => Promise.resolve()),
@@ -210,7 +190,10 @@ describe("SummitSpeakerListPage", () => {
       initialState: buildInitialState()
     });
 
-    await user.type(screen.getByTestId("search-input"), "alice{Enter}");
+    await user.type(
+      screen.getByPlaceholderText("general.placeholders.search_speakers"),
+      "alice{Enter}"
+    );
 
     await waitFor(() => {
       expect(speakerActions.getSpeakers).toHaveBeenCalledWith(

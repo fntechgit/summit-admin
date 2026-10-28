@@ -79,29 +79,6 @@ jest.mock(
   })
 );
 
-/**
- * SearchInput mock: plain <input> that fires onSearch on Enter key,
- * matching the real component behaviour without TextField overhead.
- */
-jest.mock("openstack-uicore-foundation/lib/components/mui/search-input", () => {
-  const React = require("react");
-  return {
-    __esModule: true,
-    default: ({ onSearch, term }) => {
-      const handleKeyDown = (e) => {
-        if (e.key === "Enter") onSearch(e.target.value);
-      };
-      return (
-        <input
-          data-testid="search-input"
-          defaultValue={term || ""}
-          onKeyDown={handleKeyDown}
-        />
-      );
-    }
-  };
-});
-
 // ---- Helpers ----
 
 const DEFAULT_PURCHASE_LIST_STATE = {
@@ -438,7 +415,10 @@ describe("SponsorPurchasesTab", () => {
       });
 
       await act(async () => {
-        await userEvent.type(screen.getByTestId("search-input"), "john{Enter}");
+        await userEvent.type(
+          screen.getByPlaceholderText("edit_sponsor.placeholders.search"),
+          "john{Enter}"
+        );
       });
 
       expect(getSponsorPurchases).toHaveBeenCalledWith(

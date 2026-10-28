@@ -30,6 +30,7 @@ import {
   GridFilter,
   useGridFilter
 } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getTicketTypes,
@@ -41,7 +42,6 @@ import { getBadgeTypes } from "../../actions/badge-actions";
 import { handleDDLSortByLabel } from "../../utils/methods";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 import showConfirmDialog from "../../components/mui/showConfirmDialog";
-import GridToolbar from "../../components/mui/grid-toolbar";
 import {
   getCriterias,
   buildTicketTypeFilters
