@@ -93,6 +93,16 @@ describe("EmailTemplateForm preview dispatch", () => {
     );
   });
 
+  it("drops the queued preview render when the form unmounts", async () => {
+    const props = baseProps(mjmlEntity);
+    const { unmount } = render(<EmailTemplateForm {...props} />);
+    unmount();
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(props.renderEmailTemplate).not.toHaveBeenCalled();
+  });
+
   it("sends html with isMjml=false for an HTML template", async () => {
     const props = baseProps(htmlEntity);
     render(<EmailTemplateForm {...props} />);

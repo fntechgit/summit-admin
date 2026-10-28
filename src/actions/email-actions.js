@@ -100,9 +100,11 @@ export const getEmailTemplates =
       `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates`,
       snackbarErrorHandler,
       { order, orderDir, term, page, perPage }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .finally(() => {
+        dispatch(stopLoading());
+      })
+      .catch(() => {});
   };
 
 // Sequence-guard (see sequenced()): EditEmailTemplatePage dispatches a fresh
@@ -205,7 +207,7 @@ export const deleteEmailTemplate = (templateId) => async (dispatch) => {
     `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/${templateId}`,
     null,
     snackbarErrorHandler
-  )(params)(dispatch).then(() => {
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
@@ -380,9 +382,11 @@ export const getSentEmails =
       `${window.EMAIL_API_BASE_URL}/api/v1/mails`,
       snackbarErrorHandler,
       { order, orderDir, term, page, perPage, filters }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .finally(() => {
+        dispatch(stopLoading());
+      })
+      .catch(() => {});
   };
 
 export const updateTemplateJsonData = (data) => async (dispatch) =>
@@ -408,9 +412,11 @@ export const getAllClients = () => async (dispatch) => {
     createAction(RECEIVE_EMAIL_CLIENTS),
     `${window.EMAIL_API_BASE_URL}/api/v1/clients`,
     snackbarErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+  )(params)(dispatch)
+    .finally(() => {
+      dispatch(stopLoading());
+    })
+    .catch(() => {});
 };
 
 /** ********************************************************************************************************* */

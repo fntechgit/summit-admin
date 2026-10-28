@@ -280,6 +280,10 @@ const EmailTemplateForm = ({
     }, DEBOUNCE_WAIT)
   ).current;
 
+  // a render still queued when the page navigates away (e.g. after a save)
+  // must not fire against the next page
+  useEffect(() => () => debouncedRenderTemplate.cancel(), []);
+
   // MJML mode sends raw mjml_content so the API runs Jinja -> official MJML CLI
   // (same pipeline as production); HTML mode sends html_content unchanged.
   // mjmlEditor is in the deps so a button-only mode switch re-fires this with
