@@ -14,7 +14,7 @@
 import React, { useEffect, useMemo } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Alert, Box, Button } from "@mui/material";
+import { Alert, Box, Button, Checkbox, FormControlLabel } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
 import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
@@ -91,12 +91,23 @@ const UnpaidChargesReportPage = ({
           onSearch: (value) => getUnpaidCharges(value, filters),
           placeholder: T.translate("general.placeholders.search")
         }}
-        checkboxProps={{
-          checked: !!filters.adminOnly,
-          label: t("unpaid_admin_only"),
-          onChange: (ev) =>
-            getUnpaidCharges(term, { ...filters, adminOnly: ev.target.checked })
-        }}
+        filter={
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={!!filters.adminOnly}
+                onChange={(ev) =>
+                  getUnpaidCharges(term, {
+                    ...filters,
+                    adminOnly: ev.target.checked
+                  })
+                }
+              />
+            }
+            label={t("unpaid_admin_only")}
+            sx={{ whiteSpace: "nowrap" }}
+          />
+        }
       >
         <MuiDropdown
           id="unpaid-filter-stage"
