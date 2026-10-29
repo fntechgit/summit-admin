@@ -156,7 +156,7 @@ const FormTemplateItemListPage = ({
       ? unarchiveFormTemplateItem(formTemplateId, item)
       : archiveFormTemplateItem(formTemplateId, item);
 
-  const handleShowArchivedForms = (ev) => {
+  const handleShowArchivedForms = (archived) => {
     getFormTemplateItems(
       formTemplateId,
       term,
@@ -164,7 +164,7 @@ const FormTemplateItemListPage = ({
       perPage,
       order,
       orderDir,
-      ev.target.checked
+      archived
     );
   };
 
@@ -238,10 +238,9 @@ const FormTemplateItemListPage = ({
         {T.translate("form_template_item_list.alert_info")}
       </Alert>
       <GridToolbar
-        checkboxProps={{
-          checked: showArchived,
-          onChange: handleShowArchivedForms,
-          label: T.translate("form_template_item_list.show_archived")
+        archiveToggleProps={{
+          showArchived,
+          onChange: handleShowArchivedForms
         }}
       >
         <Button
