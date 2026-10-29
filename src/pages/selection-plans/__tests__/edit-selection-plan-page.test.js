@@ -17,13 +17,18 @@ jest.mock("../../../actions/selection-plan-actions", () => ({
 
 jest.mock("../../../components/forms/selection-plan-form", () => ({
   __esModule: true,
-  default: ({ entity, onSave }) => (
-    <button
-      type="button"
-      onClick={() => onSave({ id: entity.id, marketing_settings: {} })}
-    >
-      form-save
-    </button>
+  default: ({ entity, onSave, onTabChange }) => (
+    <>
+      <button
+        type="button"
+        onClick={() => onSave({ id: entity.id, marketing_settings: {} })}
+      >
+        form-save
+      </button>
+      <button type="button" onClick={() => onTabChange("questions")}>
+        form-tab
+      </button>
+    </>
   )
 }));
 
@@ -76,5 +81,16 @@ describe("EditSelectionPlanPage", () => {
 
     expect(saveSelectionPlanSettings).toHaveBeenCalledWith({}, 5);
     expect(history.push).not.toHaveBeenCalled();
+  });
+
+  it("navigates to the tab's URL when the form changes tab", async () => {
+    renderWithRedux(<EditSelectionPlanPage history={history} />, {
+      initialState: buildState({ id: 5 })
+    });
+    await userEvent.click(screen.getByRole("button", { name: "form-tab" }));
+
+    expect(history.push).toHaveBeenCalledWith(
+      "/app/summits/1/selection-plans/5/questions"
+    );
   });
 });

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
@@ -170,19 +170,32 @@ const baseProps = {
   onImportAllowedMembers: jest.fn(),
   onAllowedMemberAdd: jest.fn(),
   onAllowedMemberDelete: jest.fn(),
-  onAllowedMembersPageChange: jest.fn()
+  onAllowedMembersPageChange: jest.fn(),
+  onTabChange: jest.fn()
 };
 
-// Mirrors the popup - external submit button via form attribute
-const FormWithButton = (props) => (
-  <>
-    {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-    <SelectionPlanForm {...props} />
-    <button type="submit" form="selection-plan-form">
-      general.save
-    </button>
-  </>
-);
+// Mirrors the popup - external submit button via form attribute; slug state stands in for the URL
+const FormWithButton = (props) => {
+  const { tabSlug, onTabChange } = props;
+  const [slug, setSlug] = useState(tabSlug);
+  const handleTabChange = (next) => {
+    onTabChange(next);
+    setSlug(next);
+  };
+  return (
+    <>
+      <SelectionPlanForm
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        {...props}
+        tabSlug={slug}
+        onTabChange={handleTabChange}
+      />
+      <button type="submit" form="selection-plan-form">
+        general.save
+      </button>
+    </>
+  );
+};
 
 const renderForm = (overrides = {}) => {
   const merged = { ...baseProps, ...overrides };
@@ -252,6 +265,34 @@ describe("SelectionPlanForm - tab navigation", () => {
     expect(
       screen.getByRole("tab", { name: "edit_selection_plan.allowed_members" })
     ).toBeInTheDocument();
+  });
+
+  it("opens the tab named by the URL slug", () => {
+    renderExistingForm({ tabSlug: "category-groups" });
+    expect(document.getElementById("tabpanel-track_groups")).toBeVisible();
+    expect(document.getElementById("tabpanel-main")).not.toBeVisible();
+  });
+
+  it("opens the main tab for an unknown slug", () => {
+    renderExistingForm({ tabSlug: "not-a-tab" });
+    expect(screen.getByRole("tab", { name: "Main" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+  });
+
+  it("reports the extra questions tab as the questions slug", async () => {
+    renderExistingForm();
+    await clickTab("edit_selection_plan.extra_questions");
+    expect(baseProps.onTabChange).toHaveBeenCalledWith("questions");
+  });
+
+  it("sends a hidden plan's allowed members link to the main tab", () => {
+    renderExistingForm({
+      entity: { ...existingEntity, is_hidden: true },
+      tabSlug: "allowed-members"
+    });
+    expect(baseProps.onTabChange).toHaveBeenCalledWith("main");
   });
 });
 
