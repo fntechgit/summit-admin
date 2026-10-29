@@ -11,10 +11,12 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
+import { Button, Grid2 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import ScheduleSettingsForm from "../../components/forms/schedule-settings-form";
 import {
   getScheduleSetting,
@@ -22,15 +24,13 @@ import {
   saveScheduleSettings
 } from "../../actions/schedule-settings-actions";
 
-import "../../styles/edit-schedule-settings-page.less";
-import AddNewButton from "../../components/buttons/add-new-button";
-
 function EditScheduleSettingsPage({
   currentSummit,
   match,
   scheduleSettings,
   entity,
   errors,
+  history,
   ...props
 }) {
   const scheduleSettingsId = match.params.schedule_settings_id;
@@ -58,21 +58,44 @@ function EditScheduleSettingsPage({
     return `schedule_${keyNumber}`;
   };
 
-  if (!entity.id) {
-    entity.key = createKey();
-  }
+  // copy instead of mutating the redux entity
+  const formEntity = useMemo(
+    () => (entity.id ? entity : { ...entity, key: createKey() }),
+    [entity, scheduleSettings]
+  );
 
   return (
     <div className="container">
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-      <h3>
-        {title} {T.translate("edit_schedule_settings.schedule_settings")}
-        <AddNewButton entity={entity} />
-      </h3>
+      <Grid2
+        container
+        sx={{ justifyContent: "space-between", alignItems: "center" }}
+      >
+        <Grid2>
+          <h3>
+            {title} {T.translate("edit_schedule_settings.schedule_settings")}
+          </h3>
+        </Grid2>
+        {entity.id > 0 && (
+          <Grid2>
+            <Button
+              variant="contained"
+              onClick={() =>
+                history.push(
+                  `/app/summits/${currentSummit.id}/schedule-settings/new`
+                )
+              }
+              startIcon={<AddIcon />}
+            >
+              {T.translate("general.add_new")}
+            </Button>
+          </Grid2>
+        )}
+      </Grid2>
       <hr />
       {currentSummit && (
         <ScheduleSettingsForm
-          entity={entity}
+          entity={formEntity}
           summit={currentSummit}
           errors={errors}
           onSubmit={props.saveScheduleSettings}
@@ -85,11 +108,9 @@ function EditScheduleSettingsPage({
 const mapStateToProps = ({
   currentSummitState,
   scheduleSettingsState,
-  baseState,
   scheduleSettingsListState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
-  loading: baseState.loading,
   scheduleSettings: scheduleSettingsListState.scheduleSettings,
   ...scheduleSettingsState
 });
