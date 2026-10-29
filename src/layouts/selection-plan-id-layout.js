@@ -64,9 +64,14 @@ const SelectionPlanIdLayout = ({
           <Route
             strict
             exact
-            path={`${match.url}`}
-            render={({ history }) =>
-              isLoaded && <EditSelectionPlanPage history={history} />
+            path={`${match.url}/:tab?`}
+            render={({ history, match: routeMatch }) =>
+              isLoaded && (
+                <EditSelectionPlanPage
+                  history={history}
+                  tab={routeMatch.params.tab}
+                />
+              )
             }
           />
           <Route

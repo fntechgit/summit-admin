@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { useFormik, FormikProvider } from "formik";
@@ -57,10 +57,25 @@ const TAB_SX = {
   py: 1
 };
 
+// URL slug per tab; "questions" because /extra-questions is the question editor route
+const TAB_SLUGS = {
+  main: "main",
+  track_groups: "category-groups",
+  event_types: "activity-types",
+  extra_questions: "questions",
+  email_templates: "email-templates",
+  track_chair_settings: "track-chairs-settings",
+  presentation_action_types: "progress-flags",
+  allowed_members: "allowed-members",
+  cfp_settings: "cfp-settings"
+};
+
 const SelectionPlanForm = (props) => {
   const {
     entity: propsEntity,
     errors: propsErrors,
+    tabSlug,
+    onTabChange,
     currentSummit,
     extraQuestionsOrderDir,
     extraQuestionsOrder,
@@ -90,7 +105,10 @@ const SelectionPlanForm = (props) => {
     onAllowedMembersPageChange
   } = props;
 
-  const [activeTab, setActiveTab] = useState("main");
+  const activeTab =
+    Object.keys(TAB_SLUGS).find((value) => TAB_SLUGS[value] === tabSlug) ??
+    "main";
+  const setActiveTab = (value) => onTabChange(TAB_SLUGS[value]);
 
   const handleFormikSubmit = (values) => {
     const normalized = { ...values };
@@ -303,6 +321,8 @@ SelectionPlanForm.propTypes = {
     allowed_presentation_action_types: PropTypes.arrayOf(PropTypes.shape({}))
   }).isRequired,
   errors: PropTypes.shape({}),
+  tabSlug: PropTypes.string,
+  onTabChange: PropTypes.func.isRequired,
   currentSummit: PropTypes.shape({
     id: PropTypes.number.isRequired,
     time_zone_id: PropTypes.string.isRequired,
@@ -343,7 +363,8 @@ SelectionPlanForm.propTypes = {
 };
 
 SelectionPlanForm.defaultProps = {
-  errors: {}
+  errors: {},
+  tabSlug: "main"
 };
 
 export default SelectionPlanForm;

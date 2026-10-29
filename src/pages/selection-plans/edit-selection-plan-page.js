@@ -44,6 +44,7 @@ const EditSelectionPlanPage = ({
   allowedMembers,
   errors,
   history,
+  tab,
   extraQuestionsOrder,
   extraQuestionsOrderDir,
   updateSelectionPlanExtraQuestionOrder,
@@ -118,6 +119,12 @@ const EditSelectionPlanPage = ({
       questions,
       questionId,
       newOrder
+    );
+  };
+
+  const onTabChange = (slug) => {
+    history.push(
+      `/app/summits/${currentSummit.id}/selection-plans/${entity.id}/${slug}`
     );
   };
 
@@ -208,7 +215,7 @@ const EditSelectionPlanPage = ({
   };
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <h3>
         {title} {T.translate("edit_selection_plan.selection_plan")}
       </h3>
@@ -218,6 +225,8 @@ const EditSelectionPlanPage = ({
         allowedMembers={allowedMembers}
         currentSummit={currentSummit}
         errors={errors}
+        tabSlug={tab}
+        onTabChange={onTabChange}
         onSave={handleSave}
         extraQuestionsOrder={extraQuestionsOrder}
         extraQuestionsOrderDir={extraQuestionsOrderDir}

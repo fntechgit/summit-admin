@@ -24,7 +24,7 @@ jest.mock("../../actions/marketing-actions", () => ({
 
 jest.mock("../../pages/selection-plans/edit-selection-plan-page", () => ({
   __esModule: true,
-  default: () => <div data-testid="edit-selection-plan" />
+  default: ({ tab }) => <div data-testid="edit-selection-plan">{tab}</div>
 }));
 
 const initialState = {
@@ -68,5 +68,29 @@ describe("SelectionPlanIdLayout", () => {
     expect(
       await screen.findByTestId("edit-selection-plan")
     ).toBeInTheDocument();
+  });
+
+  it("passes the tab slug from the URL to the edit page", async () => {
+    getSelectionPlan.mockReturnValue(() => Promise.resolve());
+    getMarketingSettingsBySelectionPlan.mockReturnValue(() =>
+      Promise.resolve()
+    );
+
+    const history = createMemoryHistory({
+      initialEntries: ["/app/summits/1/selection-plans/5/category-groups"]
+    });
+    renderWithRedux(
+      <Router history={history}>
+        <Route
+          path="/app/summits/:summit_id/selection-plans/:selection_plan_id"
+          component={SelectionPlanIdLayout}
+        />
+      </Router>,
+      { initialState }
+    );
+
+    expect(await screen.findByTestId("edit-selection-plan")).toHaveTextContent(
+      "category-groups"
+    );
   });
 });
