@@ -49,6 +49,7 @@ const BannerRow = ({
             id="title"
             className="form-control"
             value={row.title}
+            disabled={isSaving}
             onChange={(ev) => onChange(ev, row.id)}
           />
         </td>
@@ -57,6 +58,7 @@ const BannerRow = ({
             id="content"
             className="form-control"
             value={row.content}
+            disabled={isSaving}
             onChange={(ev) => onChange(ev, row.id)}
           />
         </td>
@@ -68,6 +70,7 @@ const BannerRow = ({
             onChange={(ev) => onChange(ev, row.id)}
             format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
             timezone={summitTz}
+            inputProps={{ disabled: isSaving }}
             value={epochToMomentTimeZone(row.start_date, summitTz)}
           />
         </td>
@@ -77,6 +80,7 @@ const BannerRow = ({
             onChange={(ev) => onChange(ev, row.id)}
             format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
             timezone={summitTz}
+            inputProps={{ disabled: isSaving }}
             value={epochToMomentTimeZone(row.end_date, summitTz)}
           />
         </td>
@@ -111,7 +115,8 @@ const NewBannerRow = ({
   onSave,
   summitTz,
   roomName,
-  disabled
+  disabled,
+  isSaving
 }) => (
   <tr id="new_row" className="odd">
     <td>TBD</td>
@@ -120,6 +125,7 @@ const NewBannerRow = ({
         id="title"
         className="form-control"
         value={row.title}
+        disabled={isSaving}
         onChange={onChange}
       />
     </td>
@@ -128,6 +134,7 @@ const NewBannerRow = ({
         id="content"
         className="form-control"
         value={row.content}
+        disabled={isSaving}
         onChange={onChange}
       />
     </td>
@@ -139,6 +146,7 @@ const NewBannerRow = ({
         onChange={onChange}
         format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
         timezone={summitTz}
+        inputProps={{ disabled: isSaving }}
         value={epochToMomentTimeZone(row.start_date, summitTz)}
       />
     </td>
@@ -148,6 +156,7 @@ const NewBannerRow = ({
         onChange={onChange}
         format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
         timezone={summitTz}
+        inputProps={{ disabled: isSaving }}
         value={epochToMomentTimeZone(row.end_date, summitTz)}
       />
     </td>
@@ -309,8 +318,8 @@ const BannersTable = ({
               row={row}
               rowClass={i % TWO === 0 ? "even" : "odd"}
               summitTz={summitTz}
-              // only one row can be edited at a time, lock the rest
-              disabled={!!editingRow && editingRow.id !== row.id}
+              // one edit at a time: lock the other rows while one is edited, and all rows while a save is in flight
+              disabled={isSaving || (!!editingRow && editingRow.id !== row.id)}
               isSaving={isSaving}
               onChange={onChangeCell}
               onEdit={editRow}
@@ -327,6 +336,7 @@ const BannersTable = ({
             summitTz={summitTz}
             roomName={room.name}
             disabled={!!editingRow || isSaving}
+            isSaving={isSaving}
           />
         </tbody>
       </table>

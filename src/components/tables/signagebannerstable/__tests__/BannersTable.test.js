@@ -38,9 +38,10 @@ jest.mock(
   "openstack-uicore-foundation/lib/components/inputs/datetimepicker",
   () => ({
     __esModule: true,
-    default: ({ id, onChange }) => (
+    default: ({ id, onChange, inputProps }) => (
       <input
         id={id}
+        disabled={inputProps?.disabled}
         onChange={(ev) =>
           onChange({
             target: {
@@ -90,6 +91,15 @@ const INITIAL_STATE = {
 const thunkResolving = () => () => Promise.resolve();
 const thunkRejecting = () => () => Promise.reject(new Error("failed"));
 const thunkPending = () => () => new Promise(() => {});
+// holds the save open until the test calls resolve()
+const deferredSave = () => {
+  let resolve;
+  const promise = new Promise((res) => {
+    resolve = res;
+  });
+  saveBanner.mockImplementation(() => () => promise);
+  return resolve;
+};
 
 const renderTable = () =>
   renderWithRedux(<BannersTable data={BANNERS} room={{ name: "Room A" }} />, {
@@ -194,15 +204,65 @@ describe("BannersTable", () => {
     expect(getAddButton()).toBeDisabled();
   });
 
-  it("a second click on a row's save while saving does not call saveBanner again", async () => {
+  it("hides a row's save while saving so it cannot be clicked again", async () => {
     saveBanner.mockImplementation(thunkPending);
     renderTable();
 
     await userEvent.click(getAction(1, "edit"));
     await userEvent.click(getAction(1, "save"));
+
+    expect(getAction(1, "save")).toBeNull();
+    expect(saveBanner).toHaveBeenCalledTimes(1);
+  });
+
+  it("locks every row's actions while adding a banner", async () => {
+    const resolveSave = deferredSave();
+    renderTable();
+
+    await fillNewRow();
+    await userEvent.click(getAddButton());
+
+    expect(getAction(1, "edit")).toBeNull();
+    expect(getAction(2, "edit")).toBeNull();
+
+    resolveSave();
+
+    await waitFor(() => expect(getAction(1, "edit")).toBeInTheDocument());
+  });
+
+  it("disables the new banner inputs while adding, then clears them", async () => {
+    const resolveSave = deferredSave();
+    renderTable();
+
+    await fillNewRow();
+    await userEvent.click(getAddButton());
+
+    const inputs = getNewRow().querySelectorAll("input");
+    inputs.forEach((input) => expect(input).toBeDisabled());
+
+    resolveSave();
+
+    await waitFor(() =>
+      expect(getNewRow().querySelector("input#title")).toBeEnabled()
+    );
+    expect(getNewRow().querySelector("input#title")).toHaveValue("");
+  });
+
+  it("disables the edited row's inputs while saving it", async () => {
+    const resolveSave = deferredSave();
+    renderTable();
+
+    await userEvent.click(getAction(1, "edit"));
     await userEvent.click(getAction(1, "save"));
 
-    expect(saveBanner).toHaveBeenCalledTimes(1);
+    const inputs = getRow(1).querySelectorAll("input");
+    expect(inputs).toHaveLength(4);
+    inputs.forEach((input) => expect(input).toBeDisabled());
+
+    resolveSave();
+
+    await waitFor(() => expect(getRow(1).querySelector("input")).toBeNull());
+    expect(getAction(1, "edit")).toBeInTheDocument();
   });
 
   it("clears the new banner draft after a successful add", async () => {
