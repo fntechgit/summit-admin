@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { getCurrentEventForOccupancy } from "../../../../actions/room-occupancy-actions";
 
-function OverflowModal({
+export function OverflowModal({
   event,
   show,
   onHide,
@@ -22,8 +22,21 @@ function OverflowModal({
     if (event)
       getCurrentEventForOccupancy(event.roomId, event.id).then(
         (currentEvent) => {
-          setStreamUrl(currentEvent.overflow_streaming_url);
-          setIsSecure(currentEvent.overflow_stream_is_secure);
+          // Prefill with the overflow stream when the event has one; otherwise with the
+          // event's own stream, so a room whose talks were bulk-edited with the room's
+          // stream URL opens the modal ready to save. summit-api no longer mirrors
+          // streaming_url into overflow_streaming_url, so the fallback lives here.
+          const hasOverflow = !!currentEvent.overflow_streaming_url;
+          setStreamUrl(
+            (hasOverflow
+              ? currentEvent.overflow_streaming_url
+              : currentEvent.streaming_url) || ""
+          );
+          setIsSecure(
+            !!(hasOverflow
+              ? currentEvent.overflow_stream_is_secure
+              : currentEvent.stream_is_secure)
+          );
         }
       );
   }, [event]);
