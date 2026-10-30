@@ -101,12 +101,15 @@ const SummitDirectoryPage = ({
     history.push("/app/summits/new");
   };
 
+  const summitEditUrl = (summit) => `/app/summits/${summit.id}`;
+  const summitDashboardUrl = (summit) => `/app/summits/${summit.id}/dashboard`;
+
   const handleEditSummit = (summit) => {
-    history.push(`/app/summits/${summit.id}`);
+    history.push(summitEditUrl(summit));
   };
 
   const handleSelectSummit = (summit) => {
-    history.push(`/app/summits/${summit.id}/dashboard`);
+    history.push(summitDashboardUrl(summit));
   };
 
   const columns = [
@@ -117,6 +120,7 @@ const SummitDirectoryPage = ({
     {
       columnKey: "name",
       header: T.translate("directory.summit_name"),
+      getHref: canEditSummit ? summitEditUrl : undefined,
       render: (row) => (
         <>
           <div>{row.name}</div>
@@ -203,6 +207,7 @@ const SummitDirectoryPage = ({
         onEdit={canEditSummit ? handleEditSummit : undefined}
         onDelete={canDeleteSummits ? (id) => deleteSummit(id) : undefined}
         onSelect={handleSelectSummit}
+        onNavigate={(href) => history.push(href)}
         deleteDialogBody={(name) =>
           `${T.translate("directory.remove_warning")} ${name}`
         }
