@@ -16,8 +16,8 @@ import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
-import UploadInputV3 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v3";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
+import FileUploadInput from "../inputs/file-upload-input";
 import { scrollToError, hasErrors } from "../../utils/methods";
 import {
   ALLOWED_SLIDES_FORMATS,
@@ -237,14 +237,12 @@ const EventMaterialForm = ({ entity, errors, event, onSubmit }) => {
               {" "}
               {T.translate("edit_event_material.slide")} (max size 500Mb)
             </label>
-            <UploadInputV3
+            <FileUploadInput
               id="slide"
               onUploadComplete={onMediaUploadComplete}
               value={mediaInputValue}
               mediaType={slideMediaType}
-              postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
               error={hasErrors("slide", errorsState)}
-              djsConfig={{ withCredentials: true }}
               parallelChunkUploads
             />
           </div>
@@ -305,15 +303,13 @@ const EventMaterialForm = ({ entity, errors, event, onSubmit }) => {
                   entityState.media_upload_type.max_size / KB
                 }Mb )`}
               </label>
-              <UploadInputV3
+              <FileUploadInput
                 id={`media_upload_${mediaType.id}`}
                 onUploadComplete={onMediaUploadComplete}
                 value={mediaInputValue}
                 mediaType={mediaType}
                 onRemove={handleRemoveFile}
-                postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
                 error={hasErrors(mediaType.name, errorsState)}
-                djsConfig={{ withCredentials: true }}
                 parallelChunkUploads
               />
             </div>
