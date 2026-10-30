@@ -17,10 +17,5 @@ export const ICON_ONLY_BUTTON_SX = {
   "& .MuiButton-startIcon": { m: 0 }
 };
 
-// MUI's fontSize="large" size
-const LARGE_ICON_PX = 35;
-
-// GridActionsCellItem forces small icons; match uicore table's fontSize="large"
-export const ACTION_ICON_SX = (theme) => ({
-  fontSize: theme.typography.pxToRem(LARGE_ICON_PX)
-});
+// GridActionsCellItem forces small icons; match uicore table's medium (22px)
+export const ACTION_ICON_SX = { fontSize: "1.375rem" };
