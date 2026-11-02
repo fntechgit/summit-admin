@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Box,
   Button,
   DialogActions,
   DialogContent,
@@ -12,6 +11,7 @@ import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikSwitch from "openstack-uicore-foundation/lib/components/mui/formik-inputs/switch";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import useScrollToError from "../../../../../hooks/useScrollToError";
 import AccessRightsList from "./access-rights-lists";
 
@@ -64,12 +64,7 @@ const SponsorUserForm = ({ user, summitId, userGroups, onSubmit }) => {
 
   return (
     <FormikProvider value={formik}>
-      <Box
-        component="form"
-        onSubmit={formik.handleSubmit}
-        noValidate
-        autoComplete="off"
-      >
+      <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
         <DialogContent sx={{ p: 2 }}>
           <Grid2 container spacing={2} size={12}>
             <Grid2 size={4}>
@@ -107,7 +102,7 @@ const SponsorUserForm = ({ user, summitId, userGroups, onSubmit }) => {
             {T.translate("sponsor_users.edit_user.save")}
           </Button>
         </DialogActions>
-      </Box>
+      </MuiForm>
     </FormikProvider>
   );
 };

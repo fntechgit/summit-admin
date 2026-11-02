@@ -36,6 +36,7 @@ import { FormikProvider, useFormik } from "formik";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import MuiFormikSelectGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select-group";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import MenuButton from "../../../../../../../components/mui/menu-button";
 import { querySponsorAddons } from "../../../../../../../actions/sponsor-actions";
 import { getShowPages } from "../../../../../../../actions/show-pages-actions";
@@ -218,12 +219,7 @@ const AddSponsorPageTemplatePopup = ({
       </DialogTitle>
       <Divider />
       <FormikProvider value={formik}>
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          autoComplete="off"
-        >
+        <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
           <DialogContent sx={{ p: 0 }}>
             <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
               <MuiFormikSelectGroup
@@ -317,7 +313,7 @@ const AddSponsorPageTemplatePopup = ({
               {T.translate("edit_sponsor.pages_tab.add_selected_page_template")}
             </Button>
           </DialogActions>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </Dialog>
   );
