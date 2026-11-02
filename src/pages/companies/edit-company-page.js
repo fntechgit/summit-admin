@@ -17,8 +17,9 @@ import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Button, Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import CompanyForm from "../../components/forms/company-form";
 import {
   getCompany,
@@ -146,12 +147,7 @@ const EditCompanyPage = ({
       </Grid2>
       <hr />
       <FormikProvider value={formik}>
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          autoComplete="off"
-        >
+        <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
           <CompanyForm
             initialEntity={initialEntity}
             sponsoredProjects={sponsoredProjects}
@@ -170,7 +166,7 @@ const EditCompanyPage = ({
               {T.translate("general.save")}
             </Button>
           </Grid2>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </div>
   );

@@ -16,10 +16,10 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
-import { Box } from "@mui/material";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikRadioGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/radio-group";
 import CustomDialog from "openstack-uicore-foundation/lib/components/mui/custom-dialog";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import { requiredStringValidation } from "../../../../../utils/yup";
 import {
   VISIBILITY_OPTION_EVERYONE,
@@ -63,17 +63,7 @@ const SaveViewDialog = ({ selectedView, onSave, onClose }) => {
       }}
     >
       <FormikProvider value={formik}>
-        {/* keeps Enter in the name field submitting */}
-        <Box
-          component="form"
-          onSubmit={(ev) => {
-            ev.preventDefault();
-            if (formik.isSubmitting) return;
-            formik.handleSubmit(ev);
-          }}
-          noValidate
-          autoComplete="off"
-        >
+        <MuiForm noValidate autoComplete="off">
           <MuiFormikTextField
             name="name"
             label={T.translate("general.name")}
@@ -95,7 +85,7 @@ const SaveViewDialog = ({ selectedView, onSave, onClose }) => {
               }
             ]}
           />
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </CustomDialog>
   );

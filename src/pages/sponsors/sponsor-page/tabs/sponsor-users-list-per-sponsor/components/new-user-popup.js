@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
@@ -18,6 +17,7 @@ import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
 import CustomAlert from "openstack-uicore-foundation/lib/components/mui/custom-alert";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import {
   sendSponsorUserInvite,
   getSponsorUsers
@@ -85,12 +85,7 @@ const NewUserPopup = ({
       </DialogTitle>
       <Divider />
       <FormikProvider value={formik}>
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          autoComplete="off"
-        >
+        <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
           <DialogContent sx={{ p: 2 }}>
             <MuiFormikTextField
               name="email"
@@ -113,7 +108,7 @@ const NewUserPopup = ({
               {T.translate("sponsor_users.new_user.invite")}
             </Button>
           </DialogActions>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </Dialog>
   );

@@ -22,6 +22,7 @@ import AdditionalInputList from "openstack-uicore-foundation/lib/components/mui/
 import MuiFormikUpload from "openstack-uicore-foundation/lib/components/mui/formik-inputs/upload";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikQuantityField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/quantity-field";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import {
   ALLOWED_INVENTORY_IMAGE_FORMATS,
   MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
@@ -129,12 +130,7 @@ const SponsorItemDialog = ({
       </DialogTitle>
       <Divider />
       <FormikProvider value={formik}>
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          autoComplete="off"
-        >
+        <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
           <DialogContent sx={{ p: 0 }}>
             <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
               <Grid2 size={4}>
@@ -264,7 +260,7 @@ const SponsorItemDialog = ({
               {T.translate("edit_inventory_item.save_changes")}
             </Button>
           </DialogActions>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </Dialog>
   );

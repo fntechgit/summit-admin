@@ -20,6 +20,7 @@ import * as yup from "yup";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import MarketingSettingForm from "../../components/forms/marketing-setting-form";
 import { getSummitById } from "../../actions/summit-actions";
 import {
@@ -138,7 +139,7 @@ const EditMarketingSettingPage = ({
       <hr />
       {currentSummit && (
         <FormikProvider value={formik}>
-          <Box component="form" onSubmit={formik.handleSubmit} noValidate>
+          <MuiForm onSubmit={formik.handleSubmit} noValidate>
             <MarketingSettingForm onDeleteImage={deleteSetting} />
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
               <Button
@@ -149,7 +150,7 @@ const EditMarketingSettingPage = ({
                 {T.translate("general.save")}
               </Button>
             </Box>
-          </Box>
+          </MuiForm>
         </FormikProvider>
       )}
     </div>

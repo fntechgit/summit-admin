@@ -17,6 +17,7 @@ import { FormikProvider, useFormik } from "formik";
 import MuiDropdownCheckbox from "openstack-uicore-foundation/lib/components/mui/dropdown-checkbox";
 import MuiFormikDatepicker from "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import {
   addIssAfterDateFieldValidator,
   formMetafieldsValidation,
@@ -76,12 +77,7 @@ const FormTemplateForm = ({
 
   return (
     <FormikProvider value={formik}>
-      <Box
-        component="form"
-        onSubmit={formik.handleSubmit}
-        noValidate
-        autoComplete="off"
-      >
+      <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
         <DialogContent sx={{ p: 0 }}>
           <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
             <Grid2 size={4}>
@@ -160,7 +156,7 @@ const FormTemplateForm = ({
             {T.translate("sponsor_forms.form_template_popup.save")}
           </Button>
         </DialogActions>
-      </Box>
+      </MuiForm>
     </FormikProvider>
   );
 };
