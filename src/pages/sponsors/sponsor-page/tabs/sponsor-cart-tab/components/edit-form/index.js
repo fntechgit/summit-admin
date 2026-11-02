@@ -23,6 +23,7 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 import MuiFormItemTable, {
   getCurrentApplicableRate
 } from "openstack-uicore-foundation/lib/components/mui/form-item-table";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import { DISCOUNT_TYPES } from "../../../../../../../utils/constants";
 import showConfirmDialog from "../../../../../../../components/mui/showConfirmDialog";
 import { buildGlobalQuantitySchema } from "./quantity-schema";
@@ -296,12 +297,7 @@ const EditForm = ({
         {form?.items.length} {T.translate("general.items")}
       </Box>
       <FormikProvider value={formik}>
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          autoComplete="off"
-          noValidate
-        >
+        <MuiForm onSubmit={formik.handleSubmit} autoComplete="off" noValidate>
           <MuiFormItemTable
             data={form.items}
             currentApplicableRate={currentApplicableRate}
@@ -333,7 +329,7 @@ const EditForm = ({
               {T.translate("general.save")}
             </Button>
           </Box>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </>
   );

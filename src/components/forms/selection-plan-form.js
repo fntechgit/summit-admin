@@ -20,6 +20,7 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import useScrollToError from "../../hooks/useScrollToError";
 import MainTab from "./selection-plan-form/main-tab";
 import TrackGroupsTab from "./selection-plan-form/track-groups-tab";
@@ -186,9 +187,8 @@ const SelectionPlanForm = (props) => {
 
   return (
     <FormikProvider value={formik}>
-      <Box
+      <MuiForm
         id="selection-plan-form"
-        component="form"
         className="selection-plan-form"
         onSubmit={formik.handleSubmit}
       >
@@ -288,7 +288,7 @@ const SelectionPlanForm = (props) => {
             />
           </>
         )}
-      </Box>
+      </MuiForm>
     </FormikProvider>
   );
 };

@@ -39,6 +39,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import ClearIcon from "@mui/icons-material/Clear";
 import { queryMembers } from "openstack-uicore-foundation/lib/utils/query-actions";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import MuiFormikAsyncAutocomplete from "../../../components/mui/formik-inputs/mui-formik-async-select";
 import useScrollToError from "../../../hooks/useScrollToError";
 
@@ -119,12 +120,7 @@ const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
       </DialogTitle>
       <Divider />
       <FormikProvider value={formik}>
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          autoComplete="off"
-        >
+        <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
           <DialogContent sx={{ p: 0 }}>
             <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
               <Grid2 size={12}>
@@ -228,7 +224,7 @@ const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
               {T.translate("general.save")}
             </Button>
           </DialogActions>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </Dialog>
   );

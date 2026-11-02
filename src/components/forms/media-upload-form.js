@@ -29,6 +29,7 @@ import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/f
 import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
 import MuiFormikFilesizeField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/file-size-field";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import useScrollToError from "../../hooks/useScrollToError";
 import FormikTextEditor from "../inputs/formik-text-editor";
 import { positiveNumberValidation } from "../../utils/yup";
@@ -131,11 +132,7 @@ const MediaUploadForm = ({
 
   return (
     <FormikProvider value={formik}>
-      <Box
-        id="media-upload-form"
-        component="form"
-        onSubmit={formik.handleSubmit}
-      >
+      <MuiForm id="media-upload-form" onSubmit={formik.handleSubmit}>
         <Grid2 container spacing={2} sx={{ mb: 2 }}>
           <Grid2 size={12}>
             <InputLabel htmlFor="name">
@@ -335,7 +332,7 @@ const MediaUploadForm = ({
             {T.translate("general.save")}
           </Button>
         </Box>
-      </Box>
+      </MuiForm>
     </FormikProvider>
   );
 };
