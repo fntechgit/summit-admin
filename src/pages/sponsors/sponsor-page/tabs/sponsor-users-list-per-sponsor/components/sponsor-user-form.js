@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Box,
   Button,
   DialogActions,
   DialogContent,
@@ -13,6 +12,7 @@ import { FormikProvider, useFormik } from "formik";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikCheckboxGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox-group";
 import MuiFormikSwitch from "openstack-uicore-foundation/lib/components/mui/formik-inputs/switch";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import useScrollToError from "../../../../../../hooks/useScrollToError";
 import { titleCase } from "../../../../../../utils/methods";
 
@@ -35,12 +35,7 @@ const SponsorUserForm = ({ user, userGroups, onSubmit }) => {
 
   return (
     <FormikProvider value={formik}>
-      <Box
-        component="form"
-        onSubmit={formik.handleSubmit}
-        noValidate
-        autoComplete="off"
-      >
+      <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
         <DialogContent sx={{ p: 2 }}>
           <Grid2 container spacing={2} size={12}>
             <Grid2 size={6}>
@@ -92,7 +87,7 @@ const SponsorUserForm = ({ user, userGroups, onSubmit }) => {
             {T.translate("sponsor_users.edit_user.save")}
           </Button>
         </DialogActions>
-      </Box>
+      </MuiForm>
     </FormikProvider>
   );
 };

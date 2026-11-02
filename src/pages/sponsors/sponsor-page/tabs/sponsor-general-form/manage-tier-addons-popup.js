@@ -24,6 +24,7 @@ import EditIcon from "@mui/icons-material/Edit";
 
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikAddonTypeSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/addon-type-select";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import useScrollToError from "../../../../../hooks/useScrollToError";
 
 const ManageTierAddonsPopup = ({
@@ -178,12 +179,7 @@ const ManageTierAddonsPopup = ({
       </DialogTitle>
       <Divider />
       <FormikProvider value={formik}>
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          autoComplete="off"
-        >
+        <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
           <DialogContent sx={{ p: 2 }}>
             <Typography
               sx={{
@@ -383,7 +379,7 @@ const ManageTierAddonsPopup = ({
               {T.translate("edit_sponsor.save_changes")}
             </Button>
           </DialogActions>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </Dialog>
   );

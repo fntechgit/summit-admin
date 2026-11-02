@@ -16,7 +16,6 @@ import T from "i18n-react/dist/i18n-react";
 import { useFormik, FormikProvider } from "formik";
 import * as yup from "yup";
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
@@ -25,6 +24,7 @@ import {
   Grid2
 } from "@mui/material";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 
 const EditAddressDialog = ({ open, onClose, onSubmit, address }) => {
   const formik = useFormik({
@@ -69,12 +69,7 @@ const EditAddressDialog = ({ open, onClose, onSubmit, address }) => {
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogTitle>{T.translate("client_card.edit_address")}</DialogTitle>
       <FormikProvider value={formik}>
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          autoComplete="off"
-        >
+        <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
           <DialogContent>
             <Grid2 container spacing={2}>
               <Grid2 size={12}>
@@ -135,7 +130,7 @@ const EditAddressDialog = ({ open, onClose, onSubmit, address }) => {
               {T.translate("client_card.save")}
             </Button>
           </DialogActions>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </Dialog>
   );

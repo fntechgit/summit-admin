@@ -63,7 +63,24 @@ describe("RefundForm", () => {
     await userEvent.type(screen.getByLabelText(/refund_form\.amount/i), "10");
   };
 
-  it("submits only once when Enter is pressed repeatedly while the refund is pending", async () => {
+  const clickSubmit = () =>
+    userEvent.click(
+      screen.getByRole("button", { name: /refund_form\.queue_refund/i })
+    );
+
+  it("does not submit when Enter is pressed in an input", async () => {
+    const onSubmit = jest.fn(() => Promise.resolve());
+    render(<RefundForm onSubmit={onSubmit} />);
+
+    await act(async () => {
+      await fillForm();
+      await userEvent.keyboard("{Enter}");
+    });
+
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("submits only once and disables the button while the refund is pending", async () => {
     let resolveSubmit;
     const onSubmit = jest.fn(
       () =>
@@ -75,7 +92,7 @@ describe("RefundForm", () => {
 
     await act(async () => {
       await fillForm();
-      await userEvent.keyboard("{Enter}{Enter}{Enter}{Enter}");
+      await clickSubmit();
     });
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
@@ -88,23 +105,18 @@ describe("RefundForm", () => {
     });
   });
 
-  it("clears the form after a successful refund so Enter cannot resubmit it", async () => {
+  it("clears the form after a successful refund", async () => {
     const onSubmit = jest.fn(() => Promise.resolve());
     render(<RefundForm onSubmit={onSubmit} />);
 
     await act(async () => {
       await fillForm();
-      await userEvent.keyboard("{Enter}");
+      await clickSubmit();
     });
 
     await waitFor(() =>
       expect(screen.getByLabelText(/refund_form\.reason/i)).toHaveValue("")
     );
-
-    await act(async () => {
-      await userEvent.click(screen.getByLabelText(/refund_form\.reason/i));
-      await userEvent.keyboard("{Enter}");
-    });
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
@@ -115,7 +127,7 @@ describe("RefundForm", () => {
 
     await act(async () => {
       await fillForm();
-      await userEvent.keyboard("{Enter}");
+      await clickSubmit();
     });
 
     await waitFor(() =>

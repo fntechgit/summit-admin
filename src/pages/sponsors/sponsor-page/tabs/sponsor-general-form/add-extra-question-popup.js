@@ -27,6 +27,7 @@ import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
 import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import FormikTextEditor from "../../../../../components/inputs/formik-text-editor";
 import useScrollToError from "../../../../../hooks/useScrollToError";
 import DragAndDropList from "../../../../../components/mui/dnd-list";
@@ -331,12 +332,7 @@ const AddSponsorExtraQuestionPopup = ({
       </DialogTitle>
       <Divider />
       <FormikProvider value={formik}>
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          autoComplete="off"
-        >
+        <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
           <DialogContent sx={{ p: 1 }}>
             <Grid2
               container
@@ -665,7 +661,7 @@ const AddSponsorExtraQuestionPopup = ({
               {T.translate("edit_sponsor.save_extra_question")}
             </Button>
           </DialogActions>
-        </Box>
+        </MuiForm>
       </FormikProvider>
       {valueToDelete && (
         <DeleteExtraQuestionPopup

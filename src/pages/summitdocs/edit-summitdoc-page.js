@@ -19,6 +19,7 @@ import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import SummitDocForm from "../../components/forms/summitdoc-form";
 import { getSummitById } from "../../actions/summit-actions";
 import {
@@ -126,7 +127,7 @@ const EditSummitDocPage = ({
       <hr />
       {currentSummit && (
         <FormikProvider value={formik}>
-          <Box component="form" onSubmit={formik.handleSubmit} noValidate>
+          <MuiForm onSubmit={formik.handleSubmit} noValidate>
             <SummitDocForm
               currentSummit={currentSummit}
               addFileToDoc={addFileToDoc}
@@ -142,7 +143,7 @@ const EditSummitDocPage = ({
                 {T.translate("general.save")}
               </Button>
             </Box>
-          </Box>
+          </MuiForm>
         </FormikProvider>
       )}
     </div>

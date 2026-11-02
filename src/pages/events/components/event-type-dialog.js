@@ -37,6 +37,7 @@ import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
 import CloseIcon from "@mui/icons-material/Close";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import useScrollToError from "../../../hooks/useScrollToError";
 import MuiFormikAsyncAutocomplete from "../../../components/mui/formik-inputs/mui-formik-async-select";
 import MuiFormikColorField from "../../../components/mui/formik-inputs/mui-formik-color-field";
@@ -232,11 +233,7 @@ const EventTypeDialog = ({
       </DialogTitle>
       <Divider />
       <FormikProvider value={formik}>
-        <Box
-          id="event-type-form"
-          component="form"
-          onSubmit={formik.handleSubmit}
-        >
+        <MuiForm id="event-type-form" onSubmit={formik.handleSubmit}>
           <DialogContent>
             <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
               <Tabs value={activeTab} onChange={(_, val) => setActiveTab(val)}>
@@ -661,7 +658,7 @@ const EventTypeDialog = ({
               {T.translate("general.save")}
             </Button>
           </DialogActions>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </Dialog>
   );

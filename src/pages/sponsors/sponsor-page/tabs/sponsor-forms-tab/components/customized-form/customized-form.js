@@ -17,6 +17,7 @@ import AdditionalInputList from "openstack-uicore-foundation/lib/components/mui/
 import MuiFormikDatepicker from "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikSelectGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select-group";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import {
   addIssAfterDateFieldValidator,
   formMetafieldsValidation,
@@ -109,12 +110,7 @@ const CustomizedForm = ({
 
   return (
     <FormikProvider value={formik}>
-      <Box
-        component="form"
-        onSubmit={formik.handleSubmit}
-        noValidate
-        autoComplete="off"
-      >
+      <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
         <DialogContent sx={{ p: 0 }}>
           <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
             <Grid2 size={4}>
@@ -197,7 +193,7 @@ const CustomizedForm = ({
             {T.translate("edit_sponsor.forms_tab.customized_form.save")}
           </Button>
         </DialogActions>
-      </Box>
+      </MuiForm>
     </FormikProvider>
   );
 };

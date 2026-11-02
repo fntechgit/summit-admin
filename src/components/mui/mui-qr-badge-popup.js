@@ -35,6 +35,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import QrReader from "../qr-reader";
 import {
   getTypeValue,
@@ -134,12 +135,7 @@ const MuiQrBadgePopup = ({
       </DialogTitle>
       <Divider />
       <FormikProvider value={formik}>
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          autoComplete="off"
-        >
+        <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
           <DialogContent>
             <RadioGroup
               row
@@ -248,7 +244,7 @@ const MuiQrBadgePopup = ({
               {T.translate("general.save")}
             </Button>
           </DialogActions>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </Dialog>
   );

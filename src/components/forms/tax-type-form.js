@@ -27,6 +27,7 @@ import Typography from "@mui/material/Typography";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import { queryTicketTypes } from "openstack-uicore-foundation/lib/utils/query-actions";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import { DEFAULT_PER_PAGE } from "../../utils/constants";
 import useScrollToError from "../../hooks/useScrollToError";
 
@@ -135,12 +136,7 @@ const TaxTypeForm = ({
 
   return (
     <FormikProvider value={formik}>
-      <Box
-        component="form"
-        onSubmit={formik.handleSubmit}
-        noValidate
-        autoComplete="off"
-      >
+      <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
         <input type="hidden" name="id" value={formik.values.id} />
         <Grid2 container spacing={2} sx={{ mb: 2 }}>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
@@ -235,7 +231,7 @@ const TaxTypeForm = ({
             {T.translate("general.save")}
           </Button>
         </Stack>
-      </Box>
+      </MuiForm>
     </FormikProvider>
   );
 };
