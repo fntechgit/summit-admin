@@ -1258,6 +1258,23 @@ export const getPaymentProfiles =
     });
   };
 
+// secret keys are write-only: send them only when the user typed a new one,
+// an omitted key keeps the stored value
+const normalizePaymentProfile = (entity) => {
+  const normalizedEntity = { ...entity };
+
+  if (!normalizedEntity.live_secret_key)
+    delete normalizedEntity.live_secret_key;
+
+  if (!normalizedEntity.test_secret_key)
+    delete normalizedEntity.test_secret_key;
+
+  delete normalizedEntity.has_live_secret_key;
+  delete normalizedEntity.has_test_secret_key;
+
+  return normalizedEntity;
+};
+
 export const savePaymentProfile = (entity) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
@@ -1269,14 +1286,15 @@ export const savePaymentProfile = (entity) => async (dispatch, getState) => {
     access_token: accessToken
   };
 
+  const normalizedEntity = normalizePaymentProfile(entity);
+
   if (entity.id) {
     return putRequest(
       createAction(UPDATE_PAYMENT_PROFILE),
       createAction(PAYMENT_PROFILE_UPDATED),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${entity.id}`,
-      entity,
-      snackbarErrorHandler,
-      entity
+      normalizedEntity,
+      snackbarErrorHandler
     )(params)(dispatch)
       .then(() => {
         dispatch(
@@ -1293,7 +1311,7 @@ export const savePaymentProfile = (entity) => async (dispatch, getState) => {
     createAction(UPDATE_PAYMENT_PROFILE),
     createAction(PAYMENT_PROFILE_ADDED),
     `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles`,
-    entity,
+    normalizedEntity,
     snackbarErrorHandler
   )(params)(dispatch)
     .then(() => {
