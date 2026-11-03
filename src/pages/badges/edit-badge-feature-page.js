@@ -87,6 +87,9 @@ const EditBadgeFeaturePage = ({
     formik.resetForm({ values: buildValues(entity) });
   }, [entity.id]);
 
+  // on an edit route, block saving until the requested feature has actually loaded
+  const isLoaded = !badgeFeatureId || String(entity.id) === badgeFeatureId;
+
   const title = entity.id
     ? T.translate("general.edit")
     : T.translate("general.add");
@@ -112,7 +115,7 @@ const EditBadgeFeaturePage = ({
             <Button
               type="submit"
               variant="contained"
-              disabled={formik.isSubmitting || isUploading}
+              disabled={formik.isSubmitting || isUploading || !isLoaded}
             >
               {T.translate("general.save")}
             </Button>
