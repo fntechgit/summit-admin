@@ -15,12 +15,13 @@ import {
   Box,
   InputLabel,
   TextField,
-  Tooltip
+  Tooltip,
+  Typography
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import InfoIcon from "@mui/icons-material/Info";
-import { useFormik, FormikProvider } from "formik";
+import { useFormik, useFormikContext, FormikProvider } from "formik";
 import * as yup from "yup";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
@@ -44,6 +45,71 @@ const InfoTooltip = ({ title }) => (
 
 InfoTooltip.propTypes = {
   title: PropTypes.string.isRequired
+};
+
+const SecretKeyField = ({ name, label, isSet, required }) => {
+  const { setFieldValue } = useFormikContext();
+  const [isReplacing, setIsReplacing] = useState(false);
+
+  const handleToggleReplace = () => {
+    if (isReplacing) setFieldValue(name, "");
+    setIsReplacing(!isReplacing);
+  };
+
+  return (
+    <>
+      <InputLabel htmlFor={name}>
+        {label}
+        <InfoTooltip
+          title={T.translate("edit_payment_profile.info_stripe_keys")}
+        />
+      </InputLabel>
+      {(!isSet || isReplacing) && (
+        <MuiFormikTextField
+          name={name}
+          type="password"
+          autoComplete="new-password"
+          required={required}
+          fullWidth
+          variant="outlined"
+        />
+      )}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}
+      >
+        <Typography variant="body2" color="text.secondary">
+          {T.translate(
+            isSet
+              ? "edit_payment_profile.secret_key_set"
+              : "edit_payment_profile.secret_key_not_set"
+          )}
+        </Typography>
+        {isSet && (
+          <Button size="small" onClick={handleToggleReplace}>
+            {T.translate(
+              isReplacing ? "general.cancel" : "edit_payment_profile.replace"
+            )}
+          </Button>
+        )}
+      </Box>
+    </>
+  );
+};
+
+SecretKeyField.propTypes = {
+  name: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  isSet: PropTypes.bool,
+  required: PropTypes.bool
+};
+
+SecretKeyField.defaultProps = {
+  isSet: false,
+  required: false
 };
 
 const APPLICATION_TYPE_OPTIONS = [
@@ -115,9 +181,9 @@ const PaymentProfileDialog = ({
       test_mode_enabled: initialEntity?.test_mode_enabled || false,
       send_email_receipt: initialEntity?.send_email_receipt || false,
       merchant_account_id: initialEntity?.merchant_account_id || "",
-      live_secret_key: initialEntity?.live_secret_key || "",
+      live_secret_key: "",
       live_publishable_key: initialEntity?.live_publishable_key || "",
-      test_secret_key: initialEntity?.test_secret_key || "",
+      test_secret_key: "",
       test_publishable_key: initialEntity?.test_publishable_key || ""
     },
     validationSchema: yup.object().shape({
@@ -283,7 +349,7 @@ const PaymentProfileDialog = ({
       <FormikProvider value={formik}>
         <DialogContent>
           <Grid2 container spacing={2} mb={2}>
-            <Grid2 size={6}>
+            <Grid2 size={{ xs: 12, sm: 6 }}>
               <InputLabel htmlFor="application_type">
                 {T.translate("edit_payment_profile.application_type")}
               </InputLabel>
@@ -301,7 +367,7 @@ const PaymentProfileDialog = ({
                 ))}
               </MuiFormikSelect>
             </Grid2>
-            <Grid2 size={6}>
+            <Grid2 size={{ xs: 12, sm: 6 }}>
               <InputLabel htmlFor="provider">
                 {T.translate("edit_payment_profile.provider")}
               </InputLabel>
@@ -314,13 +380,13 @@ const PaymentProfileDialog = ({
               </MuiFormikSelect>
             </Grid2>
 
-            <Grid2 size={4}>
+            <Grid2 size={{ xs: 12, sm: 4 }}>
               <MuiFormikCheckbox
                 name="is_active"
                 label={T.translate("edit_payment_profile.active")}
               />
             </Grid2>
-            <Grid2 size={4} sx={{ display: "flex" }}>
+            <Grid2 size={{ xs: 12, sm: 4 }} sx={{ display: "flex" }}>
               <MuiFormikCheckbox
                 name="test_mode_enabled"
                 label={
@@ -336,7 +402,7 @@ const PaymentProfileDialog = ({
               />
             </Grid2>
             {formik.values.provider === "Stripe" && (
-              <Grid2 size={4}>
+              <Grid2 size={{ xs: 12, sm: 4 }}>
                 <MuiFormikCheckbox
                   name="send_email_receipt"
                   label={
@@ -366,21 +432,15 @@ const PaymentProfileDialog = ({
               </Grid2>
             )}
 
-            <Grid2 size={6}>
-              <InputLabel htmlFor="live_secret_key">
-                {T.translate("edit_payment_profile.live_secret_key")}
-                <InfoTooltip
-                  title={T.translate("edit_payment_profile.info_stripe_keys")}
-                />
-              </InputLabel>
-              <MuiFormikTextField
+            <Grid2 size={{ xs: 12, sm: 6 }}>
+              <SecretKeyField
                 name="live_secret_key"
-                required
-                fullWidth
-                variant="outlined"
+                label={T.translate("edit_payment_profile.live_secret_key")}
+                isSet={Boolean(initialEntity.has_live_secret_key)}
+                required={!initialEntity.has_live_secret_key}
               />
             </Grid2>
-            <Grid2 size={6}>
+            <Grid2 size={{ xs: 12, sm: 6 }}>
               <InputLabel htmlFor="live_publishable_key">
                 {T.translate("edit_payment_profile.live_publishable_key")}
                 <InfoTooltip
@@ -394,20 +454,14 @@ const PaymentProfileDialog = ({
                 variant="outlined"
               />
             </Grid2>
-            <Grid2 size={6}>
-              <InputLabel htmlFor="test_secret_key">
-                {T.translate("edit_payment_profile.test_secret_key")}
-                <InfoTooltip
-                  title={T.translate("edit_payment_profile.info_stripe_keys")}
-                />
-              </InputLabel>
-              <MuiFormikTextField
+            <Grid2 size={{ xs: 12, sm: 6 }}>
+              <SecretKeyField
                 name="test_secret_key"
-                fullWidth
-                variant="outlined"
+                label={T.translate("edit_payment_profile.test_secret_key")}
+                isSet={Boolean(initialEntity.has_test_secret_key)}
               />
             </Grid2>
-            <Grid2 size={6}>
+            <Grid2 size={{ xs: 12, sm: 6 }}>
               <InputLabel htmlFor="test_publishable_key">
                 {T.translate("edit_payment_profile.test_publishable_key")}
                 <InfoTooltip
@@ -459,7 +513,7 @@ const PaymentProfileDialog = ({
                   <FormikProvider value={feeTypeFormik}>
                     {showFeeTypeForm && (
                       <Grid2 size={12} container spacing={2} mb={2}>
-                        <Grid2 size={4}>
+                        <Grid2 size={{ xs: 12, sm: 4 }}>
                           <InputLabel htmlFor="name">
                             {T.translate(
                               "edit_payment_profile.payment_type_fee_name"
@@ -472,7 +526,7 @@ const PaymentProfileDialog = ({
                             margin="none"
                           />
                         </Grid2>
-                        <Grid2 size={4}>
+                        <Grid2 size={{ xs: 12, sm: 4 }}>
                           <InputLabel htmlFor="kind">
                             {T.translate(
                               "edit_payment_profile.payment_type_fee_kind"
@@ -506,7 +560,7 @@ const PaymentProfileDialog = ({
                             ))}
                           </MuiFormikSelect>
                         </Grid2>
-                        <Grid2 size={4}>
+                        <Grid2 size={{ xs: 12, sm: 4 }}>
                           <InputLabel htmlFor="payment_method">
                             {T.translate(
                               "edit_payment_profile.payment_type_fee_method"
@@ -539,7 +593,7 @@ const PaymentProfileDialog = ({
                             ))}
                           </MuiFormikSelect>
                         </Grid2>
-                        <Grid2 size={4}>
+                        <Grid2 size={{ xs: 12, sm: 4 }}>
                           <InputLabel htmlFor="value">
                             {T.translate(
                               "edit_payment_profile.payment_type_fee_value"
@@ -597,7 +651,7 @@ const PaymentProfileDialog = ({
                             />
                           )}
                         </Grid2>
-                        <Grid2 size={4}>
+                        <Grid2 size={{ xs: 12, sm: 4 }}>
                           <InputLabel htmlFor="max_cents">
                             {T.translate(
                               "edit_payment_profile.payment_type_fee_max_cents"
@@ -611,7 +665,7 @@ const PaymentProfileDialog = ({
                             inCents
                           />
                         </Grid2>
-                        <Grid2 size={4}>
+                        <Grid2 size={{ xs: 12, sm: 4 }}>
                           <InputLabel htmlFor="min_cents">
                             {T.translate(
                               "edit_payment_profile.payment_type_fee_min_cents"
@@ -700,9 +754,9 @@ PaymentProfileDialog.propTypes = {
     test_mode_enabled: PropTypes.bool,
     send_email_receipt: PropTypes.bool,
     merchant_account_id: PropTypes.string,
-    live_secret_key: PropTypes.string,
+    has_live_secret_key: PropTypes.bool,
     live_publishable_key: PropTypes.string,
-    test_secret_key: PropTypes.string,
+    has_test_secret_key: PropTypes.bool,
     test_publishable_key: PropTypes.string
   }),
   paymentFeeTypes: PropTypes.shape({
