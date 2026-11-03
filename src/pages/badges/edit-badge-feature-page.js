@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
@@ -56,6 +56,7 @@ const EditBadgeFeaturePage = ({
   removeBadgeFeatureImage
 }) => {
   const badgeFeatureId = match.params.badge_feature_id;
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (!badgeFeatureId) {
@@ -104,13 +105,14 @@ const EditBadgeFeaturePage = ({
           <BadgeFeatureTypeForm
             entity={entity}
             onRemoveImage={removeBadgeFeatureImage}
+            onUploadingChange={setIsUploading}
           />
           <Divider sx={{ mb: 2 }} />
           <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
             <Button
               type="submit"
               variant="contained"
-              disabled={formik.isSubmitting}
+              disabled={formik.isSubmitting || isUploading}
             >
               {T.translate("general.save")}
             </Button>

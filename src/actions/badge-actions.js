@@ -1091,9 +1091,7 @@ export const removeBadgeFeatureImage =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-feature-types/${badgeFeatureId}/image`,
       null,
       snackbarErrorHandler
-    )(params)(dispatch)
-      .catch(() => {})
-      .finally(() => dispatch(stopLoading()));
+    )(params)(dispatch).finally(() => dispatch(stopLoading()));
   };
 
 const normalizeBadgeFeature = (entity) => {

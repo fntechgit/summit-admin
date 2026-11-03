@@ -29,7 +29,7 @@ const getImageValue = (value) => {
   return [{ filename: value.filename, file_url: value.filepath }];
 };
 
-const BadgeFeatureTypeForm = ({ entity, onRemoveImage }) => {
+const BadgeFeatureTypeForm = ({ entity, onRemoveImage, onUploadingChange }) => {
   const formik = useFormikContext();
 
   useScrollToError(formik, true);
@@ -43,10 +43,13 @@ const BadgeFeatureTypeForm = ({ entity, onRemoveImage }) => {
     delete image.path;
     delete image.name;
     formik.setFieldValue("image", image);
+    onUploadingChange(false);
   };
 
   const handleRemoveImage = () => {
     const prevValue = formik.values.image;
+    // also reached when cancelling an in-flight upload
+    onUploadingChange(false);
     formik.setFieldValue("image", null);
     // only hit the API when an image was already persisted; a pending dto just clears
     if (entity.id && typeof prevValue === "string")
@@ -103,6 +106,8 @@ const BadgeFeatureTypeForm = ({ entity, onRemoveImage }) => {
             name="image"
             value={getImageValue(formik.values.image)}
             onUploadComplete={handleUploadComplete}
+            onUploadStart={() => onUploadingChange(true)}
+            onError={() => onUploadingChange(false)}
             onRemove={handleRemoveImage}
             postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
             djsConfig={{ withCredentials: true }}
@@ -123,7 +128,8 @@ const BadgeFeatureTypeForm = ({ entity, onRemoveImage }) => {
 
 BadgeFeatureTypeForm.propTypes = {
   entity: PropTypes.object.isRequired,
-  onRemoveImage: PropTypes.func.isRequired
+  onRemoveImage: PropTypes.func.isRequired,
+  onUploadingChange: PropTypes.func.isRequired
 };
 
 export default BadgeFeatureTypeForm;
