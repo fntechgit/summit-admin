@@ -88,14 +88,14 @@ const SponsorFormItemListPage = ({
     getSponsorFormItems(formId, currentPage, perPage, key, dir, showArchived);
   };
 
-  const handleShowArchivedForms = (ev) => {
+  const handleShowArchivedForms = (archived) => {
     getSponsorFormItems(
       formId,
       DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,
-      ev.target.checked
+      archived
     );
   };
 
@@ -279,10 +279,9 @@ const SponsorFormItemListPage = ({
         {T.translate("sponsor_form_item_list.alert_info")}
       </Alert>
       <GridToolbar
-        checkboxProps={{
-          checked: showArchived,
-          onChange: handleShowArchivedForms,
-          label: T.translate("sponsor_form_item_list.show_archived")
+        archiveToggleProps={{
+          showArchived,
+          onChange: handleShowArchivedForms
         }}
       >
         <Button

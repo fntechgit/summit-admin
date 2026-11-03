@@ -222,14 +222,14 @@ const SponsorPagesTab = ({
     });
   };
 
-  const handleShowArchived = (ev) => {
+  const handleShowArchived = (archived) => {
     getSponsorManagedPages(
       term,
       DEFAULT_CURRENT_PAGE,
       managedPages.perPage,
       managedPages.order,
       managedPages.orderDir,
-      ev.target.checked
+      archived
     );
     getSponsorCustomizedPages(
       term,
@@ -237,7 +237,7 @@ const SponsorPagesTab = ({
       customizedPages.perPage,
       customizedPages.order,
       customizedPages.orderDir,
-      ev.target.checked
+      archived
     );
   };
 
@@ -368,10 +368,9 @@ const SponsorPagesTab = ({
           onSearch: handleSearch,
           placeholder: T.translate("edit_sponsor.placeholders.search")
         }}
-        checkboxProps={{
-          checked: showArchived,
-          onChange: handleShowArchived,
-          label: T.translate("edit_sponsor.pages_tab.show_archived")
+        archiveToggleProps={{
+          showArchived,
+          onChange: handleShowArchived
         }}
       >
         <Button

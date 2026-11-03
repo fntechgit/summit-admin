@@ -146,7 +146,7 @@ const SponsorFormsManageItems = ({
       ? unarchiveSponsorCustomizedFormItem(formId, item.id)
       : archiveSponsorCustomizedFormItem(formId, item.id);
 
-  const handleShowArchivedItems = (ev) => {
+  const handleShowArchivedItems = (archived) => {
     getSponsorCustomizedFormItems(
       formId,
       term,
@@ -154,7 +154,7 @@ const SponsorFormsManageItems = ({
       perPage,
       order,
       orderDir,
-      ev.target.checked
+      archived
     );
   };
 
@@ -295,12 +295,9 @@ const SponsorFormsManageItems = ({
           onSearch: handleSearch,
           placeholder: T.translate("edit_sponsor.placeholders.search")
         }}
-        checkboxProps={{
-          checked: showArchived,
-          onChange: handleShowArchivedItems,
-          label: T.translate(
-            "edit_sponsor.forms_tab.form_manage_items.show_archived"
-          )
+        archiveToggleProps={{
+          showArchived,
+          onChange: handleShowArchivedItems
         }}
       >
         <Button

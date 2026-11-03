@@ -96,14 +96,14 @@ const ShowPagesListPage = ({
   const handleArchiveItem = (item) =>
     item.is_archived ? unarchiveShowPage(item.id) : archiveShowPage(item.id);
 
-  const handleShowArchivedForms = (ev) => {
+  const handleShowArchivedForms = (archived) => {
     getShowPages(
       term,
       DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,
-      ev.target.checked
+      archived
     );
   };
 
@@ -202,10 +202,9 @@ const ShowPagesListPage = ({
           onSearch: handleSearch,
           placeholder: T.translate("show_pages.placeholders.search")
         }}
-        checkboxProps={{
-          checked: showArchived,
-          onChange: handleShowArchivedForms,
-          label: T.translate("show_pages.show_archived")
+        archiveToggleProps={{
+          showArchived,
+          onChange: handleShowArchivedForms
         }}
       >
         <Button

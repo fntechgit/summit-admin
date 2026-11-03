@@ -88,14 +88,14 @@ const PageTemplateListPage = ({
     );
   };
 
-  const handleShowArchived = (ev) => {
+  const handleShowArchived = (archived) => {
     getPageTemplates(
       term,
       DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,
-      ev.target.checked
+      archived
     );
   };
 
@@ -203,10 +203,9 @@ const PageTemplateListPage = ({
           term,
           placeholder: T.translate("page_template_list.placeholders.search")
         }}
-        checkboxProps={{
-          checked: showArchived,
-          onChange: handleShowArchived,
-          label: T.translate("page_template_list.show_archived")
+        archiveToggleProps={{
+          showArchived,
+          onChange: handleShowArchived
         }}
       >
         <Button
