@@ -61,7 +61,6 @@ export const RESET_BADGE_FEATURE_FORM = "RESET_BADGE_FEATURE_FORM";
 export const BADGE_FEATURE_UPDATED = "BADGE_FEATURE_UPDATED";
 export const BADGE_FEATURE_ADDED = "BADGE_FEATURE_ADDED";
 export const BADGE_FEATURE_DELETED = "BADGE_FEATURE_DELETED";
-export const BADGE_FEATURE_IMAGE_ATTACHED = "BADGE_FEATURE_IMAGE_ATTACHED";
 export const BADGE_FEATURE_IMAGE_DELETED = "BADGE_FEATURE_IMAGE_DELETED";
 
 export const REQUEST_ACCESS_LEVELS = "REQUEST_ACCESS_LEVELS";
@@ -1013,14 +1012,13 @@ export const saveBadgeFeature = (entity) => async (dispatch, getState) => {
     snackbarErrorHandler,
     entity
   )(params)(dispatch)
-    .then((payload) => {
+    .then(() => {
       dispatch(
         setSnackbarMessage({
           html: T.translate("edit_badge_feature.badge_feature_created"),
           type: "success"
         })
       );
-      return payload;
     })
     .finally(() => dispatch(stopLoading()));
 };
@@ -1043,33 +1041,6 @@ export const deleteBadgeFeature =
       null,
       snackbarErrorHandler
     )(params)(dispatch)
-      .catch(() => {})
-      .finally(() => dispatch(stopLoading()));
-  };
-
-export const uploadBadgeFeatureImage =
-  (entity, file) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    dispatch(startLoading());
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-
-    const params = {
-      access_token: accessToken
-    };
-
-    return postRequest(
-      null,
-      createAction(BADGE_FEATURE_IMAGE_ATTACHED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-feature-types/${entity.id}/image`,
-      file,
-      snackbarErrorHandler
-    )(params)(dispatch)
-      .then(() => {
-        history.push(
-          `/app/summits/${currentSummit.id}/badge-features/${entity.id}`
-        );
-      })
       .catch(() => {})
       .finally(() => dispatch(stopLoading()));
   };

@@ -73,13 +73,9 @@ const EditBadgeFeaturePage = ({
     validationSchema,
     onSubmit: (values) =>
       saveBadgeFeature(values)
-        .then((payload) => {
-          const listUrl = `/app/summits/${currentSummit.id}/badge-features`;
-          // new entities stay on their edit route so the image can be attached
-          history.push(
-            values.id ? listUrl : `${listUrl}/${payload.response.id}`
-          );
-        })
+        .then(() =>
+          history.push(`/app/summits/${currentSummit.id}/badge-features`)
+        )
         .catch(() => {})
   });
 

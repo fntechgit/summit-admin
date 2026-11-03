@@ -18,7 +18,6 @@ import {
   RESET_BADGE_FEATURE_FORM,
   BADGE_FEATURE_UPDATED,
   BADGE_FEATURE_ADDED,
-  BADGE_FEATURE_IMAGE_ATTACHED,
   BADGE_FEATURE_IMAGE_DELETED
 } from "../../actions/badge-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
@@ -58,10 +57,6 @@ const badgeFeatureReducer = (state = DEFAULT_STATE, action) => {
       return state;
     case VALIDATE:
       return { ...state, errors: payload.errors };
-    case BADGE_FEATURE_IMAGE_ATTACHED: {
-      const image = { ...payload.response };
-      return { ...state, entity: { ...state.entity, image: image.url } };
-    }
     case BADGE_FEATURE_IMAGE_DELETED:
       return { ...state, entity: { ...state.entity, image: null } };
     default:
