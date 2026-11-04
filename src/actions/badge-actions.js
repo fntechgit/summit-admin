@@ -24,6 +24,8 @@ import {
   showSuccessMessage,
   escapeFilterValue,
   authErrorHandler,
+  snackbarErrorHandler,
+  snackbarSuccessHandler,
   fetchResponseHandler,
   fetchErrorHandler,
   getCSV
@@ -511,10 +513,10 @@ export const getViewType = (viewTypeId) => async (dispatch, getState) => {
     null,
     createAction(RECEIVE_VIEW_TYPE),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types/${viewTypeId}`,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .catch(() => {})
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const resetViewTypeForm = () => (dispatch) => {
@@ -540,36 +542,39 @@ export const saveViewType = (entity) => async (dispatch, getState) => {
       createAction(VIEW_TYPE_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types/${entity.id}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(
-        showSuccessMessage(T.translate("edit_view_type.view_type_saved"))
-      );
-    });
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            html: T.translate("edit_view_type.view_type_saved")
+          })
+        );
+      })
+      .catch(() => {})
+      .finally(() => dispatch(stopLoading()));
   } else {
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_view_type.view_type_created"),
-      type: "success"
-    };
-
     postRequest(
       createAction(UPDATE_VIEW_TYPE),
       createAction(VIEW_TYPE_ADDED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
-      dispatch(
-        showMessage(success_message, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/view-types/${payload.response.id}`
-          );
-        })
-      );
-    });
+    )(params)(dispatch)
+      .then((payload) => {
+        dispatch(
+          snackbarSuccessHandler({
+            html: T.translate("edit_view_type.view_type_created")
+          })
+        );
+        history.push(
+          `/app/summits/${currentSummit.id}/view-types/${payload.response.id}`
+        );
+      })
+      .catch(() => {})
+      .finally(() => dispatch(stopLoading()));
   }
 };
 
