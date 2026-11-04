@@ -4,8 +4,16 @@
 import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
-import { saveBadgeSettings } from "../badge-actions";
+import { postRequest } from "openstack-uicore-foundation/lib/utils/actions";
+import { saveBadgeSettings, saveBadgeFeature } from "../badge-actions";
 import { saveMarketingSetting } from "../marketing-actions";
+import * as methods from "../../utils/methods";
+
+jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
+  __esModule: true,
+  ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
+  postRequest: jest.fn()
+}));
 
 jest.mock("../marketing-actions", () => ({
   __esModule: true,
@@ -82,5 +90,42 @@ describe("saveBadgeSettings", () => {
         })
       )
     ).resolves.toEqual([{ id: "first" }, { id: "second" }]);
+  });
+});
+
+describe("saveBadgeFeature", () => {
+  const mockStore = configureStore([thunk]);
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it("on create shows a success snackbar and stops loading", async () => {
+    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
+    postRequest.mockImplementation(
+      () => () => () => Promise.resolve({ response: { id: 99 } })
+    );
+    const store = mockStore({
+      currentSummitState: { currentSummit: { id: 7 } }
+    });
+
+    await store.dispatch(
+      saveBadgeFeature({
+        id: 0,
+        name: "VIP",
+        description: "d",
+        template_content: "t"
+      })
+    );
+
+    expect(store.getActions()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: "SET_SNACKBAR_MESSAGE",
+          payload: expect.objectContaining({ type: "success" })
+        }),
+        { type: "STOP_LOADING", payload: undefined }
+      ])
+    );
   });
 });
