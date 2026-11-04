@@ -14,7 +14,7 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input";
 import OwnerInput from "../inputs/owner-input";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
@@ -278,6 +278,8 @@ class TicketForm extends React.Component {
               optionsLimit={25}
               cacheOptions
               defaultOptions
+              menuPortalTarget={document.body}
+              styles={{ menuPortal: (base) => ({ ...base, zIndex: 1400 }) }}
             />
           </div>
           <div className="col-md-6">
