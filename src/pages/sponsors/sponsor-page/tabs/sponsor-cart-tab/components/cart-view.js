@@ -190,6 +190,8 @@ const CartView = ({
     }
   ];
 
+  const amountIndex = tableColumns.findIndex((c) => c.columnKey === "amount");
+
   return (
     <>
       <GridToolbar
@@ -221,7 +223,6 @@ const CartView = ({
             <MuiTable
               columns={tableColumns}
               data={cartData}
-              options={{ responsive: false }}
               onEdit={cartIsEditable ? handleEditForm : undefined}
               onDelete={cartIsEditable ? handleDelete : undefined}
               deleteDialogBody={(formName) =>
@@ -231,11 +232,13 @@ const CartView = ({
               }
               confirmButtonColor="error"
             >
-              {/* gap skips manage items when hidden, trailing covers lock (+ edit, delete) */}
-              {cartIsEditable ? (
-                <TotalRow total={cart?.total} colGap={5} trailing={3} />
-              ) : (
-                <TotalRow total={cart?.total} colGap={4} trailing={1} />
+              {/* aligns the total under amount; MuiTable passes its column count */}
+              {(colCount) => (
+                <TotalRow
+                  total={cart?.total}
+                  colGap={amountIndex - 1}
+                  trailing={colCount - amountIndex - 1}
+                />
               )}
             </MuiTable>
             {isCardPaymentCart && (
