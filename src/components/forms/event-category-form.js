@@ -314,7 +314,7 @@ const EventCategoryForm = ({
               queryFunction={(input, callback) =>
                 queryTags(currentSummit.id, input, callback)
               }
-              formatOption={(tag) => ({
+              formatOption={({ tag }) => ({
                 value: tag.id.toString(),
                 label: tag.tag
               })}
