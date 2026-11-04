@@ -11,290 +11,265 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import { useFormik, FormikProvider } from "formik";
 import T from "i18n-react/dist/i18n-react";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
-import Switch from "react-switch";
-import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
-import { isEmpty, scrollToError, shallowEqual } from "../../../utils/methods";
+import {
+  Box,
+  Button,
+  Grid2,
+  InputLabel,
+  MenuItem,
+  Typography
+} from "@mui/material";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikSwitch from "openstack-uicore-foundation/lib/components/mui/formik-inputs/switch";
+import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
+import MuiTableSortable from "openstack-uicore-foundation/lib/components/mui/sortable-table";
+import { FILTER_TYPES } from "../../../actions/schedule-settings-actions";
+import useScrollToError from "../../../hooks/useScrollToError";
 import EditLabelSlider from "../../inputs/edit-label-slider";
-import PreFilterInput from "./pre-filter-input";
+import PreFilterInput, { speakerLabel } from "./pre-filter-input";
 
-class ScheduleSettingsForm extends React.Component {
-  constructor(props) {
-    super(props);
+const HIDDEN_PRE_FILTERS = [
+  FILTER_TYPES.custom_order,
+  FILTER_TYPES.abstract,
+  FILTER_TYPES.date
+];
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors
+const TIME_FORMATS = ["12h", "24h"];
+
+const getColorSourceOptions = () => [
+  { value: "TRACK", label: T.translate("edit_schedule_settings.track") },
+  {
+    value: "TRACK_GROUP",
+    label: T.translate("edit_schedule_settings.track_groups")
+  },
+  {
+    value: "EVENT_TYPES",
+    label: T.translate("edit_schedule_settings.event_types")
+  }
+];
+
+// tags and speakers are kept as {value, label} options while editing
+const toFormPreFilter = (pf) => {
+  switch (pf.type) {
+    case FILTER_TYPES.tags:
+      return {
+        ...pf,
+        values: pf.values.map((t) => ({ value: t.tag, label: t.tag }))
+      };
+    case FILTER_TYPES.speakers:
+      return {
+        ...pf,
+        values: pf.values.map((s) => ({
+          value: String(s.id),
+          label: speakerLabel(s)
+        }))
+      };
+    default:
+      return pf;
+  }
+};
+
+const toEntityPreFilter = (pf) => {
+  switch (pf.type) {
+    case FILTER_TYPES.tags:
+      return { ...pf, values: pf.values.map((t) => ({ tag: t.value })) };
+    case FILTER_TYPES.speakers:
+      return {
+        ...pf,
+        values: pf.values.map((s) => ({
+          id: parseInt(s.value, 10),
+          first_name: s.label,
+          last_name: ""
+        }))
+      };
+    default:
+      return pf;
+  }
+};
+
+const ScheduleSettingsForm = ({ entity, summit, errors, onSubmit }) => {
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSubmit = (values) => {
+    setIsSaving(true);
+    const normalizedValues = {
+      ...values,
+      pre_filters: values.pre_filters.map(toEntityPreFilter)
     };
-  }
-
-  componentDidUpdate(prevProps) {
-    const state = {};
-    scrollToError(this.props.errors);
-
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
-    }
-
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
-    }
-
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
-    }
-  }
-
-  handleChange = (ev) => {
-    const entity = { ...this.state.entity };
-    const errors = { ...this.state.errors };
-
-    let { value, id } = ev.target;
-
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
-
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ entity, errors });
-  };
-
-  updateFilterOrder = (filters, filterId, newOrder) => {
-    console.log("updateFilterOrder", filters, filterId, newOrder);
-  };
-
-  onSwitchChange = (id, val) => {
-    const entity = { ...this.state.entity };
-    entity[id] = val;
-    this.setState({ entity });
-  };
-
-  onPreFilterChange = (ev) => {
-    const entity = { ...this.state.entity };
-    const { value, id } = ev.target;
-
-    entity.pre_filters.forEach((pf) => {
-      if (pf.type === id) {
-        pf.values = value;
-      }
-    });
-
-    this.setState({ entity });
-  };
-
-  onFilterChange = (id, enabled, label) => {
-    const entity = { ...this.state.entity };
-
-    entity.filters.forEach((f) => {
-      if (f.type === id) {
-        f.is_enabled = enabled;
-        f.label = label;
-      }
-    });
-
-    this.setState({ entity });
-  };
-
-  handleSubmit = (ev) => {
-    ev.preventDefault();
-    this.props.onSubmit(this.state.entity);
-  };
-
-  render() {
-    const { entity } = this.state;
-    const { summit } = this.props;
-    const disabledPreFilters = ["CUSTOM_ORDER", "ABSTRACT", "DATE"];
-    const enabledPreFilters = entity.pre_filters.filter(
-      (pf) => !disabledPreFilters.includes(pf.type)
+    Promise.resolve(onSubmit(normalizedValues)).finally(() =>
+      setIsSaving(false)
     );
+  };
 
-    const color_source_ddl = [
-      { label: "Category", value: "TRACK" },
-      { label: "Category Groups", value: "TRACK_GROUP" },
-      { label: "Activity Type", value: "EVENT_TYPES" }
-    ];
+  const formik = useFormik({
+    initialValues: {
+      ...entity,
+      pre_filters: entity.pre_filters.map(toFormPreFilter)
+    },
+    enableReinitialize: true,
+    onSubmit: handleSubmit
+  });
 
-    const time_format_ddl = [
-      { label: "12h", value: "12h" },
-      { label: "24h", value: "24h" }
-    ];
+  useScrollToError(formik);
 
-    const columns = [
-      {
-        columnKey: "type",
-        render: (filter) => (
-          <EditLabelSlider
-            checked={filter.is_enabled}
-            id={filter.type}
-            value={filter.label}
-            onChange={this.onFilterChange}
-            disabled={!entity.is_enabled}
-          />
-        )
-      }
-    ];
+  useEffect(() => {
+    if (errors && Object.keys(errors).length > 0) {
+      formik.setErrors(errors);
+      // skip validation, it would wipe the server errors just set
+      formik.setTouched(
+        Object.keys(errors).reduce((acc, key) => ({ ...acc, [key]: true }), {}),
+        false
+      );
+    }
+  }, [errors]);
 
-    const table_options = {
-      actions: {}
-    };
+  const { values, setFieldValue } = formik;
+  const disabled = !values.is_enabled;
+  const colorSourceOptions = getColorSourceOptions();
 
-    return (
-      <form className="schedule-settings-form">
-        <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("edit_schedule_settings.key")}</label>
-            <Input
-              id="key"
-              className="form-control"
-              value={entity.key}
-              disabled
+  const filterColumns = [
+    {
+      columnKey: "type",
+      header: T.translate("edit_schedule_settings.filter_title"),
+      render: (filter) => (
+        <EditLabelSlider
+          name={`filters[${values.filters.findIndex(
+            (f) => f.type === filter.type
+          )}]`}
+          disabled={disabled}
+        />
+      )
+    }
+  ];
+
+  const handleReorderFilters = (reordered) =>
+    setFieldValue("filters", reordered);
+
+  return (
+    <FormikProvider value={formik}>
+      <Box component="form" onSubmit={formik.handleSubmit}>
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="key">
+              {T.translate("edit_schedule_settings.key")}
+            </InputLabel>
+            <MuiFormikTextField name="key" margin="none" fullWidth disabled />
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <MuiFormikSwitch
+              name="is_enabled"
+              label={T.translate("edit_schedule_settings.enabled")}
             />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_schedule_settings.enabled")}</label>
-            <br />
-            <Switch
-              checked={entity.is_enabled}
-              onChange={(val) => {
-                this.onSwitchChange("is_enabled", val);
-              }}
-              uncheckedIcon={false}
-              checkedIcon={false}
-              className="react-switch"
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label>
-              {" "}
+          </Grid2>
+        </Grid2>
+
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="color_source">
               {T.translate("edit_schedule_settings.color_source")} *
-            </label>
-            <Dropdown
-              id="color_source"
-              value={entity.color_source}
-              options={color_source_ddl}
-              onChange={this.handleChange}
-              disabled={!entity.is_enabled}
-            />
-          </div>
-          <div className="col-md-2">
-            <label>
-              {T.translate("edit_schedule_settings.is_my_schedule")}
-            </label>
-            <br />
-            <Switch
-              checked={entity.is_my_schedule}
-              onChange={(val) => {
-                this.onSwitchChange("is_my_schedule", val);
-              }}
-              uncheckedIcon={false}
-              checkedIcon={false}
-              className="react-switch"
-              disabled={!entity.is_enabled}
-            />
-          </div>
-          <div className="col-md-3">
-            <label>
-              {" "}
-              {T.translate("edit_schedule_settings.access_levels_only")}
-            </label>
-            <br />
-            <Switch
-              checked={entity.only_events_with_attendee_access}
-              onChange={(val) => {
-                this.onSwitchChange("only_events_with_attendee_access", val);
-              }}
-              uncheckedIcon={false}
-              checkedIcon={false}
-              className="react-switch"
-              disabled={!entity.is_enabled}
-            />
-          </div>
-          <div className="col-md-3">
-            <label>
-              {" "}
-              {T.translate("edit_schedule_settings.hide_past_permanent")}
-            </label>
-            <br />
-            <Switch
-              checked={entity.hide_past_events_with_show_always_on_schedule}
-              onChange={(val) => {
-                this.onSwitchChange(
-                  "hide_past_events_with_show_always_on_schedule",
-                  val
-                );
-              }}
-              uncheckedIcon={false}
-              checkedIcon={false}
-              className="react-switch"
-              disabled={!entity.is_enabled}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label>
-              {" "}
+            </InputLabel>
+            <MuiFormikSelect
+              name="color_source"
+              disabled={disabled}
+              renderValue={(selected) =>
+                colorSourceOptions.find((o) => o.value === selected)?.label ??
+                selected
+              }
+            >
+              {colorSourceOptions.map((opt) => (
+                <MenuItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </MenuItem>
+              ))}
+            </MuiFormikSelect>
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="time_format">
               {T.translate("edit_schedule_settings.time_format")} *
-            </label>
-            <Dropdown
-              id="time_format"
-              value={entity.time_format}
-              options={time_format_ddl}
-              onChange={this.handleChange}
-              disabled={!entity.is_enabled}
+            </InputLabel>
+            <MuiFormikSelect name="time_format" disabled={disabled}>
+              {TIME_FORMATS.map((tf) => (
+                <MenuItem key={tf} value={tf}>
+                  {tf}
+                </MenuItem>
+              ))}
+            </MuiFormikSelect>
+          </Grid2>
+        </Grid2>
+
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <MuiFormikSwitch
+              name="is_my_schedule"
+              label={T.translate("edit_schedule_settings.is_my_schedule")}
+              disabled={disabled}
             />
-          </div>
-        </div>
-        <br />
-        <br />
-        <legend>Filters</legend>
-        <div className="row form-group">
-          <SortableTable
-            options={table_options}
-            data={entity.filters}
-            columns={columns}
-            dropCallback={this.updateFilterOrder}
-            orderField="order"
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <MuiFormikSwitch
+              name="only_events_with_attendee_access"
+              label={T.translate("edit_schedule_settings.access_levels_only")}
+              disabled={disabled}
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <MuiFormikSwitch
+              name="hide_past_events_with_show_always_on_schedule"
+              label={T.translate("edit_schedule_settings.hide_past_permanent")}
+              disabled={disabled}
+            />
+          </Grid2>
+        </Grid2>
+
+        <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>
+          {T.translate("edit_schedule_settings.filters")}
+        </Typography>
+        <Box sx={{ mb: 2 }}>
+          <MuiTableSortable
+            data={values.filters}
+            columns={filterColumns}
+            onReorder={handleReorderFilters}
           />
-        </div>
-        <br />
-        <br />
-        <legend>Pre Filters</legend>
-        <div className="row form-group pre-filters">
-          {enabledPreFilters.map((pf) => (
-            <div className="col-md-6" key={pf.type}>
-              <PreFilterInput
-                type={pf.type}
-                values={pf.values}
-                onChange={this.onPreFilterChange}
-                summit={summit}
-                disabled={!entity.is_enabled}
-              />
-            </div>
-          ))}
-        </div>
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
-              type="button"
-              onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
-        </div>
-      </form>
-    );
-  }
-}
+        </Box>
+
+        <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>
+          {T.translate("edit_schedule_settings.pre_filters")}
+        </Typography>
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          {values.pre_filters.map(
+            (pf, idx) =>
+              !HIDDEN_PRE_FILTERS.includes(pf.type) && (
+                <Grid2 key={pf.type} size={{ xs: 12, md: 6 }}>
+                  <PreFilterInput
+                    name={`pre_filters[${idx}]`}
+                    type={pf.type}
+                    summit={summit}
+                    disabled={disabled}
+                  />
+                </Grid2>
+              )
+          )}
+        </Grid2>
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+          <Button type="submit" variant="contained" disabled={isSaving}>
+            {T.translate("general.save")}
+          </Button>
+        </Box>
+      </Box>
+    </FormikProvider>
+  );
+};
+
+ScheduleSettingsForm.propTypes = {
+  entity: PropTypes.object.isRequired,
+  summit: PropTypes.object.isRequired,
+  errors: PropTypes.object,
+  onSubmit: PropTypes.func.isRequired
+};
 
 export default ScheduleSettingsForm;
