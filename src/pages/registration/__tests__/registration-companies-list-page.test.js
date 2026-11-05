@@ -5,6 +5,7 @@ import "@testing-library/jest-dom";
 import { renderWithRedux } from "../../../utils/test-utils";
 import RegistrationCompaniesListPage from "../registration-companies-list-page";
 import * as registrationCompaniesActions from "../../../actions/registration-companies-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   __esModule: true,
@@ -14,12 +15,35 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 jest.mock(
   "openstack-uicore-foundation/lib/components/mui/table",
   () =>
-    function MockMuiTable({ data, onDelete }) {
+    function MockMuiTable({
+      data,
+      onDelete,
+      onEdit,
+      onSort,
+      onPageChange,
+      onPerPageChange
+    }) {
       return (
         <div data-testid="mui-table">
+          <button type="button" onClick={() => onSort("name", -1)}>
+            sort
+          </button>
+          <button type="button" onClick={() => onPageChange(2)}>
+            page
+          </button>
+          <button type="button" onClick={() => onPerPageChange(50)}>
+            per-page
+          </button>
           {data.map((row) => (
             <div key={row.id} data-testid={`row-${row.id}`}>
               {row.name}
+              <button
+                type="button"
+                data-testid={`edit-${row.id}`}
+                onClick={() => onEdit(row)}
+              >
+                Edit
+              </button>
               <button
                 type="button"
                 data-testid={`delete-${row.id}`}
@@ -146,12 +170,38 @@ describe("RegistrationCompaniesListPage", () => {
     ).toHaveBeenCalledWith({ id: 99, name: "Acme Co" });
   });
 
-  it("deletes a company when the table's onDelete callback fires", async () => {
+  it("refetches with the current list params on search, sort, page and per-page changes", async () => {
     const user = userEvent.setup();
-    renderPage();
+    renderPage({ term: "foo", order: "name", orderDir: 1, perPage: 20 });
+    const { getRegistrationCompanies } = registrationCompaniesActions;
+    getRegistrationCompanies.mockClear();
 
+    const search = screen.getByPlaceholderText(
+      "registration_companies.placeholders.search_companies"
+    );
+    await user.clear(search);
+    await user.type(search, "acme{Enter}");
+    await user.click(screen.getByRole("button", { name: "sort" }));
+    await user.click(screen.getByRole("button", { name: "page" }));
+    await user.click(screen.getByRole("button", { name: "per-page" }));
+
+    expect(getRegistrationCompanies.mock.calls).toEqual([
+      ["acme", DEFAULT_CURRENT_PAGE, 20, "name", 1],
+      ["foo", DEFAULT_CURRENT_PAGE, 20, "name", -1],
+      ["foo", 2, 20, "name", 1],
+      ["foo", DEFAULT_CURRENT_PAGE, 50, "name", 1]
+    ]);
+  });
+
+  it("navigates to the company on edit and deletes it on delete", async () => {
+    const user = userEvent.setup();
+    const push = jest.fn();
+    renderPage({}, { push });
+
+    await user.click(screen.getByTestId("edit-1"));
     await user.click(screen.getByTestId("delete-1"));
 
+    expect(push).toHaveBeenCalledWith("/app/companies/1");
     expect(
       registrationCompaniesActions.deleteRegistrationCompany
     ).toHaveBeenCalledWith(1);

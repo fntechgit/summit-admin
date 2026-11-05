@@ -56,7 +56,15 @@ const RegistrationCompaniesListPage = ({
 
   const handleAddCompany = (company) => {
     if (!company) return;
-    addRegistrationCompany(company);
+    addRegistrationCompany(company).then(() =>
+      getRegistrationCompanies(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir
+      )
+    );
     setDropdownCompany(null);
   };
 
@@ -64,7 +72,15 @@ const RegistrationCompaniesListPage = ({
     importRegistrationCompaniesCSV(formData);
 
   const handleDeleteCompany = (companyId) =>
-    deleteRegistrationCompany(companyId);
+    deleteRegistrationCompany(companyId).then(() =>
+      getRegistrationCompanies(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir
+      )
+    );
 
   const handleEditCompany = (company) =>
     history.push(`/app/companies/${company.id}`);

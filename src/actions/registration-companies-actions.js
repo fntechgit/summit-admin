@@ -18,13 +18,13 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  authErrorHandler,
   escapeFilterValue,
   putRequest,
   deleteRequest,
-  showSuccessMessage
+  snackbarErrorHandler,
+  snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { getAccessTokenSafely } from "../utils/methods";
+import { getAccessTokenSafely, sequenced } from "../utils/methods";
 import { DEFAULT_PER_PAGE } from "../utils/constants";
 
 export const REQUEST_REGISTRATION_COMPANIES = "REQUEST_REGISTRATION_COMPANIES";
@@ -37,21 +37,27 @@ export const REGISTRATION_COMPANIES_IMPORTED =
 
 /* *************************   REGISTRATION COMPANIES   ***************************************** */
 
+const registrationCompaniesSeq = sequenced();
+
 export const getRegistrationCompanies =
   (
     term = null,
     page = 1,
     perPage = DEFAULT_PER_PAGE,
-    order = "id",
+    order = "name",
     orderDir = 1
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const filter = [];
+    const { isCurrent, guardedDispatch } = registrationCompaniesSeq(dispatch);
 
-    dispatch(startLoading());
+    guardedDispatch(startLoading());
+
+    const accessToken = await getAccessTokenSafely();
+
+    if (!isCurrent()) return Promise.resolve();
 
     const params = {
       page,
@@ -68,16 +74,21 @@ export const getRegistrationCompanies =
       params["filter[]"] = filter;
     }
 
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      params.order = `${orderDirSign}${order}`;
+    }
+
     return getRequest(
       createAction(REQUEST_REGISTRATION_COMPANIES),
       createAction(RECEIVE_REGISTRATION_COMPANIES),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/registration-companies`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { page, perPage, order, orderDir, term }
-    )(params)(dispatch)
+    )(params)(guardedDispatch)
       .catch(() => {})
       .finally(() => {
-        dispatch(stopLoading());
+        guardedDispatch(stopLoading());
       });
   };
 
@@ -96,14 +107,17 @@ export const addRegistrationCompany =
       createAction(REGISTRATION_COMPANY_ADDED)({ entity }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/registration-companies/${entity.id}`,
       null,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch)
       .then(() => {
         dispatch(
-          showSuccessMessage(
-            T.translate("registration_companies.registration_company_saved")
-          )
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate(
+              "registration_companies.registration_company_saved"
+            )
+          })
         );
       })
       .catch(() => {});
@@ -124,7 +138,7 @@ export const deleteRegistrationCompany =
       createAction(REGISTRATION_COMPANY_DELETED)({ companyId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/registration-companies/${companyId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch)
       .catch(() => {})
       .finally(() => {
@@ -135,10 +149,11 @@ export const deleteRegistrationCompany =
 export const importRegistrationCompaniesCSV =
   (file) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
 
     dispatch(startLoading());
+
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
       access_token: accessToken
@@ -149,7 +164,7 @@ export const importRegistrationCompaniesCSV =
       createAction(REGISTRATION_COMPANIES_IMPORTED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/registration-companies/csv`,
       file,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch)
       .then(() => {
         window.location.reload();

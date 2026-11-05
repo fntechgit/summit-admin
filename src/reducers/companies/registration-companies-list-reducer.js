@@ -25,7 +25,7 @@ import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 const DEFAULT_STATE = {
   companies: [],
   term: null,
-  order: "id",
+  order: "name",
   orderDir: 1,
   currentPage: 1,
   lastPage: 1,
