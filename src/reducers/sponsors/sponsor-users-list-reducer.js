@@ -23,7 +23,10 @@ import {
   REQUEST_SPONSOR_USERS
 } from "../../actions/sponsor-users-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { IMPORT_SPONSOR_USERS_STATUS } from "../../utils/constants";
+import {
+  IMPORT_SPONSOR_USERS_STATUS,
+  SPONSOR_SERVICES_GROUP_SLUG
+} from "../../utils/constants";
 
 const DEFAULT_STATE = {
   term: "",
@@ -60,7 +63,7 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
     case RECEIVE_SPONSOR_USER_GROUPS: {
       // filter out sponsors-services
       const userGroups = payload.response.data.filter(
-        (ug) => ug.slug !== "sponsors-services"
+        (ug) => ug.slug !== SPONSOR_SERVICES_GROUP_SLUG
       );
       return { ...state, userGroups };
     }
