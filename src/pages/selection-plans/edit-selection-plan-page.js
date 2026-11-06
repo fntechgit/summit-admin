@@ -10,203 +10,104 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * */
-import React from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
+import { Button, Grid2 } from "@mui/material";
+import AddNewButton from "openstack-uicore-foundation/lib/components/mui/add-new-button";
 import SelectionPlanForm from "../../components/forms/selection-plan-form";
 import {
-  addAllowedMemberToSelectionPlan,
-  addEventTypeSelectionPlan,
-  addTrackGroupToSelectionPlan,
-  assignExtraQuestion2SelectionPlan,
-  assignProgressFlag2SelectionPlan,
-  deleteEventTypeSelectionPlan,
-  deleteRatingType,
-  deleteSelectionPlanExtraQuestion,
-  getAllowedMembers,
-  importAllowedMembersCSV,
-  removeAllowedMemberFromSelectionPlan,
-  removeTrackGroupFromSelectionPlan,
-  unassignProgressFlagFromSelectionPlan,
-  updateProgressFlagOrder,
-  updateRatingTypeOrder,
-  updateSelectionPlanExtraQuestionOrder
+  saveSelectionPlan,
+  saveSelectionPlanSettings
 } from "../../actions/selection-plan-actions";
+import { getMarketingSettingsBySelectionPlan } from "../../actions/marketing-actions";
+import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../utils/constants";
 
 const EditSelectionPlanPage = ({
   currentSummit,
   entity,
-  allowedMembers,
-  errors,
-  onSave,
   history,
-  extraQuestionsOrder,
-  extraQuestionsOrderDir,
-  updateSelectionPlanExtraQuestionOrder,
-  unassignProgressFlagFromSelectionPlan,
-  deleteSelectionPlanExtraQuestion,
-  updateRatingTypeOrder,
-  deleteRatingType,
-  updateProgressFlagOrder,
-  addTrackGroupToSelectionPlan,
-  removeTrackGroupFromSelectionPlan,
-  addAllowedMemberToSelectionPlan,
-  addEventTypeSelectionPlan,
-  assignExtraQuestion2SelectionPlan,
-  assignProgressFlag2SelectionPlan,
-  deleteEventTypeSelectionPlan,
-  getAllowedMembers,
-  importAllowedMembersCSV,
-  removeAllowedMemberFromSelectionPlan
+  saveSelectionPlan,
+  saveSelectionPlanSettings,
+  getMarketingSettingsBySelectionPlan
 }) => {
-  const onDeleteExtraQuestion = (questionId) => {
-    const extraQuestion = entity.extra_questions.find(
-      (t) => t.id === questionId
-    );
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate(
-        "edit_selection_plan.extra_question_remove_warning"
-      )} ${extraQuestion.name}`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteSelectionPlanExtraQuestion(entity.id, questionId);
-      }
-    });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const onSave = (values) => {
+    if (isSaving) return Promise.resolve();
+    setIsSaving(true);
+    // After a create whose settings save failed, the plan is already in the
+    // store while the form still carries id 0: update it, don't create another.
+    const planValues = values.id ? values : { ...values, id: entity?.id ?? 0 };
+    return saveSelectionPlan(planValues)
+      .then((savedEntity) => {
+        if (!savedEntity?.id) return null;
+        return saveSelectionPlanSettings(
+          values.marketing_settings ?? {},
+          savedEntity.id
+        )
+          .then(() =>
+            history.push(`/app/summits/${currentSummit.id}/selection-plans`)
+          )
+          .catch(() =>
+            // Stay on the editor. Refetch so the ids of settings this attempt
+            // did create reach the form, and a retry updates them instead of
+            // re-POSTing (412).
+            getMarketingSettingsBySelectionPlan(
+              savedEntity.id,
+              null,
+              DEFAULT_CURRENT_PAGE,
+              MAX_PER_PAGE
+            )
+          );
+      })
+      .catch(() => {})
+      .finally(() => setIsSaving(false));
   };
 
-  const onUpdateExtraQuestionOrder = (questions, questionId, newOrder) => {
-    updateSelectionPlanExtraQuestionOrder(
-      entity.id,
-      questions,
-      questionId,
-      newOrder
-    );
-  };
-
-  const onEditExtraQuestion = (questionId) => {
-    history.push(
-      `/app/summits/${currentSummit.id}/selection-plans/${entity.id}/extra-questions/${questionId}`
-    );
-  };
-
-  const onAddNewExtraQuestion = () => {
-    history.push(
-      `/app/summits/${currentSummit.id}/selection-plans/${entity.id}/extra-questions/new`
-    );
-  };
-
-  const onAddRatingType = () => {
-    history.push(
-      `/app/summits/${currentSummit.id}/selection-plans/${entity.id}/rating-types/new`
-    );
-  };
-
-  const onEditRatingType = (ratingTypeId) => {
-    history.push(
-      `/app/summits/${currentSummit.id}/selection-plans/${entity.id}/rating-types/${ratingTypeId}`
-    );
-  };
-
-  const onUpdateRatingTypeOrder = (ratingTypes, ratingTypeId, newOrder) => {
-    updateRatingTypeOrder(entity.id, ratingTypes, ratingTypeId, newOrder);
-  };
-
-  const onDeleteRatingType = (ratingTypeId) => {
-    const ratingType = entity.track_chair_rating_types.find(
-      (t) => t.id === ratingTypeId
-    );
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("edit_selection_plan.rating_type_remove_warning")} ${
-        ratingType.name
-      }`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteRatingType(entity.id, ratingTypeId);
-      }
-    });
-  };
-
-  const onAddProgressFlag = () => {
-    history.push(`/app/summits/${currentSummit.id}/progress-flags`);
-  };
-
-  const onEditProgressFlag = (progressFlagId) => {
-    history.push(
-      `/app/summits/${currentSummit.id}/progress-flags#flag_id=${progressFlagId}`
-    );
-  };
-
-  const onUpdateProgressFlagOrder = (
-    progressFlags,
-    progressFlagId,
-    newOrder
-  ) => {
-    updateProgressFlagOrder(entity.id, progressFlags, progressFlagId, newOrder);
-  };
-
-  const onUnassignProgressFlag = (progressFlagId) => {
-    const ratingType = entity.allowed_presentation_action_types.find(
-      (t) => t.id === progressFlagId
-    );
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate(
-        "edit_selection_plan.presentation_action_type_remove_warning"
-      )} ${ratingType.label}`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        unassignProgressFlagFromSelectionPlan(entity.id, progressFlagId);
-      }
-    });
-  };
+  const title = entity?.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
 
   return (
-    <SelectionPlanForm
-      entity={entity}
-      allowedMembers={allowedMembers}
-      currentSummit={currentSummit}
-      errors={errors}
-      onSave={onSave}
-      extraQuestionsOrder={extraQuestionsOrder}
-      extraQuestionsOrderDir={extraQuestionsOrderDir}
-      onTrackGroupLink={addTrackGroupToSelectionPlan}
-      onTrackGroupUnLink={removeTrackGroupFromSelectionPlan}
-      updateExtraQuestionOrder={onUpdateExtraQuestionOrder}
-      onAddNewExtraQuestion={onAddNewExtraQuestion}
-      onDeleteExtraQuestion={onDeleteExtraQuestion}
-      onAddEventType={addEventTypeSelectionPlan}
-      onDeleteEventType={deleteEventTypeSelectionPlan}
-      onEditExtraQuestion={onEditExtraQuestion}
-      onAddRatingType={onAddRatingType}
-      onEditRatingType={onEditRatingType}
-      onUpdateRatingTypeOrder={onUpdateRatingTypeOrder}
-      onDeleteRatingType={onDeleteRatingType}
-      onAssignExtraQuestion2SelectionPlan={assignExtraQuestion2SelectionPlan}
-      onAddProgressFlag={onAddProgressFlag}
-      onEditProgressFlag={onEditProgressFlag}
-      onAssignProgressFlag2SelectionPlan={assignProgressFlag2SelectionPlan}
-      onUnassignProgressFlag={onUnassignProgressFlag}
-      onUpdateProgressFlagOrder={onUpdateProgressFlagOrder}
-      onAllowedMemberAdd={addAllowedMemberToSelectionPlan}
-      onAllowedMemberDelete={removeAllowedMemberFromSelectionPlan}
-      onAllowedMembersPageChange={getAllowedMembers}
-      onImportAllowedMembers={importAllowedMembersCSV}
-    />
+    <div className="container">
+      <Grid2
+        container
+        sx={{ justifyContent: "space-between", alignItems: "center" }}
+      >
+        <Grid2>
+          <h3>
+            {title} {T.translate("edit_selection_plan.selection_plan")}
+          </h3>
+        </Grid2>
+        {entity?.id > 0 && (
+          <Grid2>
+            <AddNewButton
+              onClick={() =>
+                history.push(
+                  `/app/summits/${currentSummit.id}/selection-plans/new`
+                )
+              }
+            />
+          </Grid2>
+        )}
+      </Grid2>
+      <hr />
+      <SelectionPlanForm history={history} onSave={onSave} />
+      <Grid2
+        size={12}
+        sx={{ p: 3, pt: 0, display: "flex", justifyContent: "flex-end" }}
+      >
+        <Button
+          type="submit"
+          form="selection-plan-form"
+          variant="contained"
+          disabled={isSaving}
+        >
+          {T.translate("general.save")}
+        </Button>
+      </Grid2>
+    </div>
   );
 };
 
@@ -215,24 +116,11 @@ const mapStateToProps = ({
   currentSelectionPlanState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
-  ...currentSelectionPlanState
+  entity: currentSelectionPlanState.entity
 });
 
 export default connect(mapStateToProps, {
-  addTrackGroupToSelectionPlan,
-  removeTrackGroupFromSelectionPlan,
-  addEventTypeSelectionPlan,
-  deleteEventTypeSelectionPlan,
-  updateSelectionPlanExtraQuestionOrder,
-  deleteSelectionPlanExtraQuestion,
-  updateRatingTypeOrder,
-  deleteRatingType,
-  assignExtraQuestion2SelectionPlan,
-  assignProgressFlag2SelectionPlan,
-  updateProgressFlagOrder,
-  unassignProgressFlagFromSelectionPlan,
-  addAllowedMemberToSelectionPlan,
-  removeAllowedMemberFromSelectionPlan,
-  getAllowedMembers,
-  importAllowedMembersCSV
+  saveSelectionPlan,
+  saveSelectionPlanSettings,
+  getMarketingSettingsBySelectionPlan
 })(EditSelectionPlanPage);
