@@ -25,29 +25,13 @@ describe("getRegistrationCompanies", () => {
     jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
   });
 
-  it("sends the sort as the order query param, defaulting to name ascending", async () => {
+  it("sends the sort order, starts loading before the token resolves and drops a superseded call's late response", async () => {
     const sentParams = [];
-    getRequest.mockImplementation(() => (params) => () => {
-      sentParams.push(params);
-      return Promise.resolve();
-    });
-    const store = mockStore({
-      currentSummitState: { currentSummit: { id: 1 } }
-    });
-
-    await store.dispatch(getRegistrationCompanies());
-    await store.dispatch(getRegistrationCompanies("acme", 1, 10, "name", -1));
-
-    expect(sentParams.map((p) => p.order)).toEqual(["name", "-name"]);
-  });
-
-  it("starts loading before the token resolves and drops a superseded call's late response", async () => {
     let releaseStale;
-    let callNum = 0;
     getRequest.mockImplementation(
-      (requestAC, receiveAC) => () => (dispatch) => {
-        callNum += 1;
-        if (callNum === 1) {
+      (requestAC, receiveAC) => (params) => (dispatch) => {
+        sentParams.push(params);
+        if (sentParams.length === 1) {
           return new Promise((resolve) => {
             releaseStale = () => {
               dispatch(receiveAC({ response: { data: [{ id: "stale" }] } }));
@@ -63,17 +47,16 @@ describe("getRegistrationCompanies", () => {
     const store = mockStore({
       currentSummitState: { currentSummit: { id: 1 } }
     });
-    const stalePromise = store.dispatch(
-      getRegistrationCompanies(null, 1, 10, "name", 1)
-    );
+    const stalePromise = store.dispatch(getRegistrationCompanies());
     expect(store.getActions()[0].type).toBe(START_LOADING);
     await flushPromises();
 
-    await store.dispatch(getRegistrationCompanies(null, 1, 50, "name", 1));
+    await store.dispatch(getRegistrationCompanies("acme", 1, 50, "name", -1));
     releaseStale();
     await stalePromise;
     await flushPromises();
 
+    expect(sentParams.map((p) => p.order)).toEqual(["name", "-name"]);
     const actions = store.getActions();
     const receives = actions.filter(
       (a) => a.type === RECEIVE_REGISTRATION_COMPANIES

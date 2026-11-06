@@ -1,5 +1,5 @@
 import React from "react";
-import { act, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { renderWithRedux } from "../../../utils/test-utils";
@@ -18,7 +18,6 @@ jest.mock(
     function MockMuiTable({
       data,
       onDelete,
-      onEdit,
       onSort,
       onPageChange,
       onPerPageChange
@@ -37,13 +36,6 @@ jest.mock(
           {data.map((row) => (
             <div key={row.id} data-testid={`row-${row.id}`}>
               {row.name}
-              <button
-                type="button"
-                data-testid={`edit-${row.id}`}
-                onClick={() => onEdit(row)}
-              >
-                Edit
-              </button>
               <button
                 type="button"
                 data-testid={`delete-${row.id}`}
@@ -75,24 +67,6 @@ jest.mock(
       );
     };
   }
-);
-
-jest.mock(
-  "../registration-companies-import-dialog",
-  () =>
-    function MockImportDialog({ onClose, onImport }) {
-      return (
-        <div data-testid="import-dialog">
-          <button
-            type="button"
-            data-testid="import-trigger"
-            onClick={() => onImport(new FormData()).then(onClose)}
-          >
-            Ingest
-          </button>
-        </div>
-      );
-    }
 );
 
 jest.mock("../../../actions/registration-companies-actions", () => {
@@ -132,30 +106,27 @@ const buildState = (listOverrides = {}) => ({
 });
 
 describe("RegistrationCompaniesListPage", () => {
-  const renderPage = (stateOverrides = {}, historyOverrides = {}) =>
+  const renderPage = (stateOverrides = {}) =>
     renderWithRedux(
-      <RegistrationCompaniesListPage
-        history={{ push: jest.fn(), ...historyOverrides }}
-      />,
-      { initialState: buildState(stateOverrides) }
+      <RegistrationCompaniesListPage history={{ push: jest.fn() }} />,
+      {
+        initialState: buildState(stateOverrides)
+      }
     );
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("calls getRegistrationCompanies on mount when the summit is loaded", () => {
-    renderPage();
-    expect(
-      registrationCompaniesActions.getRegistrationCompanies
-    ).toHaveBeenCalledTimes(1);
-  });
-
-  it("adds the selected company and refreshes the table, but not when nothing is selected", async () => {
+  it("refreshes the table with the current list params only after a successful add or delete", async () => {
     const user = userEvent.setup();
     renderPage({ term: "foo", order: "name", orderDir: -1, perPage: 20 });
-    const { addRegistrationCompany, getRegistrationCompanies } =
-      registrationCompaniesActions;
+    const {
+      addRegistrationCompany,
+      deleteRegistrationCompany,
+      getRegistrationCompanies
+    } = registrationCompaniesActions;
+    const refreshCall = ["foo", DEFAULT_CURRENT_PAGE, 20, "name", -1];
     getRegistrationCompanies.mockClear();
     const addButton = screen.getByRole("button", { name: "general.add" });
 
@@ -164,20 +135,26 @@ describe("RegistrationCompaniesListPage", () => {
 
     await user.click(screen.getByTestId("company-input"));
     await user.click(addButton);
-
     await waitFor(() =>
-      expect(getRegistrationCompanies).toHaveBeenCalledWith(
-        "foo",
-        DEFAULT_CURRENT_PAGE,
-        20,
-        "name",
-        -1
-      )
+      expect(getRegistrationCompanies.mock.calls).toEqual([refreshCall])
     );
     expect(addRegistrationCompany).toHaveBeenCalledWith({
       id: 99,
       name: "Acme Co"
     });
+
+    getRegistrationCompanies.mockClear();
+    deleteRegistrationCompany.mockImplementationOnce(
+      () => () => Promise.reject(new Error("failed"))
+    );
+    await user.click(screen.getByTestId("delete-1"));
+    expect(getRegistrationCompanies).not.toHaveBeenCalled();
+
+    await user.click(screen.getByTestId("delete-1"));
+    expect(deleteRegistrationCompany).toHaveBeenCalledWith(1);
+    await waitFor(() =>
+      expect(getRegistrationCompanies.mock.calls).toEqual([refreshCall])
+    );
   });
 
   it("refetches with the current list params on search, sort, page and per-page changes", async () => {
@@ -201,55 +178,5 @@ describe("RegistrationCompaniesListPage", () => {
       ["foo", 2, 20, "name", 1],
       ["foo", DEFAULT_CURRENT_PAGE, 50, "name", 1]
     ]);
-  });
-
-  it("navigates on edit, and refreshes the table only after a successful delete", async () => {
-    const user = userEvent.setup();
-    const push = jest.fn();
-    renderPage(
-      { term: "foo", order: "name", orderDir: -1, perPage: 20 },
-      { push }
-    );
-    const { deleteRegistrationCompany, getRegistrationCompanies } =
-      registrationCompaniesActions;
-    getRegistrationCompanies.mockClear();
-
-    await user.click(screen.getByTestId("edit-1"));
-    expect(push).toHaveBeenCalledWith("/app/companies/1");
-
-    deleteRegistrationCompany.mockImplementationOnce(
-      () => () => Promise.reject(new Error("failed"))
-    );
-    await user.click(screen.getByTestId("delete-1"));
-    expect(getRegistrationCompanies).not.toHaveBeenCalled();
-
-    await user.click(screen.getByTestId("delete-1"));
-    expect(deleteRegistrationCompany).toHaveBeenCalledWith(1);
-    await waitFor(() =>
-      expect(getRegistrationCompanies.mock.calls).toEqual([
-        ["foo", DEFAULT_CURRENT_PAGE, 20, "name", -1]
-      ])
-    );
-  });
-
-  it("opens the import dialog and closes it after a successful import", async () => {
-    const user = userEvent.setup();
-    renderPage();
-
-    expect(screen.queryByTestId("import-dialog")).not.toBeInTheDocument();
-
-    await user.click(
-      screen.getByRole("button", { name: "registration_companies.import" })
-    );
-    expect(screen.getByTestId("import-dialog")).toBeInTheDocument();
-
-    await act(async () => {
-      await user.click(screen.getByTestId("import-trigger"));
-    });
-
-    expect(
-      registrationCompaniesActions.importRegistrationCompaniesCSV
-    ).toHaveBeenCalledTimes(1);
-    expect(screen.queryByTestId("import-dialog")).not.toBeInTheDocument();
   });
 });

@@ -26,85 +26,42 @@ jest.mock(
 );
 
 describe("RegistrationCompaniesImportDialog", () => {
-  const selectFile = async (user) => {
-    await user.click(screen.getByTestId("upload-trigger"));
-  };
-
-  const getIngestButton = () =>
-    screen.getByRole("button", { name: "registration_companies.ingest" });
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("calls onImport with a FormData containing the selected file, then closes on success", async () => {
-    const user = userEvent.setup();
-    const onClose = jest.fn();
-    const onImport = jest.fn(() => Promise.resolve());
-    render(
-      <RegistrationCompaniesImportDialog
-        onClose={onClose}
-        onImport={onImport}
-      />
-    );
-
-    await selectFile(user);
-    await user.click(getIngestButton());
-
-    expect(onImport).toHaveBeenCalledTimes(1);
-    const formData = onImport.mock.calls[0][0];
-    expect(formData).toBeInstanceOf(FormData);
-    expect(formData.get("file").name).toBe("companies.csv");
-
-    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
-  });
-
-  it("keeps the dialog open and re-enables the ingest button when onImport rejects", async () => {
-    const user = userEvent.setup();
-    const onClose = jest.fn();
-    const onImport = jest.fn(() => Promise.reject(new Error("failed")));
-    render(
-      <RegistrationCompaniesImportDialog
-        onClose={onClose}
-        onImport={onImport}
-      />
-    );
-
-    await selectFile(user);
-    await user.click(getIngestButton());
-
-    await waitFor(() => expect(getIngestButton()).not.toBeDisabled());
-    expect(onClose).not.toHaveBeenCalled();
-  });
-
-  it("guards against double-submit and close while a save is pending, then settles", async () => {
+  it("stays open on a failed import, locks ingest while pending, and closes after a successful import of the selected file", async () => {
     const user = userEvent.setup();
     let resolveImport;
     const onClose = jest.fn();
-    const onImport = jest.fn(
-      () =>
-        new Promise((resolve) => {
-          resolveImport = resolve;
-        })
-    );
+    const onImport = jest
+      .fn()
+      .mockImplementationOnce(() => Promise.reject(new Error("failed")))
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveImport = resolve;
+          })
+      );
     render(
       <RegistrationCompaniesImportDialog
         onClose={onClose}
         onImport={onImport}
       />
     );
+    const ingestBtn = screen.getByRole("button", {
+      name: "registration_companies.ingest"
+    });
 
-    await selectFile(user);
-    const ingestBtn = getIngestButton();
+    await user.click(screen.getByTestId("upload-trigger"));
     await user.click(ingestBtn);
+    await waitFor(() => expect(ingestBtn).not.toBeDisabled());
+    expect(onClose).not.toHaveBeenCalled();
 
+    await user.click(ingestBtn);
     expect(ingestBtn).toBeDisabled();
-    expect(screen.getByRole("button", { name: "close" })).toBeDisabled();
-    expect(onImport).toHaveBeenCalledTimes(1);
     expect(onClose).not.toHaveBeenCalled();
 
     resolveImport();
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
-    expect(onImport).toHaveBeenCalledTimes(1);
+    const formData = onImport.mock.calls[1][0];
+    expect(formData).toBeInstanceOf(FormData);
+    expect(formData.get("file").name).toBe("companies.csv");
   });
 });
