@@ -99,6 +99,7 @@ const BulkEditDataGrid = ({
   importItems,
   importLabel,
   filter,
+  appliedFilters,
   onExport,
   searchProps,
   noRowsLabel
@@ -326,7 +327,6 @@ const BulkEditDataGrid = ({
           onSortModelChange={handleSortModelChange}
           disableColumnSorting={editEnabled}
           localeText={{
-            toolbarColumns: "",
             ...(noRowsLabel && { noRowsLabel })
           }}
           hideFooter
@@ -360,6 +360,7 @@ const BulkEditDataGrid = ({
               importItems,
               importLabel,
               filter,
+              appliedFilters,
               onExport,
               searchProps,
               editEnabled,
@@ -432,6 +433,8 @@ BulkEditDataGrid.propTypes = {
   importLabel: PropTypes.string,
   // rendered in the grid toolbar, e.g. a uicore <GridFilter />
   filter: PropTypes.node,
+  // shown after the columns and filter buttons, e.g. applied filter chips
+  appliedFilters: PropTypes.node,
   onExport: PropTypes.func,
   // same shape as GridToolbar's searchProps
   searchProps: PropTypes.shape({
@@ -462,6 +465,7 @@ BulkEditDataGrid.defaultProps = {
   importItems: [],
   importLabel: "",
   filter: null,
+  appliedFilters: null,
   onExport: null,
   searchProps: null,
   noRowsLabel: null

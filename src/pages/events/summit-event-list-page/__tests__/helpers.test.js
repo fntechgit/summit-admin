@@ -3,7 +3,8 @@ import {
   toApiSortKey,
   toUiSortKey,
   getOptionalColumns,
-  getCriterias
+  getCriterias,
+  getFilterChipLabel
 } from "../helpers";
 
 // formatDuration relies on the moment-duration-format plugin, which is only
@@ -245,5 +246,48 @@ describe("getCriterias", () => {
     expect(
       customParser({ operator: OPERATORS.HAS_NOT.value, value: [1, 2] })
     ).toEqual(["has_not_media_upload_with_type==1&&2"]);
+  });
+});
+
+describe("getFilterChipLabel", () => {
+  const summit = {
+    selection_plans: [],
+    locations: [
+      { id: 2, name: "Room A" },
+      { id: 7, name: "Room B" }
+    ],
+    tracks: [],
+    event_types: [],
+    presentation_action_types: []
+  };
+  const criterias = getCriterias(summit, []);
+
+  test("shows option labels for a multiple select instead of ids", () => {
+    const label = getFilterChipLabel(
+      { criteria: "location_id", operator: OPERATORS.IS.value, value: [2, 7] },
+      criterias
+    );
+    expect(label).toMatch(/Room A, Room B$/);
+  });
+
+  test("shows the label of async option objects", () => {
+    const label = getFilterChipLabel(
+      {
+        criteria: "tags",
+        operator: OPERATORS.IS.value,
+        value: [{ value: 1, label: "keynote" }]
+      },
+      criterias
+    );
+    expect(label).toMatch(/keynote$/);
+  });
+
+  test("uses the criteria's own operator label where operator values collide", () => {
+    const label = getFilterChipLabel(
+      { criteria: "created", operator: OPERATORS.BEFORE.value, value: 0 },
+      criterias
+    );
+    expect(label).toContain(` ${OPERATORS.BEFORE.label} `);
+    expect(OPERATORS.BEFORE.label).not.toBe(OPERATORS.LESS_OR_EQUAL.label);
   });
 });

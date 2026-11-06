@@ -15,6 +15,8 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import { Box, Chip } from "@mui/material";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import {
   GridFilter,
   useGridFilter
@@ -48,6 +50,7 @@ import ImportMUXModal from "./components/ImportMUXModal";
 import {
   formatEventData,
   getCriterias,
+  getFilterChipLabel,
   getOptionalColumns,
   packJoinOperatorIntoCriteria,
   toApiSortKey,
@@ -87,8 +90,14 @@ const SummitEventListPage = ({
   // remembered (selectedColumns), the default ones reset each visit
   const [gridColumnVisibility, setGridColumnVisibility] = useState({});
   const [selectedFilterCriteria, setSelectedFilterCriteria] = useState(null);
-  const { parsedFilter, resetFilters, filterValues, setFilters, joinOperator } =
-    useGridFilter(FILTER_ID);
+  const {
+    parsedFilter,
+    resetFilters,
+    filterValues,
+    valuesWithIds,
+    setFilters,
+    joinOperator
+  } = useGridFilter(FILTER_ID);
 
   // eslint-disable-next-line no-underscore-dangle
   const _getEvents = (params = {}) => {
@@ -226,6 +235,12 @@ const SummitEventListPage = ({
       }
     });
 
+  const handleRemoveFilter = (id) =>
+    setFilters(
+      valuesWithIds.filter((f) => f.id !== id),
+      joinOperator
+    );
+
   const eventTypeOptions = buildNameIdDDL(currentSummit.event_types);
 
   const fixedColumns = [
@@ -301,6 +316,7 @@ const SummitEventListPage = ({
   if (!currentSummit.id) return <div />;
 
   const tableData = events.map((e) => formatEventData(e, currentSummit));
+  const criterias = getCriterias(currentSummit, mediaUploadTypes);
 
   return (
     <div className="container table-container summit-event-list-filters">
@@ -316,11 +332,28 @@ const SummitEventListPage = ({
           columns={tableColumns}
           columnVisibilityModel={columnVisibilityModel}
           onColumnVisibilityModelChange={handleColumnVisibilityModelChange}
-          filter={
-            <GridFilter
-              id={FILTER_ID}
-              criterias={getCriterias(currentSummit, mediaUploadTypes)}
-            />
+          filter={<GridFilter id={FILTER_ID} criterias={criterias} />}
+          appliedFilters={
+            filterValues.length > 0 && (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: 1
+                }}
+              >
+                {valuesWithIds.map((filter) => (
+                  <Chip
+                    key={filter.id}
+                    size="small"
+                    icon={<FilterAltIcon />}
+                    label={getFilterChipLabel(filter, criterias)}
+                    onDelete={() => handleRemoveFilter(filter.id)}
+                  />
+                ))}
+              </Box>
+            )
           }
           views={
             <SavedViews

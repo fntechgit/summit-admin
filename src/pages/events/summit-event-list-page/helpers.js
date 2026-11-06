@@ -1105,3 +1105,32 @@ export const getCriterias = (summit, mediaUploadTypes) => [
     }
   }
 ];
+
+// chip text for an applied filter, e.g. "Location: is Room A, Room B"
+export const getFilterChipLabel = (filter, criterias) => {
+  const criteria = criterias.find(({ key }) => key === filter.criteria);
+  if (!criteria) return filter.criteria;
+
+  // the criteria's own operators, since BEFORE and LESS_OR_EQUAL share "<="
+  const operator = criteria.operators.find(
+    (op) => op.value === filter.operator
+  );
+  const { type, props } = criteria.values;
+  const options =
+    typeof props?.options === "function"
+      ? props.options(filter.value)
+      : props?.options;
+
+  const toLabel = (v) => {
+    // async inputs store option objects
+    if (v != null && typeof v === "object") return v.label;
+    if (type === "datetime")
+      return formatDate(v, "LOC", "MMMM Do YYYY, h:mm a");
+    return options?.find((o) => o.value === v)?.label ?? v;
+  };
+  const values = Array.isArray(filter.value) ? filter.value : [filter.value];
+
+  return `${criteria.label}: ${operator?.label ?? filter.operator} ${values
+    .map(toLabel)
+    .join(", ")}`;
+};
