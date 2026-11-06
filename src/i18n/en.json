@@ -2121,8 +2121,11 @@
     "import": "Import",
     "import_companies": "Import Companies Data",
     "ingest": "Ingest Data",
+    "import_format": "Format must be as described using column name and a description of the column content values:",
+    "import_format_name": "company names",
     "placeholders": {
-      "search_companies": "Search by Company Name"
+      "search_companies": "Search by Company Name",
+      "select_company": "Select a company to add"
     }
   },
   "edit_push_notification": {

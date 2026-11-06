@@ -18,8 +18,9 @@ import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input";
-import GridToolbar from "../../components/mui/grid-toolbar";
+import { FormikProvider, useFormik } from "formik";
+import CompanyInputMUI from "openstack-uicore-foundation/lib/components/mui/formik-inputs/company-input";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import RegistrationCompaniesImportDialog from "./registration-companies-import-dialog";
 import { getSummitById } from "../../actions/summit-actions";
 import {
@@ -45,42 +46,41 @@ const RegistrationCompaniesListPage = ({
   importRegistrationCompaniesCSV,
   history
 }) => {
-  const [dropdownCompany, setDropdownCompany] = useState(null);
   const [showImportDialog, setShowImportDialog] = useState(false);
 
   useEffect(() => {
     if (currentSummit) getRegistrationCompanies();
   }, [currentSummit]);
 
-  const handleChange = (ev) => setDropdownCompany(ev.target.value);
-
-  const handleAddCompany = (company) => {
-    if (!company) return;
-    addRegistrationCompany(company).then(() =>
-      getRegistrationCompanies(
-        term,
-        DEFAULT_CURRENT_PAGE,
-        perPage,
-        order,
-        orderDir
-      )
+  const refreshCompanies = () =>
+    getRegistrationCompanies(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir
     );
-    setDropdownCompany(null);
-  };
+
+  const formik = useFormik({
+    initialValues: { company: null },
+    onSubmit: ({ company }, { resetForm }) => {
+      if (!company?.id) return Promise.resolve();
+      return addRegistrationCompany(company)
+        .then(() => {
+          resetForm();
+          return refreshCompanies();
+        })
+        .catch(() => {});
+    }
+  });
 
   const handleImportCompanies = (formData) =>
     importRegistrationCompaniesCSV(formData);
 
   const handleDeleteCompany = (companyId) =>
-    deleteRegistrationCompany(companyId).then(() =>
-      getRegistrationCompanies(
-        term,
-        DEFAULT_CURRENT_PAGE,
-        perPage,
-        order,
-        orderDir
-      )
-    );
+    deleteRegistrationCompany(companyId)
+      .then(refreshCompanies)
+      .catch(() => {});
 
   const handleEditCompany = (company) =>
     history.push(`/app/companies/${company.id}`);
@@ -142,16 +142,22 @@ const RegistrationCompaniesListPage = ({
           sx={{ display: "flex", gap: 1, flexGrow: 1, justifyContent: "end" }}
         >
           <Box sx={{ flexGrow: 1, maxWidth: 350 }}>
-            <CompanyInput
-              id="registration-company"
-              value={dropdownCompany}
-              onChange={handleChange}
-              summitId={currentSummit.id}
-            />
+            <FormikProvider value={formik}>
+              <CompanyInputMUI
+                id="registration-company"
+                name="company"
+                size="small"
+                sx={{ "& .MuiOutlinedInput-root": { height: "36px" } }}
+                placeholder={T.translate(
+                  "registration_companies.placeholders.select_company"
+                )}
+              />
+            </FormikProvider>
           </Box>
           <Button
             variant="contained"
-            onClick={() => handleAddCompany(dropdownCompany)}
+            onClick={formik.handleSubmit}
+            disabled={formik.isSubmitting}
             startIcon={<AddIcon />}
           >
             {T.translate("general.add")}
