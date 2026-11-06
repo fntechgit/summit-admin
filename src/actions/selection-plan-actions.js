@@ -132,6 +132,7 @@ export const getSelectionPlan =
   (selectionPlanId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { isCurrent, guardedDispatch } = getSelectionPlanSeq(dispatch);
+    invalidateSelectionPlanSettings();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
 
@@ -172,6 +173,7 @@ export const getSelectionPlan =
 export const resetSelectionPlanForm = () => (dispatch) => {
   getSelectionPlanSeq(dispatch); // invalidates any in-flight getSelectionPlan
   invalidateSelectionPlanSettings(); // invalidate  any in-flight settings fetch
+  dispatch(stopLoading());
   dispatch(createAction(RESET_SELECTION_PLAN_FORM)({}));
 };
 

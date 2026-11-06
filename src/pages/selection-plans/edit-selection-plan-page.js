@@ -40,10 +40,10 @@ const EditSelectionPlanPage = ({
           values.marketing_settings ?? {},
           savedEntity.id
         )
-          .catch(() => {})
           .then(() =>
             history.push(`/app/summits/${currentSummit.id}/selection-plans`)
-          );
+          )
+          .catch(() => {});
       })
       .catch(() => {})
       .finally(() => setIsSaving(false));
