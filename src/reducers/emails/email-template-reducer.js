@@ -69,6 +69,18 @@ const normalizeEntityFields = (entity) => {
   return normalized;
 };
 
+// mailing-api 412s carry a flat list of "field: message" strings -- map them
+// onto field keys so the form can show each one under its input. Messages the
+// API leaves unprefixed (it skips the prefix when the text already names the
+// field) have no key to map to and only show in the snackbar.
+const toFieldErrors = (errors) => {
+  if (!Array.isArray(errors)) return errors;
+  return errors.reduce((acc, error) => {
+    const [field, ...rest] = String(error).split(": ");
+    return rest.length > 0 ? { ...acc, [field]: rest.join(": ") } : acc;
+  }, {});
+};
+
 const emailTemplateReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
@@ -103,6 +115,7 @@ const emailTemplateReducer = (state = DEFAULT_STATE, action) => {
           original_mjml_content: entity.mjml_content,
           original_html_content: entity.html_content
         },
+        errors: {},
         preview: null,
         render_errors: [],
         templateLoading: false,
@@ -121,6 +134,7 @@ const emailTemplateReducer = (state = DEFAULT_STATE, action) => {
           original_mjml_content: entity.mjml_content,
           original_html_content: entity.html_content
         },
+        errors: {},
         preview: null,
         render_errors: [],
         templateLoading: false,
@@ -169,7 +183,7 @@ const emailTemplateReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, json_data: payload };
 
     case VALIDATE:
-      return { ...state, errors: payload.errors };
+      return { ...state, errors: toFieldErrors(payload.errors) };
 
     default:
       return state;
