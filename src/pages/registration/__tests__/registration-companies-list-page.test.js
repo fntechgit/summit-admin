@@ -1,5 +1,5 @@
 import React from "react";
-import { act, screen } from "@testing-library/react";
+import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { renderWithRedux } from "../../../utils/test-utils";
@@ -59,23 +59,22 @@ jest.mock(
 );
 
 jest.mock(
-  "openstack-uicore-foundation/lib/components/inputs/company-input",
-  () =>
-    function MockCompanyInput({ id, onChange }) {
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/company-input",
+  () => {
+    const { useField } = jest.requireActual("formik");
+    return function MockCompanyInput({ name }) {
+      const [, , helpers] = useField(name);
       return (
         <button
           type="button"
           data-testid="company-input"
-          onClick={() =>
-            onChange({
-              target: { id, value: { id: 99, name: "Acme Co" } }
-            })
-          }
+          onClick={() => helpers.setValue({ id: 99, name: "Acme Co" })}
         >
           pick company
         </button>
       );
-    }
+    };
+  }
 );
 
 jest.mock(
@@ -152,22 +151,33 @@ describe("RegistrationCompaniesListPage", () => {
     ).toHaveBeenCalledTimes(1);
   });
 
-  it("links an existing company to the summit via CompanyInput + Add, but not when nothing is selected", async () => {
+  it("adds the selected company and refreshes the table, but not when nothing is selected", async () => {
     const user = userEvent.setup();
-    renderPage();
+    renderPage({ term: "foo", order: "name", orderDir: -1, perPage: 20 });
+    const { addRegistrationCompany, getRegistrationCompanies } =
+      registrationCompaniesActions;
+    getRegistrationCompanies.mockClear();
     const addButton = screen.getByRole("button", { name: "general.add" });
 
     await user.click(addButton);
-    expect(
-      registrationCompaniesActions.addRegistrationCompany
-    ).not.toHaveBeenCalled();
+    expect(addRegistrationCompany).not.toHaveBeenCalled();
 
     await user.click(screen.getByTestId("company-input"));
     await user.click(addButton);
 
-    expect(
-      registrationCompaniesActions.addRegistrationCompany
-    ).toHaveBeenCalledWith({ id: 99, name: "Acme Co" });
+    await waitFor(() =>
+      expect(getRegistrationCompanies).toHaveBeenCalledWith(
+        "foo",
+        DEFAULT_CURRENT_PAGE,
+        20,
+        "name",
+        -1
+      )
+    );
+    expect(addRegistrationCompany).toHaveBeenCalledWith({
+      id: 99,
+      name: "Acme Co"
+    });
   });
 
   it("refetches with the current list params on search, sort, page and per-page changes", async () => {
@@ -193,18 +203,33 @@ describe("RegistrationCompaniesListPage", () => {
     ]);
   });
 
-  it("navigates to the company on edit and deletes it on delete", async () => {
+  it("navigates on edit, and refreshes the table only after a successful delete", async () => {
     const user = userEvent.setup();
     const push = jest.fn();
-    renderPage({}, { push });
+    renderPage(
+      { term: "foo", order: "name", orderDir: -1, perPage: 20 },
+      { push }
+    );
+    const { deleteRegistrationCompany, getRegistrationCompanies } =
+      registrationCompaniesActions;
+    getRegistrationCompanies.mockClear();
 
     await user.click(screen.getByTestId("edit-1"));
-    await user.click(screen.getByTestId("delete-1"));
-
     expect(push).toHaveBeenCalledWith("/app/companies/1");
-    expect(
-      registrationCompaniesActions.deleteRegistrationCompany
-    ).toHaveBeenCalledWith(1);
+
+    deleteRegistrationCompany.mockImplementationOnce(
+      () => () => Promise.reject(new Error("failed"))
+    );
+    await user.click(screen.getByTestId("delete-1"));
+    expect(getRegistrationCompanies).not.toHaveBeenCalled();
+
+    await user.click(screen.getByTestId("delete-1"));
+    expect(deleteRegistrationCompany).toHaveBeenCalledWith(1);
+    await waitFor(() =>
+      expect(getRegistrationCompanies.mock.calls).toEqual([
+        ["foo", DEFAULT_CURRENT_PAGE, 20, "name", -1]
+      ])
+    );
   });
 
   it("opens the import dialog and closes it after a successful import", async () => {

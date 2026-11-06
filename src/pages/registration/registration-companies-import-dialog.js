@@ -14,6 +14,7 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
+import { Box, Typography } from "@mui/material";
 import CustomDialog from "openstack-uicore-foundation/lib/components/mui/custom-dialog";
 import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
 
@@ -37,31 +38,25 @@ const RegistrationCompaniesImportDialog = ({ onClose, onImport }) => {
         disabled: !importFile
       }}
     >
-      <div className="row">
-        <div className="col-md-12">
-          Format must be as described using
-          <br />
-          column name
-          <br />
-          description of column content values
-          <br />
-          <br />
-          <b>name</b>
-          <br />
-          company names
-          <br />
-        </div>
-        <div className="col-md-12 invitation-import-upload-wrapper">
-          <UploadInput
-            value={importFile && importFile.name}
-            handleUpload={(file) => setImportFile(file)}
-            handleRemove={() => setImportFile(null)}
-            className="dropzone col-md-6"
-            multiple={false}
-            accept=".csv"
-          />
-        </div>
-      </div>
+      <Typography variant="body2" sx={{ mb: 2 }}>
+        {T.translate("registration_companies.import_format")}
+      </Typography>
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+          name
+        </Typography>
+        <Typography variant="body2">
+          {T.translate("registration_companies.import_format_name")}
+        </Typography>
+      </Box>
+      <UploadInput
+        value={importFile && importFile.name}
+        handleUpload={(file) => setImportFile(file)}
+        handleRemove={() => setImportFile(null)}
+        className="dropzone"
+        multiple={false}
+        accept=".csv"
+      />
     </CustomDialog>
   );
 };

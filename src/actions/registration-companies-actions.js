@@ -95,6 +95,7 @@ export const getRegistrationCompanies =
 export const addRegistrationCompany =
   (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
+    dispatch(startLoading());
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
 
@@ -120,12 +121,13 @@ export const addRegistrationCompany =
           })
         );
       })
-      .catch(() => {});
+      .finally(() => dispatch(stopLoading()));
   };
 
 export const deleteRegistrationCompany =
   (companyId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
+    dispatch(startLoading());
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
 
@@ -139,11 +141,9 @@ export const deleteRegistrationCompany =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/registration-companies/${companyId}`,
       null,
       snackbarErrorHandler
-    )(params)(dispatch)
-      .catch(() => {})
-      .finally(() => {
-        dispatch(stopLoading());
-      });
+    )(params)(dispatch).finally(() => {
+      dispatch(stopLoading());
+    });
   };
 
 export const importRegistrationCompaniesCSV =
