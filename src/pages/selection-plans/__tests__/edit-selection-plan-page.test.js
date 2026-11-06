@@ -131,7 +131,7 @@ describe("EditSelectionPlanPage", () => {
     );
   });
 
-  it("still redirects and re-enables the save button when saving marketing settings fails", async () => {
+  it("stays on the editor and re-enables the save button when saving marketing settings fails", async () => {
     saveSelectionPlan.mockReturnValue(() => Promise.resolve({ id: 42 }));
     saveSelectionPlanSettings.mockReturnValue(() =>
       Promise.reject(new Error("settings failed"))
@@ -152,9 +152,7 @@ describe("EditSelectionPlanPage", () => {
       await flushPromises();
     });
 
-    expect(mockHistory.push).toHaveBeenCalledWith(
-      "/app/summits/1/selection-plans"
-    );
+    expect(mockHistory.push).not.toHaveBeenCalled();
     expect(
       screen.getByRole("button", { name: "general.save" })
     ).not.toBeDisabled();

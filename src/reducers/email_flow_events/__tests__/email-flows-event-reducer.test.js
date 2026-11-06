@@ -7,7 +7,8 @@ jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
 }));
 jest.mock("../../../utils/methods", () => ({
   getAccessTokenSafely: jest.fn(),
-  escapeFilterValue: jest.fn((v) => v)
+  escapeFilterValue: jest.fn((v) => v),
+  sequenced: jest.requireActual("../../../utils/methods").sequenced
 }));
 jest.mock("../../../history", () => ({}));
 
