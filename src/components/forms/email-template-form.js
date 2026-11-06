@@ -333,17 +333,24 @@ const EmailTemplateForm = ({
   // edit undone back to the stored mjml can put back the stored html that
   // matches it -- without clobbering html the user edited by hand
   const htmlCompiledRef = useRef(false);
+  // the mjml the current html_content was derived from; a bare mode switch
+  // recompiles the same mjml and must not clobber html typed by hand
+  const lastCompiledMjmlRef = useRef(values.mjml_content);
 
   useEffect(() => {
     if (!mjmlCompileResult) return;
     setMjmlRenderError(mjmlCompileResult.error);
     if (mjmlCompileResult.htmlContent !== null) {
-      formik.setFieldValue(
-        "html_content",
-        mjmlCompileResult.htmlContent,
-        false
-      );
-      htmlCompiledRef.current = true;
+      const mjmlChanged = lastCompiledMjmlRef.current !== values.mjml_content;
+      lastCompiledMjmlRef.current = values.mjml_content;
+      if (mjmlChanged || htmlCompiledRef.current || !values.html_content) {
+        formik.setFieldValue(
+          "html_content",
+          mjmlCompileResult.htmlContent,
+          false
+        );
+        htmlCompiledRef.current = true;
+      }
     } else if (!mjmlEdited && htmlCompiledRef.current) {
       formik.setFieldValue("html_content", values.original_html_content, false);
       htmlCompiledRef.current = false;
@@ -379,6 +386,7 @@ const EmailTemplateForm = ({
   };
 
   const handleCodeMirrorChange = (value) => {
+    if (!mjmlEditor) htmlCompiledRef.current = false;
     setFieldValue(mjmlEditor ? "mjml_content" : "html_content", value);
   };
 

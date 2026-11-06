@@ -387,6 +387,53 @@ describe("EmailTemplateForm mjml validation", () => {
     );
   });
 
+  it("keeps the HTML typed on a new template when the MJML sample is cleared afterwards", async () => {
+    mjml2html.mockImplementation((src) => {
+      if (!src.trim()) throw new Error("empty mjml");
+      return { html: "<p>compiled sample</p>" };
+    });
+    const props = baseProps({
+      ...mjmlEntity,
+      id: 0,
+      mjml_content: "",
+      html_content: "",
+      original_mjml_content: "",
+      original_html_content: ""
+    });
+    render(<EmailTemplateForm {...props} />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByText("emails.display_html"));
+    });
+    await act(async () => {
+      fireEvent.change(screen.getByTestId("editor-html_content"), {
+        target: { value: "<p>typed by hand</p>" }
+      });
+    });
+    // clear the seeded sample so the typed HTML becomes the effective content
+    await act(async () => {
+      fireEvent.click(screen.getByText("emails.display_mjml"));
+    });
+    await act(async () => {
+      fireEvent.change(screen.getByTestId("editor-mjml_content"), {
+        target: { value: "" }
+      });
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByText("emails.display_html"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "general.save" }));
+    });
+
+    expect(props.onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mjml_content: "",
+        html_content: "<p>typed by hand</p>"
+      })
+    );
+  });
+
   it("puts back the stored HTML when an MJML edit is undone", async () => {
     mjml2html.mockImplementation(() => ({ html: "<p>compiled edit</p>" }));
     const entity = {
