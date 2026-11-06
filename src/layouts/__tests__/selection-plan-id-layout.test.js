@@ -47,7 +47,7 @@ jest.mock("../../pages/selection-plans/edit-selection-plan-page", () => ({
 const SUMMIT_ID = 1;
 const PLAN_A = "5";
 
-const renderAt = (path) => {
+const renderAt = (path, entity = { id: 0 }) => {
   const history = createMemoryHistory({ initialEntries: [path] });
   const utils = renderWithRedux(
     <Router history={history}>
@@ -66,7 +66,7 @@ const renderAt = (path) => {
     {
       initialState: {
         currentSummitState: { currentSummit: { id: SUMMIT_ID } },
-        currentSelectionPlanState: { entity: { id: 0 } }
+        currentSelectionPlanState: { entity }
       }
     }
   );
@@ -125,5 +125,17 @@ describe("SelectionPlanIdLayout - superseded load", () => {
       1,
       expect.any(Number)
     );
+  });
+
+  it("keeps the editor mounted on /new once the plan has been created", async () => {
+    // The store holds the created plan (SELECTION_PLAN_ADDED) while the route
+    // is still /new, as after a create whose settings save failed.
+    const { getByTestId } = renderAt(
+      `/app/summits/${SUMMIT_ID}/selection-plans/new`,
+      { id: 42 }
+    );
+    await act(async () => flushPromises());
+
+    expect(getByTestId("edit-page")).toBeInTheDocument();
   });
 });

@@ -148,6 +148,26 @@ const SelectionPlanForm = (props) => {
     propsEntity.allowed_presentation_action_types
   ]);
 
+  // Pick up config-value ids from a settings refetch (after a partly failed
+  // save) while keeping the user's unsaved values, so a retry PUTs instead
+  // of re-POSTing the settings that were already created.
+  useEffect(() => {
+    formik.setValues((current) => ({
+      ...current,
+      marketing_settings: Object.fromEntries(
+        Object.entries(current.marketing_settings ?? {}).map(
+          ([key, setting]) => [
+            key,
+            {
+              ...setting,
+              id: propsEntity.marketing_settings?.[key]?.id || setting.id
+            }
+          ]
+        )
+      )
+    }));
+  }, [propsEntity.marketing_settings]);
+
   // Reset tab if allowed_members becomes unavailable
   useEffect(() => {
     if (formik.values.is_hidden && activeTab === "allowed_members") {

@@ -15,6 +15,8 @@ import React from "react";
 import { screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
+import { applyMiddleware, createStore } from "redux";
+import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
 import { renderWithRedux } from "../../../utils/test-utils";
 import EditSelectionPlanPage from "../edit-selection-plan-page";
@@ -22,11 +24,17 @@ import {
   saveSelectionPlan,
   saveSelectionPlanSettings
 } from "../../../actions/selection-plan-actions";
+import { getMarketingSettingsBySelectionPlan } from "../../../actions/marketing-actions";
 
 jest.mock("../../../actions/selection-plan-actions", () => ({
   __esModule: true,
   saveSelectionPlan: jest.fn(),
   saveSelectionPlanSettings: jest.fn()
+}));
+
+jest.mock("../../../actions/marketing-actions", () => ({
+  __esModule: true,
+  getMarketingSettingsBySelectionPlan: jest.fn()
 }));
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
@@ -40,17 +48,19 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 // entity, so the stub reads it from there too, mirroring the real component.
 jest.mock("../../../components/forms/selection-plan-form", () => {
   const { useSelector } = jest.requireActual("react-redux");
+  const { useState } = jest.requireActual("react");
   return {
     __esModule: true,
     default: ({ onSave }) => {
-      const entity = useSelector(
-        (state) => state.currentSelectionPlanState.entity
+      // Captured once at mount, like the real form's Formik initialValues.
+      const [initialId] = useState(
+        useSelector((state) => state.currentSelectionPlanState.entity).id
       );
       return (
         <div data-testid="selection-plan-form">
           <button
             type="button"
-            onClick={() => onSave({ id: entity.id, marketing_settings: {} })}
+            onClick={() => onSave({ id: initialId, marketing_settings: {} })}
           >
             save
           </button>
@@ -131,31 +141,64 @@ describe("EditSelectionPlanPage", () => {
     );
   });
 
-  it("stays on the editor and re-enables the save button when saving marketing settings fails", async () => {
+  it("stays on a created plan when its settings fail, refetches them, and retries as an update", async () => {
     saveSelectionPlan.mockReturnValue(() => Promise.resolve({ id: 42 }));
     saveSelectionPlanSettings.mockReturnValue(() =>
       Promise.reject(new Error("settings failed"))
     );
-
+    getMarketingSettingsBySelectionPlan.mockReturnValue(() =>
+      Promise.resolve()
+    );
+    // Real store so SELECTION_PLAN_ADDED's effect (entity gets the new id)
+    // can be simulated and re-rendered.
+    const store = createStore(
+      (state, action) =>
+        action.type === "SET_ENTITY"
+          ? { ...state, ...stateFor(action.entity) }
+          : state,
+      stateFor({ id: 0 }),
+      applyMiddleware(thunk)
+    );
     renderWithRedux(
       <MemoryRouter>
         <EditSelectionPlanPage history={mockHistory} />
       </MemoryRouter>,
-      {
-        initialState: stateFor({ id: 0 })
-      }
+      { store }
     );
 
     await act(async () => {
       await userEvent.click(screen.getByRole("button", { name: "save" }));
       await flushPromises();
-      await flushPromises();
     });
 
     expect(mockHistory.push).not.toHaveBeenCalled();
+    expect(getMarketingSettingsBySelectionPlan).toHaveBeenCalledWith(
+      42,
+      null,
+      1,
+      expect.any(Number)
+    );
     expect(
       screen.getByRole("button", { name: "general.save" })
     ).not.toBeDisabled();
+
+    // The form still carries id 0; the store now holds the created plan.
+    act(() => {
+      store.dispatch({ type: "SET_ENTITY", entity: { id: 42 } });
+    });
+    saveSelectionPlanSettings.mockReturnValue(() => Promise.resolve());
+
+    await act(async () => {
+      await userEvent.click(screen.getByRole("button", { name: "save" }));
+      await flushPromises();
+    });
+
+    expect(saveSelectionPlan).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: 42 })
+    );
+    expect(mockHistory.push).toHaveBeenCalledWith(
+      "/app/summits/1/selection-plans"
+    );
   });
 
   it("does not save twice while a save is already in flight", async () => {

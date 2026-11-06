@@ -1,7 +1,8 @@
 import React from "react";
-import { screen, within, waitFor } from "@testing-library/react";
+import { act, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import { createStore } from "redux";
 import { renderWithRedux } from "../../../utils/test-utils";
 import SelectionPlanForm from "../selection-plan-form";
 import {
@@ -252,6 +253,47 @@ describe("SelectionPlanForm - save behaviour", () => {
     const [payload] = onSave.mock.calls[0];
     expect(payload.submission_begin_date).toBe(0);
     expect(payload.voting_begin_date).toBe(0);
+  });
+});
+
+describe("SelectionPlanForm - marketing settings ids", () => {
+  it("takes refetched setting ids from the store but keeps the user's values", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    const entity = {
+      ...existingEntity,
+      marketing_settings: { cfp_landing_page_title: { id: 0, value: "mine" } }
+    };
+    const store = createStore(
+      (state, action) =>
+        action.type === "SET_ENTITY"
+          ? { ...state, ...stateFor(action.entity) }
+          : state,
+      stateFor(entity)
+    );
+    renderWithRedux(
+      // eslint-disable-next-line react/jsx-props-no-spreading
+      <FormWithButton {...baseProps} onSave={onSave} />,
+      { store }
+    );
+
+    // Settings refetch after a partly failed save: the key now exists.
+    act(() => {
+      store.dispatch({
+        type: "SET_ENTITY",
+        entity: {
+          ...entity,
+          marketing_settings: {
+            cfp_landing_page_title: { id: 7, value: "server" }
+          }
+        }
+      });
+    });
+    await userEvent.click(screen.getByRole("button", { name: "general.save" }));
+
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][0].marketing_settings).toEqual({
+      cfp_landing_page_title: { id: 7, value: "mine" }
+    });
   });
 });
 

@@ -14,26 +14,32 @@ import React, { useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Button, Grid2 } from "@mui/material";
-import AddNewButtonMui from "../../components/buttons/add-new-button-mui";
+import AddNewButton from "openstack-uicore-foundation/lib/components/mui/add-new-button";
 import SelectionPlanForm from "../../components/forms/selection-plan-form";
 import {
   saveSelectionPlan,
   saveSelectionPlanSettings
 } from "../../actions/selection-plan-actions";
+import { getMarketingSettingsBySelectionPlan } from "../../actions/marketing-actions";
+import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../utils/constants";
 
 const EditSelectionPlanPage = ({
   currentSummit,
   entity,
   history,
   saveSelectionPlan,
-  saveSelectionPlanSettings
+  saveSelectionPlanSettings,
+  getMarketingSettingsBySelectionPlan
 }) => {
   const [isSaving, setIsSaving] = useState(false);
 
   const onSave = (values) => {
     if (isSaving) return Promise.resolve();
     setIsSaving(true);
-    return saveSelectionPlan(values)
+    // After a create whose settings save failed, the plan is already in the
+    // store while the form still carries id 0: update it, don't create another.
+    const planValues = values.id ? values : { ...values, id: entity?.id ?? 0 };
+    return saveSelectionPlan(planValues)
       .then((savedEntity) => {
         if (!savedEntity?.id) return null;
         return saveSelectionPlanSettings(
@@ -43,7 +49,17 @@ const EditSelectionPlanPage = ({
           .then(() =>
             history.push(`/app/summits/${currentSummit.id}/selection-plans`)
           )
-          .catch(() => {});
+          .catch(() =>
+            // Stay on the editor. Refetch so the ids of settings this attempt
+            // did create reach the form, and a retry updates them instead of
+            // re-POSTing (412).
+            getMarketingSettingsBySelectionPlan(
+              savedEntity.id,
+              null,
+              DEFAULT_CURRENT_PAGE,
+              MAX_PER_PAGE
+            )
+          );
       })
       .catch(() => {})
       .finally(() => setIsSaving(false));
@@ -66,7 +82,13 @@ const EditSelectionPlanPage = ({
         </Grid2>
         {entity?.id > 0 && (
           <Grid2>
-            <AddNewButtonMui entity={entity} />
+            <AddNewButton
+              onClick={() =>
+                history.push(
+                  `/app/summits/${currentSummit.id}/selection-plans/new`
+                )
+              }
+            />
           </Grid2>
         )}
       </Grid2>
@@ -99,5 +121,6 @@ const mapStateToProps = ({
 
 export default connect(mapStateToProps, {
   saveSelectionPlan,
-  saveSelectionPlanSettings
+  saveSelectionPlanSettings,
+  getMarketingSettingsBySelectionPlan
 })(EditSelectionPlanPage);

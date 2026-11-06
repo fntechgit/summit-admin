@@ -12,6 +12,8 @@ import {
 import { getMarketingSettingsBySelectionPlan } from "../actions/marketing-actions";
 import { MAX_PER_PAGE } from "../utils/constants";
 
+const NEW_PLAN_KEY = "new";
+
 const EditSelectionPlanPage = React.lazy(() =>
   import("../pages/selection-plans/edit-selection-plan-page")
 );
@@ -30,9 +32,12 @@ const SelectionPlanIdLayout = ({
   resetSelectionPlanForm,
   getMarketingSettingsBySelectionPlan
 }) => {
-  const [hasLoaded, setHasLoaded] = useState(false);
+  // Route the completed load belongs to (NEW_PLAN_KEY for /new), so a render
+  // for a different route never shows the previous route's entity.
+  const [loadedFor, setLoadedFor] = useState(null);
   const [hasError, setHasError] = useState(false);
   const selectionPlanId = match.params.selection_plan_id;
+  const routeKey = selectionPlanId ?? NEW_PLAN_KEY;
   const breadcrumb = selectionPlanId
     ? currentSelectionPlan.name
     : T.translate("general.new");
@@ -41,11 +46,11 @@ const SelectionPlanIdLayout = ({
     // Set on cleanup (param change / unmount): getSelectionPlan resolves even
     // when superseded, so a stale effect must not chain the settings fetch.
     let ignore = false;
-    setHasLoaded(false);
+    setLoadedFor(null);
     setHasError(false);
     if (!selectionPlanId) {
       resetSelectionPlanForm();
-      setHasLoaded(true);
+      setLoadedFor(NEW_PLAN_KEY);
     } else {
       getSelectionPlan(selectionPlanId)
         .then(() =>
@@ -59,7 +64,7 @@ const SelectionPlanIdLayout = ({
               )
         )
         .then(() => {
-          if (!ignore) setHasLoaded(true);
+          if (!ignore) setLoadedFor(selectionPlanId);
         })
         .catch(() => {
           if (!ignore) setHasError(true);
@@ -74,7 +79,12 @@ const SelectionPlanIdLayout = ({
     return <Redirect to={`/app/summits/${currentSummit.id}/selection-plans`} />;
   }
 
-  if (!hasLoaded || currentSelectionPlan.id !== Number(selectionPlanId || 0)) {
+  // On /new the entity id only changes when the plan is created from this
+  // editor; keep it mounted so a failed settings save can be retried.
+  if (
+    loadedFor !== routeKey ||
+    (selectionPlanId && currentSelectionPlan.id !== Number(selectionPlanId))
+  ) {
     return null;
   }
 
