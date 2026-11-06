@@ -111,9 +111,8 @@ export const getEmailTemplates =
 // getEmailTemplate(id) on every route param change, and concurrent calls for
 // different template ids never abort each other - a stale response landing
 // after a newer one (or after a reset) would overwrite the store's entity
-// with the wrong template's data, and EmailTemplateForm's loadedEntityIdRef
-// check would silently reseed the visible form with it. guardedDispatch
-// drops the RECEIVE/loading dispatches from a superseded call.
+// with the wrong template's data, which reseeds the form from it.
+// guardedDispatch drops the RECEIVE/loading dispatches from a superseded call.
 const getEmailTemplateSeq = sequenced();
 
 export const getEmailTemplate = (templateId) => async (dispatch) => {
