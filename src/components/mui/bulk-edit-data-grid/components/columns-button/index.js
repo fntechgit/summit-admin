@@ -20,7 +20,6 @@ import {
   useGridApiContext,
   useGridSelector
 } from "@mui/x-data-grid";
-import { ICON_ONLY_BUTTON_SX } from "../../constants";
 
 // clicking the button while its panel is open should close it, but React 16
 // runs the button's handlers on document, next to the panel's click-away
@@ -40,7 +39,6 @@ const ColumnsButton = ({ buttonRef }) => {
       ref={buttonRef}
       slotProps={{
         button: {
-          sx: ICON_ONLY_BUTTON_SX,
           onPointerDown: () => {
             wasOpenRef.current =
               preferencePanel.open &&

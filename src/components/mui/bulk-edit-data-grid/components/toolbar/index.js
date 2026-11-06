@@ -30,6 +30,7 @@ const Toolbar = ({
   importItems,
   importLabel,
   filter,
+  appliedFilters,
   onExport,
   searchProps,
   editEnabled,
@@ -69,6 +70,9 @@ const Toolbar = ({
         {addLabel}
       </Button>
     )}
+    {onAdd && (importItems.length > 0 || onExport) && (
+      <Divider orientation="vertical" flexItem />
+    )}
     {importItems.length > 0 && (
       <MenuButton
         buttonId="bulk-edit-data-grid-import-button"
@@ -85,28 +89,22 @@ const Toolbar = ({
         sx={ICON_ONLY_BUTTON_SX}
       />
     )}
-    {(onAdd || importItems.length > 0) && (
-      <Divider orientation="vertical" flexItem />
-    )}
-    <ColumnsButton buttonRef={setColumnsButtonEl} />
-    {filter}
     {onExport && (
-      <>
-        <Divider orientation="vertical" flexItem />
-        <Tooltip title={T.translate("general.export")}>
-          <Button
-            size="small"
-            startIcon={<FileDownloadIcon />}
-            onClick={onExport}
-            aria-label={T.translate("general.export")}
-            sx={ICON_ONLY_BUTTON_SX}
-          />
-        </Tooltip>
-      </>
+      <Tooltip title={T.translate("general.export")}>
+        <Button
+          size="small"
+          startIcon={<FileDownloadIcon />}
+          onClick={onExport}
+          aria-label={T.translate("general.export")}
+          sx={ICON_ONLY_BUTTON_SX}
+        />
+      </Tooltip>
     )}
     {searchProps && (
       <>
-        <Divider orientation="vertical" flexItem />
+        {(onAdd || importItems.length > 0 || onExport) && (
+          <Divider orientation="vertical" flexItem />
+        )}
         <ExpandableQuickFilter
           placeholder={searchProps.placeholder}
           term={searchProps.term}
@@ -114,6 +112,11 @@ const Toolbar = ({
         />
       </>
     )}
+    <Box sx={{ width: "100%", display: "flex", alignItems: "center", gap: 1 }}>
+      <ColumnsButton buttonRef={setColumnsButtonEl} />
+      {filter}
+      {appliedFilters}
+    </Box>
   </GridToolbarContainer>
 );
 
@@ -126,6 +129,7 @@ Toolbar.propTypes = {
   ),
   importLabel: PropTypes.string,
   filter: PropTypes.node,
+  appliedFilters: PropTypes.node,
   onExport: PropTypes.func,
   searchProps: PropTypes.shape({
     placeholder: PropTypes.string,
@@ -147,6 +151,7 @@ Toolbar.defaultProps = {
   importItems: [],
   importLabel: "",
   filter: null,
+  appliedFilters: null,
   onExport: null,
   searchProps: null
 };
