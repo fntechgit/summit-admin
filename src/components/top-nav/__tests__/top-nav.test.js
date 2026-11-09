@@ -85,6 +85,25 @@ describe("TopNav", () => {
       settle();
       expect(panel()).not.toBeInTheDocument();
     });
+
+    test("the open panel squishes the page instead of covering it", () => {
+      render(
+        <>
+          <TopNav />
+          <main id="page-wrap" data-testid="page" />
+        </>
+      );
+      const page = screen.getByTestId("page");
+      const myTasks = screen.getByRole("button", {
+        name: "task_panel.my_tasks"
+      });
+
+      fireEvent.click(myTasks);
+      expect(page).toHaveStyle({ marginRight: "360px" });
+
+      fireEvent.click(myTasks);
+      expect(page).not.toHaveStyle({ marginRight: "360px" });
+    });
   });
 
   describe("composition", () => {

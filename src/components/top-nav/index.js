@@ -20,6 +20,7 @@ import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
+import GlobalStyles from "@mui/material/GlobalStyles";
 import MenuIcon from "@mui/icons-material/Menu";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumbs } from "react-breadcrumbs";
@@ -30,7 +31,7 @@ import {
 import IdTokenVerifier from "idtoken-verifier";
 import AuthButton from "../auth-button";
 import Menu from "../menu";
-import TaskPanel from "../mui/TaskPanel";
+import TaskPanel, { PANEL_WIDTH } from "../mui/TaskPanel";
 import { getGlobalItems, getSummitItems } from "../menu/menu-definition";
 
 const DRAWER_WIDTH = 260;
@@ -38,6 +39,17 @@ const COMPACT_BAR_HEIGHT = 48;
 const REGULAR_BAR_HEIGHT = 56;
 const SUB_BAR_HEIGHT = 36;
 const SHORT_VIEWPORT_MAX_HEIGHT = 500;
+
+// same easing and timing as the drawer's slide, so the page moves with the panel
+const tasksShiftTransition = (theme, open) =>
+  theme.transitions.create("margin-right", {
+    easing: open
+      ? theme.transitions.easing.easeOut
+      : theme.transitions.easing.sharp,
+    duration: open
+      ? theme.transitions.duration.enteringScreen
+      : theme.transitions.duration.leavingScreen
+  });
 
 // key: a menu link's pathname; value: the folders it sits in, outermost first
 export const addMenuLinks = (items, map = new Map(), folders = []) => {
@@ -221,6 +233,9 @@ const TopNav = ({ isLoggedUser, currentSummit, member }) => {
             borderBottom: 1,
             borderColor: "divider",
             overflowX: "auto",
+            // string, since a number here would be read as theme spacing units
+            marginRight: tasksOpen ? `${PANEL_WIDTH}px` : 0,
+            transition: (theme) => tasksShiftTransition(theme, tasksOpen),
             // menu folder crumbs are labels, not links
             "& .breadcrumbs__crumb:has(.crumb-folder)": {
               pointerEvents: "none",
@@ -271,7 +286,33 @@ const TopNav = ({ isLoggedUser, currentSummit, member }) => {
           </Box>
         </Drawer>
       )}
-      {isLoggedUser && <TaskPanel open={tasksOpen} onClose={closeTasks} />}
+      {/* the page lives in PrimaryLayout; always mounted so closing animates */}
+      {isLoggedUser && (
+        <GlobalStyles
+          styles={(theme) => ({
+            "#page-wrap": {
+              marginRight: tasksOpen ? PANEL_WIDTH : 0,
+              transition: tasksShiftTransition(theme, tasksOpen)
+            }
+          })}
+        />
+      )}
+      {isLoggedUser && (
+        <TaskPanel
+          open={tasksOpen}
+          onClose={closeTasks}
+          // starts under the pinned bar, which draws over the panel's top edge
+          paperSx={{
+            top: { xs: COMPACT_BAR_HEIGHT, sm: REGULAR_BAR_HEIGHT },
+            [`@media (max-height:${SHORT_VIEWPORT_MAX_HEIGHT}px)`]: {
+              top: COMPACT_BAR_HEIGHT
+            },
+            bottom: 0,
+            height: "auto",
+            zIndex: (theme) => theme.zIndex.appBar - 1
+          }}
+        />
+      )}
     </>
   );
 };

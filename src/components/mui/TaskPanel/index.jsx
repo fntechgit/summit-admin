@@ -4,15 +4,19 @@ import T from "i18n-react/dist/i18n-react";
 import { Box, Drawer, IconButton, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-const PANEL_WIDTH = 360;
+export const PANEL_WIDTH = 360;
 
-const TaskPanel = ({ open, onClose, children }) => (
+const TaskPanel = ({ open, onClose, paperSx, children }) => (
   <Drawer
     anchor="right"
     variant="persistent"
     open={open}
     sx={{
-      "& .MuiDrawer-paper": { width: PANEL_WIDTH, boxSizing: "border-box" }
+      "& .MuiDrawer-paper": {
+        width: PANEL_WIDTH,
+        boxSizing: "border-box",
+        ...paperSx
+      }
     }}
   >
     <Box
@@ -21,9 +25,7 @@ const TaskPanel = ({ open, onClose, children }) => (
         alignItems: "center",
         justifyContent: "space-between",
         px: 2,
-        py: 1.5,
-        borderBottom: 1,
-        borderColor: "divider"
+        py: 1.5
       }}
     >
       <Typography variant="h6" component="h2">
@@ -43,10 +45,13 @@ const TaskPanel = ({ open, onClose, children }) => (
 TaskPanel.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  // eslint-disable-next-line react/forbid-prop-types
+  paperSx: PropTypes.object,
   children: PropTypes.node
 };
 
 TaskPanel.defaultProps = {
+  paperSx: {},
   children: null
 };
 
