@@ -327,6 +327,7 @@ const BulkEditDataGrid = ({
           onSortModelChange={handleSortModelChange}
           disableColumnSorting={editEnabled}
           localeText={{
+            toolbarColumns: "",
             ...(noRowsLabel && { noRowsLabel })
           }}
           hideFooter
@@ -431,9 +432,9 @@ BulkEditDataGrid.propTypes = {
   ),
   // tooltip / aria-label of the import icon
   importLabel: PropTypes.string,
-  // rendered in the grid toolbar, e.g. a uicore <GridFilter />
+  // a uicore <GridFilter />; its iconSx is styled to match the toolbar
   filter: PropTypes.node,
-  // shown after the columns and filter buttons, e.g. applied filter chips
+  // own row under the toolbar, e.g. chips for the applied filters
   appliedFilters: PropTypes.node,
   onExport: PropTypes.func,
   // same shape as GridToolbar's searchProps

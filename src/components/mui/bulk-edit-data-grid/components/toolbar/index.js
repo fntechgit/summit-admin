@@ -11,17 +11,20 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { cloneElement } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Divider, Tooltip } from "@mui/material";
+import { Box, Button, Tooltip } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import { GridToolbarContainer } from "@mui/x-data-grid";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import MenuButton from "../../../menu-button";
 import ColumnsButton from "../columns-button";
-import ExpandableQuickFilter from "../expandable-quick-filter";
-import { ICON_ONLY_BUTTON_SX } from "../../constants";
+import { FILTER_ICON_SX, ICON_ONLY_BUTTON_SX } from "../../constants";
+
+const SEARCH_WIDTH = 330;
 
 const Toolbar = ({
   views,
@@ -41,7 +44,7 @@ const Toolbar = ({
   setColumnsButtonEl
 }) => (
   <GridToolbarContainer
-    sx={{ p: 1, gap: 1, borderBottom: 1, borderColor: "divider" }}
+    sx={{ p: 1, gap: 1, rowGap: 2, borderBottom: 1, borderColor: "divider" }}
   >
     {editEnabled ? (
       <>
@@ -55,7 +58,7 @@ const Toolbar = ({
     ) : (
       <Button
         size="small"
-        variant="contained"
+        variant="outlined"
         onClick={onEditSelected}
         disabled={selectedCount === 0}
       >
@@ -65,14 +68,6 @@ const Toolbar = ({
     )}
     {views}
     <Box sx={{ flex: 1 }} />
-    {onAdd && (
-      <Button size="small" onClick={onAdd}>
-        {addLabel}
-      </Button>
-    )}
-    {onAdd && (importItems.length > 0 || onExport) && (
-      <Divider orientation="vertical" flexItem />
-    )}
     {importItems.length > 0 && (
       <MenuButton
         buttonId="bulk-edit-data-grid-import-button"
@@ -100,23 +95,34 @@ const Toolbar = ({
         />
       </Tooltip>
     )}
-    {searchProps && (
-      <>
-        {(onAdd || importItems.length > 0 || onExport) && (
-          <Divider orientation="vertical" flexItem />
-        )}
-        <ExpandableQuickFilter
-          placeholder={searchProps.placeholder}
-          term={searchProps.term}
-          onSearch={searchProps.onSearch}
-        />
-      </>
+    {onAdd && (
+      <Button
+        size="small"
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={onAdd}
+      >
+        {addLabel}
+      </Button>
     )}
     <Box sx={{ width: "100%", display: "flex", alignItems: "center", gap: 1 }}>
       <ColumnsButton buttonRef={setColumnsButtonEl} />
-      {filter}
-      {appliedFilters}
+      {filter &&
+        cloneElement(filter, {
+          iconSx: { ...FILTER_ICON_SX, ...filter.props.iconSx }
+        })}
+      <Box sx={{ flex: 1 }} />
+      {searchProps && (
+        <Box sx={{ width: SEARCH_WIDTH }}>
+          <SearchInput
+            term={searchProps.term}
+            placeholder={searchProps.placeholder}
+            onSearch={searchProps.onSearch}
+          />
+        </Box>
+      )}
     </Box>
+    {appliedFilters && <Box sx={{ width: "100%" }}>{appliedFilters}</Box>}
   </GridToolbarContainer>
 );
 
