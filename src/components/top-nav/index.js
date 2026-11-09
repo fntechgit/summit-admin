@@ -19,6 +19,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
+import Button from "@mui/material/Button";
 import MenuIcon from "@mui/icons-material/Menu";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumbs } from "react-breadcrumbs";
@@ -29,6 +30,7 @@ import {
 import IdTokenVerifier from "idtoken-verifier";
 import AuthButton from "../auth-button";
 import Menu from "../menu";
+import TaskPanel from "../mui/TaskPanel";
 import { getGlobalItems, getSummitItems } from "../menu/menu-definition";
 
 const DRAWER_WIDTH = 260;
@@ -97,6 +99,7 @@ export const insertMenuFolders = (menuMap, summitId) => (crumbs) => {
  */
 const TopNav = ({ isLoggedUser, currentSummit, member }) => {
   const [open, setOpen] = useState(false);
+  const [tasksOpen, setTasksOpen] = useState(false);
 
   // The current summit's name, shown next to the title behind a divider.
   const contextLabel = currentSummit?.id > 0 ? currentSummit.name : null;
@@ -124,6 +127,8 @@ const TopNav = ({ isLoggedUser, currentSummit, member }) => {
 
   const closeDrawer = useCallback(() => setOpen(false), []);
   const toggleDrawer = useCallback(() => setOpen((prev) => !prev), []);
+  const closeTasks = useCallback(() => setTasksOpen(false), []);
+  const toggleTasks = useCallback(() => setTasksOpen((prev) => !prev), []);
 
   // Signed out, the bar carries nothing but the title, which then reads as a
   // banner rather than as the left-hand item of a bar.
@@ -228,6 +233,14 @@ const TopNav = ({ isLoggedUser, currentSummit, member }) => {
             separator="/"
             setCrumbs={setCrumbs}
           />
+          <Button
+            size="small"
+            aria-expanded={tasksOpen}
+            onClick={toggleTasks}
+            sx={{ ml: "auto", flexShrink: 0 }}
+          >
+            {T.translate("task_panel.my_tasks")}
+          </Button>
         </Toolbar>
       )}
       {isLoggedUser && (
@@ -258,6 +271,7 @@ const TopNav = ({ isLoggedUser, currentSummit, member }) => {
           </Box>
         </Drawer>
       )}
+      {isLoggedUser && <TaskPanel open={tasksOpen} onClose={closeTasks} />}
     </>
   );
 };

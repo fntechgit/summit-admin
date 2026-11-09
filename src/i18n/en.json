@@ -4558,5 +4558,9 @@
   "grid_display_control": {
     "show_hide": "Show / Hide All",
     "reset": "Reset"
+  },
+  "task_panel": {
+    "my_tasks": "My Tasks",
+    "close": "Close"
   }
 }

@@ -67,6 +67,26 @@ describe("TopNav", () => {
     });
   });
 
+  describe("task panel", () => {
+    test("My Tasks opens the panel and its close button closes it", () => {
+      renderNav();
+      // the drawer only mounts its content while open
+      const panel = () =>
+        screen.queryByRole("heading", { name: "task_panel.my_tasks" });
+      expect(panel()).not.toBeInTheDocument();
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "task_panel.my_tasks" })
+      );
+      settle();
+      expect(panel()).toBeVisible();
+
+      fireEvent.click(screen.getByRole("button", { name: "task_panel.close" }));
+      settle();
+      expect(panel()).not.toBeInTheDocument();
+    });
+  });
+
   describe("composition", () => {
     test("renders title, summit name, sign out and breadcrumbs", () => {
       renderNav({ currentSummit: { id: 1, name: "Summit 2026" } });
