@@ -5,25 +5,38 @@ const GUIDES = [
     steps: [
       {
         id: "marketing",
-        link: (summitId) => `/app/summits/${summitId}/marketing`
+        link: (summitId) => `/app/summits/${summitId}/marketing`,
+        instructions: ["find", "upload"]
       },
       {
         id: "activity_categories",
-        link: (summitId) => `/app/summits/${summitId}/event-categories`
+        link: (summitId) => `/app/summits/${summitId}/event-categories`,
+        instructions: ["add", "capacity", "visible"]
       },
       {
         id: "category_groups",
-        link: (summitId) => `/app/summits/${summitId}/event-category-groups`
+        link: (summitId) => `/app/summits/${summitId}/event-category-groups`,
+        instructions: ["add", "categories"]
       },
-      { id: "media_upload_types", link: () => "/app/media-file-types" },
+      {
+        id: "media_upload_types",
+        link: () => "/app/media-file-types",
+        instructions: ["add", "storage"]
+      },
       {
         id: "activity_types",
-        link: (summitId) => `/app/summits/${summitId}/event-types`
+        link: (summitId) => `/app/summits/${summitId}/event-types`,
+        instructions: ["add", "speakers", "uploads"]
       },
-      { id: "email_templates", link: () => "/app/emails/templates" },
+      {
+        id: "email_templates",
+        link: () => "/app/emails/templates",
+        instructions: ["add", "preview"]
+      },
       {
         id: "email_events",
-        link: (summitId) => `/app/summits/${summitId}/email-flow-events`
+        link: (summitId) => `/app/summits/${summitId}/email-flow-events`,
+        instructions: ["find", "template"]
       },
       {
         id: "selection_plan",
@@ -43,9 +56,13 @@ const GUIDES = [
       {
         id: "event_docs",
         link: (summitId) => `/app/summits/${summitId}/summitdocs`,
-        optional: true
+        optional: true,
+        instructions: ["add"]
       },
-      { id: "running_the_plan" }
+      {
+        id: "running_the_plan",
+        instructions: ["move_rejects", "rename", "reopen", "emails"]
+      }
     ]
   }
 ];

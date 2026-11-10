@@ -80,6 +80,10 @@ describe("TaskPanel", () => {
 
     expect(screen.getByText(/^OCP 2026 · /)).toBeInTheDocument();
     // the first unticked step starts open, linking to the task's show
+    expect(screen.getByText(`${GUIDE}.why.marketing`)).toBeInTheDocument();
+    expect(
+      screen.getByText(`${GUIDE}.instructions.marketing.upload`)
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "task_panel.go_to_page" })
     ).toHaveAttribute("href", "/app/summits/7/marketing");

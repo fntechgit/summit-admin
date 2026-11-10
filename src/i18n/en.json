@@ -4589,6 +4589,59 @@
           "event_docs": "Event docs",
           "running_the_plan": "Running the plan"
         },
+        "why": {
+          "marketing": "Puts the show's banner on every CFP email.",
+          "activity_categories": "The tracks. Their counts set the accept line.",
+          "category_groups": "Bundles tracks for the selection plan.",
+          "media_upload_types": "Files speakers upload. Abstracts first? Skip until the draft round.",
+          "activity_types": "The formats speakers submit to.",
+          "email_templates": "The emails speakers get.",
+          "email_events": "Picks the template each event sends.",
+          "selection_plan": "Ties it all into one CFP.",
+          "event_docs": "Guides and templates for speakers.",
+          "running_the_plan": "One plan runs every round."
+        },
+        "instructions": {
+          "marketing": {
+            "find": "Open EMAIL_TEMPLATE_GENERIC_BANNER.",
+            "upload": "Upload a 1920 × 300 PNG or JPG."
+          },
+          "activity_categories": {
+            "add": "Add, or copy from a past show.",
+            "capacity": "Set # of Sessions and # of Alternates.",
+            "visible": "Turn on Visible to track chairs."
+          },
+          "category_groups": {
+            "add": "Add with class PresentationCategoryGroup.",
+            "categories": "Add its categories."
+          },
+          "media_upload_types": {
+            "add": "Set max size and min/max files.",
+            "storage": "Set file type and storage."
+          },
+          "activity_types": {
+            "add": "Add with class Presentation.",
+            "speakers": "Set min/max speakers.",
+            "uploads": "Attach upload types (not for abstracts)."
+          },
+          "email_templates": {
+            "add": "One per recipient and outcome.",
+            "preview": "Check with Edit Sample Data."
+          },
+          "email_events": {
+            "find": "Search the CFP events.",
+            "template": "Pick the matching template."
+          },
+          "event_docs": {
+            "add": "Pick activity types, then a file or link."
+          },
+          "running_the_plan": {
+            "move_rejects": "Move rejects to the Not Accepted plan.",
+            "rename": "Rename the plan for the next round.",
+            "reopen": "Set new submission dates to reopen.",
+            "emails": "Email Speakers, then Submitters (No Speakers)."
+          }
+        },
         "substeps": {
           "selection_plan": {
             "main": "Main",

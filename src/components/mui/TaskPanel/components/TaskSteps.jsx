@@ -101,6 +101,22 @@ const TaskSteps = ({ task, onToggle, onBack, onCloseTask }) => {
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
+              <Typography variant="body2" color="text.secondary">
+                {text(`why.${step.id}`)}
+              </Typography>
+              {step.instructions && (
+                <Box component="ol" sx={{ pl: 2.5, my: 1 }}>
+                  {step.instructions.map((instruction) => (
+                    <Typography
+                      key={instruction}
+                      component="li"
+                      variant="body2"
+                    >
+                      {text(`instructions.${step.id}.${instruction}`)}
+                    </Typography>
+                  ))}
+                </Box>
+              )}
               {step.substeps?.map((substep) => {
                 const key = `${step.id}.${substep}`;
                 return (
