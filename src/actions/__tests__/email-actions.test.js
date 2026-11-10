@@ -286,6 +286,16 @@ describe("normalizeRenderErrors", () => {
     expect(normalizeRenderErrors("server error")).toEqual(["server error"]);
   });
 
+  it("returns only the errors list from mailing-api's 412 envelope", () => {
+    expect(
+      normalizeRenderErrors({
+        message: "Validation Failed",
+        errors: ["Invalid template syntax"],
+        code: 0
+      })
+    ).toEqual(["Invalid template syntax"]);
+  });
+
   it("flattens an object error body to a string array", () => {
     expect(normalizeRenderErrors({ mjml: ["bad tag"] })).toEqual(["bad tag"]);
   });

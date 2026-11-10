@@ -80,7 +80,11 @@ const EmailTemplateJsonDialog = ({
       </DialogTitle>
       <DialogContent dividers sx={{ maxHeight: "75vh" }}>
         {renderErrors?.length > 0 && (
-          <Box sx={{ color: "error.main", mb: 2 }}>{renderErrors}</Box>
+          <Box component="ul" sx={{ color: "error.main", mb: 2 }}>
+            {renderErrors.map((err) => (
+              <li key={err}>{err}</li>
+            ))}
+          </Box>
         )}
         {formik.errors.json && (
           <Box sx={{ color: "error.main", mb: 2 }}>{formik.errors.json}</Box>

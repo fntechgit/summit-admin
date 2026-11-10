@@ -245,6 +245,7 @@ export const renderEmailTemplate =
 
 export const normalizeRenderErrors = (body) => {
   if (Array.isArray(body)) return body.map(String);
+  if (Array.isArray(body?.errors)) return body.errors.map(String);
   if (typeof body === "string") return [body];
   if (body && typeof body === "object")
     return Object.values(body).flat().map(String);
