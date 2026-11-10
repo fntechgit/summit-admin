@@ -23,6 +23,7 @@ const SelectionPlanRatingTypesLayout = React.lazy(() =>
 
 const SelectionPlanIdLayout = ({
   match,
+  history,
   currentSelectionPlan,
   currentSummit,
   getSelectionPlan,
@@ -52,7 +53,9 @@ const SelectionPlanIdLayout = ({
           )
         )
         .then(() => setLoadedId(selectionPlanId))
-        .catch(() => {});
+        .catch(() =>
+          history.replace(`/app/summits/${currentSummit.id}/selection-plans`)
+        );
     }
   }, [selectionPlanId]);
 

@@ -93,4 +93,26 @@ describe("SelectionPlanIdLayout", () => {
       "category-groups"
     );
   });
+
+  it("returns to the list when the selection plan fails to load", async () => {
+    getSelectionPlan.mockReturnValue(() => Promise.reject(new Error("404")));
+
+    const history = createMemoryHistory({
+      initialEntries: ["/app/summits/1/selection-plans/999"]
+    });
+    renderWithRedux(
+      <Router history={history}>
+        <Route
+          path="/app/summits/:summit_id/selection-plans/:selection_plan_id"
+          component={SelectionPlanIdLayout}
+        />
+      </Router>,
+      { initialState }
+    );
+
+    await act(async () => {
+      await flushPromises();
+    });
+    expect(history.location.pathname).toBe("/app/summits/1/selection-plans");
+  });
 });
