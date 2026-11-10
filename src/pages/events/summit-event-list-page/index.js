@@ -17,10 +17,7 @@ import T from "i18n-react/dist/i18n-react";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import { Box, Chip } from "@mui/material";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
-import {
-  GridFilter,
-  useGridFilter
-} from "openstack-uicore-foundation/lib/components/mui/grid-filter";
+import { useGridFilter } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import BulkEditDataGrid from "../../../components/mui/bulk-edit-data-grid";
 import {
   bulkUpdateEvents,
@@ -317,6 +314,26 @@ const SummitEventListPage = ({
 
   const tableData = events.map((e) => formatEventData(e, currentSummit));
   const criterias = getCriterias(currentSummit, mediaUploadTypes);
+  const appliedFilters = valuesWithIds.length > 0 && (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: 1
+      }}
+    >
+      {valuesWithIds.map((filter) => (
+        <Chip
+          key={filter.id}
+          size="small"
+          icon={<FilterAltIcon />}
+          label={getFilterChipLabel(filter, criterias)}
+          onDelete={() => handleRemoveFilter(filter.id)}
+        />
+      ))}
+    </Box>
+  );
 
   return (
     <div className="container table-container summit-event-list-filters">
@@ -332,29 +349,8 @@ const SummitEventListPage = ({
           columns={tableColumns}
           columnVisibilityModel={columnVisibilityModel}
           onColumnVisibilityModelChange={handleColumnVisibilityModelChange}
-          filter={<GridFilter id={FILTER_ID} criterias={criterias} />}
-          appliedFilters={
-            filterValues.length > 0 && (
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                  gap: 1
-                }}
-              >
-                {valuesWithIds.map((filter) => (
-                  <Chip
-                    key={filter.id}
-                    size="small"
-                    icon={<FilterAltIcon />}
-                    label={getFilterChipLabel(filter, criterias)}
-                    onDelete={() => handleRemoveFilter(filter.id)}
-                  />
-                ))}
-              </Box>
-            )
-          }
+          filterProps={{ id: FILTER_ID, criterias }}
+          appliedFilters={appliedFilters}
           views={
             <SavedViews
               summitId={currentSummit.id}
