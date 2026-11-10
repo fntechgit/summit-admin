@@ -27,18 +27,6 @@ jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => ({
   )
 }));
 
-jest.mock(
-  "openstack-uicore-foundation/lib/components/mui/search-input",
-  () => ({
-    __esModule: true,
-    default: ({ onSearch }) => (
-      <button type="button" onClick={() => onSearch("speak")}>
-        search
-      </button>
-    )
-  })
-);
-
 jest.mock("i18n-react/dist/i18n-react", () => ({
   __esModule: true,
   default: { translate: (key) => key }
@@ -75,7 +63,11 @@ describe("ViewTypeListPage", () => {
 
     expect(getViewTypes).toHaveBeenCalledWith();
 
-    await click("search");
+    const searchInput = screen.getByPlaceholderText(
+      "view_type_list.placeholders.search_view_type"
+    );
+    await userEvent.clear(searchInput);
+    await userEvent.type(searchInput, "speak{Enter}");
     expect(getViewTypes).toHaveBeenLastCalledWith(
       "speak",
       DEFAULT_CURRENT_PAGE,

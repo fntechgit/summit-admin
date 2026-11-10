@@ -18,7 +18,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import GridToolbar from "../../components/mui/grid-toolbar";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import { getSummitById } from "../../actions/summit-actions";
 import { getViewTypes, deleteViewType } from "../../actions/badge-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
@@ -89,7 +89,7 @@ const ViewTypeListPage = ({
   };
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <h3> {T.translate("view_type_list.view_types")}</h3>
       <GridToolbar
         searchProps={{
