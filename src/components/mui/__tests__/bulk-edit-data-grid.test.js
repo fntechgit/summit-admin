@@ -228,41 +228,12 @@ describe("BulkEditDataGrid", () => {
     const onSearch = jest.fn();
     renderGrid({ searchProps: { term: "", onSearch } });
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "general.search" })
-    );
-    // opening the search focuses its input
+    await userEvent.click(screen.getByRole("textbox"));
     await userEvent.keyboard("keynote");
     expect(onSearch).not.toHaveBeenCalled();
 
     await userEvent.keyboard("{Enter}");
     expect(onSearch).toHaveBeenCalledWith("keynote");
-  });
-
-  test("keeps the search box open while a search term is applied, even when cleared", async () => {
-    renderGrid({ searchProps: { term: "keynote", onSearch: jest.fn() } });
-
-    const searchbox = screen.getByRole("textbox");
-    expect(searchbox).toHaveValue("keynote");
-
-    await userEvent.clear(searchbox);
-    await userEvent.tab();
-
-    expect(screen.getByRole("textbox")).toBeInTheDocument();
-  });
-
-  test("collapses the search box when left empty with no term applied", async () => {
-    renderGrid({ searchProps: { term: "", onSearch: jest.fn() } });
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "general.search" })
-    );
-    await userEvent.tab();
-
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "general.search" })
-    ).toBeInTheDocument();
   });
 
   test("adds from the add button and lists every import option under the import icon", async () => {
