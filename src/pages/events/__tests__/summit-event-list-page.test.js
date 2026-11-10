@@ -106,6 +106,7 @@ const mockGridFilterState = {
   parsedFilter: [],
   resetFilters: jest.fn(),
   filterValues: [],
+  valuesWithIds: [],
   setFilters: jest.fn(),
   joinOperator: undefined
 };
