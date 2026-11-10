@@ -7,6 +7,7 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
+  Button,
   Checkbox,
   FormControlLabel,
   IconButton,
@@ -15,9 +16,10 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import showConfirmDialog from "../../showConfirmDialog";
 import GUIDES, { doneStepCount, isStepDone, stepKeys } from "../guides";
 
-const TaskSteps = ({ task, onToggle, onBack }) => {
+const TaskSteps = ({ task, onToggle, onBack, onCloseTask }) => {
   const guide = GUIDES.find(({ id }) => id === task.guide);
   // null follows the next unticked step; false keeps every step closed
   const [expanded, setExpanded] = useState(null);
@@ -29,6 +31,18 @@ const TaskSteps = ({ task, onToggle, onBack }) => {
   const handleStepTick = (step, checked) => {
     onToggle(stepKeys(step), checked);
     setExpanded(null);
+  };
+
+  const handleCloseTask = async () => {
+    const confirmed =
+      !nextStep ||
+      (await showConfirmDialog({
+        title: T.translate("general.are_you_sure"),
+        text: T.translate("task_panel.close_unfinished_warning"),
+        iconType: "warning",
+        confirmButtonText: T.translate("task_panel.close_task")
+      }));
+    if (confirmed) onCloseTask();
   };
 
   return (
@@ -43,10 +57,10 @@ const TaskSteps = ({ task, onToggle, onBack }) => {
         <Box>
           <Typography sx={{ fontWeight: 600 }}>{task.name}</Typography>
           <Typography variant="body2" color="text.secondary">
-            {T.translate("task_panel.progress", {
+            {`${task.summitName} · ${T.translate("task_panel.progress", {
               done: doneStepCount(guide.steps, task.done),
               total: guide.steps.length
-            })}
+            })}`}
           </Typography>
         </Box>
       </Box>
@@ -113,6 +127,11 @@ const TaskSteps = ({ task, onToggle, onBack }) => {
           </Accordion>
         );
       })}
+      <Box sx={{ display: "flex", justifyContent: "flex-end", my: 2 }}>
+        <Button variant="outlined" onClick={handleCloseTask}>
+          {T.translate("task_panel.close_task")}
+        </Button>
+      </Box>
     </>
   );
 };
@@ -122,11 +141,13 @@ TaskSteps.propTypes = {
     name: PropTypes.string.isRequired,
     guide: PropTypes.string.isRequired,
     summitId: PropTypes.number.isRequired,
+    summitName: PropTypes.string.isRequired,
     // eslint-disable-next-line react/forbid-prop-types
     done: PropTypes.object.isRequired
   }).isRequired,
   onToggle: PropTypes.func.isRequired,
-  onBack: PropTypes.func.isRequired
+  onBack: PropTypes.func.isRequired,
+  onCloseTask: PropTypes.func.isRequired
 };
 
 export default TaskSteps;

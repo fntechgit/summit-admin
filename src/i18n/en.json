@@ -4572,6 +4572,8 @@
     "progress": "{done} of {total} done",
     "optional": "optional",
     "go_to_page": "Go to page",
+    "close_task": "Close task",
+    "close_unfinished_warning": "Are you sure you want to close this unfinished task?",
     "guides": {
       "selection_plan_setup": {
         "name": "Selection plan setup",

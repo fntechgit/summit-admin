@@ -20,7 +20,7 @@ import GUIDES, { doneStepCount } from "./guides";
 
 export const PANEL_WIDTH = 360;
 
-const TaskPanel = ({ open, onClose, summitId, paperSx }) => {
+const TaskPanel = ({ open, onClose, summit, paperSx }) => {
   // kept here, outside the drawer's content, so tasks survive closing the panel
   const [tasks, setTasks] = useState([]);
   const [creating, setCreating] = useState(false);
@@ -31,9 +31,21 @@ const TaskPanel = ({ open, onClose, summitId, paperSx }) => {
   const handleCreate = ({ guide, name }) => {
     setTasks((prev) => [
       ...prev,
-      { id: Date.now(), guide, name, summitId, done: {} }
+      {
+        id: Date.now(),
+        guide,
+        name,
+        summitId: summit.id,
+        summitName: summit.name,
+        done: {}
+      }
     ]);
     setCreating(false);
+  };
+
+  const handleCloseTask = () => {
+    setTasks((prev) => prev.filter((task) => task.id !== openTaskId));
+    setOpenTaskId(null);
   };
 
   const handleToggle = (keys, checked) => {
@@ -90,6 +102,7 @@ const TaskPanel = ({ open, onClose, summitId, paperSx }) => {
             task={openTask}
             onToggle={handleToggle}
             onBack={() => setOpenTaskId(null)}
+            onCloseTask={handleCloseTask}
           />
         )}
         {!openTask && creating && (
@@ -104,12 +117,12 @@ const TaskPanel = ({ open, onClose, summitId, paperSx }) => {
               variant="contained"
               startIcon={<AddIcon />}
               // a task's links point at the show it was created in
-              disabled={!summitId}
+              disabled={!summit?.id}
               onClick={() => setCreating(true)}
             >
               {T.translate("task_panel.new_task")}
             </Button>
-            {!summitId && (
+            {!summit?.id && (
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                 {T.translate("task_panel.select_show")}
               </Typography>
@@ -125,7 +138,7 @@ const TaskPanel = ({ open, onClose, summitId, paperSx }) => {
                     <ListItemButton onClick={() => setOpenTaskId(task.id)}>
                       <ListItemText
                         primary={task.name}
-                        secondary={`${T.translate(
+                        secondary={`${task.summitName} · ${T.translate(
                           `task_panel.guides.${task.guide}.name`
                         )} · ${progress(task)}`}
                       />
@@ -144,13 +157,16 @@ const TaskPanel = ({ open, onClose, summitId, paperSx }) => {
 TaskPanel.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  summitId: PropTypes.number,
+  summit: PropTypes.shape({
+    id: PropTypes.number,
+    name: PropTypes.string
+  }),
   // eslint-disable-next-line react/forbid-prop-types
   paperSx: PropTypes.object
 };
 
 TaskPanel.defaultProps = {
-  summitId: null,
+  summit: null,
   paperSx: {}
 };
 
