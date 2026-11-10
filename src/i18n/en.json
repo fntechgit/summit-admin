@@ -4561,6 +4561,14 @@
   },
   "task_panel": {
     "my_tasks": "My Tasks",
-    "close": "Close"
+    "close": "Close",
+    "new_task": "New task",
+    "no_tasks": "No tasks yet.",
+    "guide": "Guide",
+    "task_name": "Task name",
+    "create": "Create",
+    "guides": {
+      "selection_plan_setup": "Selection plan setup"
+    }
   }
 }
