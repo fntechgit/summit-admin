@@ -71,7 +71,7 @@ jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
     type: "REQUEST_PURCHASE_DETAILS_LINES"
   })),
   getPurchaseDetailsSkipped: jest.fn(() => ({
-    type: "REQUEST_PURCHASE_DETAILS_SKIPPED"
+    type: "GET_PURCHASE_DETAILS_SKIPPED"
   })),
   clearPurchaseDetailsValidation: jest.fn(() => ({
     type: "PURCHASE_DETAILS_VALIDATION_CLEAR"
