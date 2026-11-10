@@ -70,6 +70,9 @@ jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
   getPurchaseDetailsLinesReport: jest.fn(() => ({
     type: "REQUEST_PURCHASE_DETAILS_LINES"
   })),
+  getPurchaseDetailsSkipped: jest.fn(() => ({
+    type: "REQUEST_PURCHASE_DETAILS_SKIPPED"
+  })),
   clearPurchaseDetailsValidation: jest.fn(() => ({
     type: "PURCHASE_DETAILS_VALIDATION_CLEAR"
   })),
@@ -96,6 +99,7 @@ jest.mock("../../../../../actions/sponsor-reports-actions", () => ({
 const {
   getPurchaseDetailsReport,
   getPurchaseDetailsLinesReport,
+  getPurchaseDetailsSkipped,
   exportPurchaseDetailsLinesCsv,
   getPurchaseDetailsByItemRows,
   setPurchaseDetailsByItemPaging,
@@ -150,7 +154,9 @@ function buildState(
     linesFilters = {},
     byItemFilters = {},
     byItemData = [],
-    byItemReadError = null
+    byItemReadError = null,
+    skipped = [],
+    readError = null
   } = {}
 ) {
   return {
@@ -179,8 +185,11 @@ function buildState(
       order: null,
       orderDir: 1,
       filters: ordersFilters,
-      readError: null,
-      validationError: null
+      readError,
+      validationError: null,
+      skipped,
+      skippedCount: skipped.length,
+      skippedOldest: skipped.length ? 1735689600 : null
     },
     currentSummitState: {
       currentSummit: { id: 42 }
@@ -602,6 +611,62 @@ describe("PurchaseDetailsReportPage", () => {
     expect(
       screen.getByLabelText("sponsor_reports_page.filter_payment_method")
     ).toBeInTheDocument();
+  });
+
+  describe("skipped orders banner", () => {
+    const SKIPPED = [
+      {
+        purchase_id: 9,
+        purchase_number: "ORD-SKIP-1",
+        sponsor_id: 99,
+        sponsor_name: "Other Sponsor",
+        reason: "missing_dim",
+        last_error: "boom"
+      }
+    ];
+
+    it("loads the skipped orders once on mount", async () => {
+      renderPage();
+      await act(async () => {});
+      expect(getPurchaseDetailsSkipped).toHaveBeenCalledTimes(1);
+    });
+
+    it("renders nothing when no orders are skipped", async () => {
+      renderPage();
+      await act(async () => {});
+      expect(screen.queryByTestId("reports-skipped-orders")).toBeNull();
+    });
+
+    it("shows the banner above the summary panel, listing every skipped order despite a sponsor filter", async () => {
+      renderPage({}, { skipped: SKIPPED, ordersFilters: { sponsorIds: [17] } });
+      await act(async () => {});
+      const banner = screen.getByTestId("reports-skipped-orders");
+      expect(banner).toHaveTextContent("ORD-SKIP-1");
+      const summary = screen.getByText("sponsor_reports_page.total_orders");
+      expect(banner.compareDocumentPosition(summary)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
+    });
+
+    it("still shows the banner when the report read error is showing", async () => {
+      renderPage(
+        {},
+        { skipped: SKIPPED, readError: { message: "report down" } }
+      );
+      await act(async () => {});
+      expect(screen.getByTestId("reports-read-error")).toBeInTheDocument();
+      expect(screen.getByTestId("reports-skipped-orders")).toBeInTheDocument();
+    });
+
+    it("keeps the banner in the other views", async () => {
+      renderPage({}, { skipped: SKIPPED });
+      await act(async () => {
+        fireEvent.click(
+          screen.getByText("sponsor_reports_page.view_line_items")
+        );
+      });
+      expect(screen.getByTestId("reports-skipped-orders")).toBeInTheDocument();
+    });
   });
 
   describe("validation error — snackbar hook", () => {

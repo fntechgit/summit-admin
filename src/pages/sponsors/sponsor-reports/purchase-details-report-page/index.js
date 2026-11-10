@@ -26,6 +26,7 @@ import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/m
 import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
 import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
+import SkippedOrdersBanner from "../../../../components/sponsors/reports/SkippedOrdersBanner";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
 import FilterBar from "../../../../components/sponsors/reports/FilterBar";
 import OrdersTable from "../../../../components/sponsors/reports/OrdersTable";
@@ -40,6 +41,7 @@ import {
   getPurchaseDetailsReport,
   getPurchaseDetailsLinesReport,
   getPurchaseDetailsFilters,
+  getPurchaseDetailsSkipped,
   clearPurchaseDetailsValidation,
   exportPurchaseDetailsCsv,
   exportPurchaseDetailsLinesCsv,
@@ -107,6 +109,10 @@ const PurchaseDetailsReportPage = ({
   filters,
   readError,
   validationError,
+  // Show-wide skipped orders (never filtered by the page filters).
+  skipped,
+  skippedCount,
+  skippedOldest,
   // Lines slice (per-line manifest view) — its own pagination/filter.
   linesData,
   linesSummary,
@@ -131,6 +137,7 @@ const PurchaseDetailsReportPage = ({
   getPurchaseDetailsReport: fetchReport,
   getPurchaseDetailsLinesReport: fetchLinesReport,
   getPurchaseDetailsFilters: fetchFilters,
+  getPurchaseDetailsSkipped: fetchSkipped,
   clearPurchaseDetailsValidation: clearValidation,
   exportPurchaseDetailsCsv: exportOrdersCsv,
   exportPurchaseDetailsLinesCsv: exportLinesCsv
@@ -162,6 +169,7 @@ const PurchaseDetailsReportPage = ({
   // thunk; empty deps is intentional (fetchFilters is stable from connect()).
   useEffect(() => {
     fetchFilters();
+    fetchSkipped();
   }, []); // mount-only
 
   // Fetch the active view. Runs on mount (initial load) and on every view switch.
@@ -517,6 +525,11 @@ const PurchaseDetailsReportPage = ({
         </Box>
       }
     >
+      <SkippedOrdersBanner
+        orders={skipped}
+        count={skippedCount}
+        oldest={skippedOldest}
+      />
       <SummaryPanel tiles={tiles} />
       {activeReadError ? (
         <Alert data-testid="reports-read-error" severity="warning">
@@ -612,6 +625,7 @@ const mapDispatchToProps = {
   getPurchaseDetailsReport,
   getPurchaseDetailsLinesReport,
   getPurchaseDetailsFilters,
+  getPurchaseDetailsSkipped,
   clearPurchaseDetailsValidation,
   exportPurchaseDetailsCsv,
   exportPurchaseDetailsLinesCsv,
