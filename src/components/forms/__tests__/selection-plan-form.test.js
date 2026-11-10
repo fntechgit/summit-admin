@@ -174,7 +174,7 @@ const baseProps = {
   onTabChange: jest.fn()
 };
 
-// Mirrors the popup - external submit button via form attribute; slug state stands in for the URL
+// Mirrors the edit page - external submit button via form attribute; slug state stands in for the URL
 const FormWithButton = (props) => {
   const { tabSlug, onTabChange } = props;
   const [slug, setSlug] = useState(tabSlug);
@@ -271,14 +271,6 @@ describe("SelectionPlanForm - tab navigation", () => {
     renderExistingForm({ tabSlug: "category-groups" });
     expect(document.getElementById("tabpanel-track_groups")).toBeVisible();
     expect(document.getElementById("tabpanel-main")).not.toBeVisible();
-  });
-
-  it("opens the main tab for an unknown slug", () => {
-    renderExistingForm({ tabSlug: "not-a-tab" });
-    expect(screen.getByRole("tab", { name: "Main" })).toHaveAttribute(
-      "aria-selected",
-      "true"
-    );
   });
 
   it("reports the extra questions tab as the questions slug", async () => {

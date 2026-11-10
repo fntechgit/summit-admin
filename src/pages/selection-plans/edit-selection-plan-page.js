@@ -12,6 +12,7 @@
  * */
 import React, { useState } from "react";
 import { connect } from "react-redux";
+import { Redirect } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import Box from "@mui/material/Box";
@@ -37,6 +38,7 @@ import {
   updateRatingTypeOrder,
   updateSelectionPlanExtraQuestionOrder
 } from "../../actions/selection-plan-actions";
+import { SELECTION_PLAN_TAB_SLUGS } from "../../utils/constants";
 
 const EditSelectionPlanPage = ({
   currentSummit,
@@ -123,8 +125,9 @@ const EditSelectionPlanPage = ({
   };
 
   const onTabChange = (slug) => {
+    const tabPath = slug ? `/${slug}` : "";
     history.push(
-      `/app/summits/${currentSummit.id}/selection-plans/${entity.id}/${slug}`
+      `/app/summits/${currentSummit.id}/selection-plans/${entity.id}${tabPath}`
     );
   };
 
@@ -213,6 +216,16 @@ const EditSelectionPlanPage = ({
       }
     });
   };
+
+  const isUnknownTab =
+    tab && !Object.values(SELECTION_PLAN_TAB_SLUGS).includes(tab);
+  if (isUnknownTab) {
+    return (
+      <Redirect
+        to={`/app/summits/${currentSummit.id}/selection-plans/${entity.id}`}
+      />
+    );
+  }
 
   return (
     <div className="container table-container">

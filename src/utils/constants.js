@@ -263,6 +263,19 @@ export const SPONSOR_TABS = {
   BADGE_SCANS: 7
 };
 
+// URL slug per selection plan tab; "questions" because /extra-questions is the question editor route
+export const SELECTION_PLAN_TAB_SLUGS = {
+  main: "",
+  track_groups: "category-groups",
+  event_types: "activity-types",
+  extra_questions: "questions",
+  email_templates: "email-templates",
+  track_chair_settings: "track-chairs-settings",
+  presentation_action_types: "progress-flags",
+  allowed_members: "allowed-members",
+  cfp_settings: "cfp-settings"
+};
+
 export const fieldTypesWithOptions = [
   "CheckBoxList",
   "ComboBox",

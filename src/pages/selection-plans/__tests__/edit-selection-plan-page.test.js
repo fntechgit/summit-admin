@@ -3,6 +3,8 @@ import { act, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import flushPromises from "flush-promises";
+import { Router } from "react-router-dom";
+import { createMemoryHistory } from "history";
 import { renderWithRedux } from "../../../utils/test-utils";
 import EditSelectionPlanPage from "../edit-selection-plan-page";
 import {
@@ -25,9 +27,11 @@ jest.mock("../../../components/forms/selection-plan-form", () => ({
       >
         form-save
       </button>
-      <button type="button" onClick={() => onTabChange("questions")}>
-        form-tab
-      </button>
+      {["questions", ""].map((slug) => (
+        <button key={slug} type="button" onClick={() => onTabChange(slug)}>
+          {`form-tab-${slug || "main"}`}
+        </button>
+      ))}
     </>
   )
 }));
@@ -87,10 +91,41 @@ describe("EditSelectionPlanPage", () => {
     renderWithRedux(<EditSelectionPlanPage history={history} />, {
       initialState: buildState({ id: 5 })
     });
-    await userEvent.click(screen.getByRole("button", { name: "form-tab" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "form-tab-questions" })
+    );
 
     expect(history.push).toHaveBeenCalledWith(
       "/app/summits/1/selection-plans/5/questions"
+    );
+  });
+
+  it("navigates to the plan's base URL for the main tab", async () => {
+    renderWithRedux(<EditSelectionPlanPage history={history} />, {
+      initialState: buildState({ id: 5 })
+    });
+    await userEvent.click(
+      screen.getByRole("button", { name: "form-tab-main" })
+    );
+
+    expect(history.push).toHaveBeenCalledWith(
+      "/app/summits/1/selection-plans/5"
+    );
+  });
+
+  it("redirects an unknown tab to the plan's base URL", () => {
+    const memoryHistory = createMemoryHistory({
+      initialEntries: ["/app/summits/1/selection-plans/5/not-a-tab"]
+    });
+    renderWithRedux(
+      <Router history={memoryHistory}>
+        <EditSelectionPlanPage history={memoryHistory} tab="not-a-tab" />
+      </Router>,
+      { initialState: buildState({ id: 5 }) }
+    );
+
+    expect(memoryHistory.location.pathname).toBe(
+      "/app/summits/1/selection-plans/5"
     );
   });
 });

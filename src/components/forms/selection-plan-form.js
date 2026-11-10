@@ -21,6 +21,7 @@ import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import useScrollToError from "../../hooks/useScrollToError";
+import { SELECTION_PLAN_TAB_SLUGS } from "../../utils/constants";
 import MainTab from "./selection-plan-form/main-tab";
 import TrackGroupsTab from "./selection-plan-form/track-groups-tab";
 import EventTypesTab from "./selection-plan-form/event-types-tab";
@@ -55,19 +56,6 @@ const TAB_SX = {
   minHeight: "36px",
   px: 2,
   py: 1
-};
-
-// URL slug per tab; "questions" because /extra-questions is the question editor route
-const TAB_SLUGS = {
-  main: "main",
-  track_groups: "category-groups",
-  event_types: "activity-types",
-  extra_questions: "questions",
-  email_templates: "email-templates",
-  track_chair_settings: "track-chairs-settings",
-  presentation_action_types: "progress-flags",
-  allowed_members: "allowed-members",
-  cfp_settings: "cfp-settings"
 };
 
 const SelectionPlanForm = (props) => {
@@ -123,12 +111,12 @@ const SelectionPlanForm = (props) => {
 
   // hidden plans have no allowed members tab, so their link falls back to main
   const activeTab =
-    Object.keys(TAB_SLUGS).find(
+    Object.keys(SELECTION_PLAN_TAB_SLUGS).find(
       (value) =>
-        TAB_SLUGS[value] === tabSlug &&
+        SELECTION_PLAN_TAB_SLUGS[value] === tabSlug &&
         !(formik.values.is_hidden && value === "allowed_members")
     ) ?? "main";
-  const setActiveTab = (value) => onTabChange(TAB_SLUGS[value]);
+  const setActiveTab = (value) => onTabChange(SELECTION_PLAN_TAB_SLUGS[value]);
 
   useEffect(() => {
     formik.setErrors(
@@ -361,7 +349,7 @@ SelectionPlanForm.propTypes = {
 
 SelectionPlanForm.defaultProps = {
   errors: {},
-  tabSlug: "main"
+  tabSlug: ""
 };
 
 export default SelectionPlanForm;
