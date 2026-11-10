@@ -1,5 +1,5 @@
 import React from "react";
-import { screen, act } from "@testing-library/react";
+import { screen, act, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import flushPromises from "flush-promises";
@@ -32,8 +32,14 @@ jest.mock(
   () =>
     function BulkEditDataGridMock(props) {
       mockEditableTableSpy(props);
-      // the saved views dropdown is rendered inside the grid toolbar
-      return props.views;
+      // saved views and applied filter chips render inside the grid toolbar
+      const { views, appliedFilters } = props;
+      return (
+        <>
+          {views}
+          {appliedFilters}
+        </>
+      );
     }
 );
 
@@ -134,6 +140,7 @@ describe("SummitEventListPage", () => {
     );
     mockGridFilterState.parsedFilter = [];
     mockGridFilterState.filterValues = [];
+    mockGridFilterState.valuesWithIds = [];
     mockGridFilterState.joinOperator = undefined;
     saveFilterCriteria.mockReturnValue(() =>
       Promise.resolve({ response: { id: 1, name: "view", criteria: [] } })
@@ -448,6 +455,60 @@ describe("SummitEventListPage", () => {
     expect(rehydratedCriteria).toEqual([
       { criteria: "type", operator: "==", value: "1" }
     ]);
+  });
+
+  test("removing a filter chip keeps the other filters and the join operator", async () => {
+    const roomA = { criteria: "location_id", operator: "==", value: [2] };
+    const roomB = { criteria: "location_id", operator: "==", value: [7] };
+    mockGridFilterState.filterValues = [roomA, roomB];
+    mockGridFilterState.valuesWithIds = [
+      { ...roomA, id: "location_id-0" },
+      { ...roomB, id: "location_id-1" }
+    ];
+    mockGridFilterState.joinOperator = "ANY";
+
+    renderWithRedux(<SummitEventListPage />, {
+      initialState: {
+        currentSummitState: {
+          currentSummit: {
+            id: 12,
+            time_zone: { name: "UTC" },
+            time_zone_id: "UTC",
+            selection_plans: [],
+            tracks: [],
+            event_types: [],
+            locations: [
+              { id: 2, name: "Room A" },
+              { id: 7, name: "Room B" }
+            ],
+            presentation_action_types: []
+          }
+        },
+        mediaUploadListState: {
+          media_uploads: []
+        },
+        currentEventListState: {
+          events: [],
+          lastPage: 1,
+          currentPage: 1,
+          order: "id",
+          orderDir: 1,
+          totalEvents: 0,
+          term: "",
+          filters: {},
+          extraColumns: [],
+          perPage: 10
+        }
+      }
+    });
+
+    const roomAChip = screen.getByRole("button", { name: /Room A/ });
+    await userEvent.click(within(roomAChip).getByTestId("CancelIcon"));
+
+    expect(mockGridFilterState.setFilters).toHaveBeenCalledWith(
+      [{ ...roomB, id: "location_id-1" }],
+      "ANY"
+    );
   });
 
   test("switches to the newly saved view", async () => {
