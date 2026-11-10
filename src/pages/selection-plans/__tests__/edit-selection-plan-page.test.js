@@ -269,16 +269,23 @@ describe("EditSelectionPlanPage", () => {
     expect(mockHistory.push).toHaveBeenCalledWith(url);
   });
 
-  it("redirects an unknown tab to the plan's base URL", () => {
+  it.each([
+    ["an unknown tab", "not-a-tab", { id: 5 }],
+    [
+      "a hidden plan's allowed members tab",
+      "allowed-members",
+      { id: 5, is_hidden: true }
+    ]
+  ])("redirects %s to the plan's base URL", (_, tab, entity) => {
     const history = createMemoryHistory({
-      initialEntries: ["/app/summits/1/selection-plans/5/not-a-tab"]
+      initialEntries: [`/app/summits/1/selection-plans/5/${tab}`]
     });
     renderWithRedux(
       <Router history={history}>
-        <EditSelectionPlanPage history={history} tab="not-a-tab" />
+        <EditSelectionPlanPage history={history} tab={tab} />
       </Router>,
       {
-        initialState: stateFor({ id: 5 })
+        initialState: stateFor(entity)
       }
     );
 

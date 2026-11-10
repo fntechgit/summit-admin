@@ -80,7 +80,10 @@ const EditSelectionPlanPage = ({
 
   const isUnknownTab =
     tab && !Object.values(SELECTION_PLAN_TAB_SLUGS).includes(tab);
-  if (isUnknownTab) {
+  // saved hidden plans have no allowed members tab
+  const isHiddenTab =
+    tab === SELECTION_PLAN_TAB_SLUGS.allowed_members && entity.is_hidden;
+  if (isUnknownTab || isHiddenTab) {
     return (
       <Redirect
         to={`/app/summits/${currentSummit.id}/selection-plans/${entity.id}`}
