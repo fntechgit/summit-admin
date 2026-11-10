@@ -30,6 +30,7 @@ import { formatDate, formatDuration } from "../../../utils/methods";
 import {
   DEFAULT_Z_INDEX,
   HIGH_Z_INDEX,
+  LONG_DATETIME_FORMAT,
   SECONDS_TO_MINUTES
 } from "../../../utils/constants";
 import { buildNameIdDDL } from "../../../utils/events/summit-event-list-page.utils";
@@ -117,20 +118,20 @@ export const formatEventData = (e, summit) => {
       ? formatDate(
           e.published_date,
           summit.time_zone.name,
-          "MMMM Do YYYY, h:mm a"
+          LONG_DATETIME_FORMAT
         )
       : "No",
     start_date_display: e.start_date
-      ? formatDate(e.start_date, summit.time_zone.name, "MMMM Do YYYY, h:mm a")
+      ? formatDate(e.start_date, summit.time_zone.name, LONG_DATETIME_FORMAT)
       : "TBD",
     end_date_display: e.end_date
-      ? formatDate(e.end_date, summit.time_zone.name, "MMMM Do YYYY, h:mm a")
+      ? formatDate(e.end_date, summit.time_zone.name, LONG_DATETIME_FORMAT)
       : "TBD",
     created_display: e.created
-      ? formatDate(e.created, summit.time_zone_id, "MMMM Do YYYY, h:mm a")
+      ? formatDate(e.created, summit.time_zone_id, LONG_DATETIME_FORMAT)
       : "TBD",
     modified: e.last_edited
-      ? formatDate(e.last_edited, summit.time_zone_id, "MMMM Do YYYY, h:mm a")
+      ? formatDate(e.last_edited, summit.time_zone_id, LONG_DATETIME_FORMAT)
       : "TBD"
   };
 };
@@ -1116,21 +1117,17 @@ export const getFilterChipLabel = (filter, criterias) => {
     (op) => op.value === filter.operator
   );
   const { type, props } = criteria.values;
-  const options =
-    typeof props?.options === "function"
-      ? props.options(filter.value)
-      : props?.options;
+  const options = props?.options;
 
   const toLabel = (v) => {
     // async inputs store option objects
     if (v != null && typeof v === "object") return v.label;
-    if (type === "datetime")
-      return formatDate(v, "LOC", "MMMM Do YYYY, h:mm a");
+    if (type === "datetime") return formatDate(v, "LOC", LONG_DATETIME_FORMAT);
     return options?.find((o) => o.value === v)?.label ?? v;
   };
   const values = Array.isArray(filter.value) ? filter.value : [filter.value];
+  const operatorLabel = operator?.label ?? filter.operator;
+  const valueLabels = values.map(toLabel).join(", ");
 
-  return `${criteria.label}: ${operator?.label ?? filter.operator} ${values
-    .map(toLabel)
-    .join(", ")}`;
+  return `${criteria.label}: ${operatorLabel} ${valueLabels}`;
 };

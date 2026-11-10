@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { cloneElement } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { Box, Button, Tooltip } from "@mui/material";
@@ -20,6 +20,7 @@ import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import { GridToolbarContainer } from "@mui/x-data-grid";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import { GridFilter } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import MenuButton from "../../../menu-button";
 import ColumnsButton from "../columns-button";
 import { FILTER_ICON_SX, ICON_ONLY_BUTTON_SX } from "../../constants";
@@ -32,7 +33,7 @@ const Toolbar = ({
   addLabel,
   importItems,
   importLabel,
-  filter,
+  filterProps,
   appliedFilters,
   onExport,
   searchProps,
@@ -107,10 +108,13 @@ const Toolbar = ({
     )}
     <Box sx={{ width: "100%", display: "flex", alignItems: "center", gap: 1 }}>
       <ColumnsButton buttonRef={setColumnsButtonEl} />
-      {filter &&
-        cloneElement(filter, {
-          iconSx: { ...FILTER_ICON_SX, ...filter.props.iconSx }
-        })}
+      {filterProps && (
+        <GridFilter
+          id={filterProps.id}
+          criterias={filterProps.criterias}
+          iconSx={FILTER_ICON_SX}
+        />
+      )}
       <Box sx={{ flex: 1 }} />
       {searchProps && (
         <Box sx={{ width: SEARCH_WIDTH }}>
@@ -134,7 +138,15 @@ Toolbar.propTypes = {
     PropTypes.shape({ label: PropTypes.string, onClick: PropTypes.func })
   ),
   importLabel: PropTypes.string,
-  filter: PropTypes.node,
+  filterProps: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    criterias: PropTypes.arrayOf(
+      PropTypes.shape({
+        key: PropTypes.string.isRequired,
+        label: PropTypes.string.isRequired
+      })
+    ).isRequired
+  }),
   appliedFilters: PropTypes.node,
   onExport: PropTypes.func,
   searchProps: PropTypes.shape({
@@ -156,7 +168,7 @@ Toolbar.defaultProps = {
   addLabel: "",
   importItems: [],
   importLabel: "",
-  filter: null,
+  filterProps: null,
   appliedFilters: null,
   onExport: null,
   searchProps: null
