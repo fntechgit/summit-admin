@@ -301,6 +301,7 @@ const TopNav = ({ isLoggedUser, currentSummit, member }) => {
         <TaskPanel
           open={tasksOpen}
           onClose={closeTasks}
+          summitId={summitId}
           // starts under the pinned bar, which draws over the panel's top edge
           paperSx={{
             top: { xs: COMPACT_BAR_HEIGHT, sm: REGULAR_BAR_HEIGHT },

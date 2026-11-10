@@ -8,7 +8,7 @@ import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/form
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import GUIDES from "../guides";
 
-const guideName = (id) => T.translate(`task_panel.guides.${id}`);
+const guideName = (id) => T.translate(`task_panel.guides.${id}.name`);
 
 const NewTaskForm = ({ onCreate, onCancel }) => {
   const formik = useFormik({

@@ -4567,8 +4567,39 @@
     "guide": "Guide",
     "task_name": "Task name",
     "create": "Create",
+    "select_show": "Select a show to start a task.",
+    "back": "Back to tasks",
+    "progress": "{done} of {total} done",
+    "optional": "optional",
+    "go_to_page": "Go to page",
     "guides": {
-      "selection_plan_setup": "Selection plan setup"
+      "selection_plan_setup": {
+        "name": "Selection plan setup",
+        "steps": {
+          "marketing": "Marketing variables",
+          "activity_categories": "Activity categories",
+          "category_groups": "Category groups",
+          "media_upload_types": "Media upload types",
+          "activity_types": "Activity types",
+          "email_templates": "Email templates",
+          "email_events": "Email events",
+          "selection_plan": "Selection plan",
+          "event_docs": "Event docs",
+          "running_the_plan": "Running the plan"
+        },
+        "substeps": {
+          "selection_plan": {
+            "main": "Main",
+            "category_groups": "Category groups",
+            "activity_types": "Activity types",
+            "extra_questions": "Extra questions",
+            "email_templates": "Email templates",
+            "track_chairs": "Track chairs settings",
+            "progress_flags": "Progress flags",
+            "cfp_settings": "CFP settings"
+          }
+        }
+      }
     }
   }
 }
