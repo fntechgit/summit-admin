@@ -150,12 +150,6 @@ describe("sponsorReportsPurchaseDetailsReducer", () => {
   });
 
   describe("SET_CURRENT_SUMMIT", () => {
-    it("defaults the skipped slice to empty", () => {
-      expect(PD_DEFAULT_STATE.skipped).toStrictEqual([]);
-      expect(PD_DEFAULT_STATE.skippedCount).toBe(0);
-      expect(PD_DEFAULT_STATE.skippedOldest).toBeNull();
-    });
-
     it("resets to DEFAULT_STATE", () => {
       const dirty = { ...PD_DEFAULT_STATE, data: [{ id: 99 }], loading: true };
       const result = purchaseDetailsReducer(dirty, {

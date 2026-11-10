@@ -3,6 +3,7 @@ import React from "react";
 import { screen } from "@testing-library/react";
 import { renderWithRedux } from "utils/test-utils";
 import SkippedOrdersBanner from "../SkippedOrdersBanner";
+import en from "../../../../i18n/en.json";
 
 // Echo the key plus interpolation values so the count and time are assertable.
 jest.mock("i18n-react/dist/i18n-react", () => ({
@@ -135,10 +136,8 @@ describe("SkippedOrdersBanner", () => {
   });
 
   it("keeps the real catalog placeholders aligned with the component options", () => {
-    // The i18n mock above joins option values, so a renamed placeholder in the
-    // catalog would otherwise go unnoticed.
-    // eslint-disable-next-line global-require
-    const page = require("../../../../i18n/en.json").sponsor_reports_page;
+    // The T mock hides placeholder typos, so check the real catalog.
+    const page = en.sponsor_reports_page;
     expect(page.skipped_orders_title).toContain("{count}");
     expect(page.skipped_orders_since).toContain("{time}");
     expect(page.skipped_order_id).toContain("{id}");

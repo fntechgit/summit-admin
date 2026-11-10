@@ -298,10 +298,8 @@ export const getPurchaseDetailsReport =
       .finally(() => guardedDispatch(stopLoading()));
   };
 
-// Orders the reports API could not sync, for the Purchase Details banner. A
-// background read: no startLoading/stopLoading, because the global overlay is a
-// plain boolean and would be cleared early by whichever read finishes first.
-// Failures empty the slice (reducer) instead of replacing the report body.
+// Background read for the banner: no startLoading/stopLoading, since the shared
+// overlay is a plain boolean the report fetch also uses.
 export const getPurchaseDetailsSkipped = () => async (dispatch, getState) => {
   const { currentSummit } = getState().currentSummitState;
   if (!currentSummit?.id) return Promise.resolve();

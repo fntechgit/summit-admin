@@ -176,8 +176,7 @@ const PurchaseDetailsReportPage = ({
   // view we're leaving are carried into the view we're entering; the entering view
   // keeps its own page when those filters are unchanged, else snaps back to page 1.
   useEffect(() => {
-    // The banner is show-wide and independent of the view, but refreshing it
-    // alongside the report picks up a skip that appeared or resolved mid-session.
+    // Refresh the show-wide banner with each report fetch.
     fetchSkipped();
     const prevView = prevViewRef.current;
     prevViewRef.current = view;
