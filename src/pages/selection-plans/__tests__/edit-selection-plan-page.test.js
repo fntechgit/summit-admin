@@ -14,7 +14,8 @@
 import React from "react";
 import { screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Router } from "react-router-dom";
+import { createMemoryHistory } from "history";
 import { applyMiddleware, createStore } from "redux";
 import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
@@ -51,7 +52,7 @@ jest.mock("../../../components/forms/selection-plan-form", () => {
   const { useState } = jest.requireActual("react");
   return {
     __esModule: true,
-    default: ({ onSave }) => {
+    default: ({ onSave, onTabChange }) => {
       // Captured once at mount, like the real form's Formik initialValues.
       const [initialId] = useState(
         useSelector((state) => state.currentSelectionPlanState.entity).id
@@ -64,6 +65,11 @@ jest.mock("../../../components/forms/selection-plan-form", () => {
           >
             save
           </button>
+          {["questions", ""].map((slug) => (
+            <button key={slug} type="button" onClick={() => onTabChange(slug)}>
+              {`form-tab-${slug || "main"}`}
+            </button>
+          ))}
         </div>
       );
     }
@@ -244,5 +250,38 @@ describe("EditSelectionPlanPage", () => {
     expect(
       screen.queryByRole("button", { name: "general.add_new" })
     ).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ["form-tab-questions", "/app/summits/1/selection-plans/5/questions"],
+    ["form-tab-main", "/app/summits/1/selection-plans/5"]
+  ])("navigates to the tab's URL for %s", async (button, url) => {
+    renderWithRedux(
+      <MemoryRouter>
+        <EditSelectionPlanPage history={mockHistory} />
+      </MemoryRouter>,
+      {
+        initialState: stateFor({ id: 5 })
+      }
+    );
+    await userEvent.click(screen.getByRole("button", { name: button }));
+
+    expect(mockHistory.push).toHaveBeenCalledWith(url);
+  });
+
+  it("redirects an unknown tab to the plan's base URL", () => {
+    const history = createMemoryHistory({
+      initialEntries: ["/app/summits/1/selection-plans/5/not-a-tab"]
+    });
+    renderWithRedux(
+      <Router history={history}>
+        <EditSelectionPlanPage history={history} tab="not-a-tab" />
+      </Router>,
+      {
+        initialState: stateFor({ id: 5 })
+      }
+    );
+
+    expect(history.location.pathname).toBe("/app/summits/1/selection-plans/5");
   });
 });

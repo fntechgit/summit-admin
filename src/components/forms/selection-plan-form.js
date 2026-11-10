@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
@@ -22,6 +22,7 @@ import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import useScrollToError from "../../hooks/useScrollToError";
+import { SELECTION_PLAN_TAB_SLUGS } from "../../utils/constants";
 import MainTab from "./selection-plan-form/main-tab";
 import TrackGroupsTab from "./selection-plan-form/track-groups-tab";
 import EventTypesTab from "./selection-plan-form/event-types-tab";
@@ -84,6 +85,8 @@ const SelectionPlanForm = (props) => {
     currentSummit,
     allowedMembers,
     history,
+    tabSlug,
+    onTabChange,
     onSave,
     addTrackGroupToSelectionPlan,
     removeTrackGroupFromSelectionPlan,
@@ -103,8 +106,6 @@ const SelectionPlanForm = (props) => {
     importAllowedMembersCSV
   } = props;
 
-  const [activeTab, setActiveTab] = useState("main");
-
   const handleFormikSubmit = (values) => {
     const normalized = { ...values };
     DATE_FIELDS.forEach((field) => {
@@ -120,6 +121,15 @@ const SelectionPlanForm = (props) => {
     onSubmit: handleFormikSubmit,
     validateOnChange: false
   });
+
+  // hidden plans have no allowed members tab, so their link falls back to main
+  const activeTab =
+    Object.keys(SELECTION_PLAN_TAB_SLUGS).find(
+      (value) =>
+        SELECTION_PLAN_TAB_SLUGS[value] === tabSlug &&
+        !(formik.values.is_hidden && value === "allowed_members")
+    ) ?? "main";
+  const setActiveTab = (value) => onTabChange(SELECTION_PLAN_TAB_SLUGS[value]);
 
   useEffect(() => {
     formik.setErrors(
@@ -167,13 +177,6 @@ const SelectionPlanForm = (props) => {
       )
     }));
   }, [propsEntity.marketing_settings]);
-
-  // Reset tab if allowed_members becomes unavailable
-  useEffect(() => {
-    if (formik.values.is_hidden && activeTab === "allowed_members") {
-      setActiveTab("main");
-    }
-  }, [formik.values.is_hidden]);
 
   const onUpdateExtraQuestionOrder = (questions, questionId, newOrder) => {
     updateSelectionPlanExtraQuestionOrder(
@@ -460,6 +463,8 @@ SelectionPlanForm.propTypes = {
     lastPage: PropTypes.number.isRequired
   }).isRequired,
   history: PropTypes.shape({ push: PropTypes.func.isRequired }).isRequired,
+  tabSlug: PropTypes.string,
+  onTabChange: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   addTrackGroupToSelectionPlan: PropTypes.func.isRequired,
   removeTrackGroupFromSelectionPlan: PropTypes.func.isRequired,
@@ -480,7 +485,8 @@ SelectionPlanForm.propTypes = {
 };
 
 SelectionPlanForm.defaultProps = {
-  errors: {}
+  errors: {},
+  tabSlug: ""
 };
 
 const mapStateToProps = ({

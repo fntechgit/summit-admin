@@ -12,6 +12,7 @@
  * */
 import React, { useState } from "react";
 import { connect } from "react-redux";
+import { Redirect } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import { Button, Grid2 } from "@mui/material";
 import AddNewButton from "openstack-uicore-foundation/lib/components/mui/add-new-button";
@@ -21,12 +22,17 @@ import {
   saveSelectionPlanSettings
 } from "../../actions/selection-plan-actions";
 import { getMarketingSettingsBySelectionPlan } from "../../actions/marketing-actions";
-import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  MAX_PER_PAGE,
+  SELECTION_PLAN_TAB_SLUGS
+} from "../../utils/constants";
 
 const EditSelectionPlanPage = ({
   currentSummit,
   entity,
   history,
+  tab,
   saveSelectionPlan,
   saveSelectionPlanSettings,
   getMarketingSettingsBySelectionPlan
@@ -65,6 +71,23 @@ const EditSelectionPlanPage = ({
       .finally(() => setIsSaving(false));
   };
 
+  const onTabChange = (slug) => {
+    const tabPath = slug ? `/${slug}` : "";
+    history.push(
+      `/app/summits/${currentSummit.id}/selection-plans/${entity.id}${tabPath}`
+    );
+  };
+
+  const isUnknownTab =
+    tab && !Object.values(SELECTION_PLAN_TAB_SLUGS).includes(tab);
+  if (isUnknownTab) {
+    return (
+      <Redirect
+        to={`/app/summits/${currentSummit.id}/selection-plans/${entity.id}`}
+      />
+    );
+  }
+
   const title = entity?.id
     ? T.translate("general.edit")
     : T.translate("general.add");
@@ -93,7 +116,12 @@ const EditSelectionPlanPage = ({
         )}
       </Grid2>
       <hr />
-      <SelectionPlanForm history={history} onSave={onSave} />
+      <SelectionPlanForm
+        history={history}
+        tabSlug={tab}
+        onTabChange={onTabChange}
+        onSave={onSave}
+      />
       <Grid2
         size={12}
         sx={{ p: 3, pt: 0, display: "flex", justifyContent: "flex-end" }}
