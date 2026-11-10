@@ -35,8 +35,6 @@ export const PURCHASE_DETAILS_VALIDATION_ERROR =
 export const PURCHASE_DETAILS_VALIDATION_CLEAR =
   "PURCHASE_DETAILS_VALIDATION_CLEAR";
 
-export const REQUEST_PURCHASE_DETAILS_SKIPPED =
-  "REQUEST_PURCHASE_DETAILS_SKIPPED";
 export const RECEIVE_PURCHASE_DETAILS_SKIPPED_PAGE =
   "RECEIVE_PURCHASE_DETAILS_SKIPPED_PAGE"; // throwaway per-page action
 export const RECEIVE_PURCHASE_DETAILS_SKIPPED =
@@ -308,7 +306,6 @@ export const getPurchaseDetailsSkipped = () => async (dispatch, getState) => {
   const { currentSummit } = getState().currentSummitState;
   if (!currentSummit?.id) return Promise.resolve();
   const { isCurrent, guardedDispatch } = purchaseSkippedSeq(dispatch);
-  guardedDispatch(createAction(REQUEST_PURCHASE_DETAILS_SKIPPED)());
   try {
     const accessToken = await getAccessTokenSafely();
     if (!isCurrent()) return Promise.resolve();

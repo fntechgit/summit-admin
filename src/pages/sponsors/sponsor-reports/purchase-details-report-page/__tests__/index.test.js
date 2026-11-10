@@ -631,6 +631,22 @@ describe("PurchaseDetailsReportPage", () => {
       expect(getPurchaseDetailsSkipped).toHaveBeenCalledTimes(1);
     });
 
+    it("refetches the banner on a view switch and on Apply", async () => {
+      renderPage();
+      await act(async () => {});
+      expect(getPurchaseDetailsSkipped).toHaveBeenCalledTimes(1);
+      await act(async () => {
+        fireEvent.click(
+          screen.getByText("sponsor_reports_page.view_line_items")
+        );
+      });
+      expect(getPurchaseDetailsSkipped).toHaveBeenCalledTimes(2);
+      await act(async () => {
+        fireEvent.click(screen.getByText("sponsor_reports_page.apply"));
+      });
+      expect(getPurchaseDetailsSkipped).toHaveBeenCalledTimes(3);
+    });
+
     it("renders nothing when no orders are skipped", async () => {
       renderPage();
       await act(async () => {});

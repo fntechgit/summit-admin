@@ -169,7 +169,6 @@ const PurchaseDetailsReportPage = ({
   // thunk; empty deps is intentional (fetchFilters is stable from connect()).
   useEffect(() => {
     fetchFilters();
-    fetchSkipped();
   }, []); // mount-only
 
   // Fetch the active view. Runs on mount (initial load) and on every view switch.
@@ -177,6 +176,9 @@ const PurchaseDetailsReportPage = ({
   // view we're leaving are carried into the view we're entering; the entering view
   // keeps its own page when those filters are unchanged, else snaps back to page 1.
   useEffect(() => {
+    // The banner is show-wide and independent of the view, but refreshing it
+    // alongside the report picks up a skip that appeared or resolved mid-session.
+    fetchSkipped();
     const prevView = prevViewRef.current;
     prevViewRef.current = view;
     const carried = byView(prevView, {
@@ -269,6 +271,7 @@ const PurchaseDetailsReportPage = ({
   // axis (the thunk re-dispatches REQUEST, which re-records the slice state).
   // Applying/clearing a filter changes the result set → snap back to page 1.
   const handleApply = (next) => {
+    fetchSkipped();
     if (view === "orders") {
       fetchReport(next, {
         page: DEFAULT_CURRENT_PAGE,

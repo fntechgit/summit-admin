@@ -43,7 +43,8 @@ import {
   REQUEST_UNPAID_CHARGES,
   RECEIVE_UNPAID_CHARGES,
   getPurchaseDetailsSkipped,
-  RECEIVE_PURCHASE_DETAILS_SKIPPED
+  RECEIVE_PURCHASE_DETAILS_SKIPPED,
+  PURCHASE_DETAILS_SKIPPED_READ_ERROR
 } from "../sponsor-reports-actions";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
@@ -1654,6 +1655,24 @@ describe("sponsor-reports-actions", () => {
       const types = store.getActions().map((a) => a.type);
       expect(types).not.toContain(START_LOADING);
       expect(types).not.toContain(STOP_LOADING);
+    });
+
+    it("routes a failed read to the skipped slice's error, not the report's", async () => {
+      getRequest.mockImplementation(
+        (_requestAC, _receiveAC, _url, errorHandler) => () => (dispatch) => {
+          errorHandler({ status: 404 }, {})(dispatch);
+          return Promise.reject(new Error("404"));
+        }
+      );
+      const store = mockStore(MOCK_STATE);
+      await store.dispatch(getPurchaseDetailsSkipped());
+      const types = store.getActions().map((a) => a.type);
+      expect(types).toContain(PURCHASE_DETAILS_SKIPPED_READ_ERROR);
+      expect(types).not.toContain(PURCHASE_DETAILS_READ_ERROR);
+      const err = store
+        .getActions()
+        .find((a) => a.type === PURCHASE_DETAILS_SKIPPED_READ_ERROR);
+      expect(err.payload).toMatchObject({ status: 404, kind: "not-found" });
     });
 
     it("drops a superseded load, so only the newest call's RECEIVE lands", async () => {

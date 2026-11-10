@@ -33,7 +33,11 @@ const SkippedOrdersBanner = ({ orders = [], count = 0, oldest = null }) => {
       <Box component="ul" sx={{ m: 0, pl: 2.5 }}>
         {orders.map((o) => (
           <li key={o.purchase_id}>
-            {o.purchase_number} -{" "}
+            {o.purchase_number ||
+              T.translate("sponsor_reports_page.skipped_order_id", {
+                id: o.purchase_id
+              })}{" "}
+            -{" "}
             {o.sponsor_name ||
               T.translate("sponsor_reports_page.skipped_unknown_sponsor")}{" "}
             (

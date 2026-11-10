@@ -91,6 +91,21 @@ describe("SkippedOrdersBanner", () => {
     ).toBeInTheDocument();
   });
 
+  it("labels an order by its id when purchase_number is null", () => {
+    renderWithRedux(
+      <SkippedOrdersBanner
+        orders={[order({ purchase_id: 42, purchase_number: null })]}
+        count={1}
+        oldest={OLDEST}
+      />
+    );
+    const banner = screen.getByTestId("reports-skipped-orders");
+    expect(banner).toHaveTextContent(
+      "sponsor_reports_page.skipped_order_id|42"
+    );
+    expect(banner).not.toHaveTextContent("null");
+  });
+
   it("uses the singular title for exactly one order", () => {
     renderWithRedux(
       <SkippedOrdersBanner orders={[order()]} count={1} oldest={OLDEST} />
@@ -126,5 +141,6 @@ describe("SkippedOrdersBanner", () => {
     const page = require("../../../../i18n/en.json").sponsor_reports_page;
     expect(page.skipped_orders_title).toContain("{count}");
     expect(page.skipped_orders_since).toContain("{time}");
+    expect(page.skipped_order_id).toContain("{id}");
   });
 });
