@@ -41,7 +41,7 @@ jest.mock("../../actions/marketing-actions", () => ({
 
 jest.mock("../../pages/selection-plans/edit-selection-plan-page", () => ({
   __esModule: true,
-  default: () => <div data-testid="edit-page" />
+  default: ({ tab }) => <div data-testid="edit-page">{tab}</div>
 }));
 
 const SUMMIT_ID = 1;
@@ -137,5 +137,17 @@ describe("SelectionPlanIdLayout - superseded load", () => {
     await act(async () => flushPromises());
 
     expect(getByTestId("edit-page")).toBeInTheDocument();
+  });
+
+  it("passes the tab slug from the URL to the edit page", async () => {
+    getSelectionPlan.mockImplementation(() => () => Promise.resolve());
+
+    const { getByTestId } = renderAt(
+      `/app/summits/${SUMMIT_ID}/selection-plans/${PLAN_A}/category-groups`,
+      { id: Number(PLAN_A) }
+    );
+    await act(async () => flushPromises());
+
+    expect(getByTestId("edit-page")).toHaveTextContent("category-groups");
   });
 });

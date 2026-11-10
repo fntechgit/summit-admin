@@ -96,8 +96,13 @@ const SelectionPlanIdLayout = ({
           <Route
             strict
             exact
-            path={`${match.url}`}
-            component={EditSelectionPlanPage}
+            path={`${match.url}/:tab?`}
+            render={({ history, match: routeMatch }) => (
+              <EditSelectionPlanPage
+                history={history}
+                tab={routeMatch.params.tab}
+              />
+            )}
           />
           <Route
             path={`${match.url}/extra-questions`}
