@@ -71,24 +71,20 @@ const EditSelectionPlanPage = ({
       .finally(() => setIsSaving(false));
   };
 
+  const planUrl = `/app/summits/${currentSummit.id}/selection-plans/${entity?.id}`;
+
   const onTabChange = (slug) => {
     const tabPath = slug ? `/${slug}` : "";
-    history.push(
-      `/app/summits/${currentSummit.id}/selection-plans/${entity.id}${tabPath}`
-    );
+    history.push(`${planUrl}${tabPath}`);
   };
 
   const isUnknownTab =
     tab && !Object.values(SELECTION_PLAN_TAB_SLUGS).includes(tab);
   // saved hidden plans have no allowed members tab
   const isHiddenTab =
-    tab === SELECTION_PLAN_TAB_SLUGS.allowed_members && entity.is_hidden;
+    tab === SELECTION_PLAN_TAB_SLUGS.allowed_members && entity?.is_hidden;
   if (isUnknownTab || isHiddenTab) {
-    return (
-      <Redirect
-        to={`/app/summits/${currentSummit.id}/selection-plans/${entity.id}`}
-      />
-    );
+    return <Redirect to={planUrl} />;
   }
 
   const title = entity?.id
