@@ -105,11 +105,6 @@ const SelectionPlanForm = (props) => {
     onAllowedMembersPageChange
   } = props;
 
-  const activeTab =
-    Object.keys(TAB_SLUGS).find((value) => TAB_SLUGS[value] === tabSlug) ??
-    "main";
-  const setActiveTab = (value) => onTabChange(TAB_SLUGS[value]);
-
   const handleFormikSubmit = (values) => {
     const normalized = { ...values };
     DATE_FIELDS.forEach((field) => {
@@ -125,6 +120,15 @@ const SelectionPlanForm = (props) => {
     onSubmit: handleFormikSubmit,
     validateOnChange: false
   });
+
+  // hidden plans have no allowed members tab, so their link falls back to main
+  const activeTab =
+    Object.keys(TAB_SLUGS).find(
+      (value) =>
+        TAB_SLUGS[value] === tabSlug &&
+        !(formik.values.is_hidden && value === "allowed_members")
+    ) ?? "main";
+  const setActiveTab = (value) => onTabChange(TAB_SLUGS[value]);
 
   useEffect(() => {
     formik.setErrors(
@@ -152,13 +156,6 @@ const SelectionPlanForm = (props) => {
     propsEntity.track_chair_rating_types,
     propsEntity.allowed_presentation_action_types
   ]);
-
-  // Reset tab if allowed_members becomes unavailable
-  useEffect(() => {
-    if (formik.values.is_hidden && activeTab === "allowed_members") {
-      setActiveTab("main");
-    }
-  }, [formik.values.is_hidden]);
 
   const isNewPlan = formik.values.id === 0;
 

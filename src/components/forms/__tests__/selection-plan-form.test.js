@@ -287,12 +287,16 @@ describe("SelectionPlanForm - tab navigation", () => {
     expect(baseProps.onTabChange).toHaveBeenCalledWith("questions");
   });
 
-  it("sends a hidden plan's allowed members link to the main tab", () => {
+  it("shows the main tab for a hidden plan's allowed members link", () => {
     renderExistingForm({
       entity: { ...existingEntity, is_hidden: true },
       tabSlug: "allowed-members"
     });
-    expect(baseProps.onTabChange).toHaveBeenCalledWith("main");
+    expect(screen.getByRole("tab", { name: "Main" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+    expect(baseProps.onTabChange).not.toHaveBeenCalled();
   });
 });
 
