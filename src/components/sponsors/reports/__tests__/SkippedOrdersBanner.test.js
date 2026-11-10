@@ -90,4 +90,41 @@ describe("SkippedOrdersBanner", () => {
       screen.getByText(/sponsor_reports_page\.skipped_unknown_sponsor/)
     ).toBeInTheDocument();
   });
+
+  it("uses the singular title for exactly one order", () => {
+    renderWithRedux(
+      <SkippedOrdersBanner orders={[order()]} count={1} oldest={OLDEST} />
+    );
+    const banner = screen.getByTestId("reports-skipped-orders");
+    expect(banner).toHaveTextContent(
+      "sponsor_reports_page.skipped_orders_title_one"
+    );
+    expect(banner).not.toHaveTextContent(
+      "sponsor_reports_page.skipped_orders_title|"
+    );
+  });
+
+  it("falls back to a generic reason label for an unknown reason", () => {
+    renderWithRedux(
+      <SkippedOrdersBanner
+        orders={[order({ reason: "something_new" })]}
+        count={1}
+        oldest={OLDEST}
+      />
+    );
+    const banner = screen.getByTestId("reports-skipped-orders");
+    expect(banner).toHaveTextContent(
+      "sponsor_reports_page.skipped_reason_unknown"
+    );
+    expect(banner).not.toHaveTextContent("something_new");
+  });
+
+  it("keeps the real catalog placeholders aligned with the component options", () => {
+    // The i18n mock above joins option values, so a renamed placeholder in the
+    // catalog would otherwise go unnoticed.
+    // eslint-disable-next-line global-require
+    const page = require("../../../../i18n/en.json").sponsor_reports_page;
+    expect(page.skipped_orders_title).toContain("{count}");
+    expect(page.skipped_orders_since).toContain("{time}");
+  });
 });
