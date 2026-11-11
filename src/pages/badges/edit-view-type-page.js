@@ -15,13 +15,13 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
+import AddNewButton from "openstack-uicore-foundation/lib/components/mui/add-new-button";
 import ViewTypeForm from "../../components/forms/view-type-form";
 import {
   getViewType,
   resetViewTypeForm,
   saveViewType
 } from "../../actions/badge-actions";
-import AddNewButton from "../../components/buttons/add-new-button-mui";
 
 const EditViewTypePage = ({
   currentSummit,
