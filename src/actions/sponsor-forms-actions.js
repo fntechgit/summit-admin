@@ -673,7 +673,7 @@ export const upgradeSponsorManagedForm =
 
     const normalizedEntity = normalizeSponsorCustomizedForm(
       entity,
-      currentSummit.time_zone.id
+      currentSummit.time_zone_id
     );
 
     const params = {
@@ -926,7 +926,7 @@ export const saveSponsorCustomizedForm =
 
     const normalizedEntity = normalizeSponsorCustomizedForm(
       entity,
-      currentSummit.time_zone.id
+      currentSummit.time_zone_id
     );
 
     const params = {
@@ -969,7 +969,7 @@ export const updateSponsorCustomizedForm =
 
     const normalizedEntity = normalizeSponsorCustomizedForm(
       entity,
-      currentSummit.time_zone.id
+      currentSummit.time_zone_id
     );
 
     const params = {
