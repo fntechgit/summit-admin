@@ -661,8 +661,8 @@ export const getBadgeType = (badgeTypeId) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}`,
     snackbarErrorHandler
   )(params)(dispatch)
-    .finally(() => dispatch(stopLoading()))
-    .catch(() => {});
+    .catch(() => {})
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const resetBadgeTypeForm = () => (dispatch) => {
