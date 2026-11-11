@@ -11,10 +11,12 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
+import Box from "@mui/material/Box";
+import AddNewButton from "openstack-uicore-foundation/lib/components/mui/add-new-button";
 import TicketTypeForm from "../../components/forms/ticket-type-form";
 import {
   getTicketType,
@@ -22,20 +24,19 @@ import {
   saveTicketType
 } from "../../actions/ticket-actions";
 import { getBadgeTypes } from "../../actions/badge-actions";
-import AddNewButtonMui from "../../components/buttons/add-new-button-mui";
 
 const EditTicketTypePage = ({
   currentSummit,
   entity,
   errors,
   match,
+  history,
   getTicketType,
   resetTicketTypeForm,
   saveTicketType,
   getBadgeTypes
 }) => {
   const ticketTypeId = match.params.ticket_type_id;
-  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (currentSummit && !currentSummit.badge_types) {
@@ -51,14 +52,6 @@ const EditTicketTypePage = ({
     }
   }, [ticketTypeId]);
 
-  const onSave = (values) => {
-    if (isSaving) return Promise.resolve();
-    setIsSaving(true);
-    return saveTicketType(values)
-      .catch(() => {})
-      .finally(() => setIsSaving(false));
-  };
-
   const title = entity.id
     ? T.translate("general.edit")
     : T.translate("general.add");
@@ -71,18 +64,31 @@ const EditTicketTypePage = ({
   return (
     <div className="container">
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-      <h3>
-        {title} {T.translate("edit_ticket_type.ticket_type")}
-        <AddNewButtonMui entity={entity} />
-      </h3>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}
+      >
+        <h3>
+          {title} {T.translate("edit_ticket_type.ticket_type")}
+        </h3>
+        {entity.id > 0 && (
+          <AddNewButton
+            onClick={() =>
+              history.push(`/app/summits/${currentSummit.id}/ticket-types/new`)
+            }
+          />
+        )}
+      </Box>
       <hr />
       {currentSummit && (
         <TicketTypeForm
           entity={entity}
           errors={errors}
           currentSummit={currentSummit}
-          isSaving={isSaving}
-          onSubmit={onSave}
+          onSubmit={saveTicketType}
         />
       )}
     </div>

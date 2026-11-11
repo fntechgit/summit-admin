@@ -11,26 +11,77 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
+import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
+import { useFormik, FormikProvider } from "formik";
+import * as yup from "yup";
+import moment from "moment-timezone";
 import {
   Box,
   Button,
-  Checkbox,
   Divider,
-  FormControlLabel,
-  FormHelperText,
   Grid2,
   InputLabel,
-  TextField,
+  MenuItem,
   Tooltip
 } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
-import { hasErrors, scrollToError, shallowEqual } from "../../utils/methods";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
+import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
+import MuiFormikPriceField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/price-field";
+import MuiFormikQuantityField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/quantity-field";
+import MuiFormikDatetimepicker from "../mui/formik-inputs/mui-formik-datetimepicker";
+import useScrollToError from "../../hooks/useScrollToError";
+import { requiredStringValidation } from "../../utils/yup";
 import { TEXT_MAX_LENGTH_255 } from "../../utils/constants";
+
+const DATE_FIELDS = ["sales_start_date", "sales_end_date"];
+
+const dateValidation = () =>
+  yup
+    .mixed()
+    .nullable()
+    .test(
+      "valid-date",
+      T.translate("validation.date"),
+      (value) => value == null || (moment.isMoment(value) && value.isValid())
+    );
+
+const validationSchema = yup.object().shape({
+  name: requiredStringValidation(),
+  sales_start_date: dateValidation(),
+  sales_end_date: dateValidation()
+});
+
+const buildInitialValues = (entity, timezone) => {
+  const values = {
+    ...entity,
+    name: entity.name ?? "",
+    external_id: entity.external_id || "",
+    badge_type_id: entity.badge_type_id || "",
+    description: entity.description ?? "",
+    currency: entity.currency || "",
+    audience: entity.audience || "",
+    allows_to_delegate: !!entity.allows_to_delegate,
+    allows_to_reassign: !!entity.allows_to_reassign
+  };
+  DATE_FIELDS.forEach((field) => {
+    values[field] = entity[field]
+      ? epochToMomentTimeZone(entity[field], timezone)
+      : null;
+  });
+  return values;
+};
+
+const renderOptionLabel = (options, placeholder) => (selected) =>
+  selected ? (
+    options.find((op) => op.value === selected)?.label
+  ) : (
+    <span style={{ color: "#aaa" }}>{placeholder}</span>
+  );
 
 const InfoTooltip = ({ title }) => (
   <Tooltip title={title}>
@@ -41,78 +92,62 @@ const InfoTooltip = ({ title }) => (
   </Tooltip>
 );
 
-const TicketTypeForm = ({
-  entity: propsEntity,
-  errors: propsErrors,
-  currentSummit,
-  isSaving,
-  onSubmit
-}) => {
-  const [entity, setEntity] = useState({ ...propsEntity });
-  const [errors, setErrors] = useState(propsErrors);
-  const prevEntityRef = useRef(propsEntity);
-  const prevErrorsRef = useRef(propsErrors);
+InfoTooltip.propTypes = {
+  title: PropTypes.string.isRequired
+};
 
-  useEffect(() => {
-    scrollToError(propsErrors);
-  }, [propsErrors]);
+const CHECKBOX_WITH_INFO_SX = {
+  display: "flex",
+  alignItems: "center",
+  "& .MuiFormControl-root": { width: "auto" }
+};
 
-  useEffect(() => {
-    if (!shallowEqual(prevEntityRef.current, propsEntity)) {
-      setEntity({ ...propsEntity });
-      setErrors({});
-    }
-    prevEntityRef.current = propsEntity;
-  }, [propsEntity]);
-
-  useEffect(() => {
-    if (!shallowEqual(prevErrorsRef.current, propsErrors)) {
-      setErrors({ ...propsErrors });
-    }
-    prevErrorsRef.current = propsErrors;
-  }, [propsErrors]);
-
-  const setField = (field, value) => {
-    setErrors((prev) => ({ ...prev, [field]: "" }));
-    setEntity((prev) => ({ ...prev, [field]: value }));
+const TicketTypeForm = ({ entity, errors, currentSummit, onSubmit }) => {
+  const handleSubmit = (values) => {
+    const normalized = { ...values };
+    // 0 clears the date, see normalizeEntity in ticket-actions
+    DATE_FIELDS.forEach((field) => {
+      normalized[field] = values[field] ? values[field].unix() : 0;
+    });
+    return onSubmit(normalized);
   };
 
-  const handleChange = (ev) => {
-    const { name, type, checked } = ev.target;
-    const value = type === "checkbox" ? checked : ev.target.value;
-    setField(name, value);
-  };
+  const formik = useFormik({
+    initialValues: buildInitialValues(entity, currentSummit.time_zone_id),
+    validationSchema,
+    enableReinitialize: true,
+    onSubmit: handleSubmit
+  });
 
+  useScrollToError(formik);
+
+  // the picker never blurs into formik, so touch on change to surface an
+  // invalid date as soon as it is typed instead of only after a submit
   const handleDateChange = (field) => (value) => {
-    if (value === null) {
-      setField(field, 0);
-    } else if (value.isValid()) {
-      setField(field, value.unix());
+    formik.setFieldTouched(field, true, false);
+    formik.setFieldValue(field, value);
+  };
+
+  useEffect(() => {
+    if (errors && Object.keys(errors).length > 0) {
+      formik.setErrors(errors);
+      formik.setTouched(
+        Object.keys(errors).reduce((acc, key) => ({ ...acc, [key]: true }), {})
+      );
     }
-  };
+  }, [errors]);
 
-  const handleSubmit = (ev) => {
-    ev.preventDefault();
-    onSubmit(entity);
-  };
-
-  const fieldError = (field) => {
-    const error = hasErrors(field, errors);
-    return { error: !!error, helperText: error || undefined };
-  };
-
-  const currency_ddl = currentSummit.supported_currencies.map((i) => ({
+  const currencyOptions = currentSummit.supported_currencies.map((i) => ({
     label: i,
     value: i
   }));
-  const badge_type_ddl = currentSummit.badge_types
-    ? currentSummit.badge_types.map((bt) => ({
-        label: bt.name,
-        value: bt.id
-      }))
-    : [];
 
-  const audience_ddl = [
+  const badgeTypeOptions = (currentSummit.badge_types || []).map((bt) => ({
+    label: bt.name,
+    value: bt.id
+  }));
+
+  const audienceOptions = [
     { label: "With Invitation", value: "WithInvitation" },
     { label: "Without Invitation", value: "WithoutInvitation" },
     { label: "All", value: "All" },
@@ -124,289 +159,260 @@ const TicketTypeForm = ({
     }
   ];
 
-  const description = entity.description || "";
+  const badgeTypePlaceholder = T.translate(
+    "edit_ticket_type.placeholders.select_badge_type"
+  );
+  const audiencePlaceholder = T.translate(
+    "edit_ticket_type.placeholders.select_audience"
+  );
 
   return (
-    <Box component="form" noValidate>
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <InputLabel htmlFor="name">
-            {T.translate("edit_ticket_type.name")} *
-          </InputLabel>
-          <TextField
-            id="name"
-            name="name"
-            value={entity.name}
-            onChange={handleChange}
-            size="small"
-            fullWidth
-            {...fieldError("name")}
-          />
+    <FormikProvider value={formik}>
+      <Box
+        component="form"
+        onSubmit={formik.handleSubmit}
+        noValidate
+        autoComplete="off"
+      >
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="name">
+              {T.translate("edit_ticket_type.name")} *
+            </InputLabel>
+            <MuiFormikTextField
+              id="name"
+              name="name"
+              size="small"
+              margin="none"
+              fullWidth
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="external_id">
+              {T.translate("edit_ticket_type.external_id")}
+            </InputLabel>
+            <MuiFormikTextField
+              id="external_id"
+              name="external_id"
+              size="small"
+              margin="none"
+              fullWidth
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="badge_type_id">
+              {T.translate("edit_ticket_type.badge_type_id")}
+            </InputLabel>
+            <MuiFormikSelect
+              name="badge_type_id"
+              size="small"
+              placeholder={badgeTypePlaceholder}
+              renderValue={renderOptionLabel(
+                badgeTypeOptions,
+                badgeTypePlaceholder
+              )}
+            >
+              {badgeTypeOptions.map((op) => (
+                <MenuItem key={op.value} value={op.value}>
+                  {op.label}
+                </MenuItem>
+              ))}
+            </MuiFormikSelect>
+          </Grid2>
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <InputLabel htmlFor="external_id">
-            {T.translate("edit_ticket_type.external_id")}
-          </InputLabel>
-          <TextField
-            id="external_id"
-            name="external_id"
-            value={entity.external_id}
-            onChange={handleChange}
-            size="small"
-            fullWidth
-            {...fieldError("external_id")}
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <InputLabel id="badge_type_id-label" htmlFor="badge_type_id">
-            {T.translate("edit_ticket_type.badge_type_id")}
-          </InputLabel>
-          <MuiDropdown
-            id="badge_type_id"
-            name="badge_type_id"
-            value={entity.badge_type_id || ""}
-            onChange={handleChange}
-            options={badge_type_ddl}
-            placeholder={T.translate(
-              "edit_ticket_type.placeholders.select_badge_type"
-            )}
-            size="small"
-            SelectDisplayProps={{ id: "badge_type_id" }}
-          />
-        </Grid2>
-      </Grid2>
 
-      <Grid2 container spacing={2} sx={{ mb: 4 }}>
-        <Grid2 size={{ xs: 12, md: 8 }}>
-          <InputLabel htmlFor="description">
-            {T.translate("edit_ticket_type.description")}
-          </InputLabel>
-          <TextField
-            id="description"
-            name="description"
-            value={description}
-            onChange={handleChange}
-            multiline
-            rows={4}
-            fullWidth
-            helperText={`${description.length}/${TEXT_MAX_LENGTH_255}`}
-            slotProps={{
-              htmlInput: { maxLength: TEXT_MAX_LENGTH_255 },
-              formHelperText: { sx: { right: 0 } }
-            }}
-          />
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 8 }}>
+            <InputLabel htmlFor="description">
+              {T.translate("edit_ticket_type.description")}
+            </InputLabel>
+            <MuiFormikTextField
+              id="description"
+              name="description"
+              multiline
+              rows={4}
+              margin="none"
+              maxLength={TEXT_MAX_LENGTH_255}
+              fullWidth
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="audience">
+              {T.translate("edit_ticket_type.audience")}
+              {formik.values.audience === "WithPromoCode" && (
+                <InfoTooltip
+                  title={T.translate(
+                    "edit_ticket_type.info_audience_with_promo_code"
+                  )}
+                />
+              )}
+            </InputLabel>
+            <MuiFormikSelect
+              name="audience"
+              size="small"
+              placeholder={audiencePlaceholder}
+              renderValue={renderOptionLabel(
+                audienceOptions,
+                audiencePlaceholder
+              )}
+            >
+              {audienceOptions.map((op) => (
+                <MenuItem key={op.value} value={op.value}>
+                  {op.label}
+                </MenuItem>
+              ))}
+            </MuiFormikSelect>
+          </Grid2>
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }} sx={{ position: "relative" }}>
-          <InputLabel id="audience-label" htmlFor="audience">
-            {T.translate("edit_ticket_type.audience")}
-            {entity.audience === "WithPromoCode" && (
-              <InfoTooltip
-                title={T.translate(
-                  "edit_ticket_type.info_audience_with_promo_code"
-                )}
+
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="cost">
+              {T.translate("edit_ticket_type.cost")}
+            </InputLabel>
+            <MuiFormikPriceField
+              id="cost"
+              name="cost"
+              size="small"
+              margin="none"
+              fullWidth
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="currency">
+              {T.translate("edit_ticket_type.currency")}
+            </InputLabel>
+            <MuiFormikSelect
+              name="currency"
+              size="small"
+              placeholder={T.translate(
+                "edit_ticket_type.placeholders.select_currency"
+              )}
+            >
+              {currencyOptions.map((op) => (
+                <MenuItem key={op.value} value={op.value}>
+                  {op.label}
+                </MenuItem>
+              ))}
+            </MuiFormikSelect>
+          </Grid2>
+          <Grid2
+            size={{ xs: 12, md: 4 }}
+            sx={{ display: "flex", alignItems: "flex-end" }}
+          >
+            <Box sx={CHECKBOX_WITH_INFO_SX}>
+              <MuiFormikCheckbox
+                name="allows_to_delegate"
+                margin="none"
+                label={T.translate("edit_ticket_type.allows_to_delegate")}
               />
-            )}
-          </InputLabel>
-          <MuiDropdown
-            id="audience"
-            name="audience"
-            value={entity.audience || ""}
-            onChange={handleChange}
-            options={audience_ddl}
-            placeholder={T.translate(
-              "edit_ticket_type.placeholders.select_audience"
-            )}
-            size="small"
-            error={!!hasErrors("audience", errors)}
-            SelectDisplayProps={{ id: "audience" }}
-          />
-          {hasErrors("audience", errors) && (
-            <FormHelperText error>
-              {hasErrors("audience", errors)}
-            </FormHelperText>
-          )}
+              <InfoTooltip
+                title={T.translate("edit_ticket_type.allows_to_delegate_info")}
+              />
+            </Box>
+          </Grid2>
         </Grid2>
-      </Grid2>
 
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <InputLabel htmlFor="cost">
-            {T.translate("edit_ticket_type.cost")}
-          </InputLabel>
-          <TextField
-            id="cost"
-            name="cost"
-            value={entity.cost}
-            onChange={handleChange}
-            size="small"
-            fullWidth
-            {...fieldError("cost")}
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }} sx={{ position: "relative" }}>
-          <InputLabel id="currency-label" htmlFor="currency">
-            {T.translate("edit_ticket_type.currency")}
-          </InputLabel>
-          <MuiDropdown
-            id="currency"
-            name="currency"
-            value={entity.currency || ""}
-            onChange={handleChange}
-            options={currency_ddl}
-            placeholder={T.translate(
-              "edit_ticket_type.placeholders.select_currency"
-            )}
-            size="small"
-            error={!!hasErrors("currency", errors)}
-            SelectDisplayProps={{ id: "currency" }}
-          />
-          {hasErrors("currency", errors) && (
-            <FormHelperText error>
-              {hasErrors("currency", errors)}
-            </FormHelperText>
-          )}
-        </Grid2>
-        <Grid2
-          size={{ xs: 12, md: 4 }}
-          sx={{ display: "flex", alignItems: "flex-end" }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  id="allows_to_delegate"
-                  name="allows_to_delegate"
-                  checked={!!entity.allows_to_delegate}
-                  onChange={handleChange}
-                />
-              }
-              label={T.translate("edit_ticket_type.allows_to_delegate")}
-              sx={{ mr: 0, mb: 0 }}
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="quantity_2_sell">
+              {T.translate("edit_ticket_type.quantity_to_sell")}
+            </InputLabel>
+            <MuiFormikQuantityField
+              id="quantity_2_sell"
+              name="quantity_2_sell"
+              size="small"
+              margin="none"
+              fullWidth
             />
-            <InfoTooltip
-              title={T.translate("edit_ticket_type.allows_to_delegate_info")}
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="max_quantity_per_order">
+              {T.translate("edit_ticket_type.max_quantity_to_sell_per_order")}
+            </InputLabel>
+            <MuiFormikQuantityField
+              id="max_quantity_per_order"
+              name="max_quantity_per_order"
+              size="small"
+              margin="none"
+              fullWidth
             />
-          </Box>
+          </Grid2>
+          <Grid2
+            size={{ xs: 12, md: 4 }}
+            sx={{ display: "flex", alignItems: "flex-end" }}
+          >
+            <Box sx={CHECKBOX_WITH_INFO_SX}>
+              <MuiFormikCheckbox
+                name="allows_to_reassign"
+                margin="none"
+                label={T.translate("edit_ticket_type.allows_to_reassign")}
+              />
+              <InfoTooltip
+                title={T.translate("edit_ticket_type.allows_to_reassign_info")}
+              />
+            </Box>
+          </Grid2>
         </Grid2>
-      </Grid2>
 
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <InputLabel htmlFor="quantity_2_sell">
-            {T.translate("edit_ticket_type.quantity_to_sell")}
-          </InputLabel>
-          <TextField
-            id="quantity_2_sell"
-            name="quantity_2_sell"
-            type="number"
-            value={entity.quantity_2_sell}
-            onChange={handleChange}
-            size="small"
-            fullWidth
-            {...fieldError("quantity_2_sell")}
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <InputLabel htmlFor="max_quantity_per_order">
-            {T.translate("edit_ticket_type.max_quantity_to_sell_per_order")}
-          </InputLabel>
-          <TextField
-            id="max_quantity_per_order"
-            name="max_quantity_per_order"
-            type="number"
-            value={entity.max_quantity_per_order}
-            onChange={handleChange}
-            size="small"
-            fullWidth
-            {...fieldError("max_quantity_per_order")}
-          />
-        </Grid2>
-        <Grid2
-          size={{ xs: 12, md: 4 }}
-          sx={{ display: "flex", alignItems: "flex-end" }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  id="allows_to_reassign"
-                  name="allows_to_reassign"
-                  checked={!!entity.allows_to_reassign}
-                  onChange={handleChange}
-                />
-              }
-              label={T.translate("edit_ticket_type.allows_to_reassign")}
-              sx={{ mr: 0, mb: 0 }}
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel>
+              {T.translate("edit_ticket_type.sales_start_date")}
+            </InputLabel>
+            <MuiFormikDatetimepicker
+              name="sales_start_date"
+              onChange={handleDateChange("sales_start_date")}
+              timezone={currentSummit.time_zone_id}
+              format="YYYY-MM-DD HH:mm"
+              ampm={false}
             />
-            <InfoTooltip
-              title={T.translate("edit_ticket_type.allows_to_reassign_info")}
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel>
+              {T.translate("edit_ticket_type.sales_end_date")}
+            </InputLabel>
+            <MuiFormikDatetimepicker
+              name="sales_end_date"
+              onChange={handleDateChange("sales_end_date")}
+              timezone={currentSummit.time_zone_id}
+              format="YYYY-MM-DD HH:mm"
+              ampm={false}
             />
-          </Box>
+          </Grid2>
         </Grid2>
-      </Grid2>
 
-      <Grid2 container spacing={2} sx={{ mb: 2 }}>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <InputLabel htmlFor="sales_start_date">
-            {T.translate("edit_ticket_type.sales_start_date")}
-          </InputLabel>
-          <DateTimePicker
-            value={
-              epochToMomentTimeZone(
-                entity.sales_start_date,
-                currentSummit.time_zone_id
-              ) || null
-            }
-            onChange={handleDateChange("sales_start_date")}
-            timezone={currentSummit.time_zone_id}
-            format="YYYY-MM-DD HH:mm"
-            ampm={false}
-            slotProps={{
-              textField: {
-                id: "sales_start_date",
-                size: "small",
-                fullWidth: true
-              },
-              field: { clearable: true }
-            }}
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <InputLabel htmlFor="sales_end_date">
-            {T.translate("edit_ticket_type.sales_end_date")}
-          </InputLabel>
-          <DateTimePicker
-            value={
-              epochToMomentTimeZone(
-                entity.sales_end_date,
-                currentSummit.time_zone_id
-              ) || null
-            }
-            onChange={handleDateChange("sales_end_date")}
-            timezone={currentSummit.time_zone_id}
-            format="YYYY-MM-DD HH:mm"
-            ampm={false}
-            slotProps={{
-              textField: {
-                id: "sales_end_date",
-                size: "small",
-                fullWidth: true
-              },
-              field: { clearable: true }
-            }}
-          />
-        </Grid2>
-      </Grid2>
+        <Divider sx={{ my: 2 }} />
 
-      <Divider sx={{ my: 2 }} />
-
-      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-        <Button variant="contained" onClick={handleSubmit} disabled={isSaving}>
-          {T.translate("general.save")}
-        </Button>
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            variant="contained"
+            type="submit"
+            disabled={formik.isSubmitting}
+          >
+            {T.translate("general.save")}
+          </Button>
+        </Box>
       </Box>
-    </Box>
+    </FormikProvider>
   );
+};
+
+TicketTypeForm.propTypes = {
+  entity: PropTypes.shape({
+    id: PropTypes.number
+  }).isRequired,
+  errors: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  currentSummit: PropTypes.shape({
+    time_zone_id: PropTypes.string,
+    supported_currencies: PropTypes.arrayOf(PropTypes.string),
+    badge_types: PropTypes.arrayOf(PropTypes.shape({}))
+  }).isRequired,
+  onSubmit: PropTypes.func.isRequired
+};
+
+TicketTypeForm.defaultProps = {
+  errors: {}
 };
 
 export default TicketTypeForm;
