@@ -12,7 +12,7 @@
  * */
 
 import React from "react";
-import AsyncSelect from "react-select/lib/Async";
+import AsyncSelect from "react-select/async";
 import { queryEvents } from "../../actions/event-actions";
 
 export default class EventInput extends React.Component {

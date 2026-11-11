@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import AsyncSelect from "react-select/lib/Async";
+import AsyncSelect from "react-select/async";
 import "./index.less";
 /**
  *
@@ -40,7 +40,7 @@ const Many2ManyDropDown = ({
   return (
     <div className={`${CSSClass} many-2-many-ddl-container`}>
       <AsyncSelect
-        className={"many-2-many-ddl"}
+        className="many-2-many-ddl"
         value={value}
         onChange={handleChange}
         loadOptions={fetchOptions}

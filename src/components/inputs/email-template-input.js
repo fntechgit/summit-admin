@@ -12,7 +12,7 @@
  * */
 
 import React from "react";
-import AsyncSelect from "react-select/lib/Async";
+import AsyncSelect from "react-select/async";
 import { queryTemplates } from "../../actions/email-actions";
 
 export default class EmailTemplateInput extends React.Component {

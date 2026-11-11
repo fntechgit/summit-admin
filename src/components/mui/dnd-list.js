@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Box } from "@mui/material";
 
 const reorder = (list, startIndex, endIndex, updateOrderKey) => {

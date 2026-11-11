@@ -9,16 +9,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
-import { isEmpty, shallowEqual } from "../../utils/methods";
-import CreatableSelect from "react-select/lib/Creatable";
+import CreatableSelect from "react-select/creatable";
 
-const SponsorSocialNetworkForm = ({ entity, errors, onSubmit }) => {
+const SponsorSocialNetworkForm = ({ entity, onSubmit }) => {
   const [stateEntity, setStateEntity] = useState({});
   const [theValue, setTheValue] = useState(null);
   const [iconsDDL, setIconsDDL] = useState([
@@ -91,7 +90,7 @@ const SponsorSocialNetworkForm = ({ entity, errors, onSubmit }) => {
     const newEntity = { ...stateEntity };
 
     const newOption = { label: ev, value: ev };
-    newEntity["icon_css_class"] = newOption.value;
+    newEntity.icon_css_class = newOption.value;
     setIconsDDL([...iconsDDL, newOption]);
     setStateEntity(newEntity);
   };

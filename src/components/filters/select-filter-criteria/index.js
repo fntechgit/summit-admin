@@ -15,7 +15,7 @@ import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import AsyncSelect from "react-select/lib/Async";
+import AsyncSelect from "react-select/async";
 import { queryFilterCriterias } from "../../../actions/filter-criteria-actions";
 import { HIGH_Z_INDEX } from "../../../utils/constants";
 
