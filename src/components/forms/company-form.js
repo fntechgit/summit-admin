@@ -99,6 +99,9 @@ const CompanyForm = ({
       onRemove(initialEntity, field)
         .catch(() => formik.setFieldValue(field, prevValue))
         .finally(() => setIsSaving(false));
+    } else {
+      // also reached when cancelling an in-flight upload
+      setIsSaving(false);
     }
   };
 
