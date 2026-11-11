@@ -60,7 +60,8 @@ describe("BulkEditDataGrid", () => {
 
     const titleInput = screen.getByDisplayValue("Second");
     await userEvent.clear(titleInput);
-    await userEvent.type(titleInput, "Renamed");
+    // pasted: typing it key by key re-renders the auto-height grid per key and is slow
+    await userEvent.paste("Renamed");
     await userEvent.click(
       screen.getByRole("button", { name: "bulk_edit_table.apply_changes" })
     );
@@ -294,7 +295,7 @@ describe("BulkEditDataGrid", () => {
   const clickDelete = (rowName) =>
     userEvent.click(
       within(screen.getByRole("row", { name: new RegExp(rowName) })).getByRole(
-        "menuitem",
+        "button",
         { name: "general.delete" }
       )
     );
