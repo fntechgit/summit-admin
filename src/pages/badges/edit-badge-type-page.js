@@ -15,6 +15,7 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
+import AddNewButton from "openstack-uicore-foundation/lib/components/mui/add-new-button";
 import BadgeTypeForm from "../../components/forms/badge-type-form";
 import {
   getAccessLevels,
@@ -30,7 +31,6 @@ import {
   addViewTypeToBadgeType,
   removeViewTypeFromBadgeType
 } from "../../actions/badge-actions";
-import AddNewButton from "../../components/buttons/add-new-button-mui";
 import { DEFAULT_CURRENT_PAGE, HUNDRED_PER_PAGE } from "../../utils/constants";
 
 const EditBadgeTypePage = ({
