@@ -63,18 +63,6 @@ jest.mock("@mui/material/Autocomplete", () => ({
   )
 }));
 
-jest.mock(
-  "openstack-uicore-foundation/lib/components/mui/search-input",
-  () => ({
-    __esModule: true,
-    default: ({ onSearch }) => (
-      <button type="button" onClick={() => onSearch("acme")}>
-        search-acme
-      </button>
-    )
-  })
-);
-
 jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => ({
   __esModule: true,
   default: ({ data, columns, canDelete }) => (
@@ -193,7 +181,12 @@ describe("PromocodeListPage", () => {
       expect(lastListFilter()).toEqual(["or(type==X)", "or(class_name==A||B)"])
     );
 
-    await userEvent.click(screen.getByRole("button", { name: "search-acme" }));
+    await userEvent.type(
+      screen.getByPlaceholderText(
+        "promocode_list.placeholders.search_promocodes"
+      ),
+      "acme{Enter}"
+    );
 
     await waitFor(() => {
       const filter = lastListFilter();
