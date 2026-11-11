@@ -141,8 +141,7 @@ describe("saveBadgeFeature", () => {
         { type: "STOP_LOADING", payload: undefined }
       ])
     );
-
-  })
+  });
 });
 
 describe("view type list thunks", () => {
@@ -163,10 +162,10 @@ describe("view type list thunks", () => {
     getRequest.mockImplementation(
       (requestAction, _receiveAction, _url, _errorHandler, payload) =>
         () =>
-          (dispatch) => {
-            dispatch(requestAction(payload));
-            return Promise.resolve();
-          }
+        (dispatch) => {
+          dispatch(requestAction(payload));
+          return Promise.resolve();
+        }
     );
     const store = mockStore(state);
 
@@ -175,6 +174,31 @@ describe("view type list thunks", () => {
     expect(
       store.getActions().find((a) => a.type === REQUEST_VIEW_TYPES).payload
     ).toEqual({ order: "name", orderDir: -1, perPage: 50, term: "att" });
+  });
+
+  it("getViewTypes skips a call superseded during the token await and drops a stale call's late dispatch", async () => {
+    const store = mockStore(state);
+    const guards = [];
+    getRequest.mockImplementation(() => () => (guardedDispatch) => {
+      guards.push(guardedDispatch);
+      return Promise.resolve();
+    });
+
+    await Promise.all([
+      store.dispatch(getViewTypes("a", 1, 10, "name", 1)),
+      store.dispatch(getViewTypes("b", 1, 10, "name", 1))
+    ]);
+    expect(getRequest).toHaveBeenCalledTimes(1);
+    expect(getRequest.mock.calls[0][4]).toEqual(
+      expect.objectContaining({ term: "b" })
+    );
+
+    await store.dispatch(getViewTypes("c", 1, 10, "name", 1));
+    store.clearActions();
+    guards[0]({ type: "STALE_RECEIVE" });
+    guards[1]({ type: "FRESH_RECEIVE" });
+
+    expect(store.getActions().map((a) => a.type)).toEqual(["FRESH_RECEIVE"]);
   });
 
   it("deleteViewType stops loading and rejects on failure so callers skip the refetch", async () => {

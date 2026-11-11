@@ -34,7 +34,7 @@ import pLimit from "p-limit";
 import debounce from "lodash/debounce";
 import history from "../history";
 import { saveMarketingSetting } from "./marketing-actions";
-import { getAccessTokenSafely } from "../utils/methods";
+import { getAccessTokenSafely, sequenced } from "../utils/methods";
 import {
   DEBOUNCE_WAIT,
   DEFAULT_CURRENT_PAGE,
@@ -451,6 +451,8 @@ export const clearBadgePrints = (ticketId) => async (dispatch, getState) => {
 
 /** *********************  VIEW TYPES  *********************************************** */
 
+const viewTypesSeq = sequenced();
+
 export const getViewTypes =
   (
     term = null,
@@ -461,11 +463,14 @@ export const getViewTypes =
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
+    const { isCurrent, guardedDispatch } = viewTypesSeq(dispatch);
+    guardedDispatch(startLoading());
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const filter = [];
 
-    dispatch(startLoading());
+    if (!isCurrent()) return Promise.resolve();
+
+    const filter = [];
 
     const params = {
       page,
@@ -491,11 +496,9 @@ export const getViewTypes =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types`,
       snackbarErrorHandler,
       { order, orderDir, perPage, term }
-    )(params)(dispatch)
+    )(params)(guardedDispatch)
       .catch(() => {})
-      .finally(() => {
-        dispatch(stopLoading());
-      });
+      .finally(() => guardedDispatch(stopLoading()));
   };
 
 export const getViewType = (viewTypeId) => async (dispatch, getState) => {
@@ -579,10 +582,9 @@ export const saveViewType = (entity) => async (dispatch, getState) => {
 
 export const deleteViewType = (viewTypeId) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
+  dispatch(startLoading());
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
-
-  dispatch(startLoading());
 
   const params = {
     access_token: accessToken
