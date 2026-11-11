@@ -23,10 +23,8 @@ import {
   Divider,
   Grid2,
   InputLabel,
-  MenuItem,
-  Tooltip
+  MenuItem
 } from "@mui/material";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
@@ -34,6 +32,7 @@ import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/fo
 import MuiFormikPriceField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/price-field";
 import MuiFormikQuantityField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/quantity-field";
 import MuiFormikDatetimepicker from "../mui/formik-inputs/mui-formik-datetimepicker";
+import InfoTooltip from "../mui/info-tooltip";
 import useScrollToError from "../../hooks/useScrollToError";
 import { requiredStringValidation } from "../../utils/yup";
 import { TEXT_MAX_LENGTH_255 } from "../../utils/constants";
@@ -82,19 +81,6 @@ const renderOptionLabel = (options, placeholder) => (selected) =>
   ) : (
     <span style={{ color: "#aaa" }}>{placeholder}</span>
   );
-
-const InfoTooltip = ({ title }) => (
-  <Tooltip title={title}>
-    <InfoOutlinedIcon
-      fontSize="small"
-      sx={{ ml: 0.5, verticalAlign: "middle", color: "text.secondary" }}
-    />
-  </Tooltip>
-);
-
-InfoTooltip.propTypes = {
-  title: PropTypes.string.isRequired
-};
 
 const CHECKBOX_WITH_INFO_SX = {
   display: "flex",
