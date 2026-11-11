@@ -63,7 +63,7 @@ const SaveViewDialog = ({ selectedView, onSave, onClose }) => {
       }}
     >
       <FormikProvider value={formik}>
-        <MuiForm noValidate autoComplete="off">
+        <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
           <MuiFormikTextField
             name="name"
             label={T.translate("general.name")}
