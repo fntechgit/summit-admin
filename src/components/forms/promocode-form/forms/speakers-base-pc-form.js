@@ -34,11 +34,18 @@ const SpeakersBasePCForm = ({
   }, [entity.id]);
 
   useEffect(() => {
-    if (speakerInput) {
-      querySpeakers(summit.id, speakerInput, (results) =>
-        setSpeakerOptions(results.map(formatSpeakerOption))
-      );
+    if (!speakerInput) {
+      setSpeakerOptions([]);
+      return undefined;
     }
+    // drop responses for an input that has since changed
+    let active = true;
+    querySpeakers(summit.id, speakerInput, (results) => {
+      if (active) setSpeakerOptions(results.map(formatSpeakerOption));
+    });
+    return () => {
+      active = false;
+    };
   }, [speakerInput]);
 
   const handleAssign = () => {
