@@ -61,8 +61,7 @@ const EditBadgeTypePage = ({
   useEffect(() => {
     if (!currentSummit.badge_features) getBadgeFeatures();
     if (!currentSummit.badge_access_level_types) getAccessLevels();
-    if (!currentSummit.badge_view_types)
-      getViewTypes(null, DEFAULT_CURRENT_PAGE, HUNDRED_PER_PAGE);
+    getViewTypes(null, DEFAULT_CURRENT_PAGE, HUNDRED_PER_PAGE);
   }, []);
 
   useEffect(() => {
