@@ -118,7 +118,8 @@ const TicketTypeForm = ({ entity, errors, currentSummit, onSubmit }) => {
     if (errors && Object.keys(errors).length > 0) {
       formik.setErrors(errors);
       formik.setTouched(
-        Object.keys(errors).reduce((acc, key) => ({ ...acc, [key]: true }), {})
+        Object.keys(errors).reduce((acc, key) => ({ ...acc, [key]: true }), {}),
+        false
       );
     }
   }, [errors]);
