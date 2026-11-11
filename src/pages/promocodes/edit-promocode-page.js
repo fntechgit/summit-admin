@@ -36,10 +36,13 @@ import {
 import { getBadgeFeatures, getBadgeTypes } from "../../actions/badge-actions";
 import useScrollToError from "../../hooks/useScrollToError";
 
+const SERVER_ERROR_FIELDS = { sponsor_id: "sponsor", speaker_id: "speaker" };
+
 const EditPromocodePage = ({
   currentSummit,
   allClasses,
   entity,
+  errors,
   match,
   history,
   getPromocode,
@@ -92,6 +95,25 @@ const EditPromocodePage = ({
   useEffect(() => {
     formik.resetForm({ values: buildPromocodeValues(entity, currentSummit) });
   }, [entity.id]);
+
+  // server validation errors (412) land in redux keyed by API field; show them on the formik fields
+  useEffect(() => {
+    const fieldErrors = Object.entries(errors || {}).reduce(
+      (acc, [field, msg]) => ({
+        ...acc,
+        [SERVER_ERROR_FIELDS[field] ?? field]: [].concat(msg).join(" ")
+      }),
+      {}
+    );
+    formik.setErrors(fieldErrors);
+    formik.setTouched(
+      Object.keys(fieldErrors).reduce(
+        (acc, field) => ({ ...acc, [field]: true }),
+        {}
+      ),
+      false
+    );
+  }, [errors]);
 
   // wait for the reset on /new too: a stale entity would mount sub-forms that fetch for its id
   if (promocodeId ? String(entity.id) !== promocodeId : entity.id) {

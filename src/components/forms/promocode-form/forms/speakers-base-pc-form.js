@@ -55,7 +55,7 @@ const SpeakersBasePCForm = ({
     getAssignedSpeakers(
       promocode,
       term,
-      speakers.currentPage,
+      1,
       speakers.perPage,
       speakers.order,
       speakers.orderDir

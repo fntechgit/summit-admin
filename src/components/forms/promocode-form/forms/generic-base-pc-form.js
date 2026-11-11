@@ -19,7 +19,6 @@ const GenericBasePCForm = (props) => {
         <MuiFormikAsyncAutocomplete
           name="allowed_ticket_types"
           isMulti
-          defaultOptions
           placeholder={T.translate(
             "edit_promocode.placeholders.select_ticket_types"
           )}
