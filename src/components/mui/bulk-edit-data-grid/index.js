@@ -143,6 +143,16 @@ const BulkEditDataGrid = ({
     reset();
   }, [dataIds]);
 
+  // MUI X v8+ selection is { type, ids }; "exclude" (select all) means every row but ids
+  const handleSelectionChange = ({ type, ids }) => {
+    const rowIds = data.map((row) => row[idKey]);
+    setSelectedIds(
+      type === "exclude"
+        ? rowIds.filter((id) => !ids.has(id))
+        : rowIds.filter((id) => ids.has(id))
+    );
+  };
+
   const enterEditMode = () => {
     setEditRows(
       Object.fromEntries(
@@ -309,8 +319,8 @@ const BulkEditDataGrid = ({
           getRowHeight={({ id }) => (editRows[id] ? "auto" : null)}
           checkboxSelection
           disableRowSelectionOnClick
-          rowSelectionModel={selectedIds}
-          onRowSelectionModelChange={setSelectedIds}
+          rowSelectionModel={{ type: "include", ids: new Set(selectedIds) }}
+          onRowSelectionModelChange={handleSelectionChange}
           isRowSelectable={() => !editEnabled}
           columnVisibilityModel={columnVisibilityModel}
           onColumnVisibilityModelChange={onColumnVisibilityModelChange}
@@ -330,6 +340,7 @@ const BulkEditDataGrid = ({
             ...(noRowsLabel && { noRowsLabel })
           }}
           hideFooter
+          showToolbar
           slots={{ toolbar: Toolbar, columnMenu: ColumnMenu }}
           slotProps={{
             panel: { anchorEl: columnsButtonEl, placement: "bottom-end" },

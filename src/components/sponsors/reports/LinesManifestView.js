@@ -74,7 +74,11 @@ export const Destination = ({ name, booth }) => {
   return label ? (
     <>{label}</>
   ) : (
-    <Typography component="span" variant="body2" color="text.disabled">
+    <Typography
+      component="span"
+      variant="body2"
+      sx={{ color: "text.disabled" }}
+    >
       {T.translate("sponsor_reports_page.destination_booth_fallback")}
     </Typography>
   );

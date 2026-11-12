@@ -141,10 +141,11 @@ describe("ShowPagesListPage", () => {
           }
         }
       );
-      const editButton = screen.getByTestId("EditIcon").closest("button");
-      await act(async () => {
-        await userEvent.click(editButton);
-      });
+      // open the row actions menu first: React 18 renders it only after the click settles
+      await userEvent.click(screen.getByTestId("row-actions-menu-trigger"));
+      await userEvent.click(
+        await screen.findByRole("menuitem", { name: "general.edit" })
+      );
       expect(getSummitSponsorshipTypes).toHaveBeenCalledWith(
         DEFAULT_CURRENT_PAGE,
         MAX_PER_PAGE
@@ -168,10 +169,11 @@ describe("ShowPagesListPage", () => {
           }
         }
       );
-      const editButton = screen.getByTestId("EditIcon").closest("button");
-      await act(async () => {
-        await userEvent.click(editButton);
-      });
+      // open the row actions menu first: React 18 renders it only after the click settles
+      await userEvent.click(screen.getByTestId("row-actions-menu-trigger"));
+      await userEvent.click(
+        await screen.findByRole("menuitem", { name: "general.edit" })
+      );
       expect(getSummitSponsorshipTypes).toHaveBeenCalledWith(
         DEFAULT_CURRENT_PAGE,
         MAX_PER_PAGE
@@ -208,11 +210,13 @@ describe("ShowPagesListPage", () => {
           }
         }
       );
-      const deleteButtons = screen.getAllByTestId("DeleteIcon");
-      const secondDeleteButton = deleteButtons[1].closest("button");
-      await act(async () => {
-        await userEvent.click(secondDeleteButton);
-      });
+      // open the row actions menu first: React 18 renders it only after the click settles
+      await userEvent.click(
+        screen.getAllByTestId("row-actions-menu-trigger")[1]
+      );
+      await userEvent.click(
+        await screen.findByRole("menuitem", { name: "general.delete" })
+      );
       expect(
         await screen.findByText("general.are_you_sure")
       ).toBeInTheDocument();
@@ -244,10 +248,11 @@ describe("ShowPagesListPage", () => {
           }
         }
       );
-      const deleteButton = screen.getByTestId("DeleteIcon").closest("button");
-      await act(async () => {
-        await userEvent.click(deleteButton);
-      });
+      // open the row actions menu first: React 18 renders it only after the click settles
+      await userEvent.click(screen.getByTestId("row-actions-menu-trigger"));
+      await userEvent.click(
+        await screen.findByRole("menuitem", { name: "general.delete" })
+      );
       expect(
         await screen.findByText("general.are_you_sure")
       ).toBeInTheDocument();

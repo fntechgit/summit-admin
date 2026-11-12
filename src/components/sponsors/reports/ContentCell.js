@@ -68,9 +68,8 @@ const ContentCell = ({ row }) => {
   }
   return (
     <Stack
-      alignItems="center"
       spacing={0.5}
-      sx={{ color: "text.disabled", py: 2 }}
+      sx={{ alignItems: "center", color: "text.disabled", py: 2 }}
     >
       <ImageOutlinedIcon />
       <Typography variant="caption">

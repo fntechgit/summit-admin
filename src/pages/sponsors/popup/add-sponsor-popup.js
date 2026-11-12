@@ -11,7 +11,7 @@ import {
   Button,
   IconButton,
   Divider,
-  Grid2,
+  Grid,
   InputLabel,
   Box
 } from "@mui/material";
@@ -79,13 +79,7 @@ const AddSponsorDialog = ({ onClose, onSubmit, summitId }) => {
   }, [formik.errors]);
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      maxWidth="xs"
-      fullWidth
-      disableEscapeKeyDown={isSaving}
-    >
+    <Dialog open onClose={handleClose} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         {T.translate("sponsor_list.add_sponsor")}
         <IconButton
@@ -106,8 +100,8 @@ const AddSponsorDialog = ({ onClose, onSubmit, summitId }) => {
           autoComplete="off"
         >
           <DialogContent sx={{ p: 1 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid
                 container
                 spacing={2}
                 size={12}
@@ -116,7 +110,7 @@ const AddSponsorDialog = ({ onClose, onSubmit, summitId }) => {
                 <InputLabel htmlFor="company">
                   {T.translate("sponsor_list.company")}
                 </InputLabel>
-                <Box width="100%">
+                <Box sx={{ width: "100%" }}>
                   <CompanyInputMUI
                     name="company"
                     formik={formik}
@@ -125,8 +119,8 @@ const AddSponsorDialog = ({ onClose, onSubmit, summitId }) => {
                     )}
                   />
                 </Box>
-              </Grid2>
-              <Grid2
+              </Grid>
+              <Grid
                 container
                 spacing={2}
                 size={12}
@@ -142,8 +136,8 @@ const AddSponsorDialog = ({ onClose, onSubmit, summitId }) => {
                   isMulti
                   placeholder={T.translate("sponsor_list.placeholders.select")}
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
           </DialogContent>
           <Divider />
           <DialogActions sx={{ p: 2 }}>

@@ -22,7 +22,7 @@ import {
   Autocomplete,
   Box,
   Button,
-  Grid2,
+  Grid,
   InputLabel,
   TextField,
   Tooltip,
@@ -201,44 +201,44 @@ const EventCategoryForm = ({
   return (
     <FormikProvider value={formik}>
       <Box component="form" onSubmit={formik.handleSubmit}>
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <InputLabel htmlFor="name">
               {T.translate("edit_event_category.name")} *
             </InputLabel>
             <MuiFormikTextField name="name" margin="none" fullWidth />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
             <InputLabel htmlFor="code">
               {T.translate("edit_event_category.code")} *
             </InputLabel>
             <MuiFormikTextField name="code" margin="none" fullWidth />
-          </Grid2>
-          <Grid2 size={{ xs: 6, md: 2 }}>
+          </Grid>
+          <Grid size={{ xs: 6, md: 2 }}>
             <InputLabel htmlFor="color">
               {T.translate("edit_event_category.color")} *
             </InputLabel>
             <MuiFormikColorField name="color" />
-          </Grid2>
-          <Grid2 size={{ xs: 6, md: 2 }}>
+          </Grid>
+          <Grid size={{ xs: 6, md: 2 }}>
             <InputLabel htmlFor="text_color">
               {T.translate("edit_event_category.text_color")} *
             </InputLabel>
             <MuiFormikColorField name="text_color" />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={12}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid size={12}>
             <InputLabel htmlFor="description">
               {T.translate("edit_event_category.description")} *
             </InputLabel>
             <FormikTextEditor name="description" />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <InputLabel htmlFor="session_count">
               {T.translate("edit_event_category.number_sessions")}
             </InputLabel>
@@ -248,8 +248,8 @@ const EventCategoryForm = ({
               margin="none"
               fullWidth
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <InputLabel htmlFor="alternate_count">
               {T.translate("edit_event_category.number_alternates")}
             </InputLabel>
@@ -259,8 +259,8 @@ const EventCategoryForm = ({
               margin="none"
               fullWidth
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <InputLabel htmlFor="lightning_count">
               {T.translate("edit_event_category.number_lightning")}
             </InputLabel>
@@ -270,8 +270,8 @@ const EventCategoryForm = ({
               margin="none"
               fullWidth
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <InputLabel htmlFor="lightning_alternate_count">
               {T.translate("edit_event_category.number_lightning_alternates")}
             </InputLabel>
@@ -281,26 +281,26 @@ const EventCategoryForm = ({
               margin="none"
               fullWidth
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={{ xs: 12, sm: 4 }}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <MuiFormikCheckbox
               name="voting_visible"
               label={T.translate("edit_event_category.visible_voters")}
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 8 }}>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 8 }}>
             <MuiFormikCheckbox
               name="chair_visible"
               label={T.translate("edit_event_category.visible_track_chairs")}
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={12}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid size={12}>
             <InputLabel htmlFor="allowed_tags">
               {T.translate("edit_event_category.tags")}
             </InputLabel>
@@ -320,11 +320,11 @@ const EventCategoryForm = ({
               })}
               formatSelectedValue={(s) => ({ value: s.value, label: s.label })}
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={12}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid size={12}>
             <InputLabel
               htmlFor="allowed_access_levels"
               sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
@@ -354,12 +354,12 @@ const EventCategoryForm = ({
               })}
               formatSelectedValue={(s) => ({ value: s.value, label: s.label })}
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
         {entity.id !== 0 && (
-          <Grid2 container spacing={2} sx={{ mb: 2 }}>
-            <Grid2 size={{ xs: 12, md: 6 }}>
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <InputLabel htmlFor="icon_url">
                 {T.translate("edit_event_category.pic")}
               </InputLabel>
@@ -381,8 +381,8 @@ const EventCategoryForm = ({
                   }
                 }}
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
         )}
 
         <Accordion
@@ -398,8 +398,8 @@ const EventCategoryForm = ({
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Grid2 container spacing={2}>
-              <Grid2 size={{ xs: 12, md: 4 }}>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <InputLabel htmlFor="proposed_schedule_transition_time">
                   {T.translate(
                     "edit_event_category.proposed_schedule_settings.transition_time"
@@ -415,23 +415,23 @@ const EventCategoryForm = ({
                   )}
                   slotProps={{ htmlInput: { min: 1, max: 240 } }}
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
           </AccordionDetails>
         </Accordion>
 
         {!!entity.id && !entity.parent?.id && (
           <Box sx={{ mb: 2 }}>
-            <Grid2 container spacing={2} sx={{ mb: 1 }}>
-              <Grid2 size={12}>
+            <Grid container spacing={2} sx={{ mb: 1 }}>
+              <Grid size={12}>
                 <InputLabel>
                   {T.translate("edit_event_category.subtracks")}
                   &nbsp;(<i>Nested tracks on schedule filter widget</i>)
                 </InputLabel>
-              </Grid2>
-            </Grid2>
-            <Grid2 container spacing={1} sx={{ mb: 2, alignItems: "stretch" }}>
-              <Grid2 size={{ xs: 12, sm: 6 }}>
+              </Grid>
+            </Grid>
+            <Grid container spacing={1} sx={{ mb: 2, alignItems: "stretch" }}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Autocomplete
                   options={availableSubTracks}
                   getOptionLabel={(t) => t.name}
@@ -447,8 +447,8 @@ const EventCategoryForm = ({
                     />
                   )}
                 />
-              </Grid2>
-              <Grid2>
+              </Grid>
+              <Grid>
                 <Button
                   variant="outlined"
                   disabled={!subtrackToLink}
@@ -457,8 +457,8 @@ const EventCategoryForm = ({
                 >
                   {T.translate("general.add")}
                 </Button>
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
             <MuiTableSortable
               data={entity.subtracks || []}
               columns={subtrackColumns}

@@ -20,7 +20,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import Grid2 from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -142,34 +142,34 @@ const TaxTypeForm = ({
         autoComplete="off"
       >
         <input type="hidden" name="id" value={formik.values.id} />
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <MuiFormikTextField
               name="name"
               label={T.translate("edit_tax_type.name")}
               required
               fullWidth
             />
-          </Grid2>
-        </Grid2>
-        <Grid2 container spacing={2} sx={{ mb: 3 }}>
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          </Grid>
+        </Grid>
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <MuiFormikTextField
               name="rate"
               label={T.translate("edit_tax_type.rate")}
               type="number"
-              inputProps={{ step: "0.001" }}
+              slotProps={{ htmlInput: { step: "0.001" } }}
               fullWidth
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <MuiFormikTextField
               name="tax_id"
               label={T.translate("edit_tax_type.tax_id")}
               fullWidth
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
         {formik.values.id !== 0 && (
           <Box sx={{ mb: 3 }}>
             <Typography variant="h6" sx={{ mb: 1 }}>
@@ -192,12 +192,13 @@ const TaxTypeForm = ({
                     size="small"
                     placeholder={T.translate("edit_tax_type.ticket_types")}
                     slotProps={{
+                      ...params.slotProps,
                       input: {
-                        ...params.InputProps,
+                        ...params.slotProps.input,
                         endAdornment: (
                           <>
                             {loadingTickets && <CircularProgress size={20} />}
-                            {params.InputProps?.endAdornment}
+                            {params.slotProps.input?.endAdornment}
                           </>
                         )
                       }
@@ -230,7 +231,7 @@ const TaxTypeForm = ({
             )}
           </Box>
         )}
-        <Stack direction="row" justifyContent="flex-end">
+        <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
           <Button variant="contained" type="submit" disabled={isSaving}>
             {T.translate("general.save")}
           </Button>

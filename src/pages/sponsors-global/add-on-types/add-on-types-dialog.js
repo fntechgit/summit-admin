@@ -25,7 +25,7 @@ import {
   Box,
   IconButton,
   Divider,
-  Grid2
+  Grid
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
@@ -70,13 +70,7 @@ const AddOnTypesDialog = ({ entity: initialEntity, onSave, onClose }) => {
       )}`;
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      disableEscapeKeyDown={isSaving}
-    >
+    <Dialog open onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         {title}
         <IconButton
@@ -98,8 +92,8 @@ const AddOnTypesDialog = ({ entity: initialEntity, onSave, onClose }) => {
           autoComplete="off"
         >
           <DialogContent sx={{ p: 0 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
-              <Grid2 size={12}>
+            <Grid container spacing={2} size={12} sx={{ p: 3 }}>
+              <Grid size={12}>
                 <MuiFormikTextField
                   variant="outlined"
                   name="name"
@@ -109,8 +103,8 @@ const AddOnTypesDialog = ({ entity: initialEntity, onSave, onClose }) => {
                   label={T.translate("edit_sponsorship.name")}
                   required
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
           </DialogContent>
           <Divider />
           <DialogActions>

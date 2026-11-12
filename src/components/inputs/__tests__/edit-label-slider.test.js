@@ -39,7 +39,7 @@ describe("EditLabelSlider", () => {
   test("toggling the switch updates is_enabled", async () => {
     renderWithFormik();
 
-    await userEvent.click(screen.getByRole("checkbox", { name: "Category" }));
+    await userEvent.click(screen.getByRole("switch", { name: "Category" }));
 
     expect(fieldValue().is_enabled).toBe(true);
   });
@@ -120,6 +120,6 @@ describe("EditLabelSlider", () => {
     expect(
       screen.queryByRole("button", { name: "edit_schedule_settings.edit_name" })
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("checkbox", { name: "Category" })).toBeDisabled();
+    expect(screen.getByRole("switch", { name: "Category" })).toBeDisabled();
   });
 });

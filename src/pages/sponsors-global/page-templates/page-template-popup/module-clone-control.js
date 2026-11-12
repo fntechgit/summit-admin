@@ -72,7 +72,7 @@ const ModuleCloneControl = ({
       <Tooltip
         title={disabled ? disabledReason : ""}
         arrow
-        componentsProps={{ tooltip: { sx: { fontSize: "0.625rem" } } }}
+        slotProps={{ tooltip: { sx: { fontSize: "0.625rem" } } }}
       >
         <span>
           <Button

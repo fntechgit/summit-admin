@@ -1,4 +1,4 @@
-/**
+/* *
  * Copyright 2017 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -230,13 +230,13 @@ const SignagePage = ({
                 <InputGroup>
                   <DateTimePicker
                     format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                    inputProps={{
-                      placeholder: T.translate("signage.placeholders.date")
-                    }}
                     timezone={summit.time_zone_id}
                     onChange={(ev) => setJumpDate(ev.target.value.unix())}
                     value={epochToMomentTimeZone(jumpDate, summit.time_zone_id)}
                     disabled={!locationId}
+                    inputProps={{
+                      placeholder: T.translate("signage.placeholders.date")
+                    }}
                   />
                   <InputGroup.Button>
                     <button

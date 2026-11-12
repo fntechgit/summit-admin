@@ -11,7 +11,7 @@ import {
   DialogTitle,
   Divider,
   FormControlLabel,
-  Grid2,
+  Grid,
   IconButton,
   Radio,
   Typography
@@ -153,18 +153,18 @@ const SelectPageTemplateDialog = ({
       </DialogTitle>
       <Divider />
       <DialogContent sx={{ p: 0 }}>
-        <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-          <Grid2 size={4} sx={{ mt: 1 }}>
+        <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+          <Grid size={4} sx={{ mt: 1 }}>
             {selectedRows.length} items selected
-          </Grid2>
-          <Grid2 size={6} offset={2}>
+          </Grid>
+          <Grid size={6} offset={2}>
             <SearchInput
               onSearch={handleOnSearch}
               term={term}
               placeholder={T.translate("show_pages.placeholders.search")}
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
         {pageTemplates.length > 0 && (
           <Box sx={{ p: 2 }}>

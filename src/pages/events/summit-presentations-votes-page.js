@@ -1,4 +1,4 @@
-/**
+/* *
  * Copyright 2022 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -9,24 +9,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react";
-import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
 import Table from "openstack-uicore-foundation/lib/components/table";
 import { Pagination } from "react-bootstrap";
+import { Breadcrumb } from "react-breadcrumbs";
+import { escapeFilterValue } from "openstack-uicore-foundation/lib/utils/actions";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   clearVotesReport,
   getPresentationsVotes,
   getAttendeeVotes
 } from "../../actions/presentation-votes-actions";
-import { Breadcrumb } from "react-breadcrumbs";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import { escapeFilterValue } from "openstack-uicore-foundation/lib/utils/actions";
+import { DEFAULT_PER_PAGE } from "../../utils/constants";
 
 class SummitPresentationsVotesPage extends React.Component {
   constructor(props) {
@@ -53,12 +54,12 @@ class SummitPresentationsVotesPage extends React.Component {
   }
 
   getCurrentTrackGroupId(reportType) {
-    let parts = reportType.split("_");
+    const parts = reportType.split("_");
     return parts.length > 1 ? parseInt(parts[1]) : 0;
   }
 
   isReportByPresentation(reportType) {
-    let parts = reportType.split("_");
+    const parts = reportType.split("_");
     return parts[0] === "PRESENTATION";
   }
 
@@ -68,7 +69,7 @@ class SummitPresentationsVotesPage extends React.Component {
       end_presentation_attendee_vote_date,
       term
     } = this.state;
-    let filters = [];
+    const filters = [];
     if (term !== "") {
       const escapedTerm = escapeFilterValue(term);
       if (this.isReportByPresentation(reportType))
@@ -114,15 +115,27 @@ class SummitPresentationsVotesPage extends React.Component {
   }
 
   handleChangeReportType(ev) {
-    const { value, id } = ev.target;
+    const { value } = ev.target;
     this.props.clearVotesReport();
     this.setState({ ...this.state, current_report_type: value });
-    let filters = this.buildExtraFilters(value);
+    const filters = this.buildExtraFilters(value);
     if (this.isReportByPresentation(value)) {
-      this.props.getPresentationsVotes(1, 10, "votes_count", 0, filters);
+      this.props.getPresentationsVotes(
+        1,
+        DEFAULT_PER_PAGE,
+        "votes_count",
+        0,
+        filters
+      );
       return;
     }
-    this.props.getAttendeeVotes(1, 10, "presentation_votes_count", 0, filters);
+    this.props.getAttendeeVotes(
+      1,
+      DEFAULT_PER_PAGE,
+      "presentation_votes_count",
+      0,
+      filters
+    );
   }
 
   handlePageChange(page) {
@@ -142,7 +155,7 @@ class SummitPresentationsVotesPage extends React.Component {
     );
   }
 
-  handleSort(index, key, dir, func) {
+  handleSort(index, key, dir) {
     const { page, perPage } = this.props;
     const { current_report_type } = this.state;
     const filters = this.buildExtraFilters(current_report_type);
@@ -187,7 +200,7 @@ class SummitPresentationsVotesPage extends React.Component {
     }
 
     errors[id] = "";
-    let newState = { ...this.state, errors };
+    const newState = { ...this.state, errors };
 
     newState[`${id}`] = value;
 
@@ -197,15 +210,21 @@ class SummitPresentationsVotesPage extends React.Component {
   handleSearch(term) {
     const { order, orderDir } = this.props;
     const { current_report_type } = this.state;
-    this.setState({ ...this.state, term: term }, () => {
+    this.setState({ ...this.state, term }, () => {
       const filters = this.buildExtraFilters(current_report_type);
       if (this.isReportByPresentation(current_report_type)) {
-        this.props.getPresentationsVotes(1, 10, order, orderDir, filters);
+        this.props.getPresentationsVotes(
+          1,
+          DEFAULT_PER_PAGE,
+          order,
+          orderDir,
+          filters
+        );
         return;
       }
       this.props.getAttendeeVotes(
         1,
-        10,
+        DEFAULT_PER_PAGE,
         order === "votes_count" ? "presentation_votes_count" : order,
         orderDir,
         filters
@@ -231,7 +250,7 @@ class SummitPresentationsVotesPage extends React.Component {
       current_report_type
     } = this.state;
 
-    let columns = this.isReportByPresentation(current_report_type)
+    const columns = this.isReportByPresentation(current_report_type)
       ? [
           { columnKey: "id", value: T.translate("general.id"), sortable: true },
           {
@@ -271,15 +290,15 @@ class SummitPresentationsVotesPage extends React.Component {
     };
 
     if (!currentSummit.id) return <div />;
-    let byPresentationOptions = currentSummit.track_groups.map((tg) => ({
+    const byPresentationOptions = currentSummit.track_groups.map((tg) => ({
       label: `View by Presentation for ${tg.name}`,
       value: `PRESENTATION_${tg.id}`
     }));
-    let byAttendeeOptions = currentSummit.track_groups.map((tg) => ({
+    const byAttendeeOptions = currentSummit.track_groups.map((tg) => ({
       label: `View by Attendee for ${tg.name}`,
       value: `ATTENDEE_${tg.id}`
     }));
-    let reportTypeDDL = [
+    const reportTypeDDL = [
       { label: "-- SELECT A REPORT TYPE --", value: "" },
       ...byPresentationOptions,
       ...byAttendeeOptions
@@ -303,8 +322,8 @@ class SummitPresentationsVotesPage extends React.Component {
               : T.translate("presentation_votes_page.attendees_vote_list")}{" "}
             ({totalItems})
           </h3>
-          <div className={"row"} style={{ paddingBottom: "1em" }}>
-            <div className={"col-md-6"}>
+          <div className="row" style={{ paddingBottom: "1em" }}>
+            <div className="col-md-6">
               <Dropdown
                 id="report_type"
                 value={this.state.current_report_type}
@@ -312,38 +331,38 @@ class SummitPresentationsVotesPage extends React.Component {
                 options={reportTypeDDL}
               />
             </div>
-            <div className="col-md-6 text-right"></div>
+            <div className="col-md-6 text-right" />
           </div>
-          <div className={"row"}>
-            <div className={"col-md-12"}>
-              <div className={"row"}>
-                <div className={"col-md-2"}>
+          <div className="row">
+            <div className="col-md-12">
+              <div className="row">
+                <div className="col-md-2">
                   <DateTimePicker
                     id="begin_presentation_attendee_vote_date"
                     onChange={this.handleChangeFilters}
                     format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
                     timezone={currentSummit.time_zone_id}
-                    inputProps={{ placeholder: "From" }}
                     value={epochToMomentTimeZone(
                       begin_presentation_attendee_vote_date,
                       currentSummit.time_zone_id
                     )}
+                    inputProps={{ placeholder: "From" }}
                   />
                 </div>
-                <div className={"col-md-2"}>
+                <div className="col-md-2">
                   <DateTimePicker
                     id="end_presentation_attendee_vote_date"
                     onChange={this.handleChangeFilters}
                     format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
                     timezone={currentSummit.time_zone_id}
-                    inputProps={{ placeholder: "To" }}
                     value={epochToMomentTimeZone(
                       end_presentation_attendee_vote_date,
                       currentSummit.time_zone_id
                     )}
+                    inputProps={{ placeholder: "To" }}
                   />
                 </div>
-                <div className={"col-md-2"}>
+                <div className="col-md-2">
                   <button
                     className="btn btn-primary right-space"
                     onClick={this.handleFilterByDate}
@@ -351,7 +370,7 @@ class SummitPresentationsVotesPage extends React.Component {
                     {T.translate("presentation_votes_page.filter_by_date")}
                   </button>
                 </div>
-                <div className={"col-md-6"}>
+                <div className="col-md-6">
                   <FreeTextSearch
                     value={term ?? ""}
                     placeholder={

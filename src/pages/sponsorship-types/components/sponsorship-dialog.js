@@ -13,7 +13,7 @@ import {
   Box,
   IconButton,
   Divider,
-  Grid2
+  Grid
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
@@ -69,13 +69,7 @@ const SponsorshipDialog = ({ entity: initialEntity, onClose, onSave }) => {
       )}`;
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      disableEscapeKeyDown={isSaving}
-    >
+    <Dialog open onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         {title}
         <IconButton
@@ -97,8 +91,8 @@ const SponsorshipDialog = ({ entity: initialEntity, onClose, onSave }) => {
           autoComplete="off"
         >
           <DialogContent sx={{ p: 0 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
-              <Grid2 size={12}>
+            <Grid container spacing={2} size={12} sx={{ p: 3 }}>
+              <Grid size={12}>
                 <InputLabel htmlFor="name">
                   {T.translate("edit_sponsorship.name")} *
                 </InputLabel>
@@ -110,8 +104,8 @@ const SponsorshipDialog = ({ entity: initialEntity, onClose, onSave }) => {
                   fullWidth
                   required
                 />
-              </Grid2>
-              <Grid2 size={6} sx={{ mt: 2 }}>
+              </Grid>
+              <Grid size={6} sx={{ mt: 2 }}>
                 <InputLabel htmlFor="label">
                   {T.translate("edit_sponsorship.label")}
                 </InputLabel>
@@ -121,8 +115,8 @@ const SponsorshipDialog = ({ entity: initialEntity, onClose, onSave }) => {
                   margin="none"
                   fullWidth
                 />
-              </Grid2>
-              <Grid2 size={6} sx={{ mt: 2 }}>
+              </Grid>
+              <Grid size={6} sx={{ mt: 2 }}>
                 <InputLabel htmlFor="size">
                   {T.translate("edit_sponsorship.size")}
                 </InputLabel>
@@ -137,8 +131,8 @@ const SponsorshipDialog = ({ entity: initialEntity, onClose, onSave }) => {
                     options={SIZE_OPTIONS_DDL}
                   />
                 </Box>
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
           </DialogContent>
           <Divider />
           <DialogActions>

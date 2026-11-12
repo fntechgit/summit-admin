@@ -19,7 +19,7 @@ import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/edit
 import Autocomplete from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
-import Grid2 from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import MuiSwitch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
 import {
@@ -77,8 +77,8 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
   return (
     <div role="tabpanel" id="tabpanel-cfp_settings" hidden={hidden}>
       <Box sx={{ pt: 2 }}>
-        <Grid2 container spacing={2}>
-          <Grid2 size={12}>
+        <Grid container spacing={2}>
+          <Grid size={12}>
             {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
             <label>
               {T.translate(
@@ -101,8 +101,8 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
               value={ms.cfp_presentation_edition_custom_message?.value || ""}
               license={process.env.JODIT_LICENSE_KEY}
             />
-          </Grid2>
-          <Grid2 size={12}>
+          </Grid>
+          <Grid size={12}>
             {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
             <label>
               {T.translate(
@@ -126,9 +126,9 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
                   selected.map((opt) => opt.value)
                 )
               }
-              renderTags={(value, getTagProps) =>
+              renderValue={(value, getItemProps) =>
                 value.map((option, index) => {
-                  const { key, ...tagProps } = getTagProps({ index });
+                  const { key, ...tagProps } = getItemProps({ index });
                   // eslint-disable-next-line react/jsx-props-no-spreading
                   return (
                     <Chip
@@ -142,8 +142,8 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
               }
               renderInput={renderAllowedQuestionsInput}
             />
-          </Grid2>
-          <Grid2 size={12}>
+          </Grid>
+          <Grid size={12}>
             {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
             <label>
               {T.translate(
@@ -168,9 +168,9 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
                   selected.map((opt) => opt.value)
                 )
               }
-              renderTags={(value, getTagProps) =>
+              renderValue={(value, getItemProps) =>
                 value.map((option, index) => {
-                  const { key, ...tagProps } = getTagProps({ index });
+                  const { key, ...tagProps } = getItemProps({ index });
                   // eslint-disable-next-line react/jsx-props-no-spreading
                   return (
                     <Chip
@@ -184,8 +184,8 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
               }
               renderInput={renderAllowedEditableQuestionsInput}
             />
-          </Grid2>
-          <Grid2 size={12}>
+          </Grid>
+          <Grid size={12}>
             {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
             <label>
               {T.translate(
@@ -211,7 +211,7 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
               }
               renderInput={renderDefaultTabInput}
             />
-          </Grid2>
+          </Grid>
 
           {[
             ["cfp_landing_page_title", "cfp_landing_page_title_info"],
@@ -243,7 +243,7 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
               "cfp_presentation_summary_links_label_info"
             ]
           ].map(([field, infoKey]) => (
-            <Grid2 key={field} size={{ xs: 12, md: 6 }}>
+            <Grid key={field} size={{ xs: 12, md: 6 }}>
               {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
               <label>
                 {T.translate(`edit_selection_plan.${field}`)}
@@ -264,7 +264,7 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
                 onChange={handleChange}
                 value={ms[field]?.value || ""}
               />
-            </Grid2>
+            </Grid>
           ))}
 
           {[
@@ -277,7 +277,7 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
               "cfp_presentation_summary_hide_activity_type_selection_info"
             ]
           ].map(([field, infoKey]) => (
-            <Grid2 key={field} size={{ xs: 12, md: 6 }}>
+            <Grid key={field} size={{ xs: 12, md: 6 }}>
               {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
               <label>
                 {T.translate(`edit_selection_plan.${field}`)}
@@ -293,12 +293,12 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
                 checked={ms[field]?.value || false}
                 onChange={(ev) => handleSwitchChange(field, ev.target.checked)}
               />
-            </Grid2>
+            </Grid>
           ))}
 
           {window.CFP_APP_BASE_URL && (
             <>
-              <Grid2 size={{ xs: 12, md: 6 }}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
                 <label>
                   {T.translate(
@@ -314,8 +314,8 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
                 >
                   {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${values.id}`}
                 </a>
-              </Grid2>
-              <Grid2 size={{ xs: 12, md: 6 }}>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
                 {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
                 <label>
                   {T.translate(
@@ -331,10 +331,10 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
                 >
                   {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
                 </a>
-              </Grid2>
+              </Grid>
             </>
           )}
-        </Grid2>
+        </Grid>
       </Box>
     </div>
   );

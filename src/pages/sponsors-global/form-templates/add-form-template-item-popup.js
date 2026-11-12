@@ -12,7 +12,7 @@ import {
   DialogTitle,
   Divider,
   FormControlLabel,
-  Grid2,
+  Grid,
   IconButton,
   Typography
 } from "@mui/material";
@@ -175,7 +175,7 @@ const AddFormTemplateItemDialog = ({
   return (
     <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1rem">
+        <Typography sx={{ fontSize: "1rem" }}>
           {T.translate("inventory_items_list_modal.select_items")}
         </Typography>
         <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
@@ -184,12 +184,12 @@ const AddFormTemplateItemDialog = ({
       </DialogTitle>
       <Divider />
       <DialogContent sx={{ p: 0 }}>
-        <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-          <Grid2 container spacing={2} size={6} sx={{ alignItems: "baseline" }}>
-            <Grid2 size={4}>{selectedCount} items selected</Grid2>
-          </Grid2>
-          <Grid2 container spacing={2} size={6}>
-            <Grid2 size={4}>
+        <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+          <Grid container spacing={2} size={6} sx={{ alignItems: "baseline" }}>
+            <Grid size={4}>{selectedCount} items selected</Grid>
+          </Grid>
+          <Grid container spacing={2} size={6}>
+            <Grid size={4}>
               <MenuButton
                 buttonId="sort-button"
                 menuId="sort-menu"
@@ -216,17 +216,17 @@ const AddFormTemplateItemDialog = ({
               >
                 <SwapVertIcon sx={{ mr: 1 }} /> {T.translate("general.sort_by")}
               </MenuButton>
-            </Grid2>
-            <Grid2 size={8}>
+            </Grid>
+            <Grid size={8}>
               <SearchInput
                 onSearch={handleOnSearch}
                 placeholder={T.translate(
                   "inventory_items_list_modal.placeholders.search_inventory_items"
                 )}
               />
-            </Grid2>
-          </Grid2>
-        </Grid2>
+            </Grid>
+          </Grid>
+        </Grid>
 
         {inventoryItems.length > 0 && (
           <Box sx={{ p: 2 }}>

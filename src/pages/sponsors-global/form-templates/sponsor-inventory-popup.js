@@ -14,7 +14,7 @@ import {
   Box,
   IconButton,
   Divider,
-  Grid2,
+  Grid,
   FormHelperText
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -112,7 +112,6 @@ const SponsorItemDialog = ({
       disableEnforceFocus
       disableAutoFocus
       disableRestoreFocus
-      disableEscapeKeyDown={isSaving}
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         {initialEntity.id
@@ -136,8 +135,8 @@ const SponsorItemDialog = ({
           autoComplete="off"
         >
           <DialogContent sx={{ p: 0 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
-              <Grid2 size={4}>
+            <Grid container spacing={2} size={12} sx={{ p: 3 }}>
+              <Grid size={4}>
                 <InputLabel htmlFor="code">
                   {T.translate("edit_inventory_item.code")} *
                 </InputLabel>
@@ -147,8 +146,8 @@ const SponsorItemDialog = ({
                   formik={formik}
                   fullWidth
                 />
-              </Grid2>
-              <Grid2 size={8}>
+              </Grid>
+              <Grid size={8}>
                 <InputLabel htmlFor="name">
                   {T.translate("edit_inventory_item.name")} *
                 </InputLabel>
@@ -158,11 +157,11 @@ const SponsorItemDialog = ({
                   formik={formik}
                   fullWidth
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
             <Divider />
-            <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
-              <Grid2 size={12}>
+            <Grid container spacing={2} size={12} sx={{ p: 3 }}>
+              <Grid size={12}>
                 <InputLabel htmlFor="description">
                   {T.translate("edit_inventory_item.description")}
                 </InputLabel>
@@ -170,17 +169,17 @@ const SponsorItemDialog = ({
                   name="description"
                   options={{ zIndex: 9999999 }}
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
 
             <Divider />
 
-            <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
+            <Grid container spacing={2} size={12} sx={{ p: 3 }}>
               <ItemPriceTiers />
-            </Grid2>
+            </Grid>
             <Divider />
-            <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
-              <Grid2 size={4}>
+            <Grid container spacing={2} size={12} sx={{ p: 3 }}>
+              <Grid size={4}>
                 <InputLabel htmlFor="default_quantity">
                   {T.translate("edit_inventory_item.default_quantity")}
                   {requireDefaultQuantity && " *"}
@@ -191,8 +190,8 @@ const SponsorItemDialog = ({
                   formik={formik}
                   fullWidth
                 />
-              </Grid2>
-              <Grid2 size={4}>
+              </Grid>
+              <Grid size={4}>
                 <InputLabel htmlFor="quantity_limit_per_sponsor">
                   {T.translate(
                     "edit_inventory_item.quantity_limit_per_sponsor"
@@ -204,8 +203,8 @@ const SponsorItemDialog = ({
                   formik={formik}
                   fullWidth
                 />
-              </Grid2>
-              <Grid2 size={4}>
+              </Grid>
+              <Grid size={4}>
                 <InputLabel htmlFor="quantity_limit_per_show">
                   {T.translate("edit_inventory_item.quantity_limit_per_show")}
                 </InputLabel>
@@ -215,8 +214,8 @@ const SponsorItemDialog = ({
                   formik={formik}
                   fullWidth
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
 
             <Divider />
             <DialogTitle sx={{ p: 3 }}>
@@ -231,12 +230,12 @@ const SponsorItemDialog = ({
               />
             </Box>
 
-            <Grid2
+            <Grid
               container
               spacing={2}
               sx={{ alignItems: "start", px: 3, py: 1 }}
             >
-              <Grid2 size={12}>
+              <Grid size={12}>
                 <InputLabel htmlFor="image" id="images">
                   {T.translate("edit_inventory_item.images")}
                 </InputLabel>
@@ -250,8 +249,8 @@ const SponsorItemDialog = ({
                   onDelete={handleIDeleteImage}
                   allowedExtensions={getFileUploadAllowedExtensions()}
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
           </DialogContent>
           <Divider />
           <DialogActions>

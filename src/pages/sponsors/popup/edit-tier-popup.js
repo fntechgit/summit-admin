@@ -11,7 +11,7 @@ import {
   Button,
   IconButton,
   Divider,
-  Grid2,
+  Grid,
   Typography,
   MenuItem,
   InputLabel,
@@ -133,15 +133,9 @@ const EditTierDialog = ({
   ];
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      maxWidth="md"
-      fullWidth
-      disableEscapeKeyDown={isSaving}
-    >
+    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1rem">
+        <Typography sx={{ fontSize: "1rem" }}>
           {`${initialEntity.id ? "Edit" : "Add"} ${T.translate(
             "edit_summit_sponsorship.tier"
           )}`}
@@ -164,14 +158,14 @@ const EditTierDialog = ({
           autoComplete="off"
         >
           <DialogContent sx={{ p: 0 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid
                 container
                 spacing={2}
                 size={12}
                 sx={{ alignItems: "baseline" }}
               >
-                <Grid2
+                <Grid
                   container
                   spacing={0}
                   size={6}
@@ -180,7 +174,7 @@ const EditTierDialog = ({
                   <InputLabel htmlFor="type">
                     {T.translate("edit_summit_sponsorship.sponsorship_type")}
                   </InputLabel>
-                  <Box width="100%">
+                  <Box sx={{ width: "100%" }}>
                     <SponsorshipTypeInputMUI
                       name="type"
                       placeholder={T.translate(
@@ -188,8 +182,8 @@ const EditTierDialog = ({
                       )}
                     />
                   </Box>
-                </Grid2>
-                <Grid2
+                </Grid>
+                <Grid
                   container
                   spacing={0}
                   size={6}
@@ -198,7 +192,7 @@ const EditTierDialog = ({
                   <InputLabel htmlFor="widget_title">
                     {T.translate("edit_summit_sponsorship.widget_title")}
                   </InputLabel>
-                  <Box width="100%">
+                  <Box sx={{ width: "100%" }}>
                     <MuiFormikTextField
                       formik={formik}
                       name="widget_title"
@@ -210,15 +204,15 @@ const EditTierDialog = ({
                       fullWidth
                     />
                   </Box>
-                </Grid2>
-              </Grid2>
-              <Grid2
+                </Grid>
+              </Grid>
+              <Grid
                 container
                 spacing={2}
                 size={12}
                 sx={{ alignItems: "baseline" }}
               >
-                <Grid2
+                <Grid
                   container
                   spacing={0}
                   size={6}
@@ -257,8 +251,8 @@ const EditTierDialog = ({
                       </MenuItem>
                     ))}
                   </MuiFormikSelect>
-                </Grid2>
-                <Grid2
+                </Grid>
+                <Grid
                   container
                   spacing={0}
                   size={6}
@@ -297,15 +291,15 @@ const EditTierDialog = ({
                       </MenuItem>
                     ))}
                   </MuiFormikSelect>
-                </Grid2>
-              </Grid2>
-              <Grid2
+                </Grid>
+              </Grid>
+              <Grid
                 container
                 spacing={2}
                 size={12}
                 sx={{ alignItems: "baseline" }}
               >
-                <Grid2
+                <Grid
                   container
                   spacing={0}
                   size={6}
@@ -344,8 +338,8 @@ const EditTierDialog = ({
                       </MenuItem>
                     ))}
                   </MuiFormikSelect>
-                </Grid2>
-                <Grid2
+                </Grid>
+                <Grid
                   container
                   spacing={0}
                   size={6}
@@ -386,16 +380,15 @@ const EditTierDialog = ({
                       </MenuItem>
                     ))}
                   </MuiFormikSelect>
-                </Grid2>
-              </Grid2>
-              <Grid2
+                </Grid>
+              </Grid>
+              <Grid
                 container
                 spacing={2}
-                mt={3}
                 size={12}
-                sx={{ alignItems: "baseline" }}
+                sx={{ mt: 3, alignItems: "baseline" }}
               >
-                <Grid2
+                <Grid
                   container
                   spacing={0}
                   size={4}
@@ -408,8 +401,8 @@ const EditTierDialog = ({
                     )}
                     formik={formik}
                   />
-                </Grid2>
-                <Grid2
+                </Grid>
+                <Grid
                   container
                   spacing={0}
                   size={4}
@@ -422,8 +415,8 @@ const EditTierDialog = ({
                     )}
                     formik={formik}
                   />
-                </Grid2>
-                <Grid2
+                </Grid>
+                <Grid
                   container
                   spacing={0}
                   size={4}
@@ -436,16 +429,15 @@ const EditTierDialog = ({
                     )}
                     formik={formik}
                   />
-                </Grid2>
-              </Grid2>
-              <Grid2
+                </Grid>
+              </Grid>
+              <Grid
                 container
                 spacing={2}
-                mb={1}
                 size={12}
-                sx={{ alignItems: "baseline" }}
+                sx={{ mb: 1, alignItems: "baseline" }}
               >
-                <Grid2
+                <Grid
                   container
                   spacing={0}
                   size={4}
@@ -458,8 +450,8 @@ const EditTierDialog = ({
                     )}
                     formik={formik}
                   />
-                </Grid2>
-                <Grid2
+                </Grid>
+                <Grid
                   container
                   spacing={0}
                   size={4}
@@ -472,8 +464,8 @@ const EditTierDialog = ({
                     )}
                     formik={formik}
                   />
-                </Grid2>
-                <Grid2
+                </Grid>
+                <Grid
                   container
                   spacing={0}
                   size={4}
@@ -486,16 +478,15 @@ const EditTierDialog = ({
                     )}
                     formik={formik}
                   />
-                </Grid2>
-              </Grid2>
-              <Grid2
+                </Grid>
+              </Grid>
+              <Grid
                 container
                 spacing={2}
-                mb={1}
                 size={12}
-                sx={{ alignItems: "baseline" }}
+                sx={{ mb: 1, alignItems: "baseline" }}
               >
-                <Grid2
+                <Grid
                   container
                   spacing={0}
                   size={4}
@@ -506,18 +497,18 @@ const EditTierDialog = ({
                     label={T.translate("edit_summit_sponsorship.is_public")}
                     formik={formik}
                   />
-                </Grid2>
-              </Grid2>
-            </Grid2>
+                </Grid>
+              </Grid>
+            </Grid>
             {initialEntity.id > 0 && (
               <>
                 <Divider />
-                <Grid2
+                <Grid
                   container
                   spacing={2}
                   sx={{ alignItems: "start", px: 3, py: 1 }}
                 >
-                  <Grid2 size={12}>
+                  <Grid size={12}>
                     <InputLabel
                       htmlFor="badge_image"
                       id="images"
@@ -534,8 +525,8 @@ const EditTierDialog = ({
                       multiple={false}
                       accept="image/*"
                     />
-                  </Grid2>
-                  <Grid2 size={12} sx={{ my: 1 }}>
+                  </Grid>
+                  <Grid size={12} sx={{ my: 1 }}>
                     <InputLabel htmlFor="badge_image_alt_text">
                       {T.translate("edit_summit_sponsorship.badge_alt")}
                     </InputLabel>
@@ -546,8 +537,8 @@ const EditTierDialog = ({
                       margin="none"
                       fullWidth
                     />
-                  </Grid2>
-                </Grid2>
+                  </Grid>
+                </Grid>
               </>
             )}
           </DialogContent>

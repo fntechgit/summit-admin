@@ -86,10 +86,9 @@ describe("SponsorExtraQuestions delete", () => {
     await userEvent.click(screen.getByTestId("delete-check-devices"));
     await userEvent.click(screen.getByTestId("delete-check-pending"));
     await userEvent.click(screen.getByTestId("delete-check-third_party"));
-    await userEvent.type(
-      screen.getByTestId("delete-reason"),
-      "created by mistake"
-    );
+    // pasted: typing it key by key re-renders the dialog per key and is slow
+    await userEvent.click(screen.getByTestId("delete-reason"));
+    await userEvent.paste("created by mistake");
     await userEvent.click(
       screen.getByRole("button", { name: "edit_sponsor.delete_question" })
     );

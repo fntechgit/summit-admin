@@ -419,7 +419,7 @@ const UnpaidChargesBySponsor = ({
           key={group.sponsorId}
           expanded={expandedSponsors.has(group.sponsorId)}
           onChange={() => toggleSponsor(group.sponsorId)}
-          TransitionProps={{ unmountOnExit: true }}
+          slotProps={{ transition: { unmountOnExit: true } }}
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography sx={{ fontWeight: 600 }}>

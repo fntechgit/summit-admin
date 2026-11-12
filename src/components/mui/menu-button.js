@@ -68,10 +68,8 @@ const MenuButton = ({
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleClose}
-        MenuListProps={{
-          "aria-labelledby": buttonId
-        }}
         slotProps={{
+          list: { "aria-labelledby": buttonId },
           paper: {
             sx: { minWidth: 220 }
           }

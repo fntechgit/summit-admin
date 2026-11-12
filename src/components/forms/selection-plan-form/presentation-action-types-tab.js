@@ -17,7 +17,7 @@ import T from "i18n-react/dist/i18n-react";
 import { useFormikContext } from "formik";
 import SortableTable from "openstack-uicore-foundation/lib/components/mui/sortable-table";
 import Box from "@mui/material/Box";
-import Grid2 from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Many2ManyDropDown from "../../inputs/many-2-many-dropdown";
 import { querySummitProgressFlags } from "../../../actions/track-chair-actions";
 
@@ -56,8 +56,8 @@ const PresentationActionTypesTab = ({
       hidden={hidden}
     >
       <Box sx={{ pt: 2 }}>
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={{ xs: 12, md: 9 }}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid size={{ xs: 12, md: 9 }}>
             <Many2ManyDropDown
               id="addAllowedPresentationActionType"
               isClearable
@@ -68,8 +68,8 @@ const PresentationActionTypesTab = ({
               fetchOptions={fetchOptions}
               onAdd={handleLink}
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
         {values.allowed_presentation_action_types.length === 0 && (
           <div>
             {T.translate("edit_selection_plan.no_presentation_action_types")}

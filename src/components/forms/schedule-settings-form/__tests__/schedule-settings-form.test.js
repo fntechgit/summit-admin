@@ -151,7 +151,7 @@ describe("ScheduleSettingsForm", () => {
     await userEvent.click(
       screen.getByRole("button", { name: "reverse-filters" })
     );
-    await userEvent.click(screen.getByRole("checkbox", { name: "Category" }));
+    await userEvent.click(screen.getByRole("switch", { name: "Category" }));
     await clickSave();
 
     const { filters } = onSubmit.mock.calls[0][0];
@@ -166,17 +166,17 @@ describe("ScheduleSettingsForm", () => {
   test("turning off Enabled disables the rest of the form", async () => {
     await renderForm();
 
-    const myScheduleSwitch = screen.getByRole("checkbox", {
+    const myScheduleSwitch = screen.getByRole("switch", {
       name: "edit_schedule_settings.is_my_schedule"
     });
     expect(myScheduleSwitch).toBeEnabled();
 
     await userEvent.click(
-      screen.getByRole("checkbox", { name: "edit_schedule_settings.enabled" })
+      screen.getByRole("switch", { name: "edit_schedule_settings.enabled" })
     );
 
     expect(myScheduleSwitch).toBeDisabled();
-    expect(screen.getByRole("checkbox", { name: "Category" })).toBeDisabled();
+    expect(screen.getByRole("switch", { name: "Category" })).toBeDisabled();
   });
 
   test("hides pre-filter types without an input", async () => {

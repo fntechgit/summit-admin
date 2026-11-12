@@ -22,7 +22,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid2
+  Grid
 } from "@mui/material";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 
@@ -73,40 +73,40 @@ const EditClientDialog = ({ open, onClose, onSubmit, client }) => {
           autoComplete="off"
         >
           <DialogContent>
-            <Grid2 container spacing={2}>
-              <Grid2 size={6}>
+            <Grid container spacing={2}>
+              <Grid size={6}>
                 <MuiFormikTextField
                   name="company_name"
                   fullWidth
                   size="small"
                   label={T.translate("client_card.company_name")}
                 />
-              </Grid2>
-              <Grid2 size={6}>
+              </Grid>
+              <Grid size={6}>
                 <MuiFormikTextField
                   name="contact_name"
                   fullWidth
                   size="small"
                   label={T.translate("client_card.contact_name")}
                 />
-              </Grid2>
-              <Grid2 size={6}>
+              </Grid>
+              <Grid size={6}>
                 <MuiFormikTextField
                   name="contact_email"
                   fullWidth
                   size="small"
                   label={T.translate("client_card.contact_email")}
                 />
-              </Grid2>
-              <Grid2 size={6}>
+              </Grid>
+              <Grid size={6}>
                 <MuiFormikTextField
                   name="contact_phone"
                   fullWidth
                   size="small"
                   label={T.translate("client_card.contact_phone")}
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>

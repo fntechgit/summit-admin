@@ -11,7 +11,7 @@ import {
   Button,
   IconButton,
   Divider,
-  Grid2,
+  Grid,
   Typography,
   InputLabel,
   Box
@@ -117,7 +117,7 @@ const EditBadgeScanPopup = ({ badgeScan, onClose, onSubmit }) => {
   return (
     <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1rem">
+        <Typography sx={{ fontSize: "1rem" }}>
           {T.translate("edit_badge_scan.edit_badge_scan")}
         </Typography>
         <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
@@ -133,8 +133,8 @@ const EditBadgeScanPopup = ({ badgeScan, onClose, onSubmit }) => {
           autoComplete="off"
         >
           <DialogContent sx={{ p: 1 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid
                 container
                 spacing={2}
                 size={6}
@@ -143,7 +143,7 @@ const EditBadgeScanPopup = ({ badgeScan, onClose, onSubmit }) => {
                 <InputLabel htmlFor="attendee_full_name">
                   {T.translate("edit_badge_scan.attendee_name")}
                 </InputLabel>
-                <Box width="100%">
+                <Box sx={{ width: "100%" }}>
                   <MuiFormikTextField
                     name="attendee_full_name"
                     formik={formik}
@@ -152,8 +152,8 @@ const EditBadgeScanPopup = ({ badgeScan, onClose, onSubmit }) => {
                     margin="none"
                   />
                 </Box>
-              </Grid2>
-              <Grid2
+              </Grid>
+              <Grid
                 container
                 spacing={2}
                 size={6}
@@ -162,7 +162,7 @@ const EditBadgeScanPopup = ({ badgeScan, onClose, onSubmit }) => {
                 <InputLabel htmlFor="attendee_company">
                   {T.translate("edit_badge_scan.attendee_company")}
                 </InputLabel>
-                <Box width="100%">
+                <Box sx={{ width: "100%" }}>
                   <MuiFormikTextField
                     name="attendee_company"
                     formik={formik}
@@ -171,8 +171,8 @@ const EditBadgeScanPopup = ({ badgeScan, onClose, onSubmit }) => {
                     margin="none"
                   />
                 </Box>
-              </Grid2>
-              <Grid2
+              </Grid>
+              <Grid
                 container
                 spacing={2}
                 size={12}
@@ -181,7 +181,7 @@ const EditBadgeScanPopup = ({ badgeScan, onClose, onSubmit }) => {
                 <InputLabel htmlFor="notes">
                   {T.translate("edit_badge_scan.notes")}
                 </InputLabel>
-                <Box width="100%">
+                <Box sx={{ width: "100%" }}>
                   <MuiFormikTextField
                     name="notes"
                     formik={formik}
@@ -192,11 +192,11 @@ const EditBadgeScanPopup = ({ badgeScan, onClose, onSubmit }) => {
                     margin="none"
                   />
                 </Box>
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
             <Divider />
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2 spacing={2} size={12} sx={{ alignItems: "baseline" }}>
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid spacing={2} size={12} sx={{ alignItems: "baseline" }}>
                 <Typography>
                   {T.translate("edit_badge_scan.extra_questions")}
                 </Typography>
@@ -207,8 +207,8 @@ const EditBadgeScanPopup = ({ badgeScan, onClose, onSubmit }) => {
                   formik={formik}
                   allowEdit
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
           </DialogContent>
           <DialogActions sx={{ p: 2 }}>
             <Button type="submit" fullWidth variant="contained">

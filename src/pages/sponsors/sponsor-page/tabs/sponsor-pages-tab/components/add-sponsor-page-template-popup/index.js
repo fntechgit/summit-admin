@@ -25,7 +25,7 @@ import {
   DialogTitle,
   Divider,
   FormControlLabel,
-  Grid2,
+  Grid,
   IconButton,
   Typography
 } from "@mui/material";
@@ -196,15 +196,9 @@ const AddSponsorPageTemplatePopup = ({
   ];
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      maxWidth="md"
-      fullWidth
-      disableEscapeKeyDown={isSaving}
-    >
+    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1rem">
+        <Typography sx={{ fontSize: "1rem" }}>
           {T.translate("edit_sponsor.pages_tab.add_page_using_template")}
         </Typography>
         <IconButton
@@ -225,7 +219,7 @@ const AddSponsorPageTemplatePopup = ({
           autoComplete="off"
         >
           <DialogContent sx={{ p: 0 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
               <MuiFormikSelectGroup
                 name="add_ons"
                 formik={formik}
@@ -242,21 +236,21 @@ const AddSponsorPageTemplatePopup = ({
                   "edit_sponsor.placeholders.select_add_ons"
                 )}
               />
-            </Grid2>
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2
+            </Grid>
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid
                 container
                 spacing={2}
                 size={6}
                 sx={{ alignItems: "baseline" }}
               >
-                <Grid2 size={4}>
+                <Grid size={4}>
                   {selectedPages.length}{" "}
                   {T.translate("edit_sponsor.pages_tab.items_selected")}
-                </Grid2>
-              </Grid2>
-              <Grid2 container spacing={2} size={6}>
-                <Grid2 size={4}>
+                </Grid>
+              </Grid>
+              <Grid container spacing={2} size={6}>
+                <Grid size={4}>
                   <MenuButton
                     buttonId="sort-button"
                     menuId="sort-menu"
@@ -274,17 +268,17 @@ const AddSponsorPageTemplatePopup = ({
                     <SwapVertIcon sx={{ mr: 1 }} />{" "}
                     {T.translate("general.sort_by")}
                   </MenuButton>
-                </Grid2>
-                <Grid2 size={8}>
+                </Grid>
+                <Grid size={8}>
                   <SearchInput
                     onSearch={handleOnSearch}
                     placeholder={T.translate(
                       "edit_sponsor.placeholders.search"
                     )}
                   />
-                </Grid2>
-              </Grid2>
-            </Grid2>
+                </Grid>
+              </Grid>
+            </Grid>
 
             {showPages.length > 0 && (
               <Box sx={{ p: 2 }}>

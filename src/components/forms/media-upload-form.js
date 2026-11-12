@@ -20,7 +20,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
-import Grid2 from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import InputAdornment from "@mui/material/InputAdornment";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -136,17 +136,17 @@ const MediaUploadForm = ({
         component="form"
         onSubmit={formik.handleSubmit}
       >
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={12}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid size={12}>
             <InputLabel htmlFor="name">
               {T.translate("media_upload.name")} *
             </InputLabel>
             <MuiFormikTextField name="name" margin="none" fullWidth />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <InputLabel htmlFor="max_size">
               {T.translate("media_upload.max_size")} *
             </InputLabel>
@@ -157,8 +157,8 @@ const MediaUploadForm = ({
               margin="none"
               fullWidth
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
             <InputLabel htmlFor="min_uploads_qty">
               {T.translate("media_upload.min_qty")}
             </InputLabel>
@@ -168,8 +168,8 @@ const MediaUploadForm = ({
               margin="none"
               fullWidth
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
             <InputLabel
               htmlFor="max_uploads_qty"
               title={T.translate("media_upload.max_qty_hint")}
@@ -182,22 +182,22 @@ const MediaUploadForm = ({
               margin="none"
               fullWidth
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={12}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid size={12}>
             <InputLabel htmlFor="description">
               {T.translate("media_upload.description")}
             </InputLabel>
             <FormikTextEditor name="description" maxLength={5120} />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
         <Divider sx={{ mb: 2 }} />
 
-        <Grid2 container spacing={2} sx={{ mb: 2, alignItems: "center" }}>
-          <Grid2 size={{ xs: 12, md: 6 }}>
+        <Grid container spacing={2} sx={{ mb: 2, alignItems: "center" }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <InputLabel htmlFor="type_id">
               {T.translate("media_upload.type")}
             </InputLabel>
@@ -211,19 +211,19 @@ const MediaUploadForm = ({
                 </MenuItem>
               ))}
             </MuiFormikSelect>
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 6 }} sx={{ mt: "8px" }}>
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }} sx={{ mt: "8px" }}>
             <MuiFormikCheckbox
               name="is_editable"
               label={T.translate("media_upload.is_editable")}
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
         <Divider sx={{ mb: 2 }} />
 
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <InputLabel htmlFor="private_storage_type">
               {T.translate("media_upload.private_storage_type")}
             </InputLabel>
@@ -239,8 +239,8 @@ const MediaUploadForm = ({
                 </MenuItem>
               ))}
             </MuiFormikSelect>
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
             <InputLabel htmlFor="public_storage_type">
               {T.translate("media_upload.public_storage_type")}
             </InputLabel>
@@ -256,20 +256,20 @@ const MediaUploadForm = ({
                 </MenuItem>
               ))}
             </MuiFormikSelect>
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 4 }} sx={{ mt: "8px" }}>
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }} sx={{ mt: "8px" }}>
             <MuiFormikCheckbox
               name="use_temporary_links_on_public_storage"
               label={T.translate(
                 "media_upload.use_temporary_links_on_public_storage"
               )}
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
         {values.use_temporary_links_on_public_storage && (
-          <Grid2 container spacing={2} sx={{ mb: 2 }}>
-            <Grid2 size={{ xs: 12, md: 4 }}>
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <InputLabel htmlFor="temporary_links_public_storage_ttl">
                 {T.translate(
                   "media_upload.temporary_links_public_storage_ttl_info"
@@ -290,14 +290,14 @@ const MediaUploadForm = ({
                   }
                 }}
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
         )}
 
         <Divider sx={{ mb: 2 }} />
 
-        <Grid2 container spacing={2}>
-          <Grid2 size={12}>
+        <Grid container spacing={2}>
+          <Grid size={12}>
             <Autocomplete
               multiple
               size="small"
@@ -321,8 +321,8 @@ const MediaUploadForm = ({
                 />
               )}
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
         <Divider sx={{ my: 3 }} />
         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>

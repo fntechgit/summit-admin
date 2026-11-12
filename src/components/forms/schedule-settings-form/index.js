@@ -18,7 +18,7 @@ import T from "i18n-react/dist/i18n-react";
 import {
   Box,
   Button,
-  Grid2,
+  Grid,
   InputLabel,
   MenuItem,
   Typography
@@ -152,23 +152,23 @@ const ScheduleSettingsForm = ({ entity, summit, errors, onSubmit }) => {
   return (
     <FormikProvider value={formik}>
       <Box component="form" onSubmit={formik.handleSubmit}>
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <InputLabel htmlFor="key">
               {T.translate("edit_schedule_settings.key")}
             </InputLabel>
             <MuiFormikTextField name="key" margin="none" fullWidth disabled />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
             <MuiFormikSwitch
               name="is_enabled"
               label={T.translate("edit_schedule_settings.enabled")}
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <InputLabel htmlFor="color_source">
               {T.translate("edit_schedule_settings.color_source")} *
             </InputLabel>
@@ -186,8 +186,8 @@ const ScheduleSettingsForm = ({ entity, summit, errors, onSubmit }) => {
                 </MenuItem>
               ))}
             </MuiFormikSelect>
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
             <InputLabel htmlFor="time_format">
               {T.translate("edit_schedule_settings.time_format")} *
             </InputLabel>
@@ -198,32 +198,32 @@ const ScheduleSettingsForm = ({ entity, summit, errors, onSubmit }) => {
                 </MenuItem>
               ))}
             </MuiFormikSelect>
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <MuiFormikSwitch
               name="is_my_schedule"
               label={T.translate("edit_schedule_settings.is_my_schedule")}
               disabled={disabled}
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
             <MuiFormikSwitch
               name="only_events_with_attendee_access"
               label={T.translate("edit_schedule_settings.access_levels_only")}
               disabled={disabled}
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
             <MuiFormikSwitch
               name="hide_past_events_with_show_always_on_schedule"
               label={T.translate("edit_schedule_settings.hide_past_permanent")}
               disabled={disabled}
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
         <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>
           {T.translate("edit_schedule_settings.filters")}
@@ -239,21 +239,21 @@ const ScheduleSettingsForm = ({ entity, summit, errors, onSubmit }) => {
         <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>
           {T.translate("edit_schedule_settings.pre_filters")}
         </Typography>
-        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
           {values.pre_filters.map(
             (pf, idx) =>
               !HIDDEN_PRE_FILTERS.includes(pf.type) && (
-                <Grid2 key={pf.type} size={{ xs: 12, md: 6 }}>
+                <Grid key={pf.type} size={{ xs: 12, md: 6 }}>
                   <PreFilterInput
                     name={`pre_filters[${idx}]`}
                     type={pf.type}
                     summit={summit}
                     disabled={disabled}
                   />
-                </Grid2>
+                </Grid>
               )
           )}
-        </Grid2>
+        </Grid>
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
           <Button type="submit" variant="contained" disabled={isSaving}>

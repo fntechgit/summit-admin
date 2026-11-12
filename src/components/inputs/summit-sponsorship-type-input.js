@@ -9,10 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
-import AsyncSelect from "react-select/lib/Async";
+import AsyncSelect from "react-select/async";
 import { querySummitSponsorships } from "../../actions/sponsor-actions";
 
 export default class SummitSponsorshipTypeInput extends React.Component {
@@ -78,7 +78,7 @@ export default class SummitSponsorshipTypeInput extends React.Component {
 
     if (value) {
       theValue = plainValue
-        ? { value: value, label: value }
+        ? { value, label: value }
         : { value: value.id?.toString(), label: value.name };
     }
 

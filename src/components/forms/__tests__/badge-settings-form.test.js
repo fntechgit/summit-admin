@@ -103,7 +103,10 @@ it("should show the success message and re-enable Save when onSubmit resolves", 
       })
     )
   );
-  expect(
-    screen.getByRole("button", { name: "general.save" })
-  ).not.toBeDisabled();
+  // isSaving resets in .finally, after the success message
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "general.save" })
+    ).not.toBeDisabled()
+  );
 });

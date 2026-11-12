@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Grid2 } from "@mui/material";
+import { Grid } from "@mui/material";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
@@ -180,12 +180,12 @@ const AuditLogs = ({
 
   return (
     <>
-      <Grid2
+      <Grid
         container
         spacing={2}
         sx={{ justifyContent: "end", alignItems: "center", mb: 2 }}
       >
-        <Grid2
+        <Grid
           container
           size={{ xs: 12, md: 6 }}
           sx={{ flexWrap: "nowrap", alignItems: "center", gap: 1 }}
@@ -196,8 +196,8 @@ const AuditLogs = ({
             onSearch={handleSearch}
           />
           <GridFilter id={gridFilterId} criterias={getCriterias()} />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
       <CustomAlert
         message={T.translate("audit_log.timezone_info", { tz: userTimeZone })}
       />
@@ -205,7 +205,6 @@ const AuditLogs = ({
       {logEntries.length === 0 && (
         <div>{T.translate("audit_log.no_log_entries")}</div>
       )}
-
       {logEntries.length > 0 && (
         <MuiTable
           columns={showColumns}

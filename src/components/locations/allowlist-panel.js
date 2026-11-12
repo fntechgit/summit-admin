@@ -207,7 +207,7 @@ function AllowlistPanel({
       >
         {bannerText()}
       </Alert>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+      <Typography variant="body2" sx={{ color: "text.secondary", mb: 1 }}>
         {T.translate("dropbox_sync.allowlist_helper")}
       </Typography>
 
@@ -276,8 +276,10 @@ function AllowlistPanel({
                         <Checkbox
                           checked={!uncheckedKeys.has(row.uiKey)}
                           onChange={() => handleToggleStored(row.uiKey)}
-                          inputProps={{
-                            "data-testid": `allowlist-check-${row.uiKey}`
+                          slotProps={{
+                            input: {
+                              "data-testid": `allowlist-check-${row.uiKey}`
+                            }
                           }}
                         />
                       }
@@ -297,8 +299,10 @@ function AllowlistPanel({
                   <Checkbox
                     checked={pickedIds.has(opt.id)}
                     onChange={() => handleTogglePicked(opt.id)}
-                    inputProps={{
-                      "data-testid": `allowlist-option-${opt.id}`
+                    slotProps={{
+                      input: {
+                        "data-testid": `allowlist-option-${opt.id}`
+                      }
                     }}
                   />
                 }

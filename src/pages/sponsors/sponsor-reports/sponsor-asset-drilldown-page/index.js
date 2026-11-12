@@ -32,7 +32,7 @@ import {
   Button,
   Card,
   CardContent,
-  Grid2,
+  Grid,
   Stack,
   Typography
 } from "@mui/material";
@@ -160,10 +160,10 @@ const SponsorAssetDrilldownPage = ({
             gap: 1
           }}
         >
-          <Stack direction="row" spacing={2} alignItems="center">
+          <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
             <SponsorAvatar name={sponsor.name} logoUrl={sponsor.logo_url} />
             <Box>
-              <Stack direction="row" spacing={1} alignItems="center">
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                 <Typography variant="h6">{sponsor.name}</Typography>
                 <TierBadge tier={sponsor.tier} onDark />
               </Stack>
@@ -209,9 +209,9 @@ const SponsorAssetDrilldownPage = ({
                 {T.translate("sponsor_reports_page.download_csv")}
               </Button>
             </Box>
-            <Grid2 container spacing={2}>
+            <Grid container spacing={2}>
               {section.modules?.map((row) => (
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={row.module?.id}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={row.module?.id}>
                   <Box
                     sx={{
                       border: 1,
@@ -224,10 +224,12 @@ const SponsorAssetDrilldownPage = ({
                   >
                     <Stack
                       direction="row"
-                      justifyContent="space-between"
-                      alignItems="center"
                       spacing={1}
-                      sx={{ mb: 1 }}
+                      sx={{
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mb: 1
+                      }}
                     >
                       <Typography
                         variant="body2"
@@ -247,9 +249,9 @@ const SponsorAssetDrilldownPage = ({
                     </Stack>
                     <ContentCell row={row} />
                   </Box>
-                </Grid2>
+                </Grid>
               ))}
-            </Grid2>
+            </Grid>
           </CardContent>
         </Card>
       ))}

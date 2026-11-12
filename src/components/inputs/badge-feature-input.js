@@ -9,12 +9,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
-import AsyncSelect from "react-select/lib/Async";
+import AsyncSelect from "react-select/async";
 import { queryBadgeFeatures } from "../../actions/badge-actions";
-import { shallowEqual } from "../../utils/methods";
 
 export default class BadgeFeatureInput extends React.Component {
   constructor(props) {
@@ -30,7 +29,7 @@ export default class BadgeFeatureInput extends React.Component {
     if (this.props.hasOwnProperty("getOptionValue")) {
       return this.props.getOptionValue(badgeFeature);
     }
-    //default
+    // default
     return badgeFeature.id;
   }
 
@@ -38,7 +37,7 @@ export default class BadgeFeatureInput extends React.Component {
     if (this.props.hasOwnProperty("getOptionLabel")) {
       return this.props.getOptionLabel(badgeFeature);
     }
-    //default
+    // default
     return `${badgeFeature.name}`;
   }
 
@@ -46,7 +45,7 @@ export default class BadgeFeatureInput extends React.Component {
     const ev = {
       target: {
         id: this.props.id,
-        value: value,
+        value,
         type: "badgefeatureinput"
       }
     };

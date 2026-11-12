@@ -82,13 +82,7 @@ const CustomizedFormPopup = ({
   }, [formId]);
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      disableEscapeKeyDown={isSaving}
-      maxWidth="md"
-      fullWidth
-    >
+    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between" }}
         component="div"

@@ -15,7 +15,7 @@ import React, { useEffect, useMemo } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import { Button, Grid2 } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ScheduleSettingsForm from "../../components/forms/schedule-settings-form";
 import {
@@ -67,17 +67,17 @@ function EditScheduleSettingsPage({
   return (
     <div className="container">
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-      <Grid2
+      <Grid
         container
         sx={{ justifyContent: "space-between", alignItems: "center" }}
       >
-        <Grid2>
+        <Grid>
           <h3>
             {title} {T.translate("edit_schedule_settings.schedule_settings")}
           </h3>
-        </Grid2>
+        </Grid>
         {entity.id > 0 && (
-          <Grid2>
+          <Grid>
             <Button
               variant="contained"
               onClick={() =>
@@ -89,9 +89,9 @@ function EditScheduleSettingsPage({
             >
               {T.translate("general.add_new")}
             </Button>
-          </Grid2>
+          </Grid>
         )}
-      </Grid2>
+      </Grid>
       <hr />
       {currentSummit && (
         <ScheduleSettingsForm

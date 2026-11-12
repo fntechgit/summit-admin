@@ -84,8 +84,9 @@ describe("MediaTypeFilter", () => {
   test("loads the available media types for the given summit", async () => {
     render(<MediaTypeFilter {...baseProps} />);
 
-    await waitFor(() => expect(getAllMediaUploadTypes).toHaveBeenCalledWith(1));
-    expect(screen.getByText("Video")).toBeInTheDocument();
+    expect(getAllMediaUploadTypes).toHaveBeenCalledWith(1);
+    // options render once the request resolves
+    expect(await screen.findByText("Video")).toBeInTheDocument();
     expect(screen.getByText("Slides")).toBeInTheDocument();
   });
 

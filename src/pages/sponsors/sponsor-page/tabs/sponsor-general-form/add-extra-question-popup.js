@@ -12,7 +12,7 @@ import {
   Button,
   IconButton,
   Divider,
-  Grid2,
+  Grid,
   Typography,
   InputLabel,
   Box,
@@ -220,7 +220,7 @@ const AddSponsorExtraQuestionPopup = ({
   };
 
   const renderValueItem = (valueItem, index, provided, snapshot, remove) => (
-    <Grid2
+    <Grid
       container
       spacing={2}
       sx={{
@@ -232,7 +232,7 @@ const AddSponsorExtraQuestionPopup = ({
       }}
       size={12}
     >
-      <Grid2 size={4.5}>
+      <Grid size={4.5}>
         <MuiFormikTextField
           name={`values[${index}].value`}
           formik={formik}
@@ -241,8 +241,8 @@ const AddSponsorExtraQuestionPopup = ({
           placeholder={T.translate("edit_sponsor.hidden_value")}
           onChange={(e) => handleValueChange(index, "value", e.target.value)}
         />
-      </Grid2>
-      <Grid2 size={4.5}>
+      </Grid>
+      <Grid size={4.5}>
         <MuiFormikTextField
           name={`values[${index}].label`}
           formik={formik}
@@ -251,8 +251,8 @@ const AddSponsorExtraQuestionPopup = ({
           placeholder={T.translate("edit_sponsor.visible_value")}
           onChange={(e) => handleValueChange(index, "label", e.target.value)}
         />
-      </Grid2>
-      <Grid2
+      </Grid>
+      <Grid
         size={2}
         sx={{
           display: "flex",
@@ -270,8 +270,8 @@ const AddSponsorExtraQuestionPopup = ({
           }
           label={T.translate("edit_sponsor.is_default")}
         />
-      </Grid2>
-      <Grid2
+      </Grid>
+      <Grid
         size={0.5}
         sx={{
           display: "flex",
@@ -294,8 +294,8 @@ const AddSponsorExtraQuestionPopup = ({
             <CloseIcon />
           </IconButton>
         )}
-      </Grid2>
-      <Grid2
+      </Grid>
+      <Grid
         size={0.5}
         sx={{
           display: "flex",
@@ -305,8 +305,8 @@ const AddSponsorExtraQuestionPopup = ({
         }}
       >
         <DragIndicatorIcon sx={{ color: "#666" }} />
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   );
 
   const badge_features_ddl =
@@ -320,7 +320,7 @@ const AddSponsorExtraQuestionPopup = ({
   return (
     <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1rem">
+        <Typography sx={{ fontSize: "1rem" }}>
           {extraQuestion.id
             ? T.translate("edit_sponsor.edit_extra_question")
             : T.translate("edit_sponsor.add_extra_question")}
@@ -338,13 +338,13 @@ const AddSponsorExtraQuestionPopup = ({
           autoComplete="off"
         >
           <DialogContent sx={{ p: 1 }}>
-            <Grid2
+            <Grid
               container
               spacing={2}
               size={12}
               sx={{ p: 2, alignItems: "flex-start" }}
             >
-              <Grid2
+              <Grid
                 container
                 spacing={2}
                 size={6}
@@ -353,7 +353,7 @@ const AddSponsorExtraQuestionPopup = ({
                 <InputLabel htmlFor="type">
                   {T.translate("edit_sponsor.question_type")}
                 </InputLabel>
-                <Box width="100%">
+                <Box sx={{ width: "100%" }}>
                   <MuiFormikSelect
                     name="type"
                     formik={formik}
@@ -381,8 +381,8 @@ const AddSponsorExtraQuestionPopup = ({
                     ))}
                   </MuiFormikSelect>
                 </Box>
-              </Grid2>
-              <Grid2
+              </Grid>
+              <Grid
                 container
                 spacing={2}
                 size={6}
@@ -391,7 +391,7 @@ const AddSponsorExtraQuestionPopup = ({
                 <InputLabel htmlFor="name">
                   {T.translate("edit_sponsor.question_id")}
                 </InputLabel>
-                <Box width="100%">
+                <Box sx={{ width: "100%" }}>
                   <MuiFormikTextField
                     name="name"
                     formik={formik}
@@ -399,11 +399,11 @@ const AddSponsorExtraQuestionPopup = ({
                     margin="none"
                   />
                 </Box>
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
             {formik.values.type === "CheckBoxList" && (
-              <Grid2 container spacing={2} size={6} sx={{ p: 2 }}>
-                <Grid2
+              <Grid container spacing={2} size={6} sx={{ p: 2 }}>
+                <Grid
                   container
                   spacing={2}
                   size={12}
@@ -412,7 +412,7 @@ const AddSponsorExtraQuestionPopup = ({
                   <InputLabel htmlFor="max_selected_values">
                     {T.translate("edit_sponsor.max_selected_values")}
                   </InputLabel>
-                  <Box width="100%">
+                  <Box sx={{ width: "100%" }}>
                     <MuiFormikTextField
                       name="max_selected_values"
                       formik={formik}
@@ -421,12 +421,12 @@ const AddSponsorExtraQuestionPopup = ({
                       margin="none"
                     />
                   </Box>
-                </Grid2>
-              </Grid2>
+                </Grid>
+              </Grid>
             )}
             <Divider />
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid
                 container
                 spacing={2}
                 size={12}
@@ -435,7 +435,7 @@ const AddSponsorExtraQuestionPopup = ({
                 <InputLabel htmlFor="label">
                   {T.translate("edit_sponsor.visible_question")}
                 </InputLabel>
-                <Box width="100%">
+                <Box sx={{ width: "100%" }}>
                   <FormikTextEditor
                     name="label"
                     formik={formik}
@@ -443,11 +443,11 @@ const AddSponsorExtraQuestionPopup = ({
                     margin="none"
                   />
                 </Box>
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
             {shouldShowField("values") && (
-              <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-                <Grid2
+              <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+                <Grid
                   container
                   spacing={2}
                   sx={{
@@ -458,18 +458,18 @@ const AddSponsorExtraQuestionPopup = ({
                   }}
                   size={12}
                 >
-                  <Grid2 size={4.5}>
+                  <Grid size={4.5}>
                     {T.translate("edit_sponsor.hidden_value")}
-                  </Grid2>
-                  <Grid2 size={4.5}>
+                  </Grid>
+                  <Grid size={4.5}>
                     {T.translate("edit_sponsor.visible_value")}
-                  </Grid2>
-                  <Grid2 size={2} />
-                </Grid2>
+                  </Grid>
+                  <Grid size={2} />
+                </Grid>
                 <FieldArray name="values">
                   {({ push, remove }) => (
                     <>
-                      <Grid2 container spacing={2} size={12}>
+                      <Grid container spacing={2} size={12}>
                         <DragAndDropList
                           items={formik.values.values.sort(
                             (a, b) => a.order - b.order
@@ -488,7 +488,7 @@ const AddSponsorExtraQuestionPopup = ({
                           updateOrderKey="order"
                           droppableId="sponsor-extra-question-values"
                         />
-                      </Grid2>
+                      </Grid>
                       <Button
                         variant="text"
                         startIcon={<AddIcon />}
@@ -519,8 +519,7 @@ const AddSponsorExtraQuestionPopup = ({
                         formik.submitCount > 0 && (
                           <Typography
                             color="error"
-                            fontSize="0.75rem"
-                            sx={{ mt: 0.5, ml: 2 }}
+                            sx={{ fontSize: "0.75rem", mt: 0.5, ml: 2 }}
                           >
                             {formik.errors.values}
                           </Typography>
@@ -528,12 +527,12 @@ const AddSponsorExtraQuestionPopup = ({
                     </>
                   )}
                 </FieldArray>
-              </Grid2>
+              </Grid>
             )}
             <Divider />
             {formik.values.type === "Text" && (
-              <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-                <Grid2
+              <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+                <Grid
                   container
                   spacing={2}
                   size={6}
@@ -542,7 +541,7 @@ const AddSponsorExtraQuestionPopup = ({
                   <InputLabel htmlFor="placeholder">
                     {T.translate("edit_sponsor.hint")}
                   </InputLabel>
-                  <Box width="100%">
+                  <Box sx={{ width: "100%" }}>
                     <MuiFormikTextField
                       name="placeholder"
                       formik={formik}
@@ -550,18 +549,18 @@ const AddSponsorExtraQuestionPopup = ({
                       margin="none"
                     />
                   </Box>
-                </Grid2>
-              </Grid2>
+                </Grid>
+              </Grid>
             )}
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2
+            <Grid container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid
                 container
                 spacing={2}
                 size={6}
                 sx={{ alignItems: "baseline" }}
               >
                 {!hideMandatory && (
-                  <Box width="100%">
+                  <Box sx={{ width: "100%" }}>
                     <MuiFormikCheckbox
                       name="mandatory"
                       formik={formik}
@@ -571,15 +570,15 @@ const AddSponsorExtraQuestionPopup = ({
                     />
                   </Box>
                 )}
-              </Grid2>
+              </Grid>
               {badge_features_ddl.length > 0 && (
-                <Grid2
+                <Grid
                   container
                   spacing={2}
                   size={6}
                   sx={{ alignItems: "baseline" }}
                 >
-                  <Grid2
+                  <Grid
                     container
                     spacing={2}
                     size={12}
@@ -628,8 +627,8 @@ const AddSponsorExtraQuestionPopup = ({
                         />
                       </IconButton>
                     </Tooltip>
-                  </Grid2>
-                  <Box width="100%">
+                  </Grid>
+                  <Box sx={{ width: "100%" }}>
                     <MuiFormikSelect
                       name="allowed_badge_features_types"
                       formik={formik}
@@ -655,9 +654,9 @@ const AddSponsorExtraQuestionPopup = ({
                       ))}
                     </MuiFormikSelect>
                   </Box>
-                </Grid2>
+                </Grid>
               )}
-            </Grid2>
+            </Grid>
           </DialogContent>
           <Divider />
           <DialogActions sx={{ p: 2 }}>

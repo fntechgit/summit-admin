@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
 import { getIn, useFormikContext } from "formik";
-import { Divider, Grid2, InputLabel, MenuItem } from "@mui/material";
+import { Divider, Grid, InputLabel, MenuItem } from "@mui/material";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikRadioGroup from "openstack-uicore-foundation/lib/components/mui/formik-inputs/radio-group";
 import MuiFormikFilesizeField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/file-size-field";
@@ -53,19 +53,19 @@ const MediaRequestModule = ({
   }));
 
   return (
-    <Grid2 container spacing={2} size={12}>
-      <Grid2 size={12}>
+    <Grid container spacing={2} size={12}>
+      <Grid size={12}>
         <MuiFormikRadioGroup
           name={buildFieldName("type")}
           options={mediaTypeOptions}
           row
           marginWrapper="none"
         />
-      </Grid2>
-      <Grid2 size={12}>
+      </Grid>
+      <Grid size={12}>
         <Divider sx={{ mx: -2 }} />
-      </Grid2>
-      <Grid2 size={showUploadDeadline ? COLUMN_6 : COLUMN_12}>
+      </Grid>
+      <Grid size={showUploadDeadline ? COLUMN_6 : COLUMN_12}>
         <InputLabel htmlFor={buildFieldName("name")}>
           {T.translate("page_template_list.page_crud.name")}
         </InputLabel>
@@ -74,9 +74,9 @@ const MediaRequestModule = ({
           fullWidth
           margin="none"
         />
-      </Grid2>
+      </Grid>
       {showUploadDeadline && (
-        <Grid2 size={6}>
+        <Grid size={6}>
           <InputLabel htmlFor={buildFieldName("upload_deadline")}>
             {T.translate("page_template_list.page_crud.upload_deadline")}
           </InputLabel>
@@ -84,12 +84,12 @@ const MediaRequestModule = ({
             name={buildFieldName("upload_deadline")}
             timezone={timezone}
           />
-        </Grid2>
+        </Grid>
       )}
 
       {mediaType === PAGE_MODULES_MEDIA_TYPES.FILE && (
         <>
-          <Grid2 size={6}>
+          <Grid size={6}>
             <InputLabel htmlFor={buildFieldName("max_file_size")}>
               {T.translate("page_template_list.page_crud.max_file_size")}
             </InputLabel>
@@ -98,8 +98,8 @@ const MediaRequestModule = ({
               margin="none"
               fullWidth
             />
-          </Grid2>
-          <Grid2 size={6}>
+          </Grid>
+          <Grid size={6}>
             <InputLabel htmlFor={buildFieldName("file_type_id")}>
               {T.translate("page_template_list.page_crud.allowed_formats")}
             </InputLabel>
@@ -127,11 +127,11 @@ const MediaRequestModule = ({
                 </MenuItem>
               ))}
             </MuiFormikSelect>
-          </Grid2>
+          </Grid>
         </>
       )}
 
-      <Grid2 size={12}>
+      <Grid size={12}>
         <InputLabel htmlFor={buildFieldName("description")}>
           {T.translate("page_template_list.page_crud.description")}
         </InputLabel>
@@ -142,8 +142,8 @@ const MediaRequestModule = ({
           margin="none"
           rows={2}
         />
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   );
 };
 

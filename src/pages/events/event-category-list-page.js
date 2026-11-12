@@ -14,7 +14,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button, Grid } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTableSortable from "openstack-uicore-foundation/lib/components/mui/sortable-table";
 import SummitsDropdown from "openstack-uicore-foundation/lib/components/mui/summits-dropdown";
@@ -78,7 +78,7 @@ const EventCategoryListPage = ({
   return (
     <div className="container table-container">
       <h3> {T.translate("event_category_list.event_category_list")} </h3>
-      <Grid2
+      <Grid
         container
         size={{ xs: 12, m3: 6 }}
         spacing={1}
@@ -89,7 +89,7 @@ const EventCategoryListPage = ({
           mb: 2
         }}
       >
-        <Grid2>
+        <Grid>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -97,10 +97,10 @@ const EventCategoryListPage = ({
           >
             {T.translate("event_category_list.add_category")}
           </Button>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
-      <Grid2
+      <Grid
         container
         size={{ xs: 12, m3: 6 }}
         spacing={1}
@@ -111,15 +111,15 @@ const EventCategoryListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={{ xs: 12, sm: 3 }}>
+        <Grid size={{ xs: 12, sm: 3 }}>
           <SummitsDropdown
             label={T.translate("general.select_summit")}
             onChange={setSummitToCopy}
             summits={[]}
             excludeSummitIds={[currentSummit.id]}
           />
-        </Grid2>
-        <Grid2>
+        </Grid>
+        <Grid>
           <Button
             variant="outlined"
             disabled={!summitToCopy}
@@ -127,8 +127,8 @@ const EventCategoryListPage = ({
           >
             {T.translate("event_category_list.copy_categories")}
           </Button>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       {eventCategories.length === 0 && (
         <div className="no-items">

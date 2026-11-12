@@ -17,7 +17,7 @@ import T from "i18n-react/dist/i18n-react";
 import {
   Box,
   FormControl,
-  Grid2,
+  Grid,
   InputLabel,
   MenuItem,
   OutlinedInput,
@@ -162,7 +162,7 @@ const SentEmailListPage = ({
   return (
     <div className="container">
       <h3> {T.translate("email_logs.email_list")}</h3>
-      <Grid2
+      <Grid
         container
         spacing={2}
         sx={{
@@ -171,36 +171,32 @@ const SentEmailListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={2}>
+        <Grid size={2}>
           <Box component="span">
             {totalEmails} {T.translate("emails.emails")}
           </Box>
-        </Grid2>
-        <Grid2
+        </Grid>
+        <Grid
           container
           size={10}
           spacing={1}
-          gap={1}
-          sx={{
-            justifyContent: "flex-end",
-            alignItems: "center"
-          }}
+          sx={{ gap: 1, justifyContent: "flex-end", alignItems: "center" }}
         >
-          <Grid2 size={6}>
+          <Grid size={6}>
             <SearchInput
               term={term}
               onSearch={handleSearch}
               placeholder={T.translate("emails.placeholders.search_emails")}
             />
-          </Grid2>
+          </Grid>
           <GridFilter
             id={FILTER_ID}
             criterias={getCriterias()}
             hideJoinOperators
           />
-        </Grid2>
-      </Grid2>
-      <Grid2 sx={{ mb: 2 }}>
+        </Grid>
+      </Grid>
+      <Grid sx={{ mb: 2 }}>
         <FormControl fullWidth size="small">
           <InputLabel id="select_fields-label">
             {T.translate("email_logs.select_fields")}
@@ -228,10 +224,9 @@ const SentEmailListPage = ({
             ))}
           </Select>
         </FormControl>
-      </Grid2>
+      </Grid>
 
       {emails.length === 0 && <div>{T.translate("emails.no_emails")}</div>}
-
       {emails.length > 0 && (
         <MuiTable
           options={table_options}

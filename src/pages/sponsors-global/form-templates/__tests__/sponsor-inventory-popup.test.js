@@ -269,7 +269,8 @@ describe("SponsorItemDialog", () => {
       expect(pendingSave).toHaveBeenCalledTimes(1);
     });
 
-    it("does not call onSave twice when the save button is double-clicked before isSaving commits", async () => {
+    it("does not call onSave twice when the save button is double-clicked", async () => {
+      const user = userEvent.setup();
       let resolveSave;
       const pendingSave = jest.fn(
         () =>
@@ -290,13 +291,8 @@ describe("SponsorItemDialog", () => {
         name: "edit_inventory_item.save_changes"
       });
 
-      // Fired back-to-back with no await in between, so both clicks reach
-      // formik's validation before React commits the isSaving state update
-      // that disables the button - this is the actual race `if (isSaving)
-      // return` in handleOnSave guards against (validation is async, so a
-      // real fast double-click can land before the first render commits).
-      fireEvent.click(saveButton);
-      fireEvent.click(saveButton);
+      // a real double-click: React renders isSaving between the two clicks
+      await user.dblClick(saveButton);
 
       await waitFor(() => expect(pendingSave).toHaveBeenCalled());
       resolveSave();

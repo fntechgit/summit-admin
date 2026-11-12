@@ -7,7 +7,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Divider from "@mui/material/Divider";
-import Grid2 from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
@@ -64,13 +64,7 @@ const ImportMUXModal = ({ show, onClose, onImport }) => {
   };
 
   return (
-    <Dialog
-      open={show}
-      onClose={handleClose}
-      disableEscapeKeyDown={isSaving}
-      maxWidth="md"
-      fullWidth
-    >
+    <Dialog open={show} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle
         component="div"
         sx={{ display: "flex", justifyContent: "space-between" }}
@@ -89,8 +83,8 @@ const ImportMUXModal = ({ show, onClose, onImport }) => {
       </DialogTitle>
       <Divider />
       <DialogContent>
-        <Grid2 container spacing={2}>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <FieldLabel
               htmlFor="mux_token_id"
               label={T.translate("event_list.mux_token_id")}
@@ -103,8 +97,8 @@ const ImportMUXModal = ({ show, onClose, onImport }) => {
               fullWidth
               size="small"
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
             <FieldLabel
               htmlFor="mux_token_secret"
               label={T.translate("event_list.mux_token_secret")}
@@ -118,8 +112,8 @@ const ImportMUXModal = ({ show, onClose, onImport }) => {
               fullWidth
               size="small"
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, md: 4 }}>
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
             <FieldLabel
               htmlFor="mux_email_to"
               label={T.translate("event_list.mux_email_to")}
@@ -133,8 +127,8 @@ const ImportMUXModal = ({ show, onClose, onImport }) => {
               fullWidth
               size="small"
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
       </DialogContent>
       <Divider />
       <DialogActions>

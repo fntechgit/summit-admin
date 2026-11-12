@@ -43,7 +43,7 @@ const TextValueDialog = ({ name, moduleName, open, onClose, onSubmit }) => {
         minRows={4}
         value={text}
         onChange={(ev) => setText(ev.target.value)}
-        inputProps={{ maxLength: TEXT_MAX_LENGTH_1024 }}
+        slotProps={{ htmlInput: { maxLength: TEXT_MAX_LENGTH_1024 } }}
         helperText={`${text.length}/${TEXT_MAX_LENGTH_1024}`}
       />
     </CustomDialog>

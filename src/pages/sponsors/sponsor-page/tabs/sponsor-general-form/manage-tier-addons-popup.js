@@ -11,7 +11,7 @@ import {
   Button,
   IconButton,
   Divider,
-  Grid2,
+  Grid,
   Typography,
   InputLabel,
   Box
@@ -195,7 +195,7 @@ const ManageTierAddonsPopup = ({
               {`${sponsorship.tier} ${T.translate("edit_sponsor.sponsorship")}`}
             </Typography>
             {formik.values.addons.map((addon, index) => (
-              <Grid2
+              <Grid
                 key={addon?.id || index}
                 container
                 spacing={3}
@@ -207,7 +207,7 @@ const ManageTierAddonsPopup = ({
                   border: "1px solid rgba(0, 0, 0, 0.12)"
                 }}
               >
-                <Grid2
+                <Grid
                   container
                   spacing={2}
                   rowSpacing={editingRow === index ? "14px" : "6px"}
@@ -218,7 +218,7 @@ const ManageTierAddonsPopup = ({
                     {T.translate("edit_sponsor.addon_type")}
                   </InputLabel>
                   {editingRow === index ? (
-                    <Box width="100%">
+                    <Box sx={{ width: "100%" }}>
                       <MuiFormikAddonTypeSelect
                         name={`addons[${index}].type`}
                         placeholder={T.translate(
@@ -233,8 +233,8 @@ const ManageTierAddonsPopup = ({
                   ) : (
                     <Typography>{`${formik.values.addons[index].type}`}</Typography>
                   )}
-                </Grid2>
-                <Grid2
+                </Grid>
+                <Grid
                   container
                   spacing={2}
                   rowSpacing={editingRow === index ? "14px" : "6px"}
@@ -254,11 +254,11 @@ const ManageTierAddonsPopup = ({
                   ) : (
                     <Typography>{`${formik.values.addons[index].name}`}</Typography>
                   )}
-                </Grid2>
-                <Grid2 container size={2} spacing={2} sx={{ display: "flex" }}>
+                </Grid>
+                <Grid container size={2} spacing={2} sx={{ display: "flex" }}>
                   {editingRow !== index && (
                     <>
-                      <Grid2
+                      <Grid
                         className="dottedBorderLeft"
                         size={6}
                         sx={{ alignContent: "center" }}
@@ -269,8 +269,8 @@ const ManageTierAddonsPopup = ({
                         >
                           <EditIcon />
                         </IconButton>
-                      </Grid2>
-                      <Grid2
+                      </Grid>
+                      <Grid
                         className="dottedBorderLeft"
                         size={6}
                         sx={{ alignContent: "center" }}
@@ -281,21 +281,21 @@ const ManageTierAddonsPopup = ({
                         >
                           <DeleteIcon />
                         </IconButton>
-                      </Grid2>
+                      </Grid>
                     </>
                   )}
-                </Grid2>
-              </Grid2>
+                </Grid>
+              </Grid>
             ))}
             {!formik.errors.addons &&
               typeof formik.errors.addons === "string" && (
-                <Box mb={2} pl={2}>
+                <Box sx={{ mb: 2, pl: 2 }}>
                   <Typography color="error" sx={{ fontSize: "12px" }}>
                     {formik.errors.addons}
                   </Typography>
                 </Box>
               )}
-            <Grid2
+            <Grid
               container
               spacing={3}
               size={12}
@@ -305,7 +305,7 @@ const ManageTierAddonsPopup = ({
                 border: "1px solid rgba(0, 0, 0, 0.12)"
               }}
             >
-              <Grid2
+              <Grid
                 container
                 spacing={2}
                 size={5}
@@ -314,7 +314,7 @@ const ManageTierAddonsPopup = ({
                 <InputLabel htmlFor="newAddon.type">
                   {T.translate("edit_sponsor.addon_type")}
                 </InputLabel>
-                <Box width="100%">
+                <Box sx={{ width: "100%" }}>
                   <MuiFormikAddonTypeSelect
                     name="newAddon.type"
                     placeholder={T.translate(
@@ -326,8 +326,8 @@ const ManageTierAddonsPopup = ({
                     }}
                   />
                 </Box>
-              </Grid2>
-              <Grid2
+              </Grid>
+              <Grid
                 container
                 spacing={2}
                 size={5}
@@ -343,8 +343,8 @@ const ManageTierAddonsPopup = ({
                   margin="none"
                   placeholder={T.translate("edit_sponsor.name")}
                 />
-              </Grid2>
-              <Grid2 size={2} sx={{ display: "flex" }}>
+              </Grid>
+              <Grid size={2} sx={{ display: "flex" }}>
                 <Button
                   variant="contained"
                   aria-label="add"
@@ -361,16 +361,16 @@ const ManageTierAddonsPopup = ({
                 >
                   <AddIcon />
                 </Button>
-              </Grid2>
+              </Grid>
               {formik.errors.newAddon &&
                 typeof formik.errors.newAddon === "string" && (
-                  <Box mb={2} pl={2}>
+                  <Box sx={{ mb: 2, pl: 2 }}>
                     <Typography color="error" sx={{ fontSize: "12px" }}>
                       {formik.errors.newAddon}
                     </Typography>
                   </Box>
                 )}
-            </Grid2>
+            </Grid>
           </DialogContent>
           <Divider />
           <DialogActions sx={{ p: 2 }}>
