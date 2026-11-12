@@ -32,13 +32,11 @@ export const getCriterias = () => [
   }
 ];
 
-export const buildRoomBookingFilters = (filterValues) => {
-  const emailEntry = filterValues.find((f) => f.criteria === "email_filter");
-
-  return {
-    email_filter: {
-      operator: EMAIL_FILTER_OPERATORS[emailEntry?.operator] ?? null,
-      value: emailEntry?.value ?? ""
-    }
-  };
-};
+export const buildRoomBookingFilters = (filterValues) => ({
+  email_filter: filterValues
+    .filter((f) => f.criteria === "email_filter")
+    .map((f) => ({
+      operator: EMAIL_FILTER_OPERATORS[f.operator] ?? null,
+      value: f.value ?? ""
+    }))
+});

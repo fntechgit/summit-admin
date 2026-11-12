@@ -7,27 +7,30 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 }));
 
 describe("buildRoomBookingFilters", () => {
-  test("maps each email_filter operator to the legacy EmailFilter operator", () => {
-    const build = (operator) =>
+  test("maps every email_filter entry to its legacy EmailFilter operator", () => {
+    expect(
       buildRoomBookingFilters([
-        { criteria: "email_filter", operator, value: "jane@acme.com" }
-      ]).email_filter;
-
-    expect(build(OPERATORS.LIKE.value)).toEqual({
-      operator: "owner_email=@",
-      value: "jane@acme.com"
-    });
-    expect(build(OPERATORS.HAS_NOT.value)).toEqual({
-      operator: "not_owner_email=@",
-      value: "jane@acme.com"
-    });
-    expect(build(OPERATORS.IS.value)).toEqual({
-      operator: "owner_email==",
-      value: "jane@acme.com"
-    });
-    expect(buildRoomBookingFilters([]).email_filter).toEqual({
-      operator: null,
-      value: ""
-    });
+        {
+          criteria: "email_filter",
+          operator: OPERATORS.LIKE.value,
+          value: "@acme.com"
+        },
+        {
+          criteria: "email_filter",
+          operator: OPERATORS.HAS_NOT.value,
+          value: "test"
+        },
+        {
+          criteria: "email_filter",
+          operator: OPERATORS.IS.value,
+          value: "jane@acme.com"
+        }
+      ]).email_filter
+    ).toEqual([
+      { operator: "owner_email=@", value: "@acme.com" },
+      { operator: "not_owner_email=@", value: "test" },
+      { operator: "owner_email==", value: "jane@acme.com" }
+    ]);
+    expect(buildRoomBookingFilters([]).email_filter).toEqual([]);
   });
 });

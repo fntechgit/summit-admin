@@ -19,6 +19,7 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import EditIcon from "@mui/icons-material/Edit";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
 import {
   GridFilter,
   useGridFilter
@@ -34,7 +35,6 @@ import {
   ReservationStatusPaid,
   ReservationStatusRequestedRefund
 } from "../../utils/constants";
-import GridToolbar from "../../components/mui/grid-toolbar";
 import RefundBookingPopup from "./components/refund-booking-popup";
 import { buildRoomBookingFilters, getCriterias } from "./helpers";
 

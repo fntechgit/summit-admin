@@ -33,7 +33,7 @@ const DEFAULT_STATE = {
   totalRoomBookings: 0,
   filters: {
     // filters definition
-    email_filter: { operator: null, value: "" }
+    email_filter: []
   }
 };
 

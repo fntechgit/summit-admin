@@ -71,14 +71,10 @@ const parseFilters = (filters, term) => {
     filter.push(`owner_name=@${escapedTerm},room_name=@${escapedTerm}`);
   }
 
-  if (filters?.email_filter) {
-    if (filters.email_filter.operator && filters.email_filter.value)
-      filter.push(
-        `${filters.email_filter.operator}${escapeFilterValue(
-          filters.email_filter.value
-        )}`
-      );
-  }
+  (filters?.email_filter ?? []).forEach(({ operator, value }) => {
+    if (operator && value)
+      filter.push(`${operator}${escapeFilterValue(value)}`);
+  });
 
   return filter;
 };
@@ -138,9 +134,9 @@ export const getRoomBookings =
   async (dispatch, getState) => {
     const { isCurrent, guardedDispatch } = roomBookingsSeq(dispatch);
     const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
     if (!isCurrent()) return Promise.resolve();
     guardedDispatch(startLoading());
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
 
     const filter = parseFilters(filters, term);
