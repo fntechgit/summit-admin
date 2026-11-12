@@ -354,6 +354,7 @@ const EmailTemplateForm = ({
     } else if (!mjmlEdited && htmlCompiledRef.current) {
       formik.setFieldValue("html_content", values.original_html_content, false);
       htmlCompiledRef.current = false;
+      lastCompiledMjmlRef.current = values.mjml_content;
     }
   }, [mjmlCompileResult]);
 

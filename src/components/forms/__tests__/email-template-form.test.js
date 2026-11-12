@@ -517,4 +517,74 @@ describe("EmailTemplateForm mjml validation", () => {
     );
     expect(save()).not.toBeDisabled();
   });
+
+  it.each(["undo/redo of an MJML edit", "re-picking a history version"])(
+    "recompiles the HTML when the MJML returns to the last compiled value (%s)",
+    async (path) => {
+      mjml2html.mockImplementation((src) => ({
+        html: `<p>compiled ${src}</p>`
+      }));
+      const edited = "<mjml><mj-body><mj-text>B</mj-text></mj-body></mjml>";
+      const entity = {
+        ...mjmlEntity,
+        html_content: "<p>stored</p>",
+        original_mjml_content: mjmlEntity.mjml_content,
+        original_html_content: "<p>stored</p>",
+        versions: [
+          {
+            sha: "abc123",
+            type: EMAIL_TEMPLATE_TYPE_MJML,
+            content: edited,
+            commit_date: 1700000000,
+            commit_message: "older",
+            html_url: "https://example.com/abc123"
+          }
+        ]
+      };
+      render(<EmailTemplateForm {...baseProps(entity)} />);
+
+      const typeMjml = async (value) => {
+        await act(async () => {
+          fireEvent.change(screen.getByTestId("editor-mjml_content"), {
+            target: { value }
+          });
+        });
+      };
+      const pickVersion = async (label) => {
+        await act(async () => {
+          fireEvent.mouseDown(
+            screen
+              .getAllByRole("combobox")
+              .find((el) =>
+                /select_version|abc123|current_version/.test(el.textContent)
+              )
+          );
+        });
+        await act(async () => {
+          fireEvent.click(
+            within(screen.getByRole("listbox")).getByText(label, {
+              exact: false
+            })
+          );
+        });
+      };
+
+      if (path === "undo/redo of an MJML edit") {
+        await typeMjml(edited);
+        await typeMjml(mjmlEntity.mjml_content);
+        await typeMjml(edited);
+      } else {
+        await pickVersion("abc123");
+        await pickVersion("emails.current_version");
+        await pickVersion("abc123");
+      }
+      await act(async () => {
+        fireEvent.click(screen.getByText("emails.display_html"));
+      });
+
+      expect(screen.getByTestId("editor-html_content")).toHaveValue(
+        `<p>compiled ${edited}</p>`
+      );
+    }
+  );
 });
