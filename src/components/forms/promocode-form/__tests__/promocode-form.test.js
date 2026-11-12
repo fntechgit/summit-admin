@@ -49,7 +49,11 @@ const ALL_CLASSES = [
   { class_name: "DOMAIN_AUTHORIZED_DISCOUNT_CODE", type: [] }
 ];
 
-const renderForm = (entityOverrides = {}, onSubmit = jest.fn()) => {
+const renderForm = (
+  entityOverrides = {},
+  onSubmit = jest.fn(),
+  resetPromocodeForm = jest.fn()
+) => {
   const entity = { ...DEFAULT_ENTITY, ...entityOverrides };
   render(
     <Formik
@@ -67,6 +71,7 @@ const renderForm = (entityOverrides = {}, onSubmit = jest.fn()) => {
             assignSpeaker={jest.fn()}
             getAssignedSpeakers={jest.fn()}
             unAssignSpeaker={jest.fn()}
+            resetPromocodeForm={resetPromocodeForm}
           />
           <div data-testid="values">{JSON.stringify(values)}</div>
           <button type="submit">submit</button>
@@ -81,7 +86,12 @@ const formValues = () => JSON.parse(screen.getByTestId("values").textContent);
 
 describe("PromocodeForm", () => {
   test("picking another class starts the form over for that class", async () => {
-    renderForm({ class_name: "SUMMIT_DISCOUNT_CODE", code: "OLD" });
+    const resetPromocodeForm = jest.fn();
+    renderForm(
+      { class_name: "SUMMIT_DISCOUNT_CODE", code: "OLD" },
+      jest.fn(),
+      resetPromocodeForm
+    );
 
     await userEvent.click(
       screen.getAllByRole("combobox").find((el) => el.id === "class_name")
@@ -96,6 +106,8 @@ describe("PromocodeForm", () => {
       class_name: "MEMBER_PROMO_CODE",
       code: ""
     });
+    // speaker assignments and their quantity are in redux
+    expect(resetPromocodeForm).toHaveBeenCalledTimes(1);
     // member codes have types and an owner
     expect(screen.getByText("edit_promocode.type *")).toBeInTheDocument();
     expect(
@@ -224,5 +236,41 @@ describe("promo code form values", () => {
       last_name: "Lee"
     });
     expect(saved.speakers).toBe(entity.speakers);
+  });
+
+  test("an untouched date keeps its stored time of day", () => {
+    // 2026-04-01 18:45 UTC, set through the API
+    const storedUntil = 1775069100;
+    const withTime = { ...entity, valid_until_date: storedUntil };
+
+    const saved = toPromocodeEntity(
+      buildPromocodeValues(withTime, SUMMIT),
+      withTime,
+      SUMMIT
+    );
+
+    expect(saved.valid_until_date).toBe(storedUntil);
+    expect(saved.valid_since_date).toBe(entity.valid_since_date);
+  });
+});
+
+describe("promocodeValidationSchema contact_email", () => {
+  it.each(["person@company", "person@company.c", "not an email"])(
+    "rejects %s",
+    async (contactEmail) => {
+      await expect(
+        promocodeValidationSchema.validateAt("contact_email", {
+          contact_email: contactEmail
+        })
+      ).rejects.toThrow("validation.email");
+    }
+  );
+
+  it.each(["", "person@company.com"])("accepts %p", async (contactEmail) => {
+    await expect(
+      promocodeValidationSchema.validateAt("contact_email", {
+        contact_email: contactEmail
+      })
+    ).resolves.toBe(contactEmail);
   });
 });

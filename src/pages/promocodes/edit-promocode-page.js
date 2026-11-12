@@ -173,6 +173,7 @@ const EditPromocodePage = ({
             assignSpeaker={assignSpeaker}
             getAssignedSpeakers={getAssignedSpeakers}
             unAssignSpeaker={unAssignSpeaker}
+            resetPromocodeForm={resetPromocodeForm}
           />
           <Grid2
             size={12}

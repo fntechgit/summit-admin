@@ -35,7 +35,8 @@ import {
 } from "./forms";
 import {
   dateToShowTZEpoch,
-  validateAllowedEmailDomainEntry
+  validateAllowedEmailDomainEntry,
+  validateEmail
 } from "../../../utils/methods";
 import { isDomainAuthorizedClass } from "./forms/domain-authorized/utils";
 import AllowedEmailDomainsRow from "./forms/domain-authorized/AllowedEmailDomainsRow";
@@ -44,6 +45,7 @@ import { formatSpeakerOption } from "./forms/speaker-base-pc-form";
 import CheckboxWithInfo from "./forms/checkbox-with-info";
 import TagsInput from "./forms/tags-input";
 import { DEFAULT_ENTITY } from "../../../reducers/promocodes/promocode-reducer";
+import { MILLISECONDS_IN_SECOND } from "../../../utils/constants";
 import FragmentParser from "../../../utils/fragmen-parser";
 
 const DESCRIPTION_MAX_LENGTH = 255;
@@ -111,6 +113,14 @@ export const buildPromocodeValues = (entity, summit) => ({
   rate: entity.rate ?? ""
 });
 
+// an untouched date goes back as stored, so a time of day set elsewhere isn't cut to 00:00
+const toSavedDate = (value, storedEpoch, timeZone) => {
+  if (!value) return "";
+  if (storedEpoch && value.valueOf() === storedEpoch * MILLISECONDS_IN_SECOND)
+    return storedEpoch;
+  return dateToShowTZEpoch(value, timeZone);
+};
+
 // rebuilds the entity shape normalizeEntity expects in savePromocode
 export const toPromocodeEntity = (values, entity, summit) => {
   const { email, first_name, last_name, ...rest } = values;
@@ -123,17 +133,28 @@ export const toPromocodeEntity = (values, entity, summit) => {
     owner: { email, first_name, last_name },
     speaker: values.speaker?.raw ?? null,
     allowed_ticket_types: values.allowed_ticket_types.map((tt) => tt.value),
-    valid_since_date: values.valid_since_date
-      ? dateToShowTZEpoch(values.valid_since_date, summit.time_zone_id)
-      : "",
-    valid_until_date: values.valid_until_date
-      ? dateToShowTZEpoch(values.valid_until_date, summit.time_zone_id)
-      : ""
+    valid_since_date: toSavedDate(
+      values.valid_since_date,
+      entity.valid_since_date,
+      summit.time_zone_id
+    ),
+    valid_until_date: toSavedDate(
+      values.valid_until_date,
+      entity.valid_until_date,
+      summit.time_zone_id
+    )
   };
 };
 
 export const promocodeValidationSchema = yup.object({
-  contact_email: yup.string().email(T.translate("validation.email")),
+  // validateEmail, as before the migration: yup's email() accepts "person@company"
+  contact_email: yup
+    .string()
+    .test(
+      "contact-email-format",
+      T.translate("validation.email"),
+      (email) => !email || !!validateEmail(email)
+    ),
   allowed_email_domains: yup.array().when("class_name", {
     is: isDomainAuthorizedClass,
     then: (schema) =>
@@ -154,7 +175,8 @@ const PromocodeForm = ({
   onSendEmail,
   assignSpeaker,
   getAssignedSpeakers,
-  unAssignSpeaker
+  unAssignSpeaker,
+  resetPromocodeForm
 }) => {
   const { values, setValues, setTouched } = useFormikContext();
   const isDomainAuthorized = isDomainAuthorizedClass(values.class_name);
@@ -168,6 +190,8 @@ const PromocodeForm = ({
     allClasses.find((c) => c.class_name === values.class_name)?.type ?? [];
 
   const handleClassChange = (ev) => {
+    // speaker assignments and their quantity live in redux, so clear them too
+    resetPromocodeForm();
     setTouched({});
     setValues({
       ...buildPromocodeValues(DEFAULT_ENTITY, currentSummit),

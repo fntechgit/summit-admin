@@ -342,13 +342,14 @@ const promocodeReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case REQUEST_ASSIGNED_SPEAKERS: {
-      const { entity, order, orderDir, page, term } = payload;
+      // only the speakers paging: a request started before a form reset must not put its stale entity back
+      const { order, orderDir, page, term } = payload;
       return {
         ...state,
         entity: {
-          ...entity,
+          ...state.entity,
           speakers: {
-            ...entity.speakers,
+            ...state.entity.speakers,
             order,
             orderDir,
             currentPage: page,
