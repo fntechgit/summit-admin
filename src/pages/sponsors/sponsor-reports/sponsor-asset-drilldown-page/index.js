@@ -160,10 +160,10 @@ const SponsorAssetDrilldownPage = ({
             gap: 1
           }}
         >
-          <Stack direction="row" spacing={2} alignItems="center">
+          <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
             <SponsorAvatar name={sponsor.name} logoUrl={sponsor.logo_url} />
             <Box>
-              <Stack direction="row" spacing={1} alignItems="center">
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                 <Typography variant="h6">{sponsor.name}</Typography>
                 <TierBadge tier={sponsor.tier} onDark />
               </Stack>
@@ -224,10 +224,12 @@ const SponsorAssetDrilldownPage = ({
                   >
                     <Stack
                       direction="row"
-                      justifyContent="space-between"
-                      alignItems="center"
                       spacing={1}
-                      sx={{ mb: 1 }}
+                      sx={{
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mb: 1
+                      }}
                     >
                       <Typography
                         variant="body2"

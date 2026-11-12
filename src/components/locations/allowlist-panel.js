@@ -207,7 +207,7 @@ function AllowlistPanel({
       >
         {bannerText()}
       </Alert>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+      <Typography variant="body2" sx={{ color: "text.secondary", mb: 1 }}>
         {T.translate("dropbox_sync.allowlist_helper")}
       </Typography>
 

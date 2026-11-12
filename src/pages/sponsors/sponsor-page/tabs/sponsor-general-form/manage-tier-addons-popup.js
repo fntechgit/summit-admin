@@ -218,7 +218,7 @@ const ManageTierAddonsPopup = ({
                     {T.translate("edit_sponsor.addon_type")}
                   </InputLabel>
                   {editingRow === index ? (
-                    <Box width="100%">
+                    <Box sx={{ width: "100%" }}>
                       <MuiFormikAddonTypeSelect
                         name={`addons[${index}].type`}
                         placeholder={T.translate(
@@ -289,7 +289,7 @@ const ManageTierAddonsPopup = ({
             ))}
             {!formik.errors.addons &&
               typeof formik.errors.addons === "string" && (
-                <Box mb={2} pl={2}>
+                <Box sx={{ mb: 2, pl: 2 }}>
                   <Typography color="error" sx={{ fontSize: "12px" }}>
                     {formik.errors.addons}
                   </Typography>
@@ -314,7 +314,7 @@ const ManageTierAddonsPopup = ({
                 <InputLabel htmlFor="newAddon.type">
                   {T.translate("edit_sponsor.addon_type")}
                 </InputLabel>
-                <Box width="100%">
+                <Box sx={{ width: "100%" }}>
                   <MuiFormikAddonTypeSelect
                     name="newAddon.type"
                     placeholder={T.translate(
@@ -364,7 +364,7 @@ const ManageTierAddonsPopup = ({
               </Grid>
               {formik.errors.newAddon &&
                 typeof formik.errors.newAddon === "string" && (
-                  <Box mb={2} pl={2}>
+                  <Box sx={{ mb: 2, pl: 2 }}>
                     <Typography color="error" sx={{ fontSize: "12px" }}>
                       {formik.errors.newAddon}
                     </Typography>

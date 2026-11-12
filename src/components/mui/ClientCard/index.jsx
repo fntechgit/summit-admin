@@ -49,9 +49,7 @@ const ClientCard = ({ client, address, onClientSubmit, onAddressSubmit }) => {
               <Box sx={{ position: "relative", pr: 4 }}>
                 <Typography
                   variant="caption"
-                  color="text.secondary"
-                  display="block"
-                  sx={{ mb: 0.5 }}
+                  sx={{ color: "text.secondary", display: "block", mb: 0.5 }}
                 >
                   {T.translate("client_card.client")}
                 </Typography>
@@ -71,9 +69,7 @@ const ClientCard = ({ client, address, onClientSubmit, onAddressSubmit }) => {
               <Box sx={{ position: "relative", pr: 4 }}>
                 <Typography
                   variant="caption"
-                  color="text.secondary"
-                  display="block"
-                  sx={{ mb: 0.5 }}
+                  sx={{ color: "text.secondary", display: "block", mb: 0.5 }}
                 >
                   {T.translate("client_card.address")}
                 </Typography>

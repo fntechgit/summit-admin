@@ -423,7 +423,10 @@ const ItemTable = ({
                       colSpan={ITEM_HEADERS.length + 1}
                       sx={{ bgcolor: "grey.50", py: 1.5 }}
                     >
-                      <Typography variant="overline" color="text.secondary">
+                      <Typography
+                        variant="overline"
+                        sx={{ color: "text.secondary" }}
+                      >
                         {T.translate(
                           "sponsor_reports_page.byitem_contributing_orders"
                         )}

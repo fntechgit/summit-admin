@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 function SummitDashboardStat({ label, value }) {
   return (
     <Box sx={{ p: 2 }}>
-      <Typography variant="body2" color="text.secondary" gutterBottom>
+      <Typography variant="body2" sx={{ color: "text.secondary" }} gutterBottom>
         {label}
       </Typography>
       <Typography variant="body1" sx={{ fontSize: "2rem", lineHeight: "1rem" }}>

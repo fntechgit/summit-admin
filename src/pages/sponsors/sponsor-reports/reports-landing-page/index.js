@@ -56,7 +56,7 @@ const ReportsLandingPage = ({ match }) => (
                 <Typography variant="h6">
                   {T.translate(card.titleKey)}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
                   {T.translate(card.descKey)}
                 </Typography>
               </CardContent>

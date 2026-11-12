@@ -116,7 +116,7 @@ const AddSponsorDialog = ({ onClose, onSubmit, summitId }) => {
                 <InputLabel htmlFor="company">
                   {T.translate("sponsor_list.company")}
                 </InputLabel>
-                <Box width="100%">
+                <Box sx={{ width: "100%" }}>
                   <CompanyInputMUI
                     name="company"
                     formik={formik}

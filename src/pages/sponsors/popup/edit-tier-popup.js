@@ -141,7 +141,7 @@ const EditTierDialog = ({
       disableEscapeKeyDown={isSaving}
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1rem">
+        <Typography sx={{ fontSize: "1rem" }}>
           {`${initialEntity.id ? "Edit" : "Add"} ${T.translate(
             "edit_summit_sponsorship.tier"
           )}`}
@@ -180,7 +180,7 @@ const EditTierDialog = ({
                   <InputLabel htmlFor="type">
                     {T.translate("edit_summit_sponsorship.sponsorship_type")}
                   </InputLabel>
-                  <Box width="100%">
+                  <Box sx={{ width: "100%" }}>
                     <SponsorshipTypeInputMUI
                       name="type"
                       placeholder={T.translate(
@@ -198,7 +198,7 @@ const EditTierDialog = ({
                   <InputLabel htmlFor="widget_title">
                     {T.translate("edit_summit_sponsorship.widget_title")}
                   </InputLabel>
-                  <Box width="100%">
+                  <Box sx={{ width: "100%" }}>
                     <MuiFormikTextField
                       formik={formik}
                       name="widget_title"
@@ -391,9 +391,8 @@ const EditTierDialog = ({
               <Grid
                 container
                 spacing={2}
-                mt={3}
                 size={12}
-                sx={{ alignItems: "baseline" }}
+                sx={{ mt: 3, alignItems: "baseline" }}
               >
                 <Grid
                   container
@@ -441,9 +440,8 @@ const EditTierDialog = ({
               <Grid
                 container
                 spacing={2}
-                mb={1}
                 size={12}
-                sx={{ alignItems: "baseline" }}
+                sx={{ mb: 1, alignItems: "baseline" }}
               >
                 <Grid
                   container
@@ -491,9 +489,8 @@ const EditTierDialog = ({
               <Grid
                 container
                 spacing={2}
-                mb={1}
                 size={12}
-                sx={{ alignItems: "baseline" }}
+                sx={{ mb: 1, alignItems: "baseline" }}
               >
                 <Grid
                   container

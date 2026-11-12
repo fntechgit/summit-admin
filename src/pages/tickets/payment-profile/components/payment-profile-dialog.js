@@ -282,7 +282,7 @@ const PaymentProfileDialog = ({
       <Divider />
       <FormikProvider value={formik}>
         <DialogContent>
-          <Grid container spacing={2} mb={2}>
+          <Grid container spacing={2} sx={{ mb: 2 }}>
             <Grid size={6}>
               <InputLabel htmlFor="application_type">
                 {T.translate("edit_payment_profile.application_type")}
@@ -426,16 +426,18 @@ const PaymentProfileDialog = ({
             formik.values.application_type === "SponsorServices" && (
               <>
                 <Divider />
-                <Box mt={2}>
+                <Box sx={{ mt: 2 }}>
                   <h5>
                     {T.translate("edit_payment_profile.payment_type_fee")}
                   </h5>
                   <Grid
                     size={12}
                     container
-                    mb={2}
-                    justifyContent="space-between"
-                    alignItems="center"
+                    sx={{
+                      mb: 2,
+                      justifyContent: "space-between",
+                      alignItems: "center"
+                    }}
                   >
                     <Grid>
                       {paymentFeeTypes.totalPaymentFeeTypes}{" "}
@@ -458,7 +460,7 @@ const PaymentProfileDialog = ({
                   </Grid>
                   <FormikProvider value={feeTypeFormik}>
                     {showFeeTypeForm && (
-                      <Grid size={12} container spacing={2} mb={2}>
+                      <Grid size={12} container spacing={2} sx={{ mb: 2 }}>
                         <Grid size={4}>
                           <InputLabel htmlFor="name">
                             {T.translate(

@@ -180,11 +180,7 @@ const SentEmailListPage = ({
           container
           size={10}
           spacing={1}
-          gap={1}
-          sx={{
-            justifyContent: "flex-end",
-            alignItems: "center"
-          }}
+          sx={{ gap: 1, justifyContent: "flex-end", alignItems: "center" }}
         >
           <Grid size={6}>
             <SearchInput

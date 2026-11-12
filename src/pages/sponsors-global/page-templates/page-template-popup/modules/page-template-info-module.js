@@ -14,7 +14,7 @@ const InfoModule = ({ baseName, index }) => {
         {T.translate("page_template_list.page_crud.info_content")}
       </InputLabel>
       <Grid size={12}>
-        <Box width="100%">
+        <Box sx={{ width: "100%" }}>
           <FormikTextEditor
             name={name}
             fullWidth

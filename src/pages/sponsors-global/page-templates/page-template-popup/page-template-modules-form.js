@@ -302,8 +302,7 @@ const PageModules = ({
       {modules.length === 0 ? (
         <Typography
           variant="body2"
-          color="#00000061"
-          sx={{ textAlign: "center", py: 2 }}
+          sx={{ color: "#00000061", textAlign: "center", py: 2 }}
         >
           {T.translate("page_template_list.page_crud.no_modules")}
         </Typography>

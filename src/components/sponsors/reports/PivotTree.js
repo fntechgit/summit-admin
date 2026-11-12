@@ -26,8 +26,7 @@ const Leaf = ({ rows }) => (
         key={row.module?.id ?? i}
         direction="row"
         spacing={1}
-        alignItems="center"
-        sx={{ flexWrap: "wrap" }}
+        sx={{ alignItems: "center", flexWrap: "wrap" }}
       >
         <Typography variant="body2" sx={{ minWidth: 160 }}>
           {row.module?.component_name ||
@@ -65,8 +64,7 @@ const PivotTree = ({ nodes, summitId, depth = 0, maxDepth }) => (
             <Stack
               direction="row"
               spacing={1}
-              alignItems="center"
-              sx={{ flexWrap: "wrap", width: "100%" }}
+              sx={{ alignItems: "center", flexWrap: "wrap", width: "100%" }}
             >
               {node.axisId === "sponsor" && (
                 <SponsorAvatar

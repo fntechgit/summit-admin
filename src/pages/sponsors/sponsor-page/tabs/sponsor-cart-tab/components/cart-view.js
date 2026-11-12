@@ -212,7 +212,7 @@ const CartView = ({
         )}
       </GridToolbar>
       {!cart && (
-        <Typography variant="h6" textAlign="center" sx={{ mb: 2, mt: 4 }}>
+        <Typography variant="h6" sx={{ textAlign: "center", mb: 2, mt: 4 }}>
           {T.translate("edit_sponsor.cart_tab.no_cart")}
         </Typography>
       )}

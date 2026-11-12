@@ -117,7 +117,7 @@ const EditBadgeScanPopup = ({ badgeScan, onClose, onSubmit }) => {
   return (
     <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1rem">
+        <Typography sx={{ fontSize: "1rem" }}>
           {T.translate("edit_badge_scan.edit_badge_scan")}
         </Typography>
         <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
@@ -143,7 +143,7 @@ const EditBadgeScanPopup = ({ badgeScan, onClose, onSubmit }) => {
                 <InputLabel htmlFor="attendee_full_name">
                   {T.translate("edit_badge_scan.attendee_name")}
                 </InputLabel>
-                <Box width="100%">
+                <Box sx={{ width: "100%" }}>
                   <MuiFormikTextField
                     name="attendee_full_name"
                     formik={formik}
@@ -162,7 +162,7 @@ const EditBadgeScanPopup = ({ badgeScan, onClose, onSubmit }) => {
                 <InputLabel htmlFor="attendee_company">
                   {T.translate("edit_badge_scan.attendee_company")}
                 </InputLabel>
-                <Box width="100%">
+                <Box sx={{ width: "100%" }}>
                   <MuiFormikTextField
                     name="attendee_company"
                     formik={formik}
@@ -181,7 +181,7 @@ const EditBadgeScanPopup = ({ badgeScan, onClose, onSubmit }) => {
                 <InputLabel htmlFor="notes">
                   {T.translate("edit_badge_scan.notes")}
                 </InputLabel>
-                <Box width="100%">
+                <Box sx={{ width: "100%" }}>
                   <MuiFormikTextField
                     name="notes"
                     formik={formik}

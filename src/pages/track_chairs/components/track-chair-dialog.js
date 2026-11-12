@@ -109,7 +109,7 @@ const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
       disableEscapeKeyDown={isSaving}
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1rem">{title}</Typography>
+        <Typography sx={{ fontSize: "1rem" }}>{title}</Typography>
         <IconButton
           size="small"
           onClick={handleOnClose}

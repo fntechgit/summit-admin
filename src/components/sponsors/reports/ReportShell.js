@@ -30,12 +30,14 @@ const ReportShell = ({
     <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2 }}>
       <Stack
         direction="row"
-        justifyContent="space-between"
-        alignItems="center"
         spacing={2}
-        sx={{ flexWrap: "wrap" }}
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap"
+        }}
       >
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
           {icon && (
             <Box
               sx={{
@@ -56,7 +58,7 @@ const ReportShell = ({
           <Box>
             <Typography variant="h5">{title}</Typography>
             {subtitle && (
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
                 {subtitle}
               </Typography>
             )}

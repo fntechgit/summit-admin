@@ -181,7 +181,7 @@ const AddSponsorFormTemplatePopup = ({
       disableRestoreFocus
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1rem">
+        <Typography sx={{ fontSize: "1rem" }}>
           {T.translate("edit_sponsor.forms_tab.add_form_using_template")}
         </Typography>
         <IconButton

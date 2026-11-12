@@ -231,7 +231,7 @@ const TaxTypeForm = ({
             )}
           </Box>
         )}
-        <Stack direction="row" justifyContent="flex-end">
+        <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
           <Button variant="contained" type="submit" disabled={isSaving}>
             {T.translate("general.save")}
           </Button>

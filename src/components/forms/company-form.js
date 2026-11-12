@@ -282,7 +282,7 @@ const CompanyForm = ({
       </Grid>
 
       {showOpenStackSection && (
-        <Grid container size={12} mt={2} mb={2} alignItems="end">
+        <Grid container size={12} sx={{ mt: 2, mb: 2, alignItems: "end" }}>
           <Grid size={4}>
             <InputLabel htmlFor="sponsored_project">
               {T.translate("edit_company.project_name")}
@@ -355,7 +355,7 @@ const CompanyForm = ({
       )}
       {initialEntity?.project_sponsorships?.length > 0 &&
         window.APP_CLIENT_NAME === "openstack" && (
-          <Grid size={12} mb={2}>
+          <Grid size={12} sx={{ mb: 2 }}>
             <Table
               data={initialEntity.project_sponsorships.map((sp) => ({
                 ...sp,
@@ -367,7 +367,7 @@ const CompanyForm = ({
           </Grid>
         )}
 
-      <Grid container size={12} mt={2} mb={2}>
+      <Grid container size={12} sx={{ mt: 2, mb: 2 }}>
         <Grid size={6}>
           <InputLabel>{T.translate("edit_company.logo")}</InputLabel>
           <UploadInputV3

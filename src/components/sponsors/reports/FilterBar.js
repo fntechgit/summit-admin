@@ -39,7 +39,7 @@ const FilterBar = ({
 
   return (
     <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
+      <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1.5 }}>
         <FilterListIcon fontSize="small" color="action" />
         <Typography variant="subtitle2">
           {T.translate("sponsor_reports_page.report_filters")}
@@ -48,8 +48,7 @@ const FilterBar = ({
       <Stack
         direction="row"
         spacing={2}
-        alignItems="center"
-        sx={{ flexWrap: "wrap", rowGap: 2 }}
+        sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 2 }}
       >
         {showSearch && (
           <Box sx={{ minWidth: 240 }}>

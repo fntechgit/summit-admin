@@ -204,7 +204,7 @@ const AddSponsorPageTemplatePopup = ({
       disableEscapeKeyDown={isSaving}
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1rem">
+        <Typography sx={{ fontSize: "1rem" }}>
           {T.translate("edit_sponsor.pages_tab.add_page_using_template")}
         </Typography>
         <IconButton

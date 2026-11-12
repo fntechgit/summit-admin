@@ -320,7 +320,7 @@ const AddSponsorExtraQuestionPopup = ({
   return (
     <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1rem">
+        <Typography sx={{ fontSize: "1rem" }}>
           {extraQuestion.id
             ? T.translate("edit_sponsor.edit_extra_question")
             : T.translate("edit_sponsor.add_extra_question")}
@@ -353,7 +353,7 @@ const AddSponsorExtraQuestionPopup = ({
                 <InputLabel htmlFor="type">
                   {T.translate("edit_sponsor.question_type")}
                 </InputLabel>
-                <Box width="100%">
+                <Box sx={{ width: "100%" }}>
                   <MuiFormikSelect
                     name="type"
                     formik={formik}
@@ -391,7 +391,7 @@ const AddSponsorExtraQuestionPopup = ({
                 <InputLabel htmlFor="name">
                   {T.translate("edit_sponsor.question_id")}
                 </InputLabel>
-                <Box width="100%">
+                <Box sx={{ width: "100%" }}>
                   <MuiFormikTextField
                     name="name"
                     formik={formik}
@@ -412,7 +412,7 @@ const AddSponsorExtraQuestionPopup = ({
                   <InputLabel htmlFor="max_selected_values">
                     {T.translate("edit_sponsor.max_selected_values")}
                   </InputLabel>
-                  <Box width="100%">
+                  <Box sx={{ width: "100%" }}>
                     <MuiFormikTextField
                       name="max_selected_values"
                       formik={formik}
@@ -435,7 +435,7 @@ const AddSponsorExtraQuestionPopup = ({
                 <InputLabel htmlFor="label">
                   {T.translate("edit_sponsor.visible_question")}
                 </InputLabel>
-                <Box width="100%">
+                <Box sx={{ width: "100%" }}>
                   <FormikTextEditor
                     name="label"
                     formik={formik}
@@ -519,8 +519,7 @@ const AddSponsorExtraQuestionPopup = ({
                         formik.submitCount > 0 && (
                           <Typography
                             color="error"
-                            fontSize="0.75rem"
-                            sx={{ mt: 0.5, ml: 2 }}
+                            sx={{ fontSize: "0.75rem", mt: 0.5, ml: 2 }}
                           >
                             {formik.errors.values}
                           </Typography>
@@ -542,7 +541,7 @@ const AddSponsorExtraQuestionPopup = ({
                   <InputLabel htmlFor="placeholder">
                     {T.translate("edit_sponsor.hint")}
                   </InputLabel>
-                  <Box width="100%">
+                  <Box sx={{ width: "100%" }}>
                     <MuiFormikTextField
                       name="placeholder"
                       formik={formik}
@@ -561,7 +560,7 @@ const AddSponsorExtraQuestionPopup = ({
                 sx={{ alignItems: "baseline" }}
               >
                 {!hideMandatory && (
-                  <Box width="100%">
+                  <Box sx={{ width: "100%" }}>
                     <MuiFormikCheckbox
                       name="mandatory"
                       formik={formik}
@@ -629,7 +628,7 @@ const AddSponsorExtraQuestionPopup = ({
                       </IconButton>
                     </Tooltip>
                   </Grid>
-                  <Box width="100%">
+                  <Box sx={{ width: "100%" }}>
                     <MuiFormikSelect
                       name="allowed_badge_features_types"
                       formik={formik}
