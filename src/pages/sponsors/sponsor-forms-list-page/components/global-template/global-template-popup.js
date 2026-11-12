@@ -44,13 +44,7 @@ const GlobalTemplatePopup = ({ onClose, cloneGlobalTemplate }) => {
   };
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      maxWidth={dialogSize}
-      fullWidth
-      disableEscapeKeyDown={isSaving}
-    >
+    <Dialog open onClose={handleClose} maxWidth={dialogSize} fullWidth>
       {stage === "templates" && (
         <SelectTemplatesDialog
           onSave={handleOnSelectTemplates}

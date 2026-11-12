@@ -157,13 +157,7 @@ const SponsorGlobalImportUsersPopup = ({
   };
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      disableEscapeKeyDown={isSaving}
-    >
+    <Dialog open onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between", p: 2 }}
         component="div"

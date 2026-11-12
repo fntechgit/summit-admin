@@ -159,13 +159,7 @@ const SponsorFormAddItemFromInventoryPopup = ({
   ];
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      maxWidth="lg"
-      fullWidth
-      disableEscapeKeyDown={isSaving}
-    >
+    <Dialog open onClose={handleClose} maxWidth="lg" fullWidth>
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between" }}
         component="div"

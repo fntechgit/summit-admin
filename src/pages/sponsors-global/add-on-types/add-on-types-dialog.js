@@ -70,13 +70,7 @@ const AddOnTypesDialog = ({ entity: initialEntity, onSave, onClose }) => {
       )}`;
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      disableEscapeKeyDown={isSaving}
-    >
+    <Dialog open onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         {title}
         <IconButton

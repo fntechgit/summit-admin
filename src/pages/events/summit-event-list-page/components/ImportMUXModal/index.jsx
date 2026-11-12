@@ -64,13 +64,7 @@ const ImportMUXModal = ({ show, onClose, onImport }) => {
   };
 
   return (
-    <Dialog
-      open={show}
-      onClose={handleClose}
-      disableEscapeKeyDown={isSaving}
-      maxWidth="md"
-      fullWidth
-    >
+    <Dialog open={show} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle
         component="div"
         sx={{ display: "flex", justifyContent: "space-between" }}

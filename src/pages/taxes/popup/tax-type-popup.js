@@ -38,13 +38,7 @@ const TaxTypePopup = ({
   };
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      disableEscapeKeyDown={isSaving}
-      maxWidth="md"
-      fullWidth
-    >
+    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         {title} {T.translate("edit_tax_type.tax_type")}
         <IconButton size="small" onClick={handleClose} disabled={isSaving}>

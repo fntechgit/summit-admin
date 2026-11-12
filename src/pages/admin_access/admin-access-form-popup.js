@@ -28,13 +28,7 @@ const AdminAccessFormPopup = ({ entity, errors, onClose, onSave }) => {
   };
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      disableEscapeKeyDown={isSaving}
-      maxWidth="md"
-      fullWidth
-    >
+    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "flex-end", pb: 0 }}>
         <IconButton onClick={handleClose} disabled={isSaving} size="small">
           <CloseIcon />

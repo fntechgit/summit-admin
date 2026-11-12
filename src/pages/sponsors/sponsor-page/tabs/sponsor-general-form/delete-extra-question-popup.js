@@ -141,13 +141,7 @@ const DeleteExtraQuestionPopup = ({
   };
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      disableEscapeKeyDown={submitting}
-      maxWidth="sm"
-      fullWidth
-    >
+    <Dialog open onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>
         {T.translate(
           isValue

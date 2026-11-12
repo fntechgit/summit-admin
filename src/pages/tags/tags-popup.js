@@ -45,13 +45,7 @@ const TagsDialog = ({ onClose, onSave, initialData }) => {
   };
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      disableEscapeKeyDown={isSaving}
-      maxWidth="xs"
-      fullWidth
-    >
+    <Dialog open onClose={handleClose} maxWidth="xs" fullWidth>
       <DialogTitle>
         {initialData?.id
           ? `${T.translate("general.edit")} ${T.translate("edit_tag.tag")}`

@@ -101,13 +101,7 @@ const TrackChairDialog = ({ entity, tracks, onSave, onClose }) => {
   const tracks_ddl = tracks.map((t) => ({ label: t.name, value: t.id }));
 
   return (
-    <Dialog
-      open
-      onClose={handleOnClose}
-      maxWidth="sm"
-      fullWidth
-      disableEscapeKeyDown={isSaving}
-    >
+    <Dialog open onClose={handleOnClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography sx={{ fontSize: "1rem" }}>{title}</Typography>
         <IconButton

@@ -265,7 +265,6 @@ const PaymentProfileDialog = ({
       disableEnforceFocus
       disableAutoFocus
       disableRestoreFocus
-      disableEscapeKeyDown={isSaving}
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         {title}

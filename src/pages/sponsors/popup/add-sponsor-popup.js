@@ -79,13 +79,7 @@ const AddSponsorDialog = ({ onClose, onSubmit, summitId }) => {
   }, [formik.errors]);
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      maxWidth="xs"
-      fullWidth
-      disableEscapeKeyDown={isSaving}
-    >
+    <Dialog open onClose={handleClose} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         {T.translate("sponsor_list.add_sponsor")}
         <IconButton

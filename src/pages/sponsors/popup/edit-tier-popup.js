@@ -133,13 +133,7 @@ const EditTierDialog = ({
   ];
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      maxWidth="md"
-      fullWidth
-      disableEscapeKeyDown={isSaving}
-    >
+    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography sx={{ fontSize: "1rem" }}>
           {`${initialEntity.id ? "Edit" : "Add"} ${T.translate(

@@ -46,13 +46,7 @@ const ImportModal = ({ show, onClose, onImport }) => {
   };
 
   return (
-    <Dialog
-      open={show}
-      onClose={handleClose}
-      disableEscapeKeyDown={isSaving}
-      maxWidth="sm"
-      fullWidth
-    >
+    <Dialog open={show} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle
         component="div"
         sx={{ display: "flex", justifyContent: "space-between" }}

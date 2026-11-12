@@ -102,7 +102,6 @@ const FormTemplateDialog = ({
       disableEnforceFocus
       disableAutoFocus
       disableRestoreFocus
-      disableEscapeKeyDown={isSaving}
       sx={{ zIndex: 1000 }}
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>

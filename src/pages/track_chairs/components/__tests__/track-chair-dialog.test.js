@@ -222,7 +222,7 @@ describe("TrackChairDialog", () => {
       await selectTrack();
       await clickSave();
 
-      // disableEscapeKeyDown={true} while isSaving — onClose must not fire
+      // Escape calls onClose, which ignores it while isSaving
       await act(async () => {
         await userEvent.keyboard("{Escape}");
       });

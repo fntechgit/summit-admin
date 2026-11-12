@@ -211,13 +211,7 @@ const EventTypeDialog = ({
   )} ${T.translate("edit_event_type.event_type")}`;
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      maxWidth="md"
-      fullWidth
-      disableEscapeKeyDown={isSaving}
-    >
+    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         {title}
         <IconButton
