@@ -57,10 +57,17 @@ jest.mock(
 
 jest.mock(
   "openstack-uicore-foundation/lib/components/mui/formik-inputs/select",
-  () =>
-    function MockSelect({ name, children }) {
-      return <div data-testid={`select-${name}`}>{children}</div>;
-    }
+  () => {
+    // MUI v9 MenuItems throw outside a Menu/MenuList
+    const { MenuList } = jest.requireActual("@mui/material");
+    return function MockSelect({ name, children }) {
+      return (
+        <div data-testid={`select-${name}`}>
+          <MenuList>{children}</MenuList>
+        </div>
+      );
+    };
+  }
 );
 
 jest.mock(
