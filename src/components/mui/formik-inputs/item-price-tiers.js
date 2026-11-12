@@ -52,10 +52,12 @@ const ItemPriceTiers = ({ readOnly = false }) => {
                     onChange={(ev) => handleToggle(field, ev.target.checked)}
                     size="small"
                     disabled={readOnly}
-                    inputProps={{
-                      "aria-label": `${T.translate(label)} ${T.translate(
-                        "price_tiers.not_available"
-                      )}`
+                    slotProps={{
+                      input: {
+                        "aria-label": `${T.translate(label)} ${T.translate(
+                          "price_tiers.not_available"
+                        )}`
+                      }
                     }}
                   />
                 }

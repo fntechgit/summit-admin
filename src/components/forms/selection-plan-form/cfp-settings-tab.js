@@ -126,9 +126,9 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
                   selected.map((opt) => opt.value)
                 )
               }
-              renderTags={(value, getTagProps) =>
+              renderValue={(value, getItemProps) =>
                 value.map((option, index) => {
-                  const { key, ...tagProps } = getTagProps({ index });
+                  const { key, ...tagProps } = getItemProps({ index });
                   // eslint-disable-next-line react/jsx-props-no-spreading
                   return (
                     <Chip
@@ -168,9 +168,9 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
                   selected.map((opt) => opt.value)
                 )
               }
-              renderTags={(value, getTagProps) =>
+              renderValue={(value, getItemProps) =>
                 value.map((option, index) => {
-                  const { key, ...tagProps } = getTagProps({ index });
+                  const { key, ...tagProps } = getItemProps({ index });
                   // eslint-disable-next-line react/jsx-props-no-spreading
                   return (
                     <Chip

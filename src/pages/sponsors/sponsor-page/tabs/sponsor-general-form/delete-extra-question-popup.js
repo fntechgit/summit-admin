@@ -221,8 +221,10 @@ const DeleteExtraQuestionPopup = ({
                     <Checkbox
                       checked={checks[key]}
                       onChange={handleCheck(key)}
-                      inputProps={{
-                        "data-testid": `delete-check-${key}`
+                      slotProps={{
+                        input: {
+                          "data-testid": `delete-check-${key}`
+                        }
                       }}
                     />
                   }
@@ -249,7 +251,7 @@ const DeleteExtraQuestionPopup = ({
                   ? T.translate("edit_sponsor.delete_question_reason_required")
                   : ""
               }
-              inputProps={{ "data-testid": "delete-reason" }}
+              slotProps={{ htmlInput: { "data-testid": "delete-reason" } }}
               required
             />
 
@@ -268,8 +270,10 @@ const DeleteExtraQuestionPopup = ({
                       color="error"
                       checked={deleteAnswers}
                       onChange={(ev) => setDeleteAnswers(ev.target.checked)}
-                      inputProps={{
-                        "data-testid": "delete-delete-answers"
+                      slotProps={{
+                        input: {
+                          "data-testid": "delete-delete-answers"
+                        }
                       }}
                     />
                   }

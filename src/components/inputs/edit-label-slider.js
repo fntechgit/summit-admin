@@ -41,7 +41,7 @@ const EditLabelSlider = ({ name, disabled = false }) => {
         checked={!!enabledField.value}
         onChange={enabledField.onChange}
         disabled={disabled}
-        inputProps={{ "aria-label": labelField.value }}
+        slotProps={{ input: { "aria-label": labelField.value } }}
       />
       <Typography>{labelField.value}</Typography>
       {!editing && !disabled && (
@@ -62,8 +62,10 @@ const EditLabelSlider = ({ name, disabled = false }) => {
                 handleSave();
               }
             }}
-            inputProps={{
-              "aria-label": T.translate("edit_schedule_settings.edit_name")
+            slotProps={{
+              htmlInput: {
+                "aria-label": T.translate("edit_schedule_settings.edit_name")
+              }
             }}
           />
           <Button size="small" onClick={handleSave}>

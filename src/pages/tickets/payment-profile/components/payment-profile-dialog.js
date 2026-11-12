@@ -36,7 +36,7 @@ const InfoTooltip = ({ title }) => (
   <Tooltip
     title={title}
     placement="top"
-    componentsProps={{ tooltip: { sx: { fontSize: "0.625rem" } } }}
+    slotProps={{ tooltip: { sx: { fontSize: "0.625rem" } } }}
   >
     <InfoIcon fontSize="small" sx={{ ml: 0.5, verticalAlign: "middle" }} />
   </Tooltip>

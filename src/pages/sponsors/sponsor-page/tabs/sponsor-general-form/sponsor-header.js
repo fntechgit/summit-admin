@@ -111,7 +111,9 @@ const SponsorHeader = ({ sponsor, onSave }) => {
             checked={isPublished}
             disabled={isSaving}
             onChange={() => setIsPublished(!isPublished)}
-            inputProps={{ "aria-labelledby": "sponsor-is-published-label" }}
+            slotProps={{
+              input: { "aria-labelledby": "sponsor-is-published-label" }
+            }}
           />
           <Button
             variant="contained"

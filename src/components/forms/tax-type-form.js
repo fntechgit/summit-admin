@@ -158,7 +158,7 @@ const TaxTypeForm = ({
               name="rate"
               label={T.translate("edit_tax_type.rate")}
               type="number"
-              inputProps={{ step: "0.001" }}
+              slotProps={{ htmlInput: { step: "0.001" } }}
               fullWidth
             />
           </Grid>
@@ -192,12 +192,13 @@ const TaxTypeForm = ({
                     size="small"
                     placeholder={T.translate("edit_tax_type.ticket_types")}
                     slotProps={{
+                      ...params.slotProps,
                       input: {
-                        ...params.InputProps,
+                        ...params.slotProps.input,
                         endAdornment: (
                           <>
                             {loadingTickets && <CircularProgress size={20} />}
-                            {params.InputProps?.endAdornment}
+                            {params.slotProps.input?.endAdornment}
                           </>
                         )
                       }
