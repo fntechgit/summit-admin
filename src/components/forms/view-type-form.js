@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { useFormik, FormikProvider } from "formik";
 import * as yup from "yup";
@@ -25,22 +25,42 @@ import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/f
 import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
 import FormikTextEditor from "openstack-uicore-foundation/lib/components/mui/formik-inputs/texteditor";
 import useScrollToError from "../../hooks/useScrollToError";
-import { requiredStringValidation } from "../../utils/yup";
+import {
+  requiredHTMLValidation,
+  requiredStringValidation
+} from "../../utils/yup";
 
-const validationSchema = yup.object({
-  name: requiredStringValidation()
-});
+const NAME_MAX_LENGTH = 50;
+
+const buildValidationSchema = (entity) =>
+  yup.object({
+    name: requiredStringValidation()
+      .matches(/^\S+$/, T.translate("validation.single_word"))
+      .max(
+        NAME_MAX_LENGTH,
+        T.translate("validation.max_length", { max: NAME_MAX_LENGTH })
+      ),
+    description: entity.id ? yup.string() : requiredHTMLValidation()
+  });
 
 const ViewTypeForm = ({ entity, errors, onSubmit }) => {
+  const [isSaving, setIsSaving] = useState(false);
+
   const formik = useFormik({
     initialValues: {
       name: entity.name || "",
       description: entity.description || "",
       is_default: !!entity.is_default
     },
-    validationSchema,
+    validationSchema: buildValidationSchema(!entity.id),
     enableReinitialize: true,
-    onSubmit: (values) => onSubmit({ ...entity, ...values })
+    onSubmit: (values) => {
+      if (isSaving) return;
+      setIsSaving(true);
+      Promise.resolve(onSubmit({ ...entity, ...values })).finally(() =>
+        setIsSaving(false)
+      );
+    }
   });
 
   useScrollToError(formik);
@@ -88,11 +108,7 @@ const ViewTypeForm = ({ entity, errors, onSubmit }) => {
         </Grid2>
 
         <Stack direction="row" justifyContent="flex-end">
-          <Button
-            variant="contained"
-            type="submit"
-            disabled={formik.isSubmitting}
-          >
+          <Button variant="contained" type="submit" disabled={isSaving}>
             {T.translate("general.save")}
           </Button>
         </Stack>

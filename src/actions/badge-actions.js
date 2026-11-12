@@ -529,6 +529,7 @@ export const resetViewTypeForm = () => (dispatch) => {
 
 export const saveViewType = (entity) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
+  dispatch(startLoading());
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
 
@@ -536,12 +537,10 @@ export const saveViewType = (entity) => async (dispatch, getState) => {
     access_token: accessToken
   };
 
-  dispatch(startLoading());
-
   const normalizedEntity = normalizeViewType(entity);
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_VIEW_TYPE),
       createAction(VIEW_TYPE_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types/${entity.id}`,
@@ -558,28 +557,28 @@ export const saveViewType = (entity) => async (dispatch, getState) => {
       })
       .catch(() => {})
       .finally(() => dispatch(stopLoading()));
-  } else {
-    postRequest(
-      createAction(UPDATE_VIEW_TYPE),
-      createAction(VIEW_TYPE_ADDED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types`,
-      normalizedEntity,
-      snackbarErrorHandler,
-      entity
-    )(params)(dispatch)
-      .then((payload) => {
-        dispatch(
-          snackbarSuccessHandler({
-            html: T.translate("edit_view_type.view_type_created")
-          })
-        );
-        history.push(
-          `/app/summits/${currentSummit.id}/view-types/${payload.response.id}`
-        );
-      })
-      .catch(() => {})
-      .finally(() => dispatch(stopLoading()));
   }
+
+  return postRequest(
+    createAction(UPDATE_VIEW_TYPE),
+    createAction(VIEW_TYPE_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types`,
+    normalizedEntity,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch)
+    .then((payload) => {
+      dispatch(
+        snackbarSuccessHandler({
+          html: T.translate("edit_view_type.view_type_created")
+        })
+      );
+      history.push(
+        `/app/summits/${currentSummit.id}/view-types/${payload.response.id}`
+      );
+    })
+    .catch(() => {})
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const deleteViewType = (viewTypeId) => async (dispatch, getState) => {

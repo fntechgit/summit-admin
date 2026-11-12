@@ -13,7 +13,11 @@ jest.mock(
   "openstack-uicore-foundation/lib/components/mui/formik-inputs/texteditor",
   () => ({
     __esModule: true,
-    default: () => null
+    default: ({ name }) => {
+      // eslint-disable-next-line global-require
+      const { useFormikContext } = require("formik");
+      return useFormikContext().errors[name] ?? null;
+    }
   })
 );
 
@@ -25,8 +29,8 @@ jest.mock("../../../hooks/useScrollToError", () => ({
 const ENTITY = { id: 3, name: "Card", description: "", is_default: null };
 
 describe("ViewTypeForm", () => {
-  it("shows server errors and submits the edited entity", async () => {
-    const onSubmit = jest.fn();
+  it("shows server errors and submits the edited entity once while saving", async () => {
+    const onSubmit = jest.fn(() => new Promise(() => {}));
     render(
       <ViewTypeForm
         entity={ENTITY}
@@ -39,7 +43,7 @@ describe("ViewTypeForm", () => {
 
     await userEvent.type(
       screen.getByRole("textbox", { name: /edit_view_type.name/ }),
-      " Print"
+      "Print"
     );
     await userEvent.click(screen.getByRole("checkbox"));
     await userEvent.click(screen.getByRole("button", { name: "general.save" }));
@@ -47,21 +51,32 @@ describe("ViewTypeForm", () => {
     await waitFor(() =>
       expect(onSubmit).toHaveBeenCalledWith({
         ...ENTITY,
-        name: "Card Print",
+        name: "CardPrint",
         is_default: true
       })
     );
+    expect(screen.getByRole("button", { name: "general.save" })).toBeDisabled();
+    expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
-  it("blocks submit when name is empty", async () => {
+  it("blocks submit on values the API rejects", async () => {
     const onSubmit = jest.fn();
-    render(
-      <ViewTypeForm entity={{ ...ENTITY, name: "" }} onSubmit={onSubmit} />
+    const { rerender } = render(
+      <ViewTypeForm
+        entity={{ ...ENTITY, name: "Card Print" }}
+        onSubmit={onSubmit}
+      />
     );
 
     await userEvent.click(screen.getByRole("button", { name: "general.save" }));
+    expect(
+      await screen.findByText("validation.single_word")
+    ).toBeInTheDocument();
 
+    rerender(<ViewTypeForm entity={{ name: "Card" }} onSubmit={onSubmit} />);
+    await userEvent.click(screen.getByRole("button", { name: "general.save" }));
     expect(await screen.findByText("validation.required")).toBeInTheDocument();
+
     expect(onSubmit).not.toHaveBeenCalled();
   });
 });
