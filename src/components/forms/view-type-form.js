@@ -52,7 +52,7 @@ const ViewTypeForm = ({ entity, errors, onSubmit }) => {
       description: entity.description || "",
       is_default: !!entity.is_default
     },
-    validationSchema: buildValidationSchema(!entity.id),
+    validationSchema: buildValidationSchema(entity),
     enableReinitialize: true,
     onSubmit: (values) => {
       if (isSaving) return;
