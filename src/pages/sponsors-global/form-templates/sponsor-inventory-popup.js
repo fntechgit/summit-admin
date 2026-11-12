@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import PropTypes from "prop-types";
 import { FormikProvider, useFormik } from "formik";
@@ -48,8 +48,6 @@ const SponsorItemDialog = ({
   requireDefaultQuantity = false
 }) => {
   const [isSaving, setIsSaving] = useState(false);
-  // React 18 batches the isSaving update, so a fast double-click would both see false; the ref flips synchronously
-  const savingRef = useRef(false);
 
   const formik = useFormik({
     initialValues: {
@@ -76,16 +74,12 @@ const SponsorItemDialog = ({
       meta_fields: formMetafieldsValidation()
     }),
     onSubmit: (values) => {
-      if (savingRef.current) return;
-      savingRef.current = true;
+      if (isSaving) return;
       setIsSaving(true);
       onSave(values)
         .then(() => onClose())
         .catch(() => {})
-        .finally(() => {
-          savingRef.current = false;
-          setIsSaving(false);
-        });
+        .finally(() => setIsSaving(false));
     }
   });
 
