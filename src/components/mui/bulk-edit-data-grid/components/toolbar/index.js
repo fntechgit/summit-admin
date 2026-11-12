@@ -23,6 +23,7 @@ import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-i
 import { GridFilter } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import MenuButton from "../../../menu-button";
 import ColumnsButton from "../columns-button";
+import AppliedFilters from "../applied-filters";
 import { FILTER_ICON_SX, ICON_ONLY_BUTTON_SX } from "../../constants";
 
 const SEARCH_WIDTH = 330;
@@ -34,7 +35,6 @@ const Toolbar = ({
   importItems,
   importLabel,
   filterProps,
-  appliedFilters,
   onExport,
   searchProps,
   editEnabled,
@@ -126,7 +126,9 @@ const Toolbar = ({
         </Box>
       )}
     </Box>
-    {appliedFilters && <Box sx={{ width: "100%" }}>{appliedFilters}</Box>}
+    {filterProps && (
+      <AppliedFilters id={filterProps.id} criterias={filterProps.criterias} />
+    )}
   </GridToolbarContainer>
 );
 
@@ -147,7 +149,6 @@ Toolbar.propTypes = {
       })
     ).isRequired
   }),
-  appliedFilters: PropTypes.node,
   onExport: PropTypes.func,
   searchProps: PropTypes.shape({
     placeholder: PropTypes.string,
@@ -169,7 +170,6 @@ Toolbar.defaultProps = {
   importItems: [],
   importLabel: "",
   filterProps: null,
-  appliedFilters: null,
   onExport: null,
   searchProps: null
 };
