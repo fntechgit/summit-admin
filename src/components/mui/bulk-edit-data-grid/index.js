@@ -99,7 +99,6 @@ const BulkEditDataGrid = ({
   importItems,
   importLabel,
   filterProps,
-  appliedFilters,
   onExport,
   searchProps,
   noRowsLabel
@@ -361,7 +360,6 @@ const BulkEditDataGrid = ({
               importItems,
               importLabel,
               filterProps,
-              appliedFilters,
               onExport,
               searchProps,
               editEnabled,
@@ -442,8 +440,6 @@ BulkEditDataGrid.propTypes = {
       })
     ).isRequired
   }),
-  // own row under the toolbar, e.g. chips for the applied filters
-  appliedFilters: PropTypes.node,
   onExport: PropTypes.func,
   // same shape as GridToolbar's searchProps
   searchProps: PropTypes.shape({
@@ -474,7 +470,6 @@ BulkEditDataGrid.defaultProps = {
   importItems: [],
   importLabel: "",
   filterProps: null,
-  appliedFilters: null,
   onExport: null,
   searchProps: null,
   noRowsLabel: null
