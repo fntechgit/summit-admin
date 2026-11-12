@@ -134,9 +134,9 @@ export const getRoomBookings =
   async (dispatch, getState) => {
     const { isCurrent, guardedDispatch } = roomBookingsSeq(dispatch);
     const { currentSummitState } = getState();
-    if (!isCurrent()) return Promise.resolve();
     guardedDispatch(startLoading());
     const accessToken = await getAccessTokenSafely();
+    if (!isCurrent()) return Promise.resolve();
     const { currentSummit } = currentSummitState;
 
     const filter = parseFilters(filters, term);
