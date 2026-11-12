@@ -205,10 +205,11 @@ describe("SponsorPagesTab", () => {
         }
       );
 
-      const editButton = screen.getByTestId("EditIcon").closest("button");
-      await act(async () => {
-        await userEvent.click(editButton);
-      });
+      // open the row actions menu first: React 18 renders it only after the click settles
+      await userEvent.click(screen.getByTestId("row-actions-menu-trigger"));
+      await userEvent.click(
+        await screen.findByRole("menuitem", { name: "general.edit" })
+      );
 
       expect(getSponsorCustomizedPage).toHaveBeenCalledWith(1);
       await waitFor(() => {
@@ -355,10 +356,11 @@ describe("SponsorPagesTab", () => {
         }
       );
 
-      const editButton = screen.getByTestId("EditIcon").closest("button");
-      await act(async () => {
-        await userEvent.click(editButton);
-      });
+      // open the row actions menu first: React 18 renders it only after the click settles
+      await userEvent.click(screen.getByTestId("row-actions-menu-trigger"));
+      await userEvent.click(
+        await screen.findByRole("menuitem", { name: "general.edit" })
+      );
 
       await waitFor(() => {
         expect(screen.getByTestId("page-template-popup")).toBeInTheDocument();
