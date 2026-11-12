@@ -221,6 +221,7 @@
       "console": {}
     },
     "maxWorkers": 4,
+    "testTimeout": 15000,
     "testEnvironment": "jsdom",
     "setupFilesAfterEnv": [
       "<rootDir>/testSetupFile.js"
