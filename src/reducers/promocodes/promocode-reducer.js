@@ -17,7 +17,6 @@ import {
   RECEIVE_PROMOCODE,
   RECEIVE_PROMOCODE_META,
   RESET_PROMOCODE_FORM,
-  UPDATE_PROMOCODE,
   PROMOCODE_UPDATED,
   PROMOCODE_ADDED,
   EMAIL_SENT,
@@ -127,9 +126,6 @@ const promocodeReducer = (state = DEFAULT_STATE, action) => {
       const unique_types = [...new Set(types)];
 
       return { ...state, allTypes: unique_types, allClasses };
-    }
-    case UPDATE_PROMOCODE: {
-      return { ...state, entity: { ...payload }, errors: {} };
     }
     case PROMOCODE_ADDED:
     case RECEIVE_PROMOCODE: {

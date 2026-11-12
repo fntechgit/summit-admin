@@ -3,12 +3,15 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { Provider } from "react-redux";
+import { useFormikContext } from "formik";
 import { applyMiddleware, combineReducers, createStore } from "redux";
 import thunk from "redux-thunk";
 import {
   getRequest,
   postRequest,
-  putRequest
+  putRequest,
+  START_LOADING,
+  STOP_LOADING
 } from "openstack-uicore-foundation/lib/utils/actions";
 import EditPromocodePage from "../edit-promocode-page";
 import promocodeReducer from "../../../reducers/promocodes/promocode-reducer";
@@ -70,7 +73,13 @@ const buildStore = () =>
           }
         }
       ) => state,
-      currentPromocodeState: promocodeReducer
+      currentPromocodeState: promocodeReducer,
+      // the global overlay flag, as base-reducer keeps it
+      loading: (state = 0, { type }) => {
+        if (type === START_LOADING) return 1;
+        if (type === STOP_LOADING) return 0;
+        return state;
+      }
     }),
     applyMiddleware(thunk)
   );
@@ -109,7 +118,12 @@ describe("EditPromocodePage", () => {
   });
 
   test("a new promo code goes to its edit page after it is created", async () => {
-    const history = renderPage("/app/summits/1/promocodes/new");
+    const store = buildStore();
+    const history = renderPage(
+      "/app/summits/1/promocodes/new",
+      undefined,
+      store
+    );
 
     await userEvent.click(
       await screen.findByRole("button", { name: "general.save" })
@@ -119,6 +133,7 @@ describe("EditPromocodePage", () => {
       expect(history.push).toHaveBeenCalledWith("/app/summits/1/promocodes/12")
     );
     expect(postRequest).toHaveBeenCalled();
+    expect(store.getState().loading).toBe(0);
   });
 
   test("an edited sponsor promo code goes back to the sponsor promo codes list", async () => {
@@ -157,6 +172,36 @@ describe("EditPromocodePage", () => {
     mockPromocodeForm.mock.calls.forEach(([props]) =>
       expect(props.entity.id).toBe(0)
     );
+  });
+
+  test("a failed create does not leave its draft in redux", async () => {
+    // like uicore: dispatch the request action with its payload, then reject
+    postRequest.mockImplementation(
+      (req, _success, _url, _body, _errorHandler, reqPayload) =>
+        () =>
+        (dispatch) => {
+          if (typeof req === "function") dispatch(req(reqPayload));
+          return Promise.reject();
+        }
+    );
+    mockPromocodeForm.mockImplementation(() => {
+      const { setFieldValue } = useFormikContext();
+      React.useEffect(() => {
+        setFieldValue("code", "DRAFT");
+      }, []);
+      return null;
+    });
+    const store = buildStore();
+    renderPage("/app/summits/1/promocodes/new", undefined, store);
+    const save = await screen.findByRole("button", { name: "general.save" });
+
+    await userEvent.click(save);
+
+    await waitFor(() => expect(postRequest).toHaveBeenCalled());
+    await waitFor(() => expect(save).toBeEnabled());
+    // reopening /new seeds the form from redux, so the draft must not be there
+    expect(store.getState().currentPromocodeState.entity.code).toBe("");
+    expect(store.getState().loading).toBe(0);
   });
 
   test("a failed save stays on the page", async () => {

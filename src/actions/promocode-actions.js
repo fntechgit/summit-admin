@@ -39,7 +39,6 @@ export const RECEIVE_PROMOCODES = "RECEIVE_PROMOCODES";
 export const RECEIVE_PROMOCODE = "RECEIVE_PROMOCODE";
 export const RECEIVE_PROMOCODE_META = "RECEIVE_PROMOCODE_META";
 export const RESET_PROMOCODE_FORM = "RESET_PROMOCODE_FORM";
-export const UPDATE_PROMOCODE = "UPDATE_PROMOCODE";
 export const PROMOCODE_UPDATED = "PROMOCODE_UPDATED";
 export const PROMOCODE_ADDED = "PROMOCODE_ADDED";
 export const PROMOCODE_DELETED = "PROMOCODE_DELETED";
@@ -256,39 +255,41 @@ export const savePromocode = (entity) => async (dispatch, getState) => {
 
   if (entity.id) {
     return putRequest(
-      createAction(UPDATE_PROMOCODE),
+      null,
       createAction(PROMOCODE_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/${entity.id}`,
       normalizedEntity,
-      snackbarErrorHandler,
-      entity
-    )(params)(dispatch).then((payload) => {
-      dispatch(
-        snackbarSuccessHandler({
-          title: T.translate("general.success"),
-          html: T.translate("edit_promocode.promocode_saved")
-        })
-      );
-      return payload;
-    });
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then((payload) => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_promocode.promocode_saved")
+          })
+        );
+        return payload;
+      })
+      .finally(() => dispatch(stopLoading()));
   }
 
   return postRequest(
-    createAction(UPDATE_PROMOCODE),
+    null,
     createAction(PROMOCODE_ADDED),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes`,
     normalizedEntity,
-    snackbarErrorHandler,
-    entity
-  )(params)(dispatch).then((payload) => {
-    dispatch(
-      snackbarSuccessHandler({
-        title: T.translate("general.success"),
-        html: T.translate("edit_promocode.promocode_created")
-      })
-    );
-    return payload;
-  });
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then((payload) => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_promocode.promocode_created")
+        })
+      );
+      return payload;
+    })
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const deletePromocode = (promocodeId) => async (dispatch, getState) => {
