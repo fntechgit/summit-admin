@@ -1,37 +1,36 @@
 import React from "react";
 import T from "i18n-react";
-import SpeakerInput from "openstack-uicore-foundation/lib/components/inputs/speaker-input";
+import { Grid2, InputLabel } from "@mui/material";
+import { querySpeakersRaw } from "openstack-uicore-foundation/lib/utils/query-actions";
+import MuiFormikAsyncAutocomplete from "../../../mui/formik-inputs/mui-formik-async-select";
 import EmailRedeemForm from "./email-redeem-form";
 import AutoApplyCheckbox from "./auto-apply-checkbox";
 
-const SpeakerBasePCForm = (props) => (
-  <>
-    <div className="row form-group">
-      <div className="col-md-6">
-        <label> {T.translate("general.speaker")} </label>
-        <SpeakerInput
-          id="speaker"
-          value={props.entity.speaker}
-          onChange={props.handleChange}
-          summitId={props.summit.id}
-          error={props.hasErrors("speaker_id")}
-        />
-      </div>
-    </div>
-    <div className="row form-group">
-      <div className="col-md-12">
-        <AutoApplyCheckbox
-          entity={props.entity}
-          handleChange={props.handleChange}
-        />
-      </div>
-    </div>
+export const formatSpeakerOption = (speaker) => ({
+  value: speaker.id,
+  label: `${speaker.first_name} ${speaker.last_name} (${speaker.email})`,
+  raw: speaker
+});
 
-    <EmailRedeemForm
-      entity={props.entity}
-      handleChange={props.handleChange}
-      handleSendEmail={props.handleSendEmail}
-    />
+const SpeakerBasePCForm = ({ entity, summit, onSendEmail }) => (
+  <>
+    <Grid2 size={6}>
+      <InputLabel htmlFor="speaker">
+        {T.translate("general.speaker")}
+      </InputLabel>
+      <MuiFormikAsyncAutocomplete
+        name="speaker"
+        queryFunction={(input, callback) =>
+          querySpeakersRaw(summit.id, input, callback)
+        }
+        formatOption={formatSpeakerOption}
+      />
+    </Grid2>
+    <Grid2 size={6} />
+    <Grid2 size={12}>
+      <AutoApplyCheckbox />
+    </Grid2>
+    <EmailRedeemForm entity={entity} onSendEmail={onSendEmail} />
   </>
 );
 

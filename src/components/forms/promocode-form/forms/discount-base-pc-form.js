@@ -1,89 +1,100 @@
 import React from "react";
 import T from "i18n-react";
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
+import { useFormikContext } from "formik";
+import { Grid2, InputLabel, Typography } from "@mui/material";
+import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import BasePCForm from "./base-pc-form";
 import { DiscountTicketTable } from "../../../tables/dicount-ticket-table";
 
 const DiscountBasePCForm = (props) => {
-  const currencySymbol =
-    props.summit.default_ticket_type_currency_symbol || "$";
+  const { entity, summit } = props;
+  const { values, setFieldValue } = useFormikContext();
+  const currencySymbol = summit.default_ticket_type_currency_symbol || "$";
+
+  const handleApplyToAllChange = (ev) => {
+    const { checked } = ev.target;
+    setFieldValue("apply_to_all_tix", checked);
+    if (!checked) {
+      setFieldValue("amount", 0);
+      setFieldValue("rate", 0);
+    }
+  };
+
   return (
     <>
       <BasePCForm {...props} />
 
-      <div className="row form-group">
-        <div className="col-md-4">
-          <label>
-            {T.translate("edit_promocode.apply_to_all_tix_discounts")}
-          </label>
-          <div className="form-check abc-checkbox">
-            <input
-              type="checkbox"
-              id="apply_to_all_tix"
-              checked={props.entity.apply_to_all_tix}
-              onChange={props.handleChange}
-              className="form-check-input"
-            />
-            <label className="form-check-label" htmlFor="apply_to_all_tix">
-              {T.translate("edit_promocode.apply_to_all_tix")}
-            </label>
-          </div>
-          <small className="form-text text-muted">
-            {T.translate("edit_promocode.apply_to_all_tix_helper")}
-          </small>
-        </div>
-      </div>
-      {props.entity.apply_to_all_tix && (
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label>
-              {" "}
-              {T.translate("edit_promocode.amount")} ({currencySymbol}) *
-            </label>
-            <Input
-              id="amount"
-              type="number"
-              min="0"
-              value={props.entity.amount}
-              onChange={props.handleChange}
-              className="form-control"
-              disabled={props.entity.rate > 0}
-            />
-          </div>
-          <div className="col-md-2 text-center">
-            <label> {T.translate("edit_promocode.or")} </label>
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("edit_promocode.rate")} (% discount) *</label>
-            <Input
-              id="rate"
-              type="number"
-              min="0"
-              max="100"
-              value={props.entity.rate}
-              onChange={props.handleChange}
-              className="form-control"
-              disabled={props.entity.amount > 0}
-            />
-          </div>
-        </div>
-      )}
-      {!props.entity.apply_to_all_tix && (
+      <Grid2 size={12}>
+        <InputLabel>
+          {T.translate("edit_promocode.apply_to_all_tix_discounts")}
+        </InputLabel>
+        <MuiFormikCheckbox
+          name="apply_to_all_tix"
+          label={T.translate("edit_promocode.apply_to_all_tix")}
+          margin="none"
+          onChange={handleApplyToAllChange}
+        />
+        <Typography variant="body2" color="text.secondary">
+          {T.translate("edit_promocode.apply_to_all_tix_helper")}
+        </Typography>
+      </Grid2>
+      {values.apply_to_all_tix && (
         <>
-          {props.entity.id !== 0 && (
-            <DiscountTicketTable
-              ownerId={props.entity.id}
-              data={props.entity.ticket_types_rules}
-              ticketTypes={props.summit.ticket_types}
+          <Grid2 size={4}>
+            <InputLabel htmlFor="amount">
+              {T.translate("edit_promocode.amount")} ({currencySymbol}) *
+            </InputLabel>
+            <MuiFormikTextField
+              name="amount"
+              type="number"
+              margin="none"
+              fullWidth
+              slotProps={{ htmlInput: { min: 0 } }}
+              disabled={values.rate > 0}
             />
-          )}
-          {props.entity.id === 0 && (
-            <p>
-              Please save the promocode before adding rates to different ticket
-              types
-            </p>
-          )}
+          </Grid2>
+          <Grid2
+            size={2}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}
+          >
+            <Typography fontWeight="bold">
+              {T.translate("edit_promocode.or")}
+            </Typography>
+          </Grid2>
+          <Grid2 size={4}>
+            <InputLabel htmlFor="rate">
+              {T.translate("edit_promocode.rate")} (% discount) *
+            </InputLabel>
+            <MuiFormikTextField
+              name="rate"
+              type="number"
+              margin="none"
+              fullWidth
+              slotProps={{ htmlInput: { min: 0, max: 100 } }}
+              disabled={values.amount > 0}
+            />
+          </Grid2>
         </>
+      )}
+      {!values.apply_to_all_tix && (
+        <Grid2 size={12}>
+          {entity.id !== 0 ? (
+            <DiscountTicketTable
+              ownerId={entity.id}
+              data={entity.ticket_types_rules}
+              ticketTypes={summit.ticket_types}
+            />
+          ) : (
+            <Typography>
+              {T.translate("edit_promocode.save_before_ticket_rates")}
+            </Typography>
+          )}
+        </Grid2>
       )}
     </>
   );
