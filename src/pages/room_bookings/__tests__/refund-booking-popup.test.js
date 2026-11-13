@@ -14,6 +14,7 @@ const booking = {
   room_id: 7,
   owner_name: "John Doe",
   room_name: "Room 128",
+  amount: 100,
   amount_str: "$100",
   currency: "USD"
 };
@@ -43,12 +44,13 @@ describe("RefundBookingPopup", () => {
     });
     const close = screen.getByRole("button", { name: "close" });
 
-    await user.clear(amountInput);
-    await user.type(amountInput, "-5");
     await user.click(submit);
-    expect(
-      await screen.findByText("validation.non_negative")
-    ).toBeInTheDocument();
+    expect(await screen.findByText("validation.positive")).toBeInTheDocument();
+
+    await user.clear(amountInput);
+    await user.type(amountInput, "101");
+    await user.click(submit);
+    expect(await screen.findByText("validation.maximum")).toBeInTheDocument();
     expect(onSave).not.toHaveBeenCalled();
 
     await user.clear(amountInput);

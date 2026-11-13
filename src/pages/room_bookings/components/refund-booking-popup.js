@@ -41,7 +41,11 @@ const RefundBookingPopup = ({ booking, onClose, onSave }) => {
         .typeError(T.translate("validation.number"))
         .required(T.translate("validation.required"))
         .integer(T.translate("validation.integer"))
-        .min(0, T.translate("validation.non_negative"))
+        .positive(T.translate("validation.positive"))
+        .max(
+          booking.amount,
+          T.translate("validation.maximum", { maximum: booking.amount })
+        )
     }),
     onSubmit: ({ amount }) => {
       if (isSaving) return;
@@ -100,7 +104,7 @@ const RefundBookingPopup = ({ booking, onClose, onSave }) => {
               type="number"
               fullWidth
               required
-              slotProps={{ htmlInput: { min: 0 } }}
+              slotProps={{ htmlInput: { min: 1, max: booking.amount } }}
             />
           </DialogContent>
           <Divider />
@@ -121,6 +125,7 @@ RefundBookingPopup.propTypes = {
     room_id: PropTypes.number,
     owner_name: PropTypes.string,
     room_name: PropTypes.string,
+    amount: PropTypes.number.isRequired,
     amount_str: PropTypes.string,
     currency: PropTypes.string
   }).isRequired,

@@ -4,6 +4,7 @@ import flushPromises from "flush-promises";
 import {
   getRequest,
   deleteRequest,
+  START_LOADING,
   STOP_LOADING
 } from "openstack-uicore-foundation/lib/utils/actions";
 import * as methods from "../../utils/methods";
@@ -54,6 +55,8 @@ describe("room-booking-actions", () => {
 
     const store = mockStore(MOCK_STATE);
     const stalePromise = store.dispatch(getRoomBookings("john"));
+    // loader starts before the token await
+    expect(store.getActions().map((a) => a.type)).toEqual([START_LOADING]);
     await flushPromises();
     await store.dispatch(getRoomBookings("jane"));
     releaseStale();
@@ -74,14 +77,21 @@ describe("room-booking-actions", () => {
 
     const store = mockStore(MOCK_STATE);
 
-    await expect(store.dispatch(refundRoomBooking(7, 101, 25))).rejects.toThrow(
-      "request failed"
-    );
-    await expect(store.dispatch(cancelRoomBooking(7, 101))).rejects.toThrow(
-      "request failed"
-    );
-    expect(
-      store.getActions().filter((a) => a.type === STOP_LOADING)
-    ).toHaveLength(2);
+    const refund = expect(
+      store.dispatch(refundRoomBooking(7, 101, 25))
+    ).rejects.toThrow("request failed");
+    expect(store.getActions().map((a) => a.type)).toEqual([START_LOADING]);
+    await refund;
+
+    store.clearActions();
+    const cancel = expect(
+      store.dispatch(cancelRoomBooking(7, 101))
+    ).rejects.toThrow("request failed");
+    expect(store.getActions().map((a) => a.type)).toEqual([START_LOADING]);
+    await cancel;
+    expect(store.getActions().map((a) => a.type)).toEqual([
+      START_LOADING,
+      STOP_LOADING
+    ]);
   });
 });
