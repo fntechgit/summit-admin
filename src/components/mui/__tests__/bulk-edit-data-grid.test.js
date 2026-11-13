@@ -280,10 +280,7 @@ describe("BulkEditDataGrid", () => {
     const roomAChip = screen.getByRole("button", { name: /Room A/ });
     await userEvent.click(within(roomAChip).getByTestId("CancelIcon"));
 
-    expect(mockGridFilterState.setFilters).toHaveBeenCalledWith(
-      [{ ...roomB, id: "location_id-1" }],
-      "ANY"
-    );
+    expect(mockGridFilterState.setFilters).toHaveBeenCalledWith([roomB], "ANY");
   });
 
   test("adds from the add button and lists every import option under the import icon", async () => {
