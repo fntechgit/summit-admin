@@ -29,6 +29,8 @@ import {
 } from "openstack-uicore-foundation/lib/security/methods";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
+import { SelectBase } from "react-select";
+import LibSelectBase from "react-select/lib/Select";
 // eslint-disable-next-line
 import * as Sentry from "@sentry/react";
 import exclusiveSections from "./exclusive-sections.yml";
@@ -44,7 +46,8 @@ import DefaultRoute from "./routes/default-route";
 import { getTimezones } from "./actions/base-actions";
 import {
   ALLOWED_INVENTORY_IMAGE_FORMATS,
-  LANGUAGE_CODE_LENGTH
+  LANGUAGE_CODE_LENGTH,
+  REACT_SELECT_MENU_Z_INDEX
 } from "./utils/constants";
 import { SentryFallbackFunction } from "./components/SentryErrorComponent";
 
@@ -113,6 +116,18 @@ window.FILE_UPLOAD_ALLOWED_EXTENSIONS =
 if (exclusiveSections.hasOwnProperty(process.env.APP_CLIENT_NAME)) {
   window.EXCLUSIVE_SECTIONS = exclusiveSections[process.env.APP_CLIENT_NAME];
 }
+
+// absolute at 0,0 so react-select's document-based coordinates still line up; one z-index for every menu
+const selectMenuPortal = document.createElement("div");
+Object.assign(selectMenuPortal.style, {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  zIndex: REACT_SELECT_MENU_Z_INDEX
+});
+document.body.appendChild(selectMenuPortal);
+SelectBase.defaultProps.menuPortalTarget = selectMenuPortal;
+LibSelectBase.defaultProps.menuPortalTarget = selectMenuPortal;
 
 if (window.SENTRY_DSN && window.SENTRY_DSN !== "") {
   console.log("app init sentry ...");
