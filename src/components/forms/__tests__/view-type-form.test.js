@@ -77,6 +77,17 @@ describe("ViewTypeForm", () => {
     await userEvent.click(screen.getByRole("button", { name: "general.save" }));
     expect(await screen.findByText("validation.required")).toBeInTheDocument();
 
+    rerender(
+      <ViewTypeForm
+        entity={{ ...ENTITY, description: `<p>${"a".repeat(250)}</p>` }}
+        onSubmit={onSubmit}
+      />
+    );
+    await userEvent.click(screen.getByRole("button", { name: "general.save" }));
+    expect(
+      await screen.findByText("validation.max_length")
+    ).toBeInTheDocument();
+
     expect(onSubmit).not.toHaveBeenCalled();
   });
 });

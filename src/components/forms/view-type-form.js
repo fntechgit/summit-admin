@@ -31,6 +31,7 @@ import {
 } from "../../utils/yup";
 
 const NAME_MAX_LENGTH = 50;
+const DESCRIPTION_MAX_LENGTH = 255;
 
 const buildValidationSchema = (entity) =>
   yup.object({
@@ -40,7 +41,10 @@ const buildValidationSchema = (entity) =>
         NAME_MAX_LENGTH,
         T.translate("validation.max_length", { max: NAME_MAX_LENGTH })
       ),
-    description: entity.id ? yup.string() : requiredHTMLValidation()
+    description: (entity.id ? yup.string() : requiredHTMLValidation()).max(
+      DESCRIPTION_MAX_LENGTH,
+      T.translate("validation.max_length", { max: DESCRIPTION_MAX_LENGTH })
+    )
   });
 
 const ViewTypeForm = ({ entity, errors, onSubmit }) => {
