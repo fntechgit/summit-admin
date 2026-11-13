@@ -2115,14 +2115,17 @@
     "registration_companies": "Registration Companies",
     "registration_companies_list": "Registration Companies List",
     "no_registration_companies": "No companies found for current search criteria.",
-    "remove_warning": "Are you sure you want to delete company",
+    "remove_warning": "Are you sure you want to delete company {name}",
     "registration_company_saved": "Company saved successfully.",
     "name": "Name",
     "import": "Import",
     "import_companies": "Import Companies Data",
     "ingest": "Ingest Data",
+    "import_format": "Format must be as described using column name and a description of the column content values:",
+    "import_format_name": "company names",
     "placeholders": {
-      "search_companies": "Search by Company Name"
+      "search_companies": "Search by Company Name",
+      "select_company": "Select a company to add"
     }
   },
   "edit_push_notification": {
