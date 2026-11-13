@@ -1,3 +1,4 @@
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
 import emailTemplateReducer from "../email-template-reducer";
 import {
   REQUEST_TEMPLATE_RENDER,
@@ -144,6 +145,11 @@ const buildTemplateASessionState = () => {
     type: VALIDATE_RENDER,
     payload: { errors: ["A render error"], requestId: 4 }
   });
+  // a failed save left field errors behind
+  state = emailTemplateReducer(state, {
+    type: VALIDATE,
+    payload: { errors: ["identifier: taken"] }
+  });
   return emailTemplateReducer(state, {
     type: REQUEST_TEMPLATE_RENDER,
     payload: { requestId: 5 }
@@ -155,6 +161,7 @@ const expectRenderStateCleared = (state) => {
   expect(state.render_errors).toEqual([]);
   expect(state.templateLoading).toBe(false);
   expect(state.latestRenderId).toBe(0);
+  expect(state.errors).toEqual({});
 };
 
 describe("render sequencing state reset on entity change", () => {
@@ -258,5 +265,34 @@ describe("render sequencing state reset on entity change", () => {
       payload: { response: { html_content: "A_LATE_PREVIEW" }, requestId: 5 }
     });
     expect(afterStaleResponse.preview).not.toBe("A_LATE_PREVIEW");
+  });
+});
+
+describe("validation errors", () => {
+  it("maps mailing-api's 'field: message' list onto field keys", () => {
+    // the API only prefixes a message with its field when the message
+    // doesn't already name it -- an unprefixed one stays snackbar-only
+    const state = emailTemplateReducer(undefined, {
+      type: VALIDATE,
+      payload: {
+        errors: [
+          "from_email: Enter a valid email address",
+          "subject: This field may not be blank",
+          "mail template with this identifier already exists"
+        ]
+      }
+    });
+    expect(state.errors).toEqual({
+      from_email: "Enter a valid email address",
+      subject: "This field may not be blank"
+    });
+
+    // an already keyed object passes through untouched
+    expect(
+      emailTemplateReducer(undefined, {
+        type: VALIDATE,
+        payload: { errors: { subject: "required" } }
+      }).errors
+    ).toEqual({ subject: "required" });
   });
 });
