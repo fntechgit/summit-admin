@@ -15,28 +15,50 @@ jest.mock("openstack-uicore-foundation/lib/utils/query-actions", () => ({
   })
 }));
 
+function mockUploadInput({
+  id,
+  onUploadComplete,
+  onUploadStart,
+  onRemove,
+  value
+}) {
+  return (
+    <div
+      data-testid={`upload-input-${id}`}
+      data-logo={value?.[0]?.file_url ?? ""}
+    >
+      <button
+        type="button"
+        data-testid={`trigger-upload-${id}`}
+        onClick={() => {
+          onUploadStart?.();
+          onUploadComplete({ path: "/uploads/", name: `${id}.png` });
+        }}
+      >
+        Upload
+      </button>
+      <button
+        type="button"
+        data-testid={`cancel-upload-${id}`}
+        onClick={() => {
+          onUploadStart?.();
+          onRemove?.();
+        }}
+      >
+        Cancel
+      </button>
+    </div>
+  );
+}
+
 jest.mock(
   "openstack-uicore-foundation/lib/components/inputs/upload-input-v3",
-  () => ({
-    __esModule: true,
-    default: ({ id, onUploadComplete, onUploadStart, value }) => (
-      <div
-        data-testid={`upload-input-${id}`}
-        data-logo={value?.[0]?.file_url ?? ""}
-      >
-        <button
-          type="button"
-          data-testid={`trigger-upload-${id}`}
-          onClick={() => {
-            onUploadStart?.();
-            onUploadComplete({ path: "/uploads/", name: `${id}.png` });
-          }}
-        >
-          Upload
-        </button>
-      </div>
-    )
-  })
+  () => ({ __esModule: true, default: mockUploadInput })
+);
+
+jest.mock(
+  "openstack-uicore-foundation/lib/components/inputs/upload-input-v4",
+  () => ({ __esModule: true, default: mockUploadInput })
 );
 
 jest.mock(
@@ -160,6 +182,7 @@ const Harness = ({
         onDeleteSponsorship={onDeleteSponsorship}
       />
       <pre data-testid="debug-values">{JSON.stringify(formik.values)}</pre>
+      <pre data-testid="debug-saving">{String(isSaving)}</pre>
     </FormikProvider>
   );
 };
@@ -250,6 +273,25 @@ describe("CompanyForm", () => {
       });
 
       expect(onAttach).not.toHaveBeenCalled();
+    });
+
+    it("clears the saving state when a new company cancels an in-flight V4 upload", async () => {
+      const user = userEvent.setup();
+      const onRemove = jest.fn(() => Promise.resolve());
+      window.FILE_UPLOAD_USE_V4 = "true";
+
+      try {
+        render(<Harness initialEntity={BASE_ENTITY} onRemove={onRemove} />);
+
+        await act(async () => {
+          await user.click(screen.getByTestId("cancel-upload-logo"));
+        });
+
+        expect(screen.getByTestId("debug-saving")).toHaveTextContent("false");
+        expect(onRemove).not.toHaveBeenCalled();
+      } finally {
+        delete window.FILE_UPLOAD_USE_V4;
+      }
     });
 
     it("reverts the logo preview when onAttach fails for an existing company", async () => {
