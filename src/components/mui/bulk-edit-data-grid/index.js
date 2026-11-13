@@ -98,7 +98,7 @@ const BulkEditDataGrid = ({
   addLabel,
   importItems,
   importLabel,
-  filter,
+  filterProps,
   onExport,
   searchProps,
   noRowsLabel
@@ -359,7 +359,7 @@ const BulkEditDataGrid = ({
               addLabel,
               importItems,
               importLabel,
-              filter,
+              filterProps,
               onExport,
               searchProps,
               editEnabled,
@@ -430,8 +430,16 @@ BulkEditDataGrid.propTypes = {
   ),
   // tooltip / aria-label of the import icon
   importLabel: PropTypes.string,
-  // rendered in the grid toolbar, e.g. a uicore <GridFilter />
-  filter: PropTypes.node,
+  // id and criterias of the uicore GridFilter the toolbar renders
+  filterProps: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    criterias: PropTypes.arrayOf(
+      PropTypes.shape({
+        key: PropTypes.string.isRequired,
+        label: PropTypes.string.isRequired
+      })
+    ).isRequired
+  }),
   onExport: PropTypes.func,
   // same shape as GridToolbar's searchProps
   searchProps: PropTypes.shape({
@@ -461,7 +469,7 @@ BulkEditDataGrid.defaultProps = {
   addLabel: "",
   importItems: [],
   importLabel: "",
-  filter: null,
+  filterProps: null,
   onExport: null,
   searchProps: null,
   noRowsLabel: null

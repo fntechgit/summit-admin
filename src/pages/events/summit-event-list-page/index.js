@@ -15,10 +15,7 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
-import {
-  GridFilter,
-  useGridFilter
-} from "openstack-uicore-foundation/lib/components/mui/grid-filter";
+import { useGridFilter } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import BulkEditDataGrid from "../../../components/mui/bulk-edit-data-grid";
 import {
   bulkUpdateEvents,
@@ -301,6 +298,7 @@ const SummitEventListPage = ({
   if (!currentSummit.id) return <div />;
 
   const tableData = events.map((e) => formatEventData(e, currentSummit));
+  const criterias = getCriterias(currentSummit, mediaUploadTypes);
 
   return (
     <div className="container table-container summit-event-list-filters">
@@ -316,12 +314,7 @@ const SummitEventListPage = ({
           columns={tableColumns}
           columnVisibilityModel={columnVisibilityModel}
           onColumnVisibilityModelChange={handleColumnVisibilityModelChange}
-          filter={
-            <GridFilter
-              id={FILTER_ID}
-              criterias={getCriterias(currentSummit, mediaUploadTypes)}
-            />
-          }
+          filterProps={{ id: FILTER_ID, criterias }}
           views={
             <SavedViews
               summitId={currentSummit.id}

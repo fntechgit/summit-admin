@@ -14,14 +14,19 @@
 import React from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Divider, Tooltip } from "@mui/material";
+import { Box, Button, Tooltip } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import { GridToolbarContainer } from "@mui/x-data-grid";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import { GridFilter } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import MenuButton from "../../../menu-button";
 import ColumnsButton from "../columns-button";
-import ExpandableQuickFilter from "../expandable-quick-filter";
-import { ICON_ONLY_BUTTON_SX } from "../../constants";
+import AppliedFilters from "../applied-filters";
+import { FILTER_ICON_SX, ICON_ONLY_BUTTON_SX } from "../../constants";
+
+const SEARCH_WIDTH = 330;
 
 const Toolbar = ({
   views,
@@ -29,7 +34,7 @@ const Toolbar = ({
   addLabel,
   importItems,
   importLabel,
-  filter,
+  filterProps,
   onExport,
   searchProps,
   editEnabled,
@@ -40,7 +45,7 @@ const Toolbar = ({
   setColumnsButtonEl
 }) => (
   <GridToolbarContainer
-    sx={{ p: 1, gap: 1, borderBottom: 1, borderColor: "divider" }}
+    sx={{ p: 1, gap: 1, rowGap: 2, borderBottom: 1, borderColor: "divider" }}
   >
     {editEnabled ? (
       <>
@@ -54,7 +59,7 @@ const Toolbar = ({
     ) : (
       <Button
         size="small"
-        variant="contained"
+        variant="outlined"
         onClick={onEditSelected}
         disabled={selectedCount === 0}
       >
@@ -64,11 +69,6 @@ const Toolbar = ({
     )}
     {views}
     <Box sx={{ flex: 1 }} />
-    {onAdd && (
-      <Button size="small" onClick={onAdd}>
-        {addLabel}
-      </Button>
-    )}
     {importItems.length > 0 && (
       <MenuButton
         buttonId="bulk-edit-data-grid-import-button"
@@ -85,34 +85,49 @@ const Toolbar = ({
         sx={ICON_ONLY_BUTTON_SX}
       />
     )}
-    {(onAdd || importItems.length > 0) && (
-      <Divider orientation="vertical" flexItem />
-    )}
-    <ColumnsButton buttonRef={setColumnsButtonEl} />
-    {filter}
     {onExport && (
-      <>
-        <Divider orientation="vertical" flexItem />
-        <Tooltip title={T.translate("general.export")}>
-          <Button
-            size="small"
-            startIcon={<FileDownloadIcon />}
-            onClick={onExport}
-            aria-label={T.translate("general.export")}
-            sx={ICON_ONLY_BUTTON_SX}
-          />
-        </Tooltip>
-      </>
-    )}
-    {searchProps && (
-      <>
-        <Divider orientation="vertical" flexItem />
-        <ExpandableQuickFilter
-          placeholder={searchProps.placeholder}
-          term={searchProps.term}
-          onSearch={searchProps.onSearch}
+      <Tooltip title={T.translate("general.export")}>
+        <Button
+          size="small"
+          startIcon={<FileDownloadIcon />}
+          onClick={onExport}
+          aria-label={T.translate("general.export")}
+          sx={ICON_ONLY_BUTTON_SX}
         />
-      </>
+      </Tooltip>
+    )}
+    {onAdd && (
+      <Button
+        size="small"
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={onAdd}
+      >
+        {addLabel}
+      </Button>
+    )}
+    <Box sx={{ width: "100%", display: "flex", alignItems: "center", gap: 1 }}>
+      <ColumnsButton buttonRef={setColumnsButtonEl} />
+      {filterProps && (
+        <GridFilter
+          id={filterProps.id}
+          criterias={filterProps.criterias}
+          iconSx={FILTER_ICON_SX}
+        />
+      )}
+      <Box sx={{ flex: 1 }} />
+      {searchProps && (
+        <Box sx={{ width: SEARCH_WIDTH }}>
+          <SearchInput
+            term={searchProps.term}
+            placeholder={searchProps.placeholder}
+            onSearch={searchProps.onSearch}
+          />
+        </Box>
+      )}
+    </Box>
+    {filterProps && (
+      <AppliedFilters id={filterProps.id} criterias={filterProps.criterias} />
     )}
   </GridToolbarContainer>
 );
@@ -125,7 +140,15 @@ Toolbar.propTypes = {
     PropTypes.shape({ label: PropTypes.string, onClick: PropTypes.func })
   ),
   importLabel: PropTypes.string,
-  filter: PropTypes.node,
+  filterProps: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    criterias: PropTypes.arrayOf(
+      PropTypes.shape({
+        key: PropTypes.string.isRequired,
+        label: PropTypes.string.isRequired
+      })
+    ).isRequired
+  }),
   onExport: PropTypes.func,
   searchProps: PropTypes.shape({
     placeholder: PropTypes.string,
@@ -146,7 +169,7 @@ Toolbar.defaultProps = {
   addLabel: "",
   importItems: [],
   importLabel: "",
-  filter: null,
+  filterProps: null,
   onExport: null,
   searchProps: null
 };

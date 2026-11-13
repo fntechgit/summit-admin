@@ -94,6 +94,7 @@ export const DEFAULT_ORDER_DIR = 1;
 
 export const DATE_FORMAT = "MM/DD/YYYY";
 export const DATETIME_FORMAT = "MM/DD/YYYY hh:mm a";
+export const LONG_DATETIME_FORMAT = "MMMM Do YYYY, h:mm a";
 
 export const INT_BASE = 10;
 export const FIFTY_NINE = 59;

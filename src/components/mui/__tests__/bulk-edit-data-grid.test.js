@@ -12,6 +12,21 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 
 jest.mock("../showConfirmDialog", () => jest.fn());
 
+// tests seed the applied filters before rendering
+const mockGridFilterState = {
+  valuesWithIds: [],
+  setFilters: jest.fn(),
+  joinOperator: undefined
+};
+
+jest.mock("openstack-uicore-foundation/lib/components/mui/grid-filter", () => ({
+  ...jest.requireActual(
+    "openstack-uicore-foundation/lib/components/mui/grid-filter"
+  ),
+  GridFilter: () => null,
+  useGridFilter: () => mockGridFilterState
+}));
+
 const columns = [
   { columnKey: "id", label: "Id", sortable: true },
   { columnKey: "title", label: "Title", sortable: true, editableField: true }
@@ -228,10 +243,7 @@ describe("BulkEditDataGrid", () => {
     const onSearch = jest.fn();
     renderGrid({ searchProps: { term: "", onSearch } });
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "general.search" })
-    );
-    // opening the search focuses its input
+    await userEvent.click(screen.getByRole("textbox"));
     await userEvent.keyboard("keynote");
     expect(onSearch).not.toHaveBeenCalled();
 
@@ -239,30 +251,36 @@ describe("BulkEditDataGrid", () => {
     expect(onSearch).toHaveBeenCalledWith("keynote");
   });
 
-  test("keeps the search box open while a search term is applied, even when cleared", async () => {
-    renderGrid({ searchProps: { term: "keynote", onSearch: jest.fn() } });
+  test("removing a filter chip keeps the other filters and the join operator", async () => {
+    const roomA = { criteria: "location_id", operator: "==", value: [2] };
+    const roomB = { criteria: "location_id", operator: "==", value: [7] };
+    mockGridFilterState.valuesWithIds = [
+      { ...roomA, id: "location_id-0" },
+      { ...roomB, id: "location_id-1" }
+    ];
+    mockGridFilterState.joinOperator = "ANY";
+    const criterias = [
+      {
+        key: "location_id",
+        label: "Location",
+        operators: [{ value: "==", label: "is" }],
+        values: {
+          type: "select",
+          props: {
+            options: [
+              { value: 2, label: "Room A" },
+              { value: 7, label: "Room B" }
+            ]
+          }
+        }
+      }
+    ];
+    renderGrid({ filterProps: { id: "grid_filter", criterias } });
 
-    const searchbox = screen.getByRole("textbox");
-    expect(searchbox).toHaveValue("keynote");
+    const roomAChip = screen.getByRole("button", { name: /Room A/ });
+    await userEvent.click(within(roomAChip).getByTestId("CancelIcon"));
 
-    await userEvent.clear(searchbox);
-    await userEvent.tab();
-
-    expect(screen.getByRole("textbox")).toBeInTheDocument();
-  });
-
-  test("collapses the search box when left empty with no term applied", async () => {
-    renderGrid({ searchProps: { term: "", onSearch: jest.fn() } });
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "general.search" })
-    );
-    await userEvent.tab();
-
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "general.search" })
-    ).toBeInTheDocument();
+    expect(mockGridFilterState.setFilters).toHaveBeenCalledWith([roomB], "ANY");
   });
 
   test("adds from the add button and lists every import option under the import icon", async () => {
