@@ -41,7 +41,10 @@ import {
   getUnpaidCharges,
   exportUnpaidChargesCsv,
   REQUEST_UNPAID_CHARGES,
-  RECEIVE_UNPAID_CHARGES
+  RECEIVE_UNPAID_CHARGES,
+  getPurchaseDetailsSkipped,
+  RECEIVE_PURCHASE_DETAILS_SKIPPED,
+  PURCHASE_DETAILS_SKIPPED_READ_ERROR
 } from "../sponsor-reports-actions";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
@@ -1586,6 +1589,127 @@ describe("sponsor-reports-actions", () => {
         .filter((a) => a.type === RECEIVE_UNPAID_CHARGES);
       expect(receives).toHaveLength(1);
       expect(receives[0].payload.response.data).toEqual([{ id: 7 }]);
+    });
+  });
+
+  describe("getPurchaseDetailsSkipped", () => {
+    beforeEach(() => {
+      window.SPONSOR_REPORTS_API_URL = "https://reports.example.com";
+    });
+    afterEach(() => {
+      delete window.SPONSOR_REPORTS_API_URL;
+    });
+
+    const skippedPage = (page, lastPage, ids, summary = null) => ({
+      response: {
+        data: ids.map((id) => ({ purchase_id: id })),
+        current_page: page,
+        last_page: lastPage,
+        ...(summary ? { summary } : {})
+      }
+    });
+
+    it("requests the skipped endpoint with paging params only and commits both pages in one RECEIVE", async () => {
+      const calls = [];
+      getRequest.mockImplementation((req, receive, url) => (params) => () => {
+        calls.push({ url, params });
+        return Promise.resolve(
+          skippedPage(
+            params.page,
+            2,
+            [params.page * 10],
+            params.page === 1
+              ? { pending_count: 2, oldest_first_seen_at: 1700000000 }
+              : { pending_count: 99, oldest_first_seen_at: 1 }
+          )
+        );
+      });
+      const store = mockStore(MOCK_STATE);
+      await store.dispatch(getPurchaseDetailsSkipped());
+      expect(calls.map((c) => c.params.page).sort()).toEqual([1, 2]);
+      expect(calls[0].url).toBe(
+        "https://reports.example.com/api/v1/summits/42/reports/purchase-details/skipped"
+      );
+      expect(calls[0].params).toEqual({
+        access_token: "TOKEN",
+        page: 1,
+        per_page: 100
+      });
+      const receives = store
+        .getActions()
+        .filter((a) => a.type === RECEIVE_PURCHASE_DETAILS_SKIPPED);
+      expect(receives).toHaveLength(1);
+      expect(receives[0].payload).toEqual({
+        data: [{ purchase_id: 10 }, { purchase_id: 20 }],
+        pendingCount: 2,
+        oldest: 1700000000
+      });
+    });
+
+    it("never touches the global loading overlay", async () => {
+      getRequest.mockImplementation(
+        () => () => () => Promise.resolve(skippedPage(1, 1, []))
+      );
+      const store = mockStore(MOCK_STATE);
+      await store.dispatch(getPurchaseDetailsSkipped());
+      const types = store.getActions().map((a) => a.type);
+      expect(types).not.toContain(START_LOADING);
+      expect(types).not.toContain(STOP_LOADING);
+    });
+
+    it("routes a failed read to the skipped slice's error, not the report's", async () => {
+      getRequest.mockImplementation(
+        (_requestAC, _receiveAC, _url, errorHandler) => () => (dispatch) => {
+          errorHandler({ status: 404 }, {})(dispatch);
+          return Promise.reject(new Error("404"));
+        }
+      );
+      const store = mockStore(MOCK_STATE);
+      await store.dispatch(getPurchaseDetailsSkipped());
+      const types = store.getActions().map((a) => a.type);
+      expect(types).toContain(PURCHASE_DETAILS_SKIPPED_READ_ERROR);
+      expect(types).not.toContain(PURCHASE_DETAILS_READ_ERROR);
+      const err = store
+        .getActions()
+        .find((a) => a.type === PURCHASE_DETAILS_SKIPPED_READ_ERROR);
+      expect(err.payload).toMatchObject({ status: 404, kind: "not-found" });
+    });
+
+    it("drops a superseded load, so only the newest call's RECEIVE lands", async () => {
+      let releaseFirst;
+      getRequest
+        .mockImplementationOnce(
+          () => () => () =>
+            new Promise((resolve) => {
+              releaseFirst = () =>
+                resolve(
+                  skippedPage(1, 1, [99], {
+                    pending_count: 1,
+                    oldest_first_seen_at: 5
+                  })
+                );
+            })
+        )
+        .mockImplementationOnce(
+          () => () => () =>
+            Promise.resolve(
+              skippedPage(1, 1, [7], {
+                pending_count: 1,
+                oldest_first_seen_at: 6
+              })
+            )
+        );
+      const store = mockStore(MOCK_STATE);
+      const stale = store.dispatch(getPurchaseDetailsSkipped());
+      await flushPromises();
+      await store.dispatch(getPurchaseDetailsSkipped());
+      releaseFirst();
+      await stale;
+      const receives = store
+        .getActions()
+        .filter((a) => a.type === RECEIVE_PURCHASE_DETAILS_SKIPPED);
+      expect(receives).toHaveLength(1);
+      expect(receives[0].payload.data).toEqual([{ purchase_id: 7 }]);
     });
   });
 

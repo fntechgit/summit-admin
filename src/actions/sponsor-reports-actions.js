@@ -35,6 +35,13 @@ export const PURCHASE_DETAILS_VALIDATION_ERROR =
 export const PURCHASE_DETAILS_VALIDATION_CLEAR =
   "PURCHASE_DETAILS_VALIDATION_CLEAR";
 
+export const RECEIVE_PURCHASE_DETAILS_SKIPPED_PAGE =
+  "RECEIVE_PURCHASE_DETAILS_SKIPPED_PAGE"; // throwaway per-page action
+export const RECEIVE_PURCHASE_DETAILS_SKIPPED =
+  "RECEIVE_PURCHASE_DETAILS_SKIPPED";
+export const PURCHASE_DETAILS_SKIPPED_READ_ERROR =
+  "PURCHASE_DETAILS_SKIPPED_READ_ERROR";
+
 export const REQUEST_SPONSOR_ASSET = "REQUEST_SPONSOR_ASSET";
 export const RECEIVE_SPONSOR_ASSET_FILTERS = "RECEIVE_SPONSOR_ASSET_FILTERS";
 export const SPONSOR_ASSET_READ_ERROR = "SPONSOR_ASSET_READ_ERROR";
@@ -78,6 +85,7 @@ export const LINES_ORDER_BY_ITEM = "item_code";
 const purchaseDetailsSeq = sequenced();
 const purchaseLinesSeq = sequenced();
 const purchaseFiltersSeq = sequenced();
+const purchaseSkippedSeq = sequenced();
 const sponsorAssetRowsSeq = sequenced();
 const unpaidChargesSeq = sequenced();
 const assetFiltersSeq = sequenced();
@@ -289,6 +297,77 @@ export const getPurchaseDetailsReport =
       .catch(() => {})
       .finally(() => guardedDispatch(stopLoading()));
   };
+
+// Background read for the banner: no startLoading/stopLoading, since the shared
+// overlay is a plain boolean the report fetch also uses.
+export const getPurchaseDetailsSkipped = () => async (dispatch, getState) => {
+  const { currentSummit } = getState().currentSummitState;
+  if (!currentSummit?.id) return Promise.resolve();
+  const { isCurrent, guardedDispatch } = purchaseSkippedSeq(dispatch);
+  try {
+    const accessToken = await getAccessTokenSafely();
+    if (!isCurrent()) return Promise.resolve();
+
+    const params = { access_token: accessToken, per_page: HUNDRED_PER_PAGE };
+    const url = `${base(currentSummit.id)}/purchase-details/skipped`;
+    const fetchPage = (page) =>
+      getRequest(
+        null,
+        createAction(RECEIVE_PURCHASE_DETAILS_SKIPPED_PAGE),
+        url,
+        reportReadErrorHandler({
+          onReadError: createAction(PURCHASE_DETAILS_SKIPPED_READ_ERROR)
+        })
+      )({ ...params, page })(guardedDispatch);
+
+    const { response } = await fetchPage(DEFAULT_CURRENT_PAGE);
+    const lastPage = response.last_page || DEFAULT_CURRENT_PAGE;
+    const limit = pLimit(TEN);
+    const restPages = Array.from(
+      { length: lastPage },
+      (_, i) => i + DEFAULT_CURRENT_PAGE
+    ).slice(DEFAULT_CURRENT_PAGE);
+    // Re-check the seq INSIDE the pool callback so a superseded load's queued
+    // jobs never fire.
+    const rest = await Promise.all(
+      restPages.map((p) =>
+        limit(() =>
+          isCurrent()
+            ? fetchPage(p)
+            : Promise.resolve({ response: { data: [] } })
+        )
+      )
+    );
+    if (
+      !isCurrent() ||
+      getState().currentSummitState.currentSummit?.id !== currentSummit.id
+    ) {
+      return Promise.resolve();
+    }
+    const data = rest.reduce(
+      (acc, r) => acc.concat(r.response.data),
+      response.data
+    );
+    guardedDispatch(
+      createAction(RECEIVE_PURCHASE_DETAILS_SKIPPED)({
+        data,
+        pendingCount: response.summary?.pending_count ?? data.length,
+        oldest: response.summary?.oldest_first_seen_at ?? null
+      })
+    );
+  } catch (e) {
+    // HTTP errors already routed through reportReadErrorHandler; a genuine
+    // non-HTTP Error just leaves the banner empty.
+    if (e instanceof Error) {
+      guardedDispatch(
+        createAction(PURCHASE_DETAILS_SKIPPED_READ_ERROR)({
+          message: e.message
+        })
+      );
+    }
+  }
+  return Promise.resolve();
+};
 
 // Clears the Purchase Details validation toast (dispatched from the Snackbar
 // onClose).

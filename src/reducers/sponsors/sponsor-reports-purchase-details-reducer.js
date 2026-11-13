@@ -20,7 +20,9 @@ import {
   RECEIVE_PURCHASE_DETAILS_FILTERS,
   PURCHASE_DETAILS_READ_ERROR,
   PURCHASE_DETAILS_VALIDATION_ERROR,
-  PURCHASE_DETAILS_VALIDATION_CLEAR
+  PURCHASE_DETAILS_VALIDATION_CLEAR,
+  RECEIVE_PURCHASE_DETAILS_SKIPPED,
+  PURCHASE_DETAILS_SKIPPED_READ_ERROR
 } from "../../actions/sponsor-reports-actions";
 
 export const DEFAULT_STATE = {
@@ -37,7 +39,11 @@ export const DEFAULT_STATE = {
   orderDir: null,
   filters: {},
   readError: null, // replaces the body (read-disabled / not-found / unauthorized / unknown)
-  validationError: null // 412 — inline/toast, body stays
+  validationError: null, // 412 — inline/toast, body stays
+  // Orders the reports API could not sync (banner); independent of the report.
+  skipped: [],
+  skippedCount: 0,
+  skippedOldest: null // epoch
 };
 
 const reducer = (state = DEFAULT_STATE, action) => {
@@ -88,6 +94,23 @@ const reducer = (state = DEFAULT_STATE, action) => {
       return { ...state, validationError: payload };
     case PURCHASE_DETAILS_VALIDATION_CLEAR:
       return { ...state, validationError: null };
+    case RECEIVE_PURCHASE_DETAILS_SKIPPED: {
+      const { data, pendingCount, oldest } = payload;
+      return {
+        ...state,
+        skipped: data,
+        skippedCount: pendingCount,
+        skippedOldest: oldest
+      };
+    }
+    case PURCHASE_DETAILS_SKIPPED_READ_ERROR:
+      // Banner is best-effort: drop it, never touch readError or the report.
+      return {
+        ...state,
+        skipped: [],
+        skippedCount: 0,
+        skippedOldest: null
+      };
     default:
       return state;
   }
