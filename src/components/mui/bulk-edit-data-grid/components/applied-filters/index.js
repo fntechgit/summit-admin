@@ -26,7 +26,9 @@ const AppliedFilters = ({ id, criterias }) => {
 
   const handleRemoveFilter = (filterId) =>
     setFilters(
-      valuesWithIds.filter((f) => f.id !== filterId),
+      valuesWithIds
+        .filter((f) => f.id !== filterId)
+        .map(({ id: _id, ...filter }) => filter),
       joinOperator
     );
 
