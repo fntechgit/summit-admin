@@ -35,7 +35,7 @@ import pLimit from "p-limit";
 import debounce from "lodash/debounce";
 import history from "../history";
 import { saveMarketingSetting } from "./marketing-actions";
-import { getAccessTokenSafely } from "../utils/methods";
+import { getAccessTokenSafely, sequenced } from "../utils/methods";
 import {
   DEBOUNCE_WAIT,
   DEFAULT_CURRENT_PAGE,
@@ -452,6 +452,8 @@ export const clearBadgePrints = (ticketId) => async (dispatch, getState) => {
 
 /** *********************  VIEW TYPES  *********************************************** */
 
+const viewTypesSeq = sequenced();
+
 export const getViewTypes =
   (
     term = null,
@@ -462,11 +464,14 @@ export const getViewTypes =
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
+    const { isCurrent, guardedDispatch } = viewTypesSeq(dispatch);
+    guardedDispatch(startLoading());
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const filter = [];
 
-    dispatch(startLoading());
+    if (!isCurrent()) return Promise.resolve();
+
+    const filter = [];
 
     const params = {
       page,
@@ -491,10 +496,10 @@ export const getViewTypes =
       createAction(RECEIVE_VIEW_TYPES),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types`,
       snackbarErrorHandler,
-      { order, orderDir, term }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+      { order, orderDir, perPage, term }
+    )(params)(guardedDispatch)
+      .catch(() => {})
+      .finally(() => guardedDispatch(stopLoading()));
   };
 
 export const getViewType = (viewTypeId) => async (dispatch, getState) => {
@@ -513,9 +518,11 @@ export const getViewType = (viewTypeId) => async (dispatch, getState) => {
     createAction(RECEIVE_VIEW_TYPE),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types/${viewTypeId}`,
     snackbarErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+  )(params)(dispatch)
+    .catch(() => {})
+    .finally(() => {
+      dispatch(stopLoading());
+    });
 };
 
 export const resetViewTypeForm = () => (dispatch) => {
@@ -576,6 +583,7 @@ export const saveViewType = (entity) => async (dispatch, getState) => {
 
 export const deleteViewType = (viewTypeId) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
+  dispatch(startLoading());
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
 
@@ -589,7 +597,7 @@ export const deleteViewType = (viewTypeId) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types/${viewTypeId}`,
     null,
     snackbarErrorHandler
-  )(params)(dispatch).then(() => {
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
