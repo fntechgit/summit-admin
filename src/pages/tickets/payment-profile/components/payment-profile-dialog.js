@@ -14,14 +14,11 @@ import {
   MenuItem,
   Box,
   InputLabel,
-  TextField,
-  Tooltip,
-  Typography
+  TextField
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
-import InfoIcon from "@mui/icons-material/Info";
-import { useFormik, useFormikContext, FormikProvider } from "formik";
+import { useFormik, FormikProvider } from "formik";
 import * as yup from "yup";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
@@ -32,85 +29,8 @@ import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/m
 import useScrollToError from "../../../../hooks/useScrollToError";
 import { nullableDecimalValidation } from "../../../../utils/yup";
 import { ONE_HUNDRED, TEN_THOUSAND } from "../../../../utils/constants";
-
-const InfoTooltip = ({ title }) => (
-  <Tooltip
-    title={title}
-    placement="top"
-    componentsProps={{ tooltip: { sx: { fontSize: "0.625rem" } } }}
-  >
-    <InfoIcon fontSize="small" sx={{ ml: 0.5, verticalAlign: "middle" }} />
-  </Tooltip>
-);
-
-InfoTooltip.propTypes = {
-  title: PropTypes.string.isRequired
-};
-
-const SecretKeyField = ({ name, label, isSet, required }) => {
-  const { setFieldValue } = useFormikContext();
-  const [isReplacing, setIsReplacing] = useState(false);
-
-  const handleToggleReplace = () => {
-    if (isReplacing) setFieldValue(name, "");
-    setIsReplacing(!isReplacing);
-  };
-
-  return (
-    <>
-      <InputLabel htmlFor={name}>
-        {label}
-        <InfoTooltip
-          title={T.translate("edit_payment_profile.info_stripe_keys")}
-        />
-      </InputLabel>
-      {(!isSet || isReplacing) && (
-        <MuiFormikTextField
-          name={name}
-          type="password"
-          autoComplete="new-password"
-          required={required}
-          fullWidth
-          variant="outlined"
-        />
-      )}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center"
-        }}
-      >
-        <Typography variant="body2" color="text.secondary">
-          {T.translate(
-            isSet
-              ? "edit_payment_profile.secret_key_set"
-              : "edit_payment_profile.secret_key_not_set"
-          )}
-        </Typography>
-        {isSet && (
-          <Button size="small" onClick={handleToggleReplace}>
-            {T.translate(
-              isReplacing ? "general.cancel" : "edit_payment_profile.replace"
-            )}
-          </Button>
-        )}
-      </Box>
-    </>
-  );
-};
-
-SecretKeyField.propTypes = {
-  name: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
-  isSet: PropTypes.bool,
-  required: PropTypes.bool
-};
-
-SecretKeyField.defaultProps = {
-  isSet: false,
-  required: false
-};
+import InfoTooltip from "./info-tooltip";
+import SecretKeyField from "./secret-key-field";
 
 const APPLICATION_TYPE_OPTIONS = [
   { label: "Registration", value: "Registration" },
