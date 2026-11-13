@@ -22,13 +22,13 @@ import {
   DialogContent,
   DialogTitle,
   Button,
-  Box,
   IconButton,
   Divider,
   Grid2
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import { requiredStringValidation } from "../../../utils/yup";
 import useScrollToError from "../../../hooks/useScrollToError";
 
@@ -91,12 +91,7 @@ const AddOnTypesDialog = ({ entity: initialEntity, onSave, onClose }) => {
       </DialogTitle>
       <Divider />
       <FormikProvider value={formik}>
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          autoComplete="off"
-        >
+        <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
           <DialogContent sx={{ p: 0 }}>
             <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
               <Grid2 size={12}>
@@ -123,7 +118,7 @@ const AddOnTypesDialog = ({ entity: initialEntity, onSave, onClose }) => {
               {T.translate("general.save")}
             </Button>
           </DialogActions>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </Dialog>
   );

@@ -20,10 +20,11 @@ import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/f
 import MuiFormikPriceField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/price-field";
 import InfoNote from "openstack-uicore-foundation/lib/components/mui/info-note";
 import CustomAlert from "openstack-uicore-foundation/lib/components/mui/custom-alert";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 
 const RefundForm = ({ onSubmit, disabled = false }) => {
-  // Formik does not block concurrent submits, so repeated Enter presses would
-  // each queue a refund. The ref guards the gap before isSubmitting re-renders.
+  // Formik does not block concurrent submits, so repeated clicks would each
+  // queue a refund. The ref guards the gap before isSubmitting re-renders.
   const submittingRef = useRef(false);
 
   const handleSubmit = (values, formikHelpers) => {
@@ -64,12 +65,7 @@ const RefundForm = ({ onSubmit, disabled = false }) => {
 
   return (
     <FormikProvider value={formik}>
-      <Box
-        component="form"
-        onSubmit={formik.handleSubmit}
-        noValidate
-        autoComplete="off"
-      >
+      <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
         <Grid2 container spacing={2}>
           <Grid2 size={6}>
             <MuiFormikTextField
@@ -103,7 +99,7 @@ const RefundForm = ({ onSubmit, disabled = false }) => {
             </Button>
           </Grid2>
         </Grid2>
-      </Box>
+      </MuiForm>
       <Box sx={{ mt: 2 }}>
         {disabled ? (
           <CustomAlert

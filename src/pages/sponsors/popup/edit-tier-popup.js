@@ -24,6 +24,7 @@ import SponsorshipTypeInputMUI from "openstack-uicore-foundation/lib/components/
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
 import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import useScrollToError from "../../../hooks/useScrollToError";
 
 const EditTierDialog = ({
@@ -157,12 +158,7 @@ const EditTierDialog = ({
       </DialogTitle>
       <Divider />
       <FormikProvider value={formik}>
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          autoComplete="off"
-        >
+        <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
           <DialogContent sx={{ p: 0 }}>
             <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
               <Grid2
@@ -562,7 +558,7 @@ const EditTierDialog = ({
               {T.translate("edit_summit_sponsorship.save")}
             </Button>
           </DialogActions>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </Dialog>
   );

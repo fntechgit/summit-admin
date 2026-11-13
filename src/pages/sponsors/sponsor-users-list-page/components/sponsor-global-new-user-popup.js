@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
@@ -18,6 +17,7 @@ import * as yup from "yup";
 import MuiSponsorInput from "openstack-uicore-foundation/lib/components/mui/formik-inputs/sponsor-input";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import CustomAlert from "openstack-uicore-foundation/lib/components/mui/custom-alert";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 
 const SponsorGlobalNewUserPopup = ({ onClose, summitId, onSave }) => {
   const [isSaving, setIsSaving] = useState(false);
@@ -80,12 +80,7 @@ const SponsorGlobalNewUserPopup = ({ onClose, summitId, onSave }) => {
       </DialogTitle>
       <Divider />
       <FormikProvider value={formik}>
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          autoComplete="off"
-        >
+        <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
           <DialogContent sx={{ p: 2 }}>
             <MuiSponsorInput
               name="sponsor"
@@ -115,7 +110,7 @@ const SponsorGlobalNewUserPopup = ({ onClose, summitId, onSave }) => {
               {T.translate("sponsor_users.new_user.invite")}
             </Button>
           </DialogActions>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </Dialog>
   );

@@ -19,6 +19,7 @@ import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import EmailFlowEventForm from "../../components/forms/email-flow-event-form";
 import { getSummitById } from "../../actions/summit-actions";
 import {
@@ -116,7 +117,7 @@ const EditEmailFlowEventPage = ({
       <hr />
       {currentSummit && (
         <FormikProvider value={formik}>
-          <Box component="form" onSubmit={formik.handleSubmit} noValidate>
+          <MuiForm onSubmit={formik.handleSubmit} noValidate>
             <EmailFlowEventForm entity={entity} />
             <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
               <Button
@@ -127,7 +128,7 @@ const EditEmailFlowEventPage = ({
                 {T.translate("general.save")}
               </Button>
             </Box>
-          </Box>
+          </MuiForm>
         </FormikProvider>
       )}
     </div>
