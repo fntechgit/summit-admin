@@ -638,9 +638,11 @@ export const getBadgeTypes =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types`,
       snackbarErrorHandler,
       { order, orderDir }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .finally(() => {
+        dispatch(stopLoading());
+      })
+      .catch(() => {});
   };
 
 export const getBadgeType = (badgeTypeId) => async (dispatch, getState) => {
@@ -731,6 +733,8 @@ export const deleteBadgeType = (badgeTypeId) => async (dispatch, getState) => {
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
 
+  dispatch(startLoading());
+
   const params = {
     access_token: accessToken
   };
@@ -741,7 +745,7 @@ export const deleteBadgeType = (badgeTypeId) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-types/${badgeTypeId}`,
     null,
     snackbarErrorHandler
-  )(params)(dispatch).then(() => {
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
