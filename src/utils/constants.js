@@ -166,6 +166,8 @@ export const DEFAULT_Z_INDEX = 1;
 
 export const HIGH_Z_INDEX = 9999;
 
+export const REACT_SELECT_MENU_Z_INDEX = 1400;
+
 export const DELTA_SECS = 300;
 
 export const MAX_CENTS = 99;

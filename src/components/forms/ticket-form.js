@@ -278,8 +278,6 @@ class TicketForm extends React.Component {
               optionsLimit={25}
               cacheOptions
               defaultOptions
-              menuPortalTarget={document.body}
-              styles={{ menuPortal: (base) => ({ ...base, zIndex: 1400 }) }}
             />
           </div>
           <div className="col-md-6">
