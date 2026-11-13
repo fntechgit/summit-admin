@@ -24,11 +24,12 @@ import {
   showSuccessMessage,
   getCSV,
   authErrorHandler,
+  snackbarErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import Swal from "sweetalert2";
 import history from "../history";
-import { getAccessTokenSafely } from "../utils/methods";
+import { getAccessTokenSafely, sequenced } from "../utils/methods";
 import { DEFAULT_PER_PAGE, ERROR_CODE_412 } from "../utils/constants";
 
 export const REQUEST_ROOM_BOOKINGS = "REQUEST_ROOM_BOOKINGS";
@@ -61,6 +62,8 @@ export const RECEIVE_ROOM_BOOKING_AVAILABILITY =
 
 const normalizeEntity = (entity) => ({ ...entity });
 
+const roomBookingsSeq = sequenced();
+
 const parseFilters = (filters, term) => {
   const filter = [];
   if (term) {
@@ -68,14 +71,10 @@ const parseFilters = (filters, term) => {
     filter.push(`owner_name=@${escapedTerm},room_name=@${escapedTerm}`);
   }
 
-  if (filters?.email_filter) {
-    if (filters.email_filter.operator && filters.email_filter.value)
-      filter.push(
-        `${filters.email_filter.operator}${escapeFilterValue(
-          filters.email_filter.value
-        )}`
-      );
-  }
+  (filters?.email_filter ?? []).forEach(({ operator, value }) => {
+    if (operator && value)
+      filter.push(`${operator}${escapeFilterValue(value)}`);
+  });
 
   return filter;
 };
@@ -133,11 +132,13 @@ export const getRoomBookings =
     filters = {}
   ) =>
   async (dispatch, getState) => {
+    const { isCurrent, guardedDispatch } = roomBookingsSeq(dispatch);
     const { currentSummitState } = getState();
+    guardedDispatch(startLoading());
     const accessToken = await getAccessTokenSafely();
+    if (!isCurrent()) return Promise.resolve();
     const { currentSummit } = currentSummitState;
 
-    dispatch(startLoading());
     const filter = parseFilters(filters, term);
 
     const params = {
@@ -163,11 +164,11 @@ export const getRoomBookings =
       createAction(REQUEST_ROOM_BOOKINGS),
       createAction(RECEIVE_ROOM_BOOKINGS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/bookable-rooms/all/reservations`,
-      authErrorHandler,
-      { order, orderDir, term, filters }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+      snackbarErrorHandler,
+      { order, orderDir, perPage, term, filters }
+    )(params)(guardedDispatch)
+      .catch(() => {})
+      .finally(() => guardedDispatch(stopLoading()));
   };
 
 export const exportRoomBookings =
@@ -282,6 +283,7 @@ export const saveRoomBooking = (entity) => async (dispatch, getState) => {
 
 export const refundRoomBooking =
   (roomId, roomBookingId, amount) => async (dispatch, getState) => {
+    dispatch(startLoading());
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
@@ -295,10 +297,8 @@ export const refundRoomBooking =
       createAction(ROOM_BOOKING_REFUNDED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/bookable-rooms/${roomId}/reservations/${roomBookingId}/refund`,
       { amount },
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+      snackbarErrorHandler
+    )(params)(dispatch).finally(() => dispatch(stopLoading()));
   };
 
 /**
@@ -308,6 +308,7 @@ export const refundRoomBooking =
  */
 export const cancelRoomBooking =
   (roomId, roomBookingId) => async (dispatch, getState) => {
+    dispatch(startLoading());
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
@@ -321,8 +322,8 @@ export const cancelRoomBooking =
       createAction(ROOM_BOOKING_DELETED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/bookable-rooms/${roomId}/reservations/${roomBookingId}/cancel`,
       {},
-      authErrorHandler
-    )(params)(dispatch).then(() => dispatch(stopLoading()));
+      snackbarErrorHandler
+    )(params)(dispatch).finally(() => dispatch(stopLoading()));
   };
 
 /** ********************  ATTRIBUTE TYPE  **************************************************************** */

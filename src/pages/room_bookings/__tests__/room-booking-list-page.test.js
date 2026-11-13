@@ -1,97 +1,117 @@
 import React from "react";
-import { render } from "@testing-library/react";
-import { Provider } from "react-redux";
-import configureStore from "redux-mock-store";
+import { render, waitFor } from "@testing-library/react";
+import "@testing-library/jest-dom";
+import { createStore, combineReducers, applyMiddleware } from "redux";
 import thunk from "redux-thunk";
+import { Provider } from "react-redux";
+import { getRequest } from "openstack-uicore-foundation/lib/utils/actions";
+import { OPERATORS } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import RoomBookingListPage from "../room-booking-list-page";
+import roomBookingListReducer from "../../../reducers/room_bookings/room-booking-list-reducer";
+import * as methods from "../../../utils/methods";
 
-const middlewares = [thunk];
-const mockStore = configureStore(middlewares);
+const mockFetch = jest.fn(() => Promise.resolve());
+const mockGridFilterState = { parsedFilter: [], filterValues: [] };
 
-jest.mock("openstack-uicore-foundation/lib/components", () => ({
-  Table: ({ children, onSort, ...props }) => (
-    <table data-testid="table" {...props}>
-      {children}
-    </table>
+jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
+  __esModule: true,
+  ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
+  getRequest: jest.fn()
+}));
+
+jest.mock("openstack-uicore-foundation/lib/components/mui/grid-filter", () => ({
+  __esModule: true,
+  ...jest.requireActual(
+    "openstack-uicore-foundation/lib/components/mui/grid-filter"
   ),
-  FreeTextSearch: () => null
+  GridFilter: () => null,
+  useGridFilter: () => mockGridFilterState
 }));
 
-jest.mock("react-bootstrap", () => ({
-  Modal: ({ children }) => <div>{children}</div>,
-  Pagination: ({ children }) => <nav data-testid="pagination">{children}</nav>
-}));
-
-jest.mock("sweetalert2", () => ({
-  fire: jest.fn(() => Promise.resolve({ value: false }))
-}));
-
-jest.mock("react-breadcrumbs", () => ({
-  Breadcrumb: () => null
-}));
-
-jest.mock("../../../components/inputs/email-filter", () => () => null);
-
-jest.mock("react-router-dom", () => ({
-  withRouter: (component) => component
-}));
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/search-input",
+  () => ({
+    __esModule: true,
+    default: () => null
+  })
+);
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
-  translate: (key) => key
+  __esModule: true,
+  default: { translate: (key) => key }
 }));
 
-describe("RoomBookingListPage", () => {
-  const initialState = {
-    currentSummitState: {
-      currentSummit: {
-        id: 1,
-        time_zone_id: "America/Denver"
+const BASE_STATUS_FILTER = "status==Paid||Reserved||RequestedRefund||Refunded";
+
+const buildStore = (listOverrides = {}) =>
+  createStore(
+    combineReducers({
+      currentSummitState: (
+        state = { currentSummit: { id: 1, time_zone_id: "UTC" } }
+      ) => state,
+      currentRoomBookingListState: roomBookingListReducer
+    }),
+    {
+      currentRoomBookingListState: {
+        ...roomBookingListReducer(undefined, {}),
+        ...listOverrides
       }
     },
-    currentRoomBookingListState: {
-      roomBookings: [
-        {
-          id: 101,
-          created: "1/1/2024, 10:00:00 AM",
-          room_name: "Speaker Support Rm 128",
-          start_datetime: "2024-01-15 09:00:00",
-          end_datetime: "2024-01-15 10:00:00",
-          owner_name: "John Doe",
-          owner_email: "john.doe@example.com",
-          status: "Paid",
-          amount_str: "$100",
-          refunded_amount_str: "$0"
-        }
-      ],
-      lastPage: 1,
-      currentPage: 1,
-      term: "",
-      order: "start_datetime",
-      orderDir: 1,
-      totalRoomBookings: 1,
-      perPage: 10,
-      filters: {
-        email_filter: { operator: null, value: "" }
-      }
-    }
-  };
+    applyMiddleware(thunk)
+  );
 
-  test("table_is_wrapped_in_table_responsive_for_horizontal_scrolling", () => {
-    const store = mockStore(initialState);
-    const mockHistory = { push: jest.fn() };
+const renderPage = (store) => {
+  const ui = () => (
+    <Provider store={store}>
+      <RoomBookingListPage history={{ push: jest.fn() }} />
+    </Provider>
+  );
+  const utils = render(ui());
+  return { ...utils, rerenderPage: () => utils.rerender(ui()) };
+};
 
-    const { container } = render(
-      <Provider store={store}>
-        <RoomBookingListPage history={mockHistory} />
-      </Provider>
+const lastRequestFilter = () => mockFetch.mock.calls.at(-1)[0]["filter[]"];
+
+describe("RoomBookingListPage", () => {
+  beforeEach(() => {
+    jest.spyOn(methods, "getAccessTokenSafely").mockResolvedValue("TOKEN");
+    getRequest.mockImplementation(() => (params) => () => mockFetch(params));
+    mockGridFilterState.parsedFilter = [];
+    mockGridFilterState.filterValues = [];
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    mockFetch.mockClear();
+  });
+
+  test("sends the GridFilter email filter escaped alongside term and base status filter, refetching when it changes", async () => {
+    const { rerenderPage } = renderPage(buildStore({ term: "john" }));
+
+    await waitFor(() =>
+      expect(lastRequestFilter()).toEqual([
+        "owner_name=@john,room_name=@john",
+        BASE_STATUS_FILTER
+      ])
     );
 
-    const tableResponsiveWrapper = container.querySelector(".table-responsive");
-    expect(tableResponsiveWrapper).toBeInTheDocument();
+    mockGridFilterState.filterValues = [
+      {
+        criteria: "email_filter",
+        operator: OPERATORS.LIKE.value,
+        value: "jane+test@acme.com"
+      }
+    ];
+    mockGridFilterState.parsedFilter = ["email_filter=@jane+test@acme.com"];
+    rerenderPage();
 
-    const table = container.querySelector("table");
-    expect(table).toBeInTheDocument();
-
-    expect(tableResponsiveWrapper).toContainElement(table);
+    await waitFor(() =>
+      expect(lastRequestFilter()).toEqual([
+        "owner_name=@john,room_name=@john",
+        "owner_email=@jane%2Btest@acme.com",
+        BASE_STATUS_FILTER
+      ])
+    );
+    expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 });
