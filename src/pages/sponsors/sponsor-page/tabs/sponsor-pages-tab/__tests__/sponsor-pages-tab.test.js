@@ -205,9 +205,11 @@ describe("SponsorPagesTab", () => {
         }
       );
 
-      const editButton = screen.getByTestId("EditIcon").closest("button");
       await act(async () => {
-        await userEvent.click(editButton);
+        await userEvent.click(screen.getByTestId("row-actions-menu-trigger"));
+        await userEvent.click(
+          screen.getByRole("menuitem", { name: "general.edit" })
+        );
       });
 
       expect(getSponsorCustomizedPage).toHaveBeenCalledWith(1);
@@ -355,9 +357,11 @@ describe("SponsorPagesTab", () => {
         }
       );
 
-      const editButton = screen.getByTestId("EditIcon").closest("button");
       await act(async () => {
-        await userEvent.click(editButton);
+        await userEvent.click(screen.getByTestId("row-actions-menu-trigger"));
+        await userEvent.click(
+          screen.getByRole("menuitem", { name: "general.edit" })
+        );
       });
 
       await waitFor(() => {
