@@ -173,7 +173,8 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
         accept=".csv"
       />
       {report && (
-        <Box sx={{ mt: 2 }}>
+        // UploadInput floats its selected-file box (col-md-6), so clear it
+        <Box sx={{ mt: 2, clear: "both" }}>
           <Typography variant="body1" sx={{ mb: 1 }}>
             {t(isResult ? "summary_result" : "summary_preview", report.summary)}
           </Typography>
