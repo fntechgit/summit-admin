@@ -151,10 +151,10 @@ describe("ImportSponsorsPopup", () => {
     expect(decodeURIComponent(href.split(",").slice(1).join(","))).toBe(
       CSV_TEMPLATE
     );
-    expect(CSV_TEMPLATE.split("\n")[0]).toBe("company,tier");
+    expect(CSV_TEMPLATE.split("\n")[0]).toBe("\"company\",\"tier\"");
     // the on-screen example is the same text as the download
     expect(
-      screen.getByText(/^company,tier/, { selector: "pre" }).textContent
+      screen.getByText(/^"company","tier"/, { selector: "pre" }).textContent
     ).toBe(CSV_TEMPLATE);
   });
 

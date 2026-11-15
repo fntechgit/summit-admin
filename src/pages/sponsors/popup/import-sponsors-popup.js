@@ -9,7 +9,7 @@ import UploadInput from "openstack-uicore-foundation/lib/components/inputs/uploa
 
 // Shown as the format example and offered as the downloadable template
 export const CSV_TEMPLATE =
-  "company,tier\nAcme Robotics,Gold\n\"Globex, Inc.\",Gold|Silver\n";
+  "\"company\",\"tier\"\n\"Acme Robotics\",\"Gold\"\n\"Globex, Inc.\",\"Gold|Silver\"\n";
 const TEMPLATE_FILE_NAME = "sponsors-template.csv";
 
 const ACTION_LABEL_KEYS = {
