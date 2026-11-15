@@ -8,7 +8,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import ImportSponsorsPopup from "../import-sponsors-popup";
+import ImportSponsorsPopup, { CSV_TEMPLATE } from "../import-sponsors-popup";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   __esModule: true,
@@ -137,6 +137,36 @@ describe("ImportSponsorsPopup", () => {
     expect(
       screen.getAllByText("sponsor_list.import.new_company").length
     ).toBeGreaterThan(0);
+  });
+
+  it("offers the format example as a downloadable CSV template", () => {
+    setup();
+
+    const link = screen.getByRole("link", {
+      name: "sponsor_list.import.download_template"
+    });
+    expect(link).toHaveAttribute("download", "sponsors-template.csv");
+    const href = link.getAttribute("href");
+    expect(href.startsWith("data:text/csv;charset=utf-8,")).toBe(true);
+    expect(decodeURIComponent(href.split(",").slice(1).join(","))).toBe(
+      CSV_TEMPLATE
+    );
+    expect(CSV_TEMPLATE.split("\n")[0]).toBe("company,tier");
+  });
+
+  it("marks error rows with an error icon next to the message", async () => {
+    const user = userEvent.setup();
+    const onPreview = jest.fn().mockResolvedValue(previewReport);
+    setup({ onPreview });
+
+    await user.click(screen.getByTestId("upload-a"));
+    await user.click(btn("sponsor_list.import.preview"));
+
+    const message = await screen.findByText("Unknown tier Platinum");
+    expect(
+      message.parentElement.querySelector("[data-testid=\"ErrorOutlineIcon\"]")
+    ).not.toBeNull();
+    expect(screen.getAllByTestId("ErrorOutlineIcon")).toHaveLength(1);
   });
 
   it("explains a normalized company match in the preview", async () => {

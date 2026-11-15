@@ -1,18 +1,16 @@
 import React, { useRef, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Alert,
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Typography
-} from "@mui/material";
+import { Alert, Box, Link, Typography } from "@mui/material";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import CustomDialog from "openstack-uicore-foundation/lib/components/mui/custom-dialog";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
+
+// Shown as the format example and offered as the downloadable template
+export const CSV_TEMPLATE =
+  "company,tier\nAcme Robotics,Gold\n\"Globex, Inc.\",Gold|Silver\n";
+const TEMPLATE_FILE_NAME = "sponsors-template.csv";
 
 const ACTION_LABEL_KEYS = {
   create: "action_create",
@@ -37,12 +35,18 @@ const rowShape = PropTypes.shape({
   error: PropTypes.string
 });
 
+// Global page CSS bolds Typography paragraphs; keep cells at the table's weight
+const CELL_TEXT_SX = { fontWeight: "inherit" };
+
 const ResultCell = ({ row, isResult }) => {
   if (row.error) {
     return (
-      <Typography variant="body2" color="error">
-        {row.error}
-      </Typography>
+      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 0.5 }}>
+        <ErrorOutlineIcon color="error" fontSize="small" />
+        <Typography variant="body2" color="error" sx={CELL_TEXT_SX}>
+          {row.error}
+        </Typography>
+      </Box>
     );
   }
   const labelKey =
@@ -50,7 +54,7 @@ const ResultCell = ({ row, isResult }) => {
       ? "action_created"
       : ACTION_LABEL_KEYS[row.action];
   return (
-    <Typography variant="body2">
+    <Typography variant="body2" sx={CELL_TEXT_SX}>
       {t(labelKey, { row: row.duplicate_of_row })}
     </Typography>
   );
@@ -66,10 +70,12 @@ const MatchedCompanyCell = ({ row }) => {
   return (
     <>
       {company?.match === "new" && (
-        <Typography variant="body2">{t("new_company")}</Typography>
+        <Typography variant="body2" sx={CELL_TEXT_SX}>
+          {t("new_company")}
+        </Typography>
       )}
       {company && company.match !== "new" && (
-        <Typography variant="body2">
+        <Typography variant="body2" sx={CELL_TEXT_SX}>
           {company.name}
           {company.match === "normalized" &&
             company.name !== row.company_input && (
@@ -85,7 +91,9 @@ const MatchedCompanyCell = ({ row }) => {
         </Typography>
       )}
       {candidates.length > 0 && (
-        <Typography variant="body2">{candidates.join(", ")}</Typography>
+        <Typography variant="body2" sx={CELL_TEXT_SX}>
+          {candidates.join(", ")}
+        </Typography>
       )}
     </>
   );
@@ -148,6 +156,28 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
   const hasNormalizedMatch =
     !!report && report.rows.some((r) => r.company?.match === "normalized");
 
+  const columns = [
+    { columnKey: "row", header: t("col_row") },
+    { columnKey: "company_input", header: t("col_company") },
+    {
+      columnKey: "company",
+      header: t("col_match"),
+      render: (r) => <MatchedCompanyCell row={r} />
+    },
+    {
+      columnKey: "tiers",
+      header: t("col_tiers"),
+      render: (r) => r.tiers.join(", ")
+    },
+    {
+      columnKey: "action",
+      header: t("col_result"),
+      render: (r) => <ResultCell row={r} isResult={isResult} />
+    }
+  ];
+  // MuiTable keys rows by id; the CSV row number is unique per report
+  const tableRows = report ? report.rows.map((r) => ({ ...r, id: r.row })) : [];
+
   return (
     <CustomDialog
       title={t("title")}
@@ -163,6 +193,31 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
         <Typography variant="body2">{t("format_company")}</Typography>
         <Typography variant="body2">{t("format_tier")}</Typography>
         <Typography variant="body2">{t("format_excel")}</Typography>
+      </Box>
+      <Box
+        component="pre"
+        sx={{
+          m: 0,
+          mb: 1,
+          p: 1.5,
+          bgcolor: "grey.100",
+          borderRadius: 1,
+          fontFamily: "monospace",
+          fontSize: "0.85rem"
+        }}
+      >
+        {CSV_TEMPLATE}
+      </Box>
+      <Box sx={{ mb: 2 }}>
+        <Link
+          href={`data:text/csv;charset=utf-8,${encodeURIComponent(
+            CSV_TEMPLATE
+          )}`}
+          download={TEMPLATE_FILE_NAME}
+          variant="body2"
+        >
+          {t("download_template")}
+        </Link>
       </Box>
       <UploadInput
         value={file && file.name}
@@ -200,34 +255,7 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
               {t("normalized_help")}
             </Typography>
           )}
-          <Box sx={{ maxHeight: "50vh", overflow: "auto" }}>
-            <Table size="small" stickyHeader>
-              <TableHead>
-                <TableRow>
-                  <TableCell>{t("col_row")}</TableCell>
-                  <TableCell>{t("col_company")}</TableCell>
-                  <TableCell>{t("col_match")}</TableCell>
-                  <TableCell>{t("col_tiers")}</TableCell>
-                  <TableCell>{t("col_result")}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {report.rows.map((row) => (
-                  <TableRow key={row.row}>
-                    <TableCell>{row.row}</TableCell>
-                    <TableCell>{row.company_input}</TableCell>
-                    <TableCell>
-                      <MatchedCompanyCell row={row} />
-                    </TableCell>
-                    <TableCell>{row.tiers.join(", ")}</TableCell>
-                    <TableCell>
-                      <ResultCell row={row} isResult={isResult} />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Box>
+          <MuiTable columns={columns} data={tableRows} />
         </Box>
       )}
     </CustomDialog>

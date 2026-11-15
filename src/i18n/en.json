@@ -2478,6 +2478,7 @@
       "format_company": "company (required): the company name.",
       "format_tier": "tier (required): the sponsorship tier. Separate several tiers in one cell with |. Tier names must match this show's sponsorship tiers.",
       "format_excel": "In Excel, use Save As > \"CSV UTF-8\".",
+      "download_template": "Download template",
       "preview": "Preview",
       "import": "Import",
       "close": "Close",

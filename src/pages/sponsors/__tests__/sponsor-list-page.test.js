@@ -211,7 +211,10 @@ describe("SponsorListPage", () => {
       );
       await waitFor(() => expect(importBtn).toBeEnabled());
       expect(getSponsors).not.toHaveBeenCalled();
-      expect(screen.getByText("Acme", { selector: "td" })).toBeInTheDocument();
+      // MuiTable renders plain cell values in a span inside the td
+      expect(
+        screen.getByText("Acme", { selector: "td > span" })
+      ).toBeInTheDocument();
     });
   });
 });
