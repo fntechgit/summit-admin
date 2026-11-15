@@ -28,11 +28,13 @@ import {
   addSponsorToSummit,
   deleteSponsor,
   getSponsors,
+  importSponsorsCSV,
   updateSponsorOrder
 } from "../../actions/sponsor-actions";
 import Member from "../../models/member";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 import AddSponsorDialog from "./popup/add-sponsor-popup";
+import ImportSponsorsPopup from "./popup/import-sponsors-popup";
 
 const SponsorListPage = ({
   currentSummit,
@@ -47,9 +49,11 @@ const SponsorListPage = ({
   term,
   order,
   orderDir,
-  addSponsorToSummit
+  addSponsorToSummit,
+  importSponsorsCSV
 }) => {
   const [showAddSponsorModal, setShowAddSponsorModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   useEffect(() => {
     if (currentSummit) {
@@ -75,6 +79,16 @@ const SponsorListPage = ({
         () => {}
       )
     );
+
+  const handlePreviewImport = (file) => importSponsorsCSV(file, true);
+
+  const handleImport = (file) =>
+    importSponsorsCSV(file, false).then((report) => {
+      getSponsors(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir).catch(
+        () => {}
+      );
+      return report;
+    });
 
   const handlePageChange = (page) => {
     getSponsors(term, page, perPage, order, orderDir);
@@ -207,13 +221,18 @@ const SponsorListPage = ({
         }}
       >
         {canAddSponsors && (
-          <Button
-            variant="contained"
-            onClick={() => handleOpenAddSponsorPopup()}
-            startIcon={<AddIcon />}
-          >
-            {T.translate("sponsor_list.add_sponsor")}
-          </Button>
+          <>
+            <Button variant="outlined" onClick={() => setShowImportModal(true)}>
+              {T.translate("sponsor_list.import.button")}
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => handleOpenAddSponsorPopup()}
+              startIcon={<AddIcon />}
+            >
+              {T.translate("sponsor_list.add_sponsor")}
+            </Button>
+          </>
         )}
       </GridToolbar>
       <Box sx={{ mb: 2 }}>{totalSponsors} sponsors</Box>
@@ -248,6 +267,14 @@ const SponsorListPage = ({
           summitId={currentSummit.id}
         />
       )}
+
+      {showImportModal && (
+        <ImportSponsorsPopup
+          onClose={() => setShowImportModal(false)}
+          onPreview={handlePreviewImport}
+          onImport={handleImport}
+        />
+      )}
     </div>
   );
 };
@@ -273,5 +300,6 @@ export default connect(mapStateToProps, {
   deleteSponsor,
   updateSponsorOrder,
   upsertLeadReportSettings,
-  addSponsorToSummit
+  addSponsorToSummit,
+  importSponsorsCSV
 })(SponsorListPage);
