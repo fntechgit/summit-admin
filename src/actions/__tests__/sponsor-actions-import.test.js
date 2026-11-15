@@ -60,6 +60,27 @@ describe("importSponsorsCSV", () => {
     ]);
   });
 
+  it("starts loading before the access token resolves", async () => {
+    let resolveToken;
+    methods.getAccessTokenSafely.mockReturnValue(
+      new Promise((resolve) => {
+        resolveToken = resolve;
+      })
+    );
+    postFile.mockImplementation(
+      () => () => () => Promise.resolve({ response: { dry_run: true } })
+    );
+    const store = makeStore();
+
+    const pending = store.dispatch(importSponsorsCSV(makeFile(), true));
+
+    expect(store.getActions().map((a) => a.type)).toEqual([START_LOADING]);
+    expect(postFile).not.toHaveBeenCalled();
+    resolveToken("TOKEN");
+    await pending;
+    expect(postFile).toHaveBeenCalledTimes(1);
+  });
+
   it("sends dry_run 0 for the real import", async () => {
     postFile.mockImplementation(
       () => () => () => Promise.resolve({ response: { dry_run: false } })

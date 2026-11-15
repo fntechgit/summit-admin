@@ -1,26 +1,26 @@
 import React, { useRef, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import { Alert, Box, Link, Typography } from "@mui/material";
+import { Alert, Box, Button, Typography } from "@mui/material";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import CustomDialog from "openstack-uicore-foundation/lib/components/mui/custom-dialog";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
+import { downloadFileByContent } from "openstack-uicore-foundation/lib/utils/actions";
 
 // Shown as the format example and offered as the downloadable template
-export const CSV_TEMPLATE =
+const CSV_TEMPLATE =
   "\"company\",\"tier\"\n\"Acme Robotics\",\"Gold\"\n\"Globex, Inc.\",\"Gold|Silver\"\n";
 const TEMPLATE_FILE_NAME = "sponsors-template.csv";
+const CSV_MIME = "text/csv;charset=utf-8";
 
 const ACTION_LABEL_KEYS = {
-  create: "action_create",
-  skip_existing_sponsor: "action_skip_existing_sponsor",
-  skip_duplicate: "action_skip_duplicate",
-  error: "action_error",
-  not_attempted: "action_not_attempted"
+  create: "sponsor_list.import.action_create",
+  skip_existing_sponsor: "sponsor_list.import.action_skip_existing_sponsor",
+  skip_duplicate: "sponsor_list.import.action_skip_duplicate",
+  error: "sponsor_list.import.action_error",
+  not_attempted: "sponsor_list.import.action_not_attempted"
 };
-
-const t = (key, vars) => T.translate(`sponsor_list.import.${key}`, vars);
 
 const rowShape = PropTypes.shape({
   row: PropTypes.number,
@@ -60,11 +60,11 @@ const ResultCell = ({ row, isResult }) => {
   }
   const labelKey =
     isResult && row.action === "create"
-      ? "action_created"
+      ? "sponsor_list.import.action_created"
       : ACTION_LABEL_KEYS[row.action];
   return (
     <Typography variant="body2" sx={CELL_TEXT_SX}>
-      {t(labelKey, { row: row.duplicate_of_row })}
+      {T.translate(labelKey, { row: row.duplicate_of_row })}
     </Typography>
   );
 };
@@ -80,7 +80,7 @@ const MatchedCompanyCell = ({ row }) => {
     <>
       {company?.match === "new" && (
         <Typography variant="body2" sx={CELL_TEXT_SX}>
-          {t("new_company")}
+          {T.translate("sponsor_list.import.new_company")}
         </Typography>
       )}
       {company && company.match !== "new" && (
@@ -94,7 +94,7 @@ const MatchedCompanyCell = ({ row }) => {
                 color="text.secondary"
                 sx={{ ml: 1 }}
               >
-                {t("normalized_hint")}
+                {T.translate("sponsor_list.import.normalized_hint")}
               </Typography>
             )}
         </Typography>
@@ -148,15 +148,18 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
   };
 
   let primaryAction = {
-    label: t("preview"),
+    label: T.translate("sponsor_list.import.preview"),
     onClick: () => run(onPreview),
     disabled: !file || isSaving
   };
   if (isResult) {
-    primaryAction = { label: t("close"), onClick: handleClose };
+    primaryAction = {
+      label: T.translate("sponsor_list.import.close"),
+      onClick: handleClose
+    };
   } else if (isPreview) {
     primaryAction = {
-      label: t("import"),
+      label: T.translate("sponsor_list.import.import"),
       onClick: () => run(onImport),
       disabled: report.summary.sponsors_created === 0 || isSaving
     };
@@ -166,21 +169,24 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
     !!report && report.rows.some((r) => r.company?.match === "normalized");
 
   const columns = [
-    { columnKey: "row", header: t("col_row") },
-    { columnKey: "company_input", header: t("col_company") },
+    { columnKey: "row", header: T.translate("sponsor_list.import.col_row") },
+    {
+      columnKey: "company_input",
+      header: T.translate("sponsor_list.import.col_company")
+    },
     {
       columnKey: "company",
-      header: t("col_match"),
+      header: T.translate("sponsor_list.import.col_match"),
       render: (r) => <MatchedCompanyCell row={r} />
     },
     {
       columnKey: "tiers",
-      header: t("col_tiers"),
+      header: T.translate("sponsor_list.import.col_tiers"),
       render: (r) => r.tiers.join(", ")
     },
     {
       columnKey: "action",
-      header: t("col_result"),
+      header: T.translate("sponsor_list.import.col_result"),
       render: (r) => <ResultCell row={r} isResult={isResult} />
     }
   ];
@@ -189,14 +195,14 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
 
   return (
     <CustomDialog
-      title={t("title")}
+      title={T.translate("sponsor_list.import.title")}
       open
       maxWidth="md"
       onClose={handleClose}
       primaryAction={primaryAction}
     >
       <Typography variant="body2" sx={{ ...BODY_TEXT_SX, mb: 1.5 }}>
-        {t("format_intro")}
+        {T.translate("sponsor_list.import.format_intro")}
       </Typography>
       <Box
         sx={{
@@ -209,15 +215,15 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
         }}
       >
         {[
-          ["company", "format_company"],
-          ["tier", "format_tier"]
+          ["company", "sponsor_list.import.format_company"],
+          ["tier", "sponsor_list.import.format_tier"]
         ].map(([column, descriptionKey]) => (
           <React.Fragment key={column}>
             <Box component="code" sx={CODE_SX}>
               {column}
             </Box>
             <Typography variant="body2" sx={BODY_TEXT_SX}>
-              {t(descriptionKey)}
+              {T.translate(descriptionKey)}
             </Typography>
           </React.Fragment>
         ))}
@@ -227,7 +233,7 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
         color="text.secondary"
         sx={{ ...BODY_TEXT_SX, mb: 2 }}
       >
-        {t("format_excel")}
+        {T.translate("sponsor_list.import.format_excel")}
       </Typography>
       <Box
         sx={{
@@ -238,17 +244,16 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
         }}
       >
         <Typography variant="body2" sx={BODY_TEXT_SX}>
-          {t("format_example")}
+          {T.translate("sponsor_list.import.format_example")}
         </Typography>
-        <Link
-          href={`data:text/csv;charset=utf-8,${encodeURIComponent(
-            CSV_TEMPLATE
-          )}`}
-          download={TEMPLATE_FILE_NAME}
-          variant="body2"
+        <Button
+          size="small"
+          onClick={() =>
+            downloadFileByContent(TEMPLATE_FILE_NAME, CSV_TEMPLATE, CSV_MIME)
+          }
         >
-          {t("download_template")}
-        </Link>
+          {T.translate("sponsor_list.import.download_template")}
+        </Button>
       </Box>
       <Box
         component="pre"
@@ -276,28 +281,33 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
         // UploadInput floats its selected-file box (col-md-6), so clear it
         <Box sx={{ mt: 2, clear: "both" }}>
           <Typography variant="body1" sx={{ mb: 1 }}>
-            {t(isResult ? "summary_result" : "summary_preview", report.summary)}
+            {T.translate(
+              isResult
+                ? "sponsor_list.import.summary_result"
+                : "sponsor_list.import.summary_preview",
+              report.summary
+            )}
           </Typography>
           {isPreview && report.summary.errors > 0 && (
             <Alert severity="warning" sx={{ mb: 1 }}>
-              {t("errors_skipped_warning")}
+              {T.translate("sponsor_list.import.errors_skipped_warning")}
             </Alert>
           )}
           {isPreview && report.summary.sponsors_created === 0 && (
             <Alert severity="warning" sx={{ mb: 1 }}>
-              {t("nothing_to_import")}
+              {T.translate("sponsor_list.import.nothing_to_import")}
             </Alert>
           )}
           {isResult && report.summary.not_attempted > 0 && (
             <Alert severity="warning" sx={{ mb: 1 }}>
-              {t("stopped_warning", {
+              {T.translate("sponsor_list.import.stopped_warning", {
                 not_attempted: report.summary.not_attempted
               })}
             </Alert>
           )}
           {hasNormalizedMatch && (
             <Typography variant="body2" sx={{ mb: 1 }}>
-              {t("normalized_help")}
+              {T.translate("sponsor_list.import.normalized_help")}
             </Typography>
           )}
           <MuiTable columns={columns} data={tableRows} />

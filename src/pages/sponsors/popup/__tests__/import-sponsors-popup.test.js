@@ -8,7 +8,17 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import ImportSponsorsPopup, { CSV_TEMPLATE } from "../import-sponsors-popup";
+import { downloadFileByContent } from "openstack-uicore-foundation/lib/utils/actions";
+import ImportSponsorsPopup from "../import-sponsors-popup";
+
+jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
+  __esModule: true,
+  ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
+  downloadFileByContent: jest.fn()
+}));
+
+const EXPECTED_TEMPLATE =
+  "\"company\",\"tier\"\n\"Acme Robotics\",\"Gold\"\n\"Globex, Inc.\",\"Gold|Silver\"\n";
 
 jest.mock("i18n-react/dist/i18n-react", () => ({
   __esModule: true,
@@ -139,23 +149,22 @@ describe("ImportSponsorsPopup", () => {
     ).toBeGreaterThan(0);
   });
 
-  it("offers the format example as a downloadable CSV template", () => {
+  it("offers the format example as a downloadable CSV template", async () => {
+    const user = userEvent.setup();
     setup();
 
-    const link = screen.getByRole("link", {
-      name: "sponsor_list.import.download_template"
-    });
-    expect(link).toHaveAttribute("download", "sponsors-template.csv");
-    const href = link.getAttribute("href");
-    expect(href.startsWith("data:text/csv;charset=utf-8,")).toBe(true);
-    expect(decodeURIComponent(href.split(",").slice(1).join(","))).toBe(
-      CSV_TEMPLATE
-    );
-    expect(CSV_TEMPLATE.split("\n")[0]).toBe("\"company\",\"tier\"");
     // the on-screen example is the same text as the download
     expect(
       screen.getByText(/^"company","tier"/, { selector: "pre" }).textContent
-    ).toBe(CSV_TEMPLATE);
+    ).toBe(EXPECTED_TEMPLATE);
+
+    await user.click(btn("sponsor_list.import.download_template"));
+
+    expect(downloadFileByContent).toHaveBeenCalledWith(
+      "sponsors-template.csv",
+      EXPECTED_TEMPLATE,
+      "text/csv;charset=utf-8"
+    );
   });
 
   it("marks error rows with an error icon next to the message", async () => {
@@ -300,6 +309,28 @@ describe("ImportSponsorsPopup", () => {
     fireEvent.click(importBtn);
 
     expect(onImport).toHaveBeenCalledTimes(1);
+  });
+
+  it("closes from the result view", async () => {
+    const user = userEvent.setup();
+    const onPreview = jest.fn().mockResolvedValue(previewReport);
+    const onImport = jest
+      .fn()
+      .mockResolvedValue(
+        buildReport({ sponsors_created: 1 }, [row({ row: 1 })], false)
+      );
+    const { onClose } = setup({ onPreview, onImport });
+
+    await user.click(screen.getByTestId("upload-a"));
+    await user.click(btn("sponsor_list.import.preview"));
+    await user.click(
+      await screen.findByRole("button", { name: "sponsor_list.import.import" })
+    );
+    await user.click(
+      await screen.findByRole("button", { name: "sponsor_list.import.close" })
+    );
+
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it("shows the stopped-run message when rows were not attempted", async () => {

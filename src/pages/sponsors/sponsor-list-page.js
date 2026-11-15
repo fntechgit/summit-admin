@@ -52,8 +52,7 @@ const SponsorListPage = ({
   addSponsorToSummit,
   importSponsorsCSV
 }) => {
-  const [showAddSponsorModal, setShowAddSponsorModal] = useState(false);
-  const [showImportModal, setShowImportModal] = useState(false);
+  const [openPopup, setOpenPopup] = useState(null);
 
   useEffect(() => {
     if (currentSummit) {
@@ -101,11 +100,11 @@ const SponsorListPage = ({
   };
 
   const handleOpenAddSponsorPopup = () => {
-    setShowAddSponsorModal(true);
+    setOpenPopup("addSponsor");
   };
 
   const handleCloseAddSponsorPopup = () => {
-    setShowAddSponsorModal(false);
+    setOpenPopup(null);
   };
 
   const memberObj = new Member(member);
@@ -221,7 +220,10 @@ const SponsorListPage = ({
         }}
       >
         {canAddSponsors && (
-          <Button variant="outlined" onClick={() => setShowImportModal(true)}>
+          <Button
+            variant="outlined"
+            onClick={() => setOpenPopup("importSponsors")}
+          >
             {T.translate("sponsor_list.import.button")}
           </Button>
         )}
@@ -260,7 +262,7 @@ const SponsorListPage = ({
         </div>
       )}
 
-      {showAddSponsorModal && (
+      {openPopup === "addSponsor" && (
         <AddSponsorDialog
           onClose={handleCloseAddSponsorPopup}
           onSubmit={handleNewSponsor}
@@ -268,9 +270,9 @@ const SponsorListPage = ({
         />
       )}
 
-      {showImportModal && (
+      {openPopup === "importSponsors" && (
         <ImportSponsorsPopup
-          onClose={() => setShowImportModal(false)}
+          onClose={() => setOpenPopup(null)}
           onPreview={handlePreviewImport}
           onImport={handleImport}
         />
