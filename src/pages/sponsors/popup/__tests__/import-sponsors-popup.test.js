@@ -152,6 +152,10 @@ describe("ImportSponsorsPopup", () => {
       CSV_TEMPLATE
     );
     expect(CSV_TEMPLATE.split("\n")[0]).toBe("company,tier");
+    // the on-screen example is the same text as the download
+    expect(
+      screen.getByText(/^company,tier/, { selector: "pre" }).textContent
+    ).toBe(CSV_TEMPLATE);
   });
 
   it("marks error rows with an error icon next to the message", async () => {
