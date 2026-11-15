@@ -298,6 +298,13 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
               {T.translate("sponsor_list.import.nothing_to_import")}
             </Alert>
           )}
+          {isPreview && report.summary.companies_created > 0 && (
+            <Alert severity="info" sx={{ mb: 1 }}>
+              {T.translate("sponsor_list.import.new_companies_warning", {
+                companies_created: report.summary.companies_created
+              })}
+            </Alert>
+          )}
           {isResult && report.summary.not_attempted > 0 && (
             <Alert severity="warning" sx={{ mb: 1 }}>
               {T.translate("sponsor_list.import.stopped_warning", {

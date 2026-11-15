@@ -182,6 +182,58 @@ describe("ImportSponsorsPopup", () => {
     expect(screen.getAllByTestId("ErrorOutlineIcon")).toHaveLength(1);
   });
 
+  it("warns about new companies only in the preview", async () => {
+    const user = userEvent.setup();
+    const warning =
+      "sponsor_list.import.new_companies_warning:{\"companies_created\":2}";
+    const onPreview = jest
+      .fn()
+      .mockResolvedValue(
+        buildReport({ sponsors_created: 2, companies_created: 2 }, [
+          row({ row: 1 }),
+          row({ row: 2, company_input: "Initech" })
+        ])
+      );
+    const onImport = jest
+      .fn()
+      .mockResolvedValue(
+        buildReport(
+          { sponsors_created: 2, companies_created: 2 },
+          [row({ row: 1 })],
+          false
+        )
+      );
+    setup({ onPreview, onImport });
+
+    await user.click(screen.getByTestId("upload-a"));
+    await user.click(btn("sponsor_list.import.preview"));
+    expect(await screen.findByText(warning)).toBeInTheDocument();
+
+    await user.click(btn("sponsor_list.import.import"));
+    await screen.findByRole("button", { name: "sponsor_list.import.close" });
+    expect(screen.queryByText(warning)).not.toBeInTheDocument();
+  });
+
+  it("does not warn about new companies when every company exists", async () => {
+    const user = userEvent.setup();
+    const onPreview = jest
+      .fn()
+      .mockResolvedValue(
+        buildReport({ sponsors_created: 1, companies_created: 0 }, [
+          row({ company: { id: 5, name: "Acme", match: "exact" } })
+        ])
+      );
+    setup({ onPreview });
+
+    await user.click(screen.getByTestId("upload-a"));
+    await user.click(btn("sponsor_list.import.preview"));
+    await screen.findByRole("button", { name: "sponsor_list.import.import" });
+
+    expect(
+      screen.queryByText(/sponsor_list\.import\.new_companies_warning/)
+    ).not.toBeInTheDocument();
+  });
+
   it("explains a normalized company match in the preview", async () => {
     const user = userEvent.setup();
     const onPreview = jest.fn().mockResolvedValue(
