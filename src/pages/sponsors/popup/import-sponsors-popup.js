@@ -37,6 +37,15 @@ const rowShape = PropTypes.shape({
 
 // Global page CSS bolds Typography paragraphs; keep cells at the table's weight
 const CELL_TEXT_SX = { fontWeight: "inherit" };
+const BODY_TEXT_SX = { fontWeight: 400 };
+const CODE_SX = {
+  fontFamily: "monospace",
+  fontSize: "0.85rem",
+  bgcolor: "grey.100",
+  px: 0.75,
+  py: 0.25,
+  borderRadius: 0.5
+};
 
 const ResultCell = ({ row, isResult }) => {
   if (row.error) {
@@ -186,29 +195,51 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
       onClose={handleClose}
       primaryAction={primaryAction}
     >
-      <Typography variant="body2" sx={{ mb: 1 }}>
+      <Typography variant="body2" sx={{ ...BODY_TEXT_SX, mb: 1.5 }}>
         {t("format_intro")}
       </Typography>
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="body2">{t("format_company")}</Typography>
-        <Typography variant="body2">{t("format_tier")}</Typography>
-        <Typography variant="body2">{t("format_excel")}</Typography>
-      </Box>
       <Box
-        component="pre"
         sx={{
-          m: 0,
-          mb: 1,
-          p: 1.5,
-          bgcolor: "grey.100",
-          borderRadius: 1,
-          fontFamily: "monospace",
-          fontSize: "0.85rem"
+          display: "grid",
+          gridTemplateColumns: "auto 1fr",
+          columnGap: 2,
+          rowGap: 1,
+          alignItems: "baseline",
+          mb: 1.5
         }}
       >
-        {CSV_TEMPLATE}
+        {[
+          ["company", "format_company"],
+          ["tier", "format_tier"]
+        ].map(([column, descriptionKey]) => (
+          <React.Fragment key={column}>
+            <Box component="code" sx={CODE_SX}>
+              {column}
+            </Box>
+            <Typography variant="body2" sx={BODY_TEXT_SX}>
+              {t(descriptionKey)}
+            </Typography>
+          </React.Fragment>
+        ))}
       </Box>
-      <Box sx={{ mb: 2 }}>
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ ...BODY_TEXT_SX, mb: 2 }}
+      >
+        {t("format_excel")}
+      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          mb: 0.5
+        }}
+      >
+        <Typography variant="body2" sx={BODY_TEXT_SX}>
+          {t("format_example")}
+        </Typography>
         <Link
           href={`data:text/csv;charset=utf-8,${encodeURIComponent(
             CSV_TEMPLATE
@@ -218,6 +249,20 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
         >
           {t("download_template")}
         </Link>
+      </Box>
+      <Box
+        component="pre"
+        sx={{
+          m: 0,
+          mb: 2,
+          p: 1.5,
+          bgcolor: "grey.100",
+          borderRadius: 1,
+          fontFamily: "monospace",
+          fontSize: "0.85rem"
+        }}
+      >
+        {CSV_TEMPLATE}
       </Box>
       <UploadInput
         value={file && file.name}
