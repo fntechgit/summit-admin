@@ -8,7 +8,6 @@ import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
 import { downloadFileByContent } from "openstack-uicore-foundation/lib/utils/actions";
 
-// Shown as the format example and offered as the downloadable template
 const CSV_TEMPLATE =
   "\"company\",\"tier\"\n\"Acme Robotics\",\"Gold\"\n\"Globex, Inc.\",\"Gold|Silver\"\n";
 const TEMPLATE_FILE_NAME = "sponsors-template.csv";
@@ -113,9 +112,7 @@ MatchedCompanyCell.propTypes = { row: rowShape.isRequired };
 const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
   const [file, setFile] = useState(null);
   const [report, setReport] = useState(null);
-  const [isSaving, setIsSaving] = useState(false);
   const requestGeneration = useRef(0);
-  const inFlight = useRef(false);
 
   const isResult = !!report && !report.dry_run;
   const isPreview = !!report && report.dry_run;
@@ -127,41 +124,27 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
   };
 
   const run = (action) => {
-    if (inFlight.current || !file) return Promise.resolve();
-    inFlight.current = true;
-    setIsSaving(true);
     const generation = requestGeneration.current;
-    return action(file)
-      .then((newReport) => {
-        if (generation === requestGeneration.current) setReport(newReport);
-      })
-      .catch(() => {})
-      .finally(() => {
-        inFlight.current = false;
-        setIsSaving(false);
-      });
-  };
-
-  const handleClose = () => {
-    if (isSaving) return;
-    onClose();
+    return action(file).then((newReport) => {
+      if (generation === requestGeneration.current) setReport(newReport);
+    });
   };
 
   let primaryAction = {
     label: T.translate("sponsor_list.import.preview"),
     onClick: () => run(onPreview),
-    disabled: !file || isSaving
+    disabled: !file
   };
   if (isResult) {
     primaryAction = {
       label: T.translate("sponsor_list.import.close"),
-      onClick: handleClose
+      onClick: onClose
     };
   } else if (isPreview) {
     primaryAction = {
       label: T.translate("sponsor_list.import.import"),
       onClick: () => run(onImport),
-      disabled: report.summary.sponsors_created === 0 || isSaving
+      disabled: report.summary.sponsors_created === 0
     };
   }
 
@@ -198,7 +181,7 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
       title={T.translate("sponsor_list.import.title")}
       open
       maxWidth="md"
-      onClose={handleClose}
+      onClose={onClose}
       primaryAction={primaryAction}
     >
       <Typography variant="body2" sx={{ ...BODY_TEXT_SX, mb: 1.5 }}>

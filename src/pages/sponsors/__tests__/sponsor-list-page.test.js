@@ -190,6 +190,7 @@ describe("SponsorListPage", () => {
       await waitFor(() =>
         expect(getSponsors).toHaveBeenCalledWith("acme", 1, 10, "order", 1)
       );
+      await screen.findByRole("button", { name: "sponsor_list.import.close" });
     });
 
     it("keeps the preview and skips the refresh when the import rejects", async () => {
@@ -211,10 +212,7 @@ describe("SponsorListPage", () => {
       );
       await waitFor(() => expect(importBtn).toBeEnabled());
       expect(getSponsors).not.toHaveBeenCalled();
-      // MuiTable renders plain cell values in a span inside the td
-      expect(
-        screen.getByText("Acme", { selector: "td > span" })
-      ).toBeInTheDocument();
+      expect(screen.getByRole("cell", { name: "Acme" })).toBeInTheDocument();
     });
   });
 });

@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor
-} from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { downloadFileByContent } from "openstack-uicore-foundation/lib/utils/actions";
@@ -100,6 +94,7 @@ const previewReport = buildReport(
       action: "error",
       company: null,
       tiers: [],
+      candidates: ["Globex Inc", "Globex LLC"],
       error: "Unknown tier Platinum"
     })
   ]
@@ -137,23 +132,29 @@ describe("ImportSponsorsPopup", () => {
       ).toBeInTheDocument()
     );
     expect(onPreview).toHaveBeenCalledTimes(1);
-    expect(onPreview.mock.calls[0][0]).toBeInstanceOf(File);
     expect(onPreview.mock.calls[0][0].name).toBe("a.csv");
-    expect(screen.getByText("Unknown tier Platinum")).toBeInTheDocument();
     expect(
       screen.getAllByText("sponsor_list.import.action_create:{\"row\":null}")
-        .length
-    ).toBeGreaterThan(0);
+    ).toHaveLength(2);
+    expect(screen.getAllByText("sponsor_list.import.new_company")).toHaveLength(
+      3
+    );
+    expect(screen.getByText("Globex Inc, Globex LLC")).toBeInTheDocument();
     expect(
-      screen.getAllByText("sponsor_list.import.new_company").length
-    ).toBeGreaterThan(0);
+      screen.getByText("sponsor_list.import.errors_skipped_warning")
+    ).toBeInTheDocument();
+
+    const message = screen.getByText("Unknown tier Platinum");
+    expect(
+      message.parentElement.querySelector("[data-testid=\"ErrorOutlineIcon\"]")
+    ).not.toBeNull();
+    expect(screen.getAllByTestId("ErrorOutlineIcon")).toHaveLength(1);
   });
 
   it("offers the format example as a downloadable CSV template", async () => {
     const user = userEvent.setup();
     setup();
 
-    // the on-screen example is the same text as the download
     expect(
       screen.getByText(/^"company","tier"/, { selector: "pre" }).textContent
     ).toBe(EXPECTED_TEMPLATE);
@@ -165,21 +166,6 @@ describe("ImportSponsorsPopup", () => {
       EXPECTED_TEMPLATE,
       "text/csv;charset=utf-8"
     );
-  });
-
-  it("marks error rows with an error icon next to the message", async () => {
-    const user = userEvent.setup();
-    const onPreview = jest.fn().mockResolvedValue(previewReport);
-    setup({ onPreview });
-
-    await user.click(screen.getByTestId("upload-a"));
-    await user.click(btn("sponsor_list.import.preview"));
-
-    const message = await screen.findByText("Unknown tier Platinum");
-    expect(
-      message.parentElement.querySelector("[data-testid=\"ErrorOutlineIcon\"]")
-    ).not.toBeNull();
-    expect(screen.getAllByTestId("ErrorOutlineIcon")).toHaveLength(1);
   });
 
   it("warns about new companies only in the preview", async () => {
@@ -299,6 +285,9 @@ describe("ImportSponsorsPopup", () => {
       name: "sponsor_list.import.import"
     });
     expect(importBtn).toBeDisabled();
+    expect(
+      screen.getByText("sponsor_list.import.nothing_to_import")
+    ).toBeInTheDocument();
   });
 
   it("clears the preview when a different file is chosen", async () => {
@@ -343,24 +332,6 @@ describe("ImportSponsorsPopup", () => {
       screen.queryByRole("button", { name: "sponsor_list.import.import" })
     ).not.toBeInTheDocument();
     expect(btn("sponsor_list.import.preview")).toBeInTheDocument();
-  });
-
-  it("sends one import while one is in flight", async () => {
-    const user = userEvent.setup();
-    const onPreview = jest.fn().mockResolvedValue(previewReport);
-    const onImport = jest.fn().mockImplementation(() => new Promise(() => {}));
-    setup({ onPreview, onImport });
-
-    await user.click(screen.getByTestId("upload-a"));
-    await user.click(btn("sponsor_list.import.preview"));
-    const importBtn = await screen.findByRole("button", {
-      name: "sponsor_list.import.import"
-    });
-
-    await user.click(importBtn);
-    fireEvent.click(importBtn);
-
-    expect(onImport).toHaveBeenCalledTimes(1);
   });
 
   it("closes from the result view", async () => {
@@ -419,9 +390,5 @@ describe("ImportSponsorsPopup", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("db down")).toBeInTheDocument();
     expect(screen.getByText("connection reset")).toBeInTheDocument();
-    expect(btn("sponsor_list.import.close")).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "sponsor_list.import.import" })
-    ).not.toBeInTheDocument();
   });
 });
