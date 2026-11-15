@@ -130,6 +130,60 @@ describe("ImportSponsorsPopup", () => {
     expect(onPreview.mock.calls[0][0]).toBeInstanceOf(File);
     expect(onPreview.mock.calls[0][0].name).toBe("a.csv");
     expect(screen.getByText("Unknown tier Platinum")).toBeInTheDocument();
+    expect(
+      screen.getAllByText("sponsor_list.import.action_create:{\"row\":null}")
+        .length
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText("sponsor_list.import.new_company").length
+    ).toBeGreaterThan(0);
+  });
+
+  it("explains a normalized company match in the preview", async () => {
+    const user = userEvent.setup();
+    const onPreview = jest.fn().mockResolvedValue(
+      buildReport({ sponsors_created: 1 }, [
+        row({
+          company_input: "acme inc",
+          company: { id: 5, name: "Acme Inc.", match: "normalized" }
+        })
+      ])
+    );
+    setup({ onPreview });
+
+    await user.click(screen.getByTestId("upload-a"));
+    await user.click(btn("sponsor_list.import.preview"));
+
+    expect(
+      await screen.findByText("sponsor_list.import.normalized_hint")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("sponsor_list.import.normalized_help")
+    ).toBeInTheDocument();
+  });
+
+  it("labels created rows in past tense after the import", async () => {
+    const user = userEvent.setup();
+    const onPreview = jest.fn().mockResolvedValue(previewReport);
+    const onImport = jest
+      .fn()
+      .mockResolvedValue(
+        buildReport({ sponsors_created: 1 }, [row({ row: 1 })], false)
+      );
+    setup({ onPreview, onImport });
+
+    await user.click(screen.getByTestId("upload-a"));
+    await user.click(btn("sponsor_list.import.preview"));
+    await user.click(
+      await screen.findByRole("button", { name: "sponsor_list.import.import" })
+    );
+
+    expect(
+      await screen.findByText("sponsor_list.import.action_created:{\"row\":null}")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("sponsor_list.import.action_create:{\"row\":null}")
+    ).not.toBeInTheDocument();
   });
 
   it("disables import when no row would be created", async () => {
@@ -217,19 +271,22 @@ describe("ImportSponsorsPopup", () => {
   it("shows the stopped-run message when rows were not attempted", async () => {
     const user = userEvent.setup();
     const onPreview = jest.fn().mockResolvedValue(previewReport);
-    const onImport = jest
-      .fn()
-      .mockResolvedValue(
-        buildReport(
-          { sponsors_created: 1, not_attempted: 3 },
-          [
-            row({ row: 1 }),
-            row({ row: 2, action: "error", error: "db down" }),
-            row({ row: 3, action: "not_attempted" })
-          ],
-          false
-        )
-      );
+    const onImport = jest.fn().mockResolvedValue(
+      buildReport(
+        { sponsors_created: 1, not_attempted: 3 },
+        [
+          row({ row: 1 }),
+          row({ row: 2, action: "error", error: "db down" }),
+          row({
+            row: 3,
+            action: "not_attempted",
+            error: "connection reset"
+          }),
+          row({ row: 4, action: "not_attempted" })
+        ],
+        false
+      )
+    );
     setup({ onPreview, onImport });
 
     await user.click(screen.getByTestId("upload-a"));
@@ -243,6 +300,8 @@ describe("ImportSponsorsPopup", () => {
         "sponsor_list.import.stopped_warning:{\"not_attempted\":3}"
       )
     ).toBeInTheDocument();
+    expect(screen.getByText("db down")).toBeInTheDocument();
+    expect(screen.getByText("connection reset")).toBeInTheDocument();
     expect(btn("sponsor_list.import.close")).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "sponsor_list.import.import" })

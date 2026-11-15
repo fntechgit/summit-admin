@@ -221,18 +221,18 @@ const SponsorListPage = ({
         }}
       >
         {canAddSponsors && (
-          <>
-            <Button variant="outlined" onClick={() => setShowImportModal(true)}>
-              {T.translate("sponsor_list.import.button")}
-            </Button>
-            <Button
-              variant="contained"
-              onClick={() => handleOpenAddSponsorPopup()}
-              startIcon={<AddIcon />}
-            >
-              {T.translate("sponsor_list.add_sponsor")}
-            </Button>
-          </>
+          <Button variant="outlined" onClick={() => setShowImportModal(true)}>
+            {T.translate("sponsor_list.import.button")}
+          </Button>
+        )}
+        {canAddSponsors && (
+          <Button
+            variant="contained"
+            onClick={() => handleOpenAddSponsorPopup()}
+            startIcon={<AddIcon />}
+          >
+            {T.translate("sponsor_list.add_sponsor")}
+          </Button>
         )}
       </GridToolbar>
       <Box sx={{ mb: 2 }}>{totalSponsors} sponsors</Box>

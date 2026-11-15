@@ -37,22 +37,29 @@ const rowShape = PropTypes.shape({
   error: PropTypes.string
 });
 
-const ResultCell = ({ row }) => {
-  if (row.action === "error") {
+const ResultCell = ({ row, isResult }) => {
+  if (row.error) {
     return (
       <Typography variant="body2" color="error">
         {row.error}
       </Typography>
     );
   }
+  const labelKey =
+    isResult && row.action === "create"
+      ? "action_created"
+      : ACTION_LABEL_KEYS[row.action];
   return (
     <Typography variant="body2">
-      {t(ACTION_LABEL_KEYS[row.action], { row: row.duplicate_of_row })}
+      {t(labelKey, { row: row.duplicate_of_row })}
     </Typography>
   );
 };
 
-ResultCell.propTypes = { row: rowShape.isRequired };
+ResultCell.propTypes = {
+  row: rowShape.isRequired,
+  isResult: PropTypes.bool.isRequired
+};
 
 const MatchedCompanyCell = ({ row }) => {
   const { company, candidates } = row;
@@ -213,7 +220,7 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
                     </TableCell>
                     <TableCell>{row.tiers.join(", ")}</TableCell>
                     <TableCell>
-                      <ResultCell row={row} />
+                      <ResultCell row={row} isResult={isResult} />
                     </TableCell>
                   </TableRow>
                 ))}

@@ -5,6 +5,7 @@ import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import {
   postFile,
+  snackbarErrorHandler,
   START_LOADING,
   STOP_LOADING
 } from "openstack-uicore-foundation/lib/utils/actions";
@@ -38,9 +39,8 @@ describe("importSponsorsCSV", () => {
 
   it("posts the file to the summit sponsors csv endpoint with dry_run and resolves with the report", async () => {
     const report = { dry_run: true, summary: {}, rows: [] };
-    postFile.mockImplementation(
-      () => () => () => Promise.resolve({ response: report })
-    );
+    const curried = jest.fn(() => () => Promise.resolve({ response: report }));
+    postFile.mockImplementation(() => curried);
     const store = makeStore();
     const file = makeFile();
 
@@ -52,6 +52,8 @@ describe("importSponsorsCSV", () => {
     expect(url).toBe("http://test-api/api/v1/summits/42/sponsors/csv");
     expect(sentFile).toBe(file);
     expect(fields).toEqual({ dry_run: "1" });
+    expect(postFile.mock.calls[0][5]).toBe(snackbarErrorHandler);
+    expect(curried).toHaveBeenCalledWith({ access_token: "TOKEN" });
     expect(store.getActions().map((a) => a.type)).toEqual([
       START_LOADING,
       STOP_LOADING
