@@ -202,9 +202,11 @@ describe("SponsorFormsTab", () => {
       const explicitRow = screen.getByText("Managed Form 1").closest("tr");
       const implicitRow = screen.getByText("Managed Form 2").closest("tr");
 
-      expect(within(explicitRow).getByTestId("DeleteIcon")).toBeInTheDocument();
       expect(
-        within(implicitRow).queryByTestId("DeleteIcon")
+        within(explicitRow).getByTestId("row-actions-menu-trigger")
+      ).toBeInTheDocument();
+      expect(
+        within(implicitRow).queryByTestId("row-actions-menu-trigger")
       ).not.toBeInTheDocument();
     });
 
@@ -232,10 +234,13 @@ describe("SponsorFormsTab", () => {
       expect(screen.getByText("Managed Form 1")).toBeInTheDocument();
       expect(screen.getByText("Managed Form 2")).toBeInTheDocument();
 
-      const deleteButtons = screen.getAllByTestId("DeleteIcon");
-      const secondDeleteButton = deleteButtons[1].closest("button");
       await act(async () => {
-        await userEvent.click(secondDeleteButton);
+        await userEvent.click(
+          screen.getAllByTestId("row-actions-menu-trigger")[1]
+        );
+        await userEvent.click(
+          screen.getByRole("menuitem", { name: "general.delete" })
+        );
       });
 
       expect(
@@ -289,9 +294,11 @@ describe("SponsorFormsTab", () => {
         }
       });
 
-      const deleteButton = screen.getByTestId("DeleteIcon").closest("button");
       await act(async () => {
-        await userEvent.click(deleteButton);
+        await userEvent.click(screen.getByTestId("row-actions-menu-trigger"));
+        await userEvent.click(
+          screen.getByRole("menuitem", { name: "general.delete" })
+        );
       });
 
       expect(
@@ -322,9 +329,11 @@ describe("SponsorFormsTab", () => {
         store
       });
 
-      const deleteButton = screen.getByTestId("DeleteIcon").closest("button");
       await act(async () => {
-        await userEvent.click(deleteButton);
+        await userEvent.click(screen.getByTestId("row-actions-menu-trigger"));
+        await userEvent.click(
+          screen.getByRole("menuitem", { name: "general.delete" })
+        );
       });
 
       expect(
@@ -371,9 +380,11 @@ describe("SponsorFormsTab", () => {
         }
       });
 
-      const deleteButton = screen.getByTestId("DeleteIcon").closest("button");
       await act(async () => {
-        await userEvent.click(deleteButton);
+        await userEvent.click(screen.getByTestId("row-actions-menu-trigger"));
+        await userEvent.click(
+          screen.getByRole("menuitem", { name: "general.delete" })
+        );
       });
 
       expect(

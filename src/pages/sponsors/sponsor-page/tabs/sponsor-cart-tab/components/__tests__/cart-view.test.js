@@ -177,8 +177,9 @@ describe("CartView", () => {
       expect(
         screen.queryByRole("button", { name: "edit_sponsor.cart_tab.add_form" })
       ).not.toBeInTheDocument();
-      expect(screen.queryByTestId("action-edit")).not.toBeInTheDocument();
-      expect(screen.queryByTestId("action-delete")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("row-actions-menu-trigger")
+      ).not.toBeInTheDocument();
       expect(
         screen.queryByText("edit_sponsor.cart_tab.sponsor_note.title")
       ).not.toBeInTheDocument();
@@ -187,14 +188,19 @@ describe("CartView", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("shows them on an Open cart", () => {
+    it("shows them on an Open cart", async () => {
       renderCartView(createCart());
 
       expect(
         screen.getByRole("button", { name: "edit_sponsor.cart_tab.add_form" })
       ).toBeInTheDocument();
-      expect(screen.getByTestId("action-edit")).toBeInTheDocument();
-      expect(screen.getByTestId("action-delete")).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId("row-actions-menu-trigger"));
+      expect(
+        screen.getByRole("menuitem", { name: "general.edit" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("menuitem", { name: "general.delete" })
+      ).toBeInTheDocument();
       expect(
         screen.getByText("edit_sponsor.cart_tab.sponsor_note.title")
       ).toBeInTheDocument();

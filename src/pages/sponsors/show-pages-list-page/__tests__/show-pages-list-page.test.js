@@ -141,9 +141,11 @@ describe("ShowPagesListPage", () => {
           }
         }
       );
-      const editButton = screen.getByTestId("EditIcon").closest("button");
       await act(async () => {
-        await userEvent.click(editButton);
+        await userEvent.click(screen.getByTestId("row-actions-menu-trigger"));
+        await userEvent.click(
+          screen.getByRole("menuitem", { name: "general.edit" })
+        );
       });
       expect(getSummitSponsorshipTypes).toHaveBeenCalledWith(
         DEFAULT_CURRENT_PAGE,
@@ -168,9 +170,11 @@ describe("ShowPagesListPage", () => {
           }
         }
       );
-      const editButton = screen.getByTestId("EditIcon").closest("button");
       await act(async () => {
-        await userEvent.click(editButton);
+        await userEvent.click(screen.getByTestId("row-actions-menu-trigger"));
+        await userEvent.click(
+          screen.getByRole("menuitem", { name: "general.edit" })
+        );
       });
       expect(getSummitSponsorshipTypes).toHaveBeenCalledWith(
         DEFAULT_CURRENT_PAGE,
@@ -208,10 +212,13 @@ describe("ShowPagesListPage", () => {
           }
         }
       );
-      const deleteButtons = screen.getAllByTestId("DeleteIcon");
-      const secondDeleteButton = deleteButtons[1].closest("button");
       await act(async () => {
-        await userEvent.click(secondDeleteButton);
+        await userEvent.click(
+          screen.getAllByTestId("row-actions-menu-trigger")[1]
+        );
+        await userEvent.click(
+          screen.getByRole("menuitem", { name: "general.delete" })
+        );
       });
       expect(
         await screen.findByText("general.are_you_sure")
@@ -244,9 +251,11 @@ describe("ShowPagesListPage", () => {
           }
         }
       );
-      const deleteButton = screen.getByTestId("DeleteIcon").closest("button");
       await act(async () => {
-        await userEvent.click(deleteButton);
+        await userEvent.click(screen.getByTestId("row-actions-menu-trigger"));
+        await userEvent.click(
+          screen.getByRole("menuitem", { name: "general.delete" })
+        );
       });
       expect(
         await screen.findByText("general.are_you_sure")
