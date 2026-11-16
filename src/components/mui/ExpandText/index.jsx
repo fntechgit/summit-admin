@@ -77,27 +77,25 @@ const ExpandText = ({ children, lines = DEFAULT_LINES, charCount }) => {
     );
   }
 
-  // flex parent gives the clamped box a definite height so the ::before spacer can use 100%
+  // toggle sits beside the clamp, not floated inside it: Safari blanks clamped text that wraps a float
   return (
-    <Box sx={{ display: "flex", overflowWrap: "anywhere" }}>
+    <Box
+      sx={{ display: "flex", alignItems: "flex-end", overflowWrap: "anywhere" }}
+    >
       <Box
         ref={textRef}
         sx={{
+          flex: 1,
+          minWidth: 0,
           display: "-webkit-box",
           WebkitLineClamp: lines,
           WebkitBoxOrient: "vertical",
-          overflow: "hidden",
-          // spacer float pushes the toggle down to the last visible line, so the ellipsis lands before it
-          "&::before": {
-            content: "\"\"",
-            float: "right",
-            height: "calc(100% - 1lh)"
-          }
+          overflow: "hidden"
         }}
       >
-        {isClamped && renderToggle({ float: "right", clear: "both", ml: 0.5 })}
         {text}
       </Box>
+      {isClamped && renderToggle({ flexShrink: 0, ml: 0.5 })}
     </Box>
   );
 };
