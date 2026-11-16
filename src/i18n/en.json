@@ -2488,7 +2488,7 @@
       "errors_skipped_warning": "Rows with errors will be skipped.",
       "nothing_to_import": "Nothing would be imported.",
       "new_companies_warning": "New companies to create: {companies_created}. They are added to the company directory shared by every show. If one of them already exists under Companies, put its exact name in the file and preview again.",
-      "stopped_warning": "The import stopped before finishing. {not_attempted} rows were not imported.",
+      "not_imported_warning": "{not_attempted} rows were not imported. See the Result column for each row.",
       "col_row": "Row",
       "col_company": "Company (CSV)",
       "col_match": "Matched company",

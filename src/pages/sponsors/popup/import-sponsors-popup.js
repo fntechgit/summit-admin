@@ -34,9 +34,6 @@ const rowShape = PropTypes.shape({
   error: PropTypes.string
 });
 
-// Global page CSS bolds Typography paragraphs; keep cells at the table's weight
-const CELL_TEXT_SX = { fontWeight: "inherit" };
-const BODY_TEXT_SX = { fontWeight: 400 };
 const CODE_SX = {
   fontFamily: "monospace",
   fontSize: "0.85rem",
@@ -51,7 +48,7 @@ const ResultCell = ({ row, isResult }) => {
     return (
       <Box sx={{ display: "flex", alignItems: "flex-start", gap: 0.5 }}>
         <ErrorOutlineIcon color="error" fontSize="small" />
-        <Typography variant="body2" color="error" sx={CELL_TEXT_SX}>
+        <Typography variant="body1" color="error">
           {row.error}
         </Typography>
       </Box>
@@ -62,7 +59,7 @@ const ResultCell = ({ row, isResult }) => {
       ? "sponsor_list.import.action_created"
       : ACTION_LABEL_KEYS[row.action];
   return (
-    <Typography variant="body2" sx={CELL_TEXT_SX}>
+    <Typography variant="body1">
       {T.translate(labelKey, { row: row.duplicate_of_row })}
     </Typography>
   );
@@ -78,12 +75,12 @@ const MatchedCompanyCell = ({ row }) => {
   return (
     <>
       {company?.match === "new" && (
-        <Typography variant="body2" sx={CELL_TEXT_SX}>
+        <Typography variant="body1">
           {T.translate("sponsor_list.import.new_company")}
         </Typography>
       )}
       {company && company.match !== "new" && (
-        <Typography variant="body2" sx={CELL_TEXT_SX}>
+        <Typography variant="body1">
           {company.name}
           {company.match === "normalized" &&
             company.name !== row.company_input && (
@@ -99,9 +96,7 @@ const MatchedCompanyCell = ({ row }) => {
         </Typography>
       )}
       {candidates.length > 0 && (
-        <Typography variant="body2" sx={CELL_TEXT_SX}>
-          {candidates.join(", ")}
-        </Typography>
+        <Typography variant="body1">{candidates.join(", ")}</Typography>
       )}
     </>
   );
@@ -184,7 +179,7 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
       onClose={onClose}
       primaryAction={primaryAction}
     >
-      <Typography variant="body2" sx={{ ...BODY_TEXT_SX, mb: 1.5 }}>
+      <Typography variant="body1" sx={{ mb: 1.5 }}>
         {T.translate("sponsor_list.import.format_intro")}
       </Typography>
       <Box
@@ -205,17 +200,13 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
             <Box component="code" sx={CODE_SX}>
               {column}
             </Box>
-            <Typography variant="body2" sx={BODY_TEXT_SX}>
+            <Typography variant="body1">
               {T.translate(descriptionKey)}
             </Typography>
           </React.Fragment>
         ))}
       </Box>
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        sx={{ ...BODY_TEXT_SX, mb: 2 }}
-      >
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
         {T.translate("sponsor_list.import.format_excel")}
       </Typography>
       <Box
@@ -226,7 +217,7 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
           mb: 0.5
         }}
       >
-        <Typography variant="body2" sx={BODY_TEXT_SX}>
+        <Typography variant="body1">
           {T.translate("sponsor_list.import.format_example")}
         </Typography>
         <Button
@@ -290,13 +281,13 @@ const ImportSponsorsPopup = ({ onClose, onPreview, onImport }) => {
           )}
           {isResult && report.summary.not_attempted > 0 && (
             <Alert severity="warning" sx={{ mb: 1 }}>
-              {T.translate("sponsor_list.import.stopped_warning", {
+              {T.translate("sponsor_list.import.not_imported_warning", {
                 not_attempted: report.summary.not_attempted
               })}
             </Alert>
           )}
           {hasNormalizedMatch && (
-            <Typography variant="body2" sx={{ mb: 1 }}>
+            <Typography variant="body1" sx={{ mb: 1 }}>
               {T.translate("sponsor_list.import.normalized_help")}
             </Typography>
           )}

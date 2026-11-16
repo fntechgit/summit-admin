@@ -356,25 +356,23 @@ describe("ImportSponsorsPopup", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("shows the stopped-run message when rows were not attempted", async () => {
+  it("reports rows that were not imported", async () => {
     const user = userEvent.setup();
     const onPreview = jest.fn().mockResolvedValue(previewReport);
-    const onImport = jest.fn().mockResolvedValue(
-      buildReport(
-        { sponsors_created: 1, not_attempted: 3 },
-        [
-          row({ row: 1 }),
-          row({ row: 2, action: "error", error: "db down" }),
-          row({
-            row: 3,
-            action: "not_attempted",
-            error: "connection reset"
-          }),
-          row({ row: 4, action: "not_attempted" })
-        ],
-        false
-      )
-    );
+    const onImport = jest
+      .fn()
+      .mockResolvedValue(
+        buildReport(
+          { sponsors_created: 1, not_attempted: 2 },
+          [
+            row({ row: 1 }),
+            row({ row: 2, action: "error", error: "could not confirm" }),
+            row({ row: 3, action: "not_attempted" }),
+            row({ row: 4, action: "not_attempted" })
+          ],
+          false
+        )
+      );
     setup({ onPreview, onImport });
 
     await user.click(screen.getByTestId("upload-a"));
@@ -385,10 +383,14 @@ describe("ImportSponsorsPopup", () => {
 
     expect(
       await screen.findByText(
-        "sponsor_list.import.stopped_warning:{\"not_attempted\":3}"
+        "sponsor_list.import.not_imported_warning:{\"not_attempted\":2}"
       )
     ).toBeInTheDocument();
-    expect(screen.getByText("db down")).toBeInTheDocument();
-    expect(screen.getByText("connection reset")).toBeInTheDocument();
+    expect(screen.getByText("could not confirm")).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        "sponsor_list.import.action_not_attempted:{\"row\":null}"
+      )
+    ).toHaveLength(2);
   });
 });
