@@ -29,7 +29,10 @@ const getFilterChipLabel = (filter, criterias) => {
     (op) => op.value === filter.operator
   );
   const { type, props } = criteria.values;
-  const options = props?.options;
+  const options =
+    typeof props?.options === "function"
+      ? props.options(filter.value)
+      : props?.options;
 
   const toLabel = (v) => {
     // async inputs store option objects
