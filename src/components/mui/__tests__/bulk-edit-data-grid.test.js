@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import { OPERATORS } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import BulkEditDataGrid from "../bulk-edit-data-grid";
 import showConfirmDialog from "../showConfirmDialog";
 
@@ -64,6 +65,12 @@ const selectRow = (rowName) =>
   );
 
 describe("BulkEditDataGrid", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGridFilterState.valuesWithIds = [];
+    mockGridFilterState.joinOperator = undefined;
+  });
+
   test("applies inline edits of the selected rows through onUpdate", async () => {
     const onUpdate = jest.fn(() => Promise.resolve());
     renderGrid({ onUpdate });
@@ -339,5 +346,74 @@ describe("BulkEditDataGrid", () => {
 
     await waitFor(() => expect(showConfirmDialog).toHaveBeenCalled());
     expect(onDelete).not.toHaveBeenCalled();
+  });
+
+  describe("filter chip labels", () => {
+    const criterias = [
+      {
+        key: "location_id",
+        label: "Location",
+        operators: [OPERATORS.IS],
+        values: {
+          type: "select",
+          props: {
+            options: [
+              { value: 2, label: "Room A" },
+              { value: 7, label: "Room B" }
+            ],
+            multiple: true
+          }
+        }
+      },
+      {
+        key: "tags",
+        label: "Tags",
+        operators: [OPERATORS.IS],
+        values: { type: "asyncSelect", props: { multiple: true } }
+      },
+      {
+        key: "created",
+        label: "Created",
+        operators: [OPERATORS.BEFORE, OPERATORS.AFTER],
+        values: { type: "datetime", props: { mode: "datetime" } }
+      }
+    ];
+
+    const renderChip = (filter) => {
+      mockGridFilterState.valuesWithIds = [
+        { ...filter, id: `${filter.criteria}-0` }
+      ];
+      renderGrid({ filterProps: { id: "grid_filter", criterias } });
+    };
+
+    test("shows option labels for a multiple select instead of ids", () => {
+      renderChip({
+        criteria: "location_id",
+        operator: OPERATORS.IS.value,
+        value: [2, 7]
+      });
+      expect(screen.getByText(/Room A, Room B$/)).toBeInTheDocument();
+    });
+
+    test("shows the label of async option objects", () => {
+      renderChip({
+        criteria: "tags",
+        operator: OPERATORS.IS.value,
+        value: [{ value: 1, label: "keynote" }]
+      });
+      expect(screen.getByText(/keynote$/)).toBeInTheDocument();
+    });
+
+    test("uses the criteria's own operator label where operator values collide", () => {
+      renderChip({
+        criteria: "created",
+        operator: OPERATORS.BEFORE.value,
+        value: 0
+      });
+      expect(screen.getByText(/^Created:/)).toHaveTextContent(
+        `Created: ${OPERATORS.BEFORE.label}`
+      );
+      expect(OPERATORS.BEFORE.label).not.toBe(OPERATORS.LESS_OR_EQUAL.label);
+    });
   });
 });
