@@ -555,7 +555,7 @@
     "import": "Import",
     "import_allowed_members": "Import Allowed Members",
     "import_allowed_members_success": "Emails will be ingested as a background task. Will need to refresh the page to review.",
-    "cfp_settings": "Call for Presentation Settings",
+    "cfp_settings": "CFP Settings",
     "cfp_landing_page_title": "Landing page title",
     "cfp_landing_page_title_info": "custom title for the login landing page when selection plan is set",
     "cfp_track_question_label": "Track question label",

@@ -114,7 +114,6 @@ const EditSelectionPlanPage = ({
           </Grid2>
         )}
       </Grid2>
-      <hr />
       <SelectionPlanForm
         history={history}
         tabSlug={tab}
