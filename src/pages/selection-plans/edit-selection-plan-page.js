@@ -92,7 +92,7 @@ const EditSelectionPlanPage = ({
     : T.translate("general.add");
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <Grid2
         container
         sx={{ justifyContent: "space-between", alignItems: "center" }}
