@@ -75,12 +75,7 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
   const ms = values.marketing_settings;
 
   return (
-    <Box
-      role="tabpanel"
-      id="tabpanel-cfp_settings"
-      hidden={hidden}
-      sx={{ maxWidth: 1140, mx: "auto" }}
-    >
+    <div role="tabpanel" id="tabpanel-cfp_settings" hidden={hidden}>
       <Box sx={{ pt: 2 }}>
         <Grid2 container spacing={2}>
           <Grid2 size={12}>
@@ -341,7 +336,7 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
           )}
         </Grid2>
       </Box>
-    </Box>
+    </div>
   );
 };
 

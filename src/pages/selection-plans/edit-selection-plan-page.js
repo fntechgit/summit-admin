@@ -25,6 +25,7 @@ import { getMarketingSettingsBySelectionPlan } from "../../actions/marketing-act
 import {
   DEFAULT_CURRENT_PAGE,
   MAX_PER_PAGE,
+  SELECTION_PLAN_MAX_WIDTH,
   SELECTION_PLAN_TAB_SLUGS
 } from "../../utils/constants";
 
@@ -122,7 +123,13 @@ const EditSelectionPlanPage = ({
       />
       <Grid2
         size={12}
-        sx={{ p: 3, pt: 0, display: "flex", justifyContent: "flex-end" }}
+        sx={{
+          pb: 3,
+          display: "flex",
+          justifyContent: "flex-end",
+          maxWidth: SELECTION_PLAN_MAX_WIDTH,
+          mx: "auto"
+        }}
       >
         <Button
           type="submit"

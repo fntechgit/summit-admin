@@ -22,7 +22,10 @@ import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import useScrollToError from "../../hooks/useScrollToError";
-import { SELECTION_PLAN_TAB_SLUGS } from "../../utils/constants";
+import {
+  SELECTION_PLAN_MAX_WIDTH,
+  SELECTION_PLAN_TAB_SLUGS
+} from "../../utils/constants";
 import MainTab from "./selection-plan-form/main-tab";
 import TrackGroupsTab from "./selection-plan-form/track-groups-tab";
 import EventTypesTab from "./selection-plan-form/event-types-tab";
@@ -362,75 +365,77 @@ const SelectionPlanForm = (props) => {
           </Box>
         )}
 
-        {/* Main tab always in DOM - TextEditorV3 must not remount on tab switch */}
-        <MainTab
-          hidden={!isNewPlan && activeTab !== "main"}
-          currentSummit={currentSummit}
-        />
+        <Box sx={{ maxWidth: SELECTION_PLAN_MAX_WIDTH, mx: "auto" }}>
+          {/* Main tab always in DOM - TextEditorV3 must not remount on tab switch */}
+          <MainTab
+            hidden={!isNewPlan && activeTab !== "main"}
+            currentSummit={currentSummit}
+          />
 
-        {!isNewPlan && (
-          <>
-            <TrackGroupsTab
-              hidden={activeTab !== "track_groups"}
-              currentSummit={currentSummit}
-              onTrackGroupLink={addTrackGroupToSelectionPlan}
-              onTrackGroupUnLink={removeTrackGroupFromSelectionPlan}
-            />
-            <EventTypesTab
-              hidden={activeTab !== "event_types"}
-              currentSummit={currentSummit}
-              onAddEventType={addEventTypeSelectionPlan}
-              onDeleteEventType={deleteEventTypeSelectionPlan}
-            />
-            <ExtraQuestionsTab
-              hidden={activeTab !== "extra_questions"}
-              currentSummit={currentSummit}
-              extraQuestionsOrder={propsEntity.extraQuestionsOrder}
-              extraQuestionsOrderDir={propsEntity.extraQuestionsOrderDir}
-              onEditExtraQuestion={onEditExtraQuestion}
-              onDeleteExtraQuestion={onDeleteExtraQuestion}
-              onAddNewExtraQuestion={onAddNewExtraQuestion}
-              onAssignExtraQuestion2SelectionPlan={
-                assignExtraQuestion2SelectionPlan
-              }
-              updateExtraQuestionOrder={onUpdateExtraQuestionOrder}
-            />
-            <EmailTemplatesTab hidden={activeTab !== "email_templates"} />
-            <TrackChairSettingsTab
-              hidden={activeTab !== "track_chair_settings"}
-              onAddRatingType={onAddRatingType}
-              onEditRatingType={onEditRatingType}
-              onDeleteRatingType={onDeleteRatingType}
-              onUpdateRatingTypeOrder={onUpdateRatingTypeOrder}
-            />
-            <PresentationActionTypesTab
-              hidden={activeTab !== "presentation_action_types"}
-              currentSummit={currentSummit}
-              actionTypesOrder={propsEntity.actionTypesOrder}
-              actionTypesOrderDir={propsEntity.actionTypesOrderDir}
-              onAssignProgressFlag2SelectionPlan={
-                assignProgressFlag2SelectionPlan
-              }
-              onUnassignProgressFlag={onUnassignProgressFlag}
-              onUpdateProgressFlagOrder={onUpdateProgressFlagOrder}
-            />
-            {!formik.values.is_hidden && (
-              <AllowedMembersTab
-                hidden={activeTab !== "allowed_members"}
-                allowedMembers={allowedMembers}
-                onImportAllowedMembers={importAllowedMembersCSV}
-                onAllowedMemberAdd={addAllowedMemberToSelectionPlan}
-                onAllowedMemberDelete={removeAllowedMemberFromSelectionPlan}
-                onAllowedMembersPageChange={getAllowedMembers}
+          {!isNewPlan && (
+            <>
+              <TrackGroupsTab
+                hidden={activeTab !== "track_groups"}
+                currentSummit={currentSummit}
+                onTrackGroupLink={addTrackGroupToSelectionPlan}
+                onTrackGroupUnLink={removeTrackGroupFromSelectionPlan}
               />
-            )}
-            {/* cfp_settings kept in DOM always - contains TextEditorV3 */}
-            <CfpSettingsTab
-              hidden={activeTab !== "cfp_settings"}
-              currentSummit={currentSummit}
-            />
-          </>
-        )}
+              <EventTypesTab
+                hidden={activeTab !== "event_types"}
+                currentSummit={currentSummit}
+                onAddEventType={addEventTypeSelectionPlan}
+                onDeleteEventType={deleteEventTypeSelectionPlan}
+              />
+              <ExtraQuestionsTab
+                hidden={activeTab !== "extra_questions"}
+                currentSummit={currentSummit}
+                extraQuestionsOrder={propsEntity.extraQuestionsOrder}
+                extraQuestionsOrderDir={propsEntity.extraQuestionsOrderDir}
+                onEditExtraQuestion={onEditExtraQuestion}
+                onDeleteExtraQuestion={onDeleteExtraQuestion}
+                onAddNewExtraQuestion={onAddNewExtraQuestion}
+                onAssignExtraQuestion2SelectionPlan={
+                  assignExtraQuestion2SelectionPlan
+                }
+                updateExtraQuestionOrder={onUpdateExtraQuestionOrder}
+              />
+              <EmailTemplatesTab hidden={activeTab !== "email_templates"} />
+              <TrackChairSettingsTab
+                hidden={activeTab !== "track_chair_settings"}
+                onAddRatingType={onAddRatingType}
+                onEditRatingType={onEditRatingType}
+                onDeleteRatingType={onDeleteRatingType}
+                onUpdateRatingTypeOrder={onUpdateRatingTypeOrder}
+              />
+              <PresentationActionTypesTab
+                hidden={activeTab !== "presentation_action_types"}
+                currentSummit={currentSummit}
+                actionTypesOrder={propsEntity.actionTypesOrder}
+                actionTypesOrderDir={propsEntity.actionTypesOrderDir}
+                onAssignProgressFlag2SelectionPlan={
+                  assignProgressFlag2SelectionPlan
+                }
+                onUnassignProgressFlag={onUnassignProgressFlag}
+                onUpdateProgressFlagOrder={onUpdateProgressFlagOrder}
+              />
+              {!formik.values.is_hidden && (
+                <AllowedMembersTab
+                  hidden={activeTab !== "allowed_members"}
+                  allowedMembers={allowedMembers}
+                  onImportAllowedMembers={importAllowedMembersCSV}
+                  onAllowedMemberAdd={addAllowedMemberToSelectionPlan}
+                  onAllowedMemberDelete={removeAllowedMemberFromSelectionPlan}
+                  onAllowedMembersPageChange={getAllowedMembers}
+                />
+              )}
+              {/* cfp_settings kept in DOM always - contains TextEditorV3 */}
+              <CfpSettingsTab
+                hidden={activeTab !== "cfp_settings"}
+                currentSummit={currentSummit}
+              />
+            </>
+          )}
+        </Box>
       </Box>
     </FormikProvider>
   );
