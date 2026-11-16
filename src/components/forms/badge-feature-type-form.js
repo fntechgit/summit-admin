@@ -18,7 +18,7 @@ import { useFormikContext } from "formik";
 import { Box, Grid2, InputLabel } from "@mui/material";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import FormikTextEditor from "openstack-uicore-foundation/lib/components/mui/formik-inputs/texteditor";
-import UploadInputV3 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v3";
+import FileUploadInput from "../inputs/file-upload-input";
 import useScrollToError from "../../hooks/useScrollToError";
 import { KB, MAX_BADGE_FEATURE_IMAGE_UPLOAD_SIZE } from "../../utils/constants";
 
@@ -101,7 +101,7 @@ const BadgeFeatureTypeForm = ({ entity, onRemoveImage, onUploadingChange }) => {
       <Grid2 container spacing={2} sx={{ mb: 2 }}>
         <Grid2 size={12}>
           <InputLabel>{T.translate("edit_badge_feature.image")}</InputLabel>
-          <UploadInputV3
+          <FileUploadInput
             id="image"
             name="image"
             value={getImageValue(formik.values.image)}
@@ -109,8 +109,6 @@ const BadgeFeatureTypeForm = ({ entity, onRemoveImage, onUploadingChange }) => {
             onUploadStart={() => onUploadingChange(true)}
             onError={() => onUploadingChange(false)}
             onRemove={handleRemoveImage}
-            postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
-            djsConfig={{ withCredentials: true }}
             maxFiles={1}
             canAdd={!formik.values.image}
             mediaType={{

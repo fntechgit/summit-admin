@@ -14,12 +14,12 @@
 import React, { useState } from "react";
 import { Box, Divider, IconButton, Typography } from "@mui/material";
 import PropTypes from "prop-types";
-import UploadInputV3 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v3";
 import CustomDialog from "openstack-uicore-foundation/lib/components/mui/custom-dialog";
 import T from "i18n-react/dist/i18n-react";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import FileUploadInput from "../inputs/file-upload-input";
 
 const MAX_PAGE_MODULE_UPLOAD_QTY = 1;
 
@@ -118,15 +118,13 @@ const UploadDialog = ({
           <CurrentFile file={value} onRemove={handleRemove} />
         </>
       ) : (
-        <UploadInputV3
+        <FileUploadInput
           id={`media_upload_${name}`}
           name={name}
           onUploadComplete={setUploadedFile}
           value={[]}
           mediaType={mediaType}
           onRemove={() => setUploadedFile(null)}
-          postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
-          djsConfig={{ withCredentials: true }}
           maxFiles={maxFiles}
           canAdd={canAddMore()}
           parallelChunkUploads
