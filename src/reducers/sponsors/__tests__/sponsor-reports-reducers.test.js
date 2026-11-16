@@ -4,6 +4,8 @@ import {
   RECEIVE_PURCHASE_DETAILS,
   PURCHASE_DETAILS_READ_ERROR,
   PURCHASE_DETAILS_VALIDATION_ERROR,
+  RECEIVE_PURCHASE_DETAILS_SKIPPED,
+  PURCHASE_DETAILS_SKIPPED_READ_ERROR,
   REQUEST_SPONSOR_ASSET,
   RECEIVE_SPONSOR_ASSET_FILTERS,
   RECEIVE_SPONSOR_ASSET_ROWS,
@@ -109,6 +111,41 @@ describe("sponsorReportsPurchaseDetailsReducer", () => {
       expect(result.validationError).toStrictEqual(errPayload);
       // body must NOT be replaced
       expect(result.data).toStrictEqual(existingData);
+    });
+  });
+
+  describe("RECEIVE_PURCHASE_DETAILS_SKIPPED", () => {
+    it("stores the rows, pending count and oldest epoch", () => {
+      const rows = [{ purchase_id: 1 }, { purchase_id: 2 }];
+      const result = purchaseDetailsReducer(PD_DEFAULT_STATE, {
+        type: RECEIVE_PURCHASE_DETAILS_SKIPPED,
+        payload: { data: rows, pendingCount: 2, oldest: 1700000000 }
+      });
+      expect(result.skipped).toStrictEqual(rows);
+      expect(result.skippedCount).toBe(2);
+      expect(result.skippedOldest).toBe(1700000000);
+    });
+  });
+
+  describe("PURCHASE_DETAILS_SKIPPED_READ_ERROR", () => {
+    it("empties the skipped slice and leaves the report untouched", () => {
+      const state = {
+        ...PD_DEFAULT_STATE,
+        data: [{ id: 1 }],
+        readError: null,
+        skipped: [{ purchase_id: 1 }],
+        skippedCount: 1,
+        skippedOldest: 1700000000
+      };
+      const result = purchaseDetailsReducer(state, {
+        type: PURCHASE_DETAILS_SKIPPED_READ_ERROR,
+        payload: { status: 503, message: "" }
+      });
+      expect(result.skipped).toStrictEqual([]);
+      expect(result.skippedCount).toBe(0);
+      expect(result.skippedOldest).toBeNull();
+      expect(result.readError).toBeNull();
+      expect(result.data).toStrictEqual([{ id: 1 }]);
     });
   });
 

@@ -26,6 +26,7 @@ import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/m
 import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
 import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
 import ReportShell from "../../../../components/sponsors/reports/ReportShell";
+import SkippedOrdersBanner from "../../../../components/sponsors/reports/SkippedOrdersBanner";
 import SummaryPanel from "../../../../components/sponsors/reports/SummaryPanel";
 import FilterBar from "../../../../components/sponsors/reports/FilterBar";
 import OrdersTable from "../../../../components/sponsors/reports/OrdersTable";
@@ -40,6 +41,7 @@ import {
   getPurchaseDetailsReport,
   getPurchaseDetailsLinesReport,
   getPurchaseDetailsFilters,
+  getPurchaseDetailsSkipped,
   clearPurchaseDetailsValidation,
   exportPurchaseDetailsCsv,
   exportPurchaseDetailsLinesCsv,
@@ -107,6 +109,10 @@ const PurchaseDetailsReportPage = ({
   filters,
   readError,
   validationError,
+  // Show-wide skipped orders (never filtered by the page filters).
+  skipped,
+  skippedCount,
+  skippedOldest,
   // Lines slice (per-line manifest view) — its own pagination/filter.
   linesData,
   linesSummary,
@@ -131,6 +137,7 @@ const PurchaseDetailsReportPage = ({
   getPurchaseDetailsReport: fetchReport,
   getPurchaseDetailsLinesReport: fetchLinesReport,
   getPurchaseDetailsFilters: fetchFilters,
+  getPurchaseDetailsSkipped: fetchSkipped,
   clearPurchaseDetailsValidation: clearValidation,
   exportPurchaseDetailsCsv: exportOrdersCsv,
   exportPurchaseDetailsLinesCsv: exportLinesCsv
@@ -169,6 +176,8 @@ const PurchaseDetailsReportPage = ({
   // view we're leaving are carried into the view we're entering; the entering view
   // keeps its own page when those filters are unchanged, else snaps back to page 1.
   useEffect(() => {
+    // Refresh the show-wide banner with each report fetch.
+    fetchSkipped();
     const prevView = prevViewRef.current;
     prevViewRef.current = view;
     const carried = byView(prevView, {
@@ -261,6 +270,7 @@ const PurchaseDetailsReportPage = ({
   // axis (the thunk re-dispatches REQUEST, which re-records the slice state).
   // Applying/clearing a filter changes the result set → snap back to page 1.
   const handleApply = (next) => {
+    fetchSkipped();
     if (view === "orders") {
       fetchReport(next, {
         page: DEFAULT_CURRENT_PAGE,
@@ -517,6 +527,11 @@ const PurchaseDetailsReportPage = ({
         </Box>
       }
     >
+      <SkippedOrdersBanner
+        orders={skipped}
+        count={skippedCount}
+        oldest={skippedOldest}
+      />
       <SummaryPanel tiles={tiles} />
       {activeReadError ? (
         <Alert data-testid="reports-read-error" severity="warning">
@@ -612,6 +627,7 @@ const mapDispatchToProps = {
   getPurchaseDetailsReport,
   getPurchaseDetailsLinesReport,
   getPurchaseDetailsFilters,
+  getPurchaseDetailsSkipped,
   clearPurchaseDetailsValidation,
   exportPurchaseDetailsCsv,
   exportPurchaseDetailsLinesCsv,
