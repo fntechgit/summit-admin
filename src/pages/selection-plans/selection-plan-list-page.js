@@ -19,6 +19,7 @@ import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
+import TextLink from "openstack-uicore-foundation/lib/components/mui/text-link";
 import {
   deleteSelectionPlan,
   getSelectionPlans
@@ -47,11 +48,12 @@ const SelectionPlanListPage = ({
   const refreshSelectionPlans = () =>
     getSelectionPlans(term, currentPage, perPage, order, orderDir);
 
+  const getEditUrl = (selectionPlanId) =>
+    `/app/summits/${currentSummit.id}/selection-plans/${selectionPlanId}`;
+
   const handleEdit = (selectionPlan) => {
     if (!selectionPlan?.id) return;
-    history.push(
-      `/app/summits/${currentSummit.id}/selection-plans/${selectionPlan.id}`
-    );
+    history.push(getEditUrl(selectionPlan.id));
   };
 
   const handleDelete = (id) => {
@@ -97,7 +99,12 @@ const SelectionPlanListPage = ({
     },
     {
       columnKey: "name",
-      header: T.translate("selection_plan_list.name")
+      header: T.translate("selection_plan_list.name"),
+      render: (row) => (
+        <TextLink href={getEditUrl(row.id)} onNavigate={history.push}>
+          {row.name}
+        </TextLink>
+      )
     },
     {
       columnKey: "type",
