@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Autocomplete,
   TextField,
@@ -31,6 +31,7 @@ const MuiFormikAsyncAutocomplete = ({
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const isFirstSearch = useRef(true);
 
   const isMultiSelect = isMulti || multiple;
 
@@ -62,13 +63,17 @@ const MuiFormikAsyncAutocomplete = ({
     }
   };
 
+  // an empty term refetches the unfiltered list after a search; the mount run is skipped, the preload below covers it
   useEffect(() => {
-    if (!defaultOptions && searchTerm) {
-      const delayDebounce = setTimeout(() => {
-        fetchOptions(searchTerm);
-      }, DEBOUNCE_WAIT_250);
-      return () => clearTimeout(delayDebounce);
+    if (isFirstSearch.current) {
+      isFirstSearch.current = false;
+      return undefined;
     }
+    if (defaultOptions) return undefined;
+    const delayDebounce = setTimeout(() => {
+      fetchOptions(searchTerm);
+    }, DEBOUNCE_WAIT_250);
+    return () => clearTimeout(delayDebounce);
   }, [searchTerm]);
 
   // preload empty

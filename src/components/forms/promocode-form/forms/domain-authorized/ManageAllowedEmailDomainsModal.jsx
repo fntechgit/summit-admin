@@ -5,9 +5,10 @@ import React, {
   useRef,
   useCallback
 } from "react";
-import { Modal } from "react-bootstrap";
 import { FixedSizeList } from "react-window";
 import T from "i18n-react";
+import { Alert, Box, Button, TextField, Typography } from "@mui/material";
+import CustomDialog from "openstack-uicore-foundation/lib/components/mui/custom-dialog";
 import { parseTextBlob, classifyEntries } from "./bulk-input-parser";
 
 const ROW_HEIGHT = 32;
@@ -16,11 +17,7 @@ const LIST_HEIGHT = 320;
 const Row = React.memo(({ index, style, data }) => {
   const entry = data[index];
   return (
-    <div
-      style={style}
-      data-testid={`manage-modal-row-${index}`}
-      className="manage-modal-row"
-    >
+    <div style={style} data-testid={`manage-modal-row-${index}`}>
       {entry}
     </div>
   );
@@ -80,10 +77,6 @@ const ManageAllowedEmailDomainsModal = ({
     onHide();
   };
 
-  const handleCancel = () => {
-    onHide();
-  };
-
   const toastText = useMemo(() => {
     if (!toast) return null;
     return T.translate("edit_promocode.manage_modal.added_toast", {
@@ -93,80 +86,61 @@ const ManageAllowedEmailDomainsModal = ({
     });
   }, [toast]);
 
-  const countText = T.translate(
-    "edit_promocode.manage_modal.configured_count",
-    {
-      n: working.length
-    }
-  );
-
   return (
-    <Modal show={show} onHide={handleCancel} bsSize="large">
-      <Modal.Header closeButton>
-        <Modal.Title>
-          {T.translate("edit_promocode.manage_modal.title")}
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <div className="manage-modal-add-section" style={{ marginBottom: 12 }}>
-          <textarea
-            data-testid="manage-modal-textarea"
-            className="form-control"
-            rows={4}
-            value={draftText}
-            placeholder={T.translate("edit_promocode.manage_modal.add_helper")}
-            onChange={(ev) => setDraftText(ev.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          <button
-            type="button"
-            className="btn btn-primary"
-            style={{ marginTop: 8 }}
-            onClick={handleAddDomains}
-          >
-            {T.translate("edit_promocode.manage_modal.add_button")}
-          </button>
-        </div>
-        {toastText && (
-          <div
-            data-testid="manage-modal-toast"
-            className="alert alert-info"
-            style={{ padding: "6px 10px", marginBottom: 12 }}
-          >
-            {toastText}
-          </div>
-        )}
-        <div
-          className="manage-modal-count"
-          data-testid="manage-modal-count"
-          style={{ marginBottom: 4 }}
+    <CustomDialog
+      title={T.translate("edit_promocode.manage_modal.title")}
+      open={show}
+      onClose={onHide}
+      maxWidth="md"
+      primaryAction={{
+        label: T.translate("edit_promocode.manage_modal.done"),
+        onClick: handleDone
+      }}
+      secondaryAction={{
+        label: T.translate("edit_promocode.manage_modal.cancel"),
+        onClick: onHide
+      }}
+    >
+      <Box sx={{ mb: 1.5 }}>
+        <TextField
+          fullWidth
+          multiline
+          rows={4}
+          value={draftText}
+          placeholder={T.translate("edit_promocode.manage_modal.add_helper")}
+          onChange={(ev) => setDraftText(ev.target.value)}
+          onKeyDown={handleKeyDown}
+          slotProps={{ htmlInput: { "data-testid": "manage-modal-textarea" } }}
+        />
+        <Button variant="contained" sx={{ mt: 1 }} onClick={handleAddDomains}>
+          {T.translate("edit_promocode.manage_modal.add_button")}
+        </Button>
+      </Box>
+      {toastText && (
+        <Alert
+          severity="info"
+          data-testid="manage-modal-toast"
+          sx={{ mb: 1.5 }}
         >
-          {countText}
-        </div>
-        <FixedSizeList
-          ref={listRef}
-          height={LIST_HEIGHT}
-          width="100%"
-          itemCount={working.length}
-          itemSize={ROW_HEIGHT}
-          itemData={working}
-        >
-          {Row}
-        </FixedSizeList>
-      </Modal.Body>
-      <Modal.Footer>
-        <button
-          type="button"
-          className="btn btn-default"
-          onClick={handleCancel}
-        >
-          {T.translate("edit_promocode.manage_modal.cancel")}
-        </button>
-        <button type="button" className="btn btn-primary" onClick={handleDone}>
-          {T.translate("edit_promocode.manage_modal.done")}
-        </button>
-      </Modal.Footer>
-    </Modal>
+          {toastText}
+        </Alert>
+      )}
+      <Typography data-testid="manage-modal-count" sx={{ mb: 0.5 }}>
+        {T.translate("edit_promocode.manage_modal.configured_count", {
+          n: working.length
+        })}
+      </Typography>
+      <FixedSizeList
+        ref={listRef}
+        height={LIST_HEIGHT}
+        width="100%"
+        itemCount={working.length}
+        itemSize={ROW_HEIGHT}
+        itemData={working}
+      >
+        {Row}
+      </FixedSizeList>
+    </CustomDialog>
   );
 };
 

@@ -19,24 +19,13 @@ import {
   PROMOCODE_DELETED
 } from "../../actions/promocode-actions";
 
-import { ALL_FILTER } from "../../utils/constants";
-
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-
-const FILTERS_DEFAULT_STATE = {
-  assigneeFilter: null,
-  creatorFilter: null,
-  typeFilter: null,
-  classNamesFilter: [],
-  tagsFilter: [],
-  orAndFilter: ALL_FILTER
-};
 
 const DEFAULT_STATE = {
   promocodes: [],
   tags: [],
   term: null,
-  filters: { ...FILTERS_DEFAULT_STATE },
+  filters: [],
   classNames: [],
   type: "ALL",
   assignee: null,
@@ -61,9 +50,17 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_PROMOCODES: {
-      const { order, orderDir, term, filters, extraColumns } = payload;
+      const { perPage, order, orderDir, term, filters, extraColumns } = payload;
 
-      return { ...state, order, orderDir, term, filters, extraColumns };
+      return {
+        ...state,
+        perPage,
+        order,
+        orderDir,
+        term,
+        filters,
+        extraColumns
+      };
     }
     case RECEIVE_PROMOCODE_META: {
       let types = [...DEFAULT_STATE.allTypes];

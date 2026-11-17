@@ -1,5 +1,9 @@
 import promocodeReducer, { DEFAULT_ENTITY } from "../promocode-reducer";
-import { RECEIVE_PROMOCODE } from "../../../actions/promocode-actions";
+import {
+  RECEIVE_PROMOCODE,
+  REQUEST_ASSIGNED_SPEAKERS,
+  RESET_PROMOCODE_FORM
+} from "../../../actions/promocode-actions";
 
 describe("DEFAULT_ENTITY", () => {
   it("includes allowed_email_domains as an empty array", () => {
@@ -210,5 +214,43 @@ describe("RECEIVE_PROMOCODE apply_to_all_tix derivation", () => {
       }
     });
     expect(state.entity.apply_to_all_tix).toBe(true);
+  });
+});
+
+describe("REQUEST_ASSIGNED_SPEAKERS", () => {
+  it("keeps the current entity when a request started before a form reset lands", () => {
+    const staleEntity = {
+      ...DEFAULT_ENTITY,
+      id: 7,
+      class_name: "SPEAKERS_PROMO_CODE",
+      allowed_ticket_types: [3]
+    };
+    const reset = promocodeReducer(undefined, {
+      type: RESET_PROMOCODE_FORM,
+      payload: {}
+    });
+
+    const state = promocodeReducer(reset, {
+      type: REQUEST_ASSIGNED_SPEAKERS,
+      payload: {
+        entity: staleEntity,
+        order: "id",
+        orderDir: 1,
+        page: 2,
+        term: "ann"
+      }
+    });
+
+    expect(state.entity.id).toBe(reset.entity.id);
+    expect(state.entity.allowed_ticket_types).toEqual(
+      reset.entity.allowed_ticket_types
+    );
+    expect(state.entity.speakers).toEqual({
+      ...reset.entity.speakers,
+      order: "id",
+      orderDir: 1,
+      currentPage: 2,
+      term: "ann"
+    });
   });
 });

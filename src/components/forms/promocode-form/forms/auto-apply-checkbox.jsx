@@ -1,46 +1,23 @@
 import React from "react";
 import T from "i18n-react";
-import { fireChange } from "./domain-authorized/utils";
+import { Typography } from "@mui/material";
+import CheckboxWithInfo from "./checkbox-with-info";
 
-// Shared `auto_apply` checkbox. Used by:
-//  - DomainAuthorized leaf (orchestrator's .checkboxes-div) with
-//    {withCaption, marginTop} — host provides no row context.
-//  - Member/Speaker fragments — host wraps in its own .row.form-group.
-const AutoApplyCheckbox = ({
-  entity,
-  handleChange,
-  withCaption = false,
-  marginTop = false
-}) => (
-  <div
-    className="form-check abc-checkbox"
-    style={marginTop ? { marginTop: "10px" } : undefined}
-  >
-    <input
-      type="checkbox"
-      id="auto_apply"
-      checked={!!entity.auto_apply}
-      onChange={(ev) =>
-        fireChange(handleChange, "auto_apply", ev.target.checked, "checkbox", {
-          checked: ev.target.checked
-        })
-      }
-      className="form-check-input"
+// Shared `auto_apply` checkbox. The DomainAuthorized form shows it with the caption,
+// the Member/Speaker forms without it.
+const AutoApplyCheckbox = ({ withCaption = false }) => (
+  <>
+    <CheckboxWithInfo
+      name="auto_apply"
+      label={T.translate("edit_promocode.auto_apply")}
+      info={T.translate("edit_promocode.info.auto_apply")}
     />
-    <label className="form-check-label" htmlFor="auto_apply">
-      {T.translate("edit_promocode.auto_apply")}&nbsp;
-      <i
-        className="fa fa-info-circle"
-        aria-hidden="true"
-        title={T.translate("edit_promocode.info.auto_apply")}
-      />
-    </label>
     {withCaption && (
-      <small className="form-text text-muted" style={{ display: "block" }}>
+      <Typography variant="body2" color="text.secondary">
         {T.translate("edit_promocode.captions.auto_apply")}
-      </small>
+      </Typography>
     )}
-  </div>
+  </>
 );
 
 export default AutoApplyCheckbox;
