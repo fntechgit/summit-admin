@@ -16,8 +16,9 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import { FormikProvider, useFormik } from "formik";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Button, Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import PromocodeForm, {
   buildPromocodeValues,
   promocodeValidationSchema,
@@ -159,12 +160,7 @@ const EditPromocodePage = ({
       </Grid2>
       <hr />
       <FormikProvider value={formik}>
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          autoComplete="off"
-        >
+        <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
           <PromocodeForm
             entity={entity}
             currentSummit={currentSummit}
@@ -183,7 +179,7 @@ const EditPromocodePage = ({
               {T.translate("general.save")}
             </Button>
           </Grid2>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </div>
   );

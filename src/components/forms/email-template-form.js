@@ -22,6 +22,7 @@ import InputLabel from "@mui/material/InputLabel";
 import CircularProgress from "@mui/material/CircularProgress";
 import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import CodeMirror from "@uiw/react-codemirror";
 import { sublimeInit } from "@uiw/codemirror-theme-sublime";
@@ -567,8 +568,7 @@ const EmailTemplateForm = ({
 
   return (
     <FormikProvider value={formik}>
-      <Box
-        component="form"
+      <MuiForm
         className="email-template-form"
         onSubmit={formik.handleSubmit}
         noValidate
@@ -744,7 +744,7 @@ const EmailTemplateForm = ({
             {T.translate("general.save")}
           </Button>
         </Box>
-      </Box>
+      </MuiForm>
     </FormikProvider>
   );
 };

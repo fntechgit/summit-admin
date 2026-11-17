@@ -204,6 +204,22 @@ describe("EditPromocodePage", () => {
     expect(store.getState().loading).toBe(0);
   });
 
+  test("Enter in a form field does not save the promo code", async () => {
+    // stands in for the assigned-speakers search inside PromocodeForm
+    mockPromocodeForm.mockImplementation(() => (
+      <input aria-label="speaker search" />
+    ));
+    const history = renderPage("/app/summits/1/promocodes/12", "12");
+
+    await userEvent.type(
+      await screen.findByRole("textbox", { name: "speaker search" }),
+      "jane{Enter}"
+    );
+
+    expect(putRequest).not.toHaveBeenCalled();
+    expect(history.push).not.toHaveBeenCalled();
+  });
+
   test("a failed save stays on the page", async () => {
     putRequest.mockImplementation(() => () => () => Promise.reject());
     const history = renderPage("/app/summits/1/promocodes/12", "12");

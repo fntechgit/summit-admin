@@ -31,6 +31,7 @@ import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/form
 import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
 import MuiFormikPriceField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/price-field";
 import MuiFormikQuantityField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/quantity-field";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import MuiFormikDatetimepicker from "../mui/formik-inputs/mui-formik-datetimepicker";
 import InfoTooltip from "../mui/info-tooltip";
 import useScrollToError from "../../hooks/useScrollToError";
@@ -155,12 +156,7 @@ const TicketTypeForm = ({ entity, errors, currentSummit, onSubmit }) => {
 
   return (
     <FormikProvider value={formik}>
-      <Box
-        component="form"
-        onSubmit={formik.handleSubmit}
-        noValidate
-        autoComplete="off"
-      >
+      <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
         <Grid2 container spacing={2} sx={{ mb: 2 }}>
           <Grid2 size={{ xs: 12, md: 4 }}>
             <InputLabel htmlFor="name">
@@ -380,7 +376,7 @@ const TicketTypeForm = ({ entity, errors, currentSummit, onSubmit }) => {
             {T.translate("general.save")}
           </Button>
         </Box>
-      </Box>
+      </MuiForm>
     </FormikProvider>
   );
 };
