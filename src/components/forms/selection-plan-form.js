@@ -335,8 +335,8 @@ const SelectionPlanForm = (props) => {
       >
         <input type="hidden" id="id" value={formik.values.id} />
 
-        {!isNewPlan && (
-          <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
+          {!isNewPlan && (
             <Tabs
               value={activeTab}
               onChange={(_, val) => setActiveTab(val)}
@@ -357,8 +357,8 @@ const SelectionPlanForm = (props) => {
                 />
               ))}
             </Tabs>
-          </Box>
-        )}
+          )}
+        </Box>
 
         <Box sx={{ maxWidth: SELECTION_PLAN_MAX_WIDTH, mx: "auto" }}>
           {/* Main tab always in DOM - TextEditorV3 must not remount on tab switch */}
