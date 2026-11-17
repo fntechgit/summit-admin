@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Box,
   Button,
   DialogActions,
   DialogContent,
@@ -19,6 +18,7 @@ import CompanyInputMUI from "openstack-uicore-foundation/lib/components/mui/form
 import MuiSponsorInput from "openstack-uicore-foundation/lib/components/mui/formik-inputs/sponsor-input";
 import MuiFormikSwitch from "openstack-uicore-foundation/lib/components/mui/formik-inputs/switch";
 import SponsorshipsBySummitSelectMUI from "openstack-uicore-foundation/lib/components/mui/formik-inputs/sponsorship-summit-select";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import { titleCase } from "../../../../utils/methods";
 import useScrollToError from "../../../../hooks/useScrollToError";
 import { SPONSOR_USER_ASSIGNMENT_TYPE } from "../../../../utils/constants";
@@ -108,12 +108,7 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
 
   return (
     <FormikProvider value={formik}>
-      <Box
-        component="form"
-        onSubmit={formik.handleSubmit}
-        noValidate
-        autoComplete="off"
-      >
+      <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
         <DialogContent sx={{ p: 2 }}>
           <Typography variant="h6" gutterBottom>
             {T.translate("sponsor_users.process_request.request_details")}
@@ -267,7 +262,7 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
             {T.translate("sponsor_users.process_request.save")}
           </Button>
         </DialogActions>
-      </Box>
+      </MuiForm>
     </FormikProvider>
   );
 };

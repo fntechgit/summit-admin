@@ -41,6 +41,7 @@ import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/f
 import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
 import FormikTextEditor from "openstack-uicore-foundation/lib/components/mui/formik-inputs/texteditor";
 import MuiFormikAsyncAutocomplete from "openstack-uicore-foundation/lib/components/mui/formik-inputs/async-select";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import AuditLogs from "../audit-logs";
 import MuiFormikColorField from "../mui/formik-inputs/mui-formik-color-field";
 import useScrollToError from "../../hooks/useScrollToError";
@@ -200,7 +201,7 @@ const EventCategoryForm = ({
 
   return (
     <FormikProvider value={formik}>
-      <Box component="form" onSubmit={formik.handleSubmit}>
+      <MuiForm onSubmit={formik.handleSubmit}>
         <Grid2 container spacing={2} sx={{ mb: 2 }}>
           <Grid2 size={{ xs: 12, md: 4 }}>
             <InputLabel htmlFor="name">
@@ -510,7 +511,7 @@ const EventCategoryForm = ({
             {T.translate("general.save")}
           </Button>
         </Box>
-      </Box>
+      </MuiForm>
     </FormikProvider>
   );
 };

@@ -20,6 +20,7 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 import MuiFormikDatepicker from "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikCheckbox from "openstack-uicore-foundation/lib/components/mui/formik-inputs/checkbox";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import styles from "./styles.module.less";
 import {
   addEmailListValidator,
@@ -114,8 +115,7 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
 
   return (
     <FormikProvider value={formik}>
-      <Box
-        component="form"
+      <MuiForm
         onSubmit={formik.handleSubmit}
         noValidate
         className={styles.formWrapper}
@@ -211,7 +211,7 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
             {T.translate("general.save")}
           </Button>
         </Box>
-      </Box>
+      </MuiForm>
     </FormikProvider>
   );
 };

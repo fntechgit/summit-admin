@@ -21,6 +21,7 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import SponsorshipsBySummitSelectMUI from "openstack-uicore-foundation/lib/components/mui/formik-inputs/sponsorship-summit-select";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import useScrollToError from "../../../../../hooks/useScrollToError";
 
 const AddTierPopup = ({ sponsor, onClose, onSubmit, summitId }) => {
@@ -79,12 +80,7 @@ const AddTierPopup = ({ sponsor, onClose, onSubmit, summitId }) => {
       </DialogTitle>
       <Divider />
       <FormikProvider value={formik}>
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          autoComplete="off"
-        >
+        <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
           <DialogContent sx={{ p: 1 }}>
             <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
               <Grid2
@@ -140,7 +136,7 @@ const AddTierPopup = ({ sponsor, onClose, onSubmit, summitId }) => {
               {T.translate("edit_sponsor.add_tier")}
             </Button>
           </DialogActions>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </Dialog>
   );

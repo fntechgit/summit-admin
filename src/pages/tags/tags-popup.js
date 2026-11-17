@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
-import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -12,6 +11,7 @@ import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
 import CloseIcon from "@mui/icons-material/Close";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 
 const TagsDialog = ({ onClose, onSave, initialData }) => {
   const [isSaving, setIsSaving] = useState(false);
@@ -67,7 +67,7 @@ const TagsDialog = ({ onClose, onSave, initialData }) => {
       </DialogTitle>
       <Divider />
       <FormikProvider value={formik}>
-        <Box component="form" onSubmit={formik.handleSubmit} noValidate>
+        <MuiForm onSubmit={formik.handleSubmit} noValidate>
           <DialogContent>
             <TextField
               autoFocus
@@ -91,7 +91,7 @@ const TagsDialog = ({ onClose, onSave, initialData }) => {
               {T.translate("general.save")}
             </Button>
           </DialogActions>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </Dialog>
   );

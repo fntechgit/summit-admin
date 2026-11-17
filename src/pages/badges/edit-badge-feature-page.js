@@ -18,6 +18,7 @@ import T from "i18n-react/dist/i18n-react";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
 import { Box, Button, Divider, Typography } from "@mui/material";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import BadgeFeatureTypeForm from "../../components/forms/badge-feature-type-form";
 import {
   getBadgeFeature,
@@ -100,7 +101,7 @@ const EditBadgeFeaturePage = ({
       </Typography>
       <Divider sx={{ mb: 2 }} />
       <FormikProvider value={formik}>
-        <Box component="form" onSubmit={formik.handleSubmit} noValidate>
+        <MuiForm onSubmit={formik.handleSubmit} noValidate>
           <BadgeFeatureTypeForm
             entity={entity}
             onRemoveImage={removeBadgeFeatureImage}
@@ -116,7 +117,7 @@ const EditBadgeFeaturePage = ({
               {T.translate("general.save")}
             </Button>
           </Box>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </Box>
   );

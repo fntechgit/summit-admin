@@ -16,8 +16,8 @@ import { debounce } from "lodash";
 import T from "i18n-react/dist/i18n-react";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
-import Box from "@mui/material/Box";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import { DEBOUNCE_WAIT_250 } from "../../../../../../../utils/constants";
 
 const ClientForm = ({ initialValues, onChange }) => {
@@ -47,7 +47,7 @@ const ClientForm = ({ initialValues, onChange }) => {
 
   return (
     <FormikProvider value={formik}>
-      <Box component="form" onSubmit={formik.handleSubmit} autoComplete="off">
+      <MuiForm onSubmit={formik.handleSubmit} autoComplete="off">
         <MuiFormikTextField
           name="full_name"
           label={T.translate("general.full_name")}
@@ -58,7 +58,7 @@ const ClientForm = ({ initialValues, onChange }) => {
           label={T.translate("general.email")}
           fullWidth
         />
-      </Box>
+      </MuiForm>
     </FormikProvider>
   );
 };

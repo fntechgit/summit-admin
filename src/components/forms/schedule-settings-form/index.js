@@ -27,6 +27,7 @@ import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/f
 import MuiFormikSwitch from "openstack-uicore-foundation/lib/components/mui/formik-inputs/switch";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
 import MuiTableSortable from "openstack-uicore-foundation/lib/components/mui/sortable-table";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import { FILTER_TYPES } from "../../../actions/schedule-settings-actions";
 import useScrollToError from "../../../hooks/useScrollToError";
 import EditLabelSlider from "../../inputs/edit-label-slider";
@@ -151,7 +152,7 @@ const ScheduleSettingsForm = ({ entity, summit, errors, onSubmit }) => {
 
   return (
     <FormikProvider value={formik}>
-      <Box component="form" onSubmit={formik.handleSubmit}>
+      <MuiForm onSubmit={formik.handleSubmit}>
         <Grid2 container spacing={2} sx={{ mb: 2 }}>
           <Grid2 size={{ xs: 12, md: 4 }}>
             <InputLabel htmlFor="key">
@@ -260,7 +261,7 @@ const ScheduleSettingsForm = ({ entity, summit, errors, onSubmit }) => {
             {T.translate("general.save")}
           </Button>
         </Box>
-      </Box>
+      </MuiForm>
     </FormikProvider>
   );
 };

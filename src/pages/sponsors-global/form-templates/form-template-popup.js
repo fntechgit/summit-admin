@@ -18,6 +18,7 @@ import { useFormik, FormikProvider } from "formik";
 import * as yup from "yup";
 import AdditionalInputList from "openstack-uicore-foundation/lib/components/mui/formik-inputs/additional-input-list";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
 import useScrollToError from "../../../hooks/useScrollToError";
 import {
@@ -118,12 +119,7 @@ const FormTemplateDialog = ({
       </DialogTitle>
       <Divider />
       <FormikProvider value={formik}>
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          autoComplete="off"
-        >
+        <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
           <DialogContent sx={{ p: 0 }}>
             <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
               <Grid2 size={4}>
@@ -189,7 +185,7 @@ const FormTemplateDialog = ({
                 : T.translate("edit_form_template.add_form")}
             </Button>
           </DialogActions>
-        </Box>
+        </MuiForm>
       </FormikProvider>
     </Dialog>
   );
