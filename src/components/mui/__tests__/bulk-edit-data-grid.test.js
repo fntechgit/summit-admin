@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import { OPERATORS } from "openstack-uicore-foundation/lib/components/mui/grid-filter";
 import BulkEditDataGrid from "../bulk-edit-data-grid";
 import showConfirmDialog from "../showConfirmDialog";
 
@@ -11,6 +12,21 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 }));
 
 jest.mock("../showConfirmDialog", () => jest.fn());
+
+// tests seed the applied filters before rendering
+const mockGridFilterState = {
+  valuesWithIds: [],
+  setFilters: jest.fn(),
+  joinOperator: undefined
+};
+
+jest.mock("openstack-uicore-foundation/lib/components/mui/grid-filter", () => ({
+  ...jest.requireActual(
+    "openstack-uicore-foundation/lib/components/mui/grid-filter"
+  ),
+  GridFilter: () => null,
+  useGridFilter: () => mockGridFilterState
+}));
 
 const columns = [
   { columnKey: "id", label: "Id", sortable: true },
@@ -49,6 +65,12 @@ const selectRow = (rowName) =>
   );
 
 describe("BulkEditDataGrid", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGridFilterState.valuesWithIds = [];
+    mockGridFilterState.joinOperator = undefined;
+  });
+
   test("applies inline edits of the selected rows through onUpdate", async () => {
     const onUpdate = jest.fn(() => Promise.resolve());
     renderGrid({ onUpdate });
@@ -228,10 +250,7 @@ describe("BulkEditDataGrid", () => {
     const onSearch = jest.fn();
     renderGrid({ searchProps: { term: "", onSearch } });
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "general.search" })
-    );
-    // opening the search focuses its input
+    await userEvent.click(screen.getByRole("textbox"));
     await userEvent.keyboard("keynote");
     expect(onSearch).not.toHaveBeenCalled();
 
@@ -239,30 +258,36 @@ describe("BulkEditDataGrid", () => {
     expect(onSearch).toHaveBeenCalledWith("keynote");
   });
 
-  test("keeps the search box open while a search term is applied, even when cleared", async () => {
-    renderGrid({ searchProps: { term: "keynote", onSearch: jest.fn() } });
+  test("removing a filter chip keeps the other filters and the join operator", async () => {
+    const roomA = { criteria: "location_id", operator: "==", value: [2] };
+    const roomB = { criteria: "location_id", operator: "==", value: [7] };
+    mockGridFilterState.valuesWithIds = [
+      { ...roomA, id: "location_id-0" },
+      { ...roomB, id: "location_id-1" }
+    ];
+    mockGridFilterState.joinOperator = "ANY";
+    const criterias = [
+      {
+        key: "location_id",
+        label: "Location",
+        operators: [{ value: "==", label: "is" }],
+        values: {
+          type: "select",
+          props: {
+            options: [
+              { value: 2, label: "Room A" },
+              { value: 7, label: "Room B" }
+            ]
+          }
+        }
+      }
+    ];
+    renderGrid({ filterProps: { id: "grid_filter", criterias } });
 
-    const searchbox = screen.getByRole("textbox");
-    expect(searchbox).toHaveValue("keynote");
+    const roomAChip = screen.getByRole("button", { name: /Room A/ });
+    await userEvent.click(within(roomAChip).getByTestId("CancelIcon"));
 
-    await userEvent.clear(searchbox);
-    await userEvent.tab();
-
-    expect(screen.getByRole("textbox")).toBeInTheDocument();
-  });
-
-  test("collapses the search box when left empty with no term applied", async () => {
-    renderGrid({ searchProps: { term: "", onSearch: jest.fn() } });
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "general.search" })
-    );
-    await userEvent.tab();
-
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "general.search" })
-    ).toBeInTheDocument();
+    expect(mockGridFilterState.setFilters).toHaveBeenCalledWith([roomB], "ANY");
   });
 
   test("adds from the add button and lists every import option under the import icon", async () => {
@@ -321,5 +346,74 @@ describe("BulkEditDataGrid", () => {
 
     await waitFor(() => expect(showConfirmDialog).toHaveBeenCalled());
     expect(onDelete).not.toHaveBeenCalled();
+  });
+
+  describe("filter chip labels", () => {
+    const criterias = [
+      {
+        key: "location_id",
+        label: "Location",
+        operators: [OPERATORS.IS],
+        values: {
+          type: "select",
+          props: {
+            options: [
+              { value: 2, label: "Room A" },
+              { value: 7, label: "Room B" }
+            ],
+            multiple: true
+          }
+        }
+      },
+      {
+        key: "tags",
+        label: "Tags",
+        operators: [OPERATORS.IS],
+        values: { type: "asyncSelect", props: { multiple: true } }
+      },
+      {
+        key: "created",
+        label: "Created",
+        operators: [OPERATORS.BEFORE, OPERATORS.AFTER],
+        values: { type: "datetime", props: { mode: "datetime" } }
+      }
+    ];
+
+    const renderChip = (filter) => {
+      mockGridFilterState.valuesWithIds = [
+        { ...filter, id: `${filter.criteria}-0` }
+      ];
+      renderGrid({ filterProps: { id: "grid_filter", criterias } });
+    };
+
+    test("shows option labels for a multiple select instead of ids", () => {
+      renderChip({
+        criteria: "location_id",
+        operator: OPERATORS.IS.value,
+        value: [2, 7]
+      });
+      expect(screen.getByText(/Room A, Room B$/)).toBeInTheDocument();
+    });
+
+    test("shows the label of async option objects", () => {
+      renderChip({
+        criteria: "tags",
+        operator: OPERATORS.IS.value,
+        value: [{ value: 1, label: "keynote" }]
+      });
+      expect(screen.getByText(/keynote$/)).toBeInTheDocument();
+    });
+
+    test("uses the criteria's own operator label where operator values collide", () => {
+      renderChip({
+        criteria: "created",
+        operator: OPERATORS.BEFORE.value,
+        value: 0
+      });
+      expect(screen.getByText(/^Created:/)).toHaveTextContent(
+        `Created: ${OPERATORS.BEFORE.label}`
+      );
+      expect(OPERATORS.BEFORE.label).not.toBe(OPERATORS.LESS_OR_EQUAL.label);
+    });
   });
 });
