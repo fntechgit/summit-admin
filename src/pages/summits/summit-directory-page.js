@@ -16,6 +16,7 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { formatEpoch } from "openstack-uicore-foundation/lib/utils/methods";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import TextLink from "openstack-uicore-foundation/lib/components/mui/text-link";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
@@ -101,8 +102,10 @@ const SummitDirectoryPage = ({
     history.push("/app/summits/new");
   };
 
+  const summitEditUrl = (summit) => `/app/summits/${summit.id}`;
+
   const handleEditSummit = (summit) => {
-    history.push(`/app/summits/${summit.id}`);
+    history.push(summitEditUrl(summit));
   };
 
   const handleSelectSummit = (summit) => {
@@ -119,7 +122,15 @@ const SummitDirectoryPage = ({
       header: T.translate("directory.summit_name"),
       render: (row) => (
         <>
-          <div>{row.name}</div>
+          <div>
+            <TextLink
+              href={summitEditUrl(row)}
+              onNavigate={(href) => history.push(href)}
+              disabled={!canEditSummit}
+            >
+              {row.name}
+            </TextLink>
+          </div>
           {!!row.invite_only_registration && (
             <Chip
               size="small"
