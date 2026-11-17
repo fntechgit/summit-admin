@@ -21,7 +21,11 @@ import {
   saveSelectionPlanSettings
 } from "../../actions/selection-plan-actions";
 import { getMarketingSettingsBySelectionPlan } from "../../actions/marketing-actions";
-import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  MAX_PER_PAGE,
+  SELECTION_PLAN_MAX_WIDTH
+} from "../../utils/constants";
 
 const EditSelectionPlanPage = ({
   currentSummit,
@@ -70,7 +74,7 @@ const EditSelectionPlanPage = ({
     : T.translate("general.add");
 
   return (
-    <div className="container">
+    <div className="container table-container">
       <Grid2
         container
         sx={{ justifyContent: "space-between", alignItems: "center" }}
@@ -92,11 +96,16 @@ const EditSelectionPlanPage = ({
           </Grid2>
         )}
       </Grid2>
-      <hr />
       <SelectionPlanForm history={history} onSave={onSave} />
       <Grid2
         size={12}
-        sx={{ p: 3, pt: 0, display: "flex", justifyContent: "flex-end" }}
+        sx={{
+          pb: 3,
+          display: "flex",
+          justifyContent: "flex-end",
+          maxWidth: SELECTION_PLAN_MAX_WIDTH,
+          mx: "auto"
+        }}
       >
         <Button
           type="submit"
