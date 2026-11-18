@@ -19,6 +19,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  CircularProgress,
   Grid2,
   InputLabel,
   Link,
@@ -66,10 +67,24 @@ const AttendeeEmailInput = () => {
   const { setFieldValue } = useFormikContext();
   const [options, setOptions] = useState([]);
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (input)
-      queryMembers(input, (res) => setOptions(Array.isArray(res) ? res : []));
+    if (!input) {
+      setLoading(false);
+      return undefined;
+    }
+    // queryMembers doesn't cancel, so an older search can answer last
+    let active = true;
+    setLoading(true);
+    queryMembers(input, (res) => {
+      if (!active) return;
+      setOptions(Array.isArray(res) ? res : []);
+      setLoading(false);
+    });
+    return () => {
+      active = false;
+    };
   }, [input]);
 
   const handleChange = (_ev, selected) => {
@@ -89,10 +104,12 @@ const AttendeeEmailInput = () => {
       freeSolo
       options={options}
       value={field.value}
+      loading={loading}
       onChange={handleChange}
       onInputChange={(_ev, value, reason) => {
+        if (reason !== "input") return;
         setInput(value);
-        if (reason === "input") helpers.setValue(value);
+        helpers.setValue(value);
       }}
       filterOptions={(opts) => opts}
       getOptionLabel={(option) => option.email ?? option}
@@ -108,6 +125,17 @@ const AttendeeEmailInput = () => {
           size="small"
           error={meta.touched && Boolean(meta.error)}
           helperText={meta.touched && meta.error}
+          slotProps={{
+            input: {
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loading && <CircularProgress color="inherit" size={20} />}
+                  {params.InputProps.endAdornment}
+                </>
+              )
+            }
+          }}
         />
       )}
     />
@@ -134,6 +162,8 @@ const TicketForm = ({
       onSaveTicket(order.id, {
         ...entity,
         ticket_type: { id: Number(values.ticket_type.value) },
+        attendee: values.attendee,
+        attendee_company: values.attendee_company,
         attendee_email: owner?.email
       }).catch(() => {})
   });
@@ -158,7 +188,9 @@ const TicketForm = ({
         attendee.last_name,
         attendee.email,
         attendee_company
-      );
+      )
+        .then(() => setCanReassign(false))
+        .catch(() => {});
       return;
     }
 

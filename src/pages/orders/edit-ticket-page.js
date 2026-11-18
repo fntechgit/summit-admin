@@ -214,6 +214,10 @@ const EditTicketPage = ({
     props.addBadgeToTicket(entity.id).catch(() => {});
   };
 
+  // the ticket reducer ignores the reassign response, so refetch the new owner
+  const handleReassignTicket = (...args) =>
+    props.reassignTicket(...args).then(() => props.getTicket(entity.id));
+
   // the dialogs confirm and close themselves
   const handleRejectRefundRequest = (notes) =>
     props.cancelRefundTicket(currentOrder.id, entity.id, notes);
@@ -364,7 +368,7 @@ const EditTicketPage = ({
         currentSummit={currentSummit}
         entity={entity}
         order={currentOrder}
-        onReassing={props.reassignTicket}
+        onReassing={handleReassignTicket}
         onSaveTicket={props.saveTicket}
         onUnAssign={props.deleteTicket}
       />

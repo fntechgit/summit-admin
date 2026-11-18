@@ -780,12 +780,6 @@ export const reassignTicket =
       access_token: accessToken
     };
 
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_ticket.ticket_reassigned"),
-      type: "success"
-    };
-
     const attendee = {
       attendee_first_name: firstName,
       attendee_last_name: lastName,
@@ -793,21 +787,20 @@ export const reassignTicket =
       attendee_company: company
     };
 
-    putRequest(
+    return putRequest(
       null,
       createAction(TICKET_MEMBER_REASSIGNED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/tickets/${ticketId}/reassign`,
       attendee,
       snackbarErrorHandler
-    )(params)(dispatch)
-      .then(() => {
-        dispatch(
-          showMessage(success_message, () => {
-            window.location.reload();
-          })
-        );
-      })
-      .catch(() => {});
+    )(params)(dispatch).then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_ticket.ticket_reassigned")
+        })
+      );
+    });
   };
 
 // ** TICKET REFUNDS ** /
