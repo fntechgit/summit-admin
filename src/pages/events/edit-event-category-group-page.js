@@ -11,10 +11,12 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
+import Box from "@mui/material/Box";
+import AddNewButton from "openstack-uicore-foundation/lib/components/mui/add-new-button";
 import EventCategoryGroupForm from "../../components/forms/event-category-group-form";
 import {
   getEventCategoryGroup,
@@ -26,74 +28,82 @@ import {
   removeAllowedGroupFromGroup,
   getEventCategoryGroupMeta
 } from "../../actions/event-category-actions";
-import AddNewButton from "../../components/buttons/add-new-button";
 
-// import '../../styles/edit-summit-attendee-page.less';
+const EditEventCategoryGroupPage = ({
+  currentSummit,
+  entity,
+  allClasses,
+  errors,
+  match,
+  history,
+  getEventCategoryGroup,
+  resetEventCategoryGroupForm,
+  saveEventCategoryGroup,
+  addCategoryToGroup,
+  removeCategoryFromGroup,
+  addAllowedGroupToGroup,
+  removeAllowedGroupFromGroup,
+  getEventCategoryGroupMeta
+}) => {
+  const groupId = match.params.group_id;
 
-class EditEventCategoryGroupPage extends React.Component {
-  componentDidMount() {
-    const { allClasses } = this.props;
-    const groupId = this.props.match.params.group_id;
-
-    if (!groupId) {
-      this.props.resetEventCategoryGroupForm();
-    } else {
-      this.props.getEventCategoryGroup(groupId);
-    }
-
+  useEffect(() => {
     if (allClasses.length === 0) {
-      this.props.getEventCategoryGroupMeta();
+      getEventCategoryGroupMeta();
     }
-  }
+  }, []);
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const oldId = prevProps.match.params.group_id;
-    const newId = this.props.match.params.group_id;
-
-    if (oldId !== newId) {
-      if (!newId) {
-        this.props.resetEventCategoryGroupForm();
-      } else {
-        this.props.getEventCategoryGroup(newId);
-      }
+  useEffect(() => {
+    if (!groupId) {
+      resetEventCategoryGroupForm();
+    } else {
+      getEventCategoryGroup(groupId);
     }
-  }
+  }, [groupId]);
 
-  render() {
-    const { currentSummit, entity, allClasses, errors, match } = this.props;
-    const title = entity.id
-      ? T.translate("general.edit")
-      : T.translate("general.add");
-    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
+  const title = entity.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
+  const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
-    if (!allClasses.length) return <div />;
+  const handleAddNew = () =>
+    history.push(`/app/summits/${currentSummit.id}/event-category-groups/new`);
 
-    return (
-      <div className="container">
-        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+  if (!allClasses.length) return <div />;
+
+  return (
+    <div className="container">
+      <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}
+      >
         <h3>
           {title}{" "}
           {T.translate("edit_event_category_group.event_category_group")}
-          <AddNewButton entity={entity} />
         </h3>
-        <hr />
-        {currentSummit && (
-          <EventCategoryGroupForm
-            currentSummit={currentSummit}
-            allClasses={allClasses}
-            entity={entity}
-            errors={errors}
-            onTrackLink={this.props.addCategoryToGroup}
-            onTrackUnLink={this.props.removeCategoryFromGroup}
-            onAllowedGroupLink={this.props.addAllowedGroupToGroup}
-            onAllowedGroupUnLink={this.props.removeAllowedGroupFromGroup}
-            onSubmit={this.props.saveEventCategoryGroup}
-          />
-        )}
-      </div>
-    );
-  }
-}
+        {entity.id > 0 && <AddNewButton onClick={handleAddNew} />}
+      </Box>
+      <hr />
+      {currentSummit && (
+        <EventCategoryGroupForm
+          currentSummit={currentSummit}
+          allClasses={allClasses}
+          entity={entity}
+          errors={errors}
+          onTrackLink={addCategoryToGroup}
+          onTrackUnLink={removeCategoryFromGroup}
+          onAllowedGroupLink={addAllowedGroupToGroup}
+          onAllowedGroupUnLink={removeAllowedGroupFromGroup}
+          onSubmit={saveEventCategoryGroup}
+        />
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({
   currentSummitState,
