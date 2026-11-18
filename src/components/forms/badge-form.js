@@ -11,537 +11,470 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useState } from "react";
+import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
 import moment from "moment-timezone";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
-import SimpleLinkList from "openstack-uicore-foundation/lib/components/simple-link-list";
-import Table from "openstack-uicore-foundation/lib/components/table";
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
-import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import { Pagination } from "react-bootstrap";
-import { shallowEqual } from "../../utils/methods";
-import "./badge-form.less";
-import { TWO } from "../../utils/constants";
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Divider,
+  FormHelperText,
+  Grid2,
+  InputLabel,
+  Link,
+  TextField,
+  Typography
+} from "@mui/material";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import MuiDropdown from "openstack-uicore-foundation/lib/components/mui/dropdown";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import showConfirmDialog from "../mui/showConfirmDialog";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
-class BadgeForm extends React.Component {
-  constructor(props) {
-    super(props);
+const BOLD_LABEL_SX = { fontWeight: "bold" };
+const PRINT_EXCERPT_SIZE = { xs: 12, md: 4 };
+const PRINT_HISTORY_SIZE = 12;
 
-    this.state = {
-      entity: { ...props.entity },
-      printExcerptDetails: false,
-      printFilters: {
-        viewTypeFilter: [],
-        printDateFilter: Array(TWO).fill(0)
-      }
-    };
+// access_levels and allowed_view_types can hold ids or expanded objects
+const toId = (item) => (Number.isInteger(item) ? item : item?.id);
 
-    this.handleChangeBadgeType = this.handleChangeBadgeType.bind(this);
-    this.handleChangePrintType = this.handleChangePrintType.bind(this);
-    this.handleFeatureLink = this.handleFeatureLink.bind(this);
-    this.handleFeatureUnLink = this.handleFeatureUnLink.bind(this);
-    this.queryFeatures = this.queryFeatures.bind(this);
-    this.handleShowPrintDetails = this.handleShowPrintDetails.bind(this);
-    this.handleBadgePrintSearch = this.handleBadgePrintSearch.bind(this);
-    this.handleBadgePrintSort = this.handleBadgePrintSort.bind(this);
-    this.handleBadgePrintPageChange =
-      this.handleBadgePrintPageChange.bind(this);
-    this.handleBadgePrintExport = this.handleBadgePrintExport.bind(this);
-    this.handleBadgePrintClear = this.handleBadgePrintClear.bind(this);
-    this.handleBadgePrintFilterChange =
-      this.handleBadgePrintFilterChange.bind(this);
-    this.handleChangePrintDate = this.handleChangePrintDate.bind(this);
-    this.handleApplyPrintFilters = this.handleApplyPrintFilters.bind(this);
-  }
+const toEpoch = (date) => (date ? date.unix() : 0);
 
-  componentDidUpdate(prevProps) {
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      this.setState({
-        entity: { ...this.props.entity }
-      });
-    }
-  }
+const BadgeForm = ({
+  entity,
+  currentSummit,
+  canPrint,
+  selectedPrintType,
+  badgePrints: {
+    badgePrints,
+    term,
+    order,
+    orderDir,
+    currentPage,
+    perPage,
+    totalBadgePrints
+  },
+  onTypeChange,
+  onSelectPrintType,
+  onPrintBadge,
+  onShowBadgePrints,
+  onBadgePrintQuery,
+  onBadgePrintExport,
+  clearBadgePrints,
+  onFeatureLink,
+  onFeatureUnLink
+}) => {
+  const [showPrintDetails, setShowPrintDetails] = useState(false);
+  const [viewTypeFilter, setViewTypeFilter] = useState([]);
+  const [printDateFrom, setPrintDateFrom] = useState(null);
+  const [printDateTo, setPrintDateTo] = useState(null);
+  const [printDateError, setPrintDateError] = useState("");
+  const [appliedPrintDates, setAppliedPrintDates] = useState([0, 0]);
 
-  handleChangeBadgeType(ev) {
-    const entity = { ...this.state.entity };
-    const { value, id } = ev.target;
+  const { badge_types: badgeTypes, badge_features: badgeFeatures } =
+    currentSummit;
 
-    entity[id] = value;
-    this.setState({ entity });
-    this.props.onTypeChange(entity);
-  }
+  if (!badgeTypes || !badgeFeatures) return null;
 
-  handleChangePrintType(ev) {
-    const { value } = ev.target;
-    this.props.onSelectPrintType(value);
-  }
+  const badgeType = badgeTypes.find((bt) => bt.id === entity.type_id);
 
-  handleFeatureLink(feature) {
-    const { entity } = this.state;
-    this.props.onFeatureLink(entity.ticket_id, feature);
-  }
+  const accessLevels = badgeType.access_levels
+    .map((al) =>
+      currentSummit.badge_access_level_types.find((bal) => bal.id === toId(al))
+    )
+    .map((al) => al?.name)
+    .join(", ");
 
-  handleFeatureUnLink(featureId) {
-    const { entity } = this.state;
-    this.props.onFeatureUnLink(entity.ticket_id, featureId);
-  }
+  const viewTypeOptions = (badgeType.allowed_view_types ?? [])
+    .map((vt) =>
+      currentSummit.badge_view_types?.find((bvt) => bvt.id === toId(vt))
+    )
+    .filter(Boolean)
+    .map((vt) => ({ label: vt.name, value: vt.id }));
 
-  handleShowPrintDetails(displayDetails) {
-    if (displayDetails === false) this.props.onShowBadgePrints();
-    this.setState({ ...this.state, printExcerptDetails: !displayDetails });
-  }
+  const badgeTypeOptions = badgeTypes.map((bt) => ({
+    label: bt.name,
+    value: bt.id
+  }));
 
-  handleBadgePrintSearch(term) {
-    const { order, orderDir, page, perPage } = this.props;
-    this.props.onBadgePrintQuery(term, page, perPage, order, orderDir);
-  }
+  const userTimeZone = moment.tz.guess();
 
-  handleBadgePrintSort(index, key, dir) {
-    const { term, page, perPage } = this.props;
-    this.props.onBadgePrintQuery(term, page, perPage, key, dir);
-  }
+  const appliedFilters = { viewTypeFilter, printDateFilter: appliedPrintDates };
 
-  handleBadgePrintPageChange(page) {
-    const { term, order, orderDir, perPage } = this.props;
-    this.props.onBadgePrintQuery(term, page, perPage, order, orderDir);
-  }
+  const resetPrintFilters = () => {
+    setViewTypeFilter([]);
+    setPrintDateFrom(null);
+    setPrintDateTo(null);
+    setPrintDateError("");
+    setAppliedPrintDates([0, 0]);
+  };
 
-  handleBadgePrintFilterChange(ev) {
-    const { value, id } = ev.target;
-    const newFilters = { ...this.state.printFilters, [id]: value };
-    this.setState({ ...this.state, printFilters: newFilters });
-    const { term, order, orderDir, page, perPage } = this.props;
-    this.props.onBadgePrintQuery(
-      term,
-      page,
-      perPage,
-      order,
-      orderDir,
-      newFilters
-    );
-  }
-
-  handleChangePrintDate(ev, endDate) {
-    const { value } = ev.target;
-    const { printDateFilter } = this.state.printFilters;
-
-    const newDateValue = endDate
-      ? [printDateFilter[0], value.unix()]
-      : [
-          value.unix(),
-          value.unix() > printDateFilter[1] ? 0 : printDateFilter[1]
-        ];
-    const newFilters = {
-      ...this.state.printFilters,
-      printDateFilter: newDateValue
-    };
-    this.setState({ ...this.state, printFilters: newFilters });
-  }
-
-  handleApplyPrintFilters(ev) {
+  const handleTogglePrintDetails = (ev) => {
     ev.preventDefault();
-    const {
-      printFilters,
-      printFilters: { printDateFilter }
-    } = this.state;
+    if (!showPrintDetails) {
+      resetPrintFilters();
+      onShowBadgePrints();
+    }
+    setShowPrintDetails(!showPrintDetails);
+  };
+
+  const handleViewTypeFilterChange = (ev) => {
+    const { value } = ev.target;
+    setViewTypeFilter(value);
+    onBadgePrintQuery(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir, {
+      viewTypeFilter: value,
+      printDateFilter: appliedPrintDates
+    });
+  };
+
+  const handleApplyPrintFilters = () => {
+    const dates = [toEpoch(printDateFrom), toEpoch(printDateTo)];
+    const hasInvalidDate = [printDateFrom, printDateTo].some(
+      (d) => d && !d.isValid()
+    );
     if (
-      printDateFilter.every((e) => e !== 0) &&
-      printDateFilter[0] > printDateFilter[1]
+      hasInvalidDate ||
+      (dates.every((d) => d !== 0) && dates[0] > dates[1])
     ) {
-      Swal.fire(
-        "Validation error",
-        T.translate("edit_ticket.print_table.badge_print_date_warning"),
-        "warning"
+      setPrintDateError(
+        T.translate("edit_ticket.print_table.badge_print_date_warning")
       );
       return;
     }
-    const { term, order, orderDir, page, perPage } = this.props;
-    this.props.onBadgePrintQuery(
-      term,
-      page,
-      perPage,
-      order,
-      orderDir,
-      printFilters
-    );
-  }
-
-  handleBadgePrintExport(ev) {
-    ev.preventDefault();
-    this.props.onBadgePrintExport();
-  }
-
-  handleBadgePrintClear(ev) {
-    const { entity } = this.state;
-    const { clearBadgePrints } = this.props;
-
-    ev.preventDefault();
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("edit_ticket.clear_badge_prints_warning")}`,
-      type: "warning",
-      showCancelButton: true,
-      cancelButtonColor: "#d33",
-      confirmButtonColor: "#3085d6",
-      confirmButtonText: T.translate("general.clear")
-    }).then((result) => {
-      if (result.value) {
-        clearBadgePrints(entity.ticket_id);
-      }
+    setPrintDateError("");
+    setAppliedPrintDates(dates);
+    onBadgePrintQuery(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir, {
+      viewTypeFilter,
+      printDateFilter: dates
     });
-  }
+  };
 
-  queryFeatures(input, callback) {
-    const { currentSummit } = this.props;
-    const features = currentSummit.badge_features.filter(
-      (f) => f.name.toLowerCase().indexOf(input.toLowerCase()) !== -1
-    );
-    callback(features);
-  }
+  const handleClearPrints = async () => {
+    const confirmed = await showConfirmDialog({
+      title: T.translate("general.are_you_sure"),
+      text: T.translate("edit_ticket.clear_badge_prints_warning"),
+      iconType: "warning",
+      confirmButtonColor: "error",
+      confirmButtonText: T.translate("general.clear")
+    });
+    if (confirmed) clearBadgePrints(entity.ticket_id).catch(() => {});
+  };
 
-  render() {
-    const {
-      entity,
-      printExcerptDetails,
-      printFilters: { printDateFilter, viewTypeFilter }
-    } = this.state;
-    const {
-      currentSummit,
-      selectedPrintType,
-      canPrint,
-      badgePrints: { badgePrints, order, orderDir, term, currentPage, lastPage }
-    } = this.props;
+  const handleFeaturesChange = (_ev, _value, reason, details) => {
+    if (reason === "selectOption") {
+      onFeatureLink(entity.ticket_id, details.option).catch(() => {});
+    }
+    if (reason === "removeOption") {
+      onFeatureUnLink(entity.ticket_id, details.option.id).catch(() => {});
+    }
+  };
 
-    const userTimeZone = moment.tz.guess();
+  const printExcerptRows = Object.entries(entity.print_excerpt ?? {}).map(
+    ([viewType, count]) => ({ id: viewType, viewType, count })
+  );
 
-    if (!currentSummit.badge_types || !currentSummit.badge_features)
-      return <div />;
+  const printExcerptColumns = [
+    { columnKey: "viewType", header: T.translate("edit_ticket.type") },
+    { columnKey: "count", header: T.translate("edit_ticket.count") }
+  ];
 
-    const badgeType = currentSummit.badge_types.find(
-      (bt) => bt.id === entity.type_id
-    );
-    //  badgeType.access_levels could be an array of ids or full objects
-    const access_levels = badgeType.access_levels
-      .map((al) => {
-        // TODO:
-        // this is a fallback bc there are some call that are overwriting this data with expanded objects instead of ids
-        // so we do need a bigger refactor
-        const id = Number.isInteger(al) ? al : al?.id;
-        return currentSummit.badge_access_level_types.find(
-          (bal) => bal.id === id
-        );
-      })
-      .map((al) => al?.name)
-      .join(", ");
+  const printColumns = [
+    {
+      columnKey: "view_type_name",
+      header: T.translate("edit_ticket.print_table.view_type_name")
+    },
+    {
+      columnKey: "requestor_full_name",
+      header: T.translate("edit_ticket.print_table.requestor_full_name"),
+      sortable: true
+    },
+    {
+      columnKey: "requestor_email",
+      header: T.translate("edit_ticket.print_table.requestor_email"),
+      sortable: true
+    },
+    {
+      columnKey: "print_date",
+      header: T.translate("edit_ticket.print_table.print_date"),
+      sortable: true
+    }
+  ];
 
-    const featuresColumns = [
-      { columnKey: "name", value: T.translate("edit_ticket.name") }
-    ];
+  const datePickerProps = {
+    timezone: userTimeZone,
+    format: "YYYY-MM-DD HH:mm",
+    ampm: false,
+    slotProps: {
+      textField: { size: "small", fullWidth: true },
+      field: { clearable: true }
+    }
+  };
 
-    const featuresOptions = {
-      title: T.translate("edit_ticket.badge_features"),
-      valueKey: "name",
-      labelKey: "name",
-      defaultOptions: true,
-      actions: {
-        search: this.queryFeatures,
-        delete: { onClick: this.handleFeatureUnLink },
-        add: { onClick: this.handleFeatureLink }
-      }
-    };
-
-    const badge_type_ddl = currentSummit.badge_types.map((bt) => ({
-      label: bt.name,
-      value: bt.id
-    }));
-
-    // adds 'All' option to the print type dropdown
-    const currBadgeType = currentSummit.badge_types.find(
-      (bt) => bt.id === entity.type_id
-    );
-    const badge_view_type_ddl = [
-      // currBadgeType.allowed_view_types could be an array of ids or full objects
-      ...currBadgeType.allowed_view_types
-        ?.map((vt) => {
-          // TODO:
-          // this is a fallback bc there are some call that are overwriting this data with expanded objects instead of ids
-          // so we do need a bigger refactor
-          const id = Number.isInteger(vt) ? vt : vt?.id;
-          return currentSummit.badge_view_types?.find((bvt) => bvt.id === id);
-        })
-        ?.map((r) => ({ label: r?.name || r, value: r?.id || r }))
-    ];
-
-    const badge_print_columns = [
-      {
-        columnKey: "view_type_name",
-        value: T.translate("edit_ticket.print_table.view_type_name")
-      },
-      {
-        columnKey: "requestor_full_name",
-        value: T.translate("edit_ticket.print_table.requestor_full_name"),
-        sortable: true
-      },
-      {
-        columnKey: "requestor_email",
-        value: T.translate("edit_ticket.print_table.requestor_email"),
-        sortable: true
-      },
-      {
-        columnKey: "print_date",
-        value: T.translate("edit_ticket.print_table.print_date"),
-        sortable: true
-      }
-    ];
-
-    const badge_print_table_options = {
-      sortCol: order,
-      sortDir: orderDir,
-      actions: {
-        edit: { onClick: () => null }
-      }
-    };
-
-    const renderInput = (props) => {
-      function clear(ev) {
-        ev.preventDefault();
-        props.onChange({ target: { value: "" } });
-      }
-      return (
-        <div className="badge-print-datepicker">
-          <input {...props} />
-          <i onClick={clear} className="fa fa-times" />
-        </div>
-      );
-    };
-
-    return (
-      <form className="badge-form">
-        <input type="hidden" id="badge_id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("edit_ticket.type")}</label>
-            <Dropdown
-              id="type_id"
-              value={entity.type_id}
-              onChange={this.handleChangeBadgeType}
-              options={badge_type_ddl}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label> {T.translate("edit_ticket.access_levels")}:&nbsp;</label>
-            {access_levels}
-          </div>
-        </div>
-        {access_levels.includes("IN_PERSON") && (
-          <div className="row form-group">
-            <div
-              className={`badge-print-wrapper ${
-                printExcerptDetails ? "col-md-12" : "col-md-4"
-              }`}
-            >
-              {Object.keys(entity.print_excerpt).length > 0 && (
-                <>
-                  <label>
-                    {" "}
-                    {T.translate("edit_ticket.print_excerpt")}:&nbsp;
-                  </label>
-                  {printExcerptDetails ? (
-                    <>
-                      <div className="row">
-                        <div className="col-md-6">
-                          <FreeTextSearch
-                            value={term ?? ""}
-                            placeholder={T.translate(
-                              "edit_ticket.placeholders.search_badge_prints"
-                            )}
-                            preventEvents
-                            onSearch={this.handleBadgePrintSearch}
-                          />
-                        </div>
-                        <div className="col-md-4">
-                          <button
-                            className="btn btn-default right-space"
-                            onClick={this.handleBadgePrintExport}
-                          >
-                            {T.translate("general.export")}
-                          </button>
-                          <button
-                            className="btn btn-danger"
-                            onClick={this.handleBadgePrintClear}
-                          >
-                            {T.translate("general.clear")}
-                          </button>
-                        </div>
-                      </div>
-                      <div className="row filter-wrapper">
-                        <div className="col-md-4">
-                          <Dropdown
-                            id="viewTypeFilter"
-                            value={viewTypeFilter}
-                            onChange={this.handleBadgePrintFilterChange}
-                            placeholder={T.translate(
-                              "edit_ticket.placeholders.view_type_filter"
-                            )}
-                            options={badge_view_type_ddl}
-                            clearable
-                            isMulti
-                          />
-                        </div>
-                        <div className="col-md-7 col-md-offset-1 date-wrapper">
-                          <DateTimePicker
-                            id="printDateFromFilter"
-                            format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                            inputProps={{
-                              placeholder: T.translate(
-                                "edit_ticket.placeholders.print_date_from"
-                              )
-                            }}
-                            timezone={userTimeZone}
-                            onChange={(ev) =>
-                              this.handleChangePrintDate(ev, false)
-                            }
-                            value={epochToMomentTimeZone(
-                              printDateFilter[0],
-                              userTimeZone
-                            )}
-                            className="badge-print-date-picker"
-                            renderInput={renderInput}
-                          />
-                          <DateTimePicker
-                            id="printDateToFilter"
-                            format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                            inputProps={{
-                              placeholder: T.translate(
-                                "edit_ticket.placeholders.print_date_to"
-                              )
-                            }}
-                            timezone={userTimeZone}
-                            onChange={(ev) =>
-                              this.handleChangePrintDate(ev, true)
-                            }
-                            value={epochToMomentTimeZone(
-                              printDateFilter[1],
-                              userTimeZone
-                            )}
-                            className="badge-print-date-picker"
-                            renderInput={renderInput}
-                          />
-                          <button
-                            className="btn btn-default"
-                            onClick={this.handleApplyPrintFilters}
-                          >
-                            {T.translate("edit_ticket.apply_filters")}
-                          </button>
-                        </div>
-                      </div>
-                      {badgePrints.length === 0 && (
-                        <div>{T.translate("edit_ticket.no_prints")}</div>
-                      )}
-                      {badgePrints.length > 0 && (
-                        <div>
-                          <Table
-                            options={badge_print_table_options}
-                            data={badgePrints}
-                            columns={badge_print_columns}
-                            onSort={this.handleBadgePrintSort}
-                          />
-                          <Pagination
-                            bsSize="medium"
-                            prev
-                            next
-                            first
-                            last
-                            ellipsis
-                            boundaryLinks
-                            maxButtons={10}
-                            items={lastPage}
-                            activePage={currentPage}
-                            onSelect={this.handleBadgePrintPageChange}
-                          />
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <table className="table table-striped table-bordered">
-                      <thead>
-                        <tr>
-                          <th>{T.translate("edit_ticket.type")}</th>
-                          <th>{T.translate("edit_ticket.count")}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {Object.keys(entity.print_excerpt).map((row, i) => {
-                          const rowClass = i % TWO === 0 ? "even" : "odd";
-                          return (
-                            <tr
-                              id={row}
-                              key={`row_${row}`}
-                              role="row"
-                              className={rowClass}
-                            >
-                              <td>{row}</td>
-                              <td>{entity.print_excerpt[row]}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  )}
-                  <span
-                    className="details"
-                    onClick={() =>
-                      this.handleShowPrintDetails(printExcerptDetails)
-                    }
-                  >
-                    {printExcerptDetails
-                      ? T.translate("edit_ticket.print_excerpt_less")
-                      : T.translate("edit_ticket.print_excerpt_details")}
-                  </span>
-                </>
-              )}
-            </div>
-            <div className="col-md-4">
-              <label>&nbsp;</label>
-              <Dropdown
-                id="type_id"
-                value={selectedPrintType}
-                onChange={this.handleChangePrintType}
-                options={badge_view_type_ddl}
-              />
-            </div>
-            <div className="col-md-4">
-              <label>&nbsp;</label>
-              <br />
-              <button
-                onClick={this.props.onPrintBadge}
-                disabled={!canPrint || selectedPrintType === null}
-                className="btn btn-default"
-              >
-                {T.translate("edit_ticket.print")}
-              </button>
-            </div>
-          </div>
-        )}
-
-        <hr />
-        {entity.id !== 0 && (
-          <SimpleLinkList
-            values={entity.features}
-            columns={featuresColumns}
-            options={featuresOptions}
+  return (
+    <Box>
+      <Grid2 container spacing={2} sx={{ mb: 2 }}>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <InputLabel htmlFor="badge_type" sx={BOLD_LABEL_SX}>
+            {T.translate("edit_ticket.type")}
+          </InputLabel>
+          <MuiDropdown
+            id="badge_type"
+            size="small"
+            value={entity.type_id}
+            options={badgeTypeOptions}
+            onChange={(ev) =>
+              onTypeChange({ ...entity, type_id: ev.target.value }).catch(
+                () => {}
+              )
+            }
           />
-        )}
-      </form>
-    );
-  }
-}
+        </Grid2>
+        <Grid2 size={12}>
+          <Typography component="span" sx={BOLD_LABEL_SX}>
+            {T.translate("edit_ticket.access_levels")}:
+          </Typography>{" "}
+          {accessLevels}
+        </Grid2>
+      </Grid2>
+
+      {accessLevels.includes("IN_PERSON") && (
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          {printExcerptRows.length > 0 && (
+            <Grid2
+              size={showPrintDetails ? PRINT_HISTORY_SIZE : PRINT_EXCERPT_SIZE}
+            >
+              <InputLabel sx={BOLD_LABEL_SX}>
+                {T.translate("edit_ticket.print_excerpt")}
+              </InputLabel>
+              {showPrintDetails ? (
+                <>
+                  <Grid2
+                    container
+                    spacing={2}
+                    sx={{ alignItems: "center", mb: 2 }}
+                  >
+                    <Grid2 size={{ xs: 12, md: 6 }}>
+                      <SearchInput
+                        term={term ?? ""}
+                        placeholder={T.translate(
+                          "edit_ticket.placeholders.search_badge_prints"
+                        )}
+                        onSearch={(newTerm) =>
+                          onBadgePrintQuery(
+                            newTerm,
+                            DEFAULT_CURRENT_PAGE,
+                            perPage,
+                            order,
+                            orderDir,
+                            appliedFilters
+                          )
+                        }
+                      />
+                    </Grid2>
+                    <Grid2
+                      size={{ xs: 12, md: 6 }}
+                      sx={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        gap: 1
+                      }}
+                    >
+                      <Button variant="contained" onClick={onBadgePrintExport}>
+                        {T.translate("general.export")}
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={handleClearPrints}
+                      >
+                        {T.translate("general.clear")}
+                      </Button>
+                    </Grid2>
+                  </Grid2>
+                  <Grid2
+                    container
+                    spacing={2}
+                    sx={{ alignItems: "flex-start", mb: 2 }}
+                  >
+                    <Grid2 size={{ xs: 12, md: 4 }}>
+                      <MuiDropdown
+                        id="view_type_filter"
+                        size="small"
+                        multiple
+                        value={viewTypeFilter}
+                        options={viewTypeOptions}
+                        placeholder={T.translate(
+                          "edit_ticket.placeholders.view_type_filter"
+                        )}
+                        onChange={handleViewTypeFilterChange}
+                      />
+                    </Grid2>
+                    <Grid2 size={{ xs: 12, md: 3 }}>
+                      <DateTimePicker
+                        {...datePickerProps}
+                        label={T.translate(
+                          "edit_ticket.placeholders.print_date_from"
+                        )}
+                        value={printDateFrom}
+                        onChange={setPrintDateFrom}
+                      />
+                      {printDateError && (
+                        <FormHelperText error>{printDateError}</FormHelperText>
+                      )}
+                    </Grid2>
+                    <Grid2 size={{ xs: 12, md: 3 }}>
+                      <DateTimePicker
+                        {...datePickerProps}
+                        label={T.translate(
+                          "edit_ticket.placeholders.print_date_to"
+                        )}
+                        value={printDateTo}
+                        onChange={setPrintDateTo}
+                      />
+                    </Grid2>
+                    <Grid2 size={{ xs: 12, md: 2 }}>
+                      <Button
+                        variant="outlined"
+                        fullWidth
+                        onClick={handleApplyPrintFilters}
+                      >
+                        {T.translate("edit_ticket.apply_filters")}
+                      </Button>
+                    </Grid2>
+                  </Grid2>
+                  {badgePrints.length === 0 ? (
+                    <Typography>
+                      {T.translate("edit_ticket.no_prints")}
+                    </Typography>
+                  ) : (
+                    <MuiTable
+                      columns={printColumns}
+                      data={badgePrints}
+                      options={{ sortCol: order, sortDir: orderDir }}
+                      perPage={perPage}
+                      currentPage={currentPage}
+                      totalRows={totalBadgePrints}
+                      onPageChange={(page) =>
+                        onBadgePrintQuery(
+                          term,
+                          page,
+                          perPage,
+                          order,
+                          orderDir,
+                          appliedFilters
+                        )
+                      }
+                      onSort={(key, dir) =>
+                        onBadgePrintQuery(
+                          term,
+                          DEFAULT_CURRENT_PAGE,
+                          perPage,
+                          key,
+                          dir,
+                          appliedFilters
+                        )
+                      }
+                    />
+                  )}
+                </>
+              ) : (
+                <MuiTable
+                  columns={printExcerptColumns}
+                  data={printExcerptRows}
+                />
+              )}
+              <Link
+                component="button"
+                type="button"
+                onClick={handleTogglePrintDetails}
+                sx={{ mt: 1 }}
+              >
+                {showPrintDetails
+                  ? T.translate("edit_ticket.print_excerpt_less")
+                  : T.translate("edit_ticket.print_excerpt_details")}
+              </Link>
+            </Grid2>
+          )}
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel htmlFor="print_type" sx={BOLD_LABEL_SX}>
+              {T.translate("edit_ticket.print_type")}
+            </InputLabel>
+            <MuiDropdown
+              id="print_type"
+              size="small"
+              value={selectedPrintType ?? ""}
+              options={viewTypeOptions}
+              onChange={(ev) => onSelectPrintType(ev.target.value)}
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 4 }}>
+            <InputLabel aria-hidden sx={BOLD_LABEL_SX}>
+              &nbsp;
+            </InputLabel>
+            <Button
+              variant="contained"
+              onClick={onPrintBadge}
+              disabled={!canPrint || selectedPrintType === null}
+            >
+              {T.translate("edit_ticket.print")}
+            </Button>
+          </Grid2>
+        </Grid2>
+      )}
+
+      {entity.id !== 0 && (
+        <>
+          <Divider sx={{ mb: 2 }} />
+          <InputLabel htmlFor="badge_features" sx={BOLD_LABEL_SX}>
+            {T.translate("edit_ticket.badge_features")}
+          </InputLabel>
+          <Autocomplete
+            id="badge_features"
+            multiple
+            disableClearable
+            size="small"
+            options={badgeFeatures}
+            value={entity.features ?? []}
+            getOptionLabel={(feature) => feature.name}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            onChange={handleFeaturesChange}
+            renderInput={(params) => <TextField {...params} />}
+          />
+        </>
+      )}
+    </Box>
+  );
+};
+
+BadgeForm.propTypes = {
+  entity: PropTypes.shape({
+    id: PropTypes.number,
+    ticket_id: PropTypes.number,
+    type_id: PropTypes.number,
+    features: PropTypes.arrayOf(PropTypes.object),
+    print_excerpt: PropTypes.object
+  }).isRequired,
+  currentSummit: PropTypes.object.isRequired,
+  canPrint: PropTypes.bool,
+  selectedPrintType: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  badgePrints: PropTypes.object.isRequired,
+  onTypeChange: PropTypes.func.isRequired,
+  onSelectPrintType: PropTypes.func.isRequired,
+  onPrintBadge: PropTypes.func.isRequired,
+  onShowBadgePrints: PropTypes.func.isRequired,
+  onBadgePrintQuery: PropTypes.func.isRequired,
+  onBadgePrintExport: PropTypes.func.isRequired,
+  clearBadgePrints: PropTypes.func.isRequired,
+  onFeatureLink: PropTypes.func.isRequired,
+  onFeatureUnLink: PropTypes.func.isRequired
+};
+
+BadgeForm.defaultProps = {
+  canPrint: false,
+  selectedPrintType: null
+};
 
 export default BadgeForm;
