@@ -53,8 +53,8 @@ const notesReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_NOTES: {
-      const { order, orderDir } = payload;
-      return { ...state, order, orderDir };
+      const { order, orderDir, perPage } = payload;
+      return { ...state, order, orderDir, perPage };
     }
     case RECEIVE_NOTES: {
       const { current_page, total, last_page } = payload.response;
