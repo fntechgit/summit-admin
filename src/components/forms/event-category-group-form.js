@@ -40,6 +40,14 @@ const DATE_FIELDS = [
   "submission_end_date"
 ];
 
+const formatGroupOption = (group) => ({
+  value: group.id,
+  label: group.title,
+  raw: group
+});
+
+const getGroupTitle = (group) => group.title;
+
 const validationSchema = yup.object().shape({
   class_name: requiredStringValidation(),
   name: requiredStringValidation(),
@@ -141,6 +149,8 @@ const EventCategoryGroupForm = ({
   ];
 
   const selectedGroupIds = entity?.allowed_groups?.map((g) => g.id) || [];
+  // remount key so options reload without the linked groups
+  const groupSearchKey = selectedGroupIds.join();
 
   const allowedGroupsColumns = [
     { columnKey: "title", header: T.translate("edit_event_category.name") },
@@ -299,19 +309,14 @@ const EventCategoryGroupForm = ({
               <Grid2 size={{ xs: 12, sm: 6 }}>
                 <FormikProvider value={groupSearchFormik}>
                   <MuiFormikAsyncAutocomplete
-                    // remount so options reload without the linked groups
-                    key={selectedGroupIds.join()}
+                    key={groupSearchKey}
                     name="group"
                     placeholder={T.translate(
                       "edit_event_category_group.placeholders.search_groups"
                     )}
                     queryFunction={queryGroups}
                     hiddenOptions={selectedGroupIds}
-                    formatOption={(group) => ({
-                      value: group.id,
-                      label: group.title,
-                      raw: group
-                    })}
+                    formatOption={formatGroupOption}
                   />
                 </FormikProvider>
               </Grid2>
@@ -329,7 +334,7 @@ const EventCategoryGroupForm = ({
             <MuiTable
               columns={allowedGroupsColumns}
               data={entity.allowed_groups}
-              getName={(group) => group.title}
+              getName={getGroupTitle}
               onDelete={handleAllowedGroupUnLink}
             />
           </Box>
