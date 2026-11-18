@@ -265,7 +265,7 @@ export const SPONSOR_TABS = {
 };
 
 // matches the old bootstrap container content width
-export const SELECTION_PLAN_MAX_WIDTH = 1140;
+export const FULL_WIDTH_PAGE_CONTENT_MAX_WIDTH = 1140;
 
 export const fieldTypesWithOptions = [
   "CheckBoxList",

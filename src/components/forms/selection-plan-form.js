@@ -23,7 +23,7 @@ import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import useScrollToError from "../../hooks/useScrollToError";
-import { SELECTION_PLAN_MAX_WIDTH } from "../../utils/constants";
+import { FULL_WIDTH_PAGE_CONTENT_MAX_WIDTH } from "../../utils/constants";
 import MainTab from "./selection-plan-form/main-tab";
 import TrackGroupsTab from "./selection-plan-form/track-groups-tab";
 import EventTypesTab from "./selection-plan-form/event-types-tab";
@@ -360,7 +360,7 @@ const SelectionPlanForm = (props) => {
           )}
         </Box>
 
-        <Box sx={{ maxWidth: SELECTION_PLAN_MAX_WIDTH, mx: "auto" }}>
+        <Box sx={{ maxWidth: FULL_WIDTH_PAGE_CONTENT_MAX_WIDTH, mx: "auto" }}>
           {/* Main tab always in DOM - TextEditorV3 must not remount on tab switch */}
           <MainTab
             hidden={!isNewPlan && activeTab !== "main"}

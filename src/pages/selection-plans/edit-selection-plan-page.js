@@ -24,7 +24,7 @@ import { getMarketingSettingsBySelectionPlan } from "../../actions/marketing-act
 import {
   DEFAULT_CURRENT_PAGE,
   MAX_PER_PAGE,
-  SELECTION_PLAN_MAX_WIDTH
+  FULL_WIDTH_PAGE_CONTENT_MAX_WIDTH
 } from "../../utils/constants";
 
 const EditSelectionPlanPage = ({
@@ -103,7 +103,7 @@ const EditSelectionPlanPage = ({
           pb: 3,
           display: "flex",
           justifyContent: "flex-end",
-          maxWidth: SELECTION_PLAN_MAX_WIDTH,
+          maxWidth: FULL_WIDTH_PAGE_CONTENT_MAX_WIDTH,
           mx: "auto"
         }}
       >
