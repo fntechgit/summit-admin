@@ -11,362 +11,432 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
-import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input";
-import OwnerInput from "../inputs/owner-input";
-import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
-
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
+import { FormikProvider, useField, useFormik, useFormikContext } from "formik";
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Grid2,
+  InputLabel,
+  Link,
+  TextField,
+  Typography
+} from "@mui/material";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
+import {
+  queryMembers,
+  queryTicketTypes
+} from "openstack-uicore-foundation/lib/utils/query-actions";
+import MuiFormikAsyncAutocomplete from "../mui/formik-inputs/mui-formik-async-select";
+import showConfirmDialog from "../mui/showConfirmDialog";
 import CopyClipboard from "../buttons/copy-clipboard";
+import { HUNDRED_PER_PAGE } from "../../utils/constants";
 
-class TicketForm extends React.Component {
-  constructor(props) {
-    super(props);
+const BOLD_LABEL_SX = { fontWeight: "bold" };
 
-    this.state = {
-      entity: { ...props.entity },
-      errors: props.errors,
-      canReassign: false,
-      shouldShowSave: false
-    };
+const toTicketTypeOption = (ticketType) =>
+  ticketType ? { value: String(ticketType.id), label: ticketType.name } : null;
 
-    this.handlePromocodeClick = this.handlePromocodeClick.bind(this);
-    this.handleOwnerClick = this.handleOwnerClick.bind(this);
-    this.handleOrderClick = this.handleOrderClick.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleReassign = this.handleReassign.bind(this);
-    this.handleAssign = this.handleAssign.bind(this);
-    this.handleUpdateTicket = this.handleUpdateTicket.bind(this);
-    this.handleUnassign = this.handleUnassign.bind(this);
-  }
+const buildInitialValues = (entity) => ({
+  ticket_type: toTicketTypeOption(entity.ticket_type),
+  attendee: {
+    email: entity.attendee?.email || "",
+    first_name: entity.attendee?.first_name || "",
+    last_name: entity.attendee?.last_name || ""
+  },
+  attendee_company: entity.attendee_company || ""
+});
 
-  componentDidUpdate(prevProps) {
-    const state = {};
-    scrollToError(this.props.errors);
+const LabeledValue = ({ label, children, size }) => (
+  <Grid2 size={size}>
+    <Typography component="span" sx={{ fontWeight: "bold" }}>
+      {label}:
+    </Typography>{" "}
+    {children}
+  </Grid2>
+);
 
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
+// a typed email is allowed; picking a member also fills name and company
+const AttendeeEmailInput = () => {
+  const [field, meta, helpers] = useField("attendee.email");
+  const { setFieldValue } = useFormikContext();
+  const [options, setOptions] = useState([]);
+  const [input, setInput] = useState("");
+
+  useEffect(() => {
+    if (input)
+      queryMembers(input, (res) => setOptions(Array.isArray(res) ? res : []));
+  }, [input]);
+
+  const handleChange = (_ev, selected) => {
+    if (selected && typeof selected === "object") {
+      helpers.setValue(selected.email);
+      setFieldValue("attendee.first_name", selected.first_name ?? "");
+      setFieldValue("attendee.last_name", selected.last_name ?? "");
+      setFieldValue("attendee_company", selected.company || "");
+      return;
     }
+    helpers.setValue(selected ?? "");
+  };
 
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
-    }
+  return (
+    <Autocomplete
+      id="attendee_email"
+      freeSolo
+      options={options}
+      value={field.value}
+      onChange={handleChange}
+      onInputChange={(_ev, value, reason) => {
+        setInput(value);
+        if (reason === "input") helpers.setValue(value);
+      }}
+      filterOptions={(opts) => opts}
+      getOptionLabel={(option) => option.email ?? option}
+      renderOption={(props, option) => (
+        <li {...props} key={option.id}>
+          {`${option.first_name} ${option.last_name} (${option.email})`}
+        </li>
+      )}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          name="attendee.email"
+          size="small"
+          error={meta.touched && Boolean(meta.error)}
+          helperText={meta.touched && meta.error}
+        />
+      )}
+    />
+  );
+};
 
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
-    }
-  }
+const TicketForm = ({
+  entity,
+  order,
+  currentSummit,
+  history,
+  onSaveTicket,
+  onReassing,
+  onUnAssign
+}) => {
+  const [canReassign, setCanReassign] = useState(false);
+  const { owner } = entity;
 
-  handleUpdateTicket(ev) {
+  const formik = useFormik({
+    initialValues: buildInitialValues(entity),
+    enableReinitialize: true,
+    // the saved ticket reinitializes the form, which hides the save button
+    onSubmit: (values) =>
+      onSaveTicket(order.id, {
+        ...entity,
+        ticket_type: { id: Number(values.ticket_type.value) },
+        attendee_email: owner?.email
+      }).catch(() => {})
+  });
+
+  const ticketTypeChanged =
+    !!formik.values.ticket_type &&
+    formik.values.ticket_type.value !== String(entity.ticket_type?.id);
+
+  const goTo = (path) => (ev) => {
     ev.preventDefault();
+    history.push(`/app/summits/${currentSummit.id}/${path}`);
+  };
 
-    this.props
-      .onSaveTicket(this.props.order.id, {
-        ...this.state.entity,
-        attendee_email: this.state.entity?.owner?.email
-      })
-      .then(() => this.setState({ ...this.state, shouldShowSave: false }));
-  }
-
-  handleChange(ev) {
-    const entity = { ...this.state.entity };
-    let { value, id } = ev.target;
-
-    if (ev.target.type === "number") {
-      value = parseInt(ev.target.value);
-    }
-
-    if (ev.target.type === "checkbox") {
-      value = ev.target.checked;
-    }
-    let { shouldShowSave } = this.state;
-    if (id === "ticket_type") {
-      shouldShowSave = !(value == null);
-    }
-    if (ev.target.type === "ownerinput") {
-      entity.attendee_company = ev.target.value?.company || "";
-    }
-
-    entity[id] = value;
-    this.setState({
-      ...this.state,
-      entity,
-      shouldShowSave
-    });
-  }
-
-  handleReassign(ev) {
-    ev.preventDefault();
-    this.setState({ canReassign: true });
-  }
-
-  handleUnassign(ev) {
-    ev.preventDefault();
-    const { entity } = this.state;
-    const { owner: prevOwner } = this.props.entity;
-    const { onUnAssign } = this.props;
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: T.translate("edit_ticket.unassign_warning"),
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("edit_ticket.unassign_yes")
-    }).then((result) => {
-      if (result.value) {
-        onUnAssign(prevOwner.id, entity.id).then(() =>
-          window.location.reload()
-        );
-      }
-    });
-  }
-
-  handleAssign(ev) {
-    const { entity, canReassign } = this.state;
-    const { owner: prevOwner } = this.props.entity;
-    ev.preventDefault();
+  const handleAssign = () => {
+    const { attendee, attendee_company, ticket_type } = formik.values;
 
     if (canReassign) {
-      this.props.onReassing(
+      onReassing(
         entity.id,
-        prevOwner.id,
-        entity.attendee.first_name,
-        entity.attendee.last_name,
-        entity.attendee.email,
-        entity.attendee_company
+        owner.id,
+        attendee.first_name,
+        attendee.last_name,
+        attendee.email,
+        attendee_company
       );
       return;
     }
 
-    this.props.onSaveTicket(entity.order_id, entity);
-  }
+    onSaveTicket(entity.order_id, {
+      ...entity,
+      ticket_type: ticket_type
+        ? { id: Number(ticket_type.value) }
+        : entity.ticket_type,
+      attendee,
+      attendee_company
+    }).catch(() => {});
+  };
 
-  handleOwnerClick(ev) {
-    const { currentSummit, entity, history } = this.props;
+  const handleUnassign = async () => {
+    const confirmed = await showConfirmDialog({
+      title: T.translate("general.are_you_sure"),
+      text: T.translate("edit_ticket.unassign_warning"),
+      iconType: "warning",
+      confirmButtonText: T.translate("edit_ticket.unassign_yes"),
+      confirmButtonColor: "error"
+    });
 
-    ev.preventDefault();
-    history.push(
-      `/app/summits/${currentSummit.id}/attendees/${entity.owner.id}`
-    );
-  }
-
-  handlePromocodeClick(ev) {
-    const { currentSummit, entity, history } = this.props;
-
-    ev.preventDefault();
-    history.push(
-      `/app/summits/${currentSummit.id}/promocodes/${entity.promo_code.id}`
-    );
-  }
-
-  handleOrderClick(ev) {
-    const { currentSummit, entity, history } = this.props;
-
-    ev.preventDefault();
-    history.push(
-      `/app/summits/${currentSummit.id}/purchase-orders/${entity.order_id}`
-    );
-  }
-
-  hasErrors(field) {
-    const { errors } = this.state;
-    if (field in errors) {
-      return errors[field];
+    if (confirmed) {
+      onUnAssign(owner.id, entity.id)
+        .then(() => window.location.reload())
+        .catch(() => {});
     }
-    return "";
-  }
+  };
 
-  render() {
-    const { entity, canReassign, shouldShowSave } = this.state;
-    const { order, currentSummit } = this.props;
-    if (!currentSummit) return null;
+  if (!currentSummit) return null;
 
-    return (
-      <form className="ticket-form" onSubmit={(ev) => ev.preventDefault()}>
-        <input type="hidden" id="ticket_id" value={entity.id} />
-        {!canReassign && entity.owner && (
-          <div className="row form-group">
-            <div className="col-md-3">
-              <label> {T.translate("edit_ticket.attendee")}:&nbsp;</label>
-              <a href="" onClick={this.handleOwnerClick}>
+  return (
+    <FormikProvider value={formik}>
+      <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
+        {!canReassign && owner && (
+          <Grid2 container spacing={2} sx={{ mb: 2 }} alignItems="center">
+            <LabeledValue
+              label={T.translate("edit_ticket.attendee")}
+              size={{ xs: 12, md: 3 }}
+            >
+              <Link href="" onClick={goTo(`attendees/${owner.id}`)}>
                 {entity.attendee_full_name || entity.attendee_email}
-              </a>
-            </div>
-            <div className="col-md-2">
-              <label> {T.translate("edit_ticket.company")}:&nbsp;</label>
-              <span>{entity.owner.company}</span>
-            </div>
-            <div className="col-md-3">
-              <label> {T.translate("edit_ticket.email")}:&nbsp;</label>
-              <a
-                href={`mailto:${entity.owner.email}`}
+              </Link>
+            </LabeledValue>
+            <LabeledValue
+              label={T.translate("edit_ticket.company")}
+              size={{ xs: 12, md: 2 }}
+            >
+              {owner.company}
+            </LabeledValue>
+            <LabeledValue
+              label={T.translate("edit_ticket.email")}
+              size={{ xs: 12, md: 3 }}
+            >
+              <Link
+                href={`mailto:${owner.email}`}
                 target="_blank"
                 rel="noreferrer"
               >
-                {entity.owner.email}
-              </a>
-            </div>
-            <div className="col-md-4">
-              {entity.is_active && (
-                <button
-                  onClick={this.handleReassign}
-                  className="btn btn-sm btn-default"
+                {owner.email}
+              </Link>
+            </LabeledValue>
+            {entity.is_active && (
+              <Grid2 size={{ xs: 12, md: 4 }} sx={{ display: "flex", gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => setCanReassign(true)}
                 >
                   {T.translate("edit_ticket.reassign")}
-                </button>
-              )}
-              {entity.is_active && (
-                <button
-                  onClick={this.handleUnassign}
-                  className="btn btn-sm left-space btn-danger"
+                </Button>
+                <Button
+                  variant="contained"
+                  color="error"
+                  size="small"
+                  onClick={handleUnassign}
                 >
                   {T.translate("edit_ticket.unassign")}
-                </button>
-              )}
-            </div>
-          </div>
+                </Button>
+              </Grid2>
+            )}
+          </Grid2>
         )}
-        {(canReassign || !entity.owner) && (
-          <div className="row form-group">
-            <div className="col-md-9">
-              <OwnerInput
-                id="attendee"
-                owner={entity.attendee}
-                onChange={this.handleChange}
-                errors={{
-                  email: this.hasErrors("attendee_email"),
-                  first_name: this.hasErrors("attendee_first_name"),
-                  last_name: this.hasErrors("attendee_last_name")
-                }}
+
+        {(canReassign || !owner) && (
+          <Grid2 container spacing={2} sx={{ mb: 2 }}>
+            <Grid2 size={{ xs: 12, md: 3 }}>
+              <InputLabel sx={BOLD_LABEL_SX} htmlFor="attendee_email">
+                {T.translate("edit_purchase_order.owner_email")} *
+              </InputLabel>
+              <AttendeeEmailInput />
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 3 }}>
+              <InputLabel sx={BOLD_LABEL_SX} htmlFor="attendee_first_name">
+                {T.translate("edit_purchase_order.owner_first_name")} *
+              </InputLabel>
+              <MuiFormikTextField
+                id="attendee_first_name"
+                name="attendee.first_name"
+                size="small"
+                margin="none"
+                fullWidth
               />
-            </div>
-            <div className="col-md-2">
-              <label> {T.translate("edit_ticket.company")}:&nbsp;</label>
-              <Input
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 3 }}>
+              <InputLabel sx={BOLD_LABEL_SX} htmlFor="attendee_last_name">
+                {T.translate("edit_purchase_order.owner_last_name")} *
+              </InputLabel>
+              <MuiFormikTextField
+                id="attendee_last_name"
+                name="attendee.last_name"
+                size="small"
+                margin="none"
+                fullWidth
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 2 }}>
+              <InputLabel sx={BOLD_LABEL_SX} htmlFor="attendee_company">
+                {T.translate("edit_ticket.company")}
+              </InputLabel>
+              <MuiFormikTextField
                 id="attendee_company"
-                value={entity.attendee_company}
-                onChange={this.handleChange}
-                className="form-control"
-                error={this.hasErrors("attendee_company")}
+                name="attendee_company"
+                size="small"
+                margin="none"
+                fullWidth
               />
-            </div>
-            <div className="col-md-1">
-              <br />
-              <button onClick={this.handleAssign} className="btn btn-default">
+            </Grid2>
+            <Grid2
+              size={{ xs: 12, md: 1 }}
+              sx={{ display: "flex", alignItems: "flex-start", pt: 3 }}
+            >
+              <Button variant="contained" onClick={handleAssign}>
                 {T.translate("edit_ticket.assign")}
-              </button>
-            </div>
-          </div>
+              </Button>
+            </Grid2>
+          </Grid2>
         )}
-        <div className="row form-group">
-          <div className="col-md-6">
-            <label> {T.translate("edit_ticket.type")}:&nbsp;</label>
-            <TicketTypesInput
+
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 6 }}>
+            <InputLabel sx={BOLD_LABEL_SX} htmlFor="ticket_type">
+              {T.translate("edit_ticket.type")}
+            </InputLabel>
+            <MuiFormikAsyncAutocomplete
               id="ticket_type"
-              value={entity.ticket_type}
-              summitId={currentSummit.id}
-              onChange={this.handleChange}
-              version="v2"
+              name="ticket_type"
+              size="small"
               placeholder={T.translate(
                 "edit_ticket.placeholders.select_ticket_type"
               )}
-              isClearable
-              optionsLimit={25}
-              cacheOptions
-              defaultOptions
+              queryFunction={(input, callback) =>
+                queryTicketTypes(
+                  currentSummit.id,
+                  { name: input },
+                  callback,
+                  "v2",
+                  HUNDRED_PER_PAGE
+                )
+              }
             />
-          </div>
-          <div className="col-md-6">
-            <label>
-              {" "}
-              {T.translate("edit_ticket.number")}:&nbsp;
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 6 }}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <InputLabel sx={BOLD_LABEL_SX}>
+                {T.translate("edit_ticket.number")}
+              </InputLabel>
               <CopyClipboard
                 text={entity.number}
                 tooltipText={T.translate("edit_ticket.copy_ticket_number")}
               />
-            </label>
-            <br />
-            {entity.number}
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-3">
-            <label> {T.translate("edit_ticket.status")}:&nbsp;</label>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", minHeight: 40 }}>
+              <Typography>{entity.number}</Typography>
+            </Box>
+          </Grid2>
+        </Grid2>
+
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <LabeledValue
+            label={T.translate("edit_ticket.status")}
+            size={{ xs: 12, md: 3 }}
+          >
             {entity.status}
-          </div>
-          <div className="col-md-3">
-            <label> {T.translate("edit_ticket.promocode")}:&nbsp;</label>
+          </LabeledValue>
+          <LabeledValue
+            label={T.translate("edit_ticket.promocode")}
+            size={{ xs: 12, md: 3 }}
+          >
             {entity.promo_code ? (
-              <a href="" onClick={this.handlePromocodeClick}>
+              <Link
+                href=""
+                onClick={goTo(`promocodes/${entity.promo_code.id}`)}
+              >
                 {entity.promocode_name}
-              </a>
+              </Link>
             ) : (
               entity.promocode_name
             )}
-          </div>
-          <div className="col-md-6">
-            <label> {T.translate("edit_ticket.bought_date")}:&nbsp;</label>
+          </LabeledValue>
+          <LabeledValue
+            label={T.translate("edit_ticket.bought_date")}
+            size={{ xs: 12, md: 6 }}
+          >
             {entity.bought_date}
-          </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-3">
-            <label> {T.translate("edit_ticket.paid_amount")}:&nbsp;</label>
+          </LabeledValue>
+        </Grid2>
+
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <LabeledValue
+            label={T.translate("edit_ticket.paid_amount")}
+            size={{ xs: 12, md: 3 }}
+          >
             {entity.final_amount_formatted}
-          </div>
-          <div className="col-md-9">
-            <label> {T.translate("edit_ticket.order_number")}:&nbsp;</label>
-            <a href="" onClick={this.handleOrderClick}>
+          </LabeledValue>
+          <LabeledValue
+            label={T.translate("edit_ticket.order_number")}
+            size={{ xs: 12, md: 9 }}
+          >
+            <Link href="" onClick={goTo(`purchase-orders/${entity.order_id}`)}>
               {order.number}
-            </a>
-          </div>
-        </div>
+            </Link>
+          </LabeledValue>
+        </Grid2>
+
         {entity.refunded_amount > 0.0 && (
-          <>
-            <div className="row form-group">
-              <div className="col-md-3">
-                <label>
-                  {" "}
-                  {T.translate("edit_ticket.refund_total_amount")}:&nbsp;
-                </label>
-                {entity.refunded_amount_formatted}
-              </div>
-              <div className="col-md-9">&nbsp;</div>
-            </div>
-            <div className="row form-group">
-              <div className="col-md-6">
-                <label>
-                  {" "}
-                  {T.translate(
-                    "edit_ticket.adjusted_total_ticket_purchase_price"
-                  )}
-                  :&nbsp;
-                </label>
-                {entity.adjusted_total_ticket_purchase_price_formatted}
-              </div>
-              <div className="col-md-6">&nbsp;</div>
-            </div>
-          </>
+          <Grid2 container spacing={2} sx={{ mb: 2 }}>
+            <LabeledValue
+              label={T.translate("edit_ticket.refund_total_amount")}
+              size={12}
+            >
+              {entity.refunded_amount_formatted}
+            </LabeledValue>
+            <LabeledValue
+              label={T.translate(
+                "edit_ticket.adjusted_total_ticket_purchase_price"
+              )}
+              size={12}
+            >
+              {entity.adjusted_total_ticket_purchase_price_formatted}
+            </LabeledValue>
+          </Grid2>
         )}
-        {entity.id > 0 && !canReassign && shouldShowSave && (
-          <div className="row form-group">
-            <div className="col-md-12 submit-buttons">
-              <input
-                type="button"
-                onClick={this.handleUpdateTicket}
-                className="btn btn-primary pull-right"
-                value={T.translate("general.save")}
-              />
-            </div>
-          </div>
+
+        {entity.id > 0 && !canReassign && ticketTypeChanged && (
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+            <Button
+              variant="contained"
+              type="submit"
+              disabled={formik.isSubmitting}
+            >
+              {T.translate("general.save")}
+            </Button>
+          </Box>
         )}
-      </form>
-    );
-  }
-}
+      </MuiForm>
+    </FormikProvider>
+  );
+};
+
+TicketForm.propTypes = {
+  entity: PropTypes.shape({
+    id: PropTypes.number,
+    order_id: PropTypes.number
+  }).isRequired,
+  order: PropTypes.shape({
+    id: PropTypes.number,
+    number: PropTypes.string
+  }).isRequired,
+  currentSummit: PropTypes.shape({ id: PropTypes.number }),
+  history: PropTypes.shape({ push: PropTypes.func }).isRequired,
+  onSaveTicket: PropTypes.func.isRequired,
+  onReassing: PropTypes.func.isRequired,
+  onUnAssign: PropTypes.func.isRequired
+};
+
+TicketForm.defaultProps = {
+  currentSummit: null
+};
 
 export default TicketForm;

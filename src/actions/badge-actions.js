@@ -176,7 +176,12 @@ export const deleteBadge = (ticketId) => async (dispatch, getState) => {
     snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
-    dispatch(showSuccessMessage(T.translate("edit_ticket.badge_deleted")));
+    dispatch(
+      snackbarSuccessHandler({
+        title: T.translate("general.success"),
+        html: T.translate("edit_ticket.badge_deleted")
+      })
+    );
   });
 };
 
