@@ -40,7 +40,11 @@ import MuiLinkList from "../mui/link-list";
 import MuiFormikColorField from "../mui/formik-inputs/mui-formik-color-field";
 import MuiFormikDatetimepicker from "../mui/formik-inputs/mui-formik-datetimepicker";
 import useScrollToError from "../../hooks/useScrollToError";
-import { requiredStringValidation, hexColorValidation } from "../../utils/yup";
+import {
+  requiredStringValidation,
+  hexColorValidation,
+  dateValidation
+} from "../../utils/yup";
 
 const DATE_FIELDS = [
   "begin_attendee_voting_period_date",
@@ -60,7 +64,11 @@ const getGroupTitle = (group) => group.title;
 const validationSchema = yup.object().shape({
   class_name: requiredStringValidation(),
   name: requiredStringValidation(),
-  color: hexColorValidation().required(T.translate("validation.required"))
+  color: hexColorValidation().required(T.translate("validation.required")),
+  begin_attendee_voting_period_date: dateValidation(),
+  end_attendee_voting_period_date: dateValidation(),
+  submission_begin_date: dateValidation(),
+  submission_end_date: dateValidation()
 });
 
 const unlinkTrackDialogBody = () =>

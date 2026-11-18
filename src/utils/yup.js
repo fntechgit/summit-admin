@@ -1,4 +1,5 @@
 import * as yup from "yup";
+import moment from "moment-timezone";
 import T from "i18n-react";
 import { METAFIELD_TYPES, fieldTypesWithOptions } from "./constants";
 import normalizeHtmlString from "./normalize-html-string";
@@ -184,3 +185,13 @@ export const nullableDecimalValidation = () =>
       if (value === undefined || value === null) return true;
       return /^\d+(\.\d{1,2})?$/.test(value.toString());
     });
+
+export const dateValidation = () =>
+  yup
+    .mixed()
+    .nullable()
+    .test(
+      "valid-date",
+      T.translate("validation.date"),
+      (value) => value == null || (moment.isMoment(value) && value.isValid())
+    );
