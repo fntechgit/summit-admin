@@ -18,11 +18,7 @@ import * as yup from "yup";
 import { Box, Button, Grid2, InputLabel, MenuItem } from "@mui/material";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import {
-  queryTracks,
-  queryGroups
-} from "openstack-uicore-foundation/lib/utils/query-actions";
-import SimpleLinkList from "openstack-uicore-foundation/lib/components/simple-link-list";
+import { queryGroups } from "openstack-uicore-foundation/lib/utils/query-actions";
 import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
@@ -31,6 +27,7 @@ import MuiFormikAsyncAutocomplete from "openstack-uicore-foundation/lib/componen
 import FormikTextEditor from "openstack-uicore-foundation/lib/components/mui/formik-inputs/texteditor";
 import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import AuditLogs from "../audit-logs";
+import MuiLinkList from "../mui/link-list";
 import MuiFormikColorField from "../mui/formik-inputs/mui-formik-color-field";
 import MuiFormikDatetimepicker from "../mui/formik-inputs/mui-formik-datetimepicker";
 import useScrollToError from "../../hooks/useScrollToError";
@@ -48,6 +45,9 @@ const validationSchema = yup.object().shape({
   name: requiredStringValidation(),
   color: hexColorValidation().required(T.translate("validation.required"))
 });
+
+const unlinkTrackDialogBody = () =>
+  T.translate("edit_event_category_group.unlink_track_warning");
 
 const buildInitialValues = (entity, timezone) => {
   const values = { ...entity, class_name: entity.class_name || "" };
@@ -99,22 +99,22 @@ const EventCategoryGroupForm = ({
     }
   }, [errors]);
 
-  const trackSearchFormik = useFormik({
-    initialValues: { track: null },
-    onSubmit: () => {}
-  });
-
-  const handleTrackLink = () => {
-    onTrackLink(entity.id, trackSearchFormik.values.track.raw);
-    trackSearchFormik.setFieldValue("track", null);
+  const handleTrackLink = (track) => {
+    onTrackLink(entity.id, track);
   };
 
   const handleTrackUnLink = (trackId) => {
     onTrackUnLink(entity.id, trackId);
   };
 
-  const handleAllowedGroupLink = (value) => {
-    onAllowedGroupLink(entity.id, value);
+  const groupSearchFormik = useFormik({
+    initialValues: { group: null },
+    onSubmit: () => {}
+  });
+
+  const handleAllowedGroupLink = () => {
+    onAllowedGroupLink(entity.id, groupSearchFormik.values.group.raw);
+    groupSearchFormik.setFieldValue("group", null);
   };
 
   const handleAllowedGroupUnLink = (valueId) => {
@@ -135,31 +135,20 @@ const EventCategoryGroupForm = ({
     return class_name[flag];
   };
 
-  const selectedTrackIds = entity?.tracks?.map((t) => t.id) || [];
-
   const tracksColumns = [
     { columnKey: "name", header: T.translate("edit_event_category.name") },
     { columnKey: "code", header: T.translate("edit_event_category.code") }
   ];
 
+  const selectedGroupIds = entity?.allowed_groups?.map((g) => g.id) || [];
+
   const allowedGroupsColumns = [
-    { columnKey: "title", value: T.translate("edit_event_category.name") },
+    { columnKey: "title", header: T.translate("edit_event_category.name") },
     {
       columnKey: "description",
-      value: T.translate("edit_event_category.description")
+      header: T.translate("edit_event_category.description")
     }
   ];
-
-  const allowedGroupsOptions = {
-    title: T.translate("edit_event_category_group.allowed_groups"),
-    valueKey: "id",
-    labelKey: "title",
-    actions: {
-      search: queryGroups,
-      delete: { onClick: handleAllowedGroupUnLink },
-      add: { onClick: handleAllowedGroupLink }
-    }
-  };
 
   return (
     <FormikProvider value={formik}>
@@ -288,32 +277,40 @@ const EventCategoryGroupForm = ({
 
         <hr />
         {entity.id !== 0 && (
+          <MuiLinkList
+            title={T.translate("edit_event_category_group.tracks")}
+            placeholder={T.translate(
+              "edit_event_category_group.placeholders.search_categories"
+            )}
+            values={entity.tracks}
+            options={currentSummit.tracks}
+            columns={tracksColumns}
+            onLink={handleTrackLink}
+            onUnLink={handleTrackUnLink}
+            deleteDialogBody={unlinkTrackDialogBody}
+          />
+        )}
+        {entity.id !== 0 && shouldShowField("allowed_groups") && (
           <Box sx={{ mb: 2 }}>
-            <InputLabel htmlFor="track">
-              {T.translate("edit_event_category_group.tracks")}
+            <InputLabel htmlFor="group">
+              {T.translate("edit_event_category_group.allowed_groups")}
             </InputLabel>
             <Grid2 container spacing={1} sx={{ mb: 2, alignItems: "stretch" }}>
               <Grid2 size={{ xs: 12, sm: 6 }}>
-                <FormikProvider value={trackSearchFormik}>
+                <FormikProvider value={groupSearchFormik}>
                   <MuiFormikAsyncAutocomplete
-                    // remount so options reload without the linked categories
-                    key={selectedTrackIds.join()}
-                    name="track"
+                    // remount so options reload without the linked groups
+                    key={selectedGroupIds.join()}
+                    name="group"
                     placeholder={T.translate(
-                      "edit_event_category_group.placeholders.search_categories"
+                      "edit_event_category_group.placeholders.search_groups"
                     )}
-                    queryFunction={(input, callback) =>
-                      queryTracks(
-                        currentSummit.id,
-                        input,
-                        callback,
-                        selectedTrackIds
-                      )
-                    }
-                    formatOption={(track) => ({
-                      value: track.id,
-                      label: track.name,
-                      raw: track
+                    queryFunction={queryGroups}
+                    hiddenOptions={selectedGroupIds}
+                    formatOption={(group) => ({
+                      value: group.id,
+                      label: group.title,
+                      raw: group
                     })}
                   />
                 </FormikProvider>
@@ -321,8 +318,8 @@ const EventCategoryGroupForm = ({
               <Grid2>
                 <Button
                   variant="outlined"
-                  disabled={!trackSearchFormik.values.track}
-                  onClick={handleTrackLink}
+                  disabled={!groupSearchFormik.values.group}
+                  onClick={handleAllowedGroupLink}
                   sx={{ height: "100%" }}
                 >
                   {T.translate("general.add")}
@@ -330,23 +327,12 @@ const EventCategoryGroupForm = ({
               </Grid2>
             </Grid2>
             <MuiTable
-              columns={tracksColumns}
-              data={entity.tracks}
-              onDelete={handleTrackUnLink}
-              deleteDialogBody={T.translate(
-                "edit_event_category_group.unlink_track_warning"
-              )}
+              columns={allowedGroupsColumns}
+              data={entity.allowed_groups}
+              getName={(group) => group.title}
+              onDelete={handleAllowedGroupUnLink}
             />
           </Box>
-        )}
-        <br />
-        <br />
-        {entity.id !== 0 && shouldShowField("allowed_groups") && (
-          <SimpleLinkList
-            values={entity.allowed_groups}
-            columns={allowedGroupsColumns}
-            options={allowedGroupsOptions}
-          />
         )}
 
         {entity.id !== 0 && (
