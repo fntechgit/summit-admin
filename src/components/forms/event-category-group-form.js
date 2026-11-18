@@ -11,15 +11,24 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { useFormik, FormikProvider } from "formik";
 import * as yup from "yup";
-import { Box, Button, Grid2, InputLabel, MenuItem } from "@mui/material";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  Grid2,
+  InputLabel,
+  MenuItem,
+  Typography
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { queryGroups } from "openstack-uicore-foundation/lib/utils/query-actions";
-import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikSelect from "openstack-uicore-foundation/lib/components/mui/formik-inputs/select";
@@ -78,8 +87,6 @@ const EventCategoryGroupForm = ({
   onAllowedGroupLink,
   onAllowedGroupUnLink
 }) => {
-  const [showAuditLog, setShowAuditLog] = useState(false);
-
   const handleSubmit = (values) => {
     const normalized = { ...values };
     // 0 clears the date, see normalizeGroupEntity
@@ -127,11 +134,6 @@ const EventCategoryGroupForm = ({
 
   const handleAllowedGroupUnLink = (valueId) => {
     onAllowedGroupUnLink(entity.id, valueId);
-  };
-
-  const toggleAuditLog = (ev) => {
-    ev.preventDefault();
-    setShowAuditLog((prev) => !prev);
   };
 
   const shouldShowField = (flag) => {
@@ -341,20 +343,23 @@ const EventCategoryGroupForm = ({
         )}
 
         {entity.id !== 0 && (
-          <Panel
-            show={showAuditLog}
-            title={T.translate("audit_log.title")}
-            handleClick={toggleAuditLog}
-          >
-            <AuditLogs
-              filterId="category_group"
-              entityFilter={[
-                `entity_id==${entity.id}`,
-                `class_name==${entity.class_name}`
-              ]}
-              columns={["created", "action_description", "user"]}
-            />
-          </Panel>
+          <Accordion sx={{ my: 2 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography>
+                <b>{T.translate("audit_log.title")}</b>
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <AuditLogs
+                filterId="category_group"
+                entityFilter={[
+                  `entity_id==${entity.id}`,
+                  `class_name==${entity.class_name}`
+                ]}
+                columns={["created", "action_description", "user"]}
+              />
+            </AccordionDetails>
+          </Accordion>
         )}
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
