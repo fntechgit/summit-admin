@@ -121,7 +121,7 @@ describe("TicketForm", () => {
     );
   });
 
-  test("reassign ignores stale member results and sends the picked member's data", async () => {
+  test("reassign sends the picked member's data", async () => {
     const pending = [];
     queryMembers.mockImplementation((input, callback) =>
       pending.push(callback)
@@ -144,14 +144,6 @@ describe("TicketForm", () => {
         }
       ])
     );
-    act(() =>
-      pending[0]([
-        { id: 9, email: "j@test.com", first_name: "Old", last_name: "Result" }
-      ])
-    );
-    expect(
-      screen.queryByRole("option", { name: "Old Result (j@test.com)" })
-    ).not.toBeInTheDocument();
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
 
     await userEvent.click(

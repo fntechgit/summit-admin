@@ -32,7 +32,6 @@ const MuiFormikAsyncAutocomplete = ({
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const isFirstSearch = useRef(true);
-  const lastQuery = useRef(0);
 
   const isMultiSelect = isMulti || multiple;
 
@@ -49,13 +48,9 @@ const MuiFormikAsyncAutocomplete = ({
   const error = meta.touched && meta.error;
 
   const fetchOptions = async (input = "") => {
-    // query functions don't cancel, so an older search can answer last
-    lastQuery.current += 1;
-    const query = lastQuery.current;
     setLoading(true);
     try {
       await queryFunction(input, ...queryParams, (results) => {
-        if (query !== lastQuery.current) return;
         const normalized = results
           .filter((r) => !hiddenOptions.includes(r.id))
           .map(formatOption);
@@ -64,7 +59,7 @@ const MuiFormikAsyncAutocomplete = ({
       });
     } catch (err) {
       console.error("Error fetching options:", err);
-      if (query === lastQuery.current) setLoading(false);
+      setLoading(false);
     }
   };
 

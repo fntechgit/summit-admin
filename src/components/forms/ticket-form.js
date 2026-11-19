@@ -72,19 +72,13 @@ const AttendeeEmailInput = () => {
   useEffect(() => {
     if (!input) {
       setLoading(false);
-      return undefined;
+      return;
     }
-    // queryMembers doesn't cancel, so an older search can answer last
-    let active = true;
     setLoading(true);
     queryMembers(input, (res) => {
-      if (!active) return;
       setOptions(Array.isArray(res) ? res : []);
       setLoading(false);
     });
-    return () => {
-      active = false;
-    };
   }, [input]);
 
   const handleChange = (_ev, selected) => {

@@ -10,11 +10,9 @@ import {
   deleteRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
 import {
-  getTicket,
   getTicketTypes,
   deleteTicketType,
-  changeTicketTypesCurrency,
-  RECEIVE_TICKET
+  changeTicketTypesCurrency
 } from "../ticket-actions";
 import * as methods from "../../utils/methods";
 
@@ -50,39 +48,6 @@ describe("ticket-actions", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
-  });
-
-  describe("getTicket", () => {
-    it("drops the response of a superseded ticket fetch", async () => {
-      const pending = [];
-      getRequest.mockImplementation(
-        (requestAction, receiveAction) => () => (dispatch) =>
-          new Promise((resolve) => {
-            pending.push((id) => {
-              dispatch(receiveAction({ response: { id } }));
-              resolve({ response: { id } });
-            });
-          })
-      );
-      const store = mockStore(storeState);
-
-      const first = store.dispatch(getTicket(1));
-      await flushPromises();
-      const second = store.dispatch(getTicket(2));
-      await flushPromises();
-      pending[1](2);
-      pending[0](1);
-      await Promise.all([first, second]);
-
-      const received = store
-        .getActions()
-        .filter((a) => a.type === RECEIVE_TICKET);
-      expect(received).toHaveLength(1);
-      expect(received[0].payload.response.id).toBe(2);
-      expect(
-        store.getActions().filter((a) => a.type === "STOP_LOADING")
-      ).toHaveLength(1);
-    });
   });
 
   describe("getTicketTypes", () => {

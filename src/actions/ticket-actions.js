@@ -36,8 +36,7 @@ import {
   getAccessTokenSafely,
   isNumericString,
   checkOrFilter,
-  joinCVSChunks,
-  sequenced
+  joinCVSChunks
 } from "../utils/methods";
 
 import history from "../history";
@@ -686,15 +685,12 @@ export const exportTicketsCSV =
       });
   };
 
-// a slower response for the previous ticket must not overwrite the current one
-const getTicketSeq = sequenced();
-
 export const getTicket = (ticketId) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
-  const { guardedDispatch } = getTicketSeq(dispatch);
-  guardedDispatch(startLoading());
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
+
+  dispatch(startLoading());
 
   const params = {
     access_token: accessToken,
@@ -707,9 +703,10 @@ export const getTicket = (ticketId) => async (dispatch, getState) => {
     createAction(RECEIVE_TICKET),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tickets/${ticketId}`,
     snackbarErrorHandler
-  )(params)(guardedDispatch)
-    .then((data) => data.response)
-    .finally(() => guardedDispatch(stopLoading()));
+  )(params)(dispatch).then((data) => {
+    dispatch(stopLoading());
+    return data.response;
+  });
 };
 
 export const saveTicket = (orderId, ticket) => async (dispatch, getState) => {

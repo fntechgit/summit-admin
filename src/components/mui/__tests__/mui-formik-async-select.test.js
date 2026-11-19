@@ -1,5 +1,5 @@
 import React from "react";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Formik, useFormikContext } from "formik";
 import "@testing-library/jest-dom";
@@ -9,20 +9,14 @@ jest.mock("@mui/material", () => {
   const actual = jest.requireActual("@mui/material");
   return {
     ...actual,
-    Autocomplete: ({ onChange, onInputChange, options }) => (
-      <>
-        <input
-          data-testid="search"
-          onChange={(e) => onInputChange(e, e.target.value)}
-        />
-        <button
-          type="button"
-          data-testid="select-option"
-          onClick={() => onChange({}, options[0])}
-        >
-          select
-        </button>
-      </>
+    Autocomplete: ({ onChange, options }) => (
+      <button
+        type="button"
+        data-testid="select-option"
+        onClick={() => onChange({}, options[0])}
+      >
+        select
+      </button>
     )
   };
 });
@@ -57,22 +51,6 @@ describe("MuiFormikAsyncAutocomplete", () => {
     expect(consumerOnChange).not.toHaveBeenCalled();
     expect(screen.getByTestId("field-value")).toHaveTextContent(
       JSON.stringify({ value: "1", label: "Jane Doe" })
-    );
-  });
-
-  test("ignores the results of an older query that answers last", async () => {
-    const pending = [];
-    const queryFunction = (input, callback) => pending.push(callback);
-    renderWithFormik({ queryFunction });
-
-    await userEvent.type(screen.getByTestId("search"), "v");
-    await waitFor(() => expect(pending).toHaveLength(2));
-    act(() => pending[1]([{ id: 2, name: "VIP" }]));
-    act(() => pending[0]([{ id: 1, name: "General" }]));
-    await userEvent.click(screen.getByTestId("select-option"));
-
-    expect(screen.getByTestId("field-value")).toHaveTextContent(
-      JSON.stringify({ value: "2", label: "VIP" })
     );
   });
 });
