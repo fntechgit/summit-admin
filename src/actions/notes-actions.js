@@ -24,7 +24,7 @@ import {
   getCSV
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react";
-import { getAccessTokenSafely } from "../utils/methods";
+import { getAccessTokenSafely, sequenced } from "../utils/methods";
 
 export const CLEAR_NOTES_PARAMS = "CLEAR_NOTES_PARAMS";
 export const REQUEST_NOTES = "REQUEST_NOTES";
@@ -32,15 +32,19 @@ export const RECEIVE_NOTES = "RECEIVE_NOTES";
 export const NOTE_ADDED = "NOTE_ADDED";
 export const NOTE_DELETED = "NOTE_DELETED";
 
+const notesSeq = sequenced();
+
 export const getNotes =
   (attendeeId, ticketId, term = null, page, perPage, order, orderDir) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
+    const { isCurrent, guardedDispatch } = notesSeq(dispatch);
+    guardedDispatch(startLoading());
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const filter = [];
 
-    dispatch(startLoading());
+    if (!isCurrent()) return Promise.resolve();
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
@@ -76,9 +80,7 @@ export const getNotes =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/notes`,
       snackbarErrorHandler,
       { page, perPage, order, orderDir, term }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(guardedDispatch).finally(() => guardedDispatch(stopLoading()));
   };
 
 export const exportNotes =
@@ -182,5 +184,6 @@ export const deleteNote =
   };
 
 export const clearNotesParams = () => async (dispatch) => {
+  notesSeq(dispatch); // drops any getNotes still in flight
   dispatch(createAction(CLEAR_NOTES_PARAMS)());
 };

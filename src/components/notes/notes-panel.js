@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react";
 import { FormikProvider, useFormik } from "formik";
@@ -49,6 +49,8 @@ const NotesPanel = ({
   clearNotesParams
 }) => {
   const [term, setTerm] = useState("");
+  // a save or delete can resolve after the panel remounts for another attendee
+  const mounted = useRef(true);
 
   useEffect(() => {
     getNotes(
@@ -64,6 +66,7 @@ const NotesPanel = ({
       .catch(() => {});
 
     return () => {
+      mounted.current = false;
       clearNotesParams();
     };
   }, []);
@@ -79,19 +82,17 @@ const NotesPanel = ({
       newOrderDir
     ).catch(() => {});
 
+  const reloadFirstPage = () =>
+    fetchNotes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+
   const formik = useFormik({
     initialValues: { content: "" },
     onSubmit: ({ content }, { resetForm }) =>
       saveNote(attendeeId, ticketId, content)
         .then(() => {
+          if (!mounted.current) return undefined;
           resetForm();
-          return fetchNotes(
-            term,
-            DEFAULT_CURRENT_PAGE,
-            perPage,
-            order,
-            orderDir
-          );
+          return reloadFirstPage();
         })
         .catch(() => {})
   });
@@ -115,9 +116,7 @@ const NotesPanel = ({
 
   const handleDelete = (noteId) =>
     deleteNote(attendeeId, noteId)
-      .then(() =>
-        fetchNotes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
-      )
+      .then(() => (mounted.current ? reloadFirstPage() : undefined))
       .catch(() => {});
 
   const tableColumns = [

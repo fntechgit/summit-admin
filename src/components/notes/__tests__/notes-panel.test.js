@@ -141,4 +141,24 @@ describe("NotesPanel", () => {
     expect(getNotes).toHaveBeenCalledTimes(2);
     expect(lastGetNotesArgs()[3]).toBe(1);
   });
+
+  test("a save that resolves after the panel unmounts doesn't reload notes", async () => {
+    let resolveSave;
+    saveNote.mockImplementationOnce(
+      () => () =>
+        new Promise((resolve) => {
+          resolveSave = resolve;
+        })
+    );
+    const { unmount } = renderPanel();
+
+    await userEvent.type(document.getElementById("new_note"), "late note");
+    await userEvent.click(screen.getByRole("button", { name: "general.add" }));
+    await waitFor(() => expect(saveNote).toHaveBeenCalled());
+    unmount();
+    resolveSave();
+    await Promise.resolve();
+
+    expect(getNotes).toHaveBeenCalledTimes(1);
+  });
 });
