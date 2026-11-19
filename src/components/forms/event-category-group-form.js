@@ -12,6 +12,7 @@
  * */
 
 import React, { useEffect } from "react";
+import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { useFormik, FormikProvider } from "formik";
 import * as yup from "yup";
@@ -324,6 +325,7 @@ const EventCategoryGroupForm = ({
                 <FormikProvider value={groupSearchFormik}>
                   <MuiFormikAsyncAutocomplete
                     key={groupSearchKey}
+                    id="group"
                     name="group"
                     placeholder={T.translate(
                       "edit_event_category_group.placeholders.search_groups"
@@ -383,6 +385,22 @@ const EventCategoryGroupForm = ({
       </MuiForm>
     </FormikProvider>
   );
+};
+
+EventCategoryGroupForm.propTypes = {
+  currentSummit: PropTypes.object.isRequired,
+  allClasses: PropTypes.array.isRequired,
+  entity: PropTypes.object.isRequired,
+  errors: PropTypes.object,
+  onSubmit: PropTypes.func.isRequired,
+  onTrackLink: PropTypes.func.isRequired,
+  onTrackUnLink: PropTypes.func.isRequired,
+  onAllowedGroupLink: PropTypes.func.isRequired,
+  onAllowedGroupUnLink: PropTypes.func.isRequired
+};
+
+EventCategoryGroupForm.defaultProps = {
+  errors: {}
 };
 
 export default EventCategoryGroupForm;
