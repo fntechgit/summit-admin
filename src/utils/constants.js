@@ -264,6 +264,9 @@ export const SPONSOR_TABS = {
   BADGE_SCANS: 7
 };
 
+// matches the old bootstrap container content width
+export const FULL_WIDTH_PAGE_CONTENT_MAX_WIDTH = 1140;
+
 export const fieldTypesWithOptions = [
   "CheckBoxList",
   "ComboBox",
