@@ -188,6 +188,36 @@ describe("BadgeForm", () => {
     });
   });
 
+  test("a badge type change drops view type filters the new type doesn't offer", async () => {
+    const { rerender } = render(formElement());
+    await openDetails();
+    await userEvent.click(
+      screen.getByText("edit_ticket.placeholders.view_type_filter")
+    );
+    await userEvent.click(screen.getByRole("option", { name: "Card" }));
+    await userEvent.keyboard("{Escape}");
+
+    const summit = {
+      ...currentSummit,
+      badge_types: [
+        currentSummit.badge_types[0],
+        { ...currentSummit.badge_types[1], allowed_view_types: [] }
+      ]
+    };
+    rerender(
+      formElement({ entity: { ...entity, type_id: 2 }, currentSummit: summit })
+    );
+
+    expect(lastQueryArgs()).toEqual([
+      "jane",
+      1,
+      10,
+      "print_date",
+      -1,
+      { viewTypeFilter: [], printDateFilter: [0, 0] }
+    ]);
+  });
+
   test("apply filters rejects a half-typed date or from after to, and clear needs confirmation", async () => {
     render(formElement());
     await openDetails();

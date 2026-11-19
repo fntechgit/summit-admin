@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import moment from "moment-timezone";
@@ -73,6 +73,23 @@ const BadgeForm = ({
   const [printDateTo, setPrintDateTo] = useState(null);
   const [printDateError, setPrintDateError] = useState("");
   const [appliedPrintDates, setAppliedPrintDates] = useState([0, 0]);
+
+  // a new badge type can drop view types, so keep only the ones it still offers
+  useEffect(() => {
+    const allowedIds = (
+      currentSummit.badge_types?.find((bt) => bt.id === entity.type_id)
+        ?.allowed_view_types ?? []
+    ).map(toId);
+    const kept = viewTypeFilter.filter((id) => allowedIds.includes(id));
+    if (kept.length === viewTypeFilter.length) return;
+    setViewTypeFilter(kept);
+    if (showPrintDetails) {
+      onBadgePrintQuery(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir, {
+        viewTypeFilter: kept,
+        printDateFilter: appliedPrintDates
+      });
+    }
+  }, [entity.type_id]);
 
   const { badge_types: badgeTypes, badge_features: badgeFeatures } =
     currentSummit;
