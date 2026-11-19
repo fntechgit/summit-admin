@@ -300,6 +300,8 @@ export const checkInBadge = (code) => async (dispatch, getState) => {
 
 /** *********************  BADGE PRINTS  *********************************************** */
 
+const badgePrintsSeq = sequenced();
+
 export const getBadgePrints =
   (
     term = null,
@@ -311,13 +313,15 @@ export const getBadgePrints =
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState, currentTicketState } = getState();
+    const { isCurrent, guardedDispatch } = badgePrintsSeq(dispatch);
+    guardedDispatch(startLoading());
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const {
       entity: { id: ticketId }
     } = currentTicketState;
 
-    dispatch(startLoading());
+    if (!isCurrent()) return Promise.resolve();
 
     const params = {
       page,
@@ -344,9 +348,9 @@ export const getBadgePrints =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tickets/${ticketId}/badge/current/prints`,
       snackbarErrorHandler,
       { order, orderDir, term, summitTz: currentSummit.time_zone_id }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(guardedDispatch)
+      .catch(() => {})
+      .finally(() => guardedDispatch(stopLoading()));
   };
 
 export const exportBadgePrints =
