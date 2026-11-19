@@ -4,7 +4,7 @@
 import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import { getRequest } from "openstack-uicore-foundation/lib/utils/actions";
-import { clearNotesParams, getNotes } from "../notes-actions";
+import { getNotes } from "../notes-actions";
 import * as methods from "../../utils/methods";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
@@ -25,7 +25,7 @@ describe("getNotes", () => {
     jest.resetAllMocks();
   });
 
-  it("drops a superseded search's response and anything in flight once the params are cleared", async () => {
+  it("drops a superseded search's response", async () => {
     const store = mockStore({
       currentSummitState: { currentSummit: { id: 1 } }
     });
@@ -41,10 +41,5 @@ describe("getNotes", () => {
     guards[0]({ type: "STALE_RECEIVE" });
     guards[1]({ type: "FRESH_RECEIVE" });
     expect(store.getActions().map((a) => a.type)).toEqual(["FRESH_RECEIVE"]);
-
-    await store.dispatch(clearNotesParams());
-    store.clearActions();
-    guards[1]({ type: "LATE_RECEIVE" });
-    expect(store.getActions()).toEqual([]);
   });
 });

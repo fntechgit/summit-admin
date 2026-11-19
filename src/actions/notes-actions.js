@@ -184,6 +184,5 @@ export const deleteNote =
   };
 
 export const clearNotesParams = () => async (dispatch) => {
-  notesSeq(dispatch); // drops any getNotes still in flight
   dispatch(createAction(CLEAR_NOTES_PARAMS)());
 };

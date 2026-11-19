@@ -51,6 +51,9 @@ const NotesPanel = ({
   const [term, setTerm] = useState("");
   // a save or delete can resolve after the panel remounts for another attendee
   const mounted = useRef(true);
+  // or after a newer search or sort, so the reload reads the latest query
+  const query = useRef();
+  query.current = { term, perPage, order, orderDir };
 
   useEffect(() => {
     getNotes(
@@ -82,8 +85,16 @@ const NotesPanel = ({
       newOrderDir
     ).catch(() => {});
 
-  const reloadFirstPage = () =>
-    fetchNotes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+  const reloadFirstPage = () => {
+    const latest = query.current;
+    return fetchNotes(
+      latest.term,
+      DEFAULT_CURRENT_PAGE,
+      latest.perPage,
+      latest.order,
+      latest.orderDir
+    );
+  };
 
   const formik = useFormik({
     initialValues: { content: "" },

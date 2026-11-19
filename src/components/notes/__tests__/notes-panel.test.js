@@ -95,6 +95,31 @@ describe("NotesPanel", () => {
     expect(lastGetNotesArgs()[3]).toBe(1);
   });
 
+  test("a delete that resolves after a new search reloads with that search", async () => {
+    let resolveDelete;
+    deleteNote.mockImplementationOnce(
+      () => () =>
+        new Promise((resolve) => {
+          resolveDelete = resolve;
+        })
+    );
+    renderPanel();
+
+    await startDelete();
+    await userEvent.click(
+      screen.getByRole("button", { name: "general.yes_delete" })
+    );
+    await waitFor(() => expect(deleteNote).toHaveBeenCalled());
+    await userEvent.type(
+      screen.getByPlaceholderText("notes_panel.placeholders.search"),
+      "jane{Enter}"
+    );
+    resolveDelete();
+
+    await waitFor(() => expect(getNotes).toHaveBeenCalledTimes(3));
+    expect(lastGetNotesArgs()[2]).toBe("jane");
+  });
+
   test("search goes to page 1 and sort and paging keep the term", async () => {
     renderPanel({ totalNotes: 25 });
 
