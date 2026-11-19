@@ -87,7 +87,7 @@ const ENTITY = {
 const renderForm = (props) =>
   render(
     <EventCategoryGroupForm
-      currentSummit={{ id: 1, time_zone_id: "UTC", tracks: [] }}
+      currentSummit={{ time_zone_id: "UTC", tracks: [] }}
       allClasses={[PUBLIC_CLASS, PRIVATE_CLASS]}
       entity={ENTITY}
       errors={{}}
@@ -117,6 +117,14 @@ describe("EventCategoryGroupForm", () => {
         })
       )
     );
+  });
+
+  it("keeps a server error under its field", async () => {
+    renderForm({
+      errors: { max_submission_allowed_per_user: "must be at least 1" }
+    });
+
+    expect(await screen.findByText("must be at least 1")).toBeInTheDocument();
   });
 
   it.each([

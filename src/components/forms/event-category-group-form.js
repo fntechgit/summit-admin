@@ -61,6 +61,12 @@ const formatGroupOption = (group) => ({
 
 const getGroupTitle = (group) => group.title;
 
+// groups can share a title, so key options by id
+const getGroupOptionKey = (option) => option.value;
+
+const unlinkTrackDialogBody = () =>
+  T.translate("edit_event_category_group.unlink_track_warning");
+
 const validationSchema = yup.object().shape({
   class_name: requiredStringValidation(),
   name: requiredStringValidation(),
@@ -70,9 +76,6 @@ const validationSchema = yup.object().shape({
   submission_begin_date: dateValidation(),
   submission_end_date: dateValidation()
 });
-
-const unlinkTrackDialogBody = () =>
-  T.translate("edit_event_category_group.unlink_track_warning");
 
 const buildInitialValues = (entity, timezone) => {
   const values = { ...entity, class_name: entity.class_name || "" };
@@ -328,6 +331,7 @@ const EventCategoryGroupForm = ({
                     queryFunction={queryGroups}
                     hiddenOptions={selectedGroupIds}
                     formatOption={formatGroupOption}
+                    getOptionKey={getGroupOptionKey}
                   />
                 </FormikProvider>
               </Grid2>
