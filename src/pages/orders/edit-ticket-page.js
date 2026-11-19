@@ -216,7 +216,9 @@ const EditTicketPage = ({
 
   // the ticket reducer ignores the reassign response, so refetch the new owner
   const handleReassignTicket = (...args) =>
-    props.reassignTicket(...args).then(() => props.getTicket(entity.id));
+    props.reassignTicket(...args).then(() => {
+      props.getTicket(entity.id).catch(() => {});
+    });
 
   // the dialogs confirm and close themselves
   const handleRejectRefundRequest = (notes) =>
