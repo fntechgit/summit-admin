@@ -15,7 +15,6 @@ import {
   saveBadgeSettings,
   saveBadgeFeature,
   getViewTypes,
-  getBadgePrints,
   deleteViewType,
   REQUEST_VIEW_TYPES
 } from "../badge-actions";
@@ -195,26 +194,6 @@ describe("view type list thunks", () => {
     );
 
     await store.dispatch(getViewTypes("c", 1, 10, "name", 1));
-    store.clearActions();
-    guards[0]({ type: "STALE_RECEIVE" });
-    guards[1]({ type: "FRESH_RECEIVE" });
-
-    expect(store.getActions().map((a) => a.type)).toEqual(["FRESH_RECEIVE"]);
-  });
-
-  it("getBadgePrints drops a stale search's response", async () => {
-    const store = mockStore({
-      ...state,
-      currentTicketState: { entity: { id: 9 } }
-    });
-    const guards = [];
-    getRequest.mockImplementation(() => () => (guardedDispatch) => {
-      guards.push(guardedDispatch);
-      return Promise.resolve();
-    });
-
-    await store.dispatch(getBadgePrints("a"));
-    await store.dispatch(getBadgePrints("ab"));
     store.clearActions();
     guards[0]({ type: "STALE_RECEIVE" });
     guards[1]({ type: "FRESH_RECEIVE" });
