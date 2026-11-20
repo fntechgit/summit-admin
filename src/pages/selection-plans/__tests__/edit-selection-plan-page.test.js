@@ -86,7 +86,7 @@ describe("EditSelectionPlanPage", () => {
     jest.clearAllMocks();
   });
 
-  it("saves and redirects to the list on create", async () => {
+  it("saves and opens the created plan on create", async () => {
     saveSelectionPlan.mockReturnValue(() => Promise.resolve({ id: 42 }));
     saveSelectionPlanSettings.mockReturnValue(() => Promise.resolve());
 
@@ -110,11 +110,11 @@ describe("EditSelectionPlanPage", () => {
     });
     expect(saveSelectionPlanSettings).toHaveBeenCalledWith({}, 42);
     expect(mockHistory.push).toHaveBeenCalledWith(
-      "/app/summits/1/selection-plans"
+      "/app/summits/1/selection-plans/42"
     );
   });
 
-  it("saves an existing plan and redirects to the list", async () => {
+  it("saves an existing plan and stays in the editor", async () => {
     saveSelectionPlan.mockReturnValue(() => Promise.resolve({ id: 5 }));
     saveSelectionPlanSettings.mockReturnValue(() => Promise.resolve());
 
@@ -136,9 +136,7 @@ describe("EditSelectionPlanPage", () => {
       id: 5,
       marketing_settings: {}
     });
-    expect(mockHistory.push).toHaveBeenCalledWith(
-      "/app/summits/1/selection-plans"
-    );
+    expect(mockHistory.push).not.toHaveBeenCalled();
   });
 
   it("stays on a created plan when its settings fail, refetches them, and retries as an update", async () => {
@@ -197,7 +195,7 @@ describe("EditSelectionPlanPage", () => {
       expect.objectContaining({ id: 42 })
     );
     expect(mockHistory.push).toHaveBeenCalledWith(
-      "/app/summits/1/selection-plans"
+      "/app/summits/1/selection-plans/42"
     );
   });
 
