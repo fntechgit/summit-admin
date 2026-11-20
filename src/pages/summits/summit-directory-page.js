@@ -23,6 +23,7 @@ import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import AddIcon from "@mui/icons-material/Add";
 import GridToolbar from "openstack-uicore-foundation/lib/components/mui/grid-toolbar";
+import TextLink from "openstack-uicore-foundation/lib/components/mui/text-link";
 import {
   clearCurrentSummit,
   deleteSummit,
@@ -105,8 +106,10 @@ const SummitDirectoryPage = ({
     history.push(`/app/summits/${summit.id}`);
   };
 
+  const summitDashboardUrl = (summit) => `/app/summits/${summit.id}/dashboard`;
+
   const handleSelectSummit = (summit) => {
-    history.push(`/app/summits/${summit.id}/dashboard`);
+    history.push(summitDashboardUrl(summit));
   };
 
   const columns = [
@@ -119,7 +122,14 @@ const SummitDirectoryPage = ({
       header: T.translate("directory.summit_name"),
       render: (row) => (
         <>
-          <div>{row.name}</div>
+          <div>
+            <TextLink
+              href={summitDashboardUrl(row)}
+              onNavigate={(href) => history.push(href)}
+            >
+              {row.name}
+            </TextLink>
+          </div>
           {!!row.invite_only_registration && (
             <Chip
               size="small"
