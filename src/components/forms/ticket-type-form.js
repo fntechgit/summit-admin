@@ -16,7 +16,6 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { useFormik, FormikProvider } from "formik";
 import * as yup from "yup";
-import moment from "moment-timezone";
 import {
   Box,
   Button,
@@ -35,20 +34,10 @@ import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
 import MuiFormikDatetimepicker from "../mui/formik-inputs/mui-formik-datetimepicker";
 import InfoTooltip from "../mui/info-tooltip";
 import useScrollToError from "../../hooks/useScrollToError";
-import { requiredStringValidation } from "../../utils/yup";
+import { requiredStringValidation, dateValidation } from "../../utils/yup";
 import { TEXT_MAX_LENGTH_255 } from "../../utils/constants";
 
 const DATE_FIELDS = ["sales_start_date", "sales_end_date"];
-
-const dateValidation = () =>
-  yup
-    .mixed()
-    .nullable()
-    .test(
-      "valid-date",
-      T.translate("validation.date"),
-      (value) => value == null || (moment.isMoment(value) && value.isValid())
-    );
 
 const validationSchema = yup.object().shape({
   name: requiredStringValidation(),

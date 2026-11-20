@@ -21,7 +21,9 @@ import {
   startLoading,
   showMessage,
   showSuccessMessage,
-  authErrorHandler
+  authErrorHandler,
+  snackbarErrorHandler,
+  snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
 import history from "../history";
@@ -423,10 +425,10 @@ export const getEventCategoryGroup =
       null,
       createAction(RECEIVE_EVENT_CATEGORY_GROUP),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-groups/${groupId}`,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .catch(() => {})
+      .finally(() => dispatch(stopLoading()));
   };
 
 export const getEventCategoryGroupMeta = () => async (dispatch, getState) => {
@@ -442,10 +444,10 @@ export const getEventCategoryGroupMeta = () => async (dispatch, getState) => {
     null,
     createAction(RECEIVE_EVENT_CATEGORY_GROUP_META),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-groups/metadata`,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .catch(() => {})
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const resetEventCategoryGroupForm = () => (dispatch) => {
@@ -464,44 +466,45 @@ export const saveEventCategoryGroup =
     const params = { access_token: accessToken };
 
     if (entity.id) {
-      putRequest(
+      return putRequest(
         createAction(UPDATE_EVENT_CATEGORY_GROUP),
         createAction(EVENT_CATEGORY_GROUP_UPDATED),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-groups/${entity.id}`,
         normalizedEntity,
-        authErrorHandler,
+        snackbarErrorHandler,
         entity
-      )(params)(dispatch).then(() => {
-        dispatch(
-          showSuccessMessage(
-            T.translate("edit_event_category_group.group_saved")
-          )
-        );
-      });
-    } else {
-      const successMessage = {
-        title: T.translate("general.done"),
-        html: T.translate("edit_event_category_group.group_created"),
-        type: "success"
-      };
+      )(params)(dispatch)
+        .then(() => {
+          dispatch(
+            snackbarSuccessHandler({
+              html: T.translate("edit_event_category_group.group_saved")
+            })
+          );
+        })
+        .catch(() => {})
+        .finally(() => dispatch(stopLoading()));
+    }
 
-      postRequest(
-        createAction(UPDATE_EVENT_CATEGORY_GROUP),
-        createAction(EVENT_CATEGORY_GROUP_ADDED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-groups`,
-        normalizedEntity,
-        authErrorHandler,
-        entity
-      )(params)(dispatch).then((payload) => {
+    return postRequest(
+      createAction(UPDATE_EVENT_CATEGORY_GROUP),
+      createAction(EVENT_CATEGORY_GROUP_ADDED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-groups`,
+      normalizedEntity,
+      snackbarErrorHandler,
+      entity
+    )(params)(dispatch)
+      .then((payload) => {
         dispatch(
-          showMessage(successMessage, () => {
-            history.replace(
-              `/app/summits/${currentSummit.id}/event-category-groups/${payload.response.id}`
-            );
+          snackbarSuccessHandler({
+            html: T.translate("edit_event_category_group.group_created")
           })
         );
-      });
-    }
+        history.replace(
+          `/app/summits/${currentSummit.id}/event-category-groups/${payload.response.id}`
+        );
+      })
+      .catch(() => {})
+      .finally(() => dispatch(stopLoading()));
   };
 
 export const deleteEventCategoryGroup =
@@ -542,10 +545,10 @@ export const addCategoryToGroup =
       createAction(CATEGORY_ADDED_TO_GROUP)({ category }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-groups/${groupId}/tracks/${category.id}`,
       {},
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .catch(() => {})
+      .finally(() => dispatch(stopLoading()));
   };
 
 export const removeCategoryFromGroup =
@@ -565,10 +568,10 @@ export const removeCategoryFromGroup =
       createAction(CATEGORY_REMOVED_FROM_GROUP)({ categoryId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-groups/${groupId}/tracks/${categoryId}`,
       null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .catch(() => {})
+      .finally(() => dispatch(stopLoading()));
   };
 
 export const addAllowedGroupToGroup =
@@ -588,10 +591,10 @@ export const addAllowedGroupToGroup =
       createAction(GROUP_ADDED_TO_GROUP)({ allowedGroup }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-groups/${groupId}/allowed-groups/${allowedGroup.id}`,
       null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .catch(() => {})
+      .finally(() => dispatch(stopLoading()));
   };
 
 export const removeAllowedGroupFromGroup =
@@ -611,10 +614,10 @@ export const removeAllowedGroupFromGroup =
       createAction(GROUP_REMOVED_FROM_GROUP)({ allowedGroupId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-groups/${groupId}/allowed-groups/${allowedGroupId}`,
       null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .catch(() => {})
+      .finally(() => dispatch(stopLoading()));
   };
 
 const normalizeGroupEntity = (entity) => {
