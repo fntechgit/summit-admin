@@ -389,3 +389,6 @@ export const REOPEN_PRESET_HOURS_72 = 72;
 
 export const TEXT_MAX_LENGTH_255 = 255;
 export const TEXT_MAX_LENGTH_1024 = 1024;
+export const TEXT_MAX_LENGTH_1500 = 1500;
+
+export const BOLD_FONT_WEIGHT_MIN = 600;

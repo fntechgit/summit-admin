@@ -22,6 +22,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid2 from "@mui/material/Grid2";
 import TextField from "@mui/material/TextField";
 import MuiFormikDatetimepicker from "../../mui/formik-inputs/mui-formik-datetimepicker";
+import { CLEAN_PASTE_EDITOR_OPTIONS } from "../../../utils/methods";
 
 const MainTab = ({ hidden, currentSummit }) => {
   const { values, errors, setFieldValue } = useFormikContext();
@@ -218,6 +219,7 @@ const MainTab = ({ hidden, currentSummit }) => {
             onChange={handleChange}
             error={hasErrors("submission_period_disclaimer")}
             license={process.env.JODIT_LICENSE_KEY}
+            options={CLEAN_PASTE_EDITOR_OPTIONS}
           />
         </Grid2>
       </Grid2>

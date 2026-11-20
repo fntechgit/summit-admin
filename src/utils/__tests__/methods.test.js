@@ -1,4 +1,5 @@
 import {
+  cleanPastedHtml,
   getMediaInputValue,
   htmlToPlainText,
   isImageUrl,
@@ -223,6 +224,33 @@ describe("htmlToPlainText", () => {
   it("leaves malformed-case entities literal (DOMParser is case-sensitive)", () => {
     expect(htmlToPlainText("&Copy;")).toBe("&Copy;");
     expect(htmlToPlainText("x&NBSP;y")).toBe("x&NBSP;y");
+  });
+});
+
+describe("cleanPastedHtml", () => {
+  const GUID = "style='font-weight:normal;' id='docs-internal-guid-11cd'";
+  const LINK = "https://fnvirtual.app";
+  const SPAN_STYLE =
+    "font-size:10.5pt;font-family:Arial,sans-serif;color:#000000;font-weight:400;font-style:normal;text-decoration:none;white-space:pre-wrap;";
+  const docsItem = (text) =>
+    `<li dir="ltr" style="list-style-type:circle;margin-left: 36pt;" aria-level="2"><p dir="ltr" style="line-height:1.38;" role="presentation"><strong ${GUID}><span style="${SPAN_STYLE}">${text}</span></strong></p></li>`;
+
+  it("strips Google Docs list markup without making the text bold", () => {
+    const pasted = `<p><strong ${GUID}></strong></p><ul style="margin-top:0;">${docsItem(
+      "AI Data Center Energy"
+    )}${docsItem("Optical Networking &amp; Interconnects")}</ul><p></p>`;
+
+    expect(cleanPastedHtml(pasted)).toBe(
+      "<ul><li>AI Data Center Energy</li><li>Optical Networking &amp; Interconnects</li></ul>"
+    );
+  });
+
+  it("turns styled spans into tags and keeps link targets", () => {
+    const pasted = `<b ${GUID}><p dir="ltr"><span style="font-weight:700;">Bold</span> <span style="font-style:italic;text-decoration:underline;">note</span> <a href="${LINK}" style="color:#1155cc;"><span style="font-weight:400;">link</span></a></p></b>`;
+
+    expect(cleanPastedHtml(pasted)).toBe(
+      `<p><strong>Bold</strong> <u><em>note</em></u> <a href="${LINK}">link</a></p>`
+    );
   });
 });
 
