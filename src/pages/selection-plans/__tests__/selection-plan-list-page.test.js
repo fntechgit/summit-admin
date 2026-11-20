@@ -17,8 +17,16 @@ jest.mock("../../../actions/selection-plan-actions", () => ({
 
 jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => ({
   __esModule: true,
-  default: ({ onEdit, onDelete }) => (
+  default: ({ columns, data, onEdit, onDelete }) => (
     <div>
+      {data.map((row) =>
+        columns.map(
+          (col) =>
+            col.render && (
+              <span key={`${row.id}-${col.columnKey}`}>{col.render(row)}</span>
+            )
+        )
+      )}
       <button type="button" onClick={() => onEdit({ id: 1, name: "CFP 2026" })}>
         edit-row
       </button>
@@ -83,6 +91,18 @@ describe("SelectionPlanListPage", () => {
 
     expect(mockHistory.push).toHaveBeenCalledWith(
       "/app/summits/1/selection-plans/new"
+    );
+  });
+
+  it("links each selection plan name to its edit page", () => {
+    renderWithRedux(
+      <SelectionPlanListPage history={mockHistory} match={mockMatch} />,
+      { initialState }
+    );
+
+    expect(screen.getByRole("link", { name: "CFP 2026" })).toHaveAttribute(
+      "href",
+      "/app/summits/1/selection-plans/1"
     );
   });
 
