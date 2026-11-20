@@ -50,9 +50,14 @@ const EditSelectionPlanPage = ({
           values.marketing_settings ?? {},
           savedEntity.id
         )
-          .then(() =>
-            history.push(`/app/summits/${currentSummit.id}/selection-plans`)
-          )
+          .then(() => {
+            // Stay in the editor; a new plan opens at its own URL to show all tabs
+            if (!values.id) {
+              history.push(
+                `/app/summits/${currentSummit.id}/selection-plans/${savedEntity.id}`
+              );
+            }
+          })
           .catch(() =>
             // Stay on the editor. Refetch so the ids of settings this attempt
             // did create reach the form, and a retry updates them instead of
