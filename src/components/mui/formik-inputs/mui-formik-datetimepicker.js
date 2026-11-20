@@ -37,6 +37,8 @@ const MuiFormikDatetimepicker = ({
         value={field.value}
         onChange={helpers.setValue}
         timezone={timezone}
+        // MUI defaults to 5-minute steps; deadlines need exact times like 8:59
+        timeSteps={{ minutes: 1 }}
         slotProps={{
           textField: {
             name,
