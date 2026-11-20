@@ -345,10 +345,8 @@ export const getBadgePrints =
       snackbarErrorHandler,
       { order, orderDir, term, summitTz: currentSummit.time_zone_id }
     )(params)(dispatch)
-      .then(() => {
-        dispatch(stopLoading());
-      })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => dispatch(stopLoading()));
   };
 
 export const exportBadgePrints =
