@@ -30,6 +30,7 @@ import * as Sentry from "@sentry/react";
 import T from "i18n-react/dist/i18n-react";
 import {
   BADGE_QR_MINIMUM_EXPECTED_FIELDS,
+  BOLD_FONT_WEIGHT_MIN,
   BYTES_IN_MEGABYTE,
   DATETIME_FORMAT,
   ERROR_CODE_401,
@@ -692,6 +693,52 @@ export const htmlToPlainText = (html) => {
   const decoded = new DOMParser().parseFromString(spaced, "text/html")
     .documentElement.textContent;
   return decoded.replace(/\s+/g, " ").trim();
+};
+
+// Keeps bold/italic/underline/links/lists from Google Docs, drops styles and ids
+export const cleanPastedHtml = (html) => {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const unwrap = (el) => el.replaceWith(...el.childNodes);
+
+  doc.body.querySelectorAll("style, meta").forEach((el) => el.remove());
+  doc.body.querySelectorAll("[id^='docs-internal-guid']").forEach(unwrap);
+  doc.body.querySelectorAll("span").forEach((span) => {
+    const { fontWeight, fontStyle, textDecoration } = span.style;
+    const isBold =
+      fontWeight === "bold" || Number(fontWeight) >= BOLD_FONT_WEIGHT_MIN;
+    const tags = [
+      isBold && "strong",
+      fontStyle === "italic" && "em",
+      textDecoration.includes("underline") && "u"
+    ].filter(Boolean);
+    let node = span;
+    tags.forEach((tag) => {
+      const wrapper = doc.createElement(tag);
+      node.replaceWith(wrapper);
+      wrapper.append(node);
+      node = wrapper;
+    });
+    unwrap(span);
+  });
+  doc.body.querySelectorAll("*").forEach((el) =>
+    [...el.attributes].forEach(({ name }) => {
+      if (name !== "href" && name !== "src") el.removeAttribute(name);
+    })
+  );
+  doc.body.querySelectorAll("li > p:only-child").forEach(unwrap);
+  doc.body.querySelectorAll("p").forEach((p) => {
+    if (!p.textContent.trim() && !p.querySelector("img")) p.remove();
+  });
+  return doc.body.innerHTML;
+};
+
+// Jodit options: clean Google Docs pastes ourselves, Word pastes with Jodit's cleaner
+export const CLEAN_PASTE_EDITOR_OPTIONS = {
+  defaultActionOnPasteFromWord: "insert_clear_html",
+  events: {
+    processPaste: (_, html, types) =>
+      types.includes("text/html") ? cleanPastedHtml(html) : undefined
+  }
 };
 
 export const formatDuration = (duration) => {
