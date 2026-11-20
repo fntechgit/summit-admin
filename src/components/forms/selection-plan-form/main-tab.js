@@ -16,6 +16,7 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { useFormikContext } from "formik";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
+import CustomAlert from "openstack-uicore-foundation/lib/components/mui/custom-alert";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid2 from "@mui/material/Grid2";
@@ -102,6 +103,12 @@ const MainTab = ({ hidden, currentSummit }) => {
           />
         </Grid2>
       </Grid2>
+
+      <CustomAlert
+        message={T.translate("edit_selection_plan.dates_timezone_info", {
+          tz: currentSummit.time_zone_id
+        })}
+      />
 
       <Grid2 container spacing={2} sx={{ mb: 2 }}>
         <Grid2 size={{ xs: 12, md: 6 }}>

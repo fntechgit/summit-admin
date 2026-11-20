@@ -519,6 +519,7 @@
     "hidden": "Hidden",
     "submission_begin_date": "Submissions Start",
     "submission_end_date": "Submissions End",
+    "dates_timezone_info": "This show is set to {tz}, so all dates here are in that time zone",
     "submission_lock_down_presentation_status_date": "Submissions Status Lock Down Date",
     "submission_lock_down_presentation_status_date_info": "This date, if set, will cause the submissions to remain 'In Review' until the date passes. This is useful if there are multiple submission rounds or if you need more time to review the track chair selections before updating the status to the submitter and speaker(s).",
     "voting_begin_date": "Voting Start",
