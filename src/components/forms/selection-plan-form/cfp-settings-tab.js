@@ -27,6 +27,7 @@ import {
   DEFAULT_ALLOWED_QUESTIONS,
   DEFAULT_CFP_PRESENTATION_EDITION_TABS
 } from "../../../reducers/selection_plans/selection-plan-reducer";
+import { CLEAN_PASTE_EDITOR_OPTIONS } from "../../../utils/methods";
 
 function renderAllowedQuestionsInput(params) {
   const placeholder = T.translate(
@@ -100,6 +101,7 @@ const CfpSettingsTab = ({ hidden, currentSummit }) => {
               onChange={handleChange}
               value={ms.cfp_presentation_edition_custom_message?.value || ""}
               license={process.env.JODIT_LICENSE_KEY}
+              options={CLEAN_PASTE_EDITOR_OPTIONS}
             />
           </Grid2>
           <Grid2 size={12}>
