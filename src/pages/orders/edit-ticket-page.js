@@ -12,14 +12,27 @@
  * */
 
 import React, { useEffect, useState } from "react";
-import { Modal } from "react-bootstrap";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
-import Swal from "sweetalert2";
-import Table from "openstack-uicore-foundation/lib/components/table";
-import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
 import moment from "moment-timezone";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  Divider,
+  Grid2,
+  IconButton,
+  Tooltip,
+  Typography
+} from "@mui/material";
+import BlockIcon from "@mui/icons-material/Block";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import AddNewButton from "openstack-uicore-foundation/lib/components/mui/add-new-button";
+import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getTicket,
@@ -49,25 +62,47 @@ import {
 } from "../../actions/badge-actions";
 import AuditLogs from "../../components/audit-logs";
 import NotesPanel from "../../components/notes/notes-panel";
+import showConfirmDialog from "../../components/mui/showConfirmDialog";
+import RefundTicketDialog from "./components/refund-ticket-dialog";
+import RejectRefundDialog from "./components/reject-refund-dialog";
 import { deleteTicket } from "../../actions/attendee-actions";
 import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
+
+const CollapsibleSection = ({ title, expanded, onToggle, children }) => (
+  <Accordion expanded={expanded} onChange={onToggle} sx={{ mb: 2 }}>
+    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+      <Typography sx={{ fontWeight: "bold" }}>{title}</Typography>
+    </AccordionSummary>
+    <AccordionDetails>{children}</AccordionDetails>
+  </Accordion>
+);
+
+const LabeledValue = ({
+  label,
+  children,
+  size = { xs: 12, md: 6 },
+  offset
+}) => (
+  <Grid2 size={size} offset={offset}>
+    <Typography component="span" sx={{ fontWeight: "bold" }}>
+      {label}
+    </Typography>{" "}
+    {children}
+  </Grid2>
+);
 
 const EditTicketPage = ({
   entity,
   currentSummit,
   currentOrder,
   match,
-  errors,
   currentBadgePrints,
   loading,
   ...props
 }) => {
-  const [refundAmount, setRefundAmount] = useState("");
-  const [refundNotes, setRefundNotes] = useState("");
-  const [refundAmountError, setRefundAmountError] = useState(false);
+  const { errorMessage } = useSnackbarMessage();
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [showRefundRejectModal, setShowRefundRejectModal] = useState(false);
-  const [refundRejectNotes, setRefundRejectNotes] = useState("");
   const [printType, setPrintType] = useState(null);
   const [openSections, setOpenSections] = useState({
     refund_requests: false,
@@ -77,26 +112,12 @@ const EditTicketPage = ({
 
   useEffect(() => {
     props.getBadgeFeatures();
-    props.getBadgeTypes();
+    props.getBadgeTypes().catch(() => {});
   }, []);
 
   useEffect(() => {
-    props.getTicket(match.params.ticket_id);
+    props.getTicket(match.params.ticket_id).catch(() => {});
   }, [match.params.ticket_id]);
-
-  const shouldDisplayRejectRefundRequest = (id) => {
-    const request = entity.refund_requests.find((r) => r.id === id);
-    return request.status === "Requested";
-  };
-
-  const handleRefundChange = (ev) => {
-    const val = ev.target.value;
-    if (val !== "") {
-      if (!/^\d*(\.\d{0,2})?$/.test(val)) return;
-    }
-
-    setRefundAmount(isNaN(val) ? 0.0 : parseFloat(val));
-  };
 
   const handleSelectPrintType = (view_type) => {
     setPrintType(view_type);
@@ -131,26 +152,21 @@ const EditTicketPage = ({
     ev.preventDefault();
 
     if (!ticket.owner) {
-      return Swal.fire({
-        title: T.translate("general.error"),
-        text: T.translate("edit_ticket.no_attendee"),
-        type: "warning"
-      });
+      errorMessage(T.translate("edit_ticket.no_attendee"));
+      return;
     }
 
     if (ticket.owner.status === "Complete") {
-      props.reSendTicketEmail(ticket.order_id, ticket.id);
+      props.reSendTicketEmail(ticket.order_id, ticket.id).catch(() => {});
     } else {
-      Swal.fire({
+      showConfirmDialog({
         title: T.translate("edit_ticket.attendee_incomplete"),
         text: T.translate("edit_ticket.attendee_incomplete_msg"),
-        type: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
+        iconType: "warning",
         confirmButtonText: T.translate("general.yes_send")
-      }).then((result) => {
-        if (result.value) {
-          props.reSendTicketEmail(ticket.order_id, ticket.id);
+      }).then((confirmed) => {
+        if (confirmed) {
+          props.reSendTicketEmail(ticket.order_id, ticket.id).catch(() => {});
         }
       });
     }
@@ -160,91 +176,56 @@ const EditTicketPage = ({
     ev.preventDefault();
     const activate = !ticket.is_active;
 
-    Swal.fire({
+    showConfirmDialog({
       title: T.translate("general.are_you_sure"),
       text: activate
         ? T.translate("edit_ticket.activate_warning")
         : T.translate("edit_ticket.deactivate_warning"),
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
+      iconType: "warning",
+      confirmButtonColor: "error",
       confirmButtonText: activate
         ? T.translate("edit_ticket.activate_yes")
         : T.translate("edit_ticket.deactivate_yes")
-    }).then((result) => {
-      if (result.value) {
-        props.activateTicket(currentOrder.id, ticket.id, activate);
+    }).then((confirmed) => {
+      if (confirmed) {
+        props
+          .activateTicket(currentOrder.id, ticket.id, activate)
+          .catch(() => {});
       }
     });
   };
 
   const handleDeleteBadge = (ticketId) => {
-    Swal.fire({
+    showConfirmDialog({
       title: T.translate("general.are_you_sure"),
       text: T.translate("edit_ticket.remove_warning"),
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
+      iconType: "warning",
+      confirmButtonColor: "error",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        props.deleteBadge(ticketId);
+    }).then((confirmed) => {
+      if (confirmed) {
+        props.deleteBadge(ticketId).catch(() => {});
       }
     });
   };
 
   const handleAddBadgeToTicket = (ev) => {
     ev.preventDefault();
-    props.addBadgeToTicket(entity.id);
+    props.addBadgeToTicket(entity.id).catch(() => {});
   };
 
-  const handleRejectRefundRequest = () => {
-    setRefundRejectNotes("");
-    setShowRefundRejectModal(false);
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: T.translate("edit_ticket.cancel_refund_warning"),
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("edit_ticket.yes_cancel_refund")
-    }).then((result) => {
-      if (result.value) {
-        props.cancelRefundTicket(currentOrder.id, entity.id, refundRejectNotes);
-      }
+  // the ticket reducer ignores the reassign response, so refetch the new owner
+  const handleReassignTicket = (...args) =>
+    props.reassignTicket(...args).then(() => {
+      props.getTicket(entity.id).catch(() => {});
     });
-  };
 
-  const handleRefundTicket = () => {
-    const maxAllowedAmount2Refund =
-      entity.net_selling_cost - entity.refunded_amount;
+  // the dialogs confirm and close themselves
+  const handleRejectRefundRequest = (notes) =>
+    props.cancelRefundTicket(currentOrder.id, entity.id, notes);
 
-    if (refundAmount > maxAllowedAmount2Refund) {
-      setRefundAmountError(true);
-      return;
-    }
-
-    if (parseFloat(refundAmount) > 0) {
-      setRefundAmount("");
-      setRefundNotes("");
-      setRefundAmountError(false);
-      setShowRefundModal(false);
-
-      Swal.fire({
-        title: T.translate("general.are_you_sure"),
-        text: T.translate("edit_ticket.refund_warning"),
-        type: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#DD6B55",
-        confirmButtonText: T.translate("edit_ticket.yes_refund")
-      }).then((result) => {
-        if (result.value) {
-          props.refundTicket(entity.id, parseFloat(refundAmount), refundNotes);
-        }
-      });
-    }
-  };
+  const handleRefundTicket = (amount, notes) =>
+    props.refundTicket(entity.id, amount, notes);
 
   const toggleSection = (section, ev) => {
     ev?.preventDefault();
@@ -270,8 +251,8 @@ const EditTicketPage = ({
     if (!taxColumnsMap.has(columnKey)) {
       taxColumnsMap.set(columnKey, {
         columnKey,
-        value: t.tax.name,
-        render: (row, val) => val || "0"
+        header: t.tax.name,
+        render: (row) => row[columnKey] || "0"
       });
     }
   });
@@ -279,18 +260,18 @@ const EditTicketPage = ({
   const tax_columns = [...taxColumnsMap.values()];
 
   const refundRequestColumns = [
-    { columnKey: "id", value: T.translate("edit_ticket.refund_request_id") },
+    { columnKey: "id", header: T.translate("edit_ticket.refund_request_id") },
     {
       columnKey: "requested_by_fullname",
-      value: T.translate("edit_ticket.refund_request_requested_by")
+      header: T.translate("edit_ticket.refund_request_requested_by")
     },
     {
       columnKey: "action_by_fullname",
-      value: T.translate("edit_ticket.refund_request_action_by")
+      header: T.translate("edit_ticket.refund_request_action_by")
     },
     {
       columnKey: "action_date",
-      value: T.translate("edit_ticket.refund_request_action_date"),
+      header: T.translate("edit_ticket.refund_request_action_date"),
       render: (c) =>
         c.action_date
           ? moment(c.action_date * MILLISECONDS_IN_SECOND)
@@ -300,161 +281,158 @@ const EditTicketPage = ({
     },
     {
       columnKey: "status",
-      value: T.translate("edit_ticket.refund_request_status")
+      header: T.translate("edit_ticket.refund_request_status")
     },
     {
       columnKey: "refunded_amount_formatted",
-      value: T.translate("edit_ticket.refunded_amount")
+      header: T.translate("edit_ticket.refunded_amount")
     },
     ...tax_columns,
     {
       columnKey: "total_refunded_amount_formatted",
-      value: T.translate("edit_ticket.refund_total_amount")
+      header: T.translate("edit_ticket.refund_total_amount")
     },
     {
       columnKey: "notes",
-      value: T.translate("edit_ticket.refund_request_notes")
+      header: T.translate("edit_ticket.refund_request_notes")
+    },
+    {
+      columnKey: "reject",
+      header: "",
+      render: (row) =>
+        row.status === "Requested" && (
+          <Tooltip title={T.translate("edit_ticket.cancel_refund")}>
+            <IconButton
+              aria-label={T.translate("edit_ticket.cancel_refund")}
+              size="small"
+              onClick={() => setShowRefundRejectModal(true)}
+            >
+              <BlockIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )
     }
   ];
 
-  const refundRequestOptions = {
-    actions: {
-      custom: [
-        {
-          name: "Reject",
-          tooltip: T.translate("edit_ticket.cancel_refund"),
-          icon: <i className="fa fa-ban" />,
-          onClick: () => setShowRefundRejectModal(true),
-          display: shouldDisplayRejectRefundRequest
-        }
-      ]
-    }
-  };
+  const ticketsUrl = match.url.substring(0, match.url.lastIndexOf("/"));
 
   return (
     <div className="container">
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-      <h3>
-        {T.translate("edit_ticket.ticket")}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}
+      >
+        <h3>{T.translate("edit_ticket.ticket")}</h3>
         {entity.id !== 0 && (
-          <div className="pull-right form-inline">
+          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
             {entity.status === "Paid" && (
-              <button
-                className="btn btn-sm btn-primary right-space"
+              <Button
+                variant="contained"
+                size="small"
                 onClick={() => setShowRefundModal(true)}
               >
                 {T.translate("edit_ticket.refund")}
-              </button>
+              </Button>
             )}
             {entity.status === "Paid" && entity.is_active && (
-              <button
-                className="btn btn-sm btn-primary left-space"
+              <Button
+                variant="contained"
+                size="small"
                 onClick={(ev) => handleResendEmail(entity, ev)}
               >
                 {T.translate("edit_ticket.resend_email")}
-              </button>
+              </Button>
             )}
-            <button
-              className={`btn btn-sm left-space ${
-                entity.is_active ? "btn-danger" : "btn-primary"
-              }`}
+            <Button
+              variant="contained"
+              size="small"
+              color={entity.is_active ? "error" : "primary"}
               onClick={(ev) => handleActivateDeactivate(entity, ev)}
             >
               {entity.is_active
                 ? T.translate("edit_ticket.deactivate")
                 : T.translate("edit_ticket.activate")}
-            </button>
-            <a href="new" className="btn btn-default pull-right">
-              Add new
-            </a>
-          </div>
+            </Button>
+            <AddNewButton
+              onClick={() => props.history.push(`${ticketsUrl}/new`)}
+            />
+          </Box>
         )}
-      </h3>
-      <hr />
+      </Box>
+      <Divider sx={{ mb: 2 }} />
 
       <TicketForm
         history={props.history}
         currentSummit={currentSummit}
         entity={entity}
         order={currentOrder}
-        errors={errors}
-        onReassing={props.reassignTicket}
+        onReassing={handleReassignTicket}
         onSaveTicket={props.saveTicket}
         onUnAssign={props.deleteTicket}
       />
 
       {entity?.refund_requests?.length > 0 && (
-        <Panel
-          show={openSections.refund_requests}
+        <CollapsibleSection
           title={T.translate("edit_ticket.refund_requests")}
-          handleClick={(ev) => toggleSection("refund_requests", ev)}
+          expanded={openSections.refund_requests}
+          onToggle={() => toggleSection("refund_requests")}
         >
-          <div>
-            <div className="row">
-              <div className="col-md-6">
-                <label>{T.translate("edit_ticket.ticket_price")}</label>{" "}
-                {`${entity.currency_symbol}${entity.raw_cost}`}
-              </div>
-              <div className="col-md-6">
-                <label>{T.translate("edit_ticket.net_price")}</label>{" "}
-                {`${entity.currency_symbol}${
-                  entity.raw_cost - entity.discount
-                }`}
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <label>{T.translate("edit_ticket.discount")}</label>{" "}
-                {`${entity.discount_rate}% (${entity.currency_symbol}${entity.discount})`}
-              </div>
-            </div>
+          <Grid2 container rowSpacing={1} columnSpacing={2} sx={{ mb: 2 }}>
+            <LabeledValue label={T.translate("edit_ticket.ticket_price")}>
+              {`${entity.currency_symbol}${entity.raw_cost}`}
+            </LabeledValue>
+            <LabeledValue label={T.translate("edit_ticket.net_price")}>
+              {`${entity.currency_symbol}${entity.raw_cost - entity.discount}`}
+            </LabeledValue>
+            <LabeledValue label={T.translate("edit_ticket.discount")} size={12}>
+              {`${entity.discount_rate}% (${entity.currency_symbol}${entity.discount})`}
+            </LabeledValue>
             {entity?.applied_taxes.map((at) => (
-              <div className="row" key={`applied-taxes-${at.id}`}>
-                <div className="col-md-6">
-                  <label>
-                    {T.translate("edit_ticket.tax_name_rate", {
-                      tax_name: at.tax.name
-                    })}
-                  </label>
-                  {` ${at.tax.rate}%`}
-                </div>
-                <div className="col-md-6">
-                  <label>
-                    {T.translate("edit_ticket.tax_name_price", {
-                      tax_name: at.tax.name
-                    })}
-                  </label>
-                  {` ${entity.currency_symbol}${at.amount}`}
-                </div>
-              </div>
+              <React.Fragment key={`applied-taxes-${at.id}`}>
+                <LabeledValue
+                  label={T.translate("edit_ticket.tax_name_rate", {
+                    tax_name: at.tax.name
+                  })}
+                >
+                  {`${at.tax.rate}%`}
+                </LabeledValue>
+                <LabeledValue
+                  label={T.translate("edit_ticket.tax_name_price", {
+                    tax_name: at.tax.name
+                  })}
+                >
+                  {`${entity.currency_symbol}${at.amount}`}
+                </LabeledValue>
+              </React.Fragment>
             ))}
-            <div className="row">
-              <div className="col-md-6 col-md-offset-6">
-                <label>
-                  {T.translate("edit_ticket.purchase_ticket_price")}
-                </label>{" "}
-                {`${entity.currency_symbol}${entity.final_amount}`}
-              </div>
-            </div>
-          </div>
+            <LabeledValue
+              label={T.translate("edit_ticket.purchase_ticket_price")}
+              offset={{ md: 6 }}
+            >
+              {`${entity.currency_symbol}${entity.final_amount}`}
+            </LabeledValue>
+          </Grid2>
 
-          <Table
-            options={refundRequestOptions}
+          <MuiTable
             data={entity?.refund_requests}
             columns={refundRequestColumns}
           />
 
-          <div className="row">
-            <div className="col-md-12">
-              <label>
-                {T.translate(
-                  "edit_ticket.adjusted_total_ticket_purchase_price"
-                )}
-              </label>{" "}
+          <Grid2 container>
+            <LabeledValue
+              label={T.translate(
+                "edit_ticket.adjusted_total_ticket_purchase_price"
+              )}
+              size={12}
+            >
               {entity.adjusted_total_ticket_purchase_price_formatted}
-            </div>
-          </div>
-        </Panel>
+            </LabeledValue>
+          </Grid2>
+        </CollapsibleSection>
       )}
 
       {entity?.id && entity?.owner?.id && (
@@ -467,28 +445,35 @@ const EditTicketPage = ({
           onOpen={handleOpenNotes}
         />
       )}
-      <br />
-      <br />
-      <br />
 
       {entity.is_active && !entity.badge && (
-        <button className="btn btn-primary" onClick={handleAddBadgeToTicket}>
-          {T.translate("edit_ticket.add_badge")}
-        </button>
+        <Box sx={{ my: 3 }}>
+          <Button variant="contained" onClick={handleAddBadgeToTicket}>
+            {T.translate("edit_ticket.add_badge")}
+          </Button>
+        </Box>
       )}
 
       {entity.is_active && entity.badge && (
-        <div>
-          <h3>
-            {T.translate("edit_ticket.badge")}
-            <button
-              className="btn btn-sm btn-danger pull-right"
+        <Box sx={{ my: 3 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}
+          >
+            <h3>{T.translate("edit_ticket.badge")}</h3>
+            <Button
+              variant="contained"
+              color="error"
+              size="small"
               onClick={() => handleDeleteBadge(entity.id)}
             >
               {T.translate("edit_ticket.delete_badge")}
-            </button>
-          </h3>
-          <hr />
+            </Button>
+          </Box>
+          <Divider sx={{ mb: 2 }} />
           <BadgeForm
             history={props.history}
             currentSummit={currentSummit}
@@ -506,13 +491,13 @@ const EditTicketPage = ({
             onFeatureLink={props.addFeatureToBadge}
             onFeatureUnLink={props.removeFeatureFromBadge}
           />
-        </div>
+        </Box>
       )}
-      <br />
-      <Panel
-        show={openSections.audit_log}
+
+      <CollapsibleSection
         title={T.translate("audit_log.title")}
-        handleClick={(ev) => toggleSection("audit_log", ev)}
+        expanded={openSections.audit_log}
+        onToggle={() => toggleSection("audit_log")}
       >
         {entity.badge && (
           <AuditLogs
@@ -524,96 +509,24 @@ const EditTicketPage = ({
             columns={["created", "action_description", "user"]}
           />
         )}
-      </Panel>
-      <Modal show={showRefundModal} onHide={() => setShowRefundModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {T.translate("edit_ticket.refund_modal_title")}
-          </Modal.Title>
-          {`${T.translate("edit_ticket.net_selling_price")} ${
-            entity.currency_symbol
-          } ${entity.net_selling_cost}`}
-        </Modal.Header>
-        <Modal.Body>
-          <div className="row form-group">
-            <div className="col-md-12 refund-input-wrapper">
-              <input
-                className="form-control"
-                type="number"
-                min="0"
-                step=".01"
-                placeholder="0.00"
-                value={refundAmount}
-                onChange={handleRefundChange}
-              />
-              <i
-                className="fa fa-info-circle"
-                aria-hidden="true"
-                title={T.translate("edit_ticket.refund_amount_info")}
-              />
-              {refundAmountError && (
-                <span className="error-label">
-                  {T.translate("edit_ticket.refund_amount_error")}
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="row form-group">
-            <div className="col-md-12">
-              <textarea
-                className="form-control"
-                id="refundNotes"
-                placeholder={T.translate(
-                  "edit_ticket.placeholders.refund_notes"
-                )}
-                value={refundNotes}
-                onChange={(ev) => setRefundNotes(ev.target.value)}
-              />
-            </div>
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <button
-            className="btn btn-primary"
-            onClick={(ev) => handleRefundTicket(entity, ev)}
-          >
-            {T.translate("edit_ticket.refund")}
-          </button>
-        </Modal.Footer>
-      </Modal>
-      <Modal
-        show={showRefundRejectModal}
-        onHide={() => setShowRefundRejectModal(false)}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {T.translate("edit_ticket.refund_reject_modal_title")}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="row form-group">
-            <div className="col-md-12">
-              <textarea
-                className="form-control"
-                id="refundRejectNotes"
-                placeholder={T.translate(
-                  "edit_ticket.placeholders.refund_reject_notes"
-                )}
-                value={refundRejectNotes}
-                onChange={(ev) => setRefundRejectNotes(ev.target.value)}
-              />
-            </div>
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <button
-            className="btn btn-primary"
-            onClick={() => handleRejectRefundRequest()}
-          >
-            {T.translate("edit_ticket.refund_reject")}
-          </button>
-        </Modal.Footer>
-      </Modal>
+      </CollapsibleSection>
+
+      {showRefundModal && (
+        <RefundTicketDialog
+          currencySymbol={entity.currency_symbol}
+          netSellingCost={entity.net_selling_cost}
+          refundedAmount={entity.refunded_amount}
+          onRefund={handleRefundTicket}
+          onClose={() => setShowRefundModal(false)}
+        />
+      )}
+
+      {showRefundRejectModal && (
+        <RejectRefundDialog
+          onReject={handleRejectRefundRequest}
+          onClose={() => setShowRefundRejectModal(false)}
+        />
+      )}
     </div>
   );
 };

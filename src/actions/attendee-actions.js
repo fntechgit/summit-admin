@@ -23,6 +23,7 @@ import {
   startLoading,
   showMessage,
   showSuccessMessage,
+  snackbarErrorHandler,
   authErrorHandler,
   escapeFilterValue,
   fetchResponseHandler,
@@ -583,7 +584,7 @@ export const deleteTicket =
       createAction(TICKET_DELETED)({ ticketId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/tickets/${ticketId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

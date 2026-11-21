@@ -14,7 +14,6 @@
 import T from "i18n-react/dist/i18n-react";
 import pLimit from "p-limit";
 import {
-  VALIDATE,
   authErrorHandler,
   createAction,
   deleteRequest,
@@ -32,7 +31,6 @@ import {
   snackbarSuccessHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
-import Swal from "sweetalert2";
 
 import {
   getAccessTokenSafely,
@@ -46,7 +44,6 @@ import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_PER_PAGE,
   DEFAULT_ORDER_DIR,
-  ERROR_CODE_412,
   EXPORT_PAGE_SIZE_100,
   TEN
 } from "../utils/constants";
@@ -108,37 +105,6 @@ export const UNSELECT_TICKET = "UNSELECT_TICKET";
 export const CLEAR_ALL_SELECTED_TICKETS = "CLEAR_ALL_SELECTED_TICKETS";
 export const SET_SELECTED_ALL_TICKETS = "SET_SELECTED_ALL_TICKETS";
 export const PRINT_TICKETS = "PRINT_TICKETS";
-
-export const customErrorHandler = (ticketId, err, res) => (dispatch) => {
-  const code = err.status;
-
-  dispatch(stopLoading());
-
-  switch (code) {
-    case ERROR_CODE_412:
-      if (Array.isArray(err.response.body)) {
-        err.response.body.forEach((er) => {
-          msg += `${er}<br>`;
-        });
-      } else {
-        Object.keys(err.response.body).forEach((key) => {
-          msg += `${err.response.body[key]}<br>`;
-        });
-      }
-
-      Swal.fire("Validation error", msg, "warning");
-
-      if (err.response.body.errors) {
-        dispatch({
-          type: VALIDATE,
-          payload: { errors: err.response.body }
-        });
-      }
-      break;
-    default:
-      dispatch(authErrorHandler(err, res));
-  }
-};
 
 const normalizeTicket = (entity) => {
   const normalizedEntity = { ...entity };
@@ -460,10 +426,15 @@ export const reSendTicketEmail = (orderId, ticketId) => async (dispatch) => {
     createAction(TICKET_EMAIL_SENT)({ ticketId }),
     `${window.API_BASE_URL}/api/v1/summits/all/orders/${orderId}/tickets/${ticketId}/attendee/reinvite`,
     {},
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
-    dispatch(showSuccessMessage(T.translate("edit_ticket.email_resent")));
+    dispatch(
+      snackbarSuccessHandler({
+        title: T.translate("general.success"),
+        html: T.translate("edit_ticket.email_resent")
+      })
+    );
   });
 };
 
@@ -731,7 +702,7 @@ export const getTicket = (ticketId) => async (dispatch, getState) => {
     null,
     createAction(RECEIVE_TICKET),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tickets/${ticketId}`,
-    (err, res) => customErrorHandler(ticketId, err, res)
+    snackbarErrorHandler
   )(params)(dispatch).then((data) => {
     dispatch(stopLoading());
     return data.response;
@@ -758,7 +729,7 @@ export const saveTicket = (orderId, ticket) => async (dispatch, getState) => {
     createAction(TICKET_SAVED),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/orders/${orderId}/tickets/${ticket.id}`,
     normalizedEntity,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
@@ -782,7 +753,7 @@ export const activateTicket =
         createAction(TICKET_UPDATED),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/orders/${orderId}/tickets/${ticketId}/activate`,
         {},
-        authErrorHandler
+        snackbarErrorHandler
       )(params)(dispatch).then(() => {
         dispatch(stopLoading());
       });
@@ -792,7 +763,7 @@ export const activateTicket =
       createAction(TICKET_UPDATED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/orders/${orderId}/tickets/${ticketId}/activate`,
       {},
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -809,12 +780,6 @@ export const reassignTicket =
       access_token: accessToken
     };
 
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_ticket.ticket_reassigned"),
-      type: "success"
-    };
-
     const attendee = {
       attendee_first_name: firstName,
       attendee_last_name: lastName,
@@ -822,16 +787,17 @@ export const reassignTicket =
       attendee_company: company
     };
 
-    putRequest(
+    return putRequest(
       null,
       createAction(TICKET_MEMBER_REASSIGNED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/tickets/${ticketId}/reassign`,
       attendee,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(
-        showMessage(success_message, () => {
-          window.location.reload();
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_ticket.ticket_reassigned")
         })
       );
     });
@@ -851,12 +817,6 @@ export const cancelRefundTicket =
         "badge,badge.features,promo_code,ticket_type,owner,owner.member,refund_requests,refund_requests.requested_by,refund_requests.action_by,refund_requests.refunded_taxes,refund_requests.refunded_taxes.tax,applied_taxes,applied_taxes.tax"
     };
 
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_ticket.ticket_cancel_refund"),
-      type: "success"
-    };
-
     return deleteRequest(
       null,
       createAction(TICKET_CANCEL_REFUND),
@@ -864,11 +824,17 @@ export const cancelRefundTicket =
       {
         notes: refundNotes
       },
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-      dispatch(showMessage(success_message));
-    });
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_ticket.ticket_cancel_refund")
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
   };
 
 export const refundTicket =
@@ -894,11 +860,17 @@ export const refundTicket =
         amount: refundAmount,
         notes: refundNotes
       },
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-      dispatch(showSuccessMessage(T.translate("edit_ticket.ticket_refunded")));
-    });
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_ticket.ticket_refunded")
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
   };
 
 export const addBadgeToTicket = (ticketId) => async (dispatch, getState) => {
@@ -915,7 +887,7 @@ export const addBadgeToTicket = (ticketId) => async (dispatch, getState) => {
     createAction(BADGE_ADDED_TO_TICKET),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tickets/${ticketId}/badge`,
     {},
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
