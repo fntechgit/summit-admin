@@ -344,9 +344,9 @@ export const getBadgePrints =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tickets/${ticketId}/badge/current/prints`,
       snackbarErrorHandler,
       { order, orderDir, term, summitTz: currentSummit.time_zone_id }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .catch(() => {})
+      .finally(() => dispatch(stopLoading()));
   };
 
 export const exportBadgePrints =
