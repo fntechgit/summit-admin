@@ -28,9 +28,9 @@ export const DEFAULT_ENTITY = {
   application_type: null,
   provider: "Stripe",
   test_mode_enabled: false,
-  live_secret_key: "",
+  has_live_secret_key: false,
   live_publishable_key: "",
-  test_secret_key: "",
+  has_test_secret_key: false,
   test_publishable_key: "",
   send_email_receipt: false,
   merchant_account_id: ""
@@ -54,8 +54,12 @@ const paymentProfileReducer = (state = DEFAULT_STATE, action) => {
     case RESET_PAYMENT_PROFILE_FORM:
       return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
     case PAYMENT_PROFILE_ADDED:
-    case RECEIVE_PAYMENT_PROFILE: {
+    case RECEIVE_PAYMENT_PROFILE:
+    case PAYMENT_PROFILE_UPDATED: {
       const entity = { ...payload.response };
+
+      delete entity.live_secret_key;
+      delete entity.test_secret_key;
 
       for (const key in entity) {
         if (entity.hasOwnProperty(key)) {
@@ -64,10 +68,6 @@ const paymentProfileReducer = (state = DEFAULT_STATE, action) => {
       }
 
       return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
-    }
-    case PAYMENT_PROFILE_UPDATED: {
-      const entity = payload.response;
-      return { ...state, entity };
     }
     case VALIDATE:
       return { ...state, errors: payload.errors };

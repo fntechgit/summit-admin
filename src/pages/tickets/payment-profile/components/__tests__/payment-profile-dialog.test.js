@@ -169,9 +169,9 @@ const feeTypeSectionEntity = {
   test_mode_enabled: false,
   send_email_receipt: false,
   merchant_account_id: "",
-  live_secret_key: "sk_live_xxx",
+  has_live_secret_key: true,
   live_publishable_key: "pk_live_xxx",
-  test_secret_key: "",
+  has_test_secret_key: false,
   test_publishable_key: ""
 };
 
@@ -264,6 +264,43 @@ describe("PaymentProfileDialog", () => {
           })
         );
         expect(defaultProps.onClose).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    test("a stored secret key shows as set, is only replaced through an empty password field and cancelling discards the typed value", async () => {
+      renderDialog({ entity: feeTypeSectionEntity });
+
+      expect(
+        screen.getByText("edit_payment_profile.secret_key_set")
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("input-live_secret_key")
+      ).not.toBeInTheDocument();
+      // test key is not set, so its input is shown right away
+      expect(screen.getByTestId("input-test_secret_key")).toHaveAttribute(
+        "type",
+        "password"
+      );
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "edit_payment_profile.replace" })
+      );
+      const liveInput = screen.getByTestId("input-live_secret_key");
+      expect(liveInput).toHaveAttribute("type", "password");
+      expect(liveInput).toHaveValue("");
+
+      fireEvent.change(liveInput, { target: { value: "sk_live_new" } });
+      fireEvent.click(screen.getByRole("button", { name: "general.cancel" }));
+      expect(
+        screen.queryByTestId("input-live_secret_key")
+      ).not.toBeInTheDocument();
+
+      submitProfileForm();
+
+      await waitFor(() => {
+        expect(defaultProps.onSave).toHaveBeenCalledWith(
+          expect.objectContaining({ live_secret_key: "" })
+        );
       });
     });
 

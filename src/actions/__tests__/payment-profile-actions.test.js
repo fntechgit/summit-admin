@@ -288,6 +288,25 @@ describe("savePaymentProfile", () => {
     expect(putRequest.mock.calls[0][3]).toEqual(EXISTING_PROFILE);
   });
 
+  test("sends secret keys only when typed and never puts them in the request action", async () => {
+    store.dispatch(
+      savePaymentProfile({
+        ...EXISTING_PROFILE,
+        has_live_secret_key: true,
+        has_test_secret_key: false,
+        live_secret_key: "",
+        test_secret_key: "sk_test_new"
+      })
+    );
+    await flushPromises();
+
+    expect(putRequest.mock.calls[0][3]).toEqual({
+      ...EXISTING_PROFILE,
+      test_secret_key: "sk_test_new"
+    });
+    expect(JSON.stringify(store.getActions())).not.toContain("sk_test_new");
+  });
+
   test("STOP_LOADING is dispatched even when the request fails", async () => {
     putRequest.mockImplementation(
       () => () => () => Promise.reject(new Error("network error"))
