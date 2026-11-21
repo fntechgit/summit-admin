@@ -62,6 +62,7 @@ const middlewares = [thunk];
 const mockStore = configureStore(middlewares);
 
 const baseState = {
+  currentSummitState: { currentSummit: SUMMIT },
   notesState: {
     notes: [],
     currentPage: 1,
@@ -98,7 +99,7 @@ describe("AttendeeForm notes panel remount (regression)", () => {
     expect(getNotes).toHaveBeenLastCalledWith(
       1,
       undefined,
-      undefined,
+      "",
       1,
       10,
       "created",
@@ -120,7 +121,7 @@ describe("AttendeeForm notes panel remount (regression)", () => {
     expect(getNotes).toHaveBeenLastCalledWith(
       2,
       undefined,
-      undefined,
+      "",
       1,
       10,
       "created",

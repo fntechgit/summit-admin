@@ -9,22 +9,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import {
   getRequest,
   createAction,
   stopLoading,
   startLoading,
-  authErrorHandler,
+  snackbarErrorHandler,
+  snackbarSuccessHandler,
   escapeFilterValue,
   deleteRequest,
-  showSuccessMessage,
   postRequest,
   getCSV
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { getAccessTokenSafely } from "../utils/methods";
 import T from "i18n-react";
+import { getAccessTokenSafely } from "../utils/methods";
 
 export const CLEAR_NOTES_PARAMS = "CLEAR_NOTES_PARAMS";
 export const REQUEST_NOTES = "REQUEST_NOTES";
@@ -67,14 +67,14 @@ export const getNotes =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
       createAction(REQUEST_NOTES),
       createAction(RECEIVE_NOTES),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/notes`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { page, perPage, order, orderDir, term }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -113,7 +113,7 @@ export const exportNotes =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     dispatch(
@@ -147,10 +147,17 @@ export const saveNote =
       createAction(NOTE_ADDED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/notes`,
       note,
-      authErrorHandler
-    )(params)(dispatch).then((payload) => {
-      dispatch(showSuccessMessage(T.translate("notes.note_created")));
-    });
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("notes.note_created")
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
   };
 
 export const deleteNote =
@@ -168,32 +175,12 @@ export const deleteNote =
       createAction(NOTE_DELETED)({ noteId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/notes/${noteId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
 
-export const clearNotesParams = () => async (dispatch, getState) => {
+export const clearNotesParams = () => async (dispatch) => {
   dispatch(createAction(CLEAR_NOTES_PARAMS)());
-};
-
-const normalizeEntity = (entity) => {
-  const normalizedEntity = { ...entity };
-
-  /*normalizedEntity.member_id = (normalizedEntity.member != null) ? normalizedEntity.member.id : 0;
-
-    delete normalizedEntity['summit_hall_checked_in_date'];
-    delete normalizedEntity['member'];
-    delete normalizedEntity['tickets'];
-    delete normalizedEntity['id'];
-    delete normalizedEntity['created'];
-    delete normalizedEntity['last_edited'];
-    delete normalizedEntity['allowed_extra_questions'];
-
-    if(!normalizedEntity.company_id){
-        delete (normalizedEntity.company_id);
-    }*/
-
-  return normalizedEntity;
 };

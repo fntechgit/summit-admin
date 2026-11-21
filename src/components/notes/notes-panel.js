@@ -1,12 +1,21 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import Swal from "sweetalert2";
 import T from "i18n-react";
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
-import Table from "openstack-uicore-foundation/lib/components/table";
-import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
-import { Pagination } from "react-bootstrap";
-import TextArea from "openstack-uicore-foundation/lib/components/inputs/textarea-input";
+import { FormikProvider, useFormik } from "formik";
+import {
+  Box,
+  Button,
+  Divider,
+  Grid2,
+  InputLabel,
+  Link,
+  Typography
+} from "@mui/material";
+import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
+import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import CollapsibleSection from "../mui/collapsible-section";
 import {
   clearNotesParams,
   getNotes,
@@ -14,8 +23,10 @@ import {
   saveNote,
   deleteNote
 } from "../../actions/notes-actions";
-
-import styles from "./index.module.less";
+import {
+  DEFAULT_CURRENT_PAGE,
+  TEXT_MAX_LENGTH_1024
+} from "../../utils/constants";
 
 const NotesPanel = ({
   attendeeId,
@@ -23,11 +34,11 @@ const NotesPanel = ({
   open,
   onToggle,
   onOpen,
+  currentSummit,
   notes,
-  term,
   currentPage,
   perPage,
-  lastPage,
+  totalNotes,
   order,
   orderDir,
   columns,
@@ -37,92 +48,110 @@ const NotesPanel = ({
   deleteNote,
   clearNotesParams
 }) => {
-  const [newNote, setNewNote] = useState("");
-  const hasAutoOpenedRef = useRef(false);
+  const [term, setTerm] = useState("");
 
   useEffect(() => {
-    getNotes(attendeeId, ticketId, term, 1, perPage, order, orderDir).then(
-      () => {
-        if (!hasAutoOpenedRef.current) {
-          hasAutoOpenedRef.current = true;
-          onOpen();
-        }
-      }
-    );
+    getNotes(
+      attendeeId,
+      ticketId,
+      term,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir
+    )
+      .then(() => onOpen())
+      .catch(() => {});
 
     return () => {
       clearNotesParams();
     };
   }, []);
 
-  const handleSaveNote = () => {
-    saveNote(attendeeId, ticketId, newNote).then(() => setNewNote(""));
-  };
-
-  const handleDeleteNote = (noteId) => {
-    const msg = {
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("notes_panel.remove_warning")} ${noteId}`,
-      type: "warning"
-    };
-
-    Swal.fire(msg).then(() => {
-      deleteNote(attendeeId, noteId);
-    });
-  };
-
-  const handleSort = (index, key, dir) => {
-    getNotes(attendeeId, ticketId, term, currentPage, perPage, key, dir);
-  };
-
-  const handlePageChange = (page) => {
-    getNotes(attendeeId, ticketId, term, page, perPage, order, orderDir);
-  };
-
-  const handleSearch = (newTerm) => {
+  const fetchNotes = (newTerm, page, newPerPage, newOrder, newOrderDir) =>
     getNotes(
       attendeeId,
       ticketId,
       newTerm,
-      currentPage,
-      perPage,
-      order,
-      orderDir
-    );
+      page,
+      newPerPage,
+      newOrder,
+      newOrderDir
+    ).catch(() => {});
+
+  const formik = useFormik({
+    initialValues: { content: "" },
+    onSubmit: ({ content }, { resetForm }) =>
+      saveNote(attendeeId, ticketId, content)
+        .then(() => {
+          resetForm();
+          return fetchNotes(
+            term,
+            DEFAULT_CURRENT_PAGE,
+            perPage,
+            order,
+            orderDir
+          );
+        })
+        .catch(() => {})
+  });
+
+  const handleSearch = (newTerm) => {
+    setTerm(newTerm);
+    fetchNotes(newTerm, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
   };
 
-  const handleExport = () => {
+  const handleSort = (key, dir) =>
+    fetchNotes(term, DEFAULT_CURRENT_PAGE, perPage, key, dir);
+
+  const handlePageChange = (page) =>
+    fetchNotes(term, page, perPage, order, orderDir);
+
+  const handlePerPageChange = (newPerPage) =>
+    fetchNotes(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
+
+  const handleExport = () =>
     exportNotes(attendeeId, ticketId, term, order, orderDir);
-  };
 
-  const tableOptions = {
-    className: styles.notesTable,
-    sortCol: order,
-    sortDir: orderDir,
-    actions: {
-      delete: { onClick: handleDeleteNote }
-    }
-  };
+  const handleDelete = (noteId) =>
+    deleteNote(attendeeId, noteId)
+      .then(() =>
+        fetchNotes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+      )
+      .catch(() => {});
 
   const tableColumns = [
-    { columnKey: "id", value: T.translate("notes_panel.id"), sortable: true },
+    { columnKey: "id", header: T.translate("notes_panel.id"), sortable: true },
     {
       columnKey: "created",
-      value: T.translate("notes_panel.created"),
+      header: T.translate("notes_panel.created"),
       sortable: true
     },
     {
       columnKey: "author_fullname",
-      value: T.translate("notes_panel.author_fullname"),
+      header: T.translate("notes_panel.author_fullname"),
       sortable: true
     },
     {
       columnKey: "author_email",
-      value: T.translate("notes_panel.author_email"),
+      header: T.translate("notes_panel.author_email"),
       sortable: true
     },
-    { columnKey: "ticket_link", value: T.translate("notes_panel.ticket_id") },
-    { columnKey: "content", value: T.translate("notes_panel.content") }
+    {
+      columnKey: "ticket_link",
+      header: T.translate("notes_panel.ticket_id"),
+      render: ({ ticket }) =>
+        ticket ? (
+          <Link
+            href={`/app/summits/${currentSummit.id}/purchase-orders/${ticket.order_id}/tickets/${ticket.id}`}
+          >
+            {ticket.id}
+          </Link>
+        ) : (
+          "-"
+        )
+    },
+    { columnKey: "content", header: T.translate("notes_panel.content") }
   ];
 
   const showColumns = columns
@@ -130,83 +159,91 @@ const NotesPanel = ({
     : tableColumns;
 
   return (
-    <Panel
-      show={open}
+    <CollapsibleSection
       title={T.translate("notes_panel.title")}
-      handleClick={onToggle}
+      expanded={open}
+      onToggle={onToggle}
     >
-      <div className="row">
-        <div className={`col-md-12 ${styles.addNewNote}`}>
-          <div>
-            <label>Add new note</label>
-          </div>
-          <div className="input-group">
-            <TextArea
-              className="form-control"
-              value={newNote}
-              onChange={(ev) => setNewNote(ev.target.value)}
-              maxLength={1024}
-            />
-            <span className="input-group-btn" style={{ verticalAlign: "top" }}>
-              <input
-                type="button"
-                className="btn btn-default"
-                onClick={handleSaveNote}
-                value={T.translate("general.add")}
+      <FormikProvider value={formik}>
+        <MuiForm onSubmit={formik.handleSubmit} noValidate autoComplete="off">
+          <InputLabel htmlFor="new_note" sx={{ fontWeight: "bold" }}>
+            {T.translate("notes_panel.add_new_note")}
+          </InputLabel>
+          <Box sx={{ display: "flex", alignItems: "stretch", gap: 1 }}>
+            <Box sx={{ flex: 1 }}>
+              <MuiFormikTextField
+                id="new_note"
+                name="content"
+                multiline
+                rows={3}
+                margin="none"
+                fullWidth
+                maxLength={TEXT_MAX_LENGTH_1024}
               />
-            </span>
-          </div>
-        </div>
-      </div>
-      <div className="row">
-        <div className="col-md-6">
-          <FreeTextSearch
-            value={term ?? ""}
+            </Box>
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
+              <Button
+                type="submit"
+                variant="contained"
+                sx={{ flex: 1 }}
+                disabled={!formik.values.content.trim() || formik.isSubmitting}
+              >
+                {T.translate("general.add")}
+              </Button>
+              {/* same size as the char count line, so the button ends with the box */}
+              <Typography aria-hidden sx={{ fontSize: "0.75rem" }}>
+                &nbsp;
+              </Typography>
+            </Box>
+          </Box>
+        </MuiForm>
+      </FormikProvider>
+
+      <Divider sx={{ my: 2 }} />
+
+      <Grid2
+        container
+        spacing={2}
+        sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}
+      >
+        <Grid2 size={{ xs: 12, md: 6 }}>
+          <SearchInput
+            term={term}
             placeholder={T.translate("notes_panel.placeholders.search")}
             onSearch={handleSearch}
           />
-        </div>
-        <div className="col-md-6">
-          <button
-            type="button"
-            className="btn btn-default exportButton pull-right"
-            onClick={handleExport}
-          >
-            {T.translate("general.export")}
-          </button>
-        </div>
-      </div>
+        </Grid2>
+        <Button variant="contained" onClick={handleExport}>
+          {T.translate("general.export")}
+        </Button>
+      </Grid2>
 
-      {notes.length === 0 && <div>{T.translate("notes_panel.no_entries")}</div>}
-
-      {notes.length > 0 && (
-        <>
-          <Table
-            options={tableOptions}
-            data={notes}
-            columns={showColumns}
-            onSort={handleSort}
-          />
-          <Pagination
-            bsSize="medium"
-            prev
-            next
-            first
-            last
-            ellipsis
-            boundaryLinks
-            maxButtons={10}
-            items={lastPage}
-            activePage={currentPage}
-            onSelect={handlePageChange}
-          />
-        </>
+      {notes.length === 0 ? (
+        <div>{T.translate("notes_panel.no_entries")}</div>
+      ) : (
+        <MuiTable
+          columns={showColumns}
+          data={notes}
+          options={{ sortCol: order, sortDir: orderDir }}
+          perPage={perPage}
+          currentPage={currentPage}
+          totalRows={totalNotes}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSort={handleSort}
+          onDelete={handleDelete}
+          getName={(note) => note.id}
+          deleteDialogBody={(noteId) =>
+            `${T.translate("notes_panel.remove_warning")} ${noteId}`
+          }
+        />
       )}
-    </Panel>
+    </CollapsibleSection>
   );
 };
 
-const mapStateToProps = ({ notesState }) => ({
+const mapStateToProps = ({ currentSummitState, notesState }) => ({
+  currentSummit: currentSummitState.currentSummit,
   ...notesState
 });
 

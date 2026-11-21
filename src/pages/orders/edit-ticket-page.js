@@ -17,9 +17,6 @@ import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import moment from "moment-timezone";
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Box,
   Button,
   Divider,
@@ -29,7 +26,6 @@ import {
   Typography
 } from "@mui/material";
 import BlockIcon from "@mui/icons-material/Block";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import AddNewButton from "openstack-uicore-foundation/lib/components/mui/add-new-button";
 import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
@@ -63,19 +59,11 @@ import {
 import AuditLogs from "../../components/audit-logs";
 import NotesPanel from "../../components/notes/notes-panel";
 import showConfirmDialog from "../../components/mui/showConfirmDialog";
+import CollapsibleSection from "../../components/mui/collapsible-section";
 import RefundTicketDialog from "./components/refund-ticket-dialog";
 import RejectRefundDialog from "./components/reject-refund-dialog";
 import { deleteTicket } from "../../actions/attendee-actions";
 import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
-
-const CollapsibleSection = ({ title, expanded, onToggle, children }) => (
-  <Accordion expanded={expanded} onChange={onToggle} sx={{ mb: 2 }}>
-    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-      <Typography sx={{ fontWeight: "bold" }}>{title}</Typography>
-    </AccordionSummary>
-    <AccordionDetails>{children}</AccordionDetails>
-  </Accordion>
-);
 
 const LabeledValue = ({
   label,
