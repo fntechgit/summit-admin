@@ -19,6 +19,7 @@ import { GlobalConfirmDialog } from "openstack-uicore-foundation/lib/components/
 
 import MuiSnackbarNotification from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
 import App from "./app";
+import history from "./history";
 import store, { persistor } from "./store";
 import "font-awesome/css/font-awesome.css";
 import "./styles/landing.css";
@@ -34,7 +35,7 @@ ReactDOM.render(
   <Provider store={store}>
     <PersistGate onBeforeLift={onBeforeLift} persistor={persistor}>
       <CustomTheme>
-        <MuiSnackbarNotification>
+        <MuiSnackbarNotification history={history}>
           <GlobalConfirmDialog />
           <App />
         </MuiSnackbarNotification>
