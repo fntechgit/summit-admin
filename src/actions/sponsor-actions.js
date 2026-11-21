@@ -57,6 +57,7 @@ export const SPONSOR_ADDED = "SPONSOR_ADDED";
 export const SPONSOR_DELETED = "SPONSOR_DELETED";
 export const SPONSOR_ORDER_UPDATED = "SPONSOR_ORDER_UPDATED";
 export const SPONSOR_ADDED_TO_SUMMIT = "SPONSOR_ADDED_TO_SUMMIT";
+export const SPONSORS_IMPORTED = "SPONSORS_IMPORTED";
 export const MEMBER_ADDED_TO_SPONSOR = "MEMBER_ADDED_TO_SPONSOR";
 export const MEMBER_REMOVED_FROM_SPONSOR = "MEMBER_REMOVED_FROM_SPONSOR";
 export const COMPANY_ADDED = "COMPANY_ADDED";
@@ -358,6 +359,31 @@ export const addSponsorToSummit = (entity) => async (dispatch, getState) => {
     })
     .finally(() => dispatch(stopLoading()));
 };
+
+export const importSponsorsCSV =
+  (file, dryRun) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+
+    dispatch(startLoading());
+
+    const accessToken = await getAccessTokenSafely();
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return postFile(
+      null,
+      createAction(SPONSORS_IMPORTED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/csv`,
+      file,
+      { dry_run: dryRun ? "1" : "0" },
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(({ response }) => response)
+      .finally(() => dispatch(stopLoading()));
+  };
 
 export const getSponsorSponsorships =
   (
