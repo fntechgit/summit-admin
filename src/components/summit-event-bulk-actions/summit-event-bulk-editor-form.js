@@ -13,9 +13,9 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
-import SummitVenuesSelect from "openstack-uicore-foundation/lib/components/inputs/summit-venues-select"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
+import SummitVenuesSelect from "openstack-uicore-foundation/lib/components/inputs/summit-venues-select";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import moment from "moment-timezone";
@@ -429,6 +429,8 @@ class SummitEventBulkEditorForm extends React.Component {
             <div className="bulk-edit-col-empty">&nbsp;</div>
             <div className="bulk-edit-col">
               <Select
+                // keep the menu inline so it scrolls with .bulk-edit-table instead of the global portal (see app.js)
+                menuPortalTarget={null}
                 placeholder={T.translate(
                   "schedule.placeholders.select_presentation_selection_plan"
                 )}
@@ -441,6 +443,7 @@ class SummitEventBulkEditorForm extends React.Component {
             </div>
             <div className="bulk-edit-col">
               <SummitVenuesSelect
+                menuPortalTarget={null}
                 currentValue={currentBulkLocation}
                 onVenueChanged={this.onBulkLocationChange}
                 venues={venuesOptions}
@@ -501,6 +504,7 @@ class SummitEventBulkEditorForm extends React.Component {
             </div>
             <div className="bulk-edit-col">
               <Dropdown
+                menuPortalTarget={null}
                 id="type_id"
                 placeholder={T.translate(
                   "bulk_actions_page.placeholders.event_type"
@@ -512,6 +516,7 @@ class SummitEventBulkEditorForm extends React.Component {
             </div>
             <div className="bulk-edit-col">
               <Dropdown
+                menuPortalTarget={null}
                 id="track_id"
                 placeholder={T.translate(
                   "bulk_actions_page.placeholders.track"
@@ -547,6 +552,7 @@ class SummitEventBulkEditorForm extends React.Component {
             </div>
             <div className="bulk-edit-col">
               <Dropdown
+                menuPortalTarget={null}
                 id="streaming_type"
                 value={currentBulkStreamingType}
                 onChange={this.onBulkStreamingType}
@@ -558,6 +564,7 @@ class SummitEventBulkEditorForm extends React.Component {
             </div>
             <div className="bulk-edit-col">
               <Dropdown
+                menuPortalTarget={null}
                 id="stream_is_secure"
                 value={currentBulkStreamIsSecure}
                 onChange={this.onBulkStreamIsSecure}
