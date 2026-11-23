@@ -252,6 +252,13 @@ describe("cleanPastedHtml", () => {
       `<p><strong>Bold</strong> <u><em>note</em></u> <a href="${LINK}">link</a></p>`
     );
   });
+
+  it("drops script links, including mixed-case and tab-split schemes", () => {
+    const pasted =
+      "<p><a href='JavaScript:alert(1)'>a</a> <a href='java&#9;script:alert(1)'>b</a></p>";
+
+    expect(cleanPastedHtml(pasted)).toBe("<p><a>a</a> <a>b</a></p>");
+  });
 });
 
 describe("toCSV", () => {

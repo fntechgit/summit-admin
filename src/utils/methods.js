@@ -721,8 +721,10 @@ export const cleanPastedHtml = (html) => {
     unwrap(span);
   });
   doc.body.querySelectorAll("*").forEach((el) =>
-    [...el.attributes].forEach(({ name }) => {
-      if (name !== "href" && name !== "src") el.removeAttribute(name);
+    [...el.attributes].forEach(({ name, value }) => {
+      const isSafeLink =
+        (name === "href" || name === "src") && isValidUrl(value);
+      if (!isSafeLink) el.removeAttribute(name);
     })
   );
   doc.body.querySelectorAll("li > p:only-child").forEach(unwrap);
