@@ -5,6 +5,8 @@ import "@testing-library/jest-dom";
 import { createStore } from "redux";
 import { renderWithRedux } from "../../../utils/test-utils";
 import SelectionPlanForm from "../selection-plan-form";
+import showConfirmDialog from "../../mui/showConfirmDialog";
+import { MILLISECONDS_IN_SECOND, ONE_MINUTE } from "../../../utils/constants";
 import {
   addAllowedMemberToSelectionPlan,
   deleteEventTypeSelectionPlan,
@@ -253,6 +255,65 @@ describe("SelectionPlanForm - save behaviour", () => {
     const [payload] = onSave.mock.calls[0];
     expect(payload.submission_begin_date).toBe(0);
     expect(payload.voting_begin_date).toBe(0);
+  });
+
+  it("warns on a live plan and does not save when the confirm is cancelled", async () => {
+    const now = Math.floor(Date.now() / MILLISECONDS_IN_SECOND);
+    const liveEntity = {
+      ...existingEntity,
+      is_enabled: true,
+      submission_begin_date: now - ONE_MINUTE,
+      submission_end_date: now + ONE_MINUTE
+    };
+    showConfirmDialog.mockResolvedValueOnce(false);
+    const onSave = jest.fn(() => Promise.resolve());
+    renderForm({ entity: liveEntity, onSave });
+
+    expect(
+      screen.getByText("edit_selection_plan.live_plan_warning")
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "general.save" }));
+
+    await waitFor(() => expect(showConfirmDialog).toHaveBeenCalledTimes(1));
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it("asks before a save that makes the plan live", async () => {
+    const now = Math.floor(Date.now() / MILLISECONDS_IN_SECOND);
+    const hiddenEntity = {
+      ...existingEntity,
+      is_enabled: true,
+      is_hidden: true,
+      submission_begin_date: now - ONE_MINUTE,
+      submission_end_date: now + ONE_MINUTE
+    };
+    showConfirmDialog.mockResolvedValueOnce(false);
+    const onSave = jest.fn(() => Promise.resolve());
+    renderForm({ entity: hiddenEntity, onSave });
+
+    expect(
+      screen.queryByText("edit_selection_plan.live_plan_warning")
+    ).not.toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("checkbox", { name: "edit_selection_plan.hidden" })
+    );
+    await userEvent.click(screen.getByRole("button", { name: "general.save" }));
+
+    await waitFor(() => expect(showConfirmDialog).toHaveBeenCalledTimes(1));
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it("saves a plan that isn't live without asking", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    renderForm({ entity: { ...existingEntity, is_enabled: true }, onSave });
+
+    expect(
+      screen.queryByText("edit_selection_plan.live_plan_warning")
+    ).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "general.save" }));
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(showConfirmDialog).not.toHaveBeenCalled();
   });
 });
 

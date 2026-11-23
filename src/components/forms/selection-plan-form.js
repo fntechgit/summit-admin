@@ -22,6 +22,7 @@ import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import MuiForm from "openstack-uicore-foundation/lib/components/mui/form";
+import CustomAlert from "openstack-uicore-foundation/lib/components/mui/custom-alert";
 import useScrollToError from "../../hooks/useScrollToError";
 import { FULL_WIDTH_PAGE_CONTENT_MAX_WIDTH } from "../../utils/constants";
 import MainTab from "./selection-plan-form/main-tab";
@@ -73,6 +74,14 @@ const buildInitialValues = (entity, timezone) => {
   return values;
 };
 
+// Live: submitters can see the plan and submit to it right now
+const isLive = (plan, now) =>
+  plan.is_enabled &&
+  !plan.is_hidden &&
+  plan.submission_begin_date > 0 &&
+  plan.submission_begin_date <= now &&
+  now <= plan.submission_end_date;
+
 const TAB_SX = {
   minHeight: "36px",
   px: 2,
@@ -107,13 +116,28 @@ const SelectionPlanForm = (props) => {
 
   const [activeTab, setActiveTab] = useState("main");
 
-  const handleFormikSubmit = (values) => {
+  const now = moment().unix();
+  const isLivePlan = isLive(propsEntity, now);
+
+  const handleFormikSubmit = async (values) => {
     const normalized = { ...values };
     DATE_FIELDS.forEach((field) => {
       normalized[field] = values[field]
         ? moment.tz(values[field], currentSummit.time_zone_id).unix()
         : 0;
     });
+    const willBeLive = isLive(normalized, now);
+    if (isLivePlan || willBeLive) {
+      const isConfirmed = await showConfirmDialog({
+        title: T.translate("general.are_you_sure"),
+        text: T.translate("edit_selection_plan.live_plan_save_warning"),
+        iconType: "warning",
+        confirmButtonText: T.translate(
+          "edit_selection_plan.live_plan_save_confirm"
+        )
+      });
+      if (!isConfirmed) return null;
+    }
     return onSave(normalized);
   };
 
@@ -335,6 +359,13 @@ const SelectionPlanForm = (props) => {
       >
         <input type="hidden" id="id" value={formik.values.id} />
 
+        {isLivePlan && (
+          <CustomAlert
+            severity="warning"
+            message={T.translate("edit_selection_plan.live_plan_warning")}
+          />
+        )}
+
         <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
           {!isNewPlan && (
             <Tabs
@@ -439,6 +470,10 @@ const SelectionPlanForm = (props) => {
 SelectionPlanForm.propTypes = {
   entity: PropTypes.shape({
     id: PropTypes.number,
+    is_enabled: PropTypes.bool,
+    is_hidden: PropTypes.bool,
+    submission_begin_date: PropTypes.number,
+    submission_end_date: PropTypes.number,
     track_groups: PropTypes.arrayOf(PropTypes.shape({})),
     event_types: PropTypes.arrayOf(PropTypes.shape({})),
     extra_questions: PropTypes.arrayOf(PropTypes.shape({})),
