@@ -392,3 +392,45 @@ export const TEXT_MAX_LENGTH_1024 = 1024;
 export const TEXT_MAX_LENGTH_1500 = 1500;
 
 export const BOLD_FONT_WEIGHT_MIN = 600;
+
+// Tags and attributes kept when cleaning pasted HTML
+export const PASTE_ALLOWED_TAGS = [
+  "a",
+  "b",
+  "blockquote",
+  "br",
+  "em",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "hr",
+  "i",
+  "img",
+  "li",
+  "ol",
+  "p",
+  "s",
+  "strong",
+  "sub",
+  "sup",
+  "table",
+  "tbody",
+  "td",
+  "th",
+  "thead",
+  "tr",
+  "u",
+  "ul"
+];
+export const PASTE_ALLOWED_ATTR = [
+  "href",
+  "src",
+  "alt",
+  "width",
+  "height",
+  "colspan",
+  "rowspan"
+];

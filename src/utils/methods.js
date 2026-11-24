@@ -26,6 +26,7 @@ import {
 } from "openstack-uicore-foundation/lib/security/methods";
 import Swal from "sweetalert2";
 import URI from "urijs";
+import DOMPurify from "dompurify";
 import * as Sentry from "@sentry/react";
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -42,7 +43,9 @@ import {
   MARKETING_SETTING_TYPE_HEX_COLOR,
   MILLISECONDS_TO_SECONDS,
   ONE_MINUTE,
-  OR_FILTER
+  OR_FILTER,
+  PASTE_ALLOWED_ATTR,
+  PASTE_ALLOWED_TAGS
 } from "./constants";
 
 const DAY_IN_SECONDS = 86400; // 86400 seconds per day
@@ -695,21 +698,23 @@ export const htmlToPlainText = (html) => {
   return decoded.replace(/\s+/g, " ").trim();
 };
 
-// Keeps bold/italic/underline/links/lists from Google Docs, drops styles and ids
+// Keeps allowed formatting from Google Docs/Word pastes, drops styles and ids
 export const cleanPastedHtml = (html) => {
   const doc = new DOMParser().parseFromString(html, "text/html");
   const unwrap = (el) => el.replaceWith(...el.childNodes);
 
-  doc.body.querySelectorAll("style, meta").forEach((el) => el.remove());
   doc.body.querySelectorAll("[id^='docs-internal-guid']").forEach(unwrap);
   doc.body.querySelectorAll("span").forEach((span) => {
-    const { fontWeight, fontStyle, textDecoration } = span.style;
+    const { fontWeight, fontStyle, textDecoration, verticalAlign } = span.style;
     const isBold =
       fontWeight === "bold" || Number(fontWeight) >= BOLD_FONT_WEIGHT_MIN;
     const tags = [
       isBold && "strong",
       fontStyle === "italic" && "em",
-      textDecoration.includes("underline") && "u"
+      textDecoration.includes("underline") && "u",
+      textDecoration.includes("line-through") && "s",
+      verticalAlign === "super" && "sup",
+      verticalAlign === "sub" && "sub"
     ].filter(Boolean);
     let node = span;
     tags.forEach((tag) => {
@@ -720,23 +725,21 @@ export const cleanPastedHtml = (html) => {
     });
     unwrap(span);
   });
-  doc.body.querySelectorAll("*").forEach((el) =>
-    [...el.attributes].forEach(({ name, value }) => {
-      const isSafeLink =
-        (name === "href" || name === "src") && isValidUrl(value);
-      if (!isSafeLink) el.removeAttribute(name);
-    })
-  );
   doc.body.querySelectorAll("li > p:only-child").forEach(unwrap);
   doc.body.querySelectorAll("p").forEach((p) => {
-    if (!p.textContent.trim() && !p.querySelector("img")) p.remove();
+    if (!p.textContent.trim() && !p.querySelector("img, br")) p.remove();
   });
-  return doc.body.innerHTML;
+  return DOMPurify.sanitize(doc.body.innerHTML, {
+    ALLOWED_TAGS: PASTE_ALLOWED_TAGS,
+    ALLOWED_ATTR: PASTE_ALLOWED_ATTR,
+    ALLOW_ARIA_ATTR: false,
+    ALLOW_DATA_ATTR: false
+  });
 };
 
-// Jodit options: clean Google Docs pastes ourselves, Word pastes with Jodit's cleaner
+// Jodit options: clean every HTML paste, Word included, with cleanPastedHtml
 export const CLEAN_PASTE_EDITOR_OPTIONS = {
-  defaultActionOnPasteFromWord: "insert_as_text",
+  processPasteFromWord: false,
   events: {
     processPaste: (_, html, types) =>
       types.includes("text/html") ? cleanPastedHtml(html) : undefined

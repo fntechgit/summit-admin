@@ -263,10 +263,33 @@ describe("cleanPastedHtml", () => {
 
     expect(cleanPastedHtml(pasted)).toBe("<p><a>a</a> <a>b</a></p>");
   });
+
+  it("turns strikethrough, superscript and subscript spans into tags", () => {
+    const pasted =
+      "<p><span style='text-decoration:line-through;'>old</span> x<span style='vertical-align:super;'>2</span> H<span style='vertical-align:sub;'>2</span>O</p>";
+
+    expect(cleanPastedHtml(pasted)).toBe(
+      "<p><s>old</s> x<sup>2</sup> H<sub>2</sub>O</p>"
+    );
+  });
+
+  it("keeps merged cells, image size, mailto and anchor links, and blank lines", () => {
+    const pasted = `<p><a href="mailto:info@fntech.com">mail</a> <a href="#top">top</a></p><p><br></p><table style="border:1px;" data-sheets-root="1"><tbody><tr><td colspan="2" rowspan="3" style="width:50%;">cell</td></tr></tbody></table><p><img src="${LINK}/logo.png" width="120" height="40" alt="Logo" style="margin:0;"></p>`;
+
+    expect(cleanPastedHtml(pasted)).toBe(
+      `<p><a href="mailto:info@fntech.com">mail</a> <a href="#top">top</a></p><p><br></p><table><tbody><tr><td colspan="2" rowspan="3">cell</td></tr></tbody></table><p><img src="${LINK}/logo.png" width="120" height="40" alt="Logo"></p>`
+    );
+  });
+
+  it("drops iframes, scripts and forms", () => {
+    const pasted = `<p>text</p><iframe src="${LINK}"></iframe><script src="${LINK}/x.js"></script><form action="${LINK}"><input name="q"></form>`;
+
+    expect(cleanPastedHtml(pasted)).toBe("<p>text</p>");
+  });
 });
 
 describe("CLEAN_PASTE_EDITOR_OPTIONS", () => {
-  it("cleans Word pastes with Jodit's Word cleaner", () => {
+  it("cleans Word pastes with cleanPastedHtml", () => {
     const wordHtml =
       "<html xmlns:o='urn:schemas-microsoft-com:office:office'><head><meta name=Generator content='Microsoft Word 15'><style>p.MsoNormal{mso-style-unhide:no;}</style></head><body><p class=MsoNormal><b><span style='mso-bidi-font-weight:normal'>Hello</span></b><o:p></o:p></p></body></html>";
     // jsdom doesn't implement window.focus, which Jodit calls on paste
@@ -293,7 +316,7 @@ describe("CLEAN_PASTE_EDITOR_OPTIONS", () => {
     expect(onChange).toHaveBeenLastCalledWith({
       target: {
         id: "description",
-        value: "<p><b><span>Hello</span></b></p>",
+        value: "<p><b>Hello</b></p>",
         type: "texteditor"
       }
     });
