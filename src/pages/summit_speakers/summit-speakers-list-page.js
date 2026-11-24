@@ -18,6 +18,7 @@ import Swal from "sweetalert2";
 import { Modal, Pagination } from "react-bootstrap";
 import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
 import SelectableTable from "openstack-uicore-foundation/lib/components/table-selectable";
+import TextLink from "openstack-uicore-foundation/lib/components/mui/text-link";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import SpeakerPromoCodeSpecForm from "../../components/forms/speakers-promo-code-spec-form";
@@ -129,7 +130,6 @@ class SummitSpeakersListPage extends React.Component {
     this.getBySummit = this.getBySummit.bind(this);
     this.handleSpeakerSubmitterSourceChange =
       this.handleSpeakerSubmitterSourceChange.bind(this);
-    this.handleEdit = this.handleEdit.bind(this);
     this.handlePageChange = this.handlePageChange.bind(this);
     this.handleSort = this.handleSort.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
@@ -271,13 +271,6 @@ class SummitSpeakersListPage extends React.Component {
         filters
       );
     });
-  }
-
-  handleEdit(itemId) {
-    if (this.state.source === sources.speakers) {
-      const { history } = this.props;
-      history.push(`/app/speakers/${itemId}`);
-    }
   }
 
   handlePageChange(page) {
@@ -506,7 +499,8 @@ class SummitSpeakersListPage extends React.Component {
     const {
       currentSummit,
       currentPromocodeSpecification,
-      getAllMediaUploadTypes
+      getAllMediaUploadTypes,
+      history
     } = this.props;
 
     const { testRecipient, source, promoCodeStrategy } = this.state;
@@ -538,7 +532,16 @@ class SummitSpeakersListPage extends React.Component {
       {
         columnKey: "full_name",
         value: T.translate("general.name"),
-        sortable: true
+        sortable: true,
+        render: (row) => (
+          <TextLink
+            href={`/app/speakers/${row.id}`}
+            onNavigate={history.push}
+            disabled={source !== sources.speakers}
+          >
+            {row.full_name}
+          </TextLink>
+        )
       },
       {
         columnKey: "email",
@@ -700,7 +703,8 @@ class SummitSpeakersListPage extends React.Component {
       sortDir: orderDir,
       actions: {
         edit: {
-          onClick: this.handleEdit,
+          // no row click (names link instead); edit still wires the checkboxes
+          display: () => false,
           onSelected: this.handleSelected,
           onSelectedAll: this.handleSelectedAll
         }
