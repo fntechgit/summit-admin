@@ -1,4 +1,8 @@
+import React from "react";
+import { fireEvent, render } from "@testing-library/react";
+import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import {
+  CLEAN_PASTE_EDITOR_OPTIONS,
   cleanPastedHtml,
   getMediaInputValue,
   htmlToPlainText,
@@ -258,6 +262,41 @@ describe("cleanPastedHtml", () => {
       "<p><a href='JavaScript:alert(1)'>a</a> <a href='java&#9;script:alert(1)'>b</a></p>";
 
     expect(cleanPastedHtml(pasted)).toBe("<p><a>a</a> <a>b</a></p>");
+  });
+});
+
+describe("CLEAN_PASTE_EDITOR_OPTIONS", () => {
+  it("cleans Word pastes with Jodit's Word cleaner", () => {
+    const wordHtml =
+      "<html xmlns:o='urn:schemas-microsoft-com:office:office'><head><meta name=Generator content='Microsoft Word 15'><style>p.MsoNormal{mso-style-unhide:no;}</style></head><body><p class=MsoNormal><b><span style='mso-bidi-font-weight:normal'>Hello</span></b><o:p></o:p></p></body></html>";
+    // jsdom doesn't implement window.focus, which Jodit calls on paste
+    jest.spyOn(window, "focus").mockImplementation(() => {});
+    const onChange = jest.fn();
+    const { container } = render(
+      <TextEditorV3
+        id="description"
+        value=""
+        onChange={onChange}
+        options={CLEAN_PASTE_EDITOR_OPTIONS}
+      />
+    );
+    const wysiwyg = container.querySelector(".jodit-wysiwyg");
+
+    fireEvent.paste(wysiwyg, {
+      clipboardData: {
+        types: ["text/html"],
+        getData: (type) => (type === "text/html" ? wordHtml : "")
+      }
+    });
+    fireEvent.blur(wysiwyg);
+
+    expect(onChange).toHaveBeenLastCalledWith({
+      target: {
+        id: "description",
+        value: "<p><b><span>Hello</span></b></p>",
+        type: "texteditor"
+      }
+    });
   });
 });
 

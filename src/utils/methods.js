@@ -736,7 +736,7 @@ export const cleanPastedHtml = (html) => {
 
 // Jodit options: clean Google Docs pastes ourselves, Word pastes with Jodit's cleaner
 export const CLEAN_PASTE_EDITOR_OPTIONS = {
-  defaultActionOnPasteFromWord: "insert_clear_html",
+  defaultActionOnPasteFromWord: "insert_as_text",
   events: {
     processPaste: (_, html, types) =>
       types.includes("text/html") ? cleanPastedHtml(html) : undefined
