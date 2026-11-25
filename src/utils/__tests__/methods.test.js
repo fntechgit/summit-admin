@@ -250,7 +250,7 @@ describe("cleanPastedHtml", () => {
   });
 
   it("turns styled spans into tags and keeps link targets", () => {
-    const pasted = `<b ${GUID}><p dir="ltr"><span style="font-weight:700;">Bold</span> <span style="font-style:italic;text-decoration:underline;">note</span> <a href="${LINK}" style="color:#1155cc;"><span style="font-weight:400;">link</span></a></p></b>`;
+    const pasted = `<b ${GUID}><p dir="ltr"><span style="font-weight:700;">Bold</span> <span style="font-style:italic;text-decoration:underline;">note</span> <a href="${LINK}" style="color:#1155cc;"><span style="font-weight:400;text-decoration:underline;">link</span></a></p></b>`;
 
     expect(cleanPastedHtml(pasted)).toBe(
       `<p><strong>Bold</strong> <u><em>note</em></u> <a href="${LINK}">link</a></p>`
