@@ -715,7 +715,7 @@ export const cleanPastedHtml = (html) => {
     const tags = [
       isBold && "strong",
       fontStyle === "italic" && "em",
-      textDecoration.includes("underline") && "u",
+      textDecoration.includes("underline") && !span.closest("a") && "u",
       textDecoration.includes("line-through") && "s",
       verticalAlign === "super" && "sup",
       verticalAlign === "sub" && "sub"
