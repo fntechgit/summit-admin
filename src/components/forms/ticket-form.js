@@ -14,10 +14,11 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input";
 import OwnerInput from "../inputs/owner-input";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
+import { REACT_SELECT_MENU_Z_INDEX } from "../../utils/constants";
 
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import CopyClipboard from "../buttons/copy-clipboard";
@@ -278,6 +279,13 @@ class TicketForm extends React.Component {
               optionsLimit={25}
               cacheOptions
               defaultOptions
+              menuPortalTarget={document.body}
+              styles={{
+                menuPortal: (base) => ({
+                  ...base,
+                  zIndex: REACT_SELECT_MENU_Z_INDEX
+                })
+              }}
             />
           </div>
           <div className="col-md-6">
