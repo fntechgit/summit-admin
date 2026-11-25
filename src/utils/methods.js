@@ -731,7 +731,13 @@ export const cleanPastedHtml = (html) => {
   });
   doc.body.querySelectorAll("li > p:only-child").forEach(unwrap);
   doc.body.querySelectorAll("p").forEach((p) => {
-    if (!p.textContent.trim() && !p.querySelector("img, br")) p.remove();
+    if (p.textContent.trim() || p.querySelector("img, br")) return;
+    // Word sends blank lines as &nbsp;; keep them like Docs' <p><br></p>
+    if (p.textContent.includes("\u00a0")) {
+      p.replaceChildren(doc.createElement("br"));
+    } else {
+      p.remove();
+    }
   });
   return DOMPurify.sanitize(doc.body.innerHTML, {
     ALLOWED_TAGS: PASTE_ALLOWED_TAGS,

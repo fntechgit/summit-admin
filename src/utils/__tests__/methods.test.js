@@ -274,10 +274,10 @@ describe("cleanPastedHtml", () => {
   });
 
   it("keeps merged cells, image size, mailto and anchor links, and blank lines", () => {
-    const pasted = `<p><a href="mailto:info@fntech.com">mail</a> <a href="#top">top</a></p><p><br></p><table style="border:1px;" data-sheets-root="1"><tbody><tr><td colspan="2" rowspan="3" style="width:50%;">cell</td></tr></tbody></table><p><img src="${LINK}/logo.png" width="120" height="40" alt="Logo" style="margin:0;"></p>`;
+    const pasted = `<p><a href="mailto:info@fntech.com">mail</a> <a href="#top">top</a></p><p><br></p><p class=MsoNormal><o:p>&nbsp;</o:p></p><table style="border:1px;" data-sheets-root="1"><tbody><tr><td colspan="2" rowspan="3" style="width:50%;">cell</td></tr></tbody></table><p><img src="${LINK}/logo.png" width="120" height="40" alt="Logo" style="margin:0;"></p>`;
 
     expect(cleanPastedHtml(pasted)).toBe(
-      `<p><a href="mailto:info@fntech.com">mail</a> <a href="#top">top</a></p><p><br></p><table><tbody><tr><td colspan="2" rowspan="3">cell</td></tr></tbody></table><p><img src="${LINK}/logo.png" width="120" height="40" alt="Logo"></p>`
+      `<p><a href="mailto:info@fntech.com">mail</a> <a href="#top">top</a></p><p><br></p><p><br></p><table><tbody><tr><td colspan="2" rowspan="3">cell</td></tr></tbody></table><p><img src="${LINK}/logo.png" width="120" height="40" alt="Logo"></p>`
     );
   });
 
