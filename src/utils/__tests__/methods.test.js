@@ -281,6 +281,24 @@ describe("cleanPastedHtml", () => {
     );
   });
 
+  it("keeps Gmail-style div lines separate", () => {
+    const pasted =
+      "<div dir=\"ltr\"><div>Line one</div><div>Line two</div><div><br></div><div>Line three</div></div>";
+
+    expect(cleanPastedHtml(pasted)).toBe(
+      "<div><div>Line one</div><div>Line two</div><div><br></div><div>Line three</div></div>"
+    );
+  });
+
+  it("keeps Google Docs and Word text alignment", () => {
+    const pasted =
+      "<p dir='ltr' style='line-height:1.38;text-align:center;'><span style='font-weight:700;'>Docs</span></p><p class=MsoNormal align=right style='text-align:right'>Word</p>";
+
+    expect(cleanPastedHtml(pasted)).toBe(
+      "<p align=\"center\"><strong>Docs</strong></p><p align=\"right\">Word</p>"
+    );
+  });
+
   it("drops iframes, scripts and forms", () => {
     const pasted = `<p>text</p><iframe src="${LINK}"></iframe><script src="${LINK}/x.js"></script><form action="${LINK}"><input name="q"></form>`;
 

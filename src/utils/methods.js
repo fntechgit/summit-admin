@@ -704,6 +704,10 @@ export const cleanPastedHtml = (html) => {
   const unwrap = (el) => el.replaceWith(...el.childNodes);
 
   doc.body.querySelectorAll("[id^='docs-internal-guid']").forEach(unwrap);
+  // Styles are dropped, so keep alignment as an align attribute
+  doc.body.querySelectorAll("[style]").forEach((el) => {
+    if (el.style.textAlign) el.setAttribute("align", el.style.textAlign);
+  });
   doc.body.querySelectorAll("span").forEach((span) => {
     const { fontWeight, fontStyle, textDecoration, verticalAlign } = span.style;
     const isBold =

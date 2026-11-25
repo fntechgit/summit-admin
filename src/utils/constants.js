@@ -399,6 +399,7 @@ export const PASTE_ALLOWED_TAGS = [
   "b",
   "blockquote",
   "br",
+  "div",
   "em",
   "h1",
   "h2",
@@ -432,5 +433,6 @@ export const PASTE_ALLOWED_ATTR = [
   "width",
   "height",
   "colspan",
-  "rowspan"
+  "rowspan",
+  "align"
 ];
