@@ -275,8 +275,6 @@ class SummitEventBulkEditorItem extends React.Component {
         <div className="bulk-edit-col">
           <FormGroup validationState={this.getValidationEventSelectionPlan()}>
             <Select
-              // keep the menu inline so it scrolls with .bulk-edit-table instead of the global portal (see app.js)
-              menuPortalTarget={null}
               placeholder={T.translate(
                 "schedule.placeholders.select_presentation_selection_plan"
               )}
@@ -292,7 +290,6 @@ class SummitEventBulkEditorItem extends React.Component {
         <div className="bulk-edit-col">
           <FormGroup validationState={this.getValidationStateVenue()}>
             <SummitVenuesSelect
-              menuPortalTarget={null}
               onVenueChanged={this.onLocationChanged}
               currentValue={currentLocation}
               venues={venuesOptions}
@@ -358,7 +355,6 @@ class SummitEventBulkEditorItem extends React.Component {
         <div className="bulk-edit-col">
           <FormGroup>
             <Dropdown
-              menuPortalTarget={null}
               id="type_id"
               placeholder={T.translate(
                 "bulk_actions_page.placeholders.event_type"
@@ -373,7 +369,6 @@ class SummitEventBulkEditorItem extends React.Component {
         <div className="bulk-edit-col">
           <FormGroup>
             <Dropdown
-              menuPortalTarget={null}
               id="track_id"
               placeholder={T.translate("bulk_actions_page.placeholders.track")}
               value={event.track_id}
@@ -420,7 +415,6 @@ class SummitEventBulkEditorItem extends React.Component {
         <div className="bulk-edit-col">
           <FormGroup>
             <Dropdown
-              menuPortalTarget={null}
               id="streaming_type"
               value={event.streaming_type}
               onChange={this.onStreamingTypeLocalChanged}
@@ -435,7 +429,6 @@ class SummitEventBulkEditorItem extends React.Component {
         <div className="bulk-edit-col">
           <FormGroup>
             <Dropdown
-              menuPortalTarget={null}
               id="streaming_type"
               value={event.stream_is_secure}
               onChange={this.onStreamIsSecureLocalChanged}
