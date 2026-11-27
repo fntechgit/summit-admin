@@ -26,10 +26,12 @@ import {
 } from "openstack-uicore-foundation/lib/security/methods";
 import Swal from "sweetalert2";
 import URI from "urijs";
+import DOMPurify from "dompurify";
 import * as Sentry from "@sentry/react";
 import T from "i18n-react/dist/i18n-react";
 import {
   BADGE_QR_MINIMUM_EXPECTED_FIELDS,
+  BOLD_FONT_WEIGHT_MIN,
   BYTES_IN_MEGABYTE,
   DATETIME_FORMAT,
   ERROR_CODE_401,
@@ -41,7 +43,9 @@ import {
   MARKETING_SETTING_TYPE_HEX_COLOR,
   MILLISECONDS_TO_SECONDS,
   ONE_MINUTE,
-  OR_FILTER
+  OR_FILTER,
+  PASTE_ALLOWED_ATTR,
+  PASTE_ALLOWED_TAGS
 } from "./constants";
 
 const DAY_IN_SECONDS = 86400; // 86400 seconds per day
@@ -692,6 +696,64 @@ export const htmlToPlainText = (html) => {
   const decoded = new DOMParser().parseFromString(spaced, "text/html")
     .documentElement.textContent;
   return decoded.replace(/\s+/g, " ").trim();
+};
+
+// Keeps allowed formatting from Google Docs/Word pastes, drops styles and ids
+export const cleanPastedHtml = (html) => {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const unwrap = (el) => el.replaceWith(...el.childNodes);
+
+  doc.body.querySelectorAll("[id^='docs-internal-guid']").forEach(unwrap);
+  // Styles are dropped, so keep alignment as an align attribute
+  doc.body.querySelectorAll("[style]").forEach((el) => {
+    if (el.style.textAlign) el.setAttribute("align", el.style.textAlign);
+  });
+  doc.body.querySelectorAll("span").forEach((span) => {
+    const { fontWeight, fontStyle, textDecoration, verticalAlign } = span.style;
+    const isBold =
+      fontWeight === "bold" || Number(fontWeight) >= BOLD_FONT_WEIGHT_MIN;
+    const tags = [
+      isBold && "strong",
+      fontStyle === "italic" && "em",
+      textDecoration.includes("underline") && !span.closest("a") && "u",
+      textDecoration.includes("line-through") && "s",
+      verticalAlign === "super" && "sup",
+      verticalAlign === "sub" && "sub"
+    ].filter(Boolean);
+    let node = span;
+    tags.forEach((tag) => {
+      const wrapper = doc.createElement(tag);
+      node.replaceWith(wrapper);
+      wrapper.append(node);
+      node = wrapper;
+    });
+    unwrap(span);
+  });
+  doc.body.querySelectorAll("li > p:only-child").forEach(unwrap);
+  doc.body.querySelectorAll("p").forEach((p) => {
+    if (p.textContent.trim() || p.querySelector("img, br")) return;
+    // Word sends blank lines as &nbsp;; keep them like Docs' <p><br></p>
+    if (p.textContent.includes("\u00a0")) {
+      p.replaceChildren(doc.createElement("br"));
+    } else {
+      p.remove();
+    }
+  });
+  return DOMPurify.sanitize(doc.body.innerHTML, {
+    ALLOWED_TAGS: PASTE_ALLOWED_TAGS,
+    ALLOWED_ATTR: PASTE_ALLOWED_ATTR,
+    ALLOW_ARIA_ATTR: false,
+    ALLOW_DATA_ATTR: false
+  });
+};
+
+// Jodit options: clean every HTML paste, Word included, with cleanPastedHtml
+export const CLEAN_PASTE_EDITOR_OPTIONS = {
+  processPasteFromWord: false,
+  events: {
+    processPaste: (_, html, types) =>
+      types.includes("text/html") ? cleanPastedHtml(html) : undefined
+  }
 };
 
 export const formatDuration = (duration) => {

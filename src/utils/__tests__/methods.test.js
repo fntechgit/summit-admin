@@ -1,4 +1,9 @@
+import React from "react";
+import { fireEvent, render } from "@testing-library/react";
+import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import {
+  CLEAN_PASTE_EDITOR_OPTIONS,
+  cleanPastedHtml,
   getMediaInputValue,
   htmlToPlainText,
   isImageUrl,
@@ -223,6 +228,116 @@ describe("htmlToPlainText", () => {
   it("leaves malformed-case entities literal (DOMParser is case-sensitive)", () => {
     expect(htmlToPlainText("&Copy;")).toBe("&Copy;");
     expect(htmlToPlainText("x&NBSP;y")).toBe("x&NBSP;y");
+  });
+});
+
+describe("cleanPastedHtml", () => {
+  const GUID = "style='font-weight:normal;' id='docs-internal-guid-11cd'";
+  const LINK = "https://fnvirtual.app";
+  const SPAN_STYLE =
+    "font-size:10.5pt;font-family:Arial,sans-serif;color:#000000;font-weight:400;font-style:normal;text-decoration:none;white-space:pre-wrap;";
+  const docsItem = (text) =>
+    `<li dir="ltr" style="list-style-type:circle;margin-left: 36pt;" aria-level="2"><p dir="ltr" style="line-height:1.38;" role="presentation"><strong ${GUID}><span style="${SPAN_STYLE}">${text}</span></strong></p></li>`;
+
+  it("strips Google Docs list markup without making the text bold", () => {
+    const pasted = `<p><strong ${GUID}></strong></p><ul style="margin-top:0;">${docsItem(
+      "AI Data Center Energy"
+    )}${docsItem("Optical Networking &amp; Interconnects")}</ul><p></p>`;
+
+    expect(cleanPastedHtml(pasted)).toBe(
+      "<ul><li>AI Data Center Energy</li><li>Optical Networking &amp; Interconnects</li></ul>"
+    );
+  });
+
+  it("turns styled spans into tags and keeps link targets", () => {
+    const pasted = `<b ${GUID}><p dir="ltr"><span style="font-weight:700;">Bold</span> <span style="font-style:italic;text-decoration:underline;">note</span> <a href="${LINK}" style="color:#1155cc;"><span style="font-weight:400;text-decoration:underline;">link</span></a></p></b>`;
+
+    expect(cleanPastedHtml(pasted)).toBe(
+      `<p><strong>Bold</strong> <u><em>note</em></u> <a href="${LINK}">link</a></p>`
+    );
+  });
+
+  it("drops script links, including mixed-case and tab-split schemes", () => {
+    const pasted =
+      "<p><a href='JavaScript:alert(1)'>a</a> <a href='java&#9;script:alert(1)'>b</a></p>";
+
+    expect(cleanPastedHtml(pasted)).toBe("<p><a>a</a> <a>b</a></p>");
+  });
+
+  it("turns strikethrough, superscript and subscript spans into tags", () => {
+    const pasted =
+      "<p><span style='text-decoration:line-through;'>old</span> x<span style='vertical-align:super;'>2</span> H<span style='vertical-align:sub;'>2</span>O</p>";
+
+    expect(cleanPastedHtml(pasted)).toBe(
+      "<p><s>old</s> x<sup>2</sup> H<sub>2</sub>O</p>"
+    );
+  });
+
+  it("keeps merged cells, image size, mailto and anchor links, and blank lines", () => {
+    const pasted = `<p><a href="mailto:info@fntech.com">mail</a> <a href="#top">top</a></p><p><br></p><p class=MsoNormal><o:p>&nbsp;</o:p></p><table style="border:1px;" data-sheets-root="1"><tbody><tr><td colspan="2" rowspan="3" style="width:50%;">cell</td></tr></tbody></table><p><img src="${LINK}/logo.png" width="120" height="40" alt="Logo" style="margin:0;"></p>`;
+
+    expect(cleanPastedHtml(pasted)).toBe(
+      `<p><a href="mailto:info@fntech.com">mail</a> <a href="#top">top</a></p><p><br></p><p><br></p><table><tbody><tr><td colspan="2" rowspan="3">cell</td></tr></tbody></table><p><img src="${LINK}/logo.png" width="120" height="40" alt="Logo"></p>`
+    );
+  });
+
+  it("keeps Gmail-style div lines separate", () => {
+    const pasted =
+      "<div dir=\"ltr\"><div>Line one</div><div>Line two</div><div><br></div><div>Line three</div></div>";
+
+    expect(cleanPastedHtml(pasted)).toBe(
+      "<div><div>Line one</div><div>Line two</div><div><br></div><div>Line three</div></div>"
+    );
+  });
+
+  it("keeps Google Docs and Word text alignment", () => {
+    const pasted =
+      "<p dir='ltr' style='line-height:1.38;text-align:center;'><span style='font-weight:700;'>Docs</span></p><p class=MsoNormal align=right style='text-align:right'>Word</p>";
+
+    expect(cleanPastedHtml(pasted)).toBe(
+      "<p align=\"center\"><strong>Docs</strong></p><p align=\"right\">Word</p>"
+    );
+  });
+
+  it("drops iframes, scripts and forms", () => {
+    const pasted = `<p>text</p><iframe src="${LINK}"></iframe><script src="${LINK}/x.js"></script><form action="${LINK}"><input name="q"></form>`;
+
+    expect(cleanPastedHtml(pasted)).toBe("<p>text</p>");
+  });
+});
+
+describe("CLEAN_PASTE_EDITOR_OPTIONS", () => {
+  it("cleans Word pastes with cleanPastedHtml", () => {
+    const wordHtml =
+      "<html xmlns:o='urn:schemas-microsoft-com:office:office'><head><meta name=Generator content='Microsoft Word 15'><style>p.MsoNormal{mso-style-unhide:no;}</style></head><body><p class=MsoNormal><b><span style='mso-bidi-font-weight:normal'>Hello</span></b><o:p></o:p></p></body></html>";
+    // jsdom doesn't implement window.focus, which Jodit calls on paste
+    jest.spyOn(window, "focus").mockImplementation(() => {});
+    const onChange = jest.fn();
+    const { container } = render(
+      <TextEditorV3
+        id="description"
+        value=""
+        onChange={onChange}
+        options={CLEAN_PASTE_EDITOR_OPTIONS}
+      />
+    );
+    const wysiwyg = container.querySelector(".jodit-wysiwyg");
+
+    fireEvent.paste(wysiwyg, {
+      clipboardData: {
+        types: ["text/html"],
+        getData: (type) => (type === "text/html" ? wordHtml : "")
+      }
+    });
+    fireEvent.blur(wysiwyg);
+
+    expect(onChange).toHaveBeenLastCalledWith({
+      target: {
+        id: "description",
+        value: "<p><b>Hello</b></p>",
+        type: "texteditor"
+      }
+    });
   });
 });
 

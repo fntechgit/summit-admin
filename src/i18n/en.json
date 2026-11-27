@@ -122,6 +122,7 @@
     "mib_aligned": "Must be a MiB aligned value",
     "minimum": "Must be at least {minimum}",
     "maximum": "Must be at most {maximum}",
+    "html_maximum": "Must be at most {maximum} characters, including hidden formatting. Paste the text again to drop extra formatting.",
     "time": "Wrong time format.",
     "wrong_format": "Wrong format.",
     "add_on_required": "Select at least one add-on",

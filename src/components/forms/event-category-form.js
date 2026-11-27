@@ -50,13 +50,18 @@ import {
   requiredHTMLValidation,
   hexColorValidation
 } from "../../utils/yup";
+import { CLEAN_PASTE_EDITOR_OPTIONS } from "../../utils/methods";
+import { TEXT_MAX_LENGTH_1500 } from "../../utils/constants";
 
 const validationSchema = yup.object().shape({
   name: requiredStringValidation(),
   code: requiredStringValidation(),
   color: hexColorValidation().required(T.translate("validation.required")),
   text_color: hexColorValidation().required(T.translate("validation.required")),
-  description: requiredHTMLValidation()
+  description: requiredHTMLValidation().max(
+    TEXT_MAX_LENGTH_1500,
+    T.translate("validation.html_maximum", { maximum: TEXT_MAX_LENGTH_1500 })
+  )
 });
 
 const subtrackColumns = [
@@ -234,7 +239,10 @@ const EventCategoryForm = ({
             <InputLabel htmlFor="description">
               {T.translate("edit_event_category.description")} *
             </InputLabel>
-            <FormikTextEditor name="description" />
+            <FormikTextEditor
+              name="description"
+              options={CLEAN_PASTE_EDITOR_OPTIONS}
+            />
           </Grid2>
         </Grid2>
 

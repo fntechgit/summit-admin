@@ -46,6 +46,7 @@ import {
   hexColorValidation,
   dateValidation
 } from "../../utils/yup";
+import { CLEAN_PASTE_EDITOR_OPTIONS } from "../../utils/methods";
 
 const DATE_FIELDS = [
   "begin_attendee_voting_period_date",
@@ -296,7 +297,10 @@ const EventCategoryGroupForm = ({
             <InputLabel htmlFor="description">
               {T.translate("edit_event_category_group.description")}
             </InputLabel>
-            <FormikTextEditor name="description" />
+            <FormikTextEditor
+              name="description"
+              options={CLEAN_PASTE_EDITOR_OPTIONS}
+            />
           </Grid2>
         </Grid2>
 
