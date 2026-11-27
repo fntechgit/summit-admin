@@ -58,7 +58,7 @@ module.exports = {
           const isWipOnly = WIP_REGEX.test(header.trim());
           return [
             !isWipOnly,
-            "Commit message cannot be just \"WIP\" (use a descriptive message)."
+            'Commit message cannot be just "WIP" (use a descriptive message).'
           ];
         },
         "custom-no-wip-subject": ({ subject }) => {
@@ -67,7 +67,7 @@ module.exports = {
           const isWipOnly = WIP_REGEX.test(subject.trim());
           return [
             !isWipOnly,
-            "Subject cannot be just \"WIP\". Use a descriptive message like \"implement user login\" instead."
+            'Subject cannot be just "WIP". Use a descriptive message like "implement user login" instead.'
           ];
         }
       }
