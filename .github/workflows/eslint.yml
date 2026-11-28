@@ -1,15 +1,24 @@
 name: es-lint
 
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+          persist-credentials: false
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - run: yarn install
-      - run: yarn lint-staged --verbose
+      - name: Lint and format-check changed files
+        env:
+          BASE_REF: ${{ github.base_ref || github.event.repository.default_branch }}
+        run: |
+          git diff --name-only -z --diff-filter=ACMR "origin/$BASE_REF...HEAD" > "$RUNNER_TEMP/changed"
+          { grep -zE '\.(js|jsx)$' "$RUNNER_TEMP/changed" || true; } | xargs -0 -r yarn eslint
+          xargs -0 -r yarn prettier --check --ignore-unknown < "$RUNNER_TEMP/changed"

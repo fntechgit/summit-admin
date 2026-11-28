@@ -15,7 +15,7 @@
   },
   "plugins": ["react", "unused-imports"],
   "rules": {
-    "quotes": ["error", "double"],
+    "quotes": ["error", "double", { "avoidEscape": true }],
     "react/jsx-filename-extension": ["warn", { "extensions": [".js", ".jsx"] }],
     "import/no-extraneous-dependencies": "warn",
     "import/extensions": "warn",

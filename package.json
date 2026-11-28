@@ -18,8 +18,11 @@
     "segmented-control": "0.1.12"
   },
   "lint-staged": {
-    "*.{js,jsx}": "eslint --fix",
-    "**/*": "prettier --write --ignore-unknown"
+    "*.{js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "!(*.{js,jsx})": "prettier --write --ignore-unknown"
   },
   "author": "",
   "license": "ISC",
